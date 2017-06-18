@@ -11,10 +11,10 @@ add_executable(ConstitutiveTest ConstitutiveTest.cpp)
 target_link_libraries(ConstitutiveTest LINK_PUBLIC neon)
 add_test(ConstitutiveTest ${CMAKE_CURRENT_BUILD_DIR}/ConstitutiveTest)
 
-# add_executable(NumericalQuadrature QuadratureUnitTest.cpp)
-# target_link_libraries(NumericalQuadrature LINK_PUBLIC neon)
-# add_test(NumericalQuadrature ${CMAKE_CURRENT_BUILD_DIR}/NumericalQuadrature)
-#
+add_executable(QuadratureTest QuadratureTest.cpp)
+target_link_libraries(QuadratureTest LINK_PUBLIC neon)
+add_test(QuadratureTest ${CMAKE_CURRENT_BUILD_DIR}/QuadratureTest)
+
 # add_executable(TensorTest TensorUnitTest.cpp)
 # target_link_libraries(TensorTest LINK_PUBLIC neon)
 # add_test(TensorTest ${CMAKE_CURRENT_BUILD_DIR}/TensorTest)
