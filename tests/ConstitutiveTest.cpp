@@ -39,15 +39,16 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
     REQUIRE(deformation_gradients.size() == internal_variable_size);
     REQUIRE(kirchhoff_stresses.size() == internal_variable_size);
 
+    // Fill with identity matrix
+    for (auto& F : deformation_gradients) F = Matrix3::Identity();
+
     SECTION("Update of internal variables")
     {
-        // Fill with identity matrix
-        for (auto& F : deformation_gradients) F = Matrix3::Identity();
-
         neo_hooke.update_internal_variables();
-        for (auto& τ : kirchhoff_stresses)
+
+        for (auto& kirchhoff_stress : kirchhoff_stresses)
         {
-            REQUIRE(τ.norm() == Approx(0.0));
+            REQUIRE(kirchhoff_stress.norm() == Approx(0.0));
         }
     }
 
@@ -57,7 +58,8 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
         auto& material_tangents = variables(InternalVariables::Matrix::MaterialTangent);
 
         neo_hooke.update_continuum_tangent();
-        for (auto& C : material_tangents)
+
+        for (auto const& C : material_tangents)
         {
             // Check a few of the numerical values
             REQUIRE(C(0, 0) == Approx(0.111111));
