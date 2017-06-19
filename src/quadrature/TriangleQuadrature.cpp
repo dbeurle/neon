@@ -1,12 +1,20 @@
 
 #include "TriangleQuadrature.hpp"
 
+#include <range/v3/action.hpp>
+
 namespace neon
 {
 TriangleQuadrature::TriangleQuadrature(Rule rule, int interpolation_order)
 {
     switch (rule)
     {
+        case Rule::OnePoint:
+        {
+            w = {1.0};
+            clist = {{0, 1.0 / 3.0, 1.0 / 3.0}};
+            break;
+        }
         case Rule::ThreePoint:
         {
             w = {1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0};
@@ -20,5 +28,6 @@ TriangleQuadrature::TriangleQuadrature(Rule rule, int interpolation_order)
             break;
         }
     }
+    w |= ranges::action::transform([](auto const& i) { return 0.5 * i; });
 }
 }

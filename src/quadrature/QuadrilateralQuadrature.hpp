@@ -12,6 +12,6 @@ public:
     enum class Rule { OnePoint, FourPoint };
 
 public:
-    QuadrilateralQuadrature(Rule rule, int interpolationOrder = 1);
+    QuadrilateralQuadrature(Rule rule, int interpolation_order = 1);
 };
 }

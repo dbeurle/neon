@@ -10,7 +10,10 @@
 #include "quadrature/UnitSphereQuadrature.hpp"
 
 #include "interpolations/Hexahedron8.hpp"
+#include "interpolations/Quadrilateral4.hpp"
 #include "interpolations/Tetrahedron10.hpp"
+#include "interpolations/Triangle3.hpp"
+#include "interpolations/Triangle6.hpp"
 
 #include <range/v3/numeric.hpp>
 
@@ -30,20 +33,57 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
         REQUIRE(ranges::accumulate(q1.weights(), 0.0) == Approx(4.0));
         REQUIRE(ranges::accumulate(q4.weights(), 0.0) == Approx(4.0));
     }
+    SECTION("Quadrilateral interpolation function - three point")
+    {
+        Quadrilateral4 quad4(QuadrilateralQuadrature::Rule::OnePoint);
+
+        REQUIRE(quad4.nodes() == 4);
+        REQUIRE(quad4.quadrature().points() == 1);
+    }
+    SECTION("Quadrilateral interpolation function - three point")
+    {
+        Quadrilateral4 quad4(QuadrilateralQuadrature::Rule::FourPoint);
+
+        REQUIRE(quad4.nodes() == 4);
+        REQUIRE(quad4.quadrature().points() == 4);
+    }
 }
 TEST_CASE("Triangle quadrature scheme test", "[TriangleQuadrature]")
 {
     SECTION("Triangle Gauss Quadrature")
-    {
-        // Check 1 and 8 point rule
+    { // Check 1 and 8 point rule
+        TriangleQuadrature t1(TriangleQuadrature::Rule::OnePoint);
         TriangleQuadrature t3(TriangleQuadrature::Rule::ThreePoint);
         TriangleQuadrature t4(TriangleQuadrature::Rule::FourPoint);
 
+        REQUIRE(t1.points() == 1);
         REQUIRE(t3.points() == 3);
         REQUIRE(t4.points() == 4);
 
-        REQUIRE(ranges::accumulate(t3.weights(), 0.0) == Approx(1.0));
-        REQUIRE(ranges::accumulate(t4.weights(), 0.0) == Approx(1.0));
+        REQUIRE(ranges::accumulate(t1.weights(), 0.0) == Approx(0.5));
+        REQUIRE(ranges::accumulate(t3.weights(), 0.0) == Approx(0.5));
+        REQUIRE(ranges::accumulate(t4.weights(), 0.0) == Approx(0.5));
+    }
+    SECTION("Triangle3 interpolation function - three point")
+    {
+        Triangle3 tri3(TriangleQuadrature::Rule::OnePoint);
+
+        REQUIRE(tri3.nodes() == 3);
+        REQUIRE(tri3.quadrature().points() == 1);
+    }
+    SECTION("Triangle6 interpolation function - three point")
+    {
+        Triangle6 tri6(TriangleQuadrature::Rule::ThreePoint);
+
+        REQUIRE(tri6.nodes() == 6);
+        REQUIRE(tri6.quadrature().points() == 3);
+    }
+    SECTION("Triangle6 interpolation function - four point")
+    {
+        Triangle6 tri6(TriangleQuadrature::Rule::FourPoint);
+
+        REQUIRE(tri6.nodes() == 6);
+        REQUIRE(tri6.quadrature().points() == 4);
     }
 }
 TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
@@ -190,7 +230,7 @@ TEST_CASE("Prism quadrature scheme test", "[PrismQuadrature]")
 {
     SECTION("Prism Gauss Quadrature")
     {
-        // Check 1 and 8 point rule
+        // Check 1 and 6 point rule
         PrismQuadrature p1(PrismQuadrature::Rule::OnePoint);
         PrismQuadrature p6(PrismQuadrature::Rule::SixPoint);
 
