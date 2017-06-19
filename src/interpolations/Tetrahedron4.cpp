@@ -1,9 +1,3 @@
-/*
- * neon - A finite element solver.
- *
- * For licensing please refer to the LICENSE.md file
- *
- */
 
 #include "Tetrahedron4.hpp"
 
