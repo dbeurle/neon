@@ -1,10 +1,3 @@
-/*
- * neon - A finite element solver.
- *
- * For licensing please refer to the LICENSE.md file
- *
- * Copyright Darcy Beurle, 2016.
- */
 
 #pragma once
 
@@ -12,6 +5,8 @@
 #include <iostream>
 #include <string>
 
+namespace neon
+{
 /*
  * Exception header file for handling all exceptions thrown
  */
@@ -20,7 +15,7 @@ class Exception : public std::exception
 public:
     Exception() = default;
 
-    void setInputFileName(const std::string& fn) { input_file = fn; }
+    void setInputFileName(std::string const& fn) { input_file = fn; }
 
 protected:
     std::string input_file;
@@ -148,12 +143,12 @@ private:
 class DistortedElement : public Exception
 {
 public:
-    DistortedElement(int element, int quadraturePoint);
+    DistortedElement(int element, int quadrature_point);
 
     const char* what() const noexcept;
 
 private:
-    int element, quadraturePoint;
+    int element, quadrature_point;
 };
 
 class UnknownElementTypeException : public Exception
@@ -174,3 +169,20 @@ public:
 protected:
     std::string partName;
 };
+
+template <typename KeyTp>
+class KeyNotFoundInMap : public Exception
+{
+public:
+    KeyNotFoundInMap(KeyTp missing_key) : missing_key(missing_key) {}
+
+    const char* what() const noexcept
+    {
+        std::cout << "\n!! Error: Key " << missing_key << " not found in an internal datastructure\n";
+        return nullptr;
+    }
+
+protected:
+    KeyTp missing_key;
+};
+}

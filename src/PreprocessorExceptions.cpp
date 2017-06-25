@@ -1,13 +1,8 @@
-/*
- * neon - A finite element solver.
- *
- * For licensing please refer to the LICENSE.md file
- *
- * Copyright Darcy Beurle, 2016.
- */
 
 #include "PreprocessorExceptions.hpp"
 
+namespace neon
+{
 const char* UnknownBoundaryTypeException::what() const noexcept
 {
     std::cout << "\n!! Error: Boundary type \"" << boundaryType << "\" in " << input_file
@@ -34,15 +29,15 @@ const char* NegativeElementAreaException::what() const noexcept
     return nullptr;
 }
 
-DistortedElement::DistortedElement(int element, int quadraturePoint)
-    : element(element), quadraturePoint(quadraturePoint)
+DistortedElement::DistortedElement(int element, int quadrature_point)
+    : element(element), quadrature_point(quadrature_point)
 {
 }
 
 const char* DistortedElement::what() const noexcept
 {
     std::cout << "Element " + std::to_string(element) + ", quadrature point " +
-                     std::to_string(quadraturePoint) + " is exhibiting excessive distortion\n";
+                     std::to_string(quadrature_point) + " is exhibiting excessive distortion\n";
     return nullptr;
 }
 
@@ -200,4 +195,5 @@ const char* DuplicateNameException::what() const noexcept
     std::cout << "\n!! Error: Duplicate " << duplParameter << " names not allowed!  Please check "
               << duplParameter << " names in " << input_file;
     return nullptr;
+}
 }
