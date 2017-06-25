@@ -20,7 +20,7 @@ class InternalVariables
 {
 public:
     using Scalars = std::vector<double>;
-    using Tensors = std::vector<Tensor>;
+    using Tensors = std::vector<Matrix3>;
     using Matrices = std::vector<neon::Matrix>;
 
     enum class Matrix { MaterialTangent };
@@ -131,6 +131,32 @@ public:
         return std::make_tuple(std::ref(matrices.find(var0)->second),
                                std::ref(matrices.find(var1)->second),
                                std::ref(matrices.find(vars)->second)...);
+    }
+
+    /** Const access to the non-converged scalar variables */
+    template <typename... ScalarTps>
+    auto operator()(Scalar var0, Scalar var1, ScalarTps... vars) const
+    {
+        return std::make_tuple(std::cref(scalars.find(var0)->second),
+                               std::cref(scalars.find(var1)->second),
+                               std::cref(scalars.find(vars)->second)...);
+    }
+
+    /** Const access to the non-converged tensor variables */
+    template <typename... TensorTps>
+    auto operator()(Tensor var0, Tensor var1, TensorTps... vars) const
+    {
+        return std::make_tuple(std::cref(tensors.find(var0)->second),
+                               std::cref(tensors.find(var1)->second),
+                               std::cref(tensors.find(vars)->second)...);
+    }
+
+    template <typename... MatrixTps>
+    auto operator()(Matrix var0, Matrix var1, MatrixTps... vars) const
+    {
+        return std::make_tuple(std::cref(matrices.find(var0)->second),
+                               std::cref(matrices.find(var1)->second),
+                               std::cref(matrices.find(vars)->second)...);
     }
 
     /** Commit to history when iteration converges */
