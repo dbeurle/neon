@@ -10,13 +10,13 @@ target_link_libraries(neon
                       ${CMAKE_THREAD_LIBS_INIT}
                       ${JSONCPP_LIBRARIES}
                       ${MUMPS_LIBRARY}
-                      #   ${BLAS_LIBRARIES}
-                      #   ${VTK_LIBRARIES}
-                    #   pastix   # Direct linear solver
+                      ${BLAS_LIBRARIES}
+                      # ${VTK_LIBRARIES}
+                      pastix
                       #gfortran
-                    #   mumps_common
-                    #   metis
-                    #   scotch
-                    #   scotcherr
-                    #   hwloc
+                      metis
+                      scotch
+                      scotcherr
+                      hwloc
+                      dmumpso-5.0.2
                   )
