@@ -44,7 +44,7 @@ ElementTopology NodeOrderingAdapter::gmsh_type_to_enum(int element_code) const
     return found->second;
 }
 
-int NodeOrderingAdapter::to_vtk_type(ElementTopology element_topology) const
+int NodeOrderingAdapter::to_vtk(ElementTopology element_topology) const
 {
     auto const found = vtk_converter.find(element_topology);
     if (found == vtk_converter.end())

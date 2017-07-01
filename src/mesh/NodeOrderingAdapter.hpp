@@ -23,7 +23,7 @@ public:
     /** Add strong types to gmsh integer element codes */
     ElementTopology gmsh_type_to_enum(int const element_code) const;
 
-    int to_vtk_type(ElementTopology element_topology) const;
+    int to_vtk(ElementTopology element_topology) const;
 
 protected:
     std::unordered_map<int, ElementTopology> gmsh_converter{{2, ElementTopology::Triangle3},
