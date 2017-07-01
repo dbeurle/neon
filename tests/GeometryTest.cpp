@@ -6,63 +6,15 @@
 #include "mesh/BasicMesh.hpp"
 #include "mesh/ElementTopology.hpp"
 #include "mesh/NodeOrderingAdapter.hpp"
+
 #include "mesh/solid/MaterialCoordinates.hpp"
 #include "mesh/solid/Submesh.hpp"
+#include "mesh/solid/femMesh.hpp"
 
 #include <json/json.h>
 #include <range/v3/view.hpp>
 
 using namespace neon;
-
-TEST_CASE("Testing material coordinates", "[MaterialCoordinates]")
-{
-    // Build a right angled triangle
-    Vector coordinates(9);
-    coordinates << 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0;
-
-    // Setup the test case
-    NodalCoordinates nodes(coordinates);
-    solid::MaterialCoordinates material_coordinates(coordinates);
-
-    // Test with a random displacement vector
-    Vector local_displacements = Vector::Random(9);
-
-    Eigen::MatrixXd local_initial_config(3, 3);
-    local_initial_config << 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0;
-
-    // Indices for the first three nodes
-    List local_node_list = ranges::view::ints(0, 3);
-
-    // Check that we are fetching the right local element vector
-    List local_dof_list = ranges::view::ints(0, 9);
-
-    SECTION("Nodes scaffolding")
-    {
-        Vector triangle = Vector::Zero(9);
-        triangle << 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0;
-        REQUIRE((nodes.coordinates() - triangle).norm() == Approx(0.0));
-    }
-    SECTION("Check initial displacements are zero")
-    {
-        REQUIRE(material_coordinates.displacement().norm() == Approx(0.0));
-    }
-    SECTION("Test update of coordinates")
-    {
-        material_coordinates.update_current_configuration(local_displacements);
-        REQUIRE((material_coordinates.displacement() - local_displacements).norm() == Approx(0.0));
-    }
-    SECTION("Test local displacement via lookup")
-    {
-        material_coordinates.update_current_configuration(local_displacements);
-        REQUIRE((material_coordinates.displacement(local_dof_list) - local_displacements).norm() ==
-                Approx(0.0));
-    }
-    SECTION("Test element view configuration")
-    {
-        REQUIRE((material_coordinates.initial_configuration(local_node_list) - local_initial_config)
-                    .norm() == Approx(0.0));
-    }
-}
 
 std::string cube_mesh_json()
 {
@@ -129,15 +81,65 @@ std::string material_data_json()
 
 std::string simulation_data_json()
 {
-    return "{ \"BoundaryConditions\" : [ {\"Name\" : \"Restraint\", "
+    return "{ \"BoundaryConditions\" : [ {\"Name\" : \"bottom\", "
            "\"Type\" : "
-           "\"Displacement\", \"x\" : 0.0, \"y\" : 0.0, \"z\" : 0.0}, {\"Name\" : "
-           "\"LoadPoint\", \"Type\" : \"Displacement\", \"z\" : 0.001} ], "
+           "\"Displacement\", \"Values\" : {\"x\" : 0.0, \"y\" : 0.0, \"z\" : 0.0}}, "
+           "{\"Name\" : "
+           "\"top\", \"Type\" : \"Displacement\", \"Values\" : {\"z\" : 0.001}} ], "
            "\"ConstitutiveModel\" : \"NeoHooke\", "
            "\"ElementOptions\" : {\"Quadrature\" : \"Reduced\"}, "
            "\"Name\" : \"cube\"}";
 }
 
+TEST_CASE("Testing material coordinates", "[MaterialCoordinates]")
+{
+    // Build a right angled triangle
+    Vector coordinates(9);
+    coordinates << 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0;
+
+    // Setup the test case
+    NodalCoordinates nodes(coordinates);
+    solid::MaterialCoordinates material_coordinates(coordinates);
+
+    // Test with a random displacement vector
+    Vector local_displacements = Vector::Random(9);
+
+    Matrix local_initial_config(3, 3);
+    local_initial_config << 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0;
+
+    // Indices for the first three nodes
+    List local_node_list = ranges::view::ints(0, 3);
+
+    // Check that we are fetching the right local element vector
+    List local_dof_list = ranges::view::ints(0, 9);
+
+    SECTION("Nodes scaffolding")
+    {
+        Vector triangle = Vector::Zero(9);
+        triangle << 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0;
+        REQUIRE((nodes.coordinates() - triangle).norm() == Approx(0.0));
+    }
+    SECTION("Check initial displacements are zero")
+    {
+        REQUIRE(material_coordinates.displacement().norm() == Approx(0.0));
+    }
+    SECTION("Test update of coordinates")
+    {
+        material_coordinates.update_current_configuration(local_displacements);
+        REQUIRE((material_coordinates.displacement() - local_displacements).norm() == Approx(0.0));
+    }
+    SECTION("Test local displacement via lookup")
+    {
+        material_coordinates.update_current_configuration(local_displacements);
+        REQUIRE((material_coordinates.displacement(local_dof_list) - local_displacements).norm() ==
+                Approx(0.0));
+    }
+    SECTION("Test element view configuration")
+    {
+        REQUIRE((material_coordinates.initial_configuration(local_node_list) - local_initial_config)
+                    .norm() == Approx(0.0));
+    }
+}
 TEST_CASE("Basic mesh test")
 {
     // Read in a cube mesh from the json input file and use this to
@@ -278,7 +280,8 @@ TEST_CASE("Solid submesh test")
         // Check the standard ones are used
         REQUIRE(internal_vars.has(InternalVariables::Tensor::DisplacementGradient));
         REQUIRE(internal_vars.has(InternalVariables::Tensor::DeformationGradient));
-        REQUIRE(internal_vars.has(InternalVariables::Scalar::DetJ));
+        REQUIRE(internal_vars.has(InternalVariables::Tensor::CauchyStress));
+        REQUIRE(internal_vars.has(InternalVariables::Scalar::DetF));
     }
     SECTION("Material model internal variables")
     {
@@ -290,12 +293,78 @@ TEST_CASE("Solid submesh test")
         REQUIRE(local_dofs.size() == number_of_local_dofs);
         REQUIRE(stiffness.rows() == number_of_local_dofs);
         REQUIRE(stiffness.cols() == number_of_local_dofs);
+        REQUIRE(stiffness.norm() != Approx(0.0));
     }
     SECTION("Internal force")
     {
         auto[local_dofs, internal_force] = fem_submesh.internal_force(0);
         REQUIRE(internal_force.rows() == number_of_local_dofs);
         REQUIRE(local_dofs.size() == number_of_local_dofs);
+    }
+}
+TEST_CASE("Solid mesh test")
+{
+    using solid::MaterialCoordinates;
+    using solid::femMesh;
+
+    // Read in a cube mesh from the json input file and use this to
+    // test the functionality of the basic mesh
+    Json::Value mesh_data, material_data, simulation_data;
+    Json::Reader mesh_file, material_file, simulation_file;
+
+    REQUIRE(mesh_file.parse(cube_mesh_json().c_str(), mesh_data));
+    REQUIRE(material_file.parse(material_data_json().c_str(), material_data));
+    REQUIRE(simulation_file.parse(simulation_data_json().c_str(), simulation_data));
+
+    // Create the test objects
+    BasicMesh basic_mesh(mesh_data);
+    NodalCoordinates nodal_coordinates(mesh_data);
+
+    REQUIRE(!simulation_data["Name"].empty());
+
+    femMesh fem_mesh(basic_mesh, material_data, simulation_data);
+
+    REQUIRE(fem_mesh.active_dofs() == 192);
+
+    int constexpr number_of_nodes = 64;
+    int constexpr number_of_dofs = number_of_nodes * 3;
+    int constexpr number_of_local_dofs = 8 * 3;
+
+    // Check that we only have one mesh group as we only have homogenous
+    // element types
+    REQUIRE(fem_mesh.meshes().size() == 1);
+
+    for (auto const& fem_submesh : fem_mesh.meshes())
+    {
+        auto[local_dofs, internal_force] = fem_submesh.internal_force(0);
+        REQUIRE(internal_force.rows() == number_of_local_dofs);
+        REQUIRE(local_dofs.size() == number_of_local_dofs);
+    }
+
+    SECTION("Check Dirichlet boundaries")
+    {
+        auto const& map = fem_mesh.dirichlet_boundary_map();
+
+        // See if correctly input in the map
+        REQUIRE(map.find("bottom") != map.end());
+        REQUIRE(map.find("top") != map.end());
+
+        // And the negative is true...
+        REQUIRE(map.find("sides") == map.end());
+        REQUIRE(map.find("cube") == map.end());
+
+        // Check the correct values in the boundary conditions
+        for (auto const& fixed_bottom : map.find("bottom")->second)
+        {
+            REQUIRE(fixed_bottom.prescribed_value() == Approx(0.0));
+            REQUIRE(fixed_bottom.prescribed_dofs().size() == 16);
+        }
+
+        for (auto const& disp_driven : map.find("top")->second)
+        {
+            REQUIRE(disp_driven.prescribed_value() == Approx(0.001));
+            REQUIRE(disp_driven.prescribed_dofs().size() == 16);
+        }
     }
 }
 TEST_CASE("Nodal ordering Adapater")
