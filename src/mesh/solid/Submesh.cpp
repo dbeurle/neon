@@ -26,9 +26,10 @@ femSubmesh::femSubmesh(Json::Value const& material_data,
 {
     // Allocate storage for the displacement gradient
     variables.add(InternalVariables::Tensor::DisplacementGradient,
-                  InternalVariables::Tensor::DeformationGradient);
+                  InternalVariables::Tensor::DeformationGradient,
+                  InternalVariables::Tensor::CauchyStress);
 
-    variables.add(InternalVariables::Scalar::DetJ);
+    variables.add(InternalVariables::Scalar::DetF);
 
     allocate_dof_list(this->dofs_per_node());
 }
@@ -45,37 +46,35 @@ std::tuple<List const&, Matrix> femSubmesh::tangent_stiffness(int element) const
 
 std::tuple<List const&, Vector> femSubmesh::internal_force(int element) const
 {
-    auto X = material_coordinates->initial_configuration(local_node_list(element));
     auto x = material_coordinates->current_configuration(local_node_list(element));
 
     return {local_dof_list(element), internal_nodal_force(x, element)};
 }
 
-Matrix femSubmesh::geometric_tangent_stiffness(Matrix const& configuration, int element) const
+Matrix femSubmesh::geometric_tangent_stiffness(Matrix const& x, int element) const
 {
-    auto const& kirchhoffs = variables[InternalVariables::Tensor::Kirchhoff];
+    auto const& σ_list = variables[InternalVariables::Tensor::CauchyStress];
 
     auto n = nodes_per_element();
 
     Matrix const kgeo =
-        sf->quadrature().integrate(Matrix::Zero(n, n), [&](auto const& femval, auto const& l) -> Matrix {
-            auto const & [ N, rhea ] = femval;
+        sf->quadrature().integrate(Matrix::Zero(n, n),
+                                   [&](auto const& femval, auto const& l) -> Matrix {
+                                       auto const & [ N, rhea ] = femval;
 
-            auto const Jacobian = local_deformation_gradient(rhea, configuration);
+                                       auto const Jacobian = local_deformation_gradient(rhea, x);
 
-            auto const j = Jacobian.determinant();
+                                       Matrix3 const σ = σ_list[offset(element, l)];
 
-            Matrix3 cauchy_stress = kirchhoffs[offset(element, l)] / j;
+                                       // Compute the symmetric gradient operator
+                                       const auto L = (rhea * Jacobian.inverse()).transpose();
 
-            // Compute the symmetric gradient operator
-            const auto L = (rhea * Jacobian.inverse()).transpose();
-
-            return L.transpose() * cauchy_stress * L * j;
-        });
+                                       return L.transpose() * σ * L * Jacobian.determinant();
+                                   });
     return identity_expansion(kgeo, dofs_per_node(), nodes_per_element());
 }
 
-Matrix femSubmesh::material_tangent_stiffness(Matrix const& configuration, int element) const
+Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int element) const
 {
     auto const local_dofs = nodes_per_element() * dofs_per_node();
 
@@ -89,44 +88,39 @@ Matrix femSubmesh::material_tangent_stiffness(Matrix const& configuration, int e
 
         auto const& D = D_Vec[offset(element, l)];
 
-        Matrix3 const Jacobian = local_deformation_gradient(rhea, configuration);
-
-        auto const detJ = Jacobian.determinant();
+        Matrix3 const Jacobian = local_deformation_gradient(rhea, x);
 
         // Compute the symmetric gradient operator
         Matrix const B = fem::SymGradient<3>((rhea * Jacobian.inverse()).transpose());
 
-        return B.transpose() * D * B * detJ;
+        return B.transpose() * D * B * Jacobian.determinant();
     });
 }
 
-Vector femSubmesh::internal_nodal_force(Matrix const& configuration, int element) const
+Vector femSubmesh::internal_nodal_force(Matrix const& x, int element) const
 {
     using RowMatrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
-    auto const& kirchhoff = variables[InternalVariables::Tensor::Kirchhoff];
+    auto const& σ_list = variables[InternalVariables::Tensor::CauchyStress];
 
-    auto const n = nodes_per_element();
-    auto const m = dofs_per_node();
+    auto const[m, n] = std::make_tuple(nodes_per_element(), dofs_per_node());
 
     RowMatrix fint =
-        sf->quadrature().integrate(RowMatrix::Zero(n, m),
+        sf->quadrature().integrate(RowMatrix::Zero(m, n),
                                    [&](auto const& femval, auto const& l) -> RowMatrix {
                                        auto const & [ N, dN ] = femval;
 
-                                       auto const Jacobian =
-                                           local_deformation_gradient(dN, configuration);
+                                       auto const Jacobian = local_deformation_gradient(dN, x);
 
-                                       auto const j = Jacobian.determinant();
-
-                                       auto const σ = kirchhoff[offset(element, l)] / j;
+                                       auto const σ = σ_list[offset(element, l)];
 
                                        // Compute the symmetric gradient operator
-                                       const auto Bt = dN * Jacobian.inverse();
+                                       auto const Bt = dN * Jacobian.inverse();
 
-                                       return Bt * σ * j;
+                                       return Bt * σ * Jacobian.determinant();
                                    });
-    return Eigen::Map<RowMatrix>(fint.data(), n * m, 1);
+    // Convert into a vector for the vector assembly operation
+    return Eigen::Map<RowMatrix>(fint.data(), m * n, 1);
 }
 
 void femSubmesh::update_internal_variables()
@@ -150,9 +144,8 @@ void femSubmesh::update_internal_variables()
 
 void femSubmesh::update_deformation_measures()
 {
-    // FIXME These is a hack because of the decomposition and lambda functions
-    auto& Hvec = variables(InternalVariables::Tensor::DisplacementGradient);
-    auto& Fvec = variables(InternalVariables::Tensor::DeformationGradient);
+    auto& H_list = variables(InternalVariables::Tensor::DisplacementGradient);
+    auto& F_list = variables(InternalVariables::Tensor::DeformationGradient);
 
     // #pragma omp parallel for
     for (auto element = 0; element < elements(); ++element)
@@ -166,7 +159,8 @@ void femSubmesh::update_deformation_measures()
             auto const & [ N, rhea ] = femval;
 
             // Local deformation gradient for the initial configuration
-            Matrix3 const& F_0 = local_deformation_gradient(rhea, X);
+            Matrix3 const F_0 = local_deformation_gradient(rhea, X);
+            Matrix3 const F = local_deformation_gradient(rhea, x);
 
             // Gradient operator in index notation
             auto const& B_0t = rhea * F_0.inverse();
@@ -174,45 +168,46 @@ void femSubmesh::update_deformation_measures()
             // Nodal displacement matrix
             auto const u = x - X;
 
-            // Strain operator
+            // Displacement gradient
             Matrix3 const H = u * B_0t;
 
-            Hvec[offset(element, l)] = H;
-            Fvec[offset(element, l)] = Matrix3::Identity() + H;
+            H_list[offset(element, l)] = H;
+            F_list[offset(element, l)] = F * F_0.inverse();
+
         });
     }
 }
 
 void femSubmesh::update_deformation_gradient(int element, Matrix const& X, Matrix const& x)
 {
-    auto& Fvec = variables(InternalVariables::Tensor::DeformationGradient);
+    auto& F_list = variables(InternalVariables::Tensor::DeformationGradient);
 
     sf->quadrature().for_each([&](auto const& femval, const auto& l) {
 
         auto const & [ N, rhea ] = femval;
 
-        Fvec[offset(element, l)] = deformation_gradient(rhea, x, X);
+        F_list[offset(element, l)] = deformation_gradient(rhea, x, X);
     });
 }
 
 void femSubmesh::update_Jacobian_determinants()
 {
-    auto const& Fvec = variables(InternalVariables::Tensor::DeformationGradient);
+    auto const& F_list = variables(InternalVariables::Tensor::DeformationGradient);
 
-    auto& detJvec = variables(InternalVariables::Scalar::DetJ);
+    auto& detF_list = variables(InternalVariables::Scalar::DetF);
 
-    detJvec = Fvec | ranges::view::transform([](auto const& F) { return F.determinant(); });
+    detF_list = F_list | ranges::view::transform([](auto const& F) { return F.determinant(); });
 }
 
 void femSubmesh::check_element_distortion() const
 {
-    auto const& detJvec = variables(InternalVariables::Scalar::DetJ);
+    auto const& detF_list = variables(InternalVariables::Scalar::DetF);
 
-    auto found = ranges::find_if(detJvec, [](auto const& detJ) { return detJ < 0.0; });
+    auto found = ranges::find_if(detF_list, [](auto const& detF) { return detF < 0.0; });
 
-    if (found != detJvec.end())
+    if (found != detF_list.end())
     {
-        auto const i = std::distance(detJvec.begin(), found);
+        auto const i = std::distance(detF_list.begin(), found);
 
         auto const element = std::floor(static_cast<double>(i) / sf->quadrature().points());
         auto const quadrature_point = i % sf->quadrature().points();
@@ -257,8 +252,6 @@ std::unique_ptr<ConstitutiveModel> femSubmesh::make_constitutive_model(
 
 std::unique_ptr<VolumeInterpolation> femSubmesh::make_shape_function(Json::Value const& simulation_data)
 {
-    std::cout << "Allocating a volume interpolation function" << std::endl;
-
     if (!simulation_data.isMember("ElementOptions"))
     {
         throw EmptyFieldException("Part: ElementOptions");
@@ -276,9 +269,7 @@ std::unique_ptr<VolumeInterpolation> femSubmesh::make_shape_function(Json::Value
                                                             : HexahedronQuadrature::Rule::EightPoint);
             break;
         }
-        break;
         case ElementTopology::Tetrahedron4:
-            break;
         case ElementTopology::Prism6:
         case ElementTopology::Pyramid5:
         case ElementTopology::Tetrahedron20:
