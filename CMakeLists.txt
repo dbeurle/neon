@@ -23,7 +23,7 @@ include_directories(${Boost_INCLUDE_DIR})
 
 # find_package(Threads REQUIRED)
 # find_package(OpenMP REQUIRED)
-# find_package(BLAS REQUIRED)
+find_package(BLAS REQUIRED)
 
 # find_package(MUMPS REQUIRED)
 # include_directories(${MUMPS_INCLUDE_DIR})
