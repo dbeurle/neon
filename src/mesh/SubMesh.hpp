@@ -33,6 +33,9 @@ public:
     /** @return a list of unique nodal connectivities */
     List unique_connectivities() const;
 
+    /** @return a vector of lists, with each list giving the element nodes */
+    auto const& connectivities() const { return nodal_connectivity; }
+
 protected:
     /** @return coordinates given a Nodes class and  */
     Matrix gather_coordinates(NodalCoordinates const& nodal_coordinates, int const element) const;
