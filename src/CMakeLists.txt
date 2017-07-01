@@ -11,12 +11,10 @@ target_link_libraries(neon
                       ${JSONCPP_LIBRARIES}
                       ${MUMPS_LIBRARY}
                       ${BLAS_LIBRARIES}
-                      # ${VTK_LIBRARIES}
+                      ${VTK_LIBRARIES}
                       pastix
-                      #gfortran
                       metis
                       scotch
                       scotcherr
                       hwloc
-                      dmumpso-5.0.2
                   )
