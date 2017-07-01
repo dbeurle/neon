@@ -21,55 +21,55 @@ NeoHooke::NeoHooke(InternalVariables& variables, Json::Value const& material_dat
     // The Neo-Hookean model requires the following deformation measures
     // - C, right Cauchy-Green tensor for S, the PK1 stress (total)
     // - B, left Cauchy-Green tensor for kappa, the Kirchoff stress (updated)
-    // Which can be computed from the deformation gradient
-    variables.add(InternalVariables::Tensor::Kirchhoff,
-                  InternalVariables::Tensor::DeformationGradient);
-
+    // Which can be computed from the deformation gradient and transformed
+    // to the Cauchy stress with very little effort
     variables.add(InternalVariables::Matrix::MaterialTangent, 6);
 }
 
 void NeoHooke::update_internal_variables()
 {
-    // Get references into the hash table
-    auto[F, k] = variables(InternalVariables::Tensor::DeformationGradient,
-                           InternalVariables::Tensor::Kirchhoff);
+    using namespace ranges;
 
-    k = F | ranges::view::transform([this](auto const& F) -> Matrix3 {
+    // Get references into the hash table
+    auto[F, σ] = variables(InternalVariables::Tensor::DeformationGradient,
+                           InternalVariables::Tensor::CauchyStress);
+
+    auto const& detF = variables(InternalVariables::Scalar::DetF);
+
+    auto const I = Matrix3::Identity();
+
+    σ = view::zip(F, detF) | view::transform([this, &I](auto const& FdetF) -> Matrix3 {
             auto const[μ0, λ0] = material.LameConstants();
+
+            auto const & [ F, J ] = FdetF;
 
             // Left Cauchy Green deformation tensor
             auto const B = F * F.transpose();
 
-            auto const J = F.determinant();
-
-            auto const I = Matrix3::Identity();
-
-            return λ0 * std::log(J) * I + μ0 * (B - I);
+            return (λ0 * std::log(J) * I + μ0 * (B - I)) / J;
         });
 }
 
 void NeoHooke::update_continuum_tangent()
 {
-    auto& DVec = variables(InternalVariables::Matrix::MaterialTangent);
-    auto const& Fvec = variables(InternalVariables::Tensor::DeformationGradient);
+    auto& D_list = variables(InternalVariables::Matrix::MaterialTangent);
+    auto const& F_list = variables(InternalVariables::Tensor::DeformationGradient);
+    auto const& detF_list = variables(InternalVariables::Scalar::DetF);
 
-    ranges::for_each(ranges::view::zip(Fvec, DVec), [&](auto const& zip_pair) {
+    ranges::for_each(ranges::view::zip(F_list, D_list, detF_list), [&](auto const& FDdetF) {
 
-        auto & [ F, D ] = zip_pair;
+        auto & [ F, D, J ] = FDdetF;
 
-        // FIXME Move this outside lambda when compiler is fixed
         auto const[μ0, λ0] = material.LameConstants();
-
-        auto const J = F.determinant();
 
         auto const μ = μ0 - λ0 * std::log(J);
 
         D << λ0 + 2.0 * μ, λ0, λ0, 0.0, 0.0, 0.0, //
             λ0, λ0 + 2.0 * μ, λ0, 0.0, 0.0, 0.0,  //
             λ0, λ0, λ0 + 2.0 * μ, 0.0, 0.0, 0.0,  //
-            0.0, 0.0, 0.0, 2.0 * μ, 0.0, 0.0,     //
-            0.0, 0.0, 0.0, 0.0, 2.0 * μ, 0.0,     //
-            0.0, 0.0, 0.0, 0.0, 0.0, 2.0 * μ;
+            0.0, 0.0, 0.0, μ, 0.0, 0.0,           //
+            0.0, 0.0, 0.0, 0.0, μ, 0.0,           //
+            0.0, 0.0, 0.0, 0.0, 0.0, μ;
     });
 }
 }
