@@ -6,6 +6,10 @@
 #include <range/v3/algorithm.hpp>
 #include <range/v3/view.hpp>
 
+#include "vtkSmartPointer.h"
+class vtkPoints;
+class vtkDoubleArray;
+
 namespace neon::solid
 {
 class MaterialCoordinates : public NodalCoordinates
@@ -26,6 +30,12 @@ public:
     Vector displacement() const { return x - X; }
 
     Vector displacement(List const& local_dofs) const;
+
+    /** @return a vtk object of the initial coordinates */
+    vtkSmartPointer<vtkPoints> vtk_coordinates() const;
+
+    /** @return a vtk array of nodal displacements */
+    vtkSmartPointer<vtkDoubleArray> vtk_displacement() const;
 
 protected:
     Matrix get_configuration(List const& local_nodes, Vector const& configuration) const;
