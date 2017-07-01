@@ -20,6 +20,11 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
 
     InternalVariables variables(internal_variable_size);
 
+    // Add the required variables for an updated Lagrangian formulation
+    variables.add(InternalVariables::Tensor::DeformationGradient,
+                  InternalVariables::Tensor::CauchyStress);
+    variables.add(InternalVariables::Scalar::DetF);
+
     // Create a json reader object from a string
     auto input_data = json_input_file();
 
@@ -31,27 +36,26 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
     NeoHooke neo_hooke(variables, material_data);
 
     // Get the tensor variables
-    auto[deformation_gradients, kirchhoff_stresses] =
-        variables(InternalVariables::Tensor::DeformationGradient,
-                  InternalVariables::Tensor::Kirchhoff);
+    auto[F_list, σ_list] = variables(InternalVariables::Tensor::DeformationGradient,
+                                     InternalVariables::Tensor::CauchyStress);
+
+    auto& J_list = variables(InternalVariables::Scalar::DetF);
 
     // Ensure the internal variables are allocated correctly
-    REQUIRE(deformation_gradients.size() == internal_variable_size);
-    REQUIRE(kirchhoff_stresses.size() == internal_variable_size);
+    REQUIRE(F_list.size() == internal_variable_size);
+    REQUIRE(σ_list.size() == internal_variable_size);
+    REQUIRE(J_list.size() == internal_variable_size);
 
     // Fill with identity matrix
-    for (auto& F : deformation_gradients) F = Matrix3::Identity();
+    for (auto& F : F_list) F = Matrix3::Identity();
+    for (auto& J : J_list) J = 1.0;
 
     SECTION("Update of internal variables")
     {
         neo_hooke.update_internal_variables();
 
-        for (auto& kirchhoff_stress : kirchhoff_stresses)
-        {
-            REQUIRE(kirchhoff_stress.norm() == Approx(0.0));
-        }
+        for (auto& σ : σ_list) REQUIRE(σ.norm() == Approx(0.0));
     }
-
     SECTION("Check of continuum tangent")
     {
         // Get the matrix variable
