@@ -93,6 +93,7 @@ void femMatrix::solve()
         std::cout << "Newton-Raphson iterations failed to converged.  Aborting.\n";
         std::abort();
     }
+    fem_mesh.write();
 }
 
 void femMatrix::assemble_stiffness()
