@@ -15,10 +15,10 @@ add_executable(QuadratureTest QuadratureTest.cpp)
 target_link_libraries(QuadratureTest LINK_PUBLIC neon)
 add_test(QuadratureTest ${CMAKE_CURRENT_BUILD_DIR}/QuadratureTest)
 
-# add_executable(TensorTest TensorUnitTest.cpp)
-# target_link_libraries(TensorTest LINK_PUBLIC neon)
-# add_test(TensorTest ${CMAKE_CURRENT_BUILD_DIR}/TensorTest)
-#
+add_executable(SystemTest MatrixSystemTest.cpp)
+target_link_libraries(SystemTest LINK_PUBLIC neon)
+add_test(SystemTest ${CMAKE_CURRENT_BUILD_DIR}/SystemTest)
+
 # add_executable(BasicMeshTest BasicMeshTest.cpp)
 # target_link_libraries(BasicMeshTest LINK_PUBLIC neon)
 # add_test(BasicMeshTest ${CMAKE_CURRENT_BUILD_DIR}/BasicMeshTest)
