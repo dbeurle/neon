@@ -41,6 +41,8 @@ public:
 
     auto const& coordinates() const { return *(material_coordinates.get()); }
 
+    void write() const;
+
 protected:
     std::shared_ptr<MaterialCoordinates> material_coordinates;
     std::vector<femSubmesh> submeshes;

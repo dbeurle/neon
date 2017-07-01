@@ -145,40 +145,5 @@ private:
 
     std::vector<List> dof_list; //!< Map for the local to global dofs
 };
-
-/* Boundary class
- * needs to store a surface or volume mesh depending on boundary condition
- * 1) Surface and volume contributions provide an external load vector
-        - common external_force() vector
- * 2) Volume loads provide a vector by volume integration
-        - require volume interpolation and quadrature
-        - 1, 2, or 3 components
- * 3) Surface loads provide a vector by surface integration
-        - require surface interpolation and quadrature
-        - 1, 2, or 3 components
-        - Follower or nonfollower pressure and tractions
- * 4) Dirichlet conditions act on body but are essential and do not need
-      a description of the interpolation functions (separate class)
- * 5)
-
- Option 1)
-  - Each boundary mesh class holds a pointer to a surface and volume interpolation
-    function and only allocates as required
-
- Option 2)
-  - The main mesh holds a surface, volume and essential boundary condition
-    vector and populates as required.  Each submesh can just be handled
-    naively and no explicit submeshes are required -> std::map<std::string,
- std::vector<SurfaceBoundaryMeshes>
-
-*/
-
-/**
- * femBoundarySubmesh is responsible for holding the boundary mesh conditions
- * that are not fixed, but rather
- */
-class femBoundarySubmesh : public femSubmesh
-{
-};
 }
 }

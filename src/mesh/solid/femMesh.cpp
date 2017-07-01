@@ -11,6 +11,28 @@
 #include <range/v3/action.hpp>
 #include <range/v3/view.hpp>
 
+#include "vtkCellData.h"
+#include "vtkCellTypes.h"
+#include "vtkDataObject.h"
+#include "vtkDoubleArray.h"
+#include "vtkIdList.h"
+#include "vtkIdTypeArray.h"
+#include "vtkInformation.h"
+#include "vtkInformationQuadratureSchemeDefinitionVectorKey.h"
+#include "vtkPointData.h"
+#include "vtkPolyData.h"
+#include "vtkPolyDataMapper.h"
+#include "vtkQuadraturePointInterpolator.h"
+#include "vtkQuadraturePointsGenerator.h"
+#include "vtkQuadratureSchemeDefinition.h"
+#include "vtkQuadratureSchemeDictionaryGenerator.h"
+#include "vtkUnstructuredGrid.h"
+#include "vtkUnstructuredGridReader.h"
+#include "vtkXMLUnstructuredGridReader.h"
+#include "vtkXMLUnstructuredGridWriter.h"
+
+#include "vtkSmartPointer.h"
+
 namespace neon::solid
 {
 femMesh::femMesh(BasicMesh const& basic_mesh,
@@ -73,5 +95,36 @@ void femMesh::update_internal_variables(Vector const& du)
     material_coordinates->update_current_configuration(du);
 
     for (auto& submesh : submeshes) submesh.update_internal_variables();
+}
+
+void femMesh::write() const
+{
+    // Create an unstructured grid object
+    auto unstructured_grid = vtkSmartPointer<vtkUnstructuredGrid>::New();
+    unstructured_grid->Allocate();
+
+    unstructured_grid->SetPoints(material_coordinates->vtk_coordinates());
+
+    NodeOrderingAdapter adapter;
+
+    for (auto const& submesh : submeshes)
+    {
+        for (auto const& node_list : submesh.connectivities())
+        {
+            auto vtk_node_list = vtkSmartPointer<vtkIdList>::New();
+            for (auto const& node : node_list)
+            {
+                vtk_node_list->InsertNextId(static_cast<long>(node));
+            }
+            unstructured_grid->InsertNextCell(adapter.to_vtk(submesh.topology()), vtk_node_list);
+        }
+    }
+    unstructured_grid->GetPointData()->AddArray(material_coordinates->vtk_displacement());
+
+    auto unstructured_grid_writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
+    unstructured_grid_writer->SetFileName("Test.vtu");
+    unstructured_grid_writer->SetInputData(unstructured_grid);
+    unstructured_grid_writer->SetDataModeToAscii();
+    unstructured_grid_writer->Write();
 }
 }
