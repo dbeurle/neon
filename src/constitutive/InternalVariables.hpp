@@ -44,8 +44,8 @@ public:
     enum class Scalar {
         VonMisesStress,
         EffectivePlasticStrain,
-        DetJ0, // Reference Jacobian determinant
-        DetJ   // Updated Jacobian determinant
+        DetF0, // Reference Jacobian determinant
+        DetF   // Updated Jacobian determinant
     };
 
 public:
