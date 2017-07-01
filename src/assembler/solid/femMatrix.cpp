@@ -160,7 +160,7 @@ void femMatrix::enforce_dirichlet_conditions(SparseMatrix& A, Vector& x, Vector&
     {
         for (auto const& dirichlet_boundary : dirichlet_boundaries)
         {
-            for (auto const& fixed_dof : dirichlet_boundary.prescribed_dofs())
+            for (auto const& fixed_dof : dirichlet_boundary.dof_view())
             {
                 auto const diagonal_entry = Kt.coeffRef(fixed_dof, fixed_dof);
 
@@ -202,14 +202,13 @@ void femMatrix::apply_displacements(double const load_factor)
     {
         for (auto const& dirichlet_boundary : dirichlet_boundaries)
         {
-            for (auto const& dof : dirichlet_boundary.prescribed_dofs())
+            for (auto const& dof : dirichlet_boundary.dof_view())
             {
-                disp(dof) = load_factor * dirichlet_boundary.prescribed_value();
+                disp(dof) = load_factor * dirichlet_boundary.value_view();
             }
         }
     }
     fem_mesh.update_internal_variables(disp);
-
     // std::cout << "Displacements applied in" << timer.format();
 }
 }
