@@ -23,18 +23,18 @@ public:
 public:
     /**
      * Perform the numerical integration of a lambda function.
-     * @param accumulator - Initial value for the numerical integration
+     * @param integral - Initial value for the numerical integration
      * @param f - A lambda function that accepts an femValue and quadrature point
      * @return The numerically integrated matrix
      */
-    template <typename Function>
-    Matrix integrate(Matrix accumulator, Function eval_func) const
+    template <typename Functor>
+    Matrix integrate(Matrix integral, Functor&& f) const
     {
         for (int l = 0; l < points(); ++l)
         {
-            accumulator.noalias() += eval_func(femvals[l], l) * w[l];
+            integral.noalias() += f(femvals[l], l) * w[l];
         }
-        return accumulator;
+        return integral;
     }
 
     template <typename Function>
