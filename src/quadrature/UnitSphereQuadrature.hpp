@@ -9,5 +9,8 @@ class UnitSphereQuadrature : public VolumeQuadrature
 public:
     /** Fill the quadrature coordinates and weightings */
     UnitSphereQuadrature();
+
+protected:
+    void precompute_coordinates();
 };
 }
