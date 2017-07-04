@@ -1,8 +1,6 @@
 
 #include "UnitSphereQuadrature.hpp"
 
-#include "numeric/DenseTypes.hpp"
-
 namespace neon
 {
 UnitSphereQuadrature::UnitSphereQuadrature()
