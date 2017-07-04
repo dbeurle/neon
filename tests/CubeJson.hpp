@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <string>
+
 // A collection of functions that can be used to test a cube mesh
 // including a mesh and input data
 
@@ -70,8 +72,8 @@ inline std::string material_data_json()
 inline std::string simulation_data_json()
 {
     return "{ \"BoundaryConditions\" : [ {\"Name\" : \"bottom\", "
-           "\"Type\" : "
-           "\"Displacement\", \"Values\" : {\"x\" : 0.0, \"y\" : 0.0, \"z\" : 0.0}}, "
+           "\"Type\" : \"Displacement\","
+           "\"Values\" : {\"x\" : 0.0, \"y\" : 0.0, \"z\" : 0.0}}, "
            "{\"Name\" : "
            "\"top\", \"Type\" : \"Displacement\", \"Values\" : {\"z\" : 1.0e-3}} ], "
            "\"ConstitutiveModel\" : \"NeoHooke\", "
