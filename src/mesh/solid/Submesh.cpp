@@ -126,7 +126,6 @@ Vector femSubmesh::internal_nodal_force(Matrix const& x, int element) const
 void femSubmesh::update_internal_variables()
 {
     auto start = std::chrono::high_resolution_clock::now();
-    std::cout << "Updating the internal variables..." << std::flush;
 
     update_deformation_measures();
     update_Jacobian_determinants();
@@ -139,7 +138,8 @@ void femSubmesh::update_internal_variables()
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
-    std::cout << "took " << elapsed_seconds.count() << "s\n";
+
+    std::cout << "  Updating the internal variables took " << elapsed_seconds.count() << "s\n";
 }
 
 void femSubmesh::update_deformation_measures()
