@@ -45,18 +45,18 @@ void femMatrix::compute_sparsity_pattern()
 
     is_sparsity_computed = true;
 
-    std::cout << "Sparsity pattern with " << Kt.nonZeros() << " non-zeros took" << timer.format();
+    std::cout << "  Sparsity pattern with " << Kt.nonZeros() << " non-zeros took" << timer.format();
 }
 
 void femMatrix::solve()
 {
     // Perform Newton-Raphson iterations
-    std::cout << "Performing Newton-Raphson iterations\n";
+    std::cout << "Solving " << fem_mesh.active_dofs() << " non-linear equations\n";
 
     Vector delta_d = Vector::Zero(fem_mesh.active_dofs());
 
     // Iteration and tolerance specifications
-    auto max_iterations = 10, current_iteration = 0;
+    auto max_iterations = 15, current_iteration = 0;
     auto tolerance = 1.0e-5;
 
     apply_displacements();
@@ -64,6 +64,10 @@ void femMatrix::solve()
     // Full Newton-Raphson iteration to solve nonlinear equations
     while (current_iteration < max_iterations)
     {
+        std::cout << "----------------------------------\n";
+        std::cout << "    Newton-Raphson iteration " << current_iteration << "\n";
+        std::cout << "----------------------------------\n";
+
         compute_internal_force();
 
         Vector residual = -fint;
@@ -72,8 +76,8 @@ void femMatrix::solve()
 
         enforce_dirichlet_conditions(Kt, delta_d, residual);
 
-        std::cout << "Nonlinear iteration " << current_iteration << ", displacement norm "
-                  << delta_d.norm() << ", residual norm " << residual.norm() << "\n";
+        std::cout << "  Displacement norm " << delta_d.norm() << ", residual norm "
+                  << residual.norm() << "\n";
 
         if (delta_d.norm() < tolerance && residual.norm() < tolerance)
         {
@@ -85,6 +89,8 @@ void femMatrix::solve()
 
         fem_mesh.update_internal_variables(delta_d);
 
+        fem_mesh.write();
+
         current_iteration++;
     }
 
@@ -93,7 +99,6 @@ void femMatrix::solve()
         std::cout << "Newton-Raphson iterations failed to converged.  Aborting.\n";
         std::abort();
     }
-    fem_mesh.write();
 }
 
 void femMatrix::assemble_stiffness()
@@ -109,27 +114,27 @@ void femMatrix::assemble_stiffness()
         // #pragma omp parallel for
         for (auto element = 0; element < submesh.elements(); ++element)
         {
-            auto const & [ dofs, ke ] = submesh.tangent_stiffness(element);
+            auto const[dofs, ke] = submesh.tangent_stiffness(element);
 
             // Gather and add to the global coefficient matrix
             for (auto b = 0; b < dofs.size(); b++)
             {
                 for (auto a = 0; a < dofs.size(); a++)
                 {
-                    // #pragma omp atomic
+                    // #pragma omp atomic update
                     Kt.coeffRef(dofs[a], dofs[b]) += ke(a, b);
                 }
             }
         }
     }
 
-    // std::cout << "Assembly of "
-    //           << ranges::accumulate(fem_mesh.meshes(),
-    //                                 0l,
-    //                                 [](auto sum, auto const& submesh) {
-    //                                     return sum + submesh.elements();
-    //                                 })
-    //           << " elements with " << Kt.nonZeros() << " insertions took" << timer.format();
+    std::cout << "  Assembly of "
+              << ranges::accumulate(fem_mesh.meshes(),
+                                    0l,
+                                    [](auto sum, auto const& submesh) {
+                                        return sum + submesh.elements();
+                                    })
+              << " elements with " << Kt.nonZeros() << " insertions took" << timer.format();
 }
 
 void femMatrix::compute_internal_force()
@@ -150,7 +155,7 @@ void femMatrix::compute_internal_force()
             }
         }
     }
-    // std::cout << "Assembly of internal forces completed in" << timer.format();
+    std::cout << "  Assembly of internal forces took" << timer.format();
 }
 
 void femMatrix::enforce_dirichlet_conditions(SparseMatrix& A, Vector& x, Vector& b)
@@ -190,7 +195,7 @@ void femMatrix::enforce_dirichlet_conditions(SparseMatrix& A, Vector& x, Vector&
             }
         }
     }
-    // std::cout << "Dirichlet conditions enforced in" << timer.format();
+    std::cout << "  Dirichlet conditions enforced in" << timer.format();
 }
 
 void femMatrix::apply_displacements(double const load_factor)
@@ -210,6 +215,6 @@ void femMatrix::apply_displacements(double const load_factor)
         }
     }
     fem_mesh.update_internal_variables(disp);
-    // std::cout << "Displacements applied in" << timer.format();
+    std::cout << "  Displacements applied in" << timer.format();
 }
 }
