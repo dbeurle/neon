@@ -12,7 +12,7 @@ include_directories(${CATCH_INCLUDE_DIR} ${RV3_INCLUDE_DIR}
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 set(CMAKE_CXX_STANDARD 17)
-add_definitions("-Wall")
+add_definitions("-Wall -march=native")
 
 find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})
@@ -20,7 +20,12 @@ include(${VTK_USE_FILE})
 find_package(Boost 1.40 COMPONENTS system filesystem log thread timer REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
-# find_package(OpenMP REQUIRED)
+find_package(OpenMP REQUIRED)
+if (OPENMP_FOUND)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
+
 find_package(Threads REQUIRED)
 find_package(BLAS REQUIRED)
 
