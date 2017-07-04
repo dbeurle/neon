@@ -6,7 +6,7 @@
 
 namespace neon
 {
-using SparseMatrix = Eigen::SparseMatrix<double>;
+using SparseMatrix = Eigen::SparseMatrix<double, Eigen::RowMajor>;
 
 class Doublet
 {
