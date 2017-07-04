@@ -1,6 +1,8 @@
 
 #include "LinearSolver.hpp"
 
+#include <omp.h>
+
 // Must be here
 #include <Eigen/PaStiXSupport>
 
@@ -34,11 +36,7 @@ struct MUMPSWrapper<double>
     static void mumps_c(MUMPS_STRUC_C& info) { dmumps_c(&info); }
 };
 
-LinearSolver::LinearSolver() : solverParam(1e-6, 1000)
-{
-    solverParam.max_iterations = 1000;
-    solverParam.tolerance = 1e-5;
-}
+LinearSolver::LinearSolver() : solverParam(1.0e-5, 1000) {}
 
 void PaStiX::solve(const SparseMatrix& A, Vector& x, const Vector& b)
 {
@@ -47,7 +45,7 @@ void PaStiX::solve(const SparseMatrix& A, Vector& x, const Vector& b)
     Eigen::PastixLU<Eigen::SparseMatrix<double>> pastix;
 
     // Number of threads
-    pastix.iparm(34) = 2;
+    pastix.iparm(34) = 4;
 
     // Number of Cuda devices
     // pastix.iparm(64) = 1;
@@ -56,13 +54,13 @@ void PaStiX::solve(const SparseMatrix& A, Vector& x, const Vector& b)
 
     x = pastix.solve(b);
 
-    std::cout << "\tAnalysis step " << pastix.dparm(18) << " seconds\n";
-    std::cout << "\tPredicted factorization time " << pastix.dparm(19) << " seconds\n";
-    std::cout << "\tFactorization " << pastix.dparm(20) << " seconds\n";
-    std::cout << "\tTime for solve " << pastix.dparm(21) << " seconds\n";
-    std::cout << "\tGigaFLOPS during factorization " << pastix.dparm(22) / 1e9 << "\n";
-    std::cout << "\tMegaFLOPS during solve " << pastix.dparm(23) / 1e6 << "\n";
-    std::cout << "Solution time: " << timer.format() << "\n";
+    std::cout << "    Analysis step " << pastix.dparm(18) << " seconds\n";
+    std::cout << "    Predicted factorization time " << pastix.dparm(19) << " seconds\n";
+    std::cout << "    Factorization " << pastix.dparm(20) << " seconds\n";
+    std::cout << "    Time for solve " << pastix.dparm(21) << " seconds\n";
+    std::cout << "    GigaFLOPS during factorization " << pastix.dparm(22) / 1e9 << "\n";
+    std::cout << "    MegaFLOPS during solve " << pastix.dparm(23) / 1e6 << "\n";
+    std::cout << "  Linear solver took" << timer.format() << "\n";
 }
 
 void MUMPS::solve(const SparseMatrix& A, Vector& x, const Vector& b)
@@ -71,7 +69,8 @@ void MUMPS::solve(const SparseMatrix& A, Vector& x, const Vector& b)
 
     x = b;
 
-    auto const rowcols = std::make_pair(A.rows(), A.cols());
+    // Check for a square matrix
+    assert(A.rows() == A.cols() == x.size() == b.size());
 
     MUMPSWrapper<double>::MUMPS_STRUC_C info;
 
@@ -125,15 +124,15 @@ void MUMPS::solve(const SparseMatrix& A, Vector& x, const Vector& b)
     // 2 	Cheap residuals
     info.icntl[10] = 2;
 
-    info.n = rowcols.first;
+    info.n = A.rows();
     info.nz = A.nonZeros();
 
     // Convert to MUMPS representation of the matrix
 
     // Temporary matrix storage
-    int* irn = new int[info.nz];
-    int* jcn = new int[info.nz];
-    double* a = new double[info.nz];
+    std::vector<int> irn(info.nz);
+    std::vector<int> jcn(info.nz);
+    std::vector<double> a(info.nz);
 
     // Decompress the sparse matrix
     for (auto k = 0, nonzeros = 0; k < A.outerSize(); ++k)
@@ -147,9 +146,9 @@ void MUMPS::solve(const SparseMatrix& A, Vector& x, const Vector& b)
         }
     }
 
-    info.a = a;
-    info.irn = irn;
-    info.jcn = jcn;
+    info.a = a.data();
+    info.irn = irn.data();
+    info.jcn = jcn.data();
 
     // Analysis phase
     info.job = 1;
@@ -157,8 +156,7 @@ void MUMPS::solve(const SparseMatrix& A, Vector& x, const Vector& b)
 
     if (info.info[0] < 0)
     {
-        std::cout << "Error in analysis phase\n";
-        // FIXME throw exception
+        std::cerr << "Error in analysis phase of MUMPS solver\n";
         std::abort();
     }
 
@@ -182,7 +180,7 @@ void MUMPS::solve(const SparseMatrix& A, Vector& x, const Vector& b)
     MUMPSWrapper<double>::mumps_c(info);
     if (info.info[0] < 0)
     {
-        std::cout << "Error in backsubstitution phase\n";
+        std::cout << "Error in backsubstitution phase of MUMPS solver\n";
         // FIXME throw exception
         std::abort();
     }
@@ -196,16 +194,7 @@ void MUMPS::solve(const SparseMatrix& A, Vector& x, const Vector& b)
         std::cout << "Error in cleanup phase\n";
         std::abort();
     }
-
-    std::cout << "Solution time: " << timer.format();
-
-    // Clean up matrix copy
-    delete[] a;
-    delete[] irn;
-    delete[] jcn;
-    a = nullptr;
-    irn = nullptr;
-    jcn = nullptr;
+    std::cout << "  Linear solver took" << timer.format();
 }
 
 void SparseLU::solve(const SparseMatrix& A, Vector& x, const Vector& b)
@@ -227,21 +216,23 @@ pCG::pCG(double tol, int maxIter)
 
 void pCG::solve(const SparseMatrix& A, Vector& x, const Vector& b)
 {
+    omp_set_num_threads(4);
+
     Eigen::ConjugateGradient<SparseMatrix, Eigen::Lower | Eigen::Upper> pcg;
 
     pcg.setTolerance(LinearSolver::solverParam.tolerance);
     pcg.setMaxIterations(LinearSolver::solverParam.max_iterations);
 
-    std::cout << "Solver tolerance      = " << solverParam.tolerance << "\n";
-    std::cout << "Solver max iterations = " << solverParam.max_iterations << "\n";
+    std::cout << "  CG tolerance " << solverParam.tolerance << ", max iterations "
+              << solverParam.max_iterations << "\n";
 
     boost::timer::cpu_timer timer;
 
     pcg.compute(A);
     x = pcg.solveWithGuess(b, x);
 
-    std::cout << "Iterations: " << pcg.iterations() << ", estimated error: " << pcg.error() << "\n";
-    std::cout << "Solution time: " << timer.format() << "\n";
+    std::cout << "  Iterations: " << pcg.iterations() << ", estimated error: " << pcg.error() << "\n";
+    std::cout << "  Solution time: " << timer.format() << "\n";
 }
 
 BiCGSTAB::BiCGSTAB(double tol) { solverParam.tolerance = tol; }
