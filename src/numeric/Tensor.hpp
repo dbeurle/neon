@@ -48,14 +48,86 @@ inline auto I2(Matrix3 const& a) { return 0.5 * (std::pow(a.trace(), 2) - (a * a
 /** @return Third invariant, which is the determinant of the tensor */
 inline auto I3(Matrix3 const& a) { return a.determinant(); }
 
-inline auto identity_expansion(Matrix const& H, int const nodal_dofs, int const local_nodes)
+inline auto identity_expansion(Matrix const& H, int const nodal_dofs)
 {
+    assert(H.rows() == H.cols());
     // Create the geometric part of the tangent stiffness matrix
-    Matrix K = Matrix::Zero(local_nodes * nodal_dofs, local_nodes * nodal_dofs);
-    for (auto i = 0; i < local_nodes; ++i)
-        for (auto j = 0; j < local_nodes; ++j)
+    Matrix K = Matrix::Zero(H.rows() * nodal_dofs, H.rows() * nodal_dofs);
+    for (auto i = 0; i < H.rows(); ++i)
+        for (auto j = 0; j < H.rows(); ++j)
             for (auto k = 0; k < nodal_dofs; ++k)
                 K(i * nodal_dofs + k, j * nodal_dofs + k) = H(i, j);
     return K;
+}
+
+inline auto fourth_order_identity()
+{
+    Matrix I(6, 6);
+    I << 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, //
+        0.0, 1.0, 0.0, 0.0, 0.0, 0.0,  //
+        0.0, 0.0, 1.0, 0.0, 0.0, 0.0,  //
+        0.0, 0.0, 0.0, 0.5, 0.0, 0.0,  //
+        0.0, 0.0, 0.0, 0.0, 0.5, 0.0,  //
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.5;
+    return I;
+}
+
+inline auto I_outer_I()
+{
+    Matrix i_o_i(6, 6);
+    i_o_i << 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, //
+        1.0, 1.0, 1.0, 0.0, 0.0, 0.0,      //
+        1.0, 1.0, 1.0, 0.0, 0.0, 0.0,      //
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0,      //
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0,      //
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
+    return i_o_i;
+}
+
+inline auto outer_product(Matrix3 const& h)
+{
+    Matrix h_outer_h(6, 6);
+    h_outer_h << std::pow(h(0, 0), 2), //
+        h(0, 0) * h(1, 1),             //
+        h(0, 0) * h(2, 2),             //
+        h(0, 0) * h(1, 2),             //
+        h(0, 0) * h(0, 2),             //
+        h(0, 0) * h(0, 1),             //
+        //
+        h(0, 0) * h(1, 1),    //
+        std::pow(h(1, 1), 2), //
+        h(1, 1) * h(2, 2),    //
+        h(1, 1) * h(1, 2),    //
+        h(0, 2) * h(1, 1),    //
+        h(0, 1) * h(1, 1),    //
+                              //
+        h(0, 0) * h(2, 2),    //
+        h(1, 1) * h(2, 2),    //
+        std::pow(h(2, 2), 2), //
+        h(1, 2) * h(2, 2),    //
+        h(0, 2) * h(2, 2),    //
+        h(0, 1) * h(2, 2),    //
+                              //
+        h(0, 0) * h(1, 2),    //
+        h(1, 1) * h(1, 2),    //
+        h(1, 2) * h(2, 2),    //
+        std::pow(h(1, 2), 2), //
+        h(0, 2) * h(1, 2),    //
+        h(0, 1) * h(1, 2),    //
+                              //
+        h(0, 0) * h(0, 2),    //
+        h(0, 2) * h(1, 1),    //
+        h(0, 2) * h(2, 2),    //
+        h(0, 2) * h(1, 2),    //
+        std::pow(h(0, 2), 2), //
+        h(0, 1) * h(0, 2),    //
+                              //
+        h(0, 0) * h(0, 1),    //
+        h(0, 1) * h(1, 1),    //
+        h(0, 1) * h(2, 2),    //
+        h(0, 1) * h(1, 2),    //
+        h(0, 1) * h(0, 2),    //
+        std::pow(h(0, 1), 2); //
+    return h_outer_h;
 }
 }
