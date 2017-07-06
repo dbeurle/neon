@@ -4,7 +4,7 @@
 namespace neon
 {
 class InternalVariables;
-class PlasticMaterial;
+class Material;
 
 /**
  * ConstitutiveModel is the base class for all constitutive models.  The derived
@@ -23,6 +23,9 @@ public:
 
     /** Update constitutive matrix at quadrature points */
     virtual void update_continuum_tangent() = 0;
+
+    /** @return A base class reference to the common material properties */
+    virtual Material const& intrinsic_material() const = 0;
 
 protected:
     InternalVariables& variables;
