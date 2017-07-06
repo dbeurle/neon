@@ -71,7 +71,7 @@ Matrix femSubmesh::geometric_tangent_stiffness(Matrix const& x, int element) con
 
                                        return L.transpose() * σ * L * Jacobian.determinant();
                                    });
-    return identity_expansion(kgeo, dofs_per_node(), nodes_per_element());
+    return identity_expansion(kgeo, dofs_per_node());
 }
 
 Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int element) const
@@ -121,6 +121,37 @@ Vector femSubmesh::internal_nodal_force(Matrix const& x, int element) const
                                    });
     // Convert into a vector for the vector assembly operation
     return Eigen::Map<RowMatrix>(fint.data(), m * n, 1);
+}
+
+std::tuple<List const&, Matrix> femSubmesh::consistent_mass(int element) const
+{
+    auto X = material_coordinates->initial_configuration(local_node_list(element));
+
+    auto m = sf->quadrature().integrate(Matrix::Zero(nodes_per_element(), nodes_per_element()),
+                                        [&](auto const& femval, auto const& l) -> Matrix {
+                                            auto const & [ N, dN ] = femval;
+
+                                            auto const Jacobian = local_deformation_gradient(dN, X);
+
+                                            return N * N.transpose() * Jacobian.determinant();
+                                        });
+
+    m *= cm->intrinsic_material().initial_density();
+
+    return {local_dof_list(element), identity_expansion(m, dofs_per_node())};
+}
+
+std::tuple<List const&, Vector> femSubmesh::diagonal_mass(int element) const
+{
+    auto const & [ dofs, consistent_m ] = this->consistent_mass(element);
+
+    Vector diagonal_m(consistent_m.rows());
+    for (auto i = 0; i < consistent_m.rows(); ++i)
+    {
+        diagonal_m(i) = consistent_m.row(i).sum();
+    }
+
+    return {local_dof_list(element), diagonal_m};
 }
 
 void femSubmesh::update_internal_variables()
@@ -244,8 +275,13 @@ std::unique_ptr<ConstitutiveModel> femSubmesh::make_constitutive_model(
     {
         return std::make_unique<NeoHooke>(variables, material_data);
     }
+    else if (model_name == "AffineMicrosphere")
+    {
+        return std::make_unique<AffineMicrosphere>(variables, material_data);
+    }
 
     std::cerr << "The model name " << model_name << " is not recognised\n";
+    std::cout << "Supported modes are NeoHooke, AffineMicrosphere\n";
     std::abort();
     return nullptr;
 }

@@ -47,6 +47,12 @@ public:
     /** @return the internal element force */
     std::tuple<List const&, Vector> internal_force(int element) const;
 
+    /** @return the consistent mass matrix \sa diagonal_mass */
+    std::tuple<List const&, Matrix> consistent_mass(int element) const;
+
+    /** @return the consistent mass matrix \sa diagonal_mass */
+    std::tuple<List const&, Vector> diagonal_mass(int element) const;
+
     /** Update the internal variables for the mesh group
      *  Calls:
      *  \sa update_deformation_measures()

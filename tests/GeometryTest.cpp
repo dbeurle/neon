@@ -224,6 +224,24 @@ TEST_CASE("Solid submesh test")
         REQUIRE(internal_force.rows() == number_of_local_dofs);
         REQUIRE(local_dofs.size() == number_of_local_dofs);
     }
+    SECTION("Consistent and diagonal mass")
+    {
+        auto const & [ local_dofs_0, mass_c ] = fem_submesh.consistent_mass(0);
+        auto const & [ local_dofs_1, mass_d ] = fem_submesh.diagonal_mass(0);
+
+        REQUIRE(local_dofs_0.size() == number_of_local_dofs);
+        REQUIRE(local_dofs_1.size() == number_of_local_dofs);
+
+        REQUIRE(mass_c.rows() == number_of_local_dofs);
+        REQUIRE(mass_c.cols() == number_of_local_dofs);
+        REQUIRE(mass_d.rows() == number_of_local_dofs);
+
+        // Check the row sum is the same for each method
+        for (auto i = 0; i < mass_d.rows(); i++)
+        {
+            REQUIRE(mass_c.row(i).sum() == Approx(mass_d(i)));
+        }
+    }
 }
 TEST_CASE("Solid mesh test")
 {
