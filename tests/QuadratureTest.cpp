@@ -245,9 +245,9 @@ TEST_CASE("Unit sphere quadrature scheme test", "[UnitSphereQuadrature]")
 {
     SECTION("Unit sphere unit test")
     {
-        UnitSphereQuadrature unit_sphere_scheme;
+        UnitSphereQuadrature unit_sphere;
 
-        REQUIRE(unit_sphere_scheme.points() == 21);
-        REQUIRE(ranges::accumulate(unit_sphere_scheme.weights(), 0.0) == Approx(0.5));
+        REQUIRE(unit_sphere.points() == 21);
+        REQUIRE(ranges::accumulate(unit_sphere.weights(), 0.0) == Approx(0.5));
     }
 }
