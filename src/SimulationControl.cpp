@@ -3,6 +3,12 @@
 
 #include "PreprocessorExceptions.hpp"
 
+#include "assembler/solid/femStaticMatrix.hpp"
+
+#include "assembler/solid/femDynamicMatrix.hpp"
+
+#include "mesh/solid/femMesh.hpp"
+
 #include <unordered_set>
 
 #include <boost/filesystem.hpp>
@@ -114,6 +120,10 @@ void SimulationControl::parse()
     {
         solid::femStaticMatrix fem_matrix(fem_mesh, root["Simulation"][0]["LinearSolver"]);
         fem_matrix.solve();
+    }
+    else
+    {
+        std::runtime_error("Specify solution type as Transient or Equilibrium\n");
     }
 }
 

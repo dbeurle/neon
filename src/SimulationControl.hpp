@@ -3,9 +3,6 @@
 
 #include "mesh/BasicMesh.hpp"
 
-#include "assembler/solid/femMatrix.hpp"
-#include "mesh/solid/femMesh.hpp"
-
 #include <map>
 #include <string>
 #include <utility>
