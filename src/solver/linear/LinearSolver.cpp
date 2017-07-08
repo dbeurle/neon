@@ -12,8 +12,9 @@
 #include <MUMPS/dmumps_c.h>
 #include <MUMPS/smumps_c.h>
 
-#include <boost/timer/timer.hpp>
+#include <chrono>
 #include <iostream>
+#include <thread>
 
 namespace neon
 {
@@ -40,12 +41,12 @@ LinearSolver::LinearSolver() : solverParam(1.0e-5, 1000) {}
 
 void PaStiX::solve(const SparseMatrix& A, Vector& x, const Vector& b)
 {
-    boost::timer::cpu_timer timer;
+    auto start = std::chrono::high_resolution_clock::now();
 
     Eigen::PastixLU<Eigen::SparseMatrix<double>> pastix;
 
     // Number of threads
-    pastix.iparm(34) = 4;
+    pastix.iparm(34) = std::thread::hardware_concurrency();
 
     // Number of Cuda devices
     // pastix.iparm(64) = 1;
@@ -55,17 +56,21 @@ void PaStiX::solve(const SparseMatrix& A, Vector& x, const Vector& b)
     x = pastix.solve(b);
 
     std::cout << "    Analysis step " << pastix.dparm(18) << " seconds\n";
-    std::cout << "    Predicted factorization time " << pastix.dparm(19) << " seconds\n";
-    std::cout << "    Factorization " << pastix.dparm(20) << " seconds\n";
+    std::cout << "    Predicted factorisation time " << pastix.dparm(19) << " seconds\n";
+    std::cout << "    Factorisation " << pastix.dparm(20) << " seconds\n";
     std::cout << "    Time for solve " << pastix.dparm(21) << " seconds\n";
-    std::cout << "    GigaFLOPS during factorization " << pastix.dparm(22) / 1e9 << "\n";
+    std::cout << "    GigaFLOPS during factorisation " << pastix.dparm(22) / 1e9 << "\n";
     std::cout << "    MegaFLOPS during solve " << pastix.dparm(23) / 1e6 << "\n";
-    std::cout << "  Linear solver took" << timer.format() << "\n";
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end - start;
+
+    std::cout << "  Linear solver took " << elapsed_seconds.count() << "s\n";
 }
 
 void MUMPS::solve(const SparseMatrix& A, Vector& x, const Vector& b)
 {
-    boost::timer::cpu_timer timer;
+    auto start = std::chrono::high_resolution_clock::now();
 
     x = b;
 
@@ -137,12 +142,11 @@ void MUMPS::solve(const SparseMatrix& A, Vector& x, const Vector& b)
     // Decompress the sparse matrix
     for (auto k = 0, nonzeros = 0; k < A.outerSize(); ++k)
     {
-        for (SparseMatrix::InnerIterator it(A, k); it; ++it)
+        for (SparseMatrix::InnerIterator it(A, k); it; ++it, ++nonzeros)
         {
             a[nonzeros] = it.value();
             irn[nonzeros] = it.row() + 1;
             jcn[nonzeros] = it.col() + 1;
-            ++nonzeros;
         }
     }
 
@@ -154,22 +158,13 @@ void MUMPS::solve(const SparseMatrix& A, Vector& x, const Vector& b)
     info.job = 1;
     MUMPSWrapper<double>::mumps_c(info);
 
-    if (info.info[0] < 0)
-    {
-        std::cerr << "Error in analysis phase of MUMPS solver\n";
-        std::abort();
-    }
+    if (info.info[0] < 0) throw std::runtime_error("Error in analysis phase of MUMPS solver\n");
 
     // Factorization phase
     info.job = 2;
     MUMPSWrapper<double>::mumps_c(info);
 
-    if (info.info[0] < 0)
-    {
-        std::cout << "Error in factorization phase\n";
-        // FIXME throw exception
-        std::abort();
-    }
+    if (info.info[0] < 0) throw std::runtime_error("Error in factorisation phase\n");
 
     info.rhs = x.data();
     info.nrhs = 1;
@@ -178,23 +173,20 @@ void MUMPS::solve(const SparseMatrix& A, Vector& x, const Vector& b)
     // Back substitution
     info.job = 3;
     MUMPSWrapper<double>::mumps_c(info);
+
     if (info.info[0] < 0)
-    {
-        std::cout << "Error in backsubstitution phase of MUMPS solver\n";
-        // FIXME throw exception
-        std::abort();
-    }
+        throw std::runtime_error("Error in back-substitution phase of MUMPS solver\n");
 
     // Take out the trash
     info.job = -2;
     MUMPSWrapper<double>::mumps_c(info);
 
-    if (info.info[0] < 0)
-    {
-        std::cout << "Error in cleanup phase\n";
-        std::abort();
-    }
-    std::cout << "  Linear solver took" << timer.format();
+    if (info.info[0] < 0) throw std::runtime_error("Error in cleanup phase\n");
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end - start;
+
+    std::cout << "    Linear solver took " << elapsed_seconds.count() << "s\n";
 }
 
 void SparseLU::solve(const SparseMatrix& A, Vector& x, const Vector& b)
@@ -216,7 +208,7 @@ pCG::pCG(double tol, int maxIter)
 
 void pCG::solve(const SparseMatrix& A, Vector& x, const Vector& b)
 {
-    omp_set_num_threads(4);
+    omp_set_num_threads(std::thread::hardware_concurrency());
 
     Eigen::ConjugateGradient<SparseMatrix, Eigen::Lower | Eigen::Upper> pcg;
 
@@ -226,13 +218,17 @@ void pCG::solve(const SparseMatrix& A, Vector& x, const Vector& b)
     std::cout << "  CG tolerance " << solverParam.tolerance << ", max iterations "
               << solverParam.max_iterations << "\n";
 
-    boost::timer::cpu_timer timer;
+    auto start = std::chrono::high_resolution_clock::now();
 
     pcg.compute(A);
     x = pcg.solveWithGuess(b, x);
 
     std::cout << "  Iterations: " << pcg.iterations() << ", estimated error: " << pcg.error() << "\n";
-    std::cout << "  Solution time: " << timer.format() << "\n";
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end - start;
+
+    std::cout << "    Linear solver took " << elapsed_seconds.count() << "s\n";
 }
 
 BiCGSTAB::BiCGSTAB(double tol) { solverParam.tolerance = tol; }
@@ -252,14 +248,18 @@ void BiCGSTAB::solve(const SparseMatrix& A, Vector& x, const Vector& b)
     bicgstab.setTolerance(solverParam.tolerance);
     bicgstab.setMaxIterations(solverParam.max_iterations);
 
-    boost::timer::cpu_timer timer;
+    auto start = std::chrono::high_resolution_clock::now();
 
     bicgstab.compute(A);
 
     x = bicgstab.solve(b);
 
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end - start;
+
     std::cout << "#iterations:     " << bicgstab.iterations();
     std::cout << "estimated error: " << bicgstab.error();
-    std::cout << "Solution time: " << timer.format();
+
+    std::cout << "    Linear solver took " << elapsed_seconds.count() << "s\n";
 }
 }
