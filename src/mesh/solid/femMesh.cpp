@@ -90,9 +90,9 @@ femMesh::femMesh(BasicMesh const& basic_mesh,
 
 int femMesh::active_dofs() const { return 3 * material_coordinates->size(); }
 
-void femMesh::update_internal_variables(Vector const& du)
+void femMesh::update_internal_variables(Vector const& u)
 {
-    material_coordinates->update_current_configuration(du);
+    material_coordinates->update_current_configuration(u);
 
     for (auto& submesh : submeshes) submesh.update_internal_variables();
 }

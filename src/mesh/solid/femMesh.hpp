@@ -26,10 +26,10 @@ public:
     int active_dofs() const;
 
     /**
-     * Deform the body by updating the displacement x += du
+     * Deform the body by updating the displacement x = X + u
      * and update the internal variables with the new deformation
      */
-    void update_internal_variables(Vector const& du);
+    void update_internal_variables(Vector const& u);
 
     /** Constant access to the sub-meshes */
     std::vector<femSubmesh> const& meshes() const { return submeshes; }
