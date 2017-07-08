@@ -24,8 +24,8 @@ public:
     /** @return element current configuration based on the local node numbers*/
     Matrix current_configuration(List const& local_nodes) const;
 
-    /** @param du incremental displacement vector (x,y,z...) */
-    void update_current_configuration(Vector const& du) { x += du; };
+    /** @param u - displacement vector from initial configuration (x,y,z...) */
+    void update_current_configuration(Vector const& u) { x = X + u; };
 
     Vector displacement() const { return x - X; }
 
