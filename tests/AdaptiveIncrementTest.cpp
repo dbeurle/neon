@@ -21,10 +21,12 @@ TEST_CASE("AdaptiveIncrement")
 
     double load_factor = 0.1;
 
+    constexpr auto maximum_cutbacks = 5;
+
     // Simulate a well behaved nonlinear-iteration
     SECTION("Well behaved nonlinear iteration")
     {
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 4; i++)
         {
             load.update_convergence_state(true);
 
@@ -43,7 +45,7 @@ TEST_CASE("AdaptiveIncrement")
         auto last_good_load_factor = load.factor();
         load.update_convergence_state(true);
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < maximum_cutbacks - 1; i++)
         {
             load.update_convergence_state(false);
             REQUIRE(load.factor() > last_good_load_factor);
@@ -54,7 +56,7 @@ TEST_CASE("AdaptiveIncrement")
         auto last_good_load_factor = load.factor();
         load.update_convergence_state(true);
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < maximum_cutbacks - 1; i++)
         {
             load.update_convergence_state(false);
             REQUIRE(load.factor() > last_good_load_factor);
