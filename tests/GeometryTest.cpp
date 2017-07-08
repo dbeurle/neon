@@ -207,7 +207,7 @@ TEST_CASE("Solid submesh test")
         // Check the standard ones are used
         REQUIRE(internal_vars.has(InternalVariables::Tensor::DisplacementGradient));
         REQUIRE(internal_vars.has(InternalVariables::Tensor::DeformationGradient));
-        REQUIRE(internal_vars.has(InternalVariables::Tensor::CauchyStress));
+        REQUIRE(internal_vars.has(InternalVariables::Tensor::Cauchy));
         REQUIRE(internal_vars.has(InternalVariables::Scalar::DetF));
     }
     SECTION("Tangent stiffness")

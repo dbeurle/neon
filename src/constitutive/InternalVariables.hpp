@@ -26,19 +26,18 @@ public:
     enum class Matrix { MaterialTangent };
 
     enum class Tensor {
-        DisplacementGradient, // H = u * B_0'
-        CauchyStress,         // σ = 0.5 * (H + H')
-        CauchyStrain,
-        CauchyStressPlastic,
-        CauchyStrainPlastic,
+        // Stress measures
+        Cauchy,
         Kirchhoff,
         PiolaKirchhoff1,
         PiolaKirchhoff2,
+        // Deformation measures
         RateOfDeformation,
         RateOfDeformationPlastic,
         DeformationGradient,
         DeformationGradientPlastic,
-        GreenStrain
+        DisplacementGradient,
+        GreenLagrange
     };
 
     enum class Scalar {

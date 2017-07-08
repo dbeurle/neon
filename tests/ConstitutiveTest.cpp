@@ -21,8 +21,7 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
     InternalVariables variables(internal_variable_size);
 
     // Add the required variables for an updated Lagrangian formulation
-    variables.add(InternalVariables::Tensor::DeformationGradient,
-                  InternalVariables::Tensor::CauchyStress);
+    variables.add(InternalVariables::Tensor::DeformationGradient, InternalVariables::Tensor::Cauchy);
     variables.add(InternalVariables::Scalar::DetF);
 
     // Create a json reader object from a string
@@ -36,8 +35,8 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
     NeoHooke neo_hooke(variables, material_data);
 
     // Get the tensor variables
-    auto[F_list, σ_list] = variables(InternalVariables::Tensor::DeformationGradient,
-                                     InternalVariables::Tensor::CauchyStress);
+    auto[F_list, σ_list] =
+        variables(InternalVariables::Tensor::DeformationGradient, InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables(InternalVariables::Scalar::DetF);
 

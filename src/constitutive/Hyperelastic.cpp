@@ -31,8 +31,8 @@ void NeoHooke::update_internal_variables()
     using namespace ranges;
 
     // Get references into the hash table
-    auto[F, σ] = variables(InternalVariables::Tensor::DeformationGradient,
-                           InternalVariables::Tensor::CauchyStress);
+    auto[F, σ] =
+        variables(InternalVariables::Tensor::DeformationGradient, InternalVariables::Tensor::Cauchy);
 
     auto const& detF = variables(InternalVariables::Scalar::DetF);
 
@@ -93,7 +93,7 @@ void AffineMicrosphere::update_internal_variables()
 
     // Get references into the hash table
     auto[F_list, σ_list, τ_list] = variables(InternalVariables::Tensor::DeformationGradient,
-                                             InternalVariables::Tensor::CauchyStress,
+                                             InternalVariables::Tensor::Cauchy,
                                              InternalVariables::Tensor::Kirchhoff);
 
     auto const& detF_list = variables(InternalVariables::Scalar::DetF);

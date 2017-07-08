@@ -27,7 +27,7 @@ femSubmesh::femSubmesh(Json::Value const& material_data,
     // Allocate storage for the displacement gradient
     variables.add(InternalVariables::Tensor::DisplacementGradient,
                   InternalVariables::Tensor::DeformationGradient,
-                  InternalVariables::Tensor::CauchyStress);
+                  InternalVariables::Tensor::Cauchy);
 
     variables.add(InternalVariables::Scalar::DetF);
 
@@ -53,7 +53,7 @@ std::tuple<List const&, Vector> femSubmesh::internal_force(int element) const
 
 Matrix femSubmesh::geometric_tangent_stiffness(Matrix const& x, int element) const
 {
-    auto const& σ_list = variables[InternalVariables::Tensor::CauchyStress];
+    auto const& σ_list = variables[InternalVariables::Tensor::Cauchy];
 
     auto n = nodes_per_element();
 
@@ -101,7 +101,7 @@ Vector femSubmesh::internal_nodal_force(Matrix const& x, int element) const
 {
     using RowMatrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
-    auto const& σ_list = variables[InternalVariables::Tensor::CauchyStress];
+    auto const& σ_list = variables[InternalVariables::Tensor::Cauchy];
 
     auto const[m, n] = std::make_tuple(nodes_per_element(), dofs_per_node());
 
