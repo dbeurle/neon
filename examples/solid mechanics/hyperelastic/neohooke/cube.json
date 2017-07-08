@@ -14,6 +14,7 @@
     "Simulation" : [{
         "Name" : "Uniaxial",
 		"Type" : "SolidMechanics",
+        "Solution" : "Equilibrium",
 		"Mesh" :
         [{
             "Name" : "cube",
@@ -48,7 +49,7 @@
                 "Name" : "ZLoad",
 				"Type" : "Displacement",
                 "Values" : {
-                    "z" : 1.0e-3
+                    "z" : 1.0
                 }
             }]
         }],

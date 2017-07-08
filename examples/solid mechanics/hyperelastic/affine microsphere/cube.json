@@ -9,8 +9,8 @@
     "Material" : [{
         "Name" : "rubber",
         "Density" : 1522.0,
-        "ElasticModulus" : 200.0e7,
-        "PoissonsRatio" : 0.40,
+        "ElasticModulus" : 200.0e6,
+        "PoissonsRatio" : 0.45,
         "SegmentsPerChain": 25
     }],
     "Simulation" : [{
@@ -31,7 +31,7 @@
 		"Mesh" :
         [{
             "Name" : "cube",
-            "ConstitutiveModel" : "AffineMicrosphere",
+            "ConstitutiveModel" : "NeoHooke",
             "ElementOptions" :
             {
                 "Quadrature" : "Full"
@@ -62,7 +62,7 @@
                 "Name" : "ZLoad",
 				"Type" : "Displacement",
                 "Values" : {
-                    "z" : 1.0e-4
+                    "z" : 1.0e-6
                 }
             }]
         }],
