@@ -35,6 +35,8 @@ public:
     /** @return The internal variable store */
     InternalVariables const& internal_variables() const { return variables; }
 
+    void save_internal_variables(bool const have_converged);
+
     auto dofs_per_node() const { return 3; }
 
     auto const& shape_function() const { return *sf.get(); }

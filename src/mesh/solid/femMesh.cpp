@@ -97,6 +97,11 @@ void femMesh::update_internal_variables(Vector const& u)
     for (auto& submesh : submeshes) submesh.update_internal_variables();
 }
 
+void femMesh::save_internal_variables(bool const have_converged)
+{
+    for (auto& submesh : submeshes) submesh.save_internal_variables(have_converged);
+}
+
 void femMesh::write(int filename_append) const
 {
     // Create an unstructured grid object

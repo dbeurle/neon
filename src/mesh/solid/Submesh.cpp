@@ -34,6 +34,14 @@ femSubmesh::femSubmesh(Json::Value const& material_data,
     allocate_dof_list(this->dofs_per_node());
 }
 
+void femSubmesh::save_internal_variables(bool const have_converged)
+{
+    if (have_converged)
+        variables.commit();
+    else
+        variables.revert();
+}
+
 std::tuple<List const&, Matrix> femSubmesh::tangent_stiffness(int element) const
 {
     auto x = material_coordinates->current_configuration(local_node_list(element));
@@ -53,7 +61,7 @@ std::tuple<List const&, Vector> femSubmesh::internal_force(int element) const
 
 Matrix femSubmesh::geometric_tangent_stiffness(Matrix const& x, int element) const
 {
-    auto const& σ_list = variables[InternalVariables::Tensor::Cauchy];
+    auto const& σ_list = variables(InternalVariables::Tensor::Cauchy);
 
     auto n = nodes_per_element();
 
@@ -78,7 +86,7 @@ Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int element) cons
 {
     auto const local_dofs = nodes_per_element() * dofs_per_node();
 
-    auto const& D_Vec = variables[InternalVariables::Matrix::MaterialTangent];
+    auto const& D_Vec = variables(InternalVariables::Matrix::MaterialTangent);
 
     Matrix kmat = Matrix::Zero(local_dofs, local_dofs);
 
@@ -101,7 +109,7 @@ Vector femSubmesh::internal_nodal_force(Matrix const& x, int element) const
 {
     using RowMatrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
-    auto const& σ_list = variables[InternalVariables::Tensor::Cauchy];
+    auto const& σ_list = variables(InternalVariables::Tensor::Cauchy);
 
     auto const[m, n] = std::make_tuple(nodes_per_element(), dofs_per_node());
 
@@ -162,8 +170,6 @@ void femSubmesh::update_internal_variables()
 
     cm->update_internal_variables();
     cm->update_continuum_tangent();
-
-    variables.commit();
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;

@@ -31,6 +31,12 @@ public:
      */
     void update_internal_variables(Vector const& u);
 
+    /**
+     * Update the internal variables if converged, otherwise revert back
+     * for next attempted load increment
+     */
+    void save_internal_variables(bool const have_converged);
+
     /** Constant access to the sub-meshes */
     std::vector<femSubmesh> const& meshes() const { return submeshes; }
 
