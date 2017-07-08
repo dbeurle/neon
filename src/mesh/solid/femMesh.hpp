@@ -41,7 +41,7 @@ public:
 
     auto const& coordinates() const { return *(material_coordinates.get()); }
 
-    void write() const;
+    void write(int filename_append = -1) const;
 
 protected:
     std::shared_ptr<MaterialCoordinates> material_coordinates;

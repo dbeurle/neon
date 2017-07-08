@@ -97,7 +97,7 @@ void femMesh::update_internal_variables(Vector const& u)
     for (auto& submesh : submeshes) submesh.update_internal_variables();
 }
 
-void femMesh::write() const
+void femMesh::write(int filename_append) const
 {
     // Create an unstructured grid object
     auto unstructured_grid = vtkSmartPointer<vtkUnstructuredGrid>::New();
@@ -122,7 +122,11 @@ void femMesh::write() const
     unstructured_grid->GetPointData()->AddArray(material_coordinates->vtk_displacement());
 
     auto unstructured_grid_writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
-    unstructured_grid_writer->SetFileName("Test.vtu");
+
+    auto const filename =
+        filename_append < 0 ? "Test.vtu" : "Test_" + std::to_string(filename_append) + ".vtu";
+
+    unstructured_grid_writer->SetFileName(filename.c_str());
     unstructured_grid_writer->SetInputData(unstructured_grid);
     unstructured_grid_writer->SetDataModeToAscii();
     unstructured_grid_writer->Write();
