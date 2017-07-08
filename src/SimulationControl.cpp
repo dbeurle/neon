@@ -29,6 +29,10 @@ SimulationControl::SimulationControl(std::string const& input_file_name)
 
 void SimulationControl::parse()
 {
+    std::cout << "=============================================================\n\n";
+    std::cout << "           neon - a non-linear finite element code\n\n";
+    std::cout << "=============================================================\n\n";
+
     std::ifstream file(input_file_name);
 
     Json::Value root;
@@ -44,7 +48,6 @@ void SimulationControl::parse()
     if (root["Simulation"].empty()) throw EmptyFieldException("Simulation");
 
     // auto const& simulation_name = root["AnalysisName"].asString();
-
     if (!root["Cores"].empty()) threads = root["Cores"].asInt();
 
     std::unordered_set<std::string> material_names, part_names;
@@ -84,11 +87,8 @@ void SimulationControl::parse()
         mesh_store.try_emplace(part["Name"].asString(), mesh_file);
     }
 
-    std::cout << "=============================================================\n";
-    std::cout << " neon - a non-linear finite element code\n\n";
     std::cout << "    Simulation to use " << threads << " thread(s)\n";
-    std::cout << "    Preprocessing for gmsh input completed.\n";
-    std::cout << "*------------------------------------------------------------*\n";
+    std::cout << "    Preprocessing complete\n";
 
     std::cout << "Mesh name " << root["Part"][0]["Name"].asString() << std::endl;
 
@@ -96,9 +96,25 @@ void SimulationControl::parse()
                             root["Material"][0],
                             root["Simulation"][0]["Mesh"][0]);
 
-    solid::femMatrix fem_matrix(fem_mesh, root["Simulation"][0]["LinearSolver"]);
+    if (root["Simulation"][0]["Solution"].empty())
+        throw std::runtime_error(
+            "Simulations need a solution (\"Transient\" or \"Equilibrium\") type\n");
 
-    fem_matrix.solve();
+    if (root["Simulation"][0]["Solution"].asString() == "Transient")
+    {
+        if (root["Simulation"][0]["Time"].empty())
+            throw std::runtime_error("Simulation needs a \"Time\" field specified");
+
+        solid::femDynamicMatrix fem_matrix(fem_mesh,
+                                           root["Simulation"][0]["LinearSolver"],
+                                           root["Simulation"][0]["Time"]);
+        fem_matrix.solve();
+    }
+    else if (root["Simulation"][0]["Solution"].asString() == "Equilibrium")
+    {
+        solid::femStaticMatrix fem_matrix(fem_mesh, root["Simulation"][0]["LinearSolver"]);
+        fem_matrix.solve();
+    }
 }
 
 void SimulationControl::start() {}
