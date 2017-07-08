@@ -217,6 +217,9 @@ TEST_CASE("Solid submesh test")
         REQUIRE(stiffness.rows() == number_of_local_dofs);
         REQUIRE(stiffness.cols() == number_of_local_dofs);
         REQUIRE(stiffness.norm() != Approx(0.0));
+
+        // Check symmetry for NeoHooke material model
+        REQUIRE((stiffness - stiffness.transpose()).norm() == Approx(0.0));
     }
     SECTION("Internal force")
     {
@@ -234,7 +237,9 @@ TEST_CASE("Solid submesh test")
 
         REQUIRE(mass_c.rows() == number_of_local_dofs);
         REQUIRE(mass_c.cols() == number_of_local_dofs);
+
         REQUIRE(mass_d.rows() == number_of_local_dofs);
+        REQUIRE(mass_d.cols() == 1);
 
         // Check the row sum is the same for each method
         for (auto i = 0; i < mass_d.rows(); i++)

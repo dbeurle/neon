@@ -66,7 +66,7 @@ inline std::string cube_mesh_json()
 inline std::string material_data_json()
 {
     return "{\"Name\" : \"steel\",\"ElasticModulus\" : 200.0e6, \"PoissonsRatio\" "
-           ": 0.45 }";
+           ": 0.45, \"Density\" : 7800.0 }";
 }
 
 inline std::string simulation_data_json()
