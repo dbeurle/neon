@@ -1,0 +1,80 @@
+{
+    "Name" : "Toy cube model",
+    "Cores" : 4,
+    "Part": [{
+        "Name" : "cube",
+        "Material" : "rubber",
+        "MeshFormat" : "gmsh"
+    }],
+    "Material" : [{
+        "Name" : "rubber",
+        "Density" : 1522.0,
+        "ElasticModulus" : 200.0e7,
+        "PoissonsRatio" : 0.40,
+        "SegmentsPerChain": 25
+    }],
+    "Simulation" : [{
+        "Name" : "Uniaxial",
+		"Type" : "SolidMechanics",
+        "Solution" : "Transient",
+        "Time" : {
+            "Start" : 0.0,
+            "End" : 10.0,
+            "StepSize" : 1.0,
+            "IntegrationScheme": "Newmark",
+            "IntegrationOptions" :
+            {
+                "ViscousDamping" : 0.5,
+                "BetaParameter" : 0.25
+            }
+        },
+		"Mesh" :
+        [{
+            "Name" : "cube",
+            "ConstitutiveModel" : "AffineMicrosphere",
+            "ElementOptions" :
+            {
+                "Quadrature" : "Full"
+            },
+            "BoundaryConditions" :
+            [{
+                "Name" : "Xsym",
+                "Type" : "Displacement",
+                "Values" : {
+                    "x" : 0.0
+                }
+            },
+            {
+                "Name" : "Ysym",
+                "Type" : "Displacement",
+                "Values" : {
+                    "y" : 0.0
+                }
+            },
+            {
+                "Name" : "Zsym",
+                "Type" : "Displacement",
+                "Values" : {
+                    "z" : 0.0
+                }
+            },
+            {
+                "Name" : "ZLoad",
+				"Type" : "Displacement",
+                "Values" : {
+                    "z" : 1.0e-4
+                }
+            }]
+        }],
+		"LinearSolver" :
+        {
+		    "Solver" : "pCG",
+            "MaxIterations" : 1000,
+            "MaxTolerance"  : 1.0e-6
+        },
+        "Visualisation" :
+        [{
+            "Fields" : ["Displacement", "CauchyStress", "VonMises"]
+        }]
+    }]
+}
