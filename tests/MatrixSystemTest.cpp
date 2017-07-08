@@ -9,7 +9,9 @@
 #include "mesh/solid/Submesh.hpp"
 #include "mesh/solid/femMesh.hpp"
 
-#include "assembler/solid/femMatrix.hpp"
+#include "assembler/solid/femStaticMatrix.hpp"
+
+#include "assembler/solid/femDynamicMatrix.hpp"
 #include "solver/TimeControl.hpp"
 
 #include <json/json.h>
