@@ -94,14 +94,15 @@ public:
     /** Mutable access to the converged scalar variables */
     Scalars& operator[](Scalar scalarType);
 
-    /** Mutable access to the non-converged tensor variables */
-    Tensors& operator()(Tensor tensorType) { return tensors.find(tensorType)->second; }
+    /*-------------------------------------------------------------*
+     *  Mutable access methods for unconverged internal variables  *
+     *-------------------------------------------------------------*/
 
     /** Mutable access to the non-converged scalar variables */
     Scalars& operator()(Scalar scalarType) { return scalars.find(scalarType)->second; }
 
-    /** Constant access to the non-converged scalar variables */
-    Scalars const& operator()(Scalar scalarType) const { return scalars.find(scalarType)->second; }
+    /** Mutable access to the non-converged tensor variables */
+    Tensors& operator()(Tensor tensorType) { return tensors.find(tensorType)->second; }
 
     /** Mutable access to the non-converged matrix variables */
     Matrices& operator()(Matrix matrixType) { return matrices.find(matrixType)->second; }
@@ -130,6 +131,22 @@ public:
         return std::make_tuple(std::ref(matrices.find(var0)->second),
                                std::ref(matrices.find(var1)->second),
                                std::ref(matrices.find(vars)->second)...);
+    }
+
+    /*-------------------------------------------------------------*
+     * Constant access methods for unconverged internal variables  *
+     *-------------------------------------------------------------*/
+
+    /** Constant access to the non-converged scalar variables */
+    Scalars const& operator()(Scalar scalarType) const { return scalars.find(scalarType)->second; }
+
+    /** Non-mutable access to the non-converged tensor variables */
+    Tensors const& operator()(Tensor tensorType) const { return tensors.find(tensorType)->second; }
+
+    /** Non-mutable access to the non-converged matrix variables */
+    Matrices const& operator()(Matrix matrixType) const
+    {
+        return matrices.find(matrixType)->second;
     }
 
     /** Const access to the non-converged scalar variables */
