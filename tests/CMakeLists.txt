@@ -22,7 +22,3 @@ add_test(SystemTest ${CMAKE_CURRENT_BUILD_DIR}/SystemTest)
 add_executable(AdaptiveIncrement AdaptiveIncrementTest.cpp)
 target_link_libraries(AdaptiveIncrement LINK_PUBLIC neon)
 add_test(AdaptiveIncrement ${CMAKE_CURRENT_BUILD_DIR}/AdaptiveIncrement)
-
-# add_executable(femSolidTest femSolidTest.cpp)
-# target_link_libraries(femSolidTest LINK_PUBLIC neon)
-# add_test(femSolidTest ${CMAKE_CURRENT_BUILD_DIR}/femSolidTest)
