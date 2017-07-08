@@ -127,17 +127,16 @@ std::tuple<List const&, Matrix> femSubmesh::consistent_mass(int element) const
 {
     auto X = material_coordinates->initial_configuration(local_node_list(element));
 
+    auto const ρ_0 = cm->intrinsic_material().initial_density();
+
     auto m = sf->quadrature().integrate(Matrix::Zero(nodes_per_element(), nodes_per_element()),
                                         [&](auto const& femval, auto const& l) -> Matrix {
                                             auto const & [ N, dN ] = femval;
 
                                             auto const Jacobian = local_deformation_gradient(dN, X);
 
-                                            return N * N.transpose() * Jacobian.determinant();
+                                            return N * ρ_0 * N.transpose() * Jacobian.determinant();
                                         });
-
-    m *= cm->intrinsic_material().initial_density();
-
     return {local_dof_list(element), identity_expansion(m, dofs_per_node())};
 }
 
@@ -150,7 +149,6 @@ std::tuple<List const&, Vector> femSubmesh::diagonal_mass(int element) const
     {
         diagonal_m(i) = consistent_m.row(i).sum();
     }
-
     return {local_dof_list(element), diagonal_m};
 }
 
