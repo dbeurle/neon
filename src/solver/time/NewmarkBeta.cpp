@@ -1,6 +1,7 @@
 
 #include "NewmarkBeta.hpp"
 
+#include <iostream>
 #include <json/value.h>
 
 namespace neon
@@ -10,6 +11,12 @@ NewmarkBeta::NewmarkBeta(Json::Value const& time_solver_data) : time_control(tim
     if (time_solver_data["IntegrationOptions"].empty())
     {
         // Choose sensible defaults (if they exist)
+        artifical_viscosity = 0.5;
+        beta_parameter = 0.25;
+        std::cout << "Warning: Newmark-Beta parameters were not specified.\nThe artifical "
+                     "viscosity is set to 0.5 and the beta parameter is set to 0.25.\nYou can "
+                     "suppress this warning by using \"ViscousDamping\" and \"BetaParameter\" "
+                     "under the \"Integration Options\" field.";
     }
     else
     {
