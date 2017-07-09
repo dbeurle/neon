@@ -10,6 +10,11 @@ inline auto double_dot(Matrix3 const& a, Matrix3 const& b) { return (a.array() *
 /** @return the deviatoric part of the tensor */
 inline auto deviatoric(Matrix3 const& a) { return a - Matrix3::Identity() * a.trace() / 3.0; }
 
+inline double von_mises_stress(Matrix3 const& a)
+{
+    return std::sqrt(3.0 / 2.0) * deviatoric(a).norm();
+}
+
 inline auto symmetric(Matrix3 const& a) { return 1.0 / 2.0 * (a.transpose() + a); }
 
 inline auto voigt(Matrix3 const& a)
