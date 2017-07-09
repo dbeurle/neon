@@ -25,6 +25,8 @@ public:
      */
     explicit NeoHooke(InternalVariables& variables, Json::Value const& material_data);
 
+    ~NeoHooke() = default;
+
     void update_internal_variables() override final;
 
     void update_continuum_tangent() override final;

@@ -23,7 +23,7 @@ public:
     using Tensors = std::vector<Matrix3>;
     using Matrices = std::vector<neon::Matrix>;
 
-    enum class Matrix { TangentJaumannRate };
+    enum class Matrix { TruesdellModuli };
 
     enum class Tensor {
         // Stress measures
@@ -74,6 +74,13 @@ public:
      * @param rowcol Number of rows (or columns) in the square matrix
      */
     void add(Matrix name, int rowcol);
+
+    /**
+     * @param size Size of internal buffer
+     * @param name Name of variables
+     * @param init Initial matrix
+     */
+    void add(Matrix name, neon::Matrix init);
 
     bool has(Scalar name) const { return scalars.find(name) != scalars.end(); }
     bool has(Tensor name) const { return tensors.find(name) != tensors.end(); }
@@ -189,7 +196,7 @@ protected:
     std::unordered_map<Tensor, Tensors> tensors, tensors_old;
     std::unordered_map<Scalar, Scalars> scalars, scalars_old;
 
-    std::unordered_map<Matrix, Matrices> matrices;
+    std::unordered_map<Matrix, Matrices> matrices, matrices_old;
 
     std::size_t size;
 };
@@ -199,15 +206,15 @@ protected:
 template <typename... Variables>
 inline void InternalVariables::add(InternalVariables::Tensor name, Variables... names)
 {
-    tensors[name].resize(size);
-    tensors_old[name].resize(size);
+    tensors[name].resize(size, Matrix3::Zero());
+    tensors_old[name].resize(size, Matrix3::Zero());
     add(names...);
 }
 
 inline void InternalVariables::add(InternalVariables::Tensor name)
 {
-    tensors[name].resize(size);
-    tensors_old[name].resize(size);
+    tensors[name].resize(size, Matrix3::Zero());
+    tensors_old[name].resize(size, Matrix3::Zero());
 }
 
 template <typename... Variables>
@@ -227,6 +234,13 @@ inline void InternalVariables::add(InternalVariables::Scalar name)
 inline void InternalVariables::add(InternalVariables::Matrix name, int rowcol)
 {
     matrices[name].resize(size, neon::Matrix::Zero(rowcol, rowcol));
+    matrices_old[name].resize(size, neon::Matrix::Zero(rowcol, rowcol));
+}
+
+inline void InternalVariables::add(InternalVariables::Matrix name, neon::Matrix init)
+{
+    matrices[name].resize(size, init);
+    matrices_old[name].resize(size, init);
 }
 
 // Converged results
@@ -264,11 +278,13 @@ inline void InternalVariables::commit()
 {
     tensors_old = tensors;
     scalars_old = scalars;
+    matrices_old = matrices;
 }
 
 inline void InternalVariables::revert()
 {
     tensors = tensors_old;
     scalars = scalars_old;
+    matrices = matrices_old;
 }
 }

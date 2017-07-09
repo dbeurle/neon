@@ -2,7 +2,10 @@
 #include "Submesh.hpp"
 
 #include "PreprocessorExceptions.hpp"
+
 #include "constitutive/Hyperelastic.hpp"
+#include "constitutive/Hypoelasticplastic.hpp"
+
 #include "interpolations/Hexahedron8.hpp"
 #include "mesh/solid/MaterialCoordinates.hpp"
 #include "numeric/Operators.hpp"
@@ -46,10 +49,10 @@ std::tuple<List const&, Matrix> femSubmesh::tangent_stiffness(int element) const
 {
     auto x = material_coordinates->current_configuration(local_node_list(element));
 
-    Matrix kgeo = geometric_tangent_stiffness(x, element);
-    Matrix kmat = material_tangent_stiffness(x, element);
+    Matrix const kgeo = geometric_tangent_stiffness(x, element);
+    Matrix const kmat = material_tangent_stiffness(x, element);
 
-    return {local_dof_list(element), kgeo + kmat};
+    return {local_dof_list(element), kmat + kgeo};
 }
 
 std::tuple<List const&, Vector> femSubmesh::internal_force(int element) const
@@ -86,7 +89,7 @@ Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int element) cons
 {
     auto const local_dofs = nodes_per_element() * dofs_per_node();
 
-    auto const& D_Vec = variables(InternalVariables::Matrix::TangentJaumannRate);
+    auto const& D_Vec = variables(InternalVariables::Matrix::TruesdellModuli);
 
     Matrix kmat = Matrix::Zero(local_dofs, local_dofs);
 
@@ -283,10 +286,14 @@ std::unique_ptr<ConstitutiveModel> femSubmesh::make_constitutive_model(
     {
         return std::make_unique<AffineMicrosphere>(variables, material_data);
     }
+    else if (model_name == "J2")
+    {
+        return std::make_unique<J2Plasticity>(variables, material_data);
+    }
 
-    std::cerr << "The model name " << model_name << " is not recognised\n";
-    std::cout << "Supported modes are NeoHooke, AffineMicrosphere\n";
-    std::abort();
+    throw std::runtime_error("The model name " + model_name + " is not recognised\n" +
+                             "Supported models are NeoHooke, AffineMicrosphere and J2\n");
+
     return nullptr;
 }
 
