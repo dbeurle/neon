@@ -23,7 +23,7 @@ public:
     using Tensors = std::vector<Matrix3>;
     using Matrices = std::vector<neon::Matrix>;
 
-    enum class Matrix { MaterialTangent };
+    enum class Matrix { TangentJaumannRate };
 
     enum class Tensor {
         // Stress measures

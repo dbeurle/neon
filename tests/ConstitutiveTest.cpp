@@ -58,7 +58,7 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
     SECTION("Check of continuum tangent")
     {
         // Get the matrix variable
-        auto& material_tangents = variables(InternalVariables::Matrix::MaterialTangent);
+        auto& material_tangents = variables(InternalVariables::Matrix::TangentJaumannRate);
 
         neo_hooke.update_continuum_tangent();
 
@@ -68,10 +68,13 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
             REQUIRE(C(0, 0) == Approx(0.111111));
             REQUIRE(C(0, 1) == Approx(-0.222222));
             REQUIRE(C(0, 2) == Approx(-0.222222));
+            REQUIRE(C(1, 1) == Approx(0.111111));
             REQUIRE(C(2, 2) == Approx(0.111111));
             REQUIRE(C(3, 3) == Approx(0.1666666667));
             REQUIRE(C(4, 4) == Approx(0.1666666667));
             REQUIRE(C(5, 5) == Approx(0.1666666667));
+
+            REQUIRE((C - C.transpose()).norm() == Approx(0.0));
         }
     }
 }

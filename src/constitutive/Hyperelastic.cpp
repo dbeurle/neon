@@ -23,7 +23,7 @@ NeoHooke::NeoHooke(InternalVariables& variables, Json::Value const& material_dat
     // - B, left Cauchy-Green tensor for kappa, the Kirchoff stress (updated)
     // Which can be computed from the deformation gradient and transformed
     // to the Cauchy stress with very little effort
-    variables.add(InternalVariables::Matrix::MaterialTangent, 6);
+    variables.add(InternalVariables::Matrix::TangentJaumannRate, 6);
 }
 
 void NeoHooke::update_internal_variables()
@@ -52,7 +52,7 @@ void NeoHooke::update_internal_variables()
 
 void NeoHooke::update_continuum_tangent()
 {
-    auto& D_list = variables(InternalVariables::Matrix::MaterialTangent);
+    auto& D_list = variables(InternalVariables::Matrix::TangentJaumannRate);
     auto const& F_list = variables(InternalVariables::Tensor::DeformationGradient);
     auto const& detF_list = variables(InternalVariables::Scalar::DetF);
 
@@ -81,7 +81,7 @@ AffineMicrosphere::AffineMicrosphere(InternalVariables& variables, Json::Value c
 
     segments_per_chain = material_data["SegmentsPerChain"].asInt();
 
-    variables.add(InternalVariables::Matrix::MaterialTangent, 6);
+    variables.add(InternalVariables::Matrix::TangentJaumannRate, 6);
 
     // Deviatoric stress
     variables.add(InternalVariables::Tensor::Kirchhoff);
@@ -142,7 +142,7 @@ void AffineMicrosphere::update_continuum_tangent()
 {
     using namespace ranges;
 
-    auto& D_list = variables(InternalVariables::Matrix::MaterialTangent);
+    auto& D_list = variables(InternalVariables::Matrix::TangentJaumannRate);
 
     auto const & [ F_list, τ_list ] = variables(InternalVariables::Tensor::DeformationGradient,
                                                 InternalVariables::Tensor::Kirchhoff);
