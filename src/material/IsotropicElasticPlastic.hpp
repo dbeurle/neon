@@ -1,33 +1,28 @@
 
 #pragma once
 
-#include "PerfectPlasticElastic.hpp"
+#include "LinearElastic.hpp"
 
 namespace neon
 {
-class IsotropicPlasticElastic : public PerfectPlasticElastic
+/** PlasticMaterial is a base class for material exhibiting plastic behavior */
+class IsotropicElasticPlastic : public LinearElastic
 {
 public:
-    IsotropicPlasticElastic(const Json::Value& materialData);
+    IsotropicElasticPlastic(Json::Value const& material_data);
 
-    virtual ~IsotropicPlasticElastic() = default;
+    ~IsotropicElasticPlastic() = default;
 
-    /**
-     * Return the yield stress due to no hardening
-     * @param effective_strain
-     * @return
-     */
-    virtual double evaluate_yield_function(double effective_strain) const override;
+    double yield_stress(double effective_strain) const;
 
-    /**
-     * Return the plastic modulus of a EPP material which is zero
-     * @param effective_strain
-     * @return
-     */
-    virtual double plastic_modulus(double effective_strain) const override;
+    double hardening_modulus(double effective_strain) const;
+
+    double kinematic_modulus(double effective_strain) const;
 
 protected:
-    double failure_stress; //!< Material ultimate tensile stress
-    double failure_strain; //!< Material ultimate tensile strain
+    double stress_y = 0.0;
+
+    double H = 0.0; //!< Isotropic hardening modulus
+    double K = 0.0; //!< Kinematic hardening modulus
 };
 }

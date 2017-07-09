@@ -1,29 +1,36 @@
 
 #include "IsotropicElasticPlastic.hpp"
 
-#include <json/json.h>
-
 #include "MaterialExceptions.hpp"
+
+#include <json/json.h>
 
 namespace neon
 {
-IsotropicPlasticElastic::IsotropicPlasticElastic(Json::Value const& material_data)
-    : PerfectPlasticElastic(material_data)
+IsotropicElasticPlastic::IsotropicElasticPlastic(Json::Value const& material_data)
+    : LinearElastic(material_data)
 {
-    if (material_data["UltimateStress"].empty()) throw MaterialPropertyException("UltimateStress");
-    if (material_data["UltimateStrain"].empty()) throw MaterialPropertyException("UltimateStrain");
+    if (material_data["YieldStress"].empty()) throw MaterialPropertyException("YieldStress");
 
-    failure_stress = material_data["UltimateStress"].asDouble();
-    failure_strain = material_data["UltimateStrain"].asDouble();
+    stress_y = material_data["YieldStress"].asDouble();
+
+    if (!material_data["IsotropicHardeningModulus"].empty())
+    {
+        H = material_data["IsotropicHardeningModulus"].asDouble();
+    }
+
+    if (!material_data["IsotropicKinematicModulus"].empty())
+    {
+        K = material_data["IsotropicKinematicModulus"].asDouble();
+    }
 }
 
-double IsotropicPlasticElastic::evaluate_yield_function(double effective_strain) const
+double IsotropicElasticPlastic::yield_stress(double effective_strain) const
 {
-    return yield_stress;
+    return stress_y + effective_strain * H;
 }
 
-double IsotropicPlasticElastic::plastic_modulus(double effective_strain) const
-{
-    return effective_strain < failure_strain ? 0.0 : failure_stress / failure_strain;
-}
+double IsotropicElasticPlastic::hardening_modulus(double effective_strain) const { return H; }
+
+double IsotropicElasticPlastic::kinematic_modulus(double effective_strain) const { return K; }
 }
