@@ -58,7 +58,7 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
     SECTION("Check of continuum tangent")
     {
         // Get the matrix variable
-        auto& material_tangents = variables(InternalVariables::Matrix::TangentJaumannRate);
+        auto& material_tangents = variables(InternalVariables::Matrix::TruesdellModuli);
 
         neo_hooke.update_continuum_tangent();
 
