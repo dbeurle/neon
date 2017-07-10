@@ -25,7 +25,7 @@ public:
     ElementTopology topology() const { return element_topology; }
 
     /** @return a list of the element nodal connectivities */
-    List local_node_list(int const element) const { return nodal_connectivity[element]; }
+    List const& local_node_list(int const element) const { return nodal_connectivity[element]; }
 
     /** @return the number of nodes in the element */
     auto nodes_per_element() const { return nodal_connectivity.at(0).size(); }
