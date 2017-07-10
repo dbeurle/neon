@@ -90,11 +90,11 @@ femMesh::femMesh(BasicMesh const& basic_mesh,
 
 int femMesh::active_dofs() const { return 3 * material_coordinates->size(); }
 
-void femMesh::update_internal_variables(Vector const& u)
+void femMesh::update_internal_variables(Vector const& u, double const Δt)
 {
     material_coordinates->update_current_configuration(u);
 
-    for (auto& submesh : submeshes) submesh.update_internal_variables();
+    for (auto& submesh : submeshes) submesh.update_internal_variables(Δt);
 }
 
 void femMesh::save_internal_variables(bool const have_converged)

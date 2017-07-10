@@ -27,9 +27,10 @@ public:
 
     /**
      * Deform the body by updating the displacement x = X + u
-     * and update the internal variables with the new deformation
+     * and update the internal variables with the new deformation and the
+     * time step increment
      */
-    void update_internal_variables(Vector const& u);
+    void update_internal_variables(Vector const& u, double const Δt = 1.0);
 
     /**
      * Update the internal variables if converged, otherwise revert back
