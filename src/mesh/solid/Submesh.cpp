@@ -34,15 +34,26 @@ femSubmesh::femSubmesh(Json::Value const& material_data,
 
     variables.add(InternalVariables::Scalar::DetF);
 
+    // Get the old data to the undeformed configuration
+    for (auto& F : variables(InternalVariables::Tensor::DeformationGradient))
+    {
+        F = Matrix3::Identity();
+    }
+    variables.commit();
+
     allocate_dof_list(this->dofs_per_node());
 }
 
 void femSubmesh::save_internal_variables(bool const have_converged)
 {
     if (have_converged)
+    {
         variables.commit();
+    }
     else
+    {
         variables.revert();
+    }
 }
 
 std::tuple<List const&, Matrix> femSubmesh::tangent_stiffness(int element) const
@@ -163,7 +174,7 @@ std::tuple<List const&, Vector> femSubmesh::diagonal_mass(int element) const
     return {local_dof_list(element), diagonal_m};
 }
 
-void femSubmesh::update_internal_variables()
+void femSubmesh::update_internal_variables(double const Δt)
 {
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -171,8 +182,7 @@ void femSubmesh::update_internal_variables()
     update_Jacobian_determinants();
     check_element_distortion();
 
-    cm->update_internal_variables();
-    cm->update_continuum_tangent();
+    cm->update_internal_variables(Δt);
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
