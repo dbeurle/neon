@@ -362,4 +362,44 @@ int femSubmesh::offset(int element, int quadrature_point) const
 {
     return sf->quadrature().points() * element + quadrature_point;
 }
+
+std::tuple<Vector, Vector> femSubmesh::nodal_averaged_variable(
+    InternalVariables::Tensor const tensor_name) const
+{
+    Vector count = Vector::Zero(material_coordinates->size() * 9);
+    Vector value = count;
+
+    auto const& tensor_list = variables(tensor_name);
+
+    auto const& E = sf->local_quadrature_extrapolation();
+
+    for (auto e = 0; e < elements(); ++e)
+    {
+        // Assemble these into the global value vector
+        auto const& node_list = local_node_list(e);
+
+        for (auto ci = 0; ci < 3; ++ci)
+        {
+            for (auto cj = 0; cj < 3; ++cj)
+            {
+                // Vector format of values
+                Vector component = Vector::Zero(sf->quadrature().points());
+
+                for (auto l = 0; l < sf->quadrature().points(); ++l)
+                {
+                    auto const& tensor = tensor_list[this->offset(e, l)];
+                    component(l) = tensor(ci, cj);
+                }
+                Vector nodal_component = E * component;
+
+                for (auto n = 0; n < nodal_component.rows(); n++)
+                {
+                    value(node_list[n] * 9 + ci * 3 + cj) += nodal_component(n);
+                    count(node_list[n] * 9 + ci * 3 + cj) += 1.0;
+                }
+            }
+        }
+    }
+    return std::make_tuple(value, count);
+}
 }

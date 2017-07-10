@@ -22,10 +22,8 @@
 #include "vtkPointData.h"
 #include "vtkPolyData.h"
 #include "vtkPolyDataMapper.h"
-#include "vtkQuadraturePointInterpolator.h"
 #include "vtkQuadraturePointsGenerator.h"
 #include "vtkQuadratureSchemeDefinition.h"
-#include "vtkQuadratureSchemeDictionaryGenerator.h"
 #include "vtkUnstructuredGrid.h"
 #include "vtkUnstructuredGridReader.h"
 #include "vtkXMLUnstructuredGridReader.h"
@@ -125,6 +123,44 @@ void femMesh::write(int filename_append) const
         }
     }
     unstructured_grid->GetPointData()->AddArray(material_coordinates->vtk_displacement());
+
+    {
+        Vector nodal_averaged_value = Vector::Zero(material_coordinates->size() * 9);
+        Vector running_count = Vector::Zero(material_coordinates->size() * 9);
+
+        // Add internal variables
+        for (auto const& submesh : submeshes)
+        {
+            auto const[value, count] =
+                submesh.nodal_averaged_variable(InternalVariables::Tensor::Cauchy);
+
+            nodal_averaged_value += value;
+            running_count += count;
+        }
+
+        // Average nodal values
+        nodal_averaged_value = nodal_averaged_value.cwiseQuotient(running_count);
+
+        // Put this into a vtkDoubleArray
+        auto tensor_value = vtkSmartPointer<vtkDoubleArray>::New();
+
+        tensor_value->SetNumberOfComponents(9);
+        tensor_value->SetName("Cauchy stress");
+
+        for (auto i = 0; i < material_coordinates->size() * 9; i += 9)
+        {
+            tensor_value->InsertNextTuple9(nodal_averaged_value(i + 0),
+                                           nodal_averaged_value(i + 1),
+                                           nodal_averaged_value(i + 2),
+                                           nodal_averaged_value(i + 3),
+                                           nodal_averaged_value(i + 4),
+                                           nodal_averaged_value(i + 5),
+                                           nodal_averaged_value(i + 6),
+                                           nodal_averaged_value(i + 7),
+                                           nodal_averaged_value(i + 8));
+        }
+        unstructured_grid->GetPointData()->AddArray(tensor_value);
+    }
 
     auto unstructured_grid_writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
 
