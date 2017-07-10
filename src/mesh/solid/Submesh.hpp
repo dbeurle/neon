@@ -89,6 +89,8 @@ public:
         return local_deformation_gradient(rhea, x) * local_deformation_gradient(rhea, X).inverse();
     }
 
+    std::tuple<Vector, Vector> nodal_averaged_variable(InternalVariables::Tensor const tensor_name) const;
+
 protected:
     /** Update the strain measures defined by the constitutive model */
     void update_deformation_measures();
