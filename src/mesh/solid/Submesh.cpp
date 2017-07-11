@@ -4,8 +4,8 @@
 #include "PreprocessorExceptions.hpp"
 
 #include "constitutive/AffineMicrosphere.hpp"
+#include "constitutive/HyperElasticPlastic.hpp"
 #include "constitutive/Hyperelastic.hpp"
-#include "constitutive/Hypoelasticplastic.hpp"
 
 #include "interpolations/Hexahedron8.hpp"
 #include "mesh/solid/MaterialCoordinates.hpp"
