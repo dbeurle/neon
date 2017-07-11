@@ -140,7 +140,7 @@ void J2Plasticity::update_internal_variables(double const Δt)
 
 Matrix J2Plasticity::elastic_moduli() const
 {
-    auto const[μ, λ] = material.LameConstants();
+    auto const[λ, μ] = material.Lame_parameters();
     Matrix C(6, 6);
     C << λ + 2.0 * μ, λ, λ, 0.0, 0.0, 0.0, //
         λ, λ + 2.0 * μ, λ, 0.0, 0.0, 0.0,  //
@@ -157,7 +157,7 @@ Matrix J2Plasticity::algorithmic_tangent(double const α,
                                          Matrix3 const& normal,
                                          double const J) const
 {
-    auto const[μ_e, λ_e] = material.LameConstants();
+    auto const[λ_e, μ_e] = material.Lame_parameters();
 
     auto const β = material.yield_stress(α) / von_mises_stress(σ_0);
 

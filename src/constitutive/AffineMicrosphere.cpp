@@ -24,7 +24,7 @@ AffineMicrosphere::AffineMicrosphere(InternalVariables& variables, Json::Value c
         chain_decay_rate = material_data["ChainDecayRate"].asDouble();
     }
 
-    auto const[μ0, λ0] = material.LameConstants();
+    auto const μ0 = material.shear_modulus();
 
     number_of_chains = μ0 / (boltzmann_constant * temperature);
 
