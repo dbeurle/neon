@@ -9,29 +9,32 @@
     "Material" : [{
         "Name" : "rubber",
         "Density" : 1522.0,
-        "ElasticModulus" : 200.0e6,
+        "ElasticModulus" : 200.0e5,
         "PoissonsRatio" : 0.45,
-        "SegmentsPerChain": 25
+        "SegmentsPerChain": 25,
+        "ChainDecayRate" : 1.0e20
     }],
     "Simulation" : [{
-        "Name" : "Uniaxial",
+        "Name" : "Load",
 		"Type" : "SolidMechanics",
-        "Solution" : "Transient",
+        "Solution" : "Equilibrium",
+        "NonlinearOptions" : {
+            "ResidualTolerance" : 1.0e-5,
+            "DisplacementTolerance" : 1.0e-5
+        },
         "Time" : {
-            "Start" : 0.0,
-            "End" : 10.0,
-            "StepSize" : 1.0,
-            "IntegrationScheme": "Newmark",
-            "IntegrationOptions" :
-            {
-                "ViscousDamping" : 0.5,
-                "BetaParameter" : 0.25
-            }
+            "Period" : 1.0,
+            "Increment" : {
+                "Initial" : 1.0,
+                "Minimum" : 0.001,
+                "Maximum" : 1.0
+            },
+            "LoadVariation" : "Ramp"
         },
 		"Mesh" :
         [{
             "Name" : "cube",
-            "ConstitutiveModel" : "NeoHooke",
+            "ConstitutiveModel" : "AffineMicrosphere",
             "ElementOptions" :
             {
                 "Quadrature" : "Full"
@@ -62,7 +65,7 @@
                 "Name" : "ZLoad",
 				"Type" : "Displacement",
                 "Values" : {
-                    "z" : 1.0e-6
+                    "z" : 1.0e-2
                 }
             }]
         }],
@@ -70,11 +73,62 @@
         {
 		    "Solver" : "pCG",
             "MaxIterations" : 1000,
-            "MaxTolerance"  : 1.0e-6
+            "MaxTolerance"  : 1.0e-8
         },
         "Visualisation" :
         [{
-            "Fields" : ["Displacement", "CauchyStress", "VonMises"]
+            "Fields" : ["Displacement", "CauchyStress"]
+        }]
+    },
+    {
+        "Name" : "Relaxation",
+        "Continuation" : "Load",
+        "Solution" : "Equilibrium",
+        "Time" : {
+            "Period" : 86400.0,
+            "Increment" : {
+                "Initial" : 1.0,
+                "Minimum" : 0.001,
+                "Maximum" : 10000.0
+            },
+            "LoadVariation" : "Instantaneous"
+        },
+		"Mesh" :
+        [{
+            "Name" : "cube",
+            "BoundaryConditions" :
+            [{
+                "Name" : "Xsym",
+                "Type" : "Displacement",
+                "Values" : {
+                    "x" : 0.0
+                }
+            },
+            {
+                "Name" : "Ysym",
+                "Type" : "Displacement",
+                "Values" : {
+                    "y" : 0.0
+                }
+            },
+            {
+                "Name" : "Zsym",
+                "Type" : "Displacement",
+                "Values" : {
+                    "z" : 0.0
+                }
+            },
+            {
+                "Name" : "ZLoad",
+				"Type" : "Displacement",
+                "Values" : {
+                    "z" : 1.0e-2
+                }
+            }]
+        }],
+        "Visualisation" :
+        [{
+            "Fields" : ["Displacement", "CauchyStress"]
         }]
     }]
 }
