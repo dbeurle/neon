@@ -12,10 +12,8 @@ namespace neon
 J2Plasticity::J2Plasticity(InternalVariables& variables, Json::Value const& material_data)
     : Hypoelasticplastic(variables), material(material_data), C_e(elastic_moduli())
 {
-    variables.add(InternalVariables::Tensor::Kirchhoff,
-                  InternalVariables::Tensor::RateOfDeformation,
-                  InternalVariables::Tensor::RateOfDeformationPlastic,
-                  InternalVariables::Tensor::DeformationGradient);
+    variables.add(InternalVariables::Tensor::RateOfDeformation,
+                  InternalVariables::Tensor::RateOfDeformationPlastic);
 
     variables.add(InternalVariables::Scalar::VonMisesStress,
                   InternalVariables::Scalar::EffectivePlasticStrain);
@@ -26,8 +24,10 @@ J2Plasticity::J2Plasticity(InternalVariables& variables, Json::Value const& mate
 
 J2Plasticity::~J2Plasticity() = default;
 
-void J2Plasticity::update_internal_variables()
+void J2Plasticity::update_internal_variables(double const Δt)
 {
+    using namespace ranges;
+
     auto const μ_e = material.mu();
     auto const λ_e = material.lambda();
 
@@ -37,6 +37,9 @@ void J2Plasticity::update_internal_variables()
                   InternalVariables::Tensor::RateOfDeformation,
                   InternalVariables::Tensor::Cauchy,
                   InternalVariables::Tensor::DeformationGradient);
+
+    auto const& F_old_list = variables[InternalVariables::Tensor::DeformationGradient];
+
     auto& α_list = variables(InternalVariables::Scalar::EffectivePlasticStrain);
     auto const& detF_list = variables(InternalVariables::Scalar::DetF);
 
@@ -45,8 +48,9 @@ void J2Plasticity::update_internal_variables()
     auto const I = Matrix3::Identity();
 
     // Compute the rate of deformation from the deformation gradient
-    ɛ_list = F_list | ranges::view::transform([&I](auto const& F) {
-                 return 0.5 * ((F - I) * F.inverse() + ((F - I) * F.inverse()).transpose());
+    ɛ_list = view::zip(F_list, F_old_list) | view::transform([&Δt](auto const& tpl) {
+                 auto const & [ F, F_old ] = tpl;
+                 return rate_of_deformation(F, F_old, Δt);
              });
 
     // Perform the update algorithm for each quadrature point
@@ -85,8 +89,8 @@ void J2Plasticity::update_internal_variables()
         auto Δλ = 0.0;
 
         // Perform the return mapping algorithm
-        int iterations = 0, max_iterations = 30;
-        while (f > 1.0e-5 && iterations < max_iterations)
+        int iterations = 0, max_iterations = 100;
+        while (f > 1.0e-4 && iterations < max_iterations)
         {
             // Increment in plasticity rate
             const auto δλ = f / (3.0 * μ_e + material.hardening_modulus(α));
@@ -111,8 +115,12 @@ void J2Plasticity::update_internal_variables()
 
             iterations++;
         }
+
+        std::cout << "Accumulated plastic strain " << α << std::endl;
+
         if (iterations == max_iterations)
         {
+            std::cout << "Accumulated plastic strain " << α << std::endl;
             std::cout << "Yield function after mapping " << f << std::endl;
             std::cout << "New yield point " << material.yield_stress(α) / 1.0e6 << std::endl;
             std::cout << "VonMises stress " << von_mises_stress(σ) << std::endl << std::endl;
@@ -129,8 +137,6 @@ void J2Plasticity::update_internal_variables()
         }
     }
 }
-
-void J2Plasticity::update_continuum_tangent() {}
 
 Matrix J2Plasticity::elastic_moduli() const
 {

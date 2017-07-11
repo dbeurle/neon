@@ -24,9 +24,7 @@ public:
 
     ~J2Plasticity();
 
-    void update_internal_variables() override final;
-
-    void update_continuum_tangent() override final;
+    void update_internal_variables(double const Δt) override final;
 
     Material const& intrinsic_material() const override final { return material; }
 
