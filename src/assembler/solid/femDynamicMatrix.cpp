@@ -11,7 +11,7 @@ namespace neon::solid
 femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh,
                                    Json::Value const& solver_data,
                                    Json::Value const& time_data)
-    : femStaticMatrix(fem_mesh, solver_data),
+    : femStaticMatrix(fem_mesh, solver_data, time_data),
       a(Vector::Zero(fem_mesh.active_dofs())),
       v(Vector::Zero(fem_mesh.active_dofs())),
       newmark(time_data)
@@ -28,6 +28,8 @@ void femDynamicMatrix::solve()
     assemble_mass();
 
     apply_displacement_boundaries();
+
+    // TODO Put the internal variable update here
 
     std::cout << "Initial displacements\n" << d << std::endl;
 
@@ -135,7 +137,7 @@ void femDynamicMatrix::perform_equilibrium_iterations()
 
         d += delta_d;
 
-        fem_mesh.update_internal_variables(d);
+        fem_mesh.update_internal_variables(d, newmark.time_step_size());
 
         fem_mesh.write(current_iteration);
 
