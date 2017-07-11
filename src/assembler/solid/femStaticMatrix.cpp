@@ -8,9 +8,11 @@
 
 namespace neon::solid
 {
-femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& solver_data)
+femStaticMatrix::femStaticMatrix(femMesh& fem_mesh,
+                                 Json::Value const& solver_data,
+                                 Json::Value const& increment_data)
     : fem_mesh(fem_mesh),
-      adaptive_load(1.0, 1.0, 100),
+      adaptive_load(increment_data),
       fint(Vector::Zero(fem_mesh.active_dofs())),
       d(Vector::Zero(fem_mesh.active_dofs())),
       linear_solver(LinearSolverFactory::make(solver_data))
@@ -18,6 +20,11 @@ femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& solver_da
 }
 
 femStaticMatrix::~femStaticMatrix() = default;
+
+void femStaticMatrix::continuation(Json::Value const& new_increment_data)
+{
+    adaptive_load.reset(new_increment_data);
+}
 
 void femStaticMatrix::compute_sparsity_pattern()
 {
@@ -50,8 +57,8 @@ void femStaticMatrix::compute_sparsity_pattern()
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
 
-    std::cout << "  Sparsity pattern with " << Kt.nonZeros() << " non-zeros took "
-              << elapsed_seconds.count() << "s\n";
+    // std::cout << "  Sparsity pattern with " << Kt.nonZeros() << " non-zeros took "
+    //           << elapsed_seconds.count() << "s\n";
 }
 
 void femStaticMatrix::solve()
@@ -59,9 +66,13 @@ void femStaticMatrix::solve()
     // Perform Newton-Raphson iterations
     std::cout << "Solving " << fem_mesh.active_dofs() << " non-linear equations\n";
 
+    std::cout << "Pseudo time for current attempt is " << adaptive_load.factor() << std::endl;
+
     while (!adaptive_load.is_fully_applied())
     {
         apply_displacement_boundaries();
+
+        fem_mesh.update_internal_variables(d, adaptive_load.increment());
 
         perform_equilibrium_iterations();
     }
@@ -96,13 +107,13 @@ void femStaticMatrix::assemble_stiffness()
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
 
-    std::cout << "  Assembly of tangent stiffness with "
-              << ranges::accumulate(fem_mesh.meshes(),
-                                    0l,
-                                    [](auto i, auto const& submesh) {
-                                        return i + submesh.elements();
-                                    })
-              << " elements took " << elapsed_seconds.count() << "s\n";
+    // std::cout << "  Assembly of tangent stiffness with "
+    //           << ranges::accumulate(fem_mesh.meshes(),
+    //                                 0l,
+    //                                 [](auto i, auto const& submesh) {
+    //                                     return i + submesh.elements();
+    //                                 })
+    //           << " elements took " << elapsed_seconds.count() << "s\n";
 }
 
 void femStaticMatrix::compute_internal_force()
@@ -127,7 +138,7 @@ void femStaticMatrix::compute_internal_force()
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
 
-    std::cout << "  Assembly of internal forces took " << elapsed_seconds.count() << "s\n";
+    // std::cout << "  Assembly of internal forces took " << elapsed_seconds.count() << "s\n";
 }
 
 void femStaticMatrix::enforce_dirichlet_conditions(SparseMatrix& A, Vector& x, Vector& b)
@@ -170,7 +181,7 @@ void femStaticMatrix::enforce_dirichlet_conditions(SparseMatrix& A, Vector& x, V
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
 
-    std::cout << "  Dirichlet conditions enforced in " << elapsed_seconds.count() << "s\n";
+    // std::cout << "  Dirichlet conditions enforced in " << elapsed_seconds.count() << "s\n";
 }
 
 void femStaticMatrix::apply_displacement_boundaries(double const load_factor)
@@ -183,28 +194,25 @@ void femStaticMatrix::apply_displacement_boundaries(double const load_factor)
         {
             for (auto const& dof : dirichlet_boundary.dof_view())
             {
-                d(dof) = adaptive_load.factor() * dirichlet_boundary.value_view();
+                d(dof) = adaptive_load.load_factor() * dirichlet_boundary.value_view();
             }
         }
     }
-    fem_mesh.update_internal_variables(d);
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
 
-    std::cout << "  Displacements applied in " << elapsed_seconds.count() << "s\n";
+    // std::cout << "  Displacements applied in " << elapsed_seconds.count() << "s\n";
 }
 
 void femStaticMatrix::perform_equilibrium_iterations()
 {
-    auto constexpr max_iterations = 15;
-    auto current_iteration = 0;
-
-    auto constexpr tolerance = 1.0e-5;
-
     Vector delta_d = Vector::Zero(fem_mesh.active_dofs());
 
     // Full Newton-Raphson iteration to solve nonlinear equations
+    auto constexpr max_iterations = 10;
+    auto current_iteration = 0;
+
     while (current_iteration < max_iterations)
     {
         std::cout << "----------------------------------\n";
@@ -219,28 +227,27 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
         enforce_dirichlet_conditions(Kt, delta_d, residual);
 
-        std::cout << "  Displacement norm " << delta_d.norm() << ", residual norm "
-                  << residual.norm() << "\n";
+        linear_solver->solve(Kt, delta_d, -residual);
 
-        if (delta_d.norm() < tolerance && residual.norm() < tolerance)
+        d += delta_d;
+
+        fem_mesh.update_internal_variables(d, adaptive_load.increment());
+
+        std::cout << "  Displacement norm " << delta_d.norm() << "\n";
+        std::cout << "  Residual force norm " << residual.norm() << "\n";
+
+        if (delta_d.norm() < displacement_tolerance && residual.norm() < residual_tolerance)
         {
             std::cout << "Nonlinear iterations converged!\n";
             break;
         }
 
-        linear_solver->solve(Kt, delta_d, -residual);
-
-        d += delta_d;
-
-        fem_mesh.update_internal_variables(d);
-
         current_iteration++;
     }
+    std::cout << "Writing solution to file for step " << adaptive_load.step() << "\n";
+    if (current_iteration != max_iterations) fem_mesh.write(adaptive_load.step());
 
-    if (current_iteration != max_iterations)
-    {
-        fem_mesh.write(adaptive_load.increment());
-    }
     adaptive_load.update_convergence_state(current_iteration != max_iterations);
+    fem_mesh.save_internal_variables(current_iteration != max_iterations);
 }
 }

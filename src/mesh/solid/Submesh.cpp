@@ -3,6 +3,7 @@
 
 #include "PreprocessorExceptions.hpp"
 
+#include "constitutive/AffineMicrosphere.hpp"
 #include "constitutive/Hyperelastic.hpp"
 #include "constitutive/Hypoelasticplastic.hpp"
 
@@ -221,21 +222,8 @@ void femSubmesh::update_deformation_measures()
 
             H_list[offset(element, l)] = H;
             F_list[offset(element, l)] = F * F_0.inverse();
-
         });
     }
-}
-
-void femSubmesh::update_deformation_gradient(int element, Matrix const& X, Matrix const& x)
-{
-    auto& F_list = variables(InternalVariables::Tensor::DeformationGradient);
-
-    sf->quadrature().for_each([&](auto const& femval, const auto& l) {
-
-        auto const & [ N, rhea ] = femval;
-
-        F_list[offset(element, l)] = deformation_gradient(rhea, x, X);
-    });
 }
 
 void femSubmesh::update_Jacobian_determinants()

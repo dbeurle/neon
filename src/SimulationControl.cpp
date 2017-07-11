@@ -103,8 +103,10 @@ void SimulationControl::parse()
                             root["Simulation"][0]["Mesh"][0]);
 
     if (root["Simulation"][0]["Solution"].empty())
+    {
         throw std::runtime_error(
             "Simulations need a solution (\"Transient\" or \"Equilibrium\") type\n");
+    }
 
     if (root["Simulation"][0]["Solution"].asString() == "Transient")
     {
@@ -118,7 +120,26 @@ void SimulationControl::parse()
     }
     else if (root["Simulation"][0]["Solution"].asString() == "Equilibrium")
     {
-        solid::femStaticMatrix fem_matrix(fem_mesh, root["Simulation"][0]["LinearSolver"]);
+        if (root["Simulation"][0]["Time"].empty())
+        {
+            throw std::runtime_error("Simulations need a \"Time\" field\n");
+        }
+
+        solid::femStaticMatrix fem_matrix(fem_mesh,
+                                          root["Simulation"][0]["LinearSolver"],
+                                          root["Simulation"][0]["Time"]);
+        fem_matrix.solve();
+
+        std::cout << "*-------------------------------*\n";
+        std::cout << "  Setting up the next load step\n";
+        std::cout << "*-------------------------------*\n";
+
+        // Update the mesh with a continuation
+        fem_mesh.continuation(root["Simulation"][1]["Mesh"][0]);
+
+        // Update the matrix with the new time solution
+        fem_matrix.continuation(root["Simulation"][1]["Time"]);
+
         fem_matrix.solve();
     }
     else

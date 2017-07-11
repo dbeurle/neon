@@ -132,8 +132,6 @@ protected:
 
     void allocate_dof_list(int const nodal_dofs);
 
-    void update_deformation_gradient(int element, Matrix const& X, Matrix const& x);
-
     /** @return the index into the internal variable store */
     int offset(int element, int quadraturePoint) const;
 

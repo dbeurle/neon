@@ -25,6 +25,8 @@ public:
 
     int active_dofs() const;
 
+    void continuation(Json::Value const& simulation_data);
+
     /**
      * Deform the body by updating the displacement x = X + u
      * and update the internal variables with the new deformation and the

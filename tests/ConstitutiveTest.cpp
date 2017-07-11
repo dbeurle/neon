@@ -14,6 +14,37 @@ std::string json_input_file()
     return "{\"Name\": \"steel\", \"ElasticModulus\": 1.0, \"PoissonsRatio\": 2.0}";
 }
 
+TEST_CASE("Tensor operations")
+{
+    SECTION("Uniaxial loading")
+    {
+        Matrix3 F_old = Matrix3::Identity();
+        Matrix3 F = Matrix3::Identity();
+        F(0, 0) = 1.01;
+
+        double const Δt = 0.1;
+
+        Matrix3 const Fdot = time_derivative(F, F_old, Δt);
+
+        REQUIRE(Fdot.norm() == Approx(0.1));
+        REQUIRE(Fdot(0, 0) == Approx(0.1));
+
+        Matrix3 const L = velocity_gradient(Fdot, F);
+
+        REQUIRE(L(0, 0) == Approx(0.099010));
+
+        Matrix3 const D = rate_of_deformation(L);
+
+        REQUIRE(D(0, 0) == Approx(0.099010));
+        REQUIRE((D - L).norm() == Approx(0.0));
+
+        Matrix3 const D_alt = rate_of_deformation(F, F_old, Δt);
+
+        // Check the whole function against the individual functions
+        REQUIRE((D_alt - D).norm() == Approx(0.0));
+    }
+}
+
 TEST_CASE("Neo-Hookean model", "[NeoHooke]")
 {
     constexpr auto internal_variable_size = 4;
@@ -49,18 +80,16 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
     for (auto& F : F_list) F = Matrix3::Identity();
     for (auto& J : J_list) J = 1.0;
 
+    neo_hooke.update_internal_variables(1.0);
+
     SECTION("Update of internal variables")
     {
-        neo_hooke.update_internal_variables();
-
         for (auto& σ : σ_list) REQUIRE(σ.norm() == Approx(0.0));
     }
     SECTION("Check of continuum tangent")
     {
         // Get the matrix variable
         auto& material_tangents = variables(InternalVariables::Matrix::TruesdellModuli);
-
-        neo_hooke.update_continuum_tangent();
 
         for (auto const& C : material_tangents)
         {

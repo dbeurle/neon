@@ -17,9 +17,13 @@ namespace neon::solid
 class femStaticMatrix
 {
 public:
-    femStaticMatrix(femMesh& fem_mesh, Json::Value const& solver_data);
+    femStaticMatrix(femMesh& fem_mesh,
+                    Json::Value const& solver_data,
+                    Json::Value const& increment_data);
 
     ~femStaticMatrix();
+
+    void continuation(Json::Value const& new_increment_data);
 
     virtual void solve();
 
@@ -57,6 +61,9 @@ protected:
     AdaptiveIncrement adaptive_load;
 
     bool is_sparsity_computed = false;
+
+    double residual_tolerance = 1.0e-4;
+    double displacement_tolerance = 1.0e-6;
 
     SparseMatrix Kt; //!< Tangent matrix stiffness
     Vector fint;     //!< Internal force vector

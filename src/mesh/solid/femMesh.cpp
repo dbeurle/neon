@@ -59,10 +59,8 @@ femMesh::femMesh(BasicMesh const& basic_mesh,
         }
 
         auto const& boundary_name = boundary["Name"].asString();
-        auto const& boundary_type = boundary["Type"].asString();
-        auto const& boundary_meshes = basic_mesh.meshes(boundary_name);
 
-        if (boundary_type == "Displacement")
+        if (boundary["Type"].asString() == "Displacement")
         {
             for (auto const& name : boundary["Values"].getMemberNames())
             {
@@ -74,7 +72,7 @@ femMesh::femMesh(BasicMesh const& basic_mesh,
                 // placing these into a flat array, finding the unique entries
                 // and finally offsetting for the correct nodal dof
                 List const dirichlet_dofs =
-                    view::transform(boundary_meshes,
+                    view::transform(basic_mesh.meshes(boundary_name),
                                     [](auto const& submesh) { return submesh.connectivities(); }) |
                     action::join | action::join | action::sort | action::unique |
                     action::transform([=](auto const& i) { return i * 3 + dof_offset; });
@@ -87,6 +85,37 @@ femMesh::femMesh(BasicMesh const& basic_mesh,
 }
 
 int femMesh::active_dofs() const { return 3 * material_coordinates->size(); }
+
+void femMesh::continuation(Json::Value const& simulation_data)
+{
+    // Populate the boundary meshes
+    for (auto const& boundary : simulation_data["BoundaryConditions"])
+    {
+        if (boundary["Name"].empty())
+        {
+            throw std::runtime_error("Missing Name in BoundaryConditions\n");
+        }
+        if (boundary["Type"].empty())
+        {
+            throw std::runtime_error("Missing Type in BoundaryConditions\n");
+        }
+
+        auto const& boundary_name = boundary["Name"].asString();
+
+        if (boundary["Type"].asString() == "Displacement")
+        {
+            for (auto const& name : boundary["Values"].getMemberNames())
+            {
+                using namespace ranges;
+
+                for (auto& dirichlet_boundary : dirichlet_boundaries[boundary_name])
+                {
+                    dirichlet_boundary.update_value(boundary["Values"][name].asDouble());
+                }
+            }
+        }
+    }
+}
 
 void femMesh::update_internal_variables(Vector const& u, double const Δt)
 {

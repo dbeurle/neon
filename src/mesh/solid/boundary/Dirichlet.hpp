@@ -1,6 +1,10 @@
 
 #pragma once
 
+#include "numeric/DenseTypes.hpp"
+
+#include <tuple>
+
 namespace neon::solid
 {
 class Dirichlet
@@ -13,6 +17,8 @@ public:
     auto const& dof_view() const { return std::get<0>(dof_value); }
 
     auto const& value_view() const { return std::get<1>(dof_value); }
+
+    void update_value(double const value) { std::get<1>(dof_value) = value; }
 
 protected:
     std::tuple<List, double> dof_value;
