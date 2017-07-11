@@ -95,12 +95,6 @@ public:
     /** Const access to the converged matrix variables */
     Matrices const& operator[](Matrix matrixType) const;
 
-    /** Mutable access to the converged tensor variables */
-    Tensors& operator[](Tensor tensorType);
-
-    /** Mutable access to the converged scalar variables */
-    Scalars& operator[](Scalar scalarType);
-
     /*-------------------------------------------------------------*
      *  Mutable access methods for unconverged internal variables  *
      *-------------------------------------------------------------*/
@@ -259,17 +253,7 @@ inline InternalVariables::Scalars const& InternalVariables::operator[](Scalar sc
 inline InternalVariables::Matrices const& InternalVariables::operator[](
     InternalVariables::Matrix matrixType) const
 {
-    return matrices.find(matrixType)->second;
-}
-
-inline InternalVariables::Tensors& InternalVariables::operator[](Tensor tensorType)
-{
-    return tensors_old.find(tensorType)->second;
-}
-
-inline InternalVariables::Scalars& InternalVariables::operator[](Scalar scalarType)
-{
-    return scalars_old.find(scalarType)->second;
+    return matrices_old.find(matrixType)->second;
 }
 
 // Version control of internal state variables
