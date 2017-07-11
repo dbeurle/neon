@@ -51,13 +51,13 @@
                 "Name" : "ZLoad",
 				"Type" : "Displacement",
                 "Values" : {
-                    "z" : 0.95e-3
+                    "z" : 1.03e-3
                 }
             }]
         }],
 		"LinearSolver" :
         {
-		    "Solver" : "pCG",
+		    "Solver" : "SparseLU",
             "MaxIterations" : 1000,
             "MaxTolerance"  : 1.0e-6
         },
