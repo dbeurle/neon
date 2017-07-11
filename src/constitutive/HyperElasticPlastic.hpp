@@ -11,13 +11,13 @@
 
 namespace neon
 {
-class Hypoelasticplastic : public ConstitutiveModel
+class HyperElasticPlastic : public ConstitutiveModel
 {
 public:
-    Hypoelasticplastic(InternalVariables& variables) : ConstitutiveModel(variables) {}
+    HyperElasticPlastic(InternalVariables& variables) : ConstitutiveModel(variables) {}
 };
 
-class J2Plasticity : public Hypoelasticplastic
+class J2Plasticity : public HyperElasticPlastic
 {
 public:
     J2Plasticity(InternalVariables& variables, Json::Value const& material_data);

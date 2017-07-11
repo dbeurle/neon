@@ -1,5 +1,5 @@
 
-#include "Hypoelasticplastic.hpp"
+#include "HyperElasticPlastic.hpp"
 
 #include "InternalVariables.hpp"
 
@@ -10,7 +10,7 @@
 namespace neon
 {
 J2Plasticity::J2Plasticity(InternalVariables& variables, Json::Value const& material_data)
-    : Hypoelasticplastic(variables), material(material_data), C_e(elastic_moduli())
+    : HyperElasticPlastic(variables), material(material_data), C_e(elastic_moduli())
 {
     variables.add(InternalVariables::Tensor::RateOfDeformation,
                   InternalVariables::Tensor::RateOfDeformationPlastic);
