@@ -27,6 +27,8 @@ public:
     /** Perform the time integration until returns false */
     bool time_loop();
 
+    double time_step_size() const { return time_control.current_time_step_size(); }
+
 protected:
     bool are_parameters_unstable() const;
 
