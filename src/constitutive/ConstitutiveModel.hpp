@@ -18,11 +18,12 @@ public:
     /** Provide an internal variable class to be populated by the constitutive model */
     ConstitutiveModel(InternalVariables& variables) : variables(variables) {}
 
-    /** Update the required internal variables at quadrature points */
-    virtual void update_internal_variables() = 0;
-
-    /** Update constitutive matrix at quadrature points */
-    virtual void update_continuum_tangent() = 0;
+    /**
+     * Update the required internal variables and tangent matrix at quadrature
+     * points
+     * @param Δt Time step size (or load increment if quasi-static)
+     */
+    virtual void update_internal_variables(double const Δt) = 0;
 
     /** @return A base class reference to the common material properties */
     virtual Material const& intrinsic_material() const = 0;
