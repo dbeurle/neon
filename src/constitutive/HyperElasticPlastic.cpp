@@ -48,10 +48,10 @@ void J2Plasticity::update_internal_variables(double const Δt)
     auto const I = Matrix3::Identity();
 
     // Compute the rate of deformation from the deformation gradient
-    ɛ_list = view::zip(F_list, F_old_list) | view::transform([&Δt](auto const& tpl) {
-                 auto const & [ F, F_old ] = tpl;
-                 return rate_of_deformation(F, F_old, Δt);
-             });
+    // ɛ_list = view::zip(F_list, F_old_list) | view::transform([&Δt](auto const& tpl) {
+    //              auto const & [ F, F_old ] = tpl;
+    //              return rate_of_deformation(F, F_old, Δt);
+    //          });
 
     // Perform the update algorithm for each quadrature point
     for (auto l = 0; l < ɛ_list.size(); l++)
