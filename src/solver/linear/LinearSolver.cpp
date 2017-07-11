@@ -215,20 +215,25 @@ void pCG::solve(const SparseMatrix& A, Vector& x, const Vector& b)
     pcg.setTolerance(LinearSolver::solverParam.tolerance);
     pcg.setMaxIterations(LinearSolver::solverParam.max_iterations);
 
-    std::cout << "  CG tolerance " << solverParam.tolerance << ", max iterations "
-              << solverParam.max_iterations << "\n";
-
     auto start = std::chrono::high_resolution_clock::now();
 
     pcg.compute(A);
     x = pcg.solveWithGuess(b, x);
 
-    std::cout << "  Iterations: " << pcg.iterations() << ", estimated error: " << pcg.error() << "\n";
+    std::cout << "  Conjugate Gradient iterations: " << pcg.iterations() << " (max. "
+              << solverParam.max_iterations << "), estimated error: " << pcg.error() << " (min. "
+              << solverParam.tolerance << ")\n";
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
 
-    std::cout << "    Linear solver took " << elapsed_seconds.count() << "s\n";
+    if (pcg.iterations() >= solverParam.max_iterations)
+    {
+        throw std::runtime_error("Conjugate gradient solver maximum iterations reached.  Try "
+                                 "increasing the maximum number of iterations or use a different "
+                                 "solver\n");
+    }
+    // std::cout << "    Linear solver took " << elapsed_seconds.count() << "s\n";
 }
 
 BiCGSTAB::BiCGSTAB(double tol) { solverParam.tolerance = tol; }
