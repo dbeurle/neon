@@ -41,6 +41,21 @@ TEST_CASE("Linear elastic material", "[LinearElastic]")
 
     REQUIRE(linear_elastic.Poissons_ratio() == Approx(0.3));
     REQUIRE(linear_elastic.elastic_modulus() == Approx(200.0e9));
+
+    auto const E = linear_elastic.elastic_modulus();
+    auto const ν = linear_elastic.Poissons_ratio();
+
+    // Check Lamé parameters
+    REQUIRE(linear_elastic.lambda() == Approx(E * ν / ((1.0 + ν) * (1.0 - 2.0 * ν))));
+    REQUIRE(linear_elastic.mu() == Approx(E / (2.0 * (1.0 + ν))));
+
+    auto const[λ, μ] = linear_elastic.Lame_parameters();
+
+    REQUIRE(λ == Approx(linear_elastic.lambda()));
+    REQUIRE(μ == Approx(linear_elastic.mu()));
+
+    REQUIRE(linear_elastic.bulk_modulus() == Approx(λ + 2.0 / 3.0 * μ));
+    REQUIRE(linear_elastic.shear_modulus() == Approx(μ));
 }
 
 TEST_CASE("Perfect plastic material", "[PerfectPlasticElastic]")
