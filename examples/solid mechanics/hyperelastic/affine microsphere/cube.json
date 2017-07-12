@@ -8,11 +8,10 @@
     }],
     "Material" : [{
         "Name" : "rubber",
-        "Density" : 1522.0,
-        "ElasticModulus" : 200.0e5,
-        "PoissonsRatio" : 0.45,
+        "ElasticModulus" : 1.0e6,
+        "PoissonsRatio" : 0.48,
         "SegmentsPerChain": 25,
-        "ChainDecayRate" : 1.0e20
+        "ChainDecayRate" : 1.0e-7
     }],
     "Simulation" : [{
         "Name" : "Load",
@@ -25,7 +24,7 @@
         "Time" : {
             "Period" : 1.0,
             "Increment" : {
-                "Initial" : 1.0,
+                "Initial" : 0.1,
                 "Minimum" : 0.001,
                 "Maximum" : 1.0
             },
@@ -37,7 +36,7 @@
             "ConstitutiveModel" : "AffineMicrosphere",
             "ElementOptions" :
             {
-                "Quadrature" : "Full"
+                "Quadrature" : "Reduced"
             },
             "BoundaryConditions" :
             [{
@@ -85,11 +84,11 @@
         "Continuation" : "Load",
         "Solution" : "Equilibrium",
         "Time" : {
-            "Period" : 86400.0,
+            "Period" : 186400.0,
             "Increment" : {
                 "Initial" : 1.0,
                 "Minimum" : 0.001,
-                "Maximum" : 10000.0
+                "Maximum" : 5000.0
             },
             "LoadVariation" : "Instantaneous"
         },
