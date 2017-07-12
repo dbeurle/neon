@@ -59,7 +59,7 @@ void SimulationControl::parse()
     std::unordered_set<std::string> material_names, part_names;
 
     // Load in all the material names
-    for (const auto& material : root["Material"])
+    for (auto const& material : root["Material"])
     {
         if (material["Name"].empty()) throw EmptyFieldException("Material: Name");
 
@@ -69,7 +69,7 @@ void SimulationControl::parse()
     }
 
     // Load in all the part names
-    for (const auto& part : root["Part"])
+    for (auto const& part : root["Part"])
     {
         if (part["Name"].empty()) throw EmptyFieldException("Part: Name");
 
@@ -79,7 +79,7 @@ void SimulationControl::parse()
     }
 
     // Add in the parts and populate the mesh stores
-    for (const auto& part : root["Part"])
+    for (auto const& part : root["Part"])
     {
         Json::Value mesh_file;
         Json::Reader mesh_reader;
@@ -93,7 +93,6 @@ void SimulationControl::parse()
         mesh_store.try_emplace(part["Name"].asString(), mesh_file);
     }
 
-    std::cout << "    Simulation to use " << threads << " thread(s)\n";
     std::cout << "    Preprocessing complete\n";
 
     std::cout << "Mesh name " << root["Part"][0]["Name"].asString() << std::endl;
