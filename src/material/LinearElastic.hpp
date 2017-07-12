@@ -26,8 +26,10 @@ public:
 
     auto bulk_modulus() const { return lambda() + 2.0 / 3.0 * mu(); }
 
-    /** @return A pair with mu and lambda respectively */
-    auto LameConstants() const { return std::make_pair(mu(), lambda()); }
+    auto shear_modulus() const { return mu(); }
+
+    /** @return a pair of Lame's parameters with lambda and mu respectively */
+    auto Lame_parameters() const { return std::make_pair(lambda(), mu()); }
 
 protected:
     double E;  //!< Elastic modulus

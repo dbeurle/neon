@@ -22,15 +22,6 @@ inline double von_mises_stress(Matrix3 const& a)
 inline Matrix3 symmetric(Matrix3 const& a) { return 0.5 * (a.transpose() + a); }
 
 /**
- * Compute the time derivative of the deformation gradient from the current
- * and the last deformation gradient and the increment between them
- */
-inline Matrix3 time_derivative(Matrix3 const& F, Matrix3 const& F_old, double const Δt)
-{
-    return (F - F_old) / Δt;
-}
-
-/**
  * Compute the velocity gradient given the time derivative of the deformation
  * gradient and the deformation gradient
  */
@@ -43,9 +34,9 @@ inline Matrix3 velocity_gradient(Matrix3 const& Fdot, Matrix const& F)
 inline Matrix3 rate_of_deformation(Matrix3 const& L) { return symmetric(L); }
 
 /** Compute the rate of deformation given the velocity gradient */
-inline Matrix3 rate_of_deformation(Matrix3 const& F, Matrix3 const& F_old, double const Δt)
+inline Matrix3 rate_of_deformation(Matrix3 const& F_dot, Matrix3 const& F)
 {
-    return symmetric(velocity_gradient(time_derivative(F, F_old, Δt), F));
+    return symmetric(velocity_gradient(F_dot, F));
 }
 
 inline Eigen::Matrix<double, 6, 1> voigt(Matrix3 const& a)

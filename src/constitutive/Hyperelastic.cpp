@@ -41,7 +41,7 @@ void NeoHooke::update_internal_variables(double const Δt)
 
     // Compute stresses
     σ = view::zip(F_list, detF_list) | view::transform([this, &I](auto const& tpl) -> Matrix3 {
-            auto const[μ0, λ0] = material.LameConstants();
+            auto const[λ0, μ0] = material.Lame_parameters();
 
             auto const & [ F, J ] = tpl;
 
@@ -56,7 +56,7 @@ void NeoHooke::update_internal_variables(double const Δt)
 
         auto & [ F, D, J ] = tpl;
 
-        auto const[μ0, λ0] = material.LameConstants();
+        auto const[λ0, μ0] = material.Lame_parameters();
 
         auto const μ = μ0 - λ0 * std::log(J);
 

@@ -1,5 +1,5 @@
 
-#include "Hypoelasticplastic.hpp"
+#include "HyperElasticPlastic.hpp"
 
 #include "InternalVariables.hpp"
 
@@ -10,7 +10,7 @@
 namespace neon
 {
 J2Plasticity::J2Plasticity(InternalVariables& variables, Json::Value const& material_data)
-    : Hypoelasticplastic(variables), material(material_data), C_e(elastic_moduli())
+    : HyperElasticPlastic(variables), material(material_data), C_e(elastic_moduli())
 {
     variables.add(InternalVariables::Tensor::RateOfDeformation,
                   InternalVariables::Tensor::RateOfDeformationPlastic);
@@ -48,10 +48,10 @@ void J2Plasticity::update_internal_variables(double const Δt)
     auto const I = Matrix3::Identity();
 
     // Compute the rate of deformation from the deformation gradient
-    ɛ_list = view::zip(F_list, F_old_list) | view::transform([&Δt](auto const& tpl) {
-                 auto const & [ F, F_old ] = tpl;
-                 return rate_of_deformation(F, F_old, Δt);
-             });
+    // ɛ_list = view::zip(F_list, F_old_list) | view::transform([&Δt](auto const& tpl) {
+    //              auto const & [ F, F_old ] = tpl;
+    //              return rate_of_deformation(F, F_old, Δt);
+    //          });
 
     // Perform the update algorithm for each quadrature point
     for (auto l = 0; l < ɛ_list.size(); l++)
@@ -140,7 +140,7 @@ void J2Plasticity::update_internal_variables(double const Δt)
 
 Matrix J2Plasticity::elastic_moduli() const
 {
-    auto const[μ, λ] = material.LameConstants();
+    auto const[λ, μ] = material.Lame_parameters();
     Matrix C(6, 6);
     C << λ + 2.0 * μ, λ, λ, 0.0, 0.0, 0.0, //
         λ, λ + 2.0 * μ, λ, 0.0, 0.0, 0.0,  //
@@ -157,7 +157,7 @@ Matrix J2Plasticity::algorithmic_tangent(double const α,
                                          Matrix3 const& normal,
                                          double const J) const
 {
-    auto const[μ_e, λ_e] = material.LameConstants();
+    auto const[λ_e, μ_e] = material.Lame_parameters();
 
     auto const β = material.yield_stress(α) / von_mises_stress(σ_0);
 
