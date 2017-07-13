@@ -12,6 +12,7 @@ void Dirichlet::update_value(double const value)
 {
     value_old = value_new;
     value_new = value;
+    is_ramped = true;
 }
 
 void Dirichlet::inherit_from_last()
