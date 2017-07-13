@@ -15,5 +15,7 @@ int main(int argc, char* argv[])
 
     SimulationControl simulation(argv[1]);
 
+    simulation.start();
+
     return 0;
 }
