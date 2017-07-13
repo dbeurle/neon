@@ -10,17 +10,30 @@ namespace neon::solid
 class Dirichlet
 {
 public:
-    Dirichlet(List dofs, double const value) : dof_value(std::make_tuple(dofs, value)) {}
+    Dirichlet(List dofs, double const value, bool const is_ramped = true);
 
-    auto const& view() const { return dof_value; }
+    auto const& dof_view() const { return dofs; }
 
-    auto const& dof_view() const { return std::get<0>(dof_value); }
+    /** Get the value depending on the loading factor */
+    auto const value_view(double const load_factor) const
+    {
+        return is_ramped ? (value_new - value_old) * load_factor + value_old : value_new;
+    }
 
-    auto const& value_view() const { return std::get<1>(dof_value); }
+    /** Set the old value to the current value and update the current value */
+    void update_value(double const value);
 
-    void update_value(double const value) { std::get<1>(dof_value) = value; }
+    /**
+     * The boundary value is the same as the last step and are instantaneously applied
+     */
+    void inherit_from_last();
 
 protected:
-    std::tuple<List, double> dof_value;
+    List dofs;
+
+    bool is_ramped;
+
+    double value_old = 0.0;
+    double value_new = 0.0;
 };
 }
