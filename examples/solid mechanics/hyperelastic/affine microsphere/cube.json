@@ -89,41 +89,11 @@
                 "Initial" : 1.0,
                 "Minimum" : 0.001,
                 "Maximum" : 5000.0
-            },
-            "LoadVariation" : "Instantaneous"
+            }
         },
 		"Mesh" :
         [{
-            "Name" : "cube",
-            "BoundaryConditions" :
-            [{
-                "Name" : "Xsym",
-                "Type" : "Displacement",
-                "Values" : {
-                    "x" : 0.0
-                }
-            },
-            {
-                "Name" : "Ysym",
-                "Type" : "Displacement",
-                "Values" : {
-                    "y" : 0.0
-                }
-            },
-            {
-                "Name" : "Zsym",
-                "Type" : "Displacement",
-                "Values" : {
-                    "z" : 0.0
-                }
-            },
-            {
-                "Name" : "ZLoad",
-				"Type" : "Displacement",
-                "Values" : {
-                    "z" : 1.0e-2
-                }
-            }]
+            "Name" : "cube"
         }],
         "Visualisation" :
         [{
@@ -137,11 +107,10 @@
         "Time" : {
             "Period" : 1.0,
             "Increments" : {
-                "Initial" : 1.0,
+                "Initial" : 0.1,
                 "Minimum" : 0.001,
                 "Maximum" : 1.0
-            },
-            "LoadVariation" : "Ramping"
+            }
         },
         "Mesh" :
         [{
@@ -172,7 +141,7 @@
                 "Name" : "ZLoad",
                 "Type" : "Displacement",
                 "Values" : {
-                    "z" : 1.0e-2
+                    "z" : 0.0
                 }
             }]
         }],
