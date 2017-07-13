@@ -18,7 +18,7 @@ J2Plasticity::J2Plasticity(InternalVariables& variables, Json::Value const& mate
     variables.add(InternalVariables::Scalar::VonMisesStress,
                   InternalVariables::Scalar::EffectivePlasticStrain);
 
-    // Add material tangent with initial elasticity moduli
+    // Add material tangent with the linear elasticity moduli
     variables.add(InternalVariables::Matrix::TruesdellModuli, elastic_moduli());
 }
 
@@ -32,26 +32,22 @@ void J2Plasticity::update_internal_variables(double const Δt)
     auto const λ_e = material.lambda();
 
     // Extract the internal variables
-    auto[ɛ_p_list, ɛ_list, σ_list, F_list] =
-        variables(InternalVariables::Tensor::RateOfDeformationPlastic,
-                  InternalVariables::Tensor::RateOfDeformation,
-                  InternalVariables::Tensor::Cauchy,
-                  InternalVariables::Tensor::DeformationGradient);
+    auto[ɛ_p_list, ɛ_list, σ_list] = variables(InternalVariables::Tensor::RateOfDeformationPlastic,
+                                               InternalVariables::Tensor::RateOfDeformation,
+                                               InternalVariables::Tensor::Cauchy);
 
-    auto const& F_old_list = variables[InternalVariables::Tensor::DeformationGradient];
+    // Compute the linear strain gradient from the displacement gradient
+    ɛ_list = variables(InternalVariables::Tensor::DisplacementGradient) |
+             view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
+    // Retrieve the accumulated internal variables
     auto& α_list = variables(InternalVariables::Scalar::EffectivePlasticStrain);
+
     auto const& detF_list = variables(InternalVariables::Scalar::DetF);
 
     auto& C_list = variables(InternalVariables::Matrix::TruesdellModuli);
 
-    auto const I = Matrix3::Identity();
-
-    // Compute the rate of deformation from the deformation gradient
-    // ɛ_list = view::zip(F_list, F_old_list) | view::transform([&Δt](auto const& tpl) {
-    //              auto const & [ F, F_old ] = tpl;
-    //              return rate_of_deformation(F, F_old, Δt);
-    //          });
+    Matrix3 const I = Matrix3::Identity();
 
     // Perform the update algorithm for each quadrature point
     for (auto l = 0; l < ɛ_list.size(); l++)
@@ -64,8 +60,10 @@ void J2Plasticity::update_internal_variables(double const Δt)
         auto const& J = detF_list[l];
 
         if (α > 0.3)
+        {
             throw std::runtime_error("Excessive plastic strain at quadrature point " +
                                      std::to_string(l) + "\n");
+        }
 
         // Elastic predictor
         Matrix3 const σ_0 = λ_e * (ɛ - ɛ_p).trace() * I + 2.0 * μ_e * (ɛ - ɛ_p);
@@ -83,7 +81,7 @@ void J2Plasticity::update_internal_variables(double const Δt)
 
         // Compute the normal direction to the yield surface which remains
         // constant throughout the radial return method
-        const Matrix3 normal = deviatoric(σ_0) / deviatoric(σ_0).norm();
+        Matrix3 const normal = deviatoric(σ_0) / deviatoric(σ_0).norm();
 
         // Initialize the plastic increment
         auto Δλ = 0.0;
