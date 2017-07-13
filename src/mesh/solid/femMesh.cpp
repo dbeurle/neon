@@ -4,9 +4,11 @@
 #include "mesh/BasicMesh.hpp"
 
 #include <exception>
-#include <json/json.h>
 #include <memory>
 #include <numeric>
+
+#include <json/json.h>
+#include <termcolor/termcolor.hpp>
 
 #include <range/v3/action.hpp>
 #include <range/v3/view.hpp>
@@ -38,83 +40,39 @@ femMesh::femMesh(BasicMesh const& basic_mesh,
                  Json::Value const& simulation_data)
     : material_coordinates(std::make_shared<MaterialCoordinates>(basic_mesh.coordinates()))
 {
+    check_boundary_conditions(simulation_data["BoundaryConditions"]);
+
     auto const& simulation_name = simulation_data["Name"].asString();
 
-    // Populate the volume meshes
     for (auto const& submesh : basic_mesh.meshes(simulation_name))
     {
         submeshes.emplace_back(material_data, simulation_data, material_coordinates, submesh);
     }
 
-    // Populate the boundary meshes
-    for (auto const& boundary : simulation_data["BoundaryConditions"])
-    {
-        if (boundary["Name"].empty())
-        {
-            throw std::runtime_error("Missing Name in BoundaryConditions\n");
-        }
-        if (boundary["Type"].empty())
-        {
-            throw std::runtime_error("Missing Type in BoundaryConditions\n");
-        }
-
-        auto const& boundary_name = boundary["Name"].asString();
-
-        if (boundary["Type"].asString() == "Displacement")
-        {
-            for (auto const& name : boundary["Values"].getMemberNames())
-            {
-                using namespace ranges;
-
-                auto const dof_offset = dof_table.find(name)->second;
-
-                // Filter the data by collecting all the connectivities,
-                // placing these into a flat array, finding the unique entries
-                // and finally offsetting for the correct nodal dof
-                List const dirichlet_dofs =
-                    view::transform(basic_mesh.meshes(boundary_name),
-                                    [](auto const& submesh) { return submesh.connectivities(); }) |
-                    action::join | action::join | action::sort | action::unique |
-                    action::transform([=](auto const& i) { return i * 3 + dof_offset; });
-
-                dirichlet_boundaries[boundary_name].emplace_back(dirichlet_dofs,
-                                                                 boundary["Values"][name].asDouble());
-            }
-        }
-    }
+    allocate_boundary_conditions(simulation_data["BoundaryConditions"], basic_mesh);
 }
 
 int femMesh::active_dofs() const { return 3 * material_coordinates->size(); }
 
-void femMesh::continuation(Json::Value const& simulation_data)
+void femMesh::internal_restart(Json::Value const& simulation_data)
 {
-    // Populate the boundary meshes
-    for (auto const& boundary : simulation_data["BoundaryConditions"])
+    if (simulation_data["BoundaryConditions"].empty())
     {
-        if (boundary["Name"].empty())
+        for (auto & [ name, boundaries ] : dirichlet_boundaries)
         {
-            throw std::runtime_error("Missing Name in BoundaryConditions\n");
-        }
-        if (boundary["Type"].empty())
-        {
-            throw std::runtime_error("Missing Type in BoundaryConditions\n");
-        }
+            std::cout << termcolor::yellow << std::string(2, ' ') << "Boundary conditions for \""
+                      << name << "\" have been inherited from the last load step"
+                      << termcolor::reset << std::endl;
 
-        auto const& boundary_name = boundary["Name"].asString();
-
-        if (boundary["Type"].asString() == "Displacement")
-        {
-            for (auto const& name : boundary["Values"].getMemberNames())
-            {
-                using namespace ranges;
-
-                for (auto& dirichlet_boundary : dirichlet_boundaries[boundary_name])
-                {
-                    dirichlet_boundary.update_value(boundary["Values"][name].asDouble());
-                }
-            }
+            for (auto& boundary : boundaries) boundary.inherit_from_last();
         }
+        return;
     }
+
+    auto const& boundary_data = simulation_data["BoundaryConditions"];
+
+    check_boundary_conditions(boundary_data);
+    reallocate_boundary_conditions(boundary_data);
 }
 
 void femMesh::update_internal_variables(Vector const& u, double const Δt)
@@ -200,5 +158,78 @@ void femMesh::write(int filename_append) const
     unstructured_grid_writer->SetInputData(unstructured_grid);
     unstructured_grid_writer->SetDataModeToAscii();
     unstructured_grid_writer->Write();
+}
+
+void femMesh::allocate_boundary_conditions(Json::Value const& boundary_data,
+                                           BasicMesh const& basic_mesh)
+{
+    using namespace ranges;
+
+    // Populate the boundary meshes
+    for (auto const& boundary : boundary_data)
+    {
+        auto const& boundary_name = boundary["Name"].asString();
+
+        if (boundary["Type"].asString() == "Displacement")
+        {
+            auto const dirichlet_dofs = filter_dof_list(basic_mesh.meshes(boundary_name));
+
+            for (auto const& name : boundary["Values"].getMemberNames())
+            {
+                auto const& dof_offset = dof_table.find(name)->second;
+
+                dirichlet_boundaries[boundary_name]
+                    .emplace_back(view::transform(dirichlet_dofs,
+                                                  [&](auto dof) { return dof + dof_offset; }),
+                                  boundary["Values"][name].asDouble());
+            }
+        }
+    }
+}
+
+void femMesh::reallocate_boundary_conditions(Json::Value const& boundary_data)
+{
+    using namespace ranges;
+
+    for (auto const& boundary : boundary_data)
+    {
+        auto const& boundary_name = boundary["Name"].asString();
+
+        if (boundary["Type"].asString() == "Displacement")
+        {
+            for (auto const& name : boundary["Values"].getMemberNames())
+            {
+                for (auto& dirichlet_boundary : dirichlet_boundaries[boundary_name])
+                {
+                    dirichlet_boundary.update_value(boundary["Values"][name].asDouble());
+                }
+            }
+        }
+    }
+}
+
+void femMesh::check_boundary_conditions(Json::Value const& boundary_data) const
+{
+    for (auto const& boundary : boundary_data)
+    {
+        if (boundary["Name"].empty())
+        {
+            throw std::runtime_error("Missing \"Name\" in BoundaryConditions\n");
+        }
+        if (boundary["Type"].empty())
+        {
+            throw std::runtime_error("Missing \"Type\" in BoundaryConditions\n");
+        }
+    }
+}
+
+List femMesh::filter_dof_list(std::vector<SubMesh> const& boundary_mesh) const
+{
+    using namespace ranges;
+
+    return view::transform(boundary_mesh,
+                           [](auto const& submesh) { return submesh.connectivities(); }) |
+           action::join | action::join | action::sort | action::unique |
+           action::transform([=](auto const& i) { return i * 3; });
 }
 }

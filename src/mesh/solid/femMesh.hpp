@@ -25,7 +25,8 @@ public:
 
     int active_dofs() const;
 
-    void continuation(Json::Value const& simulation_data);
+    /** Reset the boundary conditions */
+    void internal_restart(Json::Value const& simulation_data);
 
     /**
      * Deform the body by updating the displacement x = X + u
@@ -51,6 +52,17 @@ public:
     auto const& coordinates() const { return *(material_coordinates.get()); }
 
     void write(int filename_append = -1) const;
+
+protected:
+    void check_boundary_conditions(Json::Value const& boundary_data) const;
+
+    void allocate_boundary_conditions(Json::Value const& boundary_data, BasicMesh const& basic_mesh);
+
+    /** \sa internal_restart */
+    void reallocate_boundary_conditions(Json::Value const& boundary_data);
+
+    /** Collapse the nodal connectivity arrays from the submesh for a node list */
+    List filter_dof_list(std::vector<SubMesh> const& boundary_mesh) const;
 
 protected:
     std::shared_ptr<MaterialCoordinates> material_coordinates;

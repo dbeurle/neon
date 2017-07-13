@@ -9,10 +9,12 @@
 
 #include "mesh/solid/femMesh.hpp"
 
+#include <iomanip>
 #include <unordered_set>
 
 #include <boost/filesystem.hpp>
-#include <json/json.h>
+#include <json/reader.h>
+#include <termcolor/termcolor.hpp>
 
 namespace neon
 {
@@ -35,23 +37,33 @@ SimulationControl::SimulationControl(std::string const& input_file_name)
 
 void SimulationControl::parse()
 {
-    std::cout << "=============================================================\n\n";
-    std::cout << "           neon - a non-linear finite element code\n\n";
-    std::cout << "=============================================================\n\n";
+    auto start = std::chrono::high_resolution_clock::now();
+
+    std::string const welcome_message("neon - a non-linear finite element code");
+
+    std::cout << termcolor::bold;
+    std::cout << std::setw(welcome_message.length() + 9) << std::setfill('=') << "\n";
+    std::cout << std::string(4, ' ') << welcome_message << "\n";
+    std::cout << std::setw(welcome_message.length() + 9) << std::setfill('=') << "\n";
+    std::cout << termcolor::reset << std::endl;
+
+    std::cout << std::string(2, ' ') << termcolor::bold << "Preprocessing mesh and simulation data\n"
+              << termcolor::reset;
 
     std::ifstream file(input_file_name);
 
-    Json::Value root;
     Json::Reader reader;
 
     if (!reader.parse(file, root, false))
+    {
         throw JsonFileParseException(reader.getFormattedErrorMessages());
+    }
 
     // Check the important fields exist before anything else is done
     if (root["Part"].empty()) throw EmptyFieldException("Part");
     if (root["Name"].empty()) throw EmptyFieldException("Name");
     if (root["Material"].empty()) throw EmptyFieldException("Material");
-    if (root["Simulation"].empty()) throw EmptyFieldException("Simulation");
+    if (root["SimulationCases"].empty()) throw EmptyFieldException("SimulationCases");
 
     // auto const& simulation_name = root["AnalysisName"].asString();
     if (!root["Cores"].empty()) threads = root["Cores"].asInt();
@@ -68,10 +80,15 @@ void SimulationControl::parse()
         if (!inserted) throw DuplicateNameException("Material");
     }
 
-    // Load in all the part names
+    // Load in all the part names and error check
     for (auto const& part : root["Part"])
     {
         if (part["Name"].empty()) throw EmptyFieldException("Part: Name");
+
+        if (ranges::find(material_names, part["Material"].asString()) == material_names.end())
+        {
+            throw std::runtime_error("The part material was not found in the provided materials\n");
+        }
 
         auto const[it, inserted] = part_names.emplace(part["Name"].asString());
 
@@ -84,68 +101,141 @@ void SimulationControl::parse()
         Json::Value mesh_file;
         Json::Reader mesh_reader;
 
+        auto const material = *ranges::find_if(root["Material"], [&part](auto const& material) {
+            return material["Name"].asString() == part["Material"].asString();
+        });
+
         std::ifstream mesh_input_stream(part["Name"].asString() + ".mesh");
 
         if (!mesh_reader.parse(mesh_input_stream, mesh_file, false))
         {
             throw JsonFileParseException(mesh_reader.getFormattedErrorMessages());
         }
-        mesh_store.try_emplace(part["Name"].asString(), mesh_file);
+
+        mesh_store.try_emplace(part["Name"].asString(), mesh_file, material);
+
+        std::cout << std::string(4, ' ') << "Inserted " << part["Name"].asString()
+                  << " into the mesh store\n";
     }
 
-    std::cout << "    Preprocessing complete\n";
-
-    std::cout << "Mesh name " << root["Part"][0]["Name"].asString() << std::endl;
-
-    solid::femMesh fem_mesh(mesh_store.find(root["Part"][0]["Name"].asString())->second,
-                            root["Material"][0],
-                            root["Simulation"][0]["Mesh"][0]);
-
-    if (root["Simulation"][0]["Solution"].empty())
+    // Build a list of all the load steps for a given mesh
+    for (auto const& simulation : root["SimulationCases"])
     {
-        throw std::runtime_error(
-            "Simulations need a solution (\"Transient\" or \"Equilibrium\") type\n");
-    }
+        if (simulation["Name"].empty())
+            throw std::runtime_error("A simulation case needs a \"Name\" field\n");
 
-    if (root["Simulation"][0]["Solution"].asString() == "Transient")
-    {
-        if (root["Simulation"][0]["Time"].empty())
-            throw std::runtime_error("Simulation needs a \"Time\" field specified");
+        if (simulation["Time"].empty())
+            throw std::runtime_error("A simulation case needs a \"Time\" field\n");
 
-        solid::femDynamicMatrix fem_matrix(fem_mesh,
-                                           root["Simulation"][0]["LinearSolver"],
-                                           root["Simulation"][0]["Time"]);
-        fem_matrix.solve();
-    }
-    else if (root["Simulation"][0]["Solution"].asString() == "Equilibrium")
-    {
-        if (root["Simulation"][0]["Time"].empty())
+        if (simulation["Solution"].empty())
+            throw std::runtime_error("A simulation case needs a \"Solution\" field\n");
+
+        // Multiple meshes not supported
+        assert(simulation["Mesh"].size() == 1);
+
+        // Make sure the simulation mesh exists in the mesh store
+        if (mesh_store.find(simulation["Mesh"][0]["Name"].asString()) == mesh_store.end())
         {
-            throw std::runtime_error("Simulations need a \"Time\" field\n");
+            throw std::runtime_error("Mesh name \"" + simulation["Mesh"][0]["Name"].asString() +
+                                     "\" was not found in the mesh store");
         }
-
-        solid::femStaticMatrix fem_matrix(fem_mesh,
-                                          root["Simulation"][0]["LinearSolver"],
-                                          root["Simulation"][0]["Time"]);
-        fem_matrix.solve();
-
-        std::cout << "*-------------------------------*\n";
-        std::cout << "  Setting up the next load step\n";
-        std::cout << "*-------------------------------*\n";
-
-        // Update the mesh with a continuation
-        fem_mesh.continuation(root["Simulation"][1]["Mesh"][0]);
-
-        // Update the matrix with the new time solution
-        fem_matrix.continuation(root["Simulation"][1]["Time"]);
-
-        fem_matrix.solve();
     }
-    else
+
+    build_simulation_tree();
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end - start;
+
+    std::cout << termcolor::bold << termcolor::green << std::string(2, ' ')
+              << "Preprocessing complete in " << elapsed_seconds.count() << "s\n"
+              << termcolor::reset << std::endl;
+}
+
+void SimulationControl::start()
+{
+    // It is desirable to have multiple load steps throughout the simulation.
+    // This can be achieved by stepping through each simulation and performing
+    // a continuation, reusing the old time data from the previous load step.
+    for (auto const& simulation : root["SimulationCases"])
     {
-        std::runtime_error("Specify solution type as Transient or Equilibrium\n");
+        if (!simulation["Inherits"].empty()) continue;
+
+        std::cout << std::string(2, ' ') << termcolor::bold << "Simulating case \""
+                  << simulation["Name"].asString() << "\"" << termcolor::reset << std::endl
+                  << std::endl;
+
+        auto const& mesh_data = simulation["Mesh"][0];
+
+        auto simulation_mesh = mesh_store.find(mesh_data["Name"].asString());
+
+        std::cout << std::string(4, ' ') << "Module \"" << simulation["Type"].asString() << "\"\n";
+
+        std::cout << std::string(4, ' ') << "Solution \"" << simulation["Solution"].asString()
+                  << "\"\n";
+
+        auto const & [ mesh, material ] = simulation_mesh->second;
+
+        solid::femMesh fem_mesh(mesh, material, mesh_data);
+
+        solid::femStaticMatrix fem_matrix(fem_mesh, simulation["LinearSolver"], simulation["Time"]);
+
+        fem_matrix.solve();
+
+        for (auto const& continued_simulation : multistep_simulations[simulation["Name"].asString()])
+        {
+            std::cout << termcolor::bold << "\n"
+                      << std::string(2, ' ') << "Simulating case \""
+                      << continued_simulation["Name"].asString() << "\"" << termcolor::reset
+                      << std::endl
+                      << std::endl;
+
+            // Update the mesh with an internal restart
+            fem_mesh.internal_restart(continued_simulation["Mesh"][0]);
+
+            // Update the matrix with the new time solution
+            fem_matrix.continuation(continued_simulation["Time"]);
+
+            fem_matrix.solve();
+        }
     }
 }
 
-void SimulationControl::start() {}
+void SimulationControl::build_simulation_tree()
+{
+    // For each simulation step, the total number of subsequent relationships
+    // need to be determined, such that an analysis can be performed in order
+    // Build a list of all the load steps for a given mesh
+    for (auto const& simulation : root["SimulationCases"])
+    {
+        if (simulation["Inherits"].empty())
+        {
+            find_children(simulation["Name"].asString(), simulation["Name"].asString());
+        }
+    }
+
+    for (auto const & [ name, queue ] : multistep_simulations)
+    {
+        std::cout << std::string(4, ' ') << "Simulation \"" << name << "\" is continued by:\n";
+        for (auto const& item : queue)
+        {
+            std::cout << "\t\"" << item["Name"].asString() << "\"" << std::endl;
+        }
+    }
+}
+
+void SimulationControl::find_children(std::string const& parent_name,
+                                      std::string const& next_parent_name)
+{
+    for (auto const& simulation : root["SimulationCases"])
+    {
+        if (simulation["Inherits"].empty()) continue;
+
+        if (auto const& name = simulation["Inherits"].asString(); name == next_parent_name)
+        {
+            multistep_simulations[parent_name].push_back(simulation);
+            // Recursive step
+            find_children(parent_name, simulation["Name"].asString());
+        }
+    }
+}
 }
