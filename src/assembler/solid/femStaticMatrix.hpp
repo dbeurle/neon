@@ -3,7 +3,7 @@
 
 #include "mesh/solid/femMesh.hpp"
 #include "numeric/SparseTypes.hpp"
-#include "solver/AdaptiveIncrement.hpp"
+#include "solver/AdaptiveLoadStep.hpp"
 
 #include <json/forwards.h>
 
@@ -58,7 +58,7 @@ private:
 protected:
     femMesh& fem_mesh;
 
-    AdaptiveIncrement adaptive_load;
+    AdaptiveLoadStep adaptive_load;
 
     bool is_sparsity_computed = false;
 
