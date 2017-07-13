@@ -177,18 +177,11 @@ std::tuple<List const&, Vector> femSubmesh::diagonal_mass(int element) const
 
 void femSubmesh::update_internal_variables(double const Δt)
 {
-    auto start = std::chrono::high_resolution_clock::now();
-
     update_deformation_measures();
     update_Jacobian_determinants();
     check_element_distortion();
 
     cm->update_internal_variables(Δt);
-
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
-
-    std::cout << "  Updating the internal variables took " << elapsed_seconds.count() << "s\n";
 }
 
 void femSubmesh::update_deformation_measures()

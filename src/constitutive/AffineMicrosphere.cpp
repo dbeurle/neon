@@ -43,9 +43,6 @@ void AffineMicrosphere::update_internal_variables(double const Δt)
     // Decay the number of chains available
     number_of_chains *= 1.0 / (1.0 + chain_decay_rate * Δt);
 
-    std::cout << "\nIncrement size " << Δt << std::endl;
-    std::cout << "\nNumber of chains are now " << number_of_chains << "\n\n";
-
     μ = number_of_chains * boltzmann_constant * temperature;
 
     // Get references into the hash table

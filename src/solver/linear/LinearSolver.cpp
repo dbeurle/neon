@@ -55,17 +55,16 @@ void PaStiX::solve(const SparseMatrix& A, Vector& x, const Vector& b)
 
     x = pastix.solve(b);
 
-    std::cout << "    Analysis step " << pastix.dparm(18) << " seconds\n";
-    std::cout << "    Predicted factorisation time " << pastix.dparm(19) << " seconds\n";
-    std::cout << "    Factorisation " << pastix.dparm(20) << " seconds\n";
-    std::cout << "    Time for solve " << pastix.dparm(21) << " seconds\n";
-    std::cout << "    GigaFLOPS during factorisation " << pastix.dparm(22) / 1e9 << "\n";
-    std::cout << "    MegaFLOPS during solve " << pastix.dparm(23) / 1e6 << "\n";
+    std::cout << std::string(6, ' ') << "Analysis step " << pastix.dparm(18) << " seconds\n";
+    std::cout << std::string(6, ' ') << "Predicted factorisation time " << pastix.dparm(19) << "s\n";
+    std::cout << std::string(6, ' ') << "Factorisation " << pastix.dparm(20) << "s\n";
+    std::cout << std::string(6, ' ') << "Time for solve " << pastix.dparm(21) << "s\n";
+    std::cout << std::string(6, ' ') << "GigaFLOPS during factorisation "
+              << pastix.dparm(22) / 1.0e9 << "\n";
+    std::cout << std::string(6, ' ') << "MegaFLOPS during solve " << pastix.dparm(23) / 1.0e6 << "\n";
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
-
-    std::cout << "  Linear solver took " << elapsed_seconds.count() << "s\n";
 }
 
 void MUMPS::solve(const SparseMatrix& A, Vector& x, const Vector& b)
@@ -215,17 +214,12 @@ void pCG::solve(const SparseMatrix& A, Vector& x, const Vector& b)
     pcg.setTolerance(LinearSolver::solverParam.tolerance);
     pcg.setMaxIterations(LinearSolver::solverParam.max_iterations);
 
-    auto start = std::chrono::high_resolution_clock::now();
-
     pcg.compute(A);
     x = pcg.solveWithGuess(b, x);
 
-    std::cout << "  Conjugate Gradient iterations: " << pcg.iterations() << " (max. "
-              << solverParam.max_iterations << "), estimated error: " << pcg.error() << " (min. "
-              << solverParam.tolerance << ")\n";
-
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << pcg.iterations()
+              << " (max. " << solverParam.max_iterations << "), estimated error: " << pcg.error()
+              << " (min. " << solverParam.tolerance << ")\n";
 
     if (pcg.iterations() >= solverParam.max_iterations)
     {

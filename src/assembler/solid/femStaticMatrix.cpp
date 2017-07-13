@@ -64,12 +64,15 @@ void femStaticMatrix::compute_sparsity_pattern()
 void femStaticMatrix::solve()
 {
     // Perform Newton-Raphson iterations
-    std::cout << "Solving " << fem_mesh.active_dofs() << " non-linear equations\n";
-
-    std::cout << "Pseudo time for current attempt is " << adaptive_load.factor() << std::endl;
+    std::cout << std::string(4, ' ') << "Non-linear equation system has " << fem_mesh.active_dofs()
+              << " degrees of freedom\n";
 
     while (!adaptive_load.is_fully_applied())
     {
+        std::cout << termcolor::magenta << termcolor::bold << "\n"
+                  << std::string(4, ' ') << "Performing equilibrium iterations for time "
+                  << adaptive_load.step_time() << termcolor::reset << std::endl;
+
         apply_displacement_boundaries();
 
         fem_mesh.update_internal_variables(d, adaptive_load.increment());
@@ -194,7 +197,7 @@ void femStaticMatrix::apply_displacement_boundaries(double const load_factor)
         {
             for (auto const& dof : dirichlet_boundary.dof_view())
             {
-                d(dof) = adaptive_load.load_factor() * dirichlet_boundary.value_view();
+                d(dof) = dirichlet_boundary.value_view(adaptive_load.load_factor());
             }
         }
     }
@@ -215,9 +218,12 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
     while (current_iteration < max_iterations)
     {
-        std::cout << "----------------------------------\n";
-        std::cout << "    Newton-Raphson iteration " << current_iteration << "\n";
-        std::cout << "----------------------------------\n";
+        auto start = std::chrono::high_resolution_clock::now();
+        auto end = std::chrono::high_resolution_clock::now();
+
+        std::cout << std::string(4, ' ') << termcolor::blue << termcolor::bold
+                  << "Newton-Raphson iteration " << current_iteration << termcolor::reset
+                  << std::endl;
 
         compute_internal_force();
 
@@ -233,18 +239,24 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
         fem_mesh.update_internal_variables(d, adaptive_load.increment());
 
-        std::cout << "  Displacement norm " << delta_d.norm() << "\n";
-        std::cout << "  Residual force norm " << residual.norm() << "\n";
+        std::cout << std::string(6, ' ') << "Displacement norm " << delta_d.norm() << "\n";
+        std::cout << std::string(6, ' ') << "Residual force norm " << residual.norm() << "\n";
+
+        std::chrono::duration<double> elapsed_seconds = end - start;
+        std::cout << std::string(6, ' ') << "Equilibrium iteration required "
+                  << elapsed_seconds.count() << "s\n";
 
         if (delta_d.norm() < displacement_tolerance && residual.norm() < residual_tolerance)
         {
-            std::cout << "Nonlinear iterations converged!\n";
             break;
         }
-
         current_iteration++;
     }
-    std::cout << "Writing solution to file for step " << adaptive_load.step() << "\n";
+
+    std::cout << "\n"
+              << std::string(4, ' ') << "Writing solution to file for step " << adaptive_load.step()
+              << "\n";
+
     if (current_iteration != max_iterations) fem_mesh.write(adaptive_load.step());
 
     adaptive_load.update_convergence_state(current_iteration != max_iterations);
