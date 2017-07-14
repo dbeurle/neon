@@ -43,4 +43,15 @@ protected:
 
     double chain_decay_rate = 0.0;
 };
+
+inline double AffineMicrosphere::volumetric_free_energy_derivative(double const J,
+                                                                   double const bulk_modulus) const
+{
+    return bulk_modulus / 2.0 * (J - 1.0 / J);
+}
+inline double AffineMicrosphere::volumetric_free_energy_second_derivative(double const J,
+                                                                          double const bulk_modulus) const
+{
+    return bulk_modulus / 2.0 * (1.0 + 1.0 / std::pow(J, 2));
+}
 }
