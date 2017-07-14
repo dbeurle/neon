@@ -12,8 +12,8 @@
 #include "numeric/Operators.hpp"
 
 #include <chrono>
-#include <json/json.h>
 
+#include <json/json.h>
 #include <range/v3/view.hpp>
 
 namespace neon::solid
@@ -178,7 +178,9 @@ std::tuple<List const&, Vector> femSubmesh::diagonal_mass(int element) const
 void femSubmesh::update_internal_variables(double const Δt)
 {
     update_deformation_measures();
+
     update_Jacobian_determinants();
+
     check_element_distortion();
 
     cm->update_internal_variables(Δt);
