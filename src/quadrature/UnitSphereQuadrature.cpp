@@ -9,7 +9,8 @@ UnitSphereQuadrature::UnitSphereQuadrature()
     // assuming orthogonal symmetry
 
     // Weightings for unit sphere
-    constexpr double w1 = 0.0265214244093, w2 = 0.0199301476312, w3 = 0.0250712367487;
+    constexpr double w1 = 0.0265214244093 * 2.0, w2 = 0.0199301476312 * 2.0,
+                     w3 = 0.0250712367487 * 2.0;
     w = {w1, w1, w1, w2, w2, w2, w2, w2, w2, w3, w3, w3, w3, w3, w3, w3, w3, w3, w3, w3, w3};
 
     // Directional cosines from unit sphere integration
