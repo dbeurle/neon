@@ -3,6 +3,11 @@
 
 #include <vector>
 
+// Do not parallelise the GEMM routines
+#ifndef NEON_PARALLEL_EIGEN_SOLVERS
+#define EIGEN_DONT_PARALLELIZE
+#endif
+
 #include <Eigen/Dense>
 
 namespace neon

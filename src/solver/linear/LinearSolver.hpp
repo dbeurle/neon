@@ -2,6 +2,7 @@
 #pragma once
 
 #include "numeric/SparseTypes.hpp"
+
 #include <string>
 
 namespace neon

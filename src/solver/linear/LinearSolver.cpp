@@ -1,4 +1,7 @@
 
+// Parallelisation of the Conjugate Gradient algorithm is good
+#define NEON_PARALLEL_EIGEN_SOLVERS
+
 #include "LinearSolver.hpp"
 
 #include <omp.h>
@@ -67,7 +70,7 @@ void PaStiX::solve(const SparseMatrix& A, Vector& x, const Vector& b)
     std::chrono::duration<double> elapsed_seconds = end - start;
 }
 
-void MUMPS::solve(const SparseMatrix& A, Vector& x, const Vector& b)
+void MUMPS::solve(SparseMatrix const& A, Vector& x, Vector const& b)
 {
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -188,7 +191,7 @@ void MUMPS::solve(const SparseMatrix& A, Vector& x, const Vector& b)
     std::cout << "    Linear solver took " << elapsed_seconds.count() << "s\n";
 }
 
-void SparseLU::solve(const SparseMatrix& A, Vector& x, const Vector& b)
+void SparseLU::solve(SparseMatrix const& A, Vector& x, Vector const& b)
 {
     Eigen::SparseLU<SparseMatrix, Eigen::AMDOrdering<int>> sparseLU;
     sparseLU.compute(A);
@@ -205,9 +208,10 @@ pCG::pCG(double tol, int maxIter)
     solverParam.tolerance = tol;
 }
 
-void pCG::solve(const SparseMatrix& A, Vector& x, const Vector& b)
+void pCG::solve(SparseMatrix const& A, Vector& x, const Vector& b)
 {
     omp_set_num_threads(std::thread::hardware_concurrency());
+    // omp_set_num_threads(1);
 
     Eigen::ConjugateGradient<SparseMatrix, Eigen::Lower | Eigen::Upper> pcg;
 
@@ -215,6 +219,7 @@ void pCG::solve(const SparseMatrix& A, Vector& x, const Vector& b)
     pcg.setMaxIterations(LinearSolver::solverParam.max_iterations);
 
     pcg.compute(A);
+
     x = pcg.solveWithGuess(b, x);
 
     std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << pcg.iterations()
@@ -258,7 +263,5 @@ void BiCGSTAB::solve(const SparseMatrix& A, Vector& x, const Vector& b)
 
     std::cout << "#iterations:     " << bicgstab.iterations();
     std::cout << "estimated error: " << bicgstab.error();
-
-    std::cout << "    Linear solver took " << elapsed_seconds.count() << "s\n";
 }
 }
