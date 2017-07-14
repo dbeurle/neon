@@ -80,9 +80,17 @@ void femMesh::internal_restart(Json::Value const& simulation_data)
 
 void femMesh::update_internal_variables(Vector const& u, double const Δt)
 {
+    auto start = std::chrono::high_resolution_clock::now();
+
     material_coordinates->update_current_configuration(u);
 
     for (auto& submesh : submeshes) submesh.update_internal_variables(Δt);
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end - start;
+
+    std::cout << std::string(6, ' ') << "Internal variable update took " << elapsed_seconds.count()
+              << "s\n";
 }
 
 void femMesh::save_internal_variables(bool const have_converged)
@@ -160,7 +168,7 @@ void femMesh::write(int const time_step, double const time)
 
     unstructured_grid_writer->SetFileName(filename.c_str());
     unstructured_grid_writer->SetInputData(unstructured_grid);
-    unstructured_grid_writer->SetDataModeToAscii();
+    // unstructured_grid_writer->SetDataModeToAscii();
     unstructured_grid_writer->Write();
 }
 
