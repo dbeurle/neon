@@ -51,7 +51,7 @@ public:
 
     auto const& coordinates() const { return *(material_coordinates.get()); }
 
-    void write(int filename_append = -1) const;
+    void write(int const filename_append) const;
 
 protected:
     void check_boundary_conditions(Json::Value const& boundary_data) const;

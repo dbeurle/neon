@@ -31,9 +31,9 @@ void AdaptiveLoadStep::update_convergence_state(bool is_converged)
         is_applied = std::abs(current_time - final_time) < 1.0e-10 &&
                      current_time + time_increment > final_time;
 
-        if (is_applied) return;
-
         last_converged_time = current_time;
+
+        if (is_applied) return;
 
         current_time = std::min(time_increment + current_time, final_time);
 
@@ -64,7 +64,7 @@ void AdaptiveLoadStep::update_convergence_state(bool is_converged)
 
 void AdaptiveLoadStep::reset(Json::Value const& new_increment_data)
 {
-    // Take the total time before the local current time is reset
+    // Update the history counters
     total_time += current_time;
 
     this->parse_input(new_increment_data);

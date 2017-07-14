@@ -87,7 +87,7 @@ void femMesh::save_internal_variables(bool const have_converged)
     for (auto& submesh : submeshes) submesh.save_internal_variables(have_converged);
 }
 
-void femMesh::write(int filename_append) const
+void femMesh::write(int const filename_append) const
 {
     // Create an unstructured grid object
     auto unstructured_grid = vtkSmartPointer<vtkUnstructuredGrid>::New();
