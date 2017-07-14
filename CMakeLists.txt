@@ -17,7 +17,7 @@ include_directories(${CATCH_INCLUDE_DIR}
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 set(CMAKE_CXX_STANDARD 17)
-add_definitions("-Wall -march=native")
+add_definitions("-Wall -march=native -ffast-math")
 
 find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})
@@ -32,7 +32,6 @@ if (OPENMP_FOUND)
 endif()
 
 find_package(Threads REQUIRED)
-find_package(BLAS REQUIRED)
 
 find_package(MUMPS REQUIRED)
 include_directories(${MUMPS_INCLUDE_DIR})
