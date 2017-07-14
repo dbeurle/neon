@@ -23,6 +23,8 @@ public:
             Json::Value const& material_data,
             Json::Value const& simulation_data);
 
+    ~femMesh();
+
     int active_dofs() const;
 
     /** Reset the boundary conditions */
@@ -51,7 +53,7 @@ public:
 
     auto const& coordinates() const { return *(material_coordinates.get()); }
 
-    void write(int const filename_append) const;
+    void write(int const time_step, double const time);
 
 protected:
     void check_boundary_conditions(Json::Value const& boundary_data) const;
@@ -64,13 +66,21 @@ protected:
     /** Collapse the nodal connectivity arrays from the submesh for a node list */
     List filter_dof_list(std::vector<SubMesh> const& boundary_mesh) const;
 
+    void finalise_vtk() const;
+
 protected:
     std::shared_ptr<MaterialCoordinates> material_coordinates;
+
+    NodeOrderingAdapter adapter;
+
     std::vector<femSubmesh> submeshes;
 
     std::map<std::string, std::vector<Dirichlet>> dirichlet_boundaries;
 
     const std::unordered_map<std::string, int> dof_table = {{"x", 0}, {"y", 1}, {"z", 2}};
+
+    std::vector<double> time_history;
+    int last_time_step = 0;
 };
 }
 }

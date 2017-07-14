@@ -4,6 +4,7 @@
 #include "mesh/BasicMesh.hpp"
 
 #include <exception>
+
 #include <memory>
 #include <numeric>
 
@@ -52,6 +53,8 @@ femMesh::femMesh(BasicMesh const& basic_mesh,
     allocate_boundary_conditions(simulation_data["BoundaryConditions"], basic_mesh);
 }
 
+femMesh::~femMesh() { finalise_vtk(); }
+
 int femMesh::active_dofs() const { return 3 * material_coordinates->size(); }
 
 void femMesh::internal_restart(Json::Value const& simulation_data)
@@ -87,15 +90,16 @@ void femMesh::save_internal_variables(bool const have_converged)
     for (auto& submesh : submeshes) submesh.save_internal_variables(have_converged);
 }
 
-void femMesh::write(int const filename_append) const
+void femMesh::write(int const time_step, double const time)
 {
     // Create an unstructured grid object
     auto unstructured_grid = vtkSmartPointer<vtkUnstructuredGrid>::New();
     unstructured_grid->Allocate();
 
-    unstructured_grid->SetPoints(material_coordinates->vtk_coordinates());
+    last_time_step = time_step;
+    time_history.push_back(time);
 
-    NodeOrderingAdapter adapter;
+    unstructured_grid->SetPoints(material_coordinates->vtk_coordinates());
 
     for (auto const& submesh : submeshes)
     {
@@ -109,6 +113,7 @@ void femMesh::write(int const filename_append) const
             unstructured_grid->InsertNextCell(adapter.to_vtk(submesh.topology()), vtk_node_list);
         }
     }
+
     unstructured_grid->GetPointData()->AddArray(material_coordinates->vtk_displacement());
 
     {
@@ -151,13 +156,35 @@ void femMesh::write(int const filename_append) const
 
     auto unstructured_grid_writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
 
-    auto const filename =
-        filename_append < 0 ? "Test.vtu" : "Test_" + std::to_string(filename_append) + ".vtu";
+    auto const filename = "Test_" + std::to_string(time_step) + ".vtu";
 
     unstructured_grid_writer->SetFileName(filename.c_str());
     unstructured_grid_writer->SetInputData(unstructured_grid);
     unstructured_grid_writer->SetDataModeToAscii();
     unstructured_grid_writer->Write();
+}
+
+void femMesh::finalise_vtk() const
+{
+    using namespace ranges;
+
+    std::ofstream pvd_file;
+    pvd_file.open("Test.pvd");
+
+    pvd_file << "<?xml version=\"1.0\"?>\n";
+    pvd_file << "<VTKFile type=\"Collection\" version=\"0.1\">\n";
+    pvd_file << std::string(2, ' ') << "<Collection>\n";
+
+    for_each(view::zip(time_history, view::ints(0)), [&](auto const& tpl) {
+        auto const & [ time, i ] = tpl;
+        pvd_file << std::string(4, ' ') << "<DataSet timestep = \"" << std::to_string(time)
+                 << "\" file = \"Test_" << std::to_string(i) << ".vtu\" />\n";
+    });
+
+    pvd_file << std::string(2, ' ') << "</Collection>\n";
+    pvd_file << "</VTKFile>\n";
+
+    pvd_file.close();
 }
 
 void femMesh::allocate_boundary_conditions(Json::Value const& boundary_data,

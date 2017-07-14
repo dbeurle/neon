@@ -67,7 +67,7 @@ void femStaticMatrix::solve()
     std::cout << std::string(4, ' ') << "Non-linear equation system has " << fem_mesh.active_dofs()
               << " degrees of freedom\n";
 
-    fem_mesh.write(adaptive_load.step());
+    if (adaptive_load.step() == 0) fem_mesh.write(0, 0.0);
 
     while (!adaptive_load.is_fully_applied())
     {
@@ -261,6 +261,7 @@ void femStaticMatrix::perform_equilibrium_iterations()
               << std::string(4, ' ') << "Writing solution to file for step " << adaptive_load.step()
               << "\n";
 
-    if (current_iteration != max_iterations) fem_mesh.write(adaptive_load.step());
+    if (current_iteration != max_iterations)
+        fem_mesh.write(adaptive_load.step(), adaptive_load.time());
 }
 }

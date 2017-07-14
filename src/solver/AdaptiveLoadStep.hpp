@@ -76,7 +76,7 @@ public:
     bool is_fully_applied() const { return is_applied; }
 
     /** Get the global time (including past load cases) */
-    double time() const { return total_time + current_time; }
+    double time() const { return total_time + last_converged_time; }
 
     /** Get the time only for the current load case */
     double step_time() const { return current_time; }

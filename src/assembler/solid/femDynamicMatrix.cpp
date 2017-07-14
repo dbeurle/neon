@@ -54,7 +54,7 @@ void femDynamicMatrix::solve()
 
         perform_equilibrium_iterations();
 
-        fem_mesh.write();
+        // fem_mesh.write();
     }
     std::cout << "Solver routine finished\n";
 }
@@ -139,7 +139,7 @@ void femDynamicMatrix::perform_equilibrium_iterations()
 
         fem_mesh.update_internal_variables(d, newmark.time_step_size());
 
-        fem_mesh.write(current_iteration);
+        // fem_mesh.write(current_iteration);
 
         current_iteration++;
     }
