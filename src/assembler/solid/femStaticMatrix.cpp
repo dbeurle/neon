@@ -4,6 +4,8 @@
 #include "solver/linear/LinearSolverFactory.hpp"
 
 #include <chrono>
+
+#include <omp.h>
 #include <termcolor/termcolor.hpp>
 
 namespace neon::solid
@@ -15,7 +17,7 @@ femStaticMatrix::femStaticMatrix(femMesh& fem_mesh,
       adaptive_load(increment_data),
       fint(Vector::Zero(fem_mesh.active_dofs())),
       d(Vector::Zero(fem_mesh.active_dofs())),
-      linear_solver(LinearSolverFactory::make(solver_data))
+      linear_solver(make_linear_solver(solver_data))
 {
 }
 
@@ -28,7 +30,7 @@ void femStaticMatrix::continuation(Json::Value const& new_increment_data)
 
 void femStaticMatrix::compute_sparsity_pattern()
 {
-    auto start = std::chrono::high_resolution_clock::now();
+    // auto start = std::chrono::high_resolution_clock::now();
 
     std::vector<Doublet> doublets;
     doublets.reserve(fem_mesh.active_dofs());
@@ -54,8 +56,8 @@ void femStaticMatrix::compute_sparsity_pattern()
 
     is_sparsity_computed = true;
 
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
+    // auto end = std::chrono::high_resolution_clock::now();
+    // std::chrono::duration<double> elapsed_seconds = end - start;
 
     // std::cout << "  Sparsity pattern with " << Kt.nonZeros() << " non-zeros took "
     //           << elapsed_seconds.count() << "s\n";
@@ -85,6 +87,8 @@ void femStaticMatrix::solve()
 
 void femStaticMatrix::assemble_stiffness()
 {
+    using ranges::accumulate;
+
     if (!is_sparsity_computed) compute_sparsity_pattern();
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -93,16 +97,19 @@ void femStaticMatrix::assemble_stiffness()
 
     for (auto const& submesh : fem_mesh.meshes())
     {
-        // #pragma omp parallel for
+#pragma omp parallel for
         for (auto element = 0; element < submesh.elements(); ++element)
         {
-            auto const[dofs, ke] = submesh.tangent_stiffness(element);
+            // auto const[dofs, ke] = submesh.tangent_stiffness(element);
+            auto const& tpl = submesh.tangent_stiffness(element);
+            auto const& dofs = std::get<0>(tpl);
+            auto const& ke = std::get<1>(tpl);
 
             for (auto b = 0; b < dofs.size(); b++)
             {
                 for (auto a = 0; a < dofs.size(); a++)
                 {
-                    // #pragma omp atomic update
+#pragma omp atomic
                     Kt.coeffRef(dofs[a], dofs[b]) += ke(a, b);
                 }
             }
@@ -112,13 +119,8 @@ void femStaticMatrix::assemble_stiffness()
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
 
-    // std::cout << "  Assembly of tangent stiffness with "
-    //           << ranges::accumulate(fem_mesh.meshes(),
-    //                                 0l,
-    //                                 [](auto i, auto const& submesh) {
-    //                                     return i + submesh.elements();
-    //                                 })
-    //           << " elements took " << elapsed_seconds.count() << "s\n";
+    std::cout << std::string(6, ' ') << "Tangent stiffness assembly took "
+              << elapsed_seconds.count() << "s\n";
 }
 
 void femStaticMatrix::compute_internal_force()
@@ -221,7 +223,6 @@ void femStaticMatrix::perform_equilibrium_iterations()
     while (current_iteration < max_iterations)
     {
         auto start = std::chrono::high_resolution_clock::now();
-        auto end = std::chrono::high_resolution_clock::now();
 
         std::cout << std::string(4, ' ') << termcolor::blue << termcolor::bold
                   << "Newton-Raphson iteration " << current_iteration << termcolor::reset
@@ -241,8 +242,12 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
         fem_mesh.update_internal_variables(d, adaptive_load.increment());
 
-        std::cout << std::string(6, ' ') << "Displacement norm " << delta_d.norm() << "\n";
-        std::cout << std::string(6, ' ') << "Residual force norm " << residual.norm() << "\n";
+        std::cout << "\n"
+                  << std::string(6, ' ') << "Incremental displacement norm " << delta_d.norm()
+                  << "\n";
+        std::cout << std::string(6, ' ') << "Residual force norm " << residual.norm() << "\n\n";
+
+        auto end = std::chrono::high_resolution_clock::now();
 
         std::chrono::duration<double> elapsed_seconds = end - start;
         std::cout << std::string(6, ' ') << "Equilibrium iteration required "
