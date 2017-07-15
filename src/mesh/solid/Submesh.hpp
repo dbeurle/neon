@@ -69,7 +69,8 @@ public:
      * @param rhea Shape function gradients at quadrature point
      * @param configuration Configuration of the element (coordinates)
      */
-    static Matrix3 local_deformation_gradient(Matrix const& rhea, Matrix const& configuration)
+    static Matrix3 local_deformation_gradient(Matrix const& rhea,
+                                              Matrix const& configuration)
     {
         return configuration * rhea;
     }
@@ -86,19 +87,23 @@ public:
     Matrix3 deformation_gradient(Matrix const& rhea, Matrix const& X, Matrix const& x)
     {
         // Deformation gradient in the reference and current configuration
-        return local_deformation_gradient(rhea, x) * local_deformation_gradient(rhea, X).inverse();
+        return local_deformation_gradient(rhea, x) *
+               local_deformation_gradient(rhea, X).inverse();
     }
 
-    std::tuple<Vector, Vector> nodal_averaged_variable(InternalVariables::Tensor const tensor_name) const;
+    std::tuple<Vector, Vector> nodal_averaged_variable(
+        InternalVariables::Tensor const tensor_name) const;
 
 protected:
     /** Update the strain measures defined by the constitutive model */
     void update_deformation_measures();
 
-    /** Computes the Jacobian determinants.  Called by \sa update_deformation_measures() */
+    /** Computes the Jacobian determinants.  Called by \sa update_deformation_measures()
+     */
     void update_Jacobian_determinants();
 
-    /** Check element Jacobians are acceptable.  Called by \sa update_deformation_measures() */
+    /** Check element Jacobians are acceptable.  Called by \sa
+     * update_deformation_measures() */
     void check_element_distortion() const;
 
     /**
@@ -134,13 +139,6 @@ protected:
 
     /** @return the index into the internal variable store */
     int offset(int element, int quadraturePoint) const;
-
-    /** Factory method for continuum three dimensional models */
-    std::unique_ptr<ConstitutiveModel> make_constitutive_model(Json::Value const& material_data,
-                                                               Json::Value const& simulation_data);
-
-    /** Factory method for the three dimensional shape functions */
-    std::unique_ptr<VolumeInterpolation> make_shape_function(Json::Value const& simulation_data);
 
 private:
     std::shared_ptr<MaterialCoordinates> material_coordinates;

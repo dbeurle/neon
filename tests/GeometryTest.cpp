@@ -302,13 +302,13 @@ TEST_CASE("Solid mesh test")
         // Check the correct values in the boundary conditions
         for (auto const& fixed_bottom : map.find("bottom")->second)
         {
-            REQUIRE(fixed_bottom.value_view() == Approx(0.0));
+            REQUIRE(fixed_bottom.value_view(1.0) == Approx(0.0));
             REQUIRE(fixed_bottom.dof_view().size() == 16);
         }
 
         for (auto const& disp_driven : map.find("top")->second)
         {
-            REQUIRE(disp_driven.value_view() == Approx(0.001));
+            REQUIRE(disp_driven.value_view(1.0) == Approx(0.001));
             REQUIRE(disp_driven.dof_view().size() == 16);
         }
     }

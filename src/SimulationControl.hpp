@@ -14,7 +14,7 @@ namespace neon
 class SimulationControl
 {
 public:
-    SimulationControl(std::string const& input_file_name);
+    explicit SimulationControl(std::string const& input_file_name);
 
     auto number_of_threads() const { return threads; }
 

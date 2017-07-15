@@ -9,16 +9,18 @@
 namespace neon::solid
 {
 femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh,
+                                   Visualisation&& visualisation,
                                    Json::Value const& solver_data,
                                    Json::Value const& time_data)
-    : femStaticMatrix(fem_mesh, solver_data, time_data),
+    : femStaticMatrix(fem_mesh,
+                      std::forward<Visualisation>(visualisation),
+                      solver_data,
+                      time_data),
       a(Vector::Zero(fem_mesh.active_dofs())),
       v(Vector::Zero(fem_mesh.active_dofs())),
       newmark(time_data)
 {
 }
-
-femDynamicMatrix::~femDynamicMatrix() = default;
 
 void femDynamicMatrix::solve()
 {
@@ -81,13 +83,7 @@ void femDynamicMatrix::assemble_mass()
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
 
-    std::cout << "  Assembly of mass matrix with "
-              << ranges::accumulate(fem_mesh.meshes(),
-                                    0l,
-                                    [](auto i, auto const& submesh) {
-                                        return i + submesh.elements();
-                                    })
-              << " elements took " << elapsed_seconds.count() << "s\n";
+    std::cout << "  Assembly of mass matrix took " << elapsed_seconds.count() << "s\n";
 }
 
 void femDynamicMatrix::perform_equilibrium_iterations()
@@ -106,7 +102,6 @@ void femDynamicMatrix::perform_equilibrium_iterations()
         compute_internal_force();
 
         a = newmark.accelerations(a, v, d);
-
         v = newmark.velocities(a, v);
 
         std::cout << "\nAcceleration\n\n" << a << std::endl;

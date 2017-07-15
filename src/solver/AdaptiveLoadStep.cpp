@@ -26,38 +26,42 @@ void AdaptiveLoadStep::update_convergence_state(bool is_converged)
         consecutive_unconverged = 0;
         successful_increments++;
 
-        double const time_increment = std::min(forward_factor * current_time, maximum_increment);
+        double const dt = std::min(forward_factor * current_time, maximum_increment);
 
         is_applied = std::abs(current_time - final_time) < 1.0e-10 &&
-                     current_time + time_increment > final_time;
+                     current_time + dt > final_time;
 
         last_converged_time = current_time;
 
         if (is_applied) return;
 
-        current_time = std::min(time_increment + current_time, final_time);
+        current_time = std::min(dt + current_time, final_time);
 
-        std::cout << termcolor::green << termcolor::bold << std::string(terminal_indent, ' ')
+        std::cout << termcolor::green << termcolor::bold
+                  << std::string(terminal_indent, ' ')
                   << "Convergence detected - step time set to " << current_time
                   << " for next attempt\n"
                   << termcolor::reset << std::flush;
     }
     else
     {
-        double const time_increment =
-            std::max(minimum_increment, (current_time - last_converged_time) * cutback_factor);
+        double const dt = std::max(minimum_increment,
+                                   (current_time - last_converged_time) * cutback_factor);
 
-        current_time = last_converged_time + time_increment;
+        current_time = last_converged_time + dt;
 
-        std::cout << termcolor::yellow << termcolor::bold << std::string(terminal_indent, ' ')
-                  << "\nNon-convergence detected - step time set to " << current_time << "\n"
+        std::cout << termcolor::yellow << termcolor::bold
+                  << std::string(terminal_indent, ' ')
+                  << "\nNon-convergence detected - step time set to " << current_time
+                  << "\n"
                   << termcolor::reset << std::flush;
 
         consecutive_unconverged++;
 
         if (consecutive_unconverged == increment_limit)
         {
-            throw std::runtime_error("Too many reductions.  Convergence not judged likely\n");
+            throw std::runtime_error(
+                "Too many reductions.  Convergence not judged likely\n");
         }
     }
 }

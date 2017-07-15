@@ -52,7 +52,7 @@ void PaStiX::solve(const SparseMatrix& A, Vector& x, const Vector& b)
     pastix.iparm(3) = 1;
 
     // Number of threads
-    pastix.iparm(34) = 2;
+    pastix.iparm(34) = std::thread::hardware_concurrency();
 
     // Number of Cuda devices
     // pastix.iparm(64) = 1;
