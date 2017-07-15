@@ -50,7 +50,15 @@ protected:
      */
     void enforce_dirichlet_conditions(SparseMatrix& A, Vector& x, Vector& b);
 
-    void apply_displacement_boundaries(double const load_factor = 1.0);
+    void apply_displacement_boundaries();
+
+    /** Equilibrium iteration convergence criteria */
+    bool is_converged(double const inc_disp_norm, double const residual_norm) const
+    {
+        return inc_disp_norm <= displacement_tolerance && residual_norm <= residual_tolerance;
+    }
+
+    void print_convergence_progress(double const delta_d_norm, double const residual_norm) const;
 
 private:
     void perform_equilibrium_iterations();

@@ -46,7 +46,7 @@ void femStaticMatrix::compute_sparsity_pattern()
             {
                 for (auto const& q : submesh.local_dof_list(element))
                 {
-                    doublets.push_back({p, q});
+                    doublets.emplace_back(p, q);
                 }
             }
         }
@@ -125,7 +125,7 @@ void femStaticMatrix::assemble_stiffness()
 
 void femStaticMatrix::compute_internal_force()
 {
-    auto start = std::chrono::high_resolution_clock::now();
+    // auto start = std::chrono::high_resolution_clock::now();
 
     fint.setZero();
 
@@ -142,15 +142,15 @@ void femStaticMatrix::compute_internal_force()
         }
     }
 
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
+    // auto end = std::chrono::high_resolution_clock::now();
+    // std::chrono::duration<double> elapsed_seconds = end - start;
 
     // std::cout << "  Assembly of internal forces took " << elapsed_seconds.count() << "s\n";
 }
 
 void femStaticMatrix::enforce_dirichlet_conditions(SparseMatrix& A, Vector& x, Vector& b)
 {
-    auto start = std::chrono::high_resolution_clock::now();
+    // auto start = std::chrono::high_resolution_clock::now();
 
     for (auto const & [ name, dirichlet_boundaries ] : fem_mesh.dirichlet_boundary_map())
     {
@@ -185,15 +185,15 @@ void femStaticMatrix::enforce_dirichlet_conditions(SparseMatrix& A, Vector& x, V
             }
         }
     }
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
+    // auto end = std::chrono::high_resolution_clock::now();
+    // std::chrono::duration<double> elapsed_seconds = end - start;
 
     // std::cout << "  Dirichlet conditions enforced in " << elapsed_seconds.count() << "s\n";
 }
 
-void femStaticMatrix::apply_displacement_boundaries(double const load_factor)
+void femStaticMatrix::apply_displacement_boundaries()
 {
-    auto start = std::chrono::high_resolution_clock::now();
+    // auto start = std::chrono::high_resolution_clock::now();
 
     for (auto const & [ name, dirichlet_boundaries ] : fem_mesh.dirichlet_boundary_map())
     {
@@ -206,8 +206,8 @@ void femStaticMatrix::apply_displacement_boundaries(double const load_factor)
         }
     }
 
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
+    // auto end = std::chrono::high_resolution_clock::now();
+    // std::chrono::duration<double> elapsed_seconds = end - start;
 
     // std::cout << "  Displacements applied in " << elapsed_seconds.count() << "s\n";
 }
@@ -242,10 +242,7 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
         fem_mesh.update_internal_variables(d, adaptive_load.increment());
 
-        std::cout << "\n"
-                  << std::string(6, ' ') << "Incremental displacement norm " << delta_d.norm()
-                  << "\n";
-        std::cout << std::string(6, ' ') << "Residual force norm " << residual.norm() << "\n\n";
+        print_convergence_progress(delta_d.norm(), residual.norm());
 
         auto end = std::chrono::high_resolution_clock::now();
 
@@ -253,7 +250,7 @@ void femStaticMatrix::perform_equilibrium_iterations()
         std::cout << std::string(6, ' ') << "Equilibrium iteration required "
                   << elapsed_seconds.count() << "s\n";
 
-        if (delta_d.norm() < displacement_tolerance && residual.norm() < residual_tolerance)
+        if (is_converged(delta_d.norm(), residual.norm()))
         {
             break;
         }
@@ -268,5 +265,32 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
     if (current_iteration != max_iterations)
         fem_mesh.write(adaptive_load.step(), adaptive_load.time());
+}
+
+void femStaticMatrix::print_convergence_progress(double const delta_d_norm,
+                                                 double const residual_norm) const
+{
+    std::cout << termcolor::bold;
+    if (delta_d_norm <= displacement_tolerance)
+    {
+        std::cout << termcolor::green;
+    }
+    else
+    {
+        std::cout << termcolor::yellow;
+    }
+    std::cout << std::string(6, ' ') << "Incremental displacement norm " << delta_d_norm << "\n";
+    std::cout << termcolor::reset << termcolor::bold;
+
+    if (residual_norm <= residual_tolerance)
+    {
+        std::cout << termcolor::green;
+    }
+    else
+    {
+        std::cout << termcolor::yellow;
+    }
+    std::cout << std::string(6, ' ') << "Residual force norm " << residual_norm << termcolor::reset
+              << "\n";
 }
 }
