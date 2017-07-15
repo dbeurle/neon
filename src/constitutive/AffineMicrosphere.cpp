@@ -40,17 +40,17 @@ void AffineMicrosphere::update_internal_variables(double const Δt)
 {
     using namespace ranges;
 
-    // Decay the number of chains available
-    number_of_chains *= 1.0 / (1.0 + chain_decay_rate * Δt);
-
-    μ = number_of_chains * boltzmann_constant * temperature;
-
     // Get references into the hash table
     auto& F_list = variables(InternalVariables::Tensor::DeformationGradient);
     auto& σ_list = variables(InternalVariables::Tensor::Cauchy);
     auto& τ_list = variables(InternalVariables::Tensor::Kirchhoff);
 
     auto const& detF_list = variables(InternalVariables::Scalar::DetF);
+
+    // Decay the number of chains available
+    number_of_chains *= 1.0 / (1.0 + chain_decay_rate * Δt);
+
+    μ = number_of_chains * boltzmann_constant * temperature;
 
     auto const N = segments_per_chain;
 
@@ -90,11 +90,7 @@ void AffineMicrosphere::update_internal_variables(double const Δt)
              });
 
     // Compute tangent moduli
-
     auto& D_list = variables(InternalVariables::Matrix::TruesdellModuli);
-
-    Matrix const IoI = I_outer_I();
-    Matrix const I = fourth_order_identity();
 
 #pragma omp parallel for
     for (auto quadrature_point = 0; quadrature_point < F_list.size(); ++quadrature_point)

@@ -6,6 +6,7 @@
 #include "constitutive/AffineMicrosphere.hpp"
 #include "constitutive/HyperElasticPlastic.hpp"
 #include "constitutive/Hyperelastic.hpp"
+#include "constitutive/NeoHooke.hpp"
 
 #include "interpolations/Hexahedron8.hpp"
 #include "mesh/solid/MaterialCoordinates.hpp"
