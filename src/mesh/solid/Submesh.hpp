@@ -140,10 +140,6 @@ protected:
     /** @return the index into the internal variable store */
     int offset(int element, int quadraturePoint) const;
 
-    /** Factory method for the three dimensional shape functions */
-    std::unique_ptr<VolumeInterpolation> make_shape_function(
-        Json::Value const& simulation_data);
-
 private:
     std::shared_ptr<MaterialCoordinates> material_coordinates;
 

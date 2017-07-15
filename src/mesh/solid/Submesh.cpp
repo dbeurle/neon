@@ -4,8 +4,8 @@
 #include "PreprocessorExceptions.hpp"
 
 #include "constitutive/ConstitutiveModelFactory.hpp"
+#include "interpolations/InterpolationFactory.hpp"
 
-#include "interpolations/Hexahedron8.hpp"
 #include "material/Material.hpp"
 #include "mesh/solid/MaterialCoordinates.hpp"
 #include "numeric/Operators.hpp"
@@ -23,7 +23,7 @@ femSubmesh::femSubmesh(Json::Value const& material_data,
                        SubMesh const& submesh)
     : neon::SubMesh(submesh),
       material_coordinates(material_coordinates),
-      sf(make_shape_function(simulation_data)),
+      sf(make_shape_function(topology(), simulation_data)),
       variables(elements() * sf->quadrature().points()),
       cm(make_constitutive_model(variables, material_data, simulation_data))
 {
@@ -268,70 +268,6 @@ void femSubmesh::allocate_dof_list(int const nodal_dofs)
                               });
                    });
                });
-}
-
-std::unique_ptr<VolumeInterpolation> femSubmesh::make_shape_function(
-    Json::Value const& simulation_data)
-{
-    if (!simulation_data.isMember("ElementOptions"))
-    {
-        throw EmptyFieldException("Part: ElementOptions");
-    }
-
-    auto is_reduced =
-        simulation_data["ElementOptions"]["Quadrature"].empty()
-            ? false
-            : simulation_data["ElementOptions"]["Quadrature"].asString() == "Reduced";
-
-    switch (topology())
-    {
-        case ElementTopology::Hexahedron8:
-        {
-            return std::make_unique<Hexahedron8>(
-                is_reduced ? HexahedronQuadrature::Rule::OnePoint
-                           : HexahedronQuadrature::Rule::EightPoint);
-            break;
-        }
-        case ElementTopology::Tetrahedron4:
-        case ElementTopology::Prism6:
-        case ElementTopology::Pyramid5:
-        case ElementTopology::Tetrahedron20:
-        case ElementTopology::Tetrahedron35:
-        case ElementTopology::Tetrahedron56:
-        case ElementTopology::Hexahedron64:
-        case ElementTopology::Hexahedron125:
-        case ElementTopology::Tetrahedron10:
-        case ElementTopology::Hexahedron27:
-        case ElementTopology::Prism18:
-        case ElementTopology::Pyramid14:
-        case ElementTopology::Hexahedron20:
-        case ElementTopology::Prism15:
-        case ElementTopology::Pyramid13:
-            std::cerr << "Element shape not implemented inside the solid femSubmesh\n";
-            std::terminate();
-            break;
-        case ElementTopology::Invalid:
-        case ElementTopology::Point:
-        case ElementTopology::Line2:
-        case ElementTopology::Line3:
-        case ElementTopology::Triangle3:
-        case ElementTopology::Triangle6:
-        case ElementTopology::Triangle9:
-        case ElementTopology::Quadrilateral4:
-        case ElementTopology::Quadrilateral8:
-        case ElementTopology::Quadrilateral9:
-        case ElementTopology::Triangle10:
-        case ElementTopology::Triangle12:
-        case ElementTopology::Triangle15:
-        case ElementTopology::Triangle15_IC:
-        case ElementTopology::Triangle21:
-        case ElementTopology::Edge4:
-        case ElementTopology::Edge5:
-        case ElementTopology::Edge6:
-        default:
-            break;
-    }
-    return nullptr;
 }
 
 int femSubmesh::offset(int element, int quadrature_point) const
