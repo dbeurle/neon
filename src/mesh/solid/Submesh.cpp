@@ -3,12 +3,10 @@
 
 #include "PreprocessorExceptions.hpp"
 
-#include "constitutive/AffineMicrosphere.hpp"
-#include "constitutive/HyperElasticPlastic.hpp"
-#include "constitutive/Hyperelastic.hpp"
-#include "constitutive/NeoHooke.hpp"
+#include "constitutive/ConstitutiveModelFactory.hpp"
 
 #include "interpolations/Hexahedron8.hpp"
+#include "material/Material.hpp"
 #include "mesh/solid/MaterialCoordinates.hpp"
 #include "numeric/Operators.hpp"
 
@@ -27,7 +25,7 @@ femSubmesh::femSubmesh(Json::Value const& material_data,
       material_coordinates(material_coordinates),
       sf(make_shape_function(simulation_data)),
       variables(elements() * sf->quadrature().points()),
-      cm(make_constitutive_model(material_data, simulation_data))
+      cm(make_constitutive_model(variables, material_data, simulation_data))
 {
     // Allocate storage for the displacement gradient
     variables.add(InternalVariables::Tensor::DisplacementGradient,
@@ -86,14 +84,17 @@ Matrix femSubmesh::geometric_tangent_stiffness(Matrix const& x, int element) con
                                    [&](auto const& femval, auto const& l) -> Matrix {
                                        auto const & [ N, rhea ] = femval;
 
-                                       auto const Jacobian = local_deformation_gradient(rhea, x);
+                                       auto const Jacobian =
+                                           local_deformation_gradient(rhea, x);
 
                                        Matrix3 const σ = σ_list[offset(element, l)];
 
                                        // Compute the symmetric gradient operator
-                                       const auto L = (rhea * Jacobian.inverse()).transpose();
+                                       const auto L =
+                                           (rhea * Jacobian.inverse()).transpose();
 
-                                       return L.transpose() * σ * L * Jacobian.determinant();
+                                       return L.transpose() * σ * L *
+                                              Jacobian.determinant();
                                    });
     return identity_expansion(kgeo, dofs_per_node());
 }
@@ -123,7 +124,8 @@ Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int element) cons
 
 Vector femSubmesh::internal_nodal_force(Matrix const& x, int element) const
 {
-    using RowMatrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+    using RowMatrix =
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
     auto const& σ_list = variables(InternalVariables::Tensor::Cauchy);
 
@@ -134,7 +136,8 @@ Vector femSubmesh::internal_nodal_force(Matrix const& x, int element) const
                                    [&](auto const& femval, auto const& l) -> RowMatrix {
                                        auto const & [ N, dN ] = femval;
 
-                                       auto const Jacobian = local_deformation_gradient(dN, x);
+                                       auto const Jacobian =
+                                           local_deformation_gradient(dN, x);
 
                                        auto const σ = σ_list[offset(element, l)];
 
@@ -153,14 +156,17 @@ std::tuple<List const&, Matrix> femSubmesh::consistent_mass(int element) const
 
     auto const ρ_0 = cm->intrinsic_material().initial_density();
 
-    auto m = sf->quadrature().integrate(Matrix::Zero(nodes_per_element(), nodes_per_element()),
-                                        [&](auto const& femval, auto const& l) -> Matrix {
-                                            auto const & [ N, dN ] = femval;
+    auto m =
+        sf->quadrature().integrate(Matrix::Zero(nodes_per_element(), nodes_per_element()),
+                                   [&](auto const& femval, auto const& l) -> Matrix {
+                                       auto const & [ N, dN ] = femval;
 
-                                            auto const Jacobian = local_deformation_gradient(dN, X);
+                                       auto const Jacobian =
+                                           local_deformation_gradient(dN, X);
 
-                                            return N * ρ_0 * N.transpose() * Jacobian.determinant();
-                                        });
+                                       return N * ρ_0 * N.transpose() *
+                                              Jacobian.determinant();
+                                   });
     return {local_dof_list(element), identity_expansion(m, dofs_per_node())};
 }
 
@@ -196,8 +202,10 @@ void femSubmesh::update_deformation_measures()
     for (auto element = 0; element < elements(); ++element)
     {
         // Gather the material coordinates
-        auto const X = material_coordinates->initial_configuration(local_node_list(element));
-        auto const x = material_coordinates->current_configuration(local_node_list(element));
+        auto const X =
+            material_coordinates->initial_configuration(local_node_list(element));
+        auto const x =
+            material_coordinates->current_configuration(local_node_list(element));
 
         sf->quadrature().for_each([&](auto const& femval, const auto& l) {
 
@@ -228,7 +236,8 @@ void femSubmesh::update_Jacobian_determinants()
 
     auto& detF_list = variables(InternalVariables::Scalar::DetF);
 
-    detF_list = F_list | ranges::view::transform([](auto const& F) { return F.determinant(); });
+    detF_list =
+        F_list | ranges::view::transform([](auto const& F) { return F.determinant(); });
 }
 
 void femSubmesh::check_element_distortion() const
@@ -253,61 +262,34 @@ void femSubmesh::allocate_dof_list(int const nodal_dofs)
 
     dof_list = nodal_connectivity | view::transform([=](auto const& node_list) {
                    return view::for_each(node_list, [=](int const local_node) {
-                       return view::ints(0, nodal_dofs) | view::transform([=](int const nodal_dof) {
+                       return view::ints(0, nodal_dofs) |
+                              view::transform([=](int const nodal_dof) {
                                   return local_node * nodal_dofs + nodal_dof;
                               });
                    });
                });
 }
 
-std::unique_ptr<ConstitutiveModel> femSubmesh::make_constitutive_model(
-    Json::Value const& material_data,
+std::unique_ptr<VolumeInterpolation> femSubmesh::make_shape_function(
     Json::Value const& simulation_data)
-{
-    if (simulation_data["ConstitutiveModel"].empty())
-    {
-        std::cout << simulation_data << std::endl;
-        throw EmptyFieldException("Part: ConstitutiveModel");
-    }
-
-    auto const& model_name = simulation_data["ConstitutiveModel"].asString();
-
-    if (model_name == "NeoHooke")
-    {
-        return std::make_unique<NeoHooke>(variables, material_data);
-    }
-    else if (model_name == "AffineMicrosphere")
-    {
-        return std::make_unique<AffineMicrosphere>(variables, material_data);
-    }
-    else if (model_name == "J2")
-    {
-        return std::make_unique<J2Plasticity>(variables, material_data);
-    }
-
-    throw std::runtime_error("The model name " + model_name + " is not recognised\n" +
-                             "Supported models are NeoHooke, AffineMicrosphere and J2\n");
-
-    return nullptr;
-}
-
-std::unique_ptr<VolumeInterpolation> femSubmesh::make_shape_function(Json::Value const& simulation_data)
 {
     if (!simulation_data.isMember("ElementOptions"))
     {
         throw EmptyFieldException("Part: ElementOptions");
     }
 
-    auto is_reduced = simulation_data["ElementOptions"]["Quadrature"].empty()
-                          ? false
-                          : simulation_data["ElementOptions"]["Quadrature"].asString() == "Reduced";
+    auto is_reduced =
+        simulation_data["ElementOptions"]["Quadrature"].empty()
+            ? false
+            : simulation_data["ElementOptions"]["Quadrature"].asString() == "Reduced";
 
     switch (topology())
     {
         case ElementTopology::Hexahedron8:
         {
-            return std::make_unique<Hexahedron8>(is_reduced ? HexahedronQuadrature::Rule::OnePoint
-                                                            : HexahedronQuadrature::Rule::EightPoint);
+            return std::make_unique<Hexahedron8>(
+                is_reduced ? HexahedronQuadrature::Rule::OnePoint
+                           : HexahedronQuadrature::Rule::EightPoint);
             break;
         }
         case ElementTopology::Tetrahedron4:
