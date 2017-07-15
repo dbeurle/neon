@@ -11,17 +11,17 @@ namespace neon
 /**
  * AdaptiveLoadStep responsibility is to handle the pseudo time step for each
  * SimulationCase (see input file).
-
+ *
  * The load factor is always between zero and one for a given load case, which
  * is defined as time_n and time_n+1.  However, to retain convergence during
  * the non-linear step, cutbacks in the load factor can be required.
-
+ *
  * These cutbacks are determined from the initial, minimum and maximum time
  * increments specified by the user.  The convergence state of the non-linear
  * solution scheme is given at the end and this is used to update the internal
  * state of the adaptive load step algorithm to decide when to reduce the load
  * factor.
-
+ *
  * Consider the simpliest case of a ramped load:
  *
  *                        applied load
@@ -61,7 +61,7 @@ namespace neon
  * The unloading step is handled by the boundary conditions as they will be
  * responsible for interpolation of their current and final states and will
  * require the load factor from this algorithm.  If g is the applied value
- * for a Dirichlet condition, then g depends on α (load_factor) such that g(α).
+ * for a Dirichlet condition, then g depends on α (load factor) such that g(α).
  *
  * TODO This class can be extended by including a smart prediction algorithm
  * for the determination of the best next step.
@@ -82,7 +82,7 @@ public:
     double step_time() const { return current_time; }
 
     /** Get the fraction through the adaptive incrementation */
-    double load_factor() const { return current_time / final_time; }
+    double factor() const { return current_time / final_time; }
 
     /** Get the pseudo time step size */
     double increment() const { return current_time - last_converged_time; }
@@ -108,8 +108,10 @@ protected:
     double initial_time = 1.0;
     double final_time = 1.0;
     double current_time = 1.0;
+
     double total_time = 0.0; //!< Time history for multi-step simulations
-    double last_converged_time = 0.0;
+
+    double last_converged_time = 0.0; //!< Last time when convergence was reached
 
     double minimum_increment; //!< Minimum increment allowed by the algorithm
     double maximum_increment; //!< Maximum increment allowed by the algorithm

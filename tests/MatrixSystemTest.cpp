@@ -21,7 +21,7 @@
 
 using namespace neon;
 
-std::string time_data_json("{\"Period\" : 1.0, \"LoadVariation\" : \"Ramp\", \"Increment\": { "
+std::string time_data_json("{\"Period\" : 1.0, \"Increments\": { "
                            "\"Initial\" : 1.0, \"Minimum\" : 0.001, \"Maximum\" : 10.0 }}");
 
 TEST_CASE("Nonlinear system equilibrium solver test")
