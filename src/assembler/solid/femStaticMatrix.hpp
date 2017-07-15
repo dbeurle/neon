@@ -4,6 +4,7 @@
 #include "mesh/solid/femMesh.hpp"
 #include "numeric/SparseTypes.hpp"
 #include "solver/AdaptiveLoadStep.hpp"
+#include "visualisation/Visualisation.hpp"
 
 #include <json/forwards.h>
 
@@ -17,13 +18,14 @@ namespace neon::solid
 class femStaticMatrix
 {
 public:
-    femStaticMatrix(femMesh& fem_mesh,
-                    Json::Value const& solver_data,
-                    Json::Value const& increment_data);
+    explicit femStaticMatrix(femMesh& fem_mesh,
+                             Visualisation&& visualisation,
+                             Json::Value const& solver_data,
+                             Json::Value const& increment_data);
 
     ~femStaticMatrix();
 
-    void continuation(Json::Value const& new_increment_data);
+    void internal_restart(Json::Value const& new_increment_data);
 
     virtual void solve();
 
@@ -50,21 +52,23 @@ protected:
      */
     void enforce_dirichlet_conditions(SparseMatrix& A, Vector& x, Vector& b);
 
+    /** Move the nodes on the mesh for the Dirichlet boundary */
     void apply_displacement_boundaries();
 
     /** Equilibrium iteration convergence criteria */
-    bool is_converged(double const inc_disp_norm, double const residual_norm) const
-    {
-        return inc_disp_norm <= displacement_tolerance && residual_norm <= residual_tolerance;
-    }
+    bool is_converged(double const inc_disp_norm, double const residual_norm) const;
 
-    void print_convergence_progress(double const delta_d_norm, double const residual_norm) const;
+    /** Pretty printer for the convergence of the Newton-Raphson solver */
+    void print_convergence_progress(double const delta_d_norm,
+                                    double const residual_norm) const;
 
 private:
     void perform_equilibrium_iterations();
 
 protected:
     femMesh& fem_mesh;
+
+    Visualisation visualisation;
 
     AdaptiveLoadStep adaptive_load;
 
@@ -79,4 +83,10 @@ protected:
 
     std::unique_ptr<LinearSolver> linear_solver;
 };
+
+inline bool femStaticMatrix::is_converged(double const inc_disp_norm,
+                                          double const residual_norm) const
+{
+    return inc_disp_norm <= displacement_tolerance && residual_norm <= residual_tolerance;
+}
 }

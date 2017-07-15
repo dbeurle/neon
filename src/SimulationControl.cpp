@@ -47,7 +47,8 @@ void SimulationControl::parse()
     std::cout << std::setw(welcome_message.length() + 9) << std::setfill('=') << "\n";
     std::cout << termcolor::reset << std::endl;
 
-    std::cout << std::string(2, ' ') << termcolor::bold << "Preprocessing mesh and simulation data\n"
+    std::cout << std::string(2, ' ') << termcolor::bold
+              << "Preprocessing mesh and simulation data\n"
               << termcolor::reset;
 
     std::ifstream file(input_file_name);
@@ -65,7 +66,6 @@ void SimulationControl::parse()
     if (root["Material"].empty()) throw EmptyFieldException("Material");
     if (root["SimulationCases"].empty()) throw EmptyFieldException("SimulationCases");
 
-    // auto const& simulation_name = root["AnalysisName"].asString();
     if (!root["Cores"].empty()) threads = root["Cores"].asInt();
 
     std::unordered_set<std::string> material_names, part_names;
@@ -85,9 +85,11 @@ void SimulationControl::parse()
     {
         if (part["Name"].empty()) throw EmptyFieldException("Part: Name");
 
-        if (ranges::find(material_names, part["Material"].asString()) == material_names.end())
+        if (ranges::find(material_names, part["Material"].asString()) ==
+            material_names.end())
         {
-            throw std::runtime_error("The part material was not found in the provided materials\n");
+            throw std::runtime_error("The part material was not found in the provided "
+                                     "materials\n");
         }
 
         auto const[it, inserted] = part_names.emplace(part["Name"].asString());
@@ -101,9 +103,10 @@ void SimulationControl::parse()
         Json::Value mesh_file;
         Json::Reader mesh_reader;
 
-        auto const material = *ranges::find_if(root["Material"], [&part](auto const& material) {
-            return material["Name"].asString() == part["Material"].asString();
-        });
+        auto const material =
+            *ranges::find_if(root["Material"], [&part](auto const& material) {
+                return material["Name"].asString() == part["Material"].asString();
+            });
 
         std::ifstream mesh_input_stream(part["Name"].asString() + ".mesh");
 
@@ -121,14 +124,18 @@ void SimulationControl::parse()
     // Build a list of all the load steps for a given mesh
     for (auto const& simulation : root["SimulationCases"])
     {
-        if (simulation["Name"].empty())
+        if (!simulation.isMember("Name"))
             throw std::runtime_error("A simulation case needs a \"Name\" field\n");
 
-        if (simulation["Time"].empty())
+        if (!simulation.isMember("Time"))
             throw std::runtime_error("A simulation case needs a \"Time\" field\n");
 
-        if (simulation["Solution"].empty())
+        if (!simulation.isMember("Solution"))
             throw std::runtime_error("A simulation case needs a \"Solution\" field\n");
+
+        if (!simulation.isMember("Visualisation"))
+            throw std::runtime_error("A simulation case needs a \"Visualisation\" "
+                                     "field\n");
 
         // Multiple meshes not supported
         assert(simulation["Mesh"].size() == 1);
@@ -136,7 +143,8 @@ void SimulationControl::parse()
         // Make sure the simulation mesh exists in the mesh store
         if (mesh_store.find(simulation["Mesh"][0]["Name"].asString()) == mesh_store.end())
         {
-            throw std::runtime_error("Mesh name \"" + simulation["Mesh"][0]["Name"].asString() +
+            throw std::runtime_error("Mesh name \"" +
+                                     simulation["Mesh"][0]["Name"].asString() +
                                      "\" was not found in the mesh store");
         }
     }
@@ -168,32 +176,38 @@ void SimulationControl::start()
 
         auto simulation_mesh = mesh_store.find(mesh_data["Name"].asString());
 
-        std::cout << std::string(4, ' ') << "Module \"" << simulation["Type"].asString() << "\"\n";
-
-        std::cout << std::string(4, ' ') << "Solution \"" << simulation["Solution"].asString()
+        std::cout << std::string(4, ' ') << "Module \"" << simulation["Type"].asString()
                   << "\"\n";
+
+        std::cout << std::string(4, ' ') << "Solution \""
+                  << simulation["Solution"].asString() << "\"\n";
 
         auto const & [ mesh, material ] = simulation_mesh->second;
 
         solid::femMesh fem_mesh(mesh, material, mesh_data);
 
-        solid::femStaticMatrix fem_matrix(fem_mesh, simulation["LinearSolver"], simulation["Time"]);
+        solid::femStaticMatrix fem_matrix(fem_mesh,
+                                          Visualisation(root["Name"].asString(),
+                                                        fem_mesh,
+                                                        simulation["Visualisation"]),
+                                          simulation["LinearSolver"],
+                                          simulation["Time"]);
 
         fem_matrix.solve();
 
-        for (auto const& continued_simulation : multistep_simulations[simulation["Name"].asString()])
+        for (auto const& next_step : multistep_simulations[simulation["Name"].asString()])
         {
             std::cout << termcolor::bold << "\n"
                       << std::string(2, ' ') << "Simulating case \""
-                      << continued_simulation["Name"].asString() << "\"" << termcolor::reset
+                      << next_step["Name"].asString() << "\"" << termcolor::reset
                       << std::endl
                       << std::endl;
 
             // Update the mesh with an internal restart
-            fem_mesh.internal_restart(continued_simulation["Mesh"][0]);
+            fem_mesh.internal_restart(next_step["Mesh"][0]);
 
             // Update the matrix with the new time solution
-            fem_matrix.continuation(continued_simulation["Time"]);
+            fem_matrix.internal_restart(next_step["Time"]);
 
             fem_matrix.solve();
         }
@@ -215,7 +229,8 @@ void SimulationControl::build_simulation_tree()
 
     for (auto const & [ name, queue ] : multistep_simulations)
     {
-        std::cout << std::string(4, ' ') << "Simulation \"" << name << "\" is continued by:\n";
+        std::cout << std::string(4, ' ') << "Simulation \"" << name
+                  << "\" is continued by:\n";
         for (auto const& item : queue)
         {
             std::cout << "\t\"" << item["Name"].asString() << "\"" << std::endl;

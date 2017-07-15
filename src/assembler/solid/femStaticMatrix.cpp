@@ -11,9 +11,11 @@
 namespace neon::solid
 {
 femStaticMatrix::femStaticMatrix(femMesh& fem_mesh,
+                                 Visualisation&& visualisation,
                                  Json::Value const& solver_data,
                                  Json::Value const& increment_data)
     : fem_mesh(fem_mesh),
+      visualisation(std::move(visualisation)),
       adaptive_load(increment_data),
       fint(Vector::Zero(fem_mesh.active_dofs())),
       d(Vector::Zero(fem_mesh.active_dofs())),
@@ -23,7 +25,7 @@ femStaticMatrix::femStaticMatrix(femMesh& fem_mesh,
 
 femStaticMatrix::~femStaticMatrix() = default;
 
-void femStaticMatrix::continuation(Json::Value const& new_increment_data)
+void femStaticMatrix::internal_restart(Json::Value const& new_increment_data)
 {
     adaptive_load.reset(new_increment_data);
 }
@@ -68,8 +70,6 @@ void femStaticMatrix::solve()
     // Perform Newton-Raphson iterations
     std::cout << std::string(4, ' ') << "Non-linear equation system has "
               << fem_mesh.active_dofs() << " degrees of freedom\n";
-
-    if (adaptive_load.step() == 0) fem_mesh.write(0, 0.0);
 
     while (!adaptive_load.is_fully_applied())
     {
@@ -266,7 +266,7 @@ void femStaticMatrix::perform_equilibrium_iterations()
               << adaptive_load.step() << "\n";
 
     if (current_iteration != max_iterations)
-        fem_mesh.write(adaptive_load.step(), adaptive_load.time());
+        visualisation.write(adaptive_load.step(), adaptive_load.time());
 }
 
 void femStaticMatrix::print_convergence_progress(double const delta_d_norm,
