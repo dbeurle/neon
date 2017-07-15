@@ -51,10 +51,11 @@ protected:
 };
 
 template <typename Quadrature>
-void ShapeFunction<Quadrature>::compute_extrapolation_matrix(Matrix const N,
-                                                             Matrix const local_nodal_coordinates,
-                                                             Matrix const local_quadrature_coordinates,
-                                                             int const nodes_per_element)
+void ShapeFunction<Quadrature>::compute_extrapolation_matrix(
+    Matrix const N,
+    Matrix const local_nodal_coordinates,
+    Matrix const local_quadrature_coordinates,
+    int const nodes_per_element)
 {
     // Take short names for consistency with algorithm
     auto const n = nodes_per_element;
@@ -80,7 +81,9 @@ void ShapeFunction<Quadrature>::compute_extrapolation_matrix(Matrix const N,
     // Number of quadrature points are less than the number of nodes
     auto const xi_hat_plus = (xi_hat.transpose() * xi_hat).inverse() * xi_hat.transpose();
 
-    extrapolation = N_plus * (Matrix::Identity(m, m) - xi_hat * xi_hat_plus) + xi * xi_hat_plus;
+    Matrix3 const I = Matrix::Identity(m, m);
+
+    extrapolation = N_plus * (I - xi_hat * xi_hat_plus) + xi * xi_hat_plus;
 }
 
 using VolumeInterpolation = ShapeFunction<VolumeQuadrature>;
