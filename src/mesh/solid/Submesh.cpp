@@ -285,6 +285,9 @@ std::tuple<Vector, Vector> femSubmesh::nodal_averaged_variable(
 
     auto const& E = sf->local_quadrature_extrapolation();
 
+    // Vector format of values
+    Vector component = Vector::Zero(sf->quadrature().points());
+
     for (auto e = 0; e < elements(); ++e)
     {
         // Assemble these into the global value vector
@@ -294,15 +297,13 @@ std::tuple<Vector, Vector> femSubmesh::nodal_averaged_variable(
         {
             for (auto cj = 0; cj < 3; ++cj)
             {
-                // Vector format of values
-                Vector component = Vector::Zero(sf->quadrature().points());
-
                 for (auto l = 0; l < sf->quadrature().points(); ++l)
                 {
                     auto const& tensor = tensor_list[this->offset(e, l)];
                     component(l) = tensor(ci, cj);
                 }
-                Vector nodal_component = E * component;
+
+                Vector const nodal_component = E * component;
 
                 for (auto n = 0; n < nodal_component.rows(); n++)
                 {
