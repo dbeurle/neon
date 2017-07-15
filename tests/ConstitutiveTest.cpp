@@ -4,8 +4,9 @@
 #include <iostream>
 #include <json/json.h>
 
-#include "constitutive/Hyperelastic.hpp"
 #include "constitutive/InternalVariables.hpp"
+
+#include "constitutive/NeoHooke.hpp"
 
 using namespace neon;
 
