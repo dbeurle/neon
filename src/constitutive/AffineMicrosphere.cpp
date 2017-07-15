@@ -55,28 +55,28 @@ void AffineMicrosphere::update_internal_variables(double const Δt)
     auto const N = segments_per_chain;
 
 #pragma omp parallel for
-    for (auto l = 0; l < F_list.size(); ++l)
+    for (auto quadrature_point = 0; quadrature_point < F_list.size(); ++quadrature_point)
     {
-        auto const& F = F_list[l];
-        auto const& J = detF_list[l];
+        auto const& F = F_list[quadrature_point];
+        auto const& J = detF_list[quadrature_point];
 
         // Unimodular decomposition of F
         Matrix3 const unimodular_F = std::pow(J, -1.0 / 3.0) * F;
 
-        τ_list[l] = μ * unit_sphere.integrate(Matrix3::Zero(),
-                                              [&N, &unimodular_F](auto const& coordinates,
-                                                                  auto const& l) -> Matrix3 {
-                                                  auto const & [ r, r_outer_r ] = coordinates;
+        τ_list[quadrature_point] =
+            μ * unit_sphere.integrate(Matrix3::Zero(),
+                                      [&](auto const& coordinates, auto const& l) -> Matrix3 {
+                                          auto const & [ r, r_outer_r ] = coordinates;
 
-                                                  // Deformed tangents
-                                                  auto const t = unimodular_F * r;
+                                          // Deformed tangents
+                                          auto const t = unimodular_F * r;
 
-                                                  // Microstretches
-                                                  auto const λ = t.norm();
+                                          // Microstretches
+                                          auto const λ = t.norm();
 
-                                                  return (3.0 * N - std::pow(λ, 2)) /
-                                                         (N - std::pow(λ, 2)) * t * t.transpose();
-                                              });
+                                          return (3.0 * N - std::pow(λ, 2)) / (N - std::pow(λ, 2)) *
+                                                 t * t.transpose();
+                                      });
     }
 
     // Perform the projection of the stresses
@@ -97,11 +97,11 @@ void AffineMicrosphere::update_internal_variables(double const Δt)
     Matrix const I = fourth_order_identity();
 
 #pragma omp parallel for
-    for (auto l = 0; l < F_list.size(); ++l)
+    for (auto quadrature_point = 0; quadrature_point < F_list.size(); ++quadrature_point)
     {
-        auto const& F = F_list[l];
-        auto const& τ_dev = τ_list[l];
-        auto const& J = detF_list[l];
+        auto const& F = F_list[quadrature_point];
+        auto const& τ_dev = τ_list[quadrature_point];
+        auto const& J = detF_list[quadrature_point];
 
         auto const pressure = J * volumetric_free_energy_derivative(J, μ);
         auto const κ = std::pow(J, 2) * volumetric_free_energy_second_derivative(J, μ);
@@ -129,7 +129,8 @@ void AffineMicrosphere::update_internal_variables(double const Δt)
                                                   voigt(t * t.transpose()).transpose();
                                        });
 
-        D_list[l] = deviatoric_projection(D, τ_dev) + (κ + pressure) * IoI - 2.0 * pressure * I;
+        D_list[quadrature_point] =
+            deviatoric_projection(D, τ_dev) + (κ + pressure) * IoI - 2.0 * pressure * I;
     }
 }
 
