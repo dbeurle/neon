@@ -190,7 +190,7 @@ protected:
     std::unordered_map<Tensor, Tensors> tensors, tensors_old;
     std::unordered_map<Scalar, Scalars> scalars, scalars_old;
 
-    std::unordered_map<Matrix, Matrices> matrices, matrices_old;
+    std::unordered_map<Matrix, Matrices> matrices;
 
     std::size_t size;
 };
@@ -228,13 +228,11 @@ inline void InternalVariables::add(InternalVariables::Scalar name)
 inline void InternalVariables::add(InternalVariables::Matrix name, int rowcol)
 {
     matrices[name].resize(size, neon::Matrix::Zero(rowcol, rowcol));
-    matrices_old[name].resize(size, neon::Matrix::Zero(rowcol, rowcol));
 }
 
 inline void InternalVariables::add(InternalVariables::Matrix name, neon::Matrix init)
 {
     matrices[name].resize(size, init);
-    matrices_old[name].resize(size, init);
 }
 
 // Converged results
@@ -250,25 +248,17 @@ inline InternalVariables::Scalars const& InternalVariables::operator[](Scalar sc
     return scalars_old.find(scalarType)->second;
 }
 
-inline InternalVariables::Matrices const& InternalVariables::operator[](
-    InternalVariables::Matrix matrixType) const
-{
-    return matrices_old.find(matrixType)->second;
-}
-
 // Version control of internal state variables
 
 inline void InternalVariables::commit()
 {
     tensors_old = tensors;
     scalars_old = scalars;
-    matrices_old = matrices;
 }
 
 inline void InternalVariables::revert()
 {
     tensors = tensors_old;
     scalars = scalars_old;
-    matrices = matrices_old;
 }
 }
