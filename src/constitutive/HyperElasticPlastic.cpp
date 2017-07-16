@@ -176,7 +176,7 @@ Matrix J2Plasticity::algorithmic_tangent(double const α,
         0, 0, 0, 0, β * μ_e, 0,                             //
         0, 0, 0, 0, 0, β * μ_e;
 
-    C_alg -= 2.0 * μ_e * γ_bar * this->outer_product(normal);
+    C_alg -= 2.0 * μ_e * γ_bar * voigt(normal) * voigt(normal).transpose();
 
     return transformJaumannToTruesdellKirchoff(C_alg, σ, J);
 }
@@ -195,10 +195,5 @@ Matrix J2Plasticity::transformJaumannToTruesdellKirchoff(Matrix const C_τ_J,
                    σ(1, 0),       σ(0, 1),             0,             0.5 * σ(0, 2),             0.5 * σ(1, 2), 0.5 * (σ(0, 0) + σ(1, 1));
     // clang-format on
     return C_τ_J / J - Cdash;
-}
-
-Matrix J2Plasticity::outer_product(Matrix3 const& n) const
-{
-    return voigt(n) * voigt(n).transpose();
 }
 }

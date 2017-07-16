@@ -35,8 +35,6 @@ protected:
                                                Matrix3 const& σ,
                                                double const J) const;
 
-    Matrix outer_product(Matrix3 const& n) const;
-
     Matrix algorithmic_tangent(double const α,
                                Matrix3 const& σ,
                                Matrix3 const& σ_0,
