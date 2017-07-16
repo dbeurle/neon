@@ -32,9 +32,10 @@ void J2Plasticity::update_internal_variables(double const Δt)
     auto const λ_e = material.lambda();
 
     // Extract the internal variables
-    auto[ɛ_p_list, ɛ_list, σ_list] = variables(InternalVariables::Tensor::RateOfDeformationPlastic,
-                                               InternalVariables::Tensor::RateOfDeformation,
-                                               InternalVariables::Tensor::Cauchy);
+    auto[ɛ_p_list, ɛ_list, σ_list] =
+        variables(InternalVariables::Tensor::RateOfDeformationPlastic,
+                  InternalVariables::Tensor::RateOfDeformation,
+                  InternalVariables::Tensor::Cauchy);
 
     // Compute the linear strain gradient from the displacement gradient
     ɛ_list = variables(InternalVariables::Tensor::DisplacementGradient) |
