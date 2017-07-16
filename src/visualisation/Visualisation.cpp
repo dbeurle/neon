@@ -82,6 +82,7 @@ Visualisation::Visualisation(std::string file_name,
 
 Visualisation::~Visualisation()
 {
+    // Close off the last of the file for the timestepping
     pvd_file << std::string(2, ' ') << "</Collection>\n";
     pvd_file << "</VTKFile>\n";
     pvd_file.close();
