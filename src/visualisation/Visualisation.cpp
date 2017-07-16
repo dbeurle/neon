@@ -16,8 +16,6 @@
 #include "vtkInformation.h"
 #include "vtkInformationQuadratureSchemeDefinitionVectorKey.h"
 #include "vtkPointData.h"
-// #include "vtkPolyData.h"
-// #include "vtkPolyDataMapper.h"
 #include "vtkQuadraturePointsGenerator.h"
 #include "vtkQuadratureSchemeDefinition.h"
 #include "vtkUnstructuredGrid.h"
