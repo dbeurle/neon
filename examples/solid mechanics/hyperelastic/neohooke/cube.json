@@ -59,9 +59,9 @@
             "MaxIterations" : 1000,
             "MaxTolerance"  : 1.0e-6
         },
-        "Visualization" :
+        "Visualisation" :
         [{
-            "Fields" : ["Displacement", "CauchyStrain", "CauchyStress", "VonMises"]
+            "Fields" : ["Displacement", "CauchyStress"]
         }]
         }
     ]
