@@ -1,3 +1,4 @@
 *.vtu
 build/*
 doc/html
+doc/latex
