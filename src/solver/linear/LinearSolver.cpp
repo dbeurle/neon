@@ -46,7 +46,7 @@ void PaStiX::solve(const SparseMatrix& A, Vector& x, const Vector& b)
 {
     auto start = std::chrono::high_resolution_clock::now();
 
-    Eigen::PastixLU<Eigen::SparseMatrix<double>> pastix;
+    Eigen::PastixLLT<Eigen::SparseMatrix<double>, Eigen::Upper> pastix;
 
     // Verbosity
     pastix.iparm(3) = 1;
