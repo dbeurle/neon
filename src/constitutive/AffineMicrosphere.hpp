@@ -72,8 +72,8 @@ protected:
     Matrix const I = fourth_order_identity();
 
     double number_of_chains;
-    double constexpr boltzmann_constant = 1.38064852e-23;
-    double constexpr temperature = 298.0;
+    static double constexpr boltzmann_constant = 1.38064852e-23;
+    static double constexpr temperature = 298.0;
 
     double μ; //!< Shear modulus
 
