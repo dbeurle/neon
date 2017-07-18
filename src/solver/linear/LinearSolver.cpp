@@ -155,7 +155,8 @@ void MUMPS::solve(SparseMatrix const& A, Vector& x, Vector const& b)
     info.job = 1;
     MUMPSWrapper<double>::mumps_c(info);
 
-    if (info.info[0] < 0) throw std::runtime_error("Error in analysis phase of MUMPS solver\n");
+    if (info.info[0] < 0)
+        throw std::runtime_error("Error in analysis phase of MUMPS solver\n");
 
     // Factorization phase
     info.job = 2;
@@ -217,15 +218,17 @@ void pCG::solve(SparseMatrix const& A, Vector& x, const Vector& b)
 
     x = pcg.solveWithGuess(b, x);
 
-    std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << pcg.iterations()
-              << " (max. " << solverParam.max_iterations << "), estimated error: " << pcg.error()
+    std::cout << std::string(6, ' ')
+              << "Conjugate Gradient iterations: " << pcg.iterations() << " (max. "
+              << solverParam.max_iterations << "), estimated error: " << pcg.error()
               << " (min. " << solverParam.tolerance << ")\n";
 
     if (pcg.iterations() >= solverParam.max_iterations)
     {
-        throw std::runtime_error("Conjugate gradient solver maximum iterations reached.  Try "
-                                 "increasing the maximum number of iterations or use a different "
-                                 "solver\n");
+        throw std::runtime_error(
+            "Conjugate gradient solver maximum iterations reached.  Try "
+            "increasing the maximum number of iterations or use a different "
+            "solver\n");
     }
     // std::cout << "    Linear solver took " << elapsed_seconds.count() << "s\n";
 }
