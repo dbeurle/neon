@@ -61,14 +61,6 @@ void PaStiX::solve(const SparseMatrix& A, Vector& x, const Vector& b)
 
     x = pastix.solve(b);
 
-    std::cout << std::string(6, ' ') << "Analysis step " << pastix.dparm(18) << " seconds\n";
-    std::cout << std::string(6, ' ') << "Predicted factorisation time " << pastix.dparm(19) << "s\n";
-    std::cout << std::string(6, ' ') << "Factorisation " << pastix.dparm(20) << "s\n";
-    std::cout << std::string(6, ' ') << "Time for solve " << pastix.dparm(21) << "s\n";
-    std::cout << std::string(6, ' ') << "GigaFLOPS during factorisation "
-              << pastix.dparm(22) / 1.0e9 << "\n";
-    std::cout << std::string(6, ' ') << "MegaFLOPS during solve " << pastix.dparm(23) / 1.0e6 << "\n";
-
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
 }
