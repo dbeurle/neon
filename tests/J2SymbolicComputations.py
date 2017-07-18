@@ -35,10 +35,10 @@ for a in range(0, 3):
     for b in range(0, 3):
         k, l = voigt_map[b]
 
-        δik = float(i == k)
-        δjl = float(j == l)
-        δil = float(i == l)
-        δjk = float(j == k)
+        δik = int(i == k)
+        δjl = int(j == l)
+        δil = int(i == l)
+        δjk = int(j == k)
 
         Cdash[a, b] = Rational(1, 2) * (δik*σ[j,l] + δil*σ[j,k] + δjk*σ[i,l] + δjl*σ[i,k])
 
