@@ -32,6 +32,8 @@ LinearElastic::LinearElastic(Json::Value const& material_data) : Material(materi
     else
     {
         throw MaterialPropertyException("\"ElasticModulus\" and \"PoissonsRatio\" or "
-                                        "\"BulkModulus\" and \"ShearModulus\"");
+                                        "\"BulkModulus\" and \"ShearModulus\" need to be "
+                                        "specified as material properties");
     }
+}
 }
