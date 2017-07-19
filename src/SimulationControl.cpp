@@ -137,6 +137,10 @@ void SimulationControl::parse()
             throw std::runtime_error("A simulation case needs a \"Visualisation\" "
                                      "field\n");
 
+        if (!simulation.isMember("LinearSolver"))
+            throw std::runtime_error("A simulation case needs a \"LinearSolver\" "
+                                     "field\n");
+
         // Multiple meshes not supported
         assert(simulation["Mesh"].size() == 1);
 

@@ -1,5 +1,5 @@
 {
-    "Name" : "Toy cube model",
+    "Name" : "NeoHookeModel",
     "Cores" : 4,
     "Part": [{
         "Name" : "cube",
@@ -8,13 +8,21 @@
     }],
     "Material" : [{
         "Name" : "rubber",
-        "ElasticModulus" : 200.0e7,
+        "ElasticModulus" : 0.01e9,
         "PoissonsRatio" : 0.40
     }],
-    "Simulation" : [{
+    "SimulationCases" : [{
         "Name" : "Uniaxial",
 		"Type" : "SolidMechanics",
         "Solution" : "Equilibrium",
+        "Time" : {
+            "Period" : 1.0,
+            "Increments" : {
+                "Initial" : 0.1,
+                "Minimum" : 0.001,
+                "Maximum" : 1.0
+            }
+        },
 		"Mesh" :
         [{
             "Name" : "cube",
@@ -49,7 +57,7 @@
                 "Name" : "ZLoad",
 				"Type" : "Displacement",
                 "Values" : {
-                    "z" : 1.0
+                    "z" : 0.1
                 }
             }]
         }],
@@ -57,12 +65,11 @@
         {
 		    "Solver" : "pCG",
             "MaxIterations" : 1000,
-            "MaxTolerance"  : 1.0e-6
+            "Tolerance"  : 1.0e-6
         },
-        "Visualization" :
-        [{
-            "Fields" : ["Displacement", "CauchyStrain", "CauchyStress", "VonMises"]
-        }]
+        "Visualisation" :
+        {
+            "Fields" : ["Displacement", "DeformationGradient", "CauchyStress"]
         }
-    ]
+    }]
 }

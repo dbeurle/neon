@@ -1,4 +1,5 @@
-#define CATCH_CONFIG_MAIN // This tells Catch to provide a main() - only do this in one cpp file
+#define CATCH_CONFIG_MAIN // This tells Catch to provide a main() - only do this in one
+                          // cpp file
 #include "catch.hpp"
 
 #include <iostream>
@@ -6,23 +7,25 @@
 
 #include "constitutive/InternalVariables.hpp"
 
+#include "constitutive/AffineMicrosphere.hpp"
 #include "constitutive/NeoHooke.hpp"
 
 using namespace neon;
 
 std::string json_input_file()
 {
-    return "{\"Name\": \"steel\", \"ElasticModulus\": 1.0, \"PoissonsRatio\": 2.0}";
+    return "{\"Name\": \"rubber\", \"ElasticModulus\": 1.0, \"PoissonsRatio\": 2.0}";
 }
+
+constexpr auto internal_variable_size = 4;
 
 TEST_CASE("Neo-Hookean model", "[NeoHooke]")
 {
-    constexpr auto internal_variable_size = 4;
-
     InternalVariables variables(internal_variable_size);
 
     // Add the required variables for an updated Lagrangian formulation
-    variables.add(InternalVariables::Tensor::DeformationGradient, InternalVariables::Tensor::Cauchy);
+    variables.add(InternalVariables::Tensor::DeformationGradient,
+                  InternalVariables::Tensor::Cauchy);
     variables.add(InternalVariables::Scalar::DetF);
 
     // Create a json reader object from a string
@@ -36,8 +39,8 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
     NeoHooke neo_hooke(variables, material_data);
 
     // Get the tensor variables
-    auto[F_list, σ_list] =
-        variables(InternalVariables::Tensor::DeformationGradient, InternalVariables::Tensor::Cauchy);
+    auto[F_list, σ_list] = variables(InternalVariables::Tensor::DeformationGradient,
+                                     InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables(InternalVariables::Scalar::DetF);
 
@@ -78,22 +81,71 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
         }
     }
 }
-TEST_CASE("Affine microsphere model", "[AffineMicrosphere]") { REQUIRE(1 == 1); }
-
-TEST_CASE("J2 plasticity model", "[J2Plasticity]")
+TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
 {
-    // Compute dummy incremental deformation gradient
+    InternalVariables variables(internal_variable_size);
 
-    Matrix3 F;
-    F << 1.1, 0.0, 0.0, //
-        0.0, 1.0, 0.0,  //
-        0.0, 0.0, 1.0;
+    // Add the required variables for an updated Lagrangian formulation
+    variables.add(InternalVariables::Tensor::DeformationGradient,
+                  InternalVariables::Tensor::Cauchy);
 
-    Matrix3 const F_0 = Matrix3::Identity();
+    variables.add(InternalVariables::Scalar::DetF);
 
-    Matrix3 ΔF = F * F_0.inverse();
+    // Create a json reader object from a string
+    std::string input_data =
+        "{\"Name\": \"rubber\", \"ElasticModulus\": 1.0, \"PoissonsRatio\": 2.0, "
+        "\"SegmentsPerChain\" : 25}";
 
-    std::cout << "ΔF \n" << ΔF << std::endl;
+    Json::Value material_data;
+    Json::Reader reader;
 
-    REQUIRE((F - ΔF).norm() == 0);
+    REQUIRE(reader.parse(input_data.c_str(), material_data));
+
+    AffineMicrosphere affine(variables, material_data);
+
+    // Get the tensor variables
+    auto[F_list, σ_list] = variables(InternalVariables::Tensor::DeformationGradient,
+                                     InternalVariables::Tensor::Cauchy);
+
+    auto& J_list = variables(InternalVariables::Scalar::DetF);
+
+    for (auto& J : J_list) J = 1.0;
+
+    auto& material_tangents = variables(InternalVariables::Matrix::TruesdellModuli);
+
+    SECTION("Affine model under no load")
+    {
+        // Fill with identity matrix
+        for (auto& F : F_list) F = Matrix3::Identity();
+
+        affine.update_internal_variables(1.0);
+
+        // Ensure symmetry is correct
+        for (auto const& C : material_tangents)
+        {
+            REQUIRE((C - C.transpose()).norm() == Approx(0.0));
+        }
+
+        for (auto& σ : σ_list) REQUIRE(σ.norm() == Approx(0.0));
+    }
+    SECTION("Affine model under uniaxial load")
+    {
+        for (auto& F : F_list)
+        {
+            F(0, 0) = 1.1;
+            F(1, 1) = 1.0 / std::sqrt(1.1);
+            F(2, 2) = 1.0 / std::sqrt(1.1);
+        }
+
+        affine.update_internal_variables(1.0);
+
+        // Ensure symmetry is correct
+        for (auto const& C : material_tangents)
+        {
+            REQUIRE((C - C.transpose()).norm() == Approx(0.0));
+        }
+
+        for (auto& σ : σ_list) REQUIRE(σ.norm() != Approx(0.0));
+    }
 }
+TEST_CASE("J2 plasticity model", "[J2Plasticity]") { REQUIRE(0 == 0); }

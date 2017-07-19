@@ -12,7 +12,7 @@ class LinearElastic : public Material
 public:
     LinearElastic(Json::Value const& material_data);
 
-    /** @return The elastic modulus */
+    /** @return Elastic modulus */
     auto elastic_modulus() const { return E; }
 
     /** @return The Poisson's ratio */
@@ -24,8 +24,10 @@ public:
     /** Compute the Lame parameter \f[ \lambda = \frac{\nu E}{(1+\nu)(1-2\nu)} \f] */
     auto lambda() const { return E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu)); }
 
+    /** @return Bulk modulus \sa lambda \sa mu */
     auto bulk_modulus() const { return lambda() + 2.0 / 3.0 * mu(); }
 
+    /** @return Shear modulus \sa mu */
     auto shear_modulus() const { return mu(); }
 
     /** @return a pair of Lame's parameters with lambda and mu respectively */

@@ -8,8 +8,8 @@
     }],
     "Material" : [{
         "Name" : "rubber",
-        "ElasticModulus" : 1.0e6,
-        "PoissonsRatio" : 0.48,
+        "ElasticModulus" : 10.0e6,
+        "PoissonsRatio" : 0.46,
         "SegmentsPerChain": 25,
         "ChainDecayRate" : 1.0e-7
     }],
@@ -64,20 +64,18 @@
 				"Type" : "Displacement",
                 "LoadVariation" : "Ramp",
                 "Values" : {
-                    "z" : 1.0e-2
+                    "z" : 0.05
                 }
             }]
         }],
-		"LinearSolver" :
-        {
-		    "Solver" : "pCG",
+		"LinearSolver" : {
+		    "Solver" : "Pastix",
             "MaxIterations" : 1000,
-            "MaxTolerance"  : 1.0e-8
+            "Tolerance"  : 1.0e-8
         },
-        "Visualisation" :
-        [{
-            "Fields" : ["Displacement", "CauchyStress"]
-        }]
+        "Visualisation" : {
+            "Fields" : ["Displacement", "DeformationGradient", "CauchyStress"]
+        }
     },
     {
         "Name" : "Relaxation",
@@ -95,6 +93,11 @@
         [{
             "Name" : "cube"
         }],
+        "LinearSolver" : {
+		    "Solver" : "pCG",
+            "MaxIterations" : 1000,
+            "Tolerance"  : 1.0e-8
+        },
         "Visualisation" :
         [{
             "Fields" : ["Displacement", "CauchyStress"]
@@ -145,6 +148,11 @@
                 }
             }]
         }],
+        "LinearSolver" : {
+		    "Solver" : "pCG",
+            "MaxIterations" : 1000,
+            "Tolerance"  : 1.0e-8
+        },
         "Visualisation" :
         [{
             "Fields" : ["Displacement", "CauchyStress"]

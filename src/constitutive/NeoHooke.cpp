@@ -39,6 +39,7 @@ void NeoHooke::update_internal_variables(double const Δt)
             // Left Cauchy Green deformation tensor
             auto const B = F * F.transpose();
 
+            // Compute Kirchhoff stress and transform to Cauchy
             return (λ0 * std::log(J) * I + μ0 * (B - I)) / J;
         });
 

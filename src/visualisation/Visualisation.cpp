@@ -36,7 +36,9 @@ Visualisation::Visualisation(std::string file_name,
     pvd_file.open(file_name + ".pvd");
 
     if (!pvd_file.is_open())
+    {
         throw std::runtime_error("Not able to write to disk for visualisation\n");
+    }
 
     pvd_file << "<?xml version=\"1.0\"?>\n";
     pvd_file << "<VTKFile type=\"Collection\" version=\"0.1\">\n";
@@ -69,6 +71,7 @@ Visualisation::Visualisation(std::string file_name,
             }
         }
     }
+
     if (visualisation_data.isMember("WriteEvery"))
     {
         write_every = visualisation_data["WriteEvery"].asInt();

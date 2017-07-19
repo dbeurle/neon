@@ -1,6 +1,9 @@
 
 #include "LinearSolver.hpp"
 
+#include "MUMPS.hpp"
+#include "Pastix.hpp"
+
 #include <exception>
 #include <memory>
 
@@ -26,19 +29,19 @@ std::unique_ptr<LinearSolver> make_linear_solver(Json::Value const& solver_data)
     }
     else if (solver_name == "pCG")
     {
-        if (not solver_data["Tolerance"].empty() and not solver_data["MaxIterations"].empty())
+        if (solver_data.isMember("Tolerance") && solver_data.isMember("MaxIterations"))
         {
             return std::make_unique<pCG>(solver_data["Tolerance"].asDouble(),
                                          solver_data["MaxIterations"].asInt());
         }
-        else if (not solver_data["Tolerance"].empty())
+        else if (solver_data.isMember("Tolerance"))
         {
             // todo add messages in these statements to print out
             // to a file that other options have not been set
             // and explain how to set them
             return std::make_unique<pCG>(solver_data["Tolerance"].asDouble());
         }
-        else if (not solver_data["MaxIterations"].empty())
+        else if (solver_data.isMember("MaxIterations"))
         {
             return std::make_unique<pCG>(solver_data["MaxIterations"].asInt());
         }
@@ -49,7 +52,8 @@ std::unique_ptr<LinearSolver> make_linear_solver(Json::Value const& solver_data)
     }
     else if (solver_name == "BiCGStab")
     {
-        if (not solver_data["Tolerance"].empty() and not solver_data["MaxIterations"].empty())
+        if (not solver_data["Tolerance"].empty() and
+            not solver_data["MaxIterations"].empty())
         {
             return std::make_unique<BiCGSTAB>(solver_data["Tolerance"].asDouble(),
                                               solver_data["MaxIterations"].asInt());
