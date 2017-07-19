@@ -37,24 +37,6 @@ protected:
 };
 
 /**
- * PaStiX is a supernodal direct solver with multithreading support
- */
-class PaStiX : public LinearSolver
-{
-public:
-    void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
-};
-
-/**
- * MUMPS is a multifrontal direct solver
- */
-class MUMPS : public LinearSolver
-{
-public:
-    void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
-};
-
-/**
  * SparseLU is a single threaded sparse LU factorization using AMD reordering.
  * This solver is not recommended over the industrial grade solver PaStiX when
  * using a direct solver except for small problems or when PaStiX is not available
@@ -78,9 +60,9 @@ class pCG : public LinearSolver
 {
 public:
     pCG() = default;
-    pCG(double tol);
+    pCG(double residual_tolerance);
     pCG(int maxIter);
-    pCG(double tol, int maxIter);
+    pCG(double residual_tolerance, int maxIter);
 
     void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
 };
@@ -98,9 +80,9 @@ class BiCGSTAB : public LinearSolver
 {
 public:
     BiCGSTAB() = default;
-    BiCGSTAB(double tol);
+    BiCGSTAB(double residual_tolerance);
     BiCGSTAB(int maxIter);
-    BiCGSTAB(double tol, int maxIter);
+    BiCGSTAB(double residual_tolerance, int maxIter);
 
     void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
 };

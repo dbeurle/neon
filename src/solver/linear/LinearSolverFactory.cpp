@@ -1,6 +1,9 @@
 
 #include "LinearSolver.hpp"
 
+#include "MUMPS.hpp"
+#include "Pastix.hpp"
+
 #include <exception>
 #include <memory>
 
