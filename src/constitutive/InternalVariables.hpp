@@ -41,6 +41,7 @@ public:
     };
 
     enum class Scalar {
+        Chains, // Chains for the micromechanical model
         VonMisesStress,
         EffectivePlasticStrain,
         DetF0, // Reference Jacobian determinant
