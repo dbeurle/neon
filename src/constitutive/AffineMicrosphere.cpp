@@ -17,24 +17,16 @@ AffineMicrosphere::AffineMicrosphere(InternalVariables& variables,
                                      Json::Value const& material_data)
     : Hyperelastic(variables), material(material_data)
 {
-    if (material_data["SegmentsPerChain"].empty())
-        throw std::runtime_error("SegmentsPerChain not specified in material data\n");
-
-    if (!material_data["ChainDecayRate"].empty())
-    {
-        chain_decay_rate = material_data["ChainDecayRate"].asDouble();
-    }
-
-    // auto const μ0 = material.shear_modulus();
-
-    // number_of_chains = μ0 / (boltzmann_constant * temperature);
-
-    // segments_per_chain = material_data["SegmentsPerChain"].asInt();
-
     variables.add(InternalVariables::Matrix::TruesdellModuli, 6);
 
     // Deviatoric stress
     variables.add(InternalVariables::Tensor::Kirchhoff);
+    variables.add(InternalVariables::Scalar::Chains);
+
+    for (auto& n : variables(InternalVariables::Scalar::Chains))
+    {
+        n = material.number_of_chains();
+    }
 }
 
 void AffineMicrosphere::update_internal_variables(double const Δt)
@@ -47,21 +39,22 @@ void AffineMicrosphere::update_internal_variables(double const Δt)
     auto& τ_list = variables(InternalVariables::Tensor::Kirchhoff);
 
     auto const& detF_list = variables(InternalVariables::Scalar::DetF);
+    auto& n_list = variables(InternalVariables::Scalar::Chains);
 
-    // Decay the number of chains available
-    // number_of_chains *= 1.0 / (1.0 + chain_decay_rate * Δt);
+    auto const N = material.segments_per_chain();
 
-    // μ = number_of_chains * boltzmann_constant * temperature;
-
-    auto const N = segments_per_chain;
-
-    auto const μ = material.shear_modulus();
+    // Update the number of chains in the network
+    n_list = n_list | view::transform([&](auto const& n) {
+                 return material.evolve_chains(n, Δt);
+             });
 
 #pragma omp parallel for
     for (auto l = 0; l < F_list.size(); ++l)
     {
         auto const& F = F_list[l];
         auto const& J = detF_list[l];
+
+        auto const μ = material.shear_modulus(n_list[l]);
 
         // Unimodular decomposition of F
         Matrix3 const unimodular_F = std::pow(J, -1.0 / 3.0) * F;
@@ -84,10 +77,12 @@ void AffineMicrosphere::update_internal_variables(double const Δt)
     }
 
     // Perform the projection of the stresses
-    σ_list = view::zip(τ_list, detF_list)
-             | view::transform([&, this](auto const& τdetF) -> Matrix3 {
+    σ_list = view::zip(τ_list, detF_list, n_list)
+             | view::transform([&, this](auto const& tpl) -> Matrix3 {
 
-                   auto const & [ τ_dev, J ] = τdetF;
+                   auto const & [ τ_dev, J, n ] = tpl;
+
+                   auto const μ = material.shear_modulus(n);
 
                    auto const pressure = J * volumetric_free_energy_derivative(J, μ);
 
@@ -103,6 +98,8 @@ void AffineMicrosphere::update_internal_variables(double const Δt)
         auto const& F = F_list[l];
         auto const& τ_dev = τ_list[l];
         auto const& J = detF_list[l];
+
+        auto const μ = material.shear_modulus(n_list[l]);
 
         auto const pressure = J * volumetric_free_energy_derivative(J, μ);
         auto const κ = std::pow(J, 2) * volumetric_free_energy_second_derivative(J, μ);
