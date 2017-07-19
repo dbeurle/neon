@@ -51,6 +51,7 @@ void AffineMicrosphere::update_internal_variables(double const Δt)
 #pragma omp parallel for
     for (auto l = 0; l < F_list.size(); ++l)
     {
+        auto& τ = τ_list[l];
         auto const& F = F_list[l];
         auto const& J = detF_list[l];
 
@@ -60,13 +61,13 @@ void AffineMicrosphere::update_internal_variables(double const Δt)
         Matrix3 const unimodular_F = std::pow(J, -1.0 / 3.0) * F;
 
         // clang-format off
-        τ_list[l] = μ * unit_sphere.integrate(Matrix3::Zero(),
-                                              [&](auto const& coordinates,
-                                                  auto const& l) -> Matrix3 {
+        τ = μ * unit_sphere.integrate(Matrix3::Zero(),
+                                      [&](auto const& coordinates,
+                                          auto const& l) -> Matrix3 {
                             auto const & [ r, r_outer_r ] = coordinates;
 
                             // Deformed tangents
-                            auto const t = unimodular_F * r;
+                            Vector3 const t = unimodular_F * r;
 
                             // Microstretches
                             auto const λ = t.norm();
