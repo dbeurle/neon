@@ -140,10 +140,16 @@ public:
      *-------------------------------------------------------------*/
 
     /** Constant access to the non-converged scalar variables */
-    Scalars const& operator()(Scalar scalarType) const { return scalars.find(scalarType)->second; }
+    Scalars const& operator()(Scalar scalarType) const
+    {
+        return scalars.find(scalarType)->second;
+    }
 
     /** Non-mutable access to the non-converged tensor variables */
-    Tensors const& operator()(Tensor tensorType) const { return tensors.find(tensorType)->second; }
+    Tensors const& operator()(Tensor tensorType) const
+    {
+        return tensors.find(tensorType)->second;
+    }
 
     /** Non-mutable access to the non-converged matrix variables */
     Matrices const& operator()(Matrix matrixType) const
