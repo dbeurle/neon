@@ -3,7 +3,7 @@
 
 #include "Hyperelastic.hpp"
 
-#include "material/LinearElastic.hpp"
+#include "material/MicromechanicalElastomer.hpp"
 #include "numeric/Tensor.hpp"
 #include "quadrature/UnitSphereQuadrature.hpp"
 
@@ -48,6 +48,22 @@ protected:
                                                     double const bulk_modulus) const;
 
     /**
+     * Compute the Padé approximation of the inverse Langevin stretch model
+     * \f{align*}{
+         n \psi_f^{'}(\lambda) &= \frac{3N - \lambda^2}{N - \lambda^2}
+       }
+     */
+    double pade_first(double const λ, double const N) const;
+
+    /**
+     * Compute the Padé approximation of the inverse Langevin stretch model
+     * \f{align*}{
+         n \psi_f^{''}(\lambda) &= \frac{\lambda^4 + 3N^2}{(N - \lambda^2)^2}
+       }
+     */
+    double pade_second(double const λ, double const N) const;
+
+    /**
      *\f{align*}{
      * \boldsymbol{\tau} &= p \boldsymbol{g}^{-1} + \mathbb{P} : \bar{\boldsymbol{\tau}}
      * \f}
@@ -64,33 +80,36 @@ protected:
     Matrix deviatoric_projection(Matrix const& C_dev, Matrix3 const& τ_dev) const;
 
 protected:
-    LinearElastic material; //!< Elastic model where C1 = mu/2 and C2 = bulk-modulus / 2
+    MicromechanicalElastomer material;
 
     UnitSphereQuadrature unit_sphere;
 
     Matrix const IoI = I_outer_I();
     Matrix const I = fourth_order_identity();
 
-    double number_of_chains;
-    static double constexpr boltzmann_constant = 1.38064852e-23;
-    static double constexpr temperature = 298.0;
-
-    double μ; //!< Shear modulus
-
     double segments_per_chain = 0.0;
 
     double chain_decay_rate = 0.0;
 };
 
-inline double AffineMicrosphere::volumetric_free_energy_derivative(double const J,
-                                                                   double const bulk_modulus) const
+inline double AffineMicrosphere::volumetric_free_energy_derivative(
+    double const J, double const bulk_modulus) const
 {
     return bulk_modulus / 2.0 * (J - 1.0 / J);
 }
 inline double AffineMicrosphere::volumetric_free_energy_second_derivative(
-    double const J,
-    double const bulk_modulus) const
+    double const J, double const bulk_modulus) const
 {
     return bulk_modulus / 2.0 * (1.0 + 1.0 / std::pow(J, 2));
+}
+
+inline double AffineMicrosphere::pade_first(double const λ, double const N) const
+{
+    return (3.0 * N - std::pow(λ, 2)) / (N - std::pow(λ, 2));
+}
+
+inline double AffineMicrosphere::pade_second(double const λ, double const N) const
+{
+    return (std::pow(λ, 4) + 3 * std::pow(N, 2)) / std::pow(N - std::pow(λ, 2), 2);
 }
 }
