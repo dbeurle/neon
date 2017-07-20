@@ -150,76 +150,75 @@ Matrix3 AffineMicrosphere::deviatoric_projection(double const pressure,
 Matrix AffineMicrosphere::deviatoric_projection(Matrix const& C_dev,
                                                 Matrix3 const& τ_dev) const
 {
-    Matrix C(6, 6);
-    C << 1.0 / 9.0
-             * (4 * C_dev(0, 0) - 2 * C_dev(0, 1) - 2 * C_dev(0, 2) - 2 * C_dev(1, 0)
-                + C_dev(1, 1) + C_dev(1, 2) - 2 * C_dev(2, 0) + C_dev(2, 1) + C_dev(2, 2)
-                + 4 * τ_dev.trace()), //
-        1.0 / 9.0
-            * (-2 * C_dev(0, 0) + 4 * C_dev(0, 1) - 2 * C_dev(0, 2) + C_dev(1, 0)
-               - 2 * C_dev(1, 1) + C_dev(1, 2) + C_dev(2, 0) - 2 * C_dev(2, 1)
-               + C_dev(2, 2) - 2.0 * τ_dev.trace()), //
-        1.0 / 9.0
-            * (-2 * C_dev(0, 0) - 2 * C_dev(0, 1) + 4 * C_dev(0, 2) + C_dev(1, 0)
-               + C_dev(1, 1) - 2 * C_dev(1, 2) + C_dev(2, 0) + C_dev(2, 1)
-               - 2 * C_dev(2, 2) - 2.0 * τ_dev.trace()),       //
-        2.0 / 3.0 * (C_dev(0, 3) - C_dev(1, 3) - C_dev(2, 3)), //
-        2.0 / 3.0 * (C_dev(0, 4) - C_dev(1, 4) - C_dev(2, 4)), //
-        2.0 / 3.0 * (C_dev(0, 5) - C_dev(1, 5) - C_dev(2, 5)), //
+    return (Matrix(6, 6) << 1.0 / 9.0
+                                * (4 * C_dev(0, 0) - 2 * C_dev(0, 1) - 2 * C_dev(0, 2)
+                                   - 2 * C_dev(1, 0) + C_dev(1, 1) + C_dev(1, 2)
+                                   - 2 * C_dev(2, 0) + C_dev(2, 1) + C_dev(2, 2)
+                                   + 4 * τ_dev.trace()), //
+            1.0 / 9.0
+                * (-2 * C_dev(0, 0) + 4 * C_dev(0, 1) - 2 * C_dev(0, 2) + C_dev(1, 0)
+                   - 2 * C_dev(1, 1) + C_dev(1, 2) + C_dev(2, 0) - 2 * C_dev(2, 1)
+                   + C_dev(2, 2) - 2.0 * τ_dev.trace()), //
+            1.0 / 9.0
+                * (-2 * C_dev(0, 0) - 2 * C_dev(0, 1) + 4 * C_dev(0, 2) + C_dev(1, 0)
+                   + C_dev(1, 1) - 2 * C_dev(1, 2) + C_dev(2, 0) + C_dev(2, 1)
+                   - 2 * C_dev(2, 2) - 2.0 * τ_dev.trace()),       //
+            2.0 / 3.0 * (C_dev(0, 3) - C_dev(1, 3) - C_dev(2, 3)), //
+            2.0 / 3.0 * (C_dev(0, 4) - C_dev(1, 4) - C_dev(2, 4)), //
+            2.0 / 3.0 * (C_dev(0, 5) - C_dev(1, 5) - C_dev(2, 5)), //
 
-        1.0 / 9.0
-            * (-2 * C_dev(0, 0) + C_dev(0, 1) + C_dev(0, 2) + 4 * C_dev(1, 0)
-               - 2 * C_dev(1, 1) - 2 * C_dev(1, 2) - 2 * C_dev(2, 0) + C_dev(2, 1)
-               + C_dev(2, 2) - 2.0 * τ_dev.trace()), //
-        1.0 / 9.0
-            * (C_dev(0, 0) - 2 * C_dev(0, 1) + C_dev(0, 2) - 2 * C_dev(1, 0)
-               + 4 * C_dev(1, 1) - 2 * C_dev(1, 2) + C_dev(2, 0) - 2 * C_dev(2, 1)
-               + C_dev(2, 2) + 4 * τ_dev.trace()), //
-        1.0 / 9.0
-            * (C_dev(0, 0) + C_dev(0, 1) - 2 * C_dev(0, 2) - 2 * C_dev(1, 0)
-               - 2 * C_dev(1, 1) + 4 * C_dev(1, 2) + C_dev(2, 0) + C_dev(2, 1)
-               - 2 * C_dev(2, 2) - 2.0 * τ_dev.trace()),            //
-        1.0 / 3.0 * (-C_dev(0, 3) + 2 * C_dev(1, 3) - C_dev(2, 3)), //
-        1.0 / 3.0 * (-C_dev(0, 4) + 2 * C_dev(1, 4) - C_dev(2, 4)), //
-        1.0 / 3.0 * (-C_dev(0, 5) + 2 * C_dev(1, 5) - C_dev(2, 5)), //
+            1.0 / 9.0
+                * (-2 * C_dev(0, 0) + C_dev(0, 1) + C_dev(0, 2) + 4 * C_dev(1, 0)
+                   - 2 * C_dev(1, 1) - 2 * C_dev(1, 2) - 2 * C_dev(2, 0) + C_dev(2, 1)
+                   + C_dev(2, 2) - 2.0 * τ_dev.trace()), //
+            1.0 / 9.0
+                * (C_dev(0, 0) - 2 * C_dev(0, 1) + C_dev(0, 2) - 2 * C_dev(1, 0)
+                   + 4 * C_dev(1, 1) - 2 * C_dev(1, 2) + C_dev(2, 0) - 2 * C_dev(2, 1)
+                   + C_dev(2, 2) + 4 * τ_dev.trace()), //
+            1.0 / 9.0
+                * (C_dev(0, 0) + C_dev(0, 1) - 2 * C_dev(0, 2) - 2 * C_dev(1, 0)
+                   - 2 * C_dev(1, 1) + 4 * C_dev(1, 2) + C_dev(2, 0) + C_dev(2, 1)
+                   - 2 * C_dev(2, 2) - 2.0 * τ_dev.trace()),            //
+            1.0 / 3.0 * (-C_dev(0, 3) + 2 * C_dev(1, 3) - C_dev(2, 3)), //
+            1.0 / 3.0 * (-C_dev(0, 4) + 2 * C_dev(1, 4) - C_dev(2, 4)), //
+            1.0 / 3.0 * (-C_dev(0, 5) + 2 * C_dev(1, 5) - C_dev(2, 5)), //
 
-        1.0 / 9.0
-            * (-2 * C_dev(0, 0) + C_dev(0, 1) + C_dev(0, 2) - 2 * C_dev(1, 0)
-               + C_dev(1, 1) + C_dev(1, 2) + 4 * C_dev(2, 0) - 2 * C_dev(2, 1)
-               - 2 * C_dev(2, 2) - 2.0 * τ_dev.trace()), //
-        1.0 / 9.0
-            * (C_dev(0, 0) - 2 * C_dev(0, 1) + C_dev(0, 2) + C_dev(1, 0) - 2 * C_dev(1, 1)
-               + C_dev(1, 2) - 2 * C_dev(2, 0) + 4 * C_dev(2, 1) - 2 * C_dev(2, 2)
-               - 2.0 * τ_dev.trace()), //
-        1.0 / 9.0
-            * (C_dev(0, 0) + C_dev(0, 1) - 2 * C_dev(0, 2) + C_dev(1, 0) + C_dev(1, 1)
-               - 2 * C_dev(1, 2) - 2 * C_dev(2, 0) - 2 * C_dev(2, 1) + 4 * C_dev(2, 2)
-               + 4 * τ_dev.trace()),                                //
-        1.0 / 3.0 * (-C_dev(0, 3) - C_dev(1, 3) + 2 * C_dev(2, 3)), //
-        1.0 / 3.0 * (-C_dev(0, 4) - C_dev(1, 4) + 2 * C_dev(2, 4)), //
-        1.0 / 3.0 * (-C_dev(0, 5) - C_dev(1, 5) + 2 * C_dev(2, 5)), //
+            1.0 / 9.0
+                * (-2 * C_dev(0, 0) + C_dev(0, 1) + C_dev(0, 2) - 2 * C_dev(1, 0)
+                   + C_dev(1, 1) + C_dev(1, 2) + 4 * C_dev(2, 0) - 2 * C_dev(2, 1)
+                   - 2 * C_dev(2, 2) - 2.0 * τ_dev.trace()), //
+            1.0 / 9.0
+                * (C_dev(0, 0) - 2 * C_dev(0, 1) + C_dev(0, 2) + C_dev(1, 0)
+                   - 2 * C_dev(1, 1) + C_dev(1, 2) - 2 * C_dev(2, 0) + 4 * C_dev(2, 1)
+                   - 2 * C_dev(2, 2) - 2.0 * τ_dev.trace()), //
+            1.0 / 9.0
+                * (C_dev(0, 0) + C_dev(0, 1) - 2 * C_dev(0, 2) + C_dev(1, 0) + C_dev(1, 1)
+                   - 2 * C_dev(1, 2) - 2 * C_dev(2, 0) - 2 * C_dev(2, 1) + 4 * C_dev(2, 2)
+                   + 4 * τ_dev.trace()),                                //
+            1.0 / 3.0 * (-C_dev(0, 3) - C_dev(1, 3) + 2 * C_dev(2, 3)), //
+            1.0 / 3.0 * (-C_dev(0, 4) - C_dev(1, 4) + 2 * C_dev(2, 4)), //
+            1.0 / 3.0 * (-C_dev(0, 5) - C_dev(1, 5) + 2 * C_dev(2, 5)), //
 
-        1.0 / 3.0 * (2 * C_dev(3, 0) - C_dev(3, 1) - C_dev(3, 2)),  //
-        1.0 / 3.0 * (-C_dev(3, 0) + 2 * C_dev(3, 1) - C_dev(3, 2)), //
-        1.0 / 3.0 * (-C_dev(3, 0) - C_dev(3, 1) + 2 * C_dev(3, 2)), //
-        C_dev(3, 3) + τ_dev.trace() / 3.0,                          //
-        C_dev(3, 4),                                                //
-        C_dev(3, 5),                                                //
+            1.0 / 3.0 * (2 * C_dev(3, 0) - C_dev(3, 1) - C_dev(3, 2)),  //
+            1.0 / 3.0 * (-C_dev(3, 0) + 2 * C_dev(3, 1) - C_dev(3, 2)), //
+            1.0 / 3.0 * (-C_dev(3, 0) - C_dev(3, 1) + 2 * C_dev(3, 2)), //
+            C_dev(3, 3) + τ_dev.trace() / 3.0,                          //
+            C_dev(3, 4),                                                //
+            C_dev(3, 5),                                                //
 
-        1.0 / 3.0 * (2 * C_dev(4, 0) - C_dev(4, 1) - C_dev(4, 2)),  //
-        1.0 / 3.0 * (-C_dev(4, 0) + 2 * C_dev(4, 1) - C_dev(4, 2)), //
-        1.0 / 3.0 * (-C_dev(4, 0) - C_dev(4, 1) + 2 * C_dev(4, 2)), //
-        C_dev(4, 3),                                                //
-        C_dev(4, 4) + τ_dev.trace() / 3.0,                          //
-        C_dev(4, 5),                                                //
+            1.0 / 3.0 * (2 * C_dev(4, 0) - C_dev(4, 1) - C_dev(4, 2)),  //
+            1.0 / 3.0 * (-C_dev(4, 0) + 2 * C_dev(4, 1) - C_dev(4, 2)), //
+            1.0 / 3.0 * (-C_dev(4, 0) - C_dev(4, 1) + 2 * C_dev(4, 2)), //
+            C_dev(4, 3),                                                //
+            C_dev(4, 4) + τ_dev.trace() / 3.0,                          //
+            C_dev(4, 5),                                                //
 
-        1.0 / 3.0 * (2 * C_dev(5, 0) - C_dev(5, 1) - C_dev(5, 2)),  //
-        1.0 / 3.0 * (-C_dev(5, 0) + 2 * C_dev(5, 1) - C_dev(5, 2)), //
-        1.0 / 3.0 * (-C_dev(5, 0) - C_dev(5, 1) + 2 * C_dev(5, 2)), //
-        C_dev(5, 3),                                                //
-        C_dev(5, 4),                                                //
-        C_dev(5, 5) + τ_dev.trace() / 3.0;                          //
-
-    return C;
+            1.0 / 3.0 * (2 * C_dev(5, 0) - C_dev(5, 1) - C_dev(5, 2)),  //
+            1.0 / 3.0 * (-C_dev(5, 0) + 2 * C_dev(5, 1) - C_dev(5, 2)), //
+            1.0 / 3.0 * (-C_dev(5, 0) - C_dev(5, 1) + 2 * C_dev(5, 2)), //
+            C_dev(5, 3),                                                //
+            C_dev(5, 4),                                                //
+            C_dev(5, 5) + τ_dev.trace() / 3.0)
+        .finished();
 }
 }
