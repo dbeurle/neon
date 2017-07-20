@@ -27,10 +27,7 @@ public:
      * @param n number of chains
      * @return the time varying shear modulus
      */
-    double shear_modulus(double const n) const
-    {
-        return n * boltzmann_constant * temperature;
-    }
+    double shear_modulus(double const n) const;
 
     double number_of_chains() const { return n0; }
 
@@ -47,6 +44,11 @@ protected:
     double const boltzmann_constant = 1.38064852e-23;
     double const temperature = 298.0;
 };
+
+inline double MicromechanicalElastomer::shear_modulus(double const n) const
+{
+    return n * boltzmann_constant * temperature;
+}
 
 inline double MicromechanicalElastomer::evolve_chains(double const n, double const Δt) const
 {
