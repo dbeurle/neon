@@ -37,6 +37,7 @@ find_package(MUMPS REQUIRED)
 include_directories(${MUMPS_INCLUDE_DIR})
 
 find_package(Jsoncpp REQUIRED)
+include_directories(${JSONCPP_INCLUDE_PREFIX})
 
 include_directories("${CMAKE_SOURCE_DIR}/src")
 
