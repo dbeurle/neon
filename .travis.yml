@@ -7,7 +7,7 @@ compiler: clang
 
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install vtk-devel -y
+  - sudo apt-get install lvtk-dev
 
 matrix:
     include:
@@ -30,6 +30,7 @@ matrix:
                   - clang-5.0
           env:
             - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
+
 addons:
     apt:
         sources:
