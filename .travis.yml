@@ -39,7 +39,7 @@ addons:
 
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install libvtk6-dev libboost-all-dev -y
+  - sudo apt-get install libvtk6-dev libboost-all-dev libmumps-seq-dev -y
   - eval "${MATRIX_EVAL}"
 
 
