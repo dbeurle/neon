@@ -18,15 +18,15 @@ matrix:
           env:
               - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
 
-        - os: linux
-          addons:
-            apt:
-              sources:
-                  - llvm-toolchain-trusty
-              packages:
-                  - clang-5.0
-          env:
-            - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
+        # - os: linux
+        #   addons:
+        #     apt:
+        #       sources:
+        #           - llvm-toolchain-trusty
+        #       packages:
+        #           - clang-5.0
+        #   env:
+        #     - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
 
 addons:
     apt:
