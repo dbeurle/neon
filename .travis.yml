@@ -1,0 +1,6 @@
+
+langauge: cpp
+
+sudo: required
+
+compiler: clang
