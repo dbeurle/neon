@@ -3,10 +3,6 @@ language: cpp
 
 sudo: required
 
-before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install libvtk6-dev
-
 matrix:
     include:
         - os: linux
@@ -36,6 +32,11 @@ addons:
         packages:
             - cmake-data
             - cmake
+
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install libvtk6-dev libboost-all-dev -y
+  - eval "${MATRIX_EVAL}"
 
 before_script:
     - mkdir build
