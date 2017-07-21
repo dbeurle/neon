@@ -38,7 +38,7 @@ before_install:
   # Other deps
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   - sudo apt-get -qq update
-  - sudo apt-get install g++-6 libvtk6-dev libboost-all-dev libmumps-seq-dev libjsoncpp-dev -y
+  - sudo apt-get install g++-6 libgcc-6-dev libvtk6-dev libboost-all-dev libmumps-seq-dev libjsoncpp-dev -y
   - eval "${MATRIX_EVAL}"
 
 before_script:
