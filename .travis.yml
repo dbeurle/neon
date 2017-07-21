@@ -3,6 +3,9 @@ language: cpp
 
 sudo: required
 
+compiler:
+  - clang
+
 matrix:
     include:
         - os: linux
