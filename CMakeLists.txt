@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(neonfe CXX)
+project(neonfe CC CXX)
 
 set(EXT_PROJECTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external")
 add_subdirectory(${EXT_PROJECTS_DIR}/catch)
