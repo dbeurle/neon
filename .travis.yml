@@ -42,6 +42,7 @@ addons:
             - cmake
 
 before_script:
+    - eval "${MATRIX_EVAL}"
     - mkdir build
     - cd build
     - cmake ..
