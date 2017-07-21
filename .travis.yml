@@ -5,6 +5,10 @@ sudo: required
 
 compiler: clang
 
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install vtk-devel -y
+
 matrix:
     include:
         - os: linux
