@@ -28,6 +28,11 @@ matrix:
         #   env:
         #     - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
 
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install libvtk6-dev libboost-all-dev -y
+  - eval "${MATRIX_EVAL}"
+
 addons:
     apt:
         sources:
@@ -35,11 +40,6 @@ addons:
         packages:
             - cmake-data
             - cmake
-
-before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install libvtk6-dev libboost-all-dev -y
-  - eval "${MATRIX_EVAL}"
 
 before_script:
     - mkdir build
