@@ -184,6 +184,8 @@ std::tuple<List const&, Vector> femSubmesh::diagonal_mass(int element) const
 
 void femSubmesh::update_internal_variables(double const Δt)
 {
+    std::feclearexcept(FE_ALL_EXCEPT);
+
     update_deformation_measures();
 
     update_Jacobian_determinants();
@@ -191,6 +193,11 @@ void femSubmesh::update_internal_variables(double const Δt)
     check_element_distortion();
 
     cm->update_internal_variables(Δt);
+
+    if (std::fetestexcept(FE_INVALID))
+    {
+        throw std::runtime_error("Floating point error reported\n");
+    }
 }
 
 void femSubmesh::update_deformation_measures()
