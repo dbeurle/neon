@@ -15,6 +15,8 @@
 #include <json/json.h>
 #include <range/v3/view.hpp>
 
+#include <cfenv>
+
 namespace neon::solid
 {
 femSubmesh::femSubmesh(Json::Value const& material_data,
@@ -79,23 +81,21 @@ Matrix femSubmesh::geometric_tangent_stiffness(Matrix const& x, int element) con
 
     auto n = nodes_per_element();
 
-    Matrix const kgeo =
-        sf->quadrature().integrate(Matrix::Zero(n, n),
-                                   [&](auto const& femval, auto const& l) -> Matrix {
-                                       auto const & [ N, rhea ] = femval;
+    Matrix const
+        kgeo = sf->quadrature()
+                   .integrate(Matrix::Zero(n, n),
+                              [&](auto const& femval, auto const& l) -> Matrix {
+                                  auto const & [ N, rhea ] = femval;
 
-                                       auto const Jacobian =
-                                           local_deformation_gradient(rhea, x);
+                                  auto const Jacobian = local_deformation_gradient(rhea, x);
 
-                                       Matrix3 const σ = σ_list[offset(element, l)];
+                                  Matrix3 const σ = σ_list[offset(element, l)];
 
-                                       // Compute the symmetric gradient operator
-                                       const auto L =
-                                           (rhea * Jacobian.inverse()).transpose();
+                                  // Compute the symmetric gradient operator
+                                  const auto L = (rhea * Jacobian.inverse()).transpose();
 
-                                       return L.transpose() * σ * L *
-                                              Jacobian.determinant();
-                                   });
+                                  return L.transpose() * σ * L * Jacobian.determinant();
+                              });
     return identity_expansion(kgeo, dofs_per_node());
 }
 
@@ -124,28 +124,27 @@ Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int element) cons
 
 Vector femSubmesh::internal_nodal_force(Matrix const& x, int element) const
 {
-    using RowMatrix =
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+    using RowMatrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
     auto const& σ_list = variables(InternalVariables::Tensor::Cauchy);
 
     auto const[m, n] = std::make_tuple(nodes_per_element(), dofs_per_node());
 
-    RowMatrix fint =
-        sf->quadrature().integrate(RowMatrix::Zero(m, n),
-                                   [&](auto const& femval, auto const& l) -> RowMatrix {
-                                       auto const & [ N, dN ] = femval;
+    RowMatrix fint = sf->quadrature()
+                         .integrate(RowMatrix::Zero(m, n),
+                                    [&](auto const& femval, auto const& l) -> RowMatrix {
+                                        auto const & [ N, dN ] = femval;
 
-                                       auto const Jacobian =
-                                           local_deformation_gradient(dN, x);
+                                        auto const Jacobian = local_deformation_gradient(dN,
+                                                                                         x);
 
-                                       auto const σ = σ_list[offset(element, l)];
+                                        auto const σ = σ_list[offset(element, l)];
 
-                                       // Compute the symmetric gradient operator
-                                       auto const Bt = dN * Jacobian.inverse();
+                                        // Compute the symmetric gradient operator
+                                        auto const Bt = dN * Jacobian.inverse();
 
-                                       return Bt * σ * Jacobian.determinant();
-                                   });
+                                        return Bt * σ * Jacobian.determinant();
+                                    });
     // Convert into a vector for the vector assembly operation
     return Eigen::Map<RowMatrix>(fint.data(), m * n, 1);
 }
@@ -156,17 +155,15 @@ std::tuple<List const&, Matrix> femSubmesh::consistent_mass(int element) const
 
     auto const ρ_0 = cm->intrinsic_material().initial_density();
 
-    auto m =
-        sf->quadrature().integrate(Matrix::Zero(nodes_per_element(), nodes_per_element()),
-                                   [&](auto const& femval, auto const& l) -> Matrix {
-                                       auto const & [ N, dN ] = femval;
+    auto m = sf->quadrature()
+                 .integrate(Matrix::Zero(nodes_per_element(), nodes_per_element()),
+                            [&](auto const& femval, auto const& l) -> Matrix {
+                                auto const & [ N, dN ] = femval;
 
-                                       auto const Jacobian =
-                                           local_deformation_gradient(dN, X);
+                                auto const Jacobian = local_deformation_gradient(dN, X);
 
-                                       return N * ρ_0 * N.transpose() *
-                                              Jacobian.determinant();
-                                   });
+                                return N * ρ_0 * N.transpose() * Jacobian.determinant();
+                            });
     return {local_dof_list(element), identity_expansion(m, dofs_per_node())};
 }
 
@@ -209,10 +206,8 @@ void femSubmesh::update_deformation_measures()
     for (auto element = 0; element < elements(); ++element)
     {
         // Gather the material coordinates
-        auto const X =
-            material_coordinates->initial_configuration(local_node_list(element));
-        auto const x =
-            material_coordinates->current_configuration(local_node_list(element));
+        auto const X = material_coordinates->initial_configuration(local_node_list(element));
+        auto const x = material_coordinates->current_configuration(local_node_list(element));
 
         sf->quadrature().for_each([&](auto const& femval, const auto& l) {
 
@@ -243,8 +238,8 @@ void femSubmesh::update_Jacobian_determinants()
 
     auto& detF_list = variables(InternalVariables::Scalar::DetF);
 
-    detF_list =
-        F_list | ranges::view::transform([](auto const& F) { return F.determinant(); });
+    detF_list = F_list
+                | ranges::view::transform([](auto const& F) { return F.determinant(); });
 }
 
 void femSubmesh::check_element_distortion() const
@@ -269,10 +264,10 @@ void femSubmesh::allocate_dof_list(int const nodal_dofs)
 
     dof_list = nodal_connectivity | view::transform([=](auto const& node_list) {
                    return view::for_each(node_list, [=](int const local_node) {
-                       return view::ints(0, nodal_dofs) |
-                              view::transform([=](int const nodal_dof) {
-                                  return local_node * nodal_dofs + nodal_dof;
-                              });
+                       return view::ints(0, nodal_dofs)
+                              | view::transform([=](int const nodal_dof) {
+                                    return local_node * nodal_dofs + nodal_dof;
+                                });
                    });
                });
 }
