@@ -3,6 +3,9 @@
 
 #include "LinearElastic.hpp"
 
+#include <cmath>
+#include <vector>
+
 namespace neon
 {
 /**
@@ -34,12 +37,19 @@ public:
     /** @return the current number of chains in the network */
     double evolve_chains(double const n, double const Δt) const;
 
+    auto const& segment_probability() const { return probability_segments_pairs; }
+
+protected:
+    void allocate_probability_and_segments();
+
 protected:
     double n0; // !< Initial number of chains
 
     double N; //!< Segments per chain
 
     double chain_decay_rate;
+
+    std::vector<std::pair<double, double>> probability_segments_pairs;
 
     double const boltzmann_constant = 1.38064852e-23;
     double const temperature = 298.0;
