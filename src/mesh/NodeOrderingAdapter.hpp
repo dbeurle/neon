@@ -6,7 +6,7 @@
 
 #include <unordered_map>
 
-#include <vtk/vtkCellType.h>
+#include <vtkCellType.h>
 
 namespace neon
 {
@@ -26,12 +26,13 @@ public:
     int to_vtk(ElementTopology element_topology) const;
 
 protected:
-    std::unordered_map<int, ElementTopology> gmsh_converter{{2, ElementTopology::Triangle3},
-                                                            {3, ElementTopology::Quadrilateral4},
-                                                            {4, ElementTopology::Tetrahedron4},
-                                                            {5, ElementTopology::Hexahedron8},
-                                                            {6, ElementTopology::Prism6},
-                                                            {9, ElementTopology::Triangle6}};
+    std::unordered_map<int, ElementTopology>
+        gmsh_converter{{2, ElementTopology::Triangle3},
+                       {3, ElementTopology::Quadrilateral4},
+                       {4, ElementTopology::Tetrahedron4},
+                       {5, ElementTopology::Hexahedron8},
+                       {6, ElementTopology::Prism6},
+                       {9, ElementTopology::Triangle6}};
 
     std::unordered_map<ElementTopology, int>
         vtk_converter{{ElementTopology::Triangle3, VTK_TRIANGLE},
