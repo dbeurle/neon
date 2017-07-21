@@ -45,7 +45,7 @@ before_install:
   - ./cmake-3.8.2-Linux-x86_64.sh --prefix=$HOME/usr --exclude-subdir --skip-license
   # Other deps
   - sudo apt-get -qq update
-  - sudo apt-get install libvtk6-dev libboost-all-dev libmumps-seq-dev libjsoncpp-dev -y
+  - sudo apt-get install g++-6 libvtk6-dev libboost-all-dev libmumps-seq-dev libjsoncpp-dev -y
   - eval "${MATRIX_EVAL}"
 
 
@@ -55,5 +55,6 @@ before_script:
     - mkdir build
     - cd build
     - cmake ..
+
 script:
     make all
