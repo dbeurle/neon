@@ -28,13 +28,13 @@ matrix:
         #   env:
         #     - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
 
-addons:
-    apt:
-        sources:
-            - george-edison55-precise-backports
-        packages:
-            - cmake-data
-            - cmake
+# addons:
+#     apt:
+#         sources:
+#             - george-edison55-precise-backports
+#         packages:
+#             - cmake-data
+#             - cmake
 
 before_install:
   # Update cmake to c++17 version
