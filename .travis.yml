@@ -6,7 +6,6 @@ sudo: required
 compiler:
   - clang
 
-
 matrix:
     include:
         - os: linux
@@ -46,7 +45,7 @@ before_install:
   - ./cmake-3.8.2-Linux-x86_64.sh --prefix=$HOME/usr --exclude-subdir --skip-license
   # Other deps
   - sudo apt-get -qq update
-  - sudo apt-get install libvtk6-dev libboost-all-dev libmumps-seq-dev -y
+  - sudo apt-get install libvtk6-dev libboost-all-dev libmumps-seq-dev libjsoncpp-dev -y
   - eval "${MATRIX_EVAL}"
 
 
