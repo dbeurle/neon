@@ -27,22 +27,20 @@ matrix:
         #           - clang-5.0
         #   env:
         #     - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
+addons:
+    apt:
+        sources:
+            - george-edison55-precise-backports
+            packages:
+                - cmake-data
+                - cmake
 
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install libvtk6-dev libboost-all-dev -y
   - eval "${MATRIX_EVAL}"
 
-addons:
-    apt:
-        sources:
-            - george-edison55-precise-backports
-        packages:
-            - cmake-data
-            - cmake
-
 before_script:
-    - eval "${MATRIX_EVAL}"
     - echo $CC
     - echo $CXX
     - mkdir build
