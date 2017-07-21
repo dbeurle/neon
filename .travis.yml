@@ -28,14 +28,6 @@ matrix:
         #   env:
         #     - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
 
-# addons:
-#     apt:
-#         sources:
-#             - george-edison55-precise-backports
-#         packages:
-#             - cmake-data
-#             - cmake
-
 before_install:
   # Update cmake to c++17 version
   - mkdir $HOME/usr
@@ -44,10 +36,10 @@ before_install:
   - chmod +x cmake-3.8.2-Linux-x86_64.sh
   - ./cmake-3.8.2-Linux-x86_64.sh --prefix=$HOME/usr --exclude-subdir --skip-license
   # Other deps
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   - sudo apt-get -qq update
   - sudo apt-get install g++-6 libvtk6-dev libboost-all-dev libmumps-seq-dev libjsoncpp-dev -y
   - eval "${MATRIX_EVAL}"
-
 
 before_script:
     - echo $CC
