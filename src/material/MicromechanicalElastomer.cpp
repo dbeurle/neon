@@ -24,19 +24,28 @@ MicromechanicalElastomer::MicromechanicalElastomer(Json::Value const& material_d
     chain_decay_rate = material_data.isMember("ChainDecayRate")
                            ? material_data["ChainDecayRate"].asDouble()
                            : 0.0;
+
+    segment_decay_rate = material_data.isMember("SegmentDecayRate")
+                             ? material_data["SegmentDecayRate"].asDouble()
+                             : 0.0;
+
     n0 = LinearElastic::shear_modulus() / (boltzmann_constant * temperature);
 
-    allocate_probability_and_segments();
+    compute_probability_and_segments();
 }
 
-void MicromechanicalElastomer::allocate_probability_and_segments()
+void MicromechanicalElastomer::compute_probability_and_segments()
 {
     probability_segments_pairs.clear();
-    probability_segments_pairs.reserve(N * 2);
+    probability_segments_pairs.reserve(N * 3);
 
-    for (auto k = 8; k < 45; ++k)
+    for (auto k = 2; k < N * 3; ++k)
     {
-        probability_segments_pairs.emplace_back(k, zero_trunc_poisson_pmf(N, k));
+        // Filter out the insignificant pmf
+        if (auto const pmf = zero_trunc_poisson_pmf(N, k); pmf > 1.0e-6)
+        {
+            probability_segments_pairs.emplace_back(k, pmf);
+        }
     }
 }
 }

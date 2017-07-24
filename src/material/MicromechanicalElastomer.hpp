@@ -35,12 +35,25 @@ public:
     double number_of_chains() const { return n0; }
 
     /** @return the current number of chains in the network */
-    double evolve_chains(double const n, double const Δt) const;
+    double update_chains(double const n, double const Δt) const;
+
+    /** Evaluates the new segments probability based on evolution equation */
+    void update_segments(double const Δt);
 
     auto const& segment_probability() const { return probability_segments_pairs; }
 
 protected:
-    void allocate_probability_and_segments();
+    /**
+     * Evaluates the probabilty mass function and populates
+     * a vector with the number of segments per chain and the corresponding
+     * mass density from the probability function.  For physicality, these
+     * are drawn from a zero truncated Poisson PMF \sa zero_trunc_poisson_pmf.
+     *
+     * This operation is wildly expensive to compute, so a threshold for the
+     * inclusion of the segments per chain is required but will always
+     * underestimate the stress in the material by approximately 1%
+     */
+    void compute_probability_and_segments();
 
 protected:
     double n0; // !< Initial number of chains
@@ -48,6 +61,7 @@ protected:
     double N; //!< Segments per chain
 
     double chain_decay_rate;
+    double segment_decay_rate;
 
     std::vector<std::pair<double, double>> probability_segments_pairs;
 
@@ -60,8 +74,14 @@ inline double MicromechanicalElastomer::shear_modulus(double const n) const
     return n * boltzmann_constant * temperature;
 }
 
-inline double MicromechanicalElastomer::evolve_chains(double const n, double const Δt) const
+inline double MicromechanicalElastomer::update_chains(double const n, double const Δt) const
 {
     return n / (1.0 + chain_decay_rate * Δt);
+}
+
+inline void MicromechanicalElastomer::update_segments(double const Δt)
+{
+    N /= (1.0 + Δt * segment_decay_rate);
+    compute_probability_and_segments();
 }
 }
