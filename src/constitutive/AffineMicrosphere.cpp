@@ -44,8 +44,14 @@ void AffineMicrosphere::update_internal_variables(double const Δt)
 
     // Update the number of chains in the network
     n_list = n_list | view::transform([&](auto const& n) {
-                 return material.evolve_chains(n, Δt);
+                 return material.update_chains(n, Δt);
              });
+
+    material.update_segments(Δt);
+
+/*-----------------------------------------------------------------------------*
+ *                          Stress computation                                 *
+ *-----------------------------------------------------------------------------*/
 
 #pragma omp parallel for
     for (auto l = 0; l < F_list.size(); ++l)
@@ -76,6 +82,10 @@ void AffineMicrosphere::update_internal_variables(double const Δt)
                    return deviatoric_projection(pressure, τ_dev) / J;
                });
 
+    /*-----------------------------------------------------------------------------*
+     *                       Tangent material computation                          *
+     *-----------------------------------------------------------------------------*/
+
     // Compute tangent moduli
     auto& D_list = variables(InternalVariables::Matrix::TruesdellModuli);
 
@@ -93,9 +103,10 @@ void AffineMicrosphere::update_internal_variables(double const Δt)
 
         Matrix3 const unimodular_F = std::pow(J, -1.0 / 3.0) * F;
 
-        Matrix const D = weighting(Matrix::Zero(6, 6).eval(), [&](auto const& N) -> Matrix {
-            return compute_material_matrix(unimodular_F, N);
-        });
+        CMatrix const D = weighting(CMatrix::Zero(6, 6).eval(),
+                                    [&](auto const& N) -> CMatrix {
+                                        return compute_material_matrix(unimodular_F, N);
+                                    });
 
         D_list[l] = deviatoric_projection(D, τ_dev) + (κ + pressure) * IoI
                     - 2.0 * pressure * I;

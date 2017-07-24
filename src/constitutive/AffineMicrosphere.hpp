@@ -77,7 +77,7 @@ protected:
      (\bar{\boldsymbol{\tau}} \otimes \boldsymbol{g}^{-1} + \boldsymbol{g}^{-1} \otimes
      \bar{\boldsymbol{\tau}}) \right] : \mathbb{P} \f}
      */
-    Matrix deviatoric_projection(Matrix const& C_dev, Matrix3 const& τ_dev) const;
+    CMatrix deviatoric_projection(CMatrix const& C_dev, Matrix3 const& τ_dev) const;
 
     /**
      * @param N number of segments per chain
@@ -85,7 +85,7 @@ protected:
      */
     Matrix3 compute_kirchhoff_stress(Matrix3 const& unimodular_F, double const N) const;
 
-    Matrix compute_material_matrix(Matrix3 const& unimodular_F, double const N) const;
+    CMatrix compute_material_matrix(Matrix3 const& unimodular_F, double const N) const;
 
     template <typename MatrixTp, typename Functor>
     MatrixTp weighting(MatrixTp accumulator, Functor f) const;
@@ -121,13 +121,13 @@ inline double AffineMicrosphere::pade_second(double const λ, double const N) co
     return (std::pow(λ, 4) + 3 * std::pow(N, 2)) / std::pow(N - std::pow(λ, 2), 2);
 }
 
-inline Matrix AffineMicrosphere::deviatoric_projection(Matrix const& C_dev,
-                                                       Matrix3 const& τ_dev) const
+inline CMatrix AffineMicrosphere::deviatoric_projection(CMatrix const& C_dev,
+                                                        Matrix3 const& τ_dev) const
 {
-    return (Matrix(6, 6) << 1.0 / 9.0
-                                * (4 * C_dev(0, 0) - 4 * C_dev(0, 1) - 4 * C_dev(0, 2)
-                                   + C_dev(1, 1) + 2 * C_dev(1, 2) + C_dev(2, 2)
-                                   + 4 * τ_dev.trace()), //
+    return (CMatrix(6, 6) << 1.0 / 9.0
+                                 * (4 * C_dev(0, 0) - 4 * C_dev(0, 1) - 4 * C_dev(0, 2)
+                                    + C_dev(1, 1) + 2 * C_dev(1, 2) + C_dev(2, 2)
+                                    + 4 * τ_dev.trace()), //
             1.0 / 9.0
                 * (-2 * C_dev(0, 0) + 5 * C_dev(0, 1) - C_dev(0, 2) - 2 * C_dev(1, 1)
                    - C_dev(1, 2) + C_dev(2, 2) - 2.0 * τ_dev.trace()), //
@@ -210,11 +210,11 @@ inline Matrix3 AffineMicrosphere::compute_kirchhoff_stress(Matrix3 const& unimod
                                  });
 }
 
-inline Matrix AffineMicrosphere::compute_material_matrix(Matrix3 const& unimodular_F,
-                                                         double const N) const
+inline CMatrix AffineMicrosphere::compute_material_matrix(Matrix3 const& unimodular_F,
+                                                          double const N) const
 {
-    return unit_sphere.integrate(Matrix::Zero(6, 6).eval(),
-                                 [&](auto const& coordinates, auto const& l) -> Matrix {
+    return unit_sphere.integrate(CMatrix::Zero(6, 6).eval(),
+                                 [&](auto const& coordinates, auto const& l) -> CMatrix {
                                      auto const & [ r, r_outer_r ] = coordinates;
 
                                      // Deformed tangents

@@ -15,6 +15,7 @@ namespace neon
 using Matrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>;
 using Matrix2 = Eigen::Matrix<double, 2, 2>;
 using Matrix3 = Eigen::Matrix<double, 3, 3>;
+using CMatrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor, 9, 9>;
 
 using Vector = Eigen::Matrix<double, Eigen::Dynamic, 1>;
 using Vector2 = Eigen::Vector2d;
