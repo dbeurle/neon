@@ -11,7 +11,8 @@
         "ElasticModulus" : 10.0e6,
         "PoissonsRatio" : 0.46,
         "SegmentsPerChain": 25,
-        "ChainDecayRate" : 1.0e-7
+        "ChainDecayRate" : 1.0e-6,
+        "SegmentDecayRate" : 1.0e-8
     }],
     "SimulationCases" : [{
         "Name" : "Load",
@@ -69,8 +70,8 @@
             }]
         }],
 		"LinearSolver" : {
-		    "Solver" : "Pastix",
-            "MaxIterations" : 1000,
+		    "Solver" : "pCG",
+            "MaxIterations" : 3000,
             "Tolerance"  : 1.0e-8
         },
         "Visualisation" : {
@@ -86,7 +87,7 @@
             "Increments" : {
                 "Initial" : 1.0,
                 "Minimum" : 0.001,
-                "Maximum" : 5000.0
+                "Maximum" : 50000.0
             }
         },
 		"Mesh" :
@@ -94,7 +95,7 @@
             "Name" : "cube"
         }],
         "LinearSolver" : {
-		    "Solver" : "pCG",
+		    "Solver" : "Pastix",
             "MaxIterations" : 1000,
             "Tolerance"  : 1.0e-8
         },
