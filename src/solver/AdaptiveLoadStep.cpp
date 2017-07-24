@@ -16,26 +16,26 @@ AdaptiveLoadStep::AdaptiveLoadStep(Json::Value const& increment_data)
 
 void AdaptiveLoadStep::update_convergence_state(bool is_converged)
 {
-    double constexpr cutback_factor = 0.5;
-    double constexpr forward_factor = 2.0;
+    auto constexpr cutback_factor = 0.5;
+    auto constexpr forward_factor = 2.0;
 
-    int constexpr terminal_indent = 4;
+    auto constexpr terminal_indent = 4;
 
     if (is_converged)
     {
         consecutive_unconverged = 0;
         successful_increments++;
 
-        double const dt = std::min(forward_factor * current_time, maximum_increment);
+        double const next_time = std::min(forward_factor * current_time, maximum_increment);
 
-        is_applied = std::abs(current_time - final_time) < 1.0e-10 &&
-                     current_time + dt > final_time;
+        is_applied = std::abs(current_time - final_time) < 1.0e-10
+                     && current_time + next_time > final_time;
 
         last_converged_time = current_time;
 
         if (is_applied) return;
 
-        current_time = std::min(dt + current_time, final_time);
+        current_time = std::min(next_time, final_time);
 
         std::cout << termcolor::green << termcolor::bold
                   << std::string(terminal_indent, ' ')
@@ -60,8 +60,8 @@ void AdaptiveLoadStep::update_convergence_state(bool is_converged)
 
         if (consecutive_unconverged == increment_limit)
         {
-            throw std::runtime_error(
-                "Too many reductions.  Convergence not judged likely\n");
+            throw std::runtime_error("Too many reductions.  Convergence not judged "
+                                     "likely\n");
         }
     }
 }
