@@ -5,6 +5,7 @@ file(GLOB_RECURSE NEON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "*.cpp")
 list(REMOVE_ITEM NEON_SOURCES "neon.cpp")
 
 add_library(neon ${NEON_SOURCES})
+
 target_link_libraries(neon
                       ${Boost_LIBRARIES}
                       ${CMAKE_THREAD_LIBS_INIT}
@@ -16,5 +17,4 @@ target_link_libraries(neon
                       metis
                       scotch
                       scotcherr
-                      hwloc
-                  )
+                      hwloc)
