@@ -17,6 +17,7 @@
 #include "CubeJson.hpp"
 
 using namespace neon;
+using namespace ranges;
 
 TEST_CASE("Testing material coordinates", "[MaterialCoordinates]")
 {
@@ -35,10 +36,10 @@ TEST_CASE("Testing material coordinates", "[MaterialCoordinates]")
     local_initial_config << 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0;
 
     // Indices for the first three nodes
-    List local_node_list = ranges::view::ints(0, 3);
+    List local_node_list = view::ints(0, 3);
 
     // Check that we are fetching the right local element vector
-    List local_dof_list = ranges::view::ints(0, 9);
+    List local_dof_list = view::ints(0, 9);
 
     SECTION("Nodes scaffolding")
     {
@@ -124,8 +125,6 @@ TEST_CASE("Basic mesh test")
     }
     SECTION("Test unique connectivities")
     {
-        using namespace ranges;
-
         for (auto const& mesh : basic_mesh.meshes("bottom"))
         {
             auto const unique_node_list = mesh.unique_connectivities();
