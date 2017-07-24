@@ -1,5 +1,5 @@
 # neon
-A non-linear finite element code
+A non-linear finite element code.  This project is still under development and is not considered stable.
 
 ## Building
 
