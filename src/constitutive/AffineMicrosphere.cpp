@@ -23,16 +23,23 @@ AffineMicrosphere::AffineMicrosphere(InternalVariables& variables,
     // Deviatoric stress
     variables.add(InternalVariables::Tensor::Kirchhoff);
     variables.add(InternalVariables::Scalar::Chains);
+    variables.add(InternalVariables::Scalar::Segments);
 
     for (auto& n : variables(InternalVariables::Scalar::Chains))
     {
-        n = material.number_of_chains();
+        n = material.number_of_initial_chains();
+    }
+    for (auto& N : variables(InternalVariables::Scalar::Segments))
+    {
+        N = material.number_of_initial_segments();
     }
 }
 
 void AffineMicrosphere::update_internal_variables(double const Δt)
 {
     using namespace ranges;
+
+    // TODO Change these back once OpenMP allows structured bindings
 
     // Get references into the hash table
     auto& F_list = variables(InternalVariables::Tensor::DeformationGradient);
@@ -41,17 +48,20 @@ void AffineMicrosphere::update_internal_variables(double const Δt)
 
     auto const& detF_list = variables(InternalVariables::Scalar::DetF);
     auto& n_list = variables(InternalVariables::Scalar::Chains);
+    auto& N_list = variables(InternalVariables::Scalar::Segments);
 
     // Update the number of chains in the network
     n_list = n_list | view::transform([&](auto const& n) {
                  return material.update_chains(n, Δt);
              });
 
-    material.update_segments(Δt);
+    N_list = N_list | view::transform([&](auto const& N) {
+                 return material.update_segments(N, Δt);
+             });
 
-/*-----------------------------------------------------------------------------*
- *                          Stress computation                                 *
- *-----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*
+ *                          Stress computation                                *
+ *----------------------------------------------------------------------------*/
 
 #pragma omp parallel for
     for (auto l = 0; l < F_list.size(); ++l)
@@ -82,9 +92,9 @@ void AffineMicrosphere::update_internal_variables(double const Δt)
                    return deviatoric_projection(pressure, τ_dev) / J;
                });
 
-    /*-----------------------------------------------------------------------------*
-     *                       Tangent material computation                          *
-     *-----------------------------------------------------------------------------*/
+    /*------------------------------------------------------------------------*
+     *                     Tangent material computation                       *
+     *------------------------------------------------------------------------*/
 
     // Compute tangent moduli
     auto& D_list = variables(InternalVariables::Matrix::TruesdellModuli);

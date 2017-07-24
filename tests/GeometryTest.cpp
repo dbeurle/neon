@@ -53,18 +53,22 @@ TEST_CASE("Testing material coordinates", "[MaterialCoordinates]")
     SECTION("Test update of coordinates")
     {
         material_coordinates.update_current_configuration(local_displacements);
-        REQUIRE((material_coordinates.displacement() - local_displacements).norm() == Approx(0.0));
+        REQUIRE((material_coordinates.displacement() - local_displacements).norm()
+                == Approx(0.0));
     }
     SECTION("Test local displacement via lookup")
     {
         material_coordinates.update_current_configuration(local_displacements);
-        REQUIRE((material_coordinates.displacement(local_dof_list) - local_displacements).norm() ==
-                Approx(0.0));
+        REQUIRE(
+            (material_coordinates.displacement(local_dof_list) - local_displacements).norm()
+            == Approx(0.0));
     }
     SECTION("Test element view configuration")
     {
-        REQUIRE((material_coordinates.initial_configuration(local_node_list) - local_initial_config)
-                    .norm() == Approx(0.0));
+        REQUIRE((material_coordinates.initial_configuration(local_node_list)
+                 - local_initial_config)
+                    .norm()
+                == Approx(0.0));
     }
 }
 TEST_CASE("Basic mesh test")
@@ -120,31 +124,34 @@ TEST_CASE("Basic mesh test")
     }
     SECTION("Test unique connectivities")
     {
+        using namespace ranges;
+
         for (auto const& mesh : basic_mesh.meshes("bottom"))
         {
             auto const unique_node_list = mesh.unique_connectivities();
             List const known_unique{0, 1, 2, 3, 14, 15, 16, 17, 18, 19, 26, 27, 36, 37, 38, 39};
 
-            REQUIRE(ranges::view::set_symmetric_difference(unique_node_list, known_unique).empty());
+            REQUIRE(view::set_symmetric_difference(unique_node_list, known_unique).empty());
         }
 
         for (auto const& mesh : basic_mesh.meshes("cube"))
         {
             auto const unique_node_list = mesh.unique_connectivities();
 
-            REQUIRE(ranges::view::set_symmetric_difference(unique_node_list, ranges::view::ints(0, 64))
-                        .empty());
+            REQUIRE(
+                view::set_symmetric_difference(unique_node_list, view::ints(0, 64)).empty());
         }
 
         for (auto const& mesh : basic_mesh.meshes("sides"))
         {
             auto const unique_node_list = mesh.unique_connectivities();
 
-            List const known_unique{0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
-                                    16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
-                                    32, 33, 34, 35, 40, 41, 42, 43, 48, 49, 50, 51, 52, 53, 54, 55};
+            List const known_unique{0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
+                                    12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+                                    24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
+                                    40, 41, 42, 43, 48, 49, 50, 51, 52, 53, 54, 55};
 
-            REQUIRE(ranges::view::set_symmetric_difference(unique_node_list, known_unique).empty());
+            REQUIRE(view::set_symmetric_difference(unique_node_list, known_unique).empty());
         }
 
         for (auto const& mesh : basic_mesh.meshes("top"))
@@ -152,7 +159,7 @@ TEST_CASE("Basic mesh test")
             auto const unique_node_list = mesh.unique_connectivities();
 
             List const known_unique{4, 5, 6, 7, 10, 11, 22, 23, 28, 29, 30, 31, 44, 45, 46, 47};
-            REQUIRE(ranges::view::set_symmetric_difference(unique_node_list, known_unique).empty());
+            REQUIRE(view::set_symmetric_difference(unique_node_list, known_unique).empty());
         }
     }
 }
@@ -179,10 +186,13 @@ TEST_CASE("Solid submesh test")
 
     auto& submesh = submeshes[0];
 
-    auto material_coordinates =
-        std::make_shared<MaterialCoordinates>(nodal_coordinates.coordinates());
+    auto material_coordinates = std::make_shared<MaterialCoordinates>(
+        nodal_coordinates.coordinates());
 
-    solid::femSubmesh fem_submesh(material_data, simulation_data, material_coordinates, submesh);
+    solid::femSubmesh fem_submesh(material_data,
+                                  simulation_data,
+                                  material_coordinates,
+                                  submesh);
 
     int constexpr number_of_nodes = 64;
     int constexpr number_of_dofs = number_of_nodes * 3;

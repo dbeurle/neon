@@ -3,7 +3,7 @@
 
 #include <json/value.h>
 
-#include <iostream>
+#include <cmath>
 
 namespace neon
 {
@@ -19,7 +19,7 @@ MicromechanicalElastomer::MicromechanicalElastomer(Json::Value const& material_d
     {
         throw std::runtime_error("SegmentsPerChain not specified in material data\n");
     }
-    N = material_data["SegmentsPerChain"].asDouble();
+    N0_avg = material_data["SegmentsPerChain"].asDouble();
 
     chain_decay_rate = material_data.isMember("ChainDecayRate")
                            ? material_data["ChainDecayRate"].asDouble()
@@ -31,15 +31,15 @@ MicromechanicalElastomer::MicromechanicalElastomer(Json::Value const& material_d
 
     n0 = LinearElastic::shear_modulus() / (boltzmann_constant * temperature);
 
-    compute_probability_and_segments();
+    compute_probability_and_segments(N0_avg);
 }
 
-void MicromechanicalElastomer::compute_probability_and_segments()
+void MicromechanicalElastomer::compute_probability_and_segments(double const N)
 {
     probability_segments_pairs.clear();
-    probability_segments_pairs.reserve(N * 3);
+    probability_segments_pairs.reserve(N * 2);
 
-    for (auto k = 2; k < N * 3; ++k)
+    for (auto k = 2; k < N * 2; ++k)
     {
         // Filter out the insignificant pmf
         if (auto const pmf = zero_trunc_poisson_pmf(N, k); pmf > 1.0e-6)
