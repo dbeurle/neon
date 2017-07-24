@@ -58,7 +58,7 @@ void AffineMicrosphere::update_internal_variables(double const Δt)
 
         Matrix3 const unimodular_F = std::pow(J, -1.0 / 3.0) * F;
 
-        τ = μ * weighting(Matrix3::Zero(), [&](auto const& N) -> Matrix3 {
+        τ = μ * weighting(Matrix3::Zero().eval(), [&](auto const& N) -> Matrix3 {
                 return compute_kirchhoff_stress(unimodular_F, N);
             });
     }
@@ -93,7 +93,7 @@ void AffineMicrosphere::update_internal_variables(double const Δt)
 
         Matrix3 const unimodular_F = std::pow(J, -1.0 / 3.0) * F;
 
-        Matrix const D = weighting(Matrix::Zero(6, 6), [&](auto const& N) -> Matrix {
+        Matrix const D = weighting(Matrix::Zero(6, 6).eval(), [&](auto const& N) -> Matrix {
             return compute_material_matrix(unimodular_F, N);
         });
 

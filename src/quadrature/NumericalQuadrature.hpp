@@ -27,8 +27,8 @@ public:
      * @param f - A lambda function that accepts an femValue and quadrature point
      * @return The numerically integrated matrix
      */
-    template <typename Functor>
-    Matrix integrate(Matrix integral, Functor&& f) const
+    template <typename MatrixTp, typename Functor>
+    MatrixTp integrate(MatrixTp integral, Functor&& f) const
     {
         for (int l = 0; l < points(); ++l)
         {

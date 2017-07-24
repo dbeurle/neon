@@ -83,7 +83,7 @@ Matrix femSubmesh::geometric_tangent_stiffness(Matrix const& x, int element) con
 
     Matrix const
         kgeo = sf->quadrature()
-                   .integrate(Matrix::Zero(n, n),
+                   .integrate(Matrix::Zero(n, n).eval(),
                               [&](auto const& femval, auto const& l) -> Matrix {
                                   auto const & [ N, rhea ] = femval;
 
@@ -131,7 +131,7 @@ Vector femSubmesh::internal_nodal_force(Matrix const& x, int element) const
     auto const[m, n] = std::make_tuple(nodes_per_element(), dofs_per_node());
 
     RowMatrix fint = sf->quadrature()
-                         .integrate(RowMatrix::Zero(m, n),
+                         .integrate(RowMatrix::Zero(m, n).eval(),
                                     [&](auto const& femval, auto const& l) -> RowMatrix {
                                         auto const & [ N, dN ] = femval;
 
@@ -156,7 +156,7 @@ std::tuple<List const&, Matrix> femSubmesh::consistent_mass(int element) const
     auto const ρ_0 = cm->intrinsic_material().initial_density();
 
     auto m = sf->quadrature()
-                 .integrate(Matrix::Zero(nodes_per_element(), nodes_per_element()),
+                 .integrate(Matrix::Zero(nodes_per_element(), nodes_per_element()).eval(),
                             [&](auto const& femval, auto const& l) -> Matrix {
                                 auto const & [ N, dN ] = femval;
 

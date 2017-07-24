@@ -87,8 +87,8 @@ protected:
 
     Matrix compute_material_matrix(Matrix3 const& unimodular_F, double const N) const;
 
-    template <typename Functor>
-    Matrix weighting(Matrix accumulator, Functor&& f) const;
+    template <typename MatrixTp, typename Functor>
+    MatrixTp weighting(MatrixTp accumulator, Functor f) const;
 
 protected:
     MicromechanicalElastomer material;
@@ -196,7 +196,7 @@ inline Matrix AffineMicrosphere::deviatoric_projection(Matrix const& C_dev,
 inline Matrix3 AffineMicrosphere::compute_kirchhoff_stress(Matrix3 const& unimodular_F,
                                                            double const N) const
 {
-    return unit_sphere.integrate(Matrix3::Zero(),
+    return unit_sphere.integrate(Matrix3::Zero().eval(),
                                  [&](auto const& coordinates, auto const& l) -> Matrix3 {
                                      auto const & [ r, r_outer_r ] = coordinates;
 
@@ -213,7 +213,7 @@ inline Matrix3 AffineMicrosphere::compute_kirchhoff_stress(Matrix3 const& unimod
 inline Matrix AffineMicrosphere::compute_material_matrix(Matrix3 const& unimodular_F,
                                                          double const N) const
 {
-    return unit_sphere.integrate(Matrix::Zero(6, 6),
+    return unit_sphere.integrate(Matrix::Zero(6, 6).eval(),
                                  [&](auto const& coordinates, auto const& l) -> Matrix {
                                      auto const & [ r, r_outer_r ] = coordinates;
 
@@ -231,8 +231,8 @@ inline Matrix AffineMicrosphere::compute_material_matrix(Matrix3 const& unimodul
                                  });
 }
 
-template <typename Functor>
-inline Matrix AffineMicrosphere::weighting(Matrix accumulator, Functor&& f) const
+template <typename MatrixTp, typename Functor>
+inline MatrixTp AffineMicrosphere::weighting(MatrixTp accumulator, Functor f) const
 {
     for (auto const & [ N, β ] : material.segment_probability())
     {

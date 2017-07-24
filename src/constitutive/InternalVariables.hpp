@@ -21,7 +21,8 @@ class InternalVariables
 public:
     using Scalars = std::vector<double>;
     using Tensors = std::vector<Matrix3>;
-    using Matrices = std::vector<neon::Matrix>;
+    using Matrices = std::vector<
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor, 9, 9>>;
 
     enum class Matrix { TruesdellModuli };
 
