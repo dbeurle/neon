@@ -9,8 +9,6 @@
 
 #include <json/forwards.h>
 
-#include <iostream>
-
 namespace neon
 {
 class AffineMicrosphere : public Hyperelastic
