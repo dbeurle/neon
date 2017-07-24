@@ -19,7 +19,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(CMAKE_CXX_STANDARD 17)
 add_definitions("-Wall -march=native -ffast-math")
 
-find_package(VTK 6.0 COMPONENTS vtkIOXML REQUIRED)
+find_package(VTK COMPONENTS vtkIOXML REQUIRED)
 include(${VTK_USE_FILE})
 
 find_package(Boost 1.40 COMPONENTS filesystem REQUIRED)
