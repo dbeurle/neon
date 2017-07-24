@@ -36,3 +36,7 @@ and for release mode with optimisations
 For checking the successful compilation of the program, invoke the test suite by
 
 `ctest`
+
+## Licensing
+
+See the LICENSE.md file for the project license and the licenses of the included dependencies.
