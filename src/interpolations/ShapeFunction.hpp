@@ -41,8 +41,7 @@ protected:
      */
     void compute_extrapolation_matrix(Matrix const N,
                                       Matrix const local_nodal_coordinates,
-                                      Matrix const local_quadrature_coordinates,
-                                      int const nodes_per_element);
+                                      Matrix const local_quadrature_coordinates);
 
 protected:
     Matrix extrapolation; //!< Quadrature point to nodal point mapping
@@ -54,11 +53,10 @@ template <typename Quadrature>
 void ShapeFunction<Quadrature>::compute_extrapolation_matrix(
     Matrix const N,
     Matrix const local_nodal_coordinates,
-    Matrix const local_quadrature_coordinates,
-    int const nodes_per_element)
+    Matrix const local_quadrature_coordinates)
 {
     // Take short names for consistency with algorithm
-    auto const n = nodes_per_element;
+    auto const n = local_nodal_coordinates.rows();
     auto const m = numerical_quadrature->points();
 
     auto const& xi = local_nodal_coordinates;
@@ -81,7 +79,7 @@ void ShapeFunction<Quadrature>::compute_extrapolation_matrix(
     // Number of quadrature points are less than the number of nodes
     auto const xi_hat_plus = (xi_hat.transpose() * xi_hat).inverse() * xi_hat.transpose();
 
-    Matrix3 const I = Matrix::Identity(m, m);
+    Matrix const I = Matrix::Identity(m, m);
 
     extrapolation = N_plus * (I - xi_hat * xi_hat_plus) + xi * xi_hat_plus;
 }

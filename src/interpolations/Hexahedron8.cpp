@@ -38,7 +38,8 @@ void Hexahedron8::precompute_shape_functions()
 
         for (auto const & [ a, xi_a, eta_a, zeta_a ] : local_coordinates)
         {
-            N(a) = 1.0 / 8.0 * (1.0 + xi_a * xi) * (1.0 + eta_a * eta) * (1.0 + zeta_a * zeta);
+            N(a) = 1.0 / 8.0 * (1.0 + xi_a * xi) * (1.0 + eta_a * eta)
+                   * (1.0 + zeta_a * zeta);
             rhea(a, 0) = 1.0 / 8.0 * xi_a * (1.0 + eta_a * eta) * (1.0 + zeta_a * zeta);
             rhea(a, 1) = 1.0 / 8.0 * (1.0 + xi_a * xi) * eta_a * (1.0 + zeta_a * zeta);
             rhea(a, 2) = 1.0 / 8.0 * (1.0 + xi_a * xi) * (1.0 + eta_a * eta) * zeta_a;
@@ -63,7 +64,6 @@ void Hexahedron8::precompute_shape_functions()
     }
     compute_extrapolation_matrix(N_matrix,
                                  local_nodal_coordinates,
-                                 local_quadrature_coordinates,
-                                 nodes());
+                                 local_quadrature_coordinates);
 }
 }

@@ -15,7 +15,7 @@ HexahedronQuadrature::HexahedronQuadrature(Rule rule, int interpolationOrder)
         }
         case Rule::EightPoint:
         {
-            w = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+            w.resize(8, 1.0);
             auto const qp = 1.0 / std::sqrt(3.0);
             clist = {{0, -qp, -qp, -qp},
                      {1, qp, -qp, -qp},

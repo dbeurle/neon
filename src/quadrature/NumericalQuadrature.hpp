@@ -37,8 +37,8 @@ public:
         return integral;
     }
 
-    template <typename Function>
-    void for_each(Function eval_func) const
+    template <typename Functor>
+    void for_each(Functor&& eval_func) const
     {
         for (int l = 0; l < points(); ++l) eval_func(femvals[l], l);
     }
@@ -48,8 +48,8 @@ public:
      * points
      * @param f - A lambda function that accepts a quadrature coordinate tuple
      */
-    template <typename Evaluate_Tp>
-    void evaluate(Evaluate_Tp f)
+    template <typename Functor>
+    void evaluate(Functor&& f)
     {
         femvals.clear();
         femvals.reserve(points());
