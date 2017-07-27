@@ -25,22 +25,20 @@ void AdaptiveLoadStep::update_convergence_state(bool is_converged)
     {
         consecutive_unconverged = 0;
         successful_increments++;
-
-        double const next_time = std::min(forward_factor * current_time, maximum_increment);
-
-        is_applied = std::abs(current_time - final_time) < 1.0e-10
-                     && current_time + next_time > final_time;
-
         last_converged_time = current_time;
+
+        is_applied = std::abs(current_time - final_time) < 1.0e-8;
 
         if (is_applied) return;
 
-        current_time = std::min(next_time, final_time);
+        double const new_time = std::min(forward_factor * current_time,
+                                         current_time + maximum_increment);
 
-        std::cout << termcolor::green << termcolor::bold
-                  << std::string(terminal_indent, ' ')
-                  << "Convergence detected - step time set to " << current_time
-                  << " for next attempt\n"
+        current_time = std::min(new_time, final_time);
+
+        std::cout << std::string(terminal_indent, ' ') << termcolor::green
+                  << termcolor::bold << "Convergence detected - step time set to "
+                  << current_time << " for next attempt\n"
                   << termcolor::reset << std::flush;
     }
     else
@@ -50,10 +48,10 @@ void AdaptiveLoadStep::update_convergence_state(bool is_converged)
 
         current_time = last_converged_time + dt;
 
-        std::cout << termcolor::yellow << termcolor::bold
-                  << std::string(terminal_indent, ' ')
-                  << "\nNon-convergence detected - step time set to " << current_time
-                  << "\n"
+        std::cout << "\n"
+                  << std::string(terminal_indent, ' ') << termcolor::yellow
+                  << termcolor::bold << "Non-convergence detected - step time set to "
+                  << current_time << "\n"
                   << termcolor::reset << std::flush;
 
         consecutive_unconverged++;
