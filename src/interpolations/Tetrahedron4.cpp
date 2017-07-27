@@ -3,72 +3,74 @@
 
 namespace neon
 {
-Tetrahedron4::Tetrahedron4() : VolumeInterpolation(nullptr)
+Tetrahedron4::Tetrahedron4(TetrahedronQuadrature::Rule rule)
+    : VolumeInterpolation(std::make_unique<TetrahedronQuadrature>(rule))
 {
-    dN = Matrix::Zero(4, 3);
-
-    this->setDerivativeMatrix();
-    this->initializeSource();
-    this->initializeMass();
+    this->precompute_shape_functions();
 }
 
-void Tetrahedron4::setDerivativeMatrix()
+void Tetrahedron4::precompute_shape_functions()
 {
-    dN << 1.0, 0.0, 0.0, //
-        0.0, 1.0, 0.0,   //
-        0.0, 0.0, 1.0,   //
-        -1.0, -1.0, -1.0;
+    using NodalCoordinate = std::tuple<int, double, double, double>;
+
+    // Initialize nodal coordinates array as Xi, Eta, Zeta
+    constexpr std::array<NodalCoordinate, 4> local_coordinates = {{
+        {0, 0.0, 0.0, 0.0},
+        {1, 1.0, 0.0, 0.0},
+        {2, 0.0, 1.0, 0.0},
+        {3, 0.0, 0.0, 1.0},
+    }};
+
+    Matrix N_matrix(numerical_quadrature->points(), nodes());
+    Matrix local_quadrature_coordinates = Matrix::Ones(numerical_quadrature->points(), 4);
+
+    numerical_quadrature->evaluate([&](auto const& coordinate) {
+        auto const & [ l, r, s, t ] = coordinate;
+
+        Vector N(4);
+        Matrix rhea(4, 3);
+
+        N(0) = r;
+        N(1) = s;
+        N(2) = t;
+        N(3) = 1.0 - r - s - t;
+
+        rhea(0, 0) = 1.0;
+        rhea(0, 1) = 0.0;
+        rhea(0, 2) = 0.0;
+
+        rhea(1, 0) = 0.0;
+        rhea(1, 1) = 1.0;
+        rhea(1, 2) = 0.0;
+
+        rhea(2, 0) = 0.0;
+        rhea(2, 1) = 0.0;
+        rhea(2, 2) = 1.0;
+
+        rhea(3, 0) = -1.0;
+        rhea(3, 1) = -1.0;
+        rhea(3, 2) = -1.0;
+
+        local_quadrature_coordinates(l, 0) = r;
+        local_quadrature_coordinates(l, 1) = s;
+        local_quadrature_coordinates(l, 2) = t;
+
+        N_matrix.row(l) = N;
+
+        return std::make_tuple(N, rhea);
+    });
+
+    // Compute extrapolation algorithm matrices
+    Matrix local_nodal_coordinates = Matrix::Ones(nodes(), 4);
+
+    for (auto const & [ a, xi_a, eta_a, zeta_a ] : local_coordinates)
+    {
+        local_nodal_coordinates(a, 0) = xi_a;
+        local_nodal_coordinates(a, 1) = eta_a;
+        local_nodal_coordinates(a, 2) = zeta_a;
+    }
+    compute_extrapolation_matrix(N_matrix,
+                                 local_nodal_coordinates,
+                                 local_quadrature_coordinates);
 }
-
-void Tetrahedron4::initializeSource()
-{
-    force.setOnes(4);
-    force /= 24.0;
-}
-
-void Tetrahedron4::initializeMass()
-{
-    mass.resize(4, 4);
-    mass << 2.0, 1.0, 1.0, 1.0, //
-        1.0, 2.0, 1.0, 1.0,     //
-        1.0, 1.0, 2.0, 1.0,     //
-        1.0, 1.0, 1.0, 2.0;
-    mass /= 120.0;
-}
-
-double Tetrahedron4::computeSixV(Matrix const& nodalCoordinates) const
-{
-    // Use the determinant to compute the volume of the element
-    Eigen::Matrix4d sixV = Eigen::Matrix4d::Ones(4, 4);
-
-    sixV.col(1) = nodalCoordinates.row(0);
-    sixV.col(2) = nodalCoordinates.row(1);
-    sixV.col(3) = nodalCoordinates.row(2);
-
-    return sixV.determinant();
-}
-
-// Matrix Tetrahedron4::computeThermalStiffness( const Matrix& nodalCoordinates,
-//                                               const cm::ThermalCEqn& ceqn) const
-// {
-//     Eigen::Matrix3d Jacobian = nodalCoordinates * dN;
-//     Matrix B = (dN * Jacobian.inverse()).transpose();
-//     const auto volume = this->computeSixV(nodalCoordinates) / 6.0;
-//
-//     if (volume < 0)
-// 	{
-//         Info<< "!Warning: Element with negative determinant detected.\n\tResults may be
-//         erroneous";
-// 	}
-//
-//     const auto C = ceqn.getConductivityTensor();
-//     return volume * B.transpose() * C * B;
-// }
-//
-// Matrix Tetrahedron4::computeThermalMass( const Matrix& nodalCoordinates,
-//                                          const cm::ThermalCEqn& ceqn) const
-// {
-//     auto const D = ceqn.getSpecificHeat() * ceqn.getDensity();
-//     return mass * this->computeSixV(nodalCoordinates) * D;
-// }
 }

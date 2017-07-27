@@ -1,5 +1,6 @@
 
-#define CATCH_CONFIG_MAIN // This tells Catch to provide a main() - only do this in one cpp file
+#define CATCH_CONFIG_MAIN // This tells Catch to provide a main() - only do this in one
+                          // cpp file
 #include <catch.hpp>
 
 #include "quadrature/HexahedronQuadrature.hpp"
@@ -12,6 +13,7 @@
 #include "interpolations/Hexahedron8.hpp"
 #include "interpolations/Quadrilateral4.hpp"
 #include "interpolations/Tetrahedron10.hpp"
+#include "interpolations/Tetrahedron4.hpp"
 #include "interpolations/Triangle3.hpp"
 #include "interpolations/Triangle6.hpp"
 
@@ -128,6 +130,9 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
             REQUIRE(rhea.col(2).sum() == Approx(0.0));
 
         });
+
+        REQUIRE(hex8.local_quadrature_extrapolation().rows() == 8);
+        REQUIRE(hex8.local_quadrature_extrapolation().cols() == 1);
     }
     SECTION("Hexahedron8 EightPoint Evaluation")
     {
@@ -150,6 +155,9 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
             REQUIRE(rhea.col(2).sum() == Approx(0.0));
 
         });
+
+        REQUIRE(hex8.local_quadrature_extrapolation().rows() == 8);
+        REQUIRE(hex8.local_quadrature_extrapolation().cols() == 8);
     }
 }
 TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
@@ -169,6 +177,27 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
         REQUIRE(ranges::accumulate(One.weights(), 0.0) == Approx(1.0 / 6.0));
         REQUIRE(ranges::accumulate(Four.weights(), 0.0) == Approx(1.0 / 6.0));
         REQUIRE(ranges::accumulate(Five.weights(), 0.0) == Approx(1.0 / 6.0));
+    }
+    SECTION("Tetrahedron4 OnePoint Evaluation")
+    {
+        Tetrahedron4 tet4(TetrahedronQuadrature::Rule::OnePoint);
+
+        REQUIRE(tet4.nodes() == 4);
+        REQUIRE(tet4.quadrature().points() == 1);
+
+        tet4.quadrature().for_each([&](auto const& femval, auto const& l) {
+
+            auto const & [ N, rhea ] = femval;
+
+            REQUIRE(N.sum() == Approx(1.0));
+
+            REQUIRE(rhea.col(0).sum() == Approx(0.0));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0));
+            REQUIRE(rhea.col(2).sum() == Approx(0.0));
+        });
+
+        REQUIRE(tet4.local_quadrature_extrapolation().rows() == 4);
+        REQUIRE(tet4.local_quadrature_extrapolation().cols() == 1);
     }
     SECTION("Tetrahedron10 OnePoint Evaluation")
     {
