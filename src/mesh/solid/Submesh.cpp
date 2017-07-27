@@ -234,12 +234,13 @@ void femSubmesh::update_deformation_measures()
 
 void femSubmesh::update_Jacobian_determinants()
 {
+    using ranges::view::transform;
+
     auto const& F_list = variables(InternalVariables::Tensor::DeformationGradient);
 
     auto& detF_list = variables(InternalVariables::Scalar::DetF);
 
-    detF_list = F_list
-                | ranges::view::transform([](auto const& F) { return F.determinant(); });
+    detF_list = F_list | transform([](auto const& F) { return F.determinant(); });
 }
 
 void femSubmesh::check_element_distortion() const
