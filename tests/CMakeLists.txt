@@ -28,3 +28,8 @@ add_executable(AdaptiveIncrement AdaptiveIncrementTest.cpp)
 add_dependencies(AdaptiveIncrement catch)
 target_link_libraries(AdaptiveIncrement LINK_PUBLIC neon)
 add_test(AdaptiveIncrement ${CMAKE_CURRENT_BUILD_DIR}/AdaptiveIncrement)
+
+add_executable(BoundaryTest BoundaryTest.cpp)
+add_dependencies(BoundaryTest catch)
+target_link_libraries(BoundaryTest LINK_PUBLIC neon)
+add_test(BoundaryTest ${CMAKE_CURRENT_BUILD_DIR}/BoundaryTest)
