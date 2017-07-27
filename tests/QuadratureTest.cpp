@@ -39,13 +39,17 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
 
         REQUIRE(quad4.nodes() == 4);
         REQUIRE(quad4.quadrature().points() == 1);
+        REQUIRE(quad4.local_quadrature_extrapolation().rows() == 4);
+        REQUIRE(quad4.local_quadrature_extrapolation().cols() == 1);
     }
-    SECTION("Quadrilateral interpolation function - three point")
+    SECTION("Quadrilateral interpolation function - four point")
     {
         Quadrilateral4 quad4(QuadrilateralQuadrature::Rule::FourPoint);
 
         REQUIRE(quad4.nodes() == 4);
         REQUIRE(quad4.quadrature().points() == 4);
+        REQUIRE(quad4.local_quadrature_extrapolation().rows() == 4);
+        REQUIRE(quad4.local_quadrature_extrapolation().cols() == 4);
     }
 }
 TEST_CASE("Triangle quadrature scheme test", "[TriangleQuadrature]")
