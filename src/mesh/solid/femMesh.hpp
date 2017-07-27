@@ -1,14 +1,15 @@
 
 #pragma once
 
-#include <json/forwards.h>
-
 #include "numeric/DenseTypes.hpp"
 
 #include "mesh/solid/MaterialCoordinates.hpp"
 #include "mesh/solid/Submesh.hpp"
 
 #include "mesh/solid/boundary/Dirichlet.hpp"
+
+#include <json/forwards.h>
+#include <map>
 
 namespace neon
 {
@@ -47,7 +48,7 @@ public:
     /** Mutable access to the sub-meshes */
     std::vector<femSubmesh>& meshes() { return submeshes; }
 
-    auto const& dirichlet_boundary_map() const { return dirichlet_boundaries; }
+    auto const& dirichlet_boundary_map() const { return displacement_bcs; }
 
     auto const& coordinates() const { return *(material_coordinates.get()); }
 
@@ -68,7 +69,7 @@ protected:
 
     std::vector<femSubmesh> submeshes;
 
-    std::map<std::string, std::vector<Dirichlet>> dirichlet_boundaries;
+    std::map<std::string, std::vector<Dirichlet>> displacement_bcs;
 
     const std::unordered_map<std::string, int> dof_table = {{"x", 0}, {"y", 1}, {"z", 2}};
 };

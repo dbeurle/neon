@@ -39,7 +39,7 @@ void femMesh::internal_restart(Json::Value const& simulation_data)
 {
     if (simulation_data["BoundaryConditions"].empty())
     {
-        for (auto & [ name, boundaries ] : dirichlet_boundaries)
+        for (auto & [ name, boundaries ] : displacement_bcs)
         {
             std::cout << termcolor::yellow << std::string(2, ' ')
                       << "Boundary conditions for \"" << name
@@ -87,7 +87,8 @@ void femMesh::allocate_boundary_conditions(Json::Value const& boundary_data,
     {
         auto const& boundary_name = boundary["Name"].asString();
 
-        if (boundary["Type"].asString() == "Displacement")
+        if (auto const& boundary_type = boundary["Type"].asString();
+            boundary_type == "Displacement")
         {
             auto const dirichlet_dofs = filter_dof_list(basic_mesh.meshes(boundary_name));
 
@@ -95,13 +96,21 @@ void femMesh::allocate_boundary_conditions(Json::Value const& boundary_data,
             {
                 auto const& dof_offset = dof_table.find(name)->second;
 
-                dirichlet_boundaries[boundary_name]
+                displacement_bcs[boundary_name]
                     .emplace_back(view::transform(dirichlet_dofs,
-                                                  [&](auto dof) {
+                                                  [&](auto const& dof) {
                                                       return dof + dof_offset;
                                                   }),
                                   boundary["Values"][name].asDouble());
             }
+        }
+        else if (boundary_type == "Traction")
+        {
+        }
+        else
+        {
+            throw std::runtime_error("BoundaryCondition \"" + boundary_type
+                                     + "\" is not recognised");
         }
     }
 }
@@ -118,7 +127,7 @@ void femMesh::reallocate_boundary_conditions(Json::Value const& boundary_data)
         {
             for (auto const& name : boundary["Values"].getMemberNames())
             {
-                for (auto& dirichlet_boundary : dirichlet_boundaries[boundary_name])
+                for (auto& dirichlet_boundary : displacement_bcs[boundary_name])
                 {
                     dirichlet_boundary.update_value(boundary["Values"][name].asDouble());
                 }
@@ -147,8 +156,8 @@ List femMesh::filter_dof_list(std::vector<SubMesh> const& boundary_mesh) const
     using namespace ranges;
 
     return view::transform(boundary_mesh,
-                           [](auto const& submesh) { return submesh.connectivities(); }) |
-           action::join | action::join | action::sort | action::unique |
-           action::transform([=](auto const& i) { return i * 3; });
+                           [](auto const& submesh) { return submesh.connectivities(); })
+           | action::join | action::join | action::sort | action::unique
+           | action::transform([=](auto const& i) { return i * 3; });
 }
 }
