@@ -70,12 +70,14 @@ TEST_CASE("Triangle quadrature scheme test", "[TriangleQuadrature]")
         REQUIRE(ranges::accumulate(t3.weights(), 0.0) == Approx(0.5));
         REQUIRE(ranges::accumulate(t4.weights(), 0.0) == Approx(0.5));
     }
-    SECTION("Triangle3 interpolation function - three point")
+    SECTION("Triangle3 interpolation function - one point")
     {
         Triangle3 tri3(TriangleQuadrature::Rule::OnePoint);
 
         REQUIRE(tri3.nodes() == 3);
         REQUIRE(tri3.quadrature().points() == 1);
+        REQUIRE(tri3.local_quadrature_extrapolation().rows() == 3);
+        REQUIRE(tri3.local_quadrature_extrapolation().cols() == 1);
     }
     SECTION("Triangle6 interpolation function - three point")
     {

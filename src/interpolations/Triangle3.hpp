@@ -17,6 +17,14 @@ public:
     double compute_measure(Matrix const& nodal_coordinates);
 
 protected:
+    /**
+     * Initialize the shape functions to the following polynomials
+     * \f{align*}{
+     * N_1(r, s, t) &= r \\
+     * N_2(r, s, t) &= s \\
+     * N_3(r, s, t) &= 1 - r - s
+     * \f}
+     */
     void precompute_shape_functions();
 };
 }
