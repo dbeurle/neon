@@ -13,6 +13,22 @@ Tetrahedron10::Tetrahedron10(TetrahedronQuadrature::Rule rule)
 
 void Tetrahedron10::precompute_shape_functions()
 {
+    using NodalCoordinate = std::tuple<int, double, double, double>;
+
+    constexpr std::array<NodalCoordinate, 10> local_coordinates = {{{0, 1.0, 0.0, 0.0},
+                                                                    {1, 0.0, 1.0, 0.0},
+                                                                    {2, 0.0, 0.0, 1.0},
+                                                                    {3, 0.0, 0.0, 0.0},
+                                                                    {4, 0.5, 0.5, 0.0},
+                                                                    {5, 0.0, 0.5, 0.5},
+                                                                    {6, 0.0, 0.0, 0.5},
+                                                                    {7, 0.5, 0.0, 0.0},
+                                                                    {8, 0.5, 0.0, 0.5},
+                                                                    {9, 0.0, 0.5, 0.0}}};
+
+    Matrix N_matrix(numerical_quadrature->points(), nodes());
+    Matrix local_quadrature_coordinates = Matrix::Ones(numerical_quadrature->points(), 4);
+
     numerical_quadrature->evaluate([&](auto const& coordinate) {
         auto const & [ l, r, s, t ] = coordinate;
 
@@ -65,7 +81,26 @@ void Tetrahedron10::precompute_shape_functions()
         rhea(8, 2) = 4.0 * r;
         rhea(9, 2) = -4.0 * s;
 
+        local_quadrature_coordinates(l, 0) = r;
+        local_quadrature_coordinates(l, 1) = s;
+        local_quadrature_coordinates(l, 2) = t;
+
+        N_matrix.row(l) = N;
+
         return std::make_tuple(N, rhea);
     });
+
+    // Compute extrapolation algorithm matrices
+    Matrix local_nodal_coordinates = Matrix::Ones(nodes(), 4);
+
+    for (auto const & [ a, r, s, t ] : local_coordinates)
+    {
+        local_nodal_coordinates(a, 0) = r;
+        local_nodal_coordinates(a, 1) = s;
+        local_nodal_coordinates(a, 2) = t;
+    }
+    compute_extrapolation_matrix(N_matrix,
+                                 local_nodal_coordinates,
+                                 local_quadrature_coordinates);
 }
 }

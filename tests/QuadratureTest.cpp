@@ -218,8 +218,10 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
             REQUIRE(rhea.col(0).sum() == Approx(0.0));
             REQUIRE(rhea.col(1).sum() == Approx(0.0));
             REQUIRE(rhea.col(2).sum() == Approx(0.0));
-
         });
+
+        REQUIRE(tet10.local_quadrature_extrapolation().rows() == 10);
+        REQUIRE(tet10.local_quadrature_extrapolation().cols() == 1);
     }
     SECTION("Tetrahedron10 FourPoint Evaluation")
     {
@@ -238,8 +240,10 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
             REQUIRE(rhea.col(0).sum() == Approx(0.0));
             REQUIRE(rhea.col(1).sum() == Approx(0.0));
             REQUIRE(rhea.col(2).sum() == Approx(0.0));
-
         });
+
+        REQUIRE(tet10.local_quadrature_extrapolation().rows() == 10);
+        REQUIRE(tet10.local_quadrature_extrapolation().cols() == 4);
     }
     SECTION("Tetrahedron10 FivePoint Evaluation")
     {
@@ -259,6 +263,9 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
             REQUIRE(rhea.col(1).sum() == Approx(0.0));
             REQUIRE(rhea.col(2).sum() == Approx(0.0));
         });
+
+        REQUIRE(tet10.local_quadrature_extrapolation().rows() == 10);
+        REQUIRE(tet10.local_quadrature_extrapolation().cols() == 5);
     }
 }
 TEST_CASE("Prism quadrature scheme test", "[PrismQuadrature]")
