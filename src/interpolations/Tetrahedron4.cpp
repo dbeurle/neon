@@ -63,11 +63,11 @@ void Tetrahedron4::precompute_shape_functions()
     // Compute extrapolation algorithm matrices
     Matrix local_nodal_coordinates = Matrix::Ones(nodes(), 4);
 
-    for (auto const & [ a, xi_a, eta_a, zeta_a ] : local_coordinates)
+    for (auto const & [ a, r, s, t ] : local_coordinates)
     {
-        local_nodal_coordinates(a, 0) = xi_a;
-        local_nodal_coordinates(a, 1) = eta_a;
-        local_nodal_coordinates(a, 2) = zeta_a;
+        local_nodal_coordinates(a, 0) = r;
+        local_nodal_coordinates(a, 1) = s;
+        local_nodal_coordinates(a, 2) = t;
     }
     compute_extrapolation_matrix(N_matrix,
                                  local_nodal_coordinates,
