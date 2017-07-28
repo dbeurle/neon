@@ -31,7 +31,7 @@ inline std::vector<List> allocate_dof_list(int const nodal_dofs,
  * This function accepts the nodal connectivity of the mesh, multiplies each
  * entry by the nodal_dofs and adds the offset.  This function is intended for
  * use with the boundary classes, where each boundary class holds a dof_list
- * with the dofs associated only with it's
+ * with the dofs associated only with the particular dof.
  */
 inline std::vector<List> filter_dof_list(int const nodal_dofs,
                                          int const dof_offset,
