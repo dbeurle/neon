@@ -85,8 +85,8 @@ void SimulationControl::parse()
     {
         if (part["Name"].empty()) throw EmptyFieldException("Part: Name");
 
-        if (ranges::find(material_names, part["Material"].asString()) ==
-            material_names.end())
+        if (ranges::find(material_names, part["Material"].asString())
+            == material_names.end())
         {
             throw std::runtime_error("The part material was not found in the provided "
                                      "materials\n");
@@ -103,10 +103,11 @@ void SimulationControl::parse()
         Json::Value mesh_file;
         Json::Reader mesh_reader;
 
-        auto const material =
-            *ranges::find_if(root["Material"], [&part](auto const& material) {
-                return material["Name"].asString() == part["Material"].asString();
-            });
+        auto const material = *ranges::find_if(root["Material"],
+                                               [&part](auto const& material) {
+                                                   return material["Name"].asString()
+                                                          == part["Material"].asString();
+                                               });
 
         std::ifstream mesh_input_stream(part["Name"].asString() + ".mesh");
 
@@ -147,9 +148,9 @@ void SimulationControl::parse()
         // Make sure the simulation mesh exists in the mesh store
         if (mesh_store.find(simulation["Mesh"][0]["Name"].asString()) == mesh_store.end())
         {
-            throw std::runtime_error("Mesh name \"" +
-                                     simulation["Mesh"][0]["Name"].asString() +
-                                     "\" was not found in the mesh store");
+            throw std::runtime_error("Mesh name \""
+                                     + simulation["Mesh"][0]["Name"].asString()
+                                     + "\" was not found in the mesh store");
         }
     }
 
