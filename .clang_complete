@@ -5,4 +5,6 @@
 -Isrc
 -I/usr/include/jsoncpp
 -I/usr/local/include
+-I/usr/local/include/vtk
 -I/usr/include
+-I/usr/include/vtk
