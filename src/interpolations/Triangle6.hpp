@@ -14,11 +14,11 @@ public:
     virtual int nodes() const override final { return 6; }
 
     /**
-     * Compute the area using Gaussian integration.
-     * @param nodal coordinates
-     * @return Element face area
+     * Compute the area of the element using Gaussian integration
+     * @param nodal_coordinates element nodal coordinates
+     * @return element face area
      */
-    double compute_measure(const Matrix& nodal_coordinates);
+    double compute_measure(Matrix const& nodal_coordinates);
 
 protected:
     void precompute_shape_functions();
