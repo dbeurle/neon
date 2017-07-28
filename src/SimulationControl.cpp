@@ -45,7 +45,7 @@ void SimulationControl::parse()
     std::cout << std::setw(welcome_message.length() + 9) << std::setfill('=') << "\n";
     std::cout << std::string(4, ' ') << welcome_message << "\n";
     std::cout << std::setw(welcome_message.length() + 9) << std::setfill('=') << "\n";
-    std::cout << termcolor::reset << std::endl;
+    std::cout << termcolor::reset << std::endl << std::setfill(' ');
 
     std::cout << std::string(2, ' ') << termcolor::bold
               << "Preprocessing mesh and simulation data\n"
