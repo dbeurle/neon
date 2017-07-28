@@ -13,8 +13,8 @@ namespace neon
  * @param nodal_connectivity Vector of nodal coordinates
  * @return The global degrees of freedom
  */
-std::vector<List> allocate_dof_list(int const nodal_dofs,
-                                    std::vector<List> const& nodal_connectivity)
+inline std::vector<List> allocate_dof_list(int const nodal_dofs,
+                                           std::vector<List> const& nodal_connectivity)
 {
     using namespace ranges;
     return nodal_connectivity | view::transform([=](auto const& node_list) {
@@ -33,9 +33,9 @@ std::vector<List> allocate_dof_list(int const nodal_dofs,
  * use with the boundary classes, where each boundary class holds a dof_list
  * with the dofs associated only with it's
  */
-std::vector<List> filter_dof_list(int const nodal_dofs,
-                                  int const dof_offset,
-                                  std::vector<List> const& nodal_connectivity)
+inline std::vector<List> filter_dof_list(int const nodal_dofs,
+                                         int const dof_offset,
+                                         std::vector<List> const& nodal_connectivity)
 {
     using namespace ranges;
     return nodal_connectivity | view::transform([=](auto const& node_list) {
