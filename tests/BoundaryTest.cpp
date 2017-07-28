@@ -38,3 +38,26 @@ TEST_CASE("Dof List Allocation", "[DofAllocator]")
         REQUIRE(view::set_difference(computed_list.at(1), known_dof_list.at(1)).empty());
     }
 }
+TEST_CASE("Dof List Filter", "[DofAllocator]")
+{
+    SECTION("One element 0 offset")
+    {
+        std::vector<List> const nodal_connectivity = {{0, 1, 2, 3}};
+
+        std::vector<List> const known_dof_list{{0, 3, 6, 9}};
+
+        std::vector<List> const computed_list = filter_dof_list(3, 0, nodal_connectivity);
+
+        REQUIRE(view::set_difference(computed_list.at(0), known_dof_list.at(0)).empty());
+    }
+    SECTION("One element 1 offset")
+    {
+        std::vector<List> const nodal_connectivity = {{0, 1, 2, 3}};
+
+        std::vector<List> const known_dof_list{{1, 4, 7, 10}};
+
+        std::vector<List> const computed_list = filter_dof_list(3, 1, nodal_connectivity);
+
+        REQUIRE(view::set_difference(computed_list.at(0), known_dof_list.at(0)).empty());
+    }
+}
