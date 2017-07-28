@@ -217,6 +217,12 @@ void femSubmesh::update_deformation_measures()
             Matrix3 const F_0 = local_deformation_gradient(rhea, X);
             Matrix3 const F = local_deformation_gradient(rhea, x);
 
+            if (F.determinant() < 0.0)
+            {
+                std::cout << "F.det = " << F.determinant() << std::endl;
+                throw DistortedElement(element, l);
+            }
+
             // Gradient operator in index notation
             auto const& B_0t = rhea * F_0.inverse();
 
