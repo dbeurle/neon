@@ -2,6 +2,20 @@ cmake_minimum_required(VERSION 3.8)
 
 project(neonfe C CXX)
 
+set(CMAKE_CXX_STANDARD 17)
+add_definitions("-Wall")
+
+option(ENABLE_NATIVE "Optimised specifically for current architecture" OFF)
+option(ENABLE_CUDA "Enable CUDA linear solver" OFF)
+
+if (ENABLE_NATIVE)
+    add_definitions("-march=native -ffast-math")
+endif()
+
+if (ENABLE_CUDA)
+    find_package(CUDA)
+endif()
+
 set(EXT_PROJECTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external")
 add_subdirectory(${EXT_PROJECTS_DIR}/catch)
 add_subdirectory(${EXT_PROJECTS_DIR}/eigen3)
@@ -16,9 +30,6 @@ include_directories(${CATCH_INCLUDE_DIR}
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-set(CMAKE_CXX_STANDARD 17)
-add_definitions("-Wall -march=native -ffast-math")
-
 find_package(VTK COMPONENTS vtkIOXML REQUIRED)
 include(${VTK_USE_FILE})
 
@@ -31,13 +42,13 @@ if (OPENMP_FOUND)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-find_package(Threads REQUIRED)
-
 find_package(MUMPS REQUIRED)
 include_directories(${MUMPS_INCLUDE_DIR})
 
 find_package(Jsoncpp REQUIRED)
 include_directories(${JSONCPP_INCLUDE_DIRS})
+
+find_package(HwLoc REQUIRED)
 
 include_directories("${CMAKE_SOURCE_DIR}/src")
 
@@ -46,9 +57,5 @@ add_subdirectory(src)
 add_subdirectory(tests)
 
 add_executable(neonfe src/neon.cpp)
-
-add_dependencies(neon eigen3)
-add_dependencies(neon range-v3)
-add_dependencies(neon termcolor)
 
 target_link_libraries(neonfe neon)
