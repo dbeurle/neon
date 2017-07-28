@@ -56,18 +56,18 @@ Visualisation::Visualisation(std::string file_name,
 
             if (!inserted)
             {
-                throw std::runtime_error(*field_name +
-                                         " is duplicated in the visualisation "
-                                         "field\n");
+                throw std::runtime_error(*field_name
+                                         + " is duplicated in the visualisation "
+                                           "field\n");
             }
 
             // Check if this result exists in the mappings
-            if (string_to_tensor.find(*field_name) == string_to_tensor.end() &&
-                string_to_scalar.find(*field_name) == string_to_scalar.end() &&
-                *field_name != "Displacement")
+            if (string_to_tensor.find(*field_name) == string_to_tensor.end()
+                && string_to_scalar.find(*field_name) == string_to_scalar.end()
+                && *field_name != "Displacement")
             {
-                throw std::runtime_error("Field name " + *field_name +
-                                         " is not a valid variable\n");
+                throw std::runtime_error("Field name " + *field_name
+                                         + " is not a valid variable\n");
             }
         }
     }
@@ -117,8 +117,8 @@ void Visualisation::write(int const time_step, double const total_time)
         }
         else
         {
-            throw std::runtime_error("Field " + field +
-                                     " was not found in mesh internal variables\n");
+            throw std::runtime_error("Field \"" + field
+                                     + "\" was not found in mesh internal variables\n");
         }
     }
     auto unstructured_mesh_writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
@@ -153,9 +153,12 @@ void Visualisation::allocate_static_mesh()
 
     for (auto const& submesh : fem_mesh.meshes())
     {
-        for (auto const& node_list : submesh.connectivities())
+        auto const vtk_ordered_connectivity = adapter.convert_to_vtk(submesh.connectivities(),
+                                                                     submesh.topology());
+        for (auto const& node_list : vtk_ordered_connectivity)
         {
             auto vtk_node_list = vtkSmartPointer<vtkIdList>::New();
+
             for (auto const& node : node_list)
             {
                 vtk_node_list->InsertNextId(static_cast<long>(node));
