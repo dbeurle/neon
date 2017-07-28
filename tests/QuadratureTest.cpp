@@ -57,7 +57,8 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
 TEST_CASE("Triangle quadrature scheme test", "[TriangleQuadrature]")
 {
     SECTION("Triangle Gauss Quadrature")
-    { // Check 1 and 8 point rule
+    {
+        // Check 1 and 8 point rule
         TriangleQuadrature t1(TriangleQuadrature::Rule::OnePoint);
         TriangleQuadrature t3(TriangleQuadrature::Rule::ThreePoint);
         TriangleQuadrature t4(TriangleQuadrature::Rule::FourPoint);
