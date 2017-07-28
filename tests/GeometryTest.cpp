@@ -334,10 +334,9 @@ TEST_CASE("Nodal ordering Adapater")
 
         node_adapter.convert_from_gmsh(nodal_connectivity, ElementTopology::Tetrahedron10);
 
-        REQUIRE(nodal_connectivity[0][4] == 9);
-        REQUIRE(nodal_connectivity[1][4] == 19);
-
-        REQUIRE(nodal_connectivity[0][9] == 4);
-        REQUIRE(nodal_connectivity[1][9] == 14);
+        REQUIRE(nodal_connectivity[0][6] == 8);
+        REQUIRE(nodal_connectivity[0][8] == 6);
+        REQUIRE(nodal_connectivity[1][6] == 18);
+        REQUIRE(nodal_connectivity[1][8] == 16);
     }
 }
