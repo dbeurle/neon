@@ -8,7 +8,7 @@
 #include <json/json.h>
 #include <range/v3/view.hpp>
 
-#include <variant>
+#include <memory>
 
 using namespace neon;
 using namespace ranges;
