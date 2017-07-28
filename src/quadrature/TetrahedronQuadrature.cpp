@@ -18,11 +18,9 @@ TetrahedronQuadrature::TetrahedronQuadrature(Rule rule, int interpolation_order)
         case Rule::FourPoint:
         {
             w = {0.25, 0.25, 0.25, 0.25};
-
-            clist = {{0, 0.5854102, 0.1381966, 0.1381966},
-                     {1, 0.1381966, 0.5854102, 0.1381966},
-                     {2, 0.1381966, 0.1381966, 0.5854102},
-                     {3, 0.1381966, 0.1381966, 0.1381966}};
+            constexpr auto c0 = 0.585410196624969;
+            constexpr auto c1 = 0.138196601125011;
+            clist = {{0, c0, c1, c1}, {1, c1, c0, c1}, {2, c1, c1, c0}, {3, c1, c1, c1}};
             break;
         }
         case Rule::FivePoint:
