@@ -1,39 +1,25 @@
 
 #pragma once
 
+#include "mesh/solid/boundary/Boundary.hpp"
 #include "numeric/DenseTypes.hpp"
-
-#include <tuple>
 
 namespace neon::solid
 {
-class Dirichlet
+class Dirichlet : public Boundary
 {
 public:
-    Dirichlet(List dofs, double const value, bool const is_ramped = true);
+    Dirichlet(List dofs, double const prescribed_value, bool const is_load_ramped = true);
 
     auto const& dof_view() const { return dofs; }
 
     /** Get the value depending on the loading factor */
     auto const value_view(double const load_factor) const
     {
-        return is_ramped ? (value_new - value_old) * load_factor + value_old : value_new;
+        return interpolate_prescribed_value(load_factor);
     }
-
-    /** Set the old value to the current value and update the current value */
-    void update_value(double const value);
-
-    /**
-     * The boundary value is the same as the last step and are instantaneously applied
-     */
-    void inherit_from_last();
 
 protected:
     List dofs;
-
-    bool is_ramped;
-
-    double value_old = 0.0;
-    double value_new = 0.0;
 };
 }

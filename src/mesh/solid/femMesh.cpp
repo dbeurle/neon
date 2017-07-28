@@ -37,7 +37,7 @@ int femMesh::active_dofs() const { return 3 * material_coordinates->size(); }
 
 void femMesh::internal_restart(Json::Value const& simulation_data)
 {
-    if (simulation_data["BoundaryConditions"].empty())
+    if (!simulation_data.isMember("BoundaryConditions"))
     {
         for (auto & [ name, boundaries ] : displacement_bcs)
         {
@@ -46,15 +46,15 @@ void femMesh::internal_restart(Json::Value const& simulation_data)
                       << "\" have been inherited from the last load step"
                       << termcolor::reset << std::endl;
 
-            for (auto& boundary : boundaries) boundary.inherit_from_last();
+            for (auto& boundary : boundaries) boundary.internal_restart();
         }
-        return;
     }
-
-    auto const& boundary_data = simulation_data["BoundaryConditions"];
-
-    check_boundary_conditions(boundary_data);
-    reallocate_boundary_conditions(boundary_data);
+    else
+    {
+        auto const& boundary_data = simulation_data["BoundaryConditions"];
+        check_boundary_conditions(boundary_data);
+        reallocate_boundary_conditions(boundary_data);
+    }
 }
 
 void femMesh::update_internal_variables(Vector const& u, double const Δt)
@@ -129,7 +129,7 @@ void femMesh::reallocate_boundary_conditions(Json::Value const& boundary_data)
             {
                 for (auto& dirichlet_boundary : displacement_bcs[boundary_name])
                 {
-                    dirichlet_boundary.update_value(boundary["Values"][name].asDouble());
+                    dirichlet_boundary.internal_restart(boundary["Values"][name].asDouble());
                 }
             }
         }
