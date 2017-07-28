@@ -3,8 +3,6 @@
 
 #include "PreprocessorExceptions.hpp"
 
-#include <iostream>
-
 namespace neon
 {
 void NodeOrderingAdapter::convert_from_gmsh(std::vector<List>& nodal_connectivity,
