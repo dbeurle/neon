@@ -3,28 +3,27 @@
 
 #include "interpolations/Hexahedron8.hpp"
 #include "interpolations/Tetrahedron10.hpp"
+#include "interpolations/Tetrahedron4.hpp"
 
-#include "PreprocessorExceptions.hpp"
+#include <stdexcept>
 
 #include <json/value.h>
 
-namespace neon
-{
-namespace solid
+namespace neon::solid
 {
 /** Factory method for the three dimensional shape functions */
-std::unique_ptr<VolumeInterpolation> make_shape_function(ElementTopology const topology,
-                                                         Json::Value const& simulation_data)
+std::unique_ptr<VolumeInterpolation> make_volume_interpolation(
+    ElementTopology const topology, Json::Value const& simulation_data)
 {
     if (!simulation_data.isMember("ElementOptions"))
     {
-        throw EmptyFieldException("Part: ElementOptions");
+        throw std::runtime_error("Missing \"Part\": \"ElementOptions\"");
     }
 
-    auto is_reduced =
-        simulation_data["ElementOptions"]["Quadrature"].empty()
-            ? false
-            : simulation_data["ElementOptions"]["Quadrature"].asString() == "Reduced";
+    auto is_reduced = simulation_data["ElementOptions"]["Quadrature"].empty()
+                          ? false
+                          : simulation_data["ElementOptions"]["Quadrature"].asString()
+                                == "Reduced";
 
     switch (topology)
     {
@@ -35,6 +34,9 @@ std::unique_ptr<VolumeInterpolation> make_shape_function(ElementTopology const t
                            : HexahedronQuadrature::Rule::EightPoint);
         }
         case ElementTopology::Tetrahedron4:
+        {
+            return std::make_unique<Tetrahedron4>(TetrahedronQuadrature::Rule::OnePoint);
+        }
         case ElementTopology::Tetrahedron10:
         {
             return std::make_unique<Tetrahedron10>(
@@ -61,5 +63,11 @@ std::unique_ptr<VolumeInterpolation> make_shape_function(ElementTopology const t
     }
     return nullptr;
 }
+
+std::unique_ptr<VolumeInterpolation> make_surface_interpolation(
+    ElementTopology const topology, Json::Value const& simulation_data)
+{
+    throw std::runtime_error("No available surface interpolations\n");
+    return nullptr;
 }
 }
