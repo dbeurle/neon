@@ -11,8 +11,8 @@
         "ElasticModulus" : 10.0e6,
         "PoissonsRatio" : 0.46,
         "SegmentsPerChain": 25,
-        "ChainDecayRate" : 1.0e-6,
-        "SegmentDecayRate" : 1.0e-8
+        "ChainDecayRate" : 2.0e-7,
+        "SegmentDecayRate" : 2.0e-11
     }],
     "SimulationCases" : [{
         "Name" : "Load",
@@ -36,7 +36,7 @@
             "ConstitutiveModel" : "AffineMicrosphere",
             "ElementOptions" :
             {
-                "Quadrature" : "Full"
+                "Quadrature" : "Reduced"
             },
             "BoundaryConditions" :
             [{
@@ -75,7 +75,8 @@
             "Tolerance"  : 1.0e-8
         },
         "Visualisation" : {
-            "Fields" : ["Displacement", "DeformationGradient", "CauchyStress"]
+            "Fields" : ["Displacement", "DeformationGradient", "CauchyStress"],
+            "WriteEvery": 20
         }
     },
     {
@@ -83,11 +84,11 @@
         "Inherits" : "Load",
         "Solution" : "Equilibrium",
         "Time" : {
-            "Period" : 186400.0,
+            "Period" : 5184000.0,
             "Increments" : {
                 "Initial" : 1.0,
                 "Minimum" : 0.001,
-                "Maximum" : 50000.0
+                "Maximum" : 500.0
             }
         },
 		"Mesh" :
@@ -99,10 +100,9 @@
             "MaxIterations" : 1000,
             "Tolerance"  : 1.0e-8
         },
-        "Visualisation" :
-        [{
+        "Visualisation" : {
             "Fields" : ["Displacement", "CauchyStress"]
-        }]
+        }
     },
     {
         "Name" : "Unloading",

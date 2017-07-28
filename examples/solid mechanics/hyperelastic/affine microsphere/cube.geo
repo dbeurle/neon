@@ -1,7 +1,7 @@
 // Code from http://matveichev.blogspot.de/2013/12/building-hexagonal-meshes-with-gmsh.html
 // x, y, z, hs
 
-elements = 2;
+elements = 5;
 
 x = 1.0;
 y = 1.0;
