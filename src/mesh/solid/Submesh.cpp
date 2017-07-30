@@ -322,6 +322,6 @@ std::tuple<Vector, Vector> femSubmesh::nodal_averaged_variable(
             }
         }
     }
-    return std::make_tuple(value, count);
+    return {value, count};
 }
 }
