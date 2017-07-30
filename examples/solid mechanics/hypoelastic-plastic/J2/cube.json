@@ -1,6 +1,6 @@
 {
     "Name" : "J2Plasticity",
-    "Cores" : 4,
+    "Cores" : 2,
     "Part": [{
         "Name" : "cube",
         "Material" : "steel",
@@ -65,7 +65,7 @@
         }],
 		"LinearSolver" :
         {
-		    "Solver" : "pCG",
+		    "Solver" : "Pastix",
             "MaxIterations" : 1000,
             "MaxTolerance"  : 1.0e-6
         },
