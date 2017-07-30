@@ -38,6 +38,11 @@ protected:
     std::shared_ptr<MaterialCoordinates> material_coordinates;
 };
 
+/**
+ * Traction is a non-follower load that has a surface interpolation and
+ * computes the element external load vector contribution to the system of
+ * equations \sa NonFollowerLoad
+ */
 class Traction : public NonFollowerLoad
 {
 public:
@@ -53,5 +58,19 @@ public:
 
 protected:
     std::unique_ptr<SurfaceInterpolation> sf;
+};
+
+/**
+ * NonFollowerLoadBoundary contains the boundary conditions which contributed to
+ * the external force vector.  This includes tractions, pressures and nodal
+ * forces defined in the initial configuration
+ */
+class NonFollowerLoadBoundary
+{
+public:
+    auto const& boundaries() const { return nf_loads; }
+
+protected:
+    std::vector<Traction> nf_loads;
 };
 }
