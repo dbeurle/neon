@@ -272,7 +272,7 @@ void femStaticMatrix::perform_equilibrium_iterations()
 void femStaticMatrix::print_convergence_progress(double const delta_d_norm,
                                                  double const residual_norm) const
 {
-    std::cout << termcolor::bold;
+    std::cout << std::string(6, ' ') << termcolor::bold;
     if (delta_d_norm <= displacement_tolerance)
     {
         std::cout << termcolor::green;
@@ -281,9 +281,8 @@ void femStaticMatrix::print_convergence_progress(double const delta_d_norm,
     {
         std::cout << termcolor::yellow;
     }
-    std::cout << std::string(6, ' ') << "Incremental displacement norm " << delta_d_norm
-              << "\n";
-    std::cout << termcolor::reset << termcolor::bold;
+    std::cout << "Incremental displacement norm " << delta_d_norm << "\n"
+              << termcolor::reset << std::string(6, ' ');
 
     if (residual_norm <= residual_tolerance)
     {
@@ -293,7 +292,7 @@ void femStaticMatrix::print_convergence_progress(double const delta_d_norm,
     {
         std::cout << termcolor::yellow;
     }
-    std::cout << std::string(6, ' ') << "Residual force norm " << residual_norm
+    std::cout << termcolor::bold << "Residual force norm " << residual_norm
               << termcolor::reset << "\n";
 }
 }
