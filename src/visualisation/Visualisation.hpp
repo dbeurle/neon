@@ -45,7 +45,8 @@ protected:
     void write_tensor_field(std::string const& pretty_name,
                             InternalVariables::Tensor const& tensor_enum);
 
-    void write_scalar_field();
+    void write_scalar_field(std::string const& pretty_name,
+                            InternalVariables::Scalar const& scalar_enum);
 
     void write_primary_field();
 

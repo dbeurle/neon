@@ -23,6 +23,9 @@ class MaterialCoordinates;
 class femSubmesh : public SubMesh
 {
 public:
+    using ValueCount = std::tuple<Vector, Vector>;
+
+public:
     /** Constructor providing the material coordinates reference */
     explicit femSubmesh(Json::Value const& material_data,
                         Json::Value const& simulation_data,
@@ -87,12 +90,13 @@ public:
     Matrix3 deformation_gradient(Matrix const& rhea, Matrix const& X, Matrix const& x)
     {
         // Deformation gradient in the reference and current configuration
-        return local_deformation_gradient(rhea, x) *
-               local_deformation_gradient(rhea, X).inverse();
+        return local_deformation_gradient(rhea, x)
+               * local_deformation_gradient(rhea, X).inverse();
     }
 
-    std::tuple<Vector, Vector> nodal_averaged_variable(
-        InternalVariables::Tensor const tensor_name) const;
+    ValueCount nodal_averaged_variable(InternalVariables::Tensor const tensor_name) const;
+
+    ValueCount nodal_averaged_variable(InternalVariables::Scalar const scalar_name) const;
 
 protected:
     /** Update the strain measures defined by the constitutive model */

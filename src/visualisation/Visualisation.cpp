@@ -108,7 +108,7 @@ void Visualisation::write(int const time_step, double const total_time)
         }
         else if (auto found = string_to_scalar.find(field); found != string_to_scalar.end())
         {
-            // write_scalar_field(found->first, found->second);
+            write_scalar_field(found->first, found->second);
         }
         else if (field == "Displacement")
         {
@@ -137,13 +137,16 @@ void Visualisation::write(int const time_step, double const total_time)
 
 void Visualisation::allocate_field_maps()
 {
-    string_to_tensor = {{"CauchyStress", InternalVariables::Tensor::Cauchy},
-                        {"DeformationGradient",
-                         InternalVariables::Tensor::DeformationGradient},
-                        {"DisplacementGradient",
-                         InternalVariables::Tensor::DisplacementGradient}};
-    string_to_scalar = {
-        {"AccumulatedPlasticStrain", InternalVariables::Scalar::EffectivePlasticStrain}};
+    string_to_tensor =
+        {{"CauchyStress", InternalVariables::Tensor::Cauchy},
+         {"LinearisedStrain", InternalVariables::Tensor::LinearisedStrain},
+         {"LinearisedPlasticStrain", InternalVariables::Tensor::LinearisedPlasticStrain},
+         {"DeformationGradient", InternalVariables::Tensor::DeformationGradient},
+         {"DisplacementGradient", InternalVariables::Tensor::DisplacementGradient}};
+
+    string_to_scalar = {{"AccumulatedPlasticStrain",
+                         InternalVariables::Scalar::EffectivePlasticStrain},
+                        {"VonMisesStress", InternalVariables::Scalar::VonMisesStress}};
 }
 
 void Visualisation::allocate_static_mesh()
@@ -210,7 +213,38 @@ void Visualisation::write_tensor_field(std::string const& pretty_name,
     }
     unstructured_mesh->GetPointData()->AddArray(tensor_value);
 }
-void Visualisation::write_scalar_field() {}
+
+void Visualisation::write_scalar_field(std::string const& pretty_name,
+                                       InternalVariables::Scalar const& scalar_enum)
+{
+    Vector nodal_averaged_value = Vector::Zero(fem_mesh.coordinates().size());
+    Vector running_count = Vector::Zero(fem_mesh.coordinates().size());
+
+    // Add internal variables
+    for (auto const& submesh : fem_mesh.meshes())
+    {
+        auto const[value, count] = submesh.nodal_averaged_variable(scalar_enum);
+        nodal_averaged_value += value;
+        running_count += count;
+    }
+
+    // Average nodal values
+    nodal_averaged_value = nodal_averaged_value.cwiseQuotient(running_count);
+
+    // Put this into a vtkDoubleArray
+    auto scalar_value = vtkSmartPointer<vtkDoubleArray>::New();
+
+    scalar_value->SetName(pretty_name.c_str());
+
+    scalar_value->SetNumberOfComponents(1);
+    scalar_value->SetNumberOfTuples(fem_mesh.coordinates().size());
+
+    for (auto i = 0; i < fem_mesh.coordinates().size(); ++i)
+    {
+        scalar_value->InsertTuple1(i, nodal_averaged_value(i));
+    }
+    unstructured_mesh->GetPointData()->AddArray(scalar_value);
+}
 
 void Visualisation::write_primary_field() {}
 }

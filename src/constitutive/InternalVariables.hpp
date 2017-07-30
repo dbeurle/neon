@@ -32,6 +32,8 @@ public:
         PiolaKirchhoff1,
         PiolaKirchhoff2,
         // Deformation measures
+        LinearisedStrain,
+        LinearisedPlasticStrain, // Small strain
         RateOfDeformation,
         RateOfDeformationPlastic,
         DeformationGradient,
