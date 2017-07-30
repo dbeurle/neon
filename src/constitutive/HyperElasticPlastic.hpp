@@ -29,20 +29,25 @@ public:
     Material const& intrinsic_material() const override final { return material; }
 
 protected:
-    Matrix elastic_moduli() const;
+    CMatrix elastic_moduli() const;
 
-    Matrix transformJaumannToTruesdellKirchoff(Matrix const C_τ_J,
-                                               Matrix3 const& σ,
-                                               double const J) const;
+    CMatrix dev_projection() const;
 
-    Matrix algorithmic_tangent(double const α,
-                               Matrix3 const& σ,
-                               Matrix3 const& σ_0,
-                               Matrix3 const& normal,
-                               double const J) const;
+    CMatrix transformJaumannToTruesdellKirchoff(CMatrix const C_τ_J,
+                                                Matrix3 const& σ,
+                                                double const J) const;
+
+    CMatrix increment_tangent(double const Δλ, double const von_mises) const;
+
+    CMatrix algorithmic_tangent(double const α,
+                                Matrix3 const& σ,
+                                Matrix3 const& σ_0,
+                                Matrix3 const& normal,
+                                double const J) const;
 
 private:
     IsotropicElasticPlastic material;
-    Matrix C_e;
+    CMatrix const C_e = elastic_moduli();
+    CMatrix const Id = dev_projection();
 };
 }

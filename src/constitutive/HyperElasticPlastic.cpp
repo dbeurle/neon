@@ -12,8 +12,8 @@ namespace neon
 J2Plasticity::J2Plasticity(InternalVariables& variables, Json::Value const& material_data)
     : HyperElasticPlastic(variables), material(material_data), C_e(elastic_moduli())
 {
-    variables.add(InternalVariables::Tensor::RateOfDeformation,
-                  InternalVariables::Tensor::RateOfDeformationPlastic);
+    variables.add(InternalVariables::Tensor::LinearisedStrain,
+                  InternalVariables::Tensor::LinearisedPlasticStrain);
 
     variables.add(InternalVariables::Scalar::VonMisesStress,
                   InternalVariables::Scalar::EffectivePlasticStrain);
@@ -32,21 +32,19 @@ void J2Plasticity::update_internal_variables(double const Δt)
     auto const λ_e = material.lambda();
 
     // Extract the internal variables
-    auto[ɛ_p_list, ɛ_list, σ_list] =
-        variables(InternalVariables::Tensor::RateOfDeformationPlastic,
-                  InternalVariables::Tensor::RateOfDeformation,
-                  InternalVariables::Tensor::Cauchy);
-
-    // Compute the linear strain gradient from the displacement gradient
-    ɛ_list = variables(InternalVariables::Tensor::DisplacementGradient) |
-             view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
+    auto[ɛ_p_list, ɛ_list, σ_list] = variables(InternalVariables::Tensor::LinearisedPlasticStrain,
+                                               InternalVariables::Tensor::LinearisedStrain,
+                                               InternalVariables::Tensor::Cauchy);
 
     // Retrieve the accumulated internal variables
-    auto& α_list = variables(InternalVariables::Scalar::EffectivePlasticStrain);
-
-    auto const& detF_list = variables(InternalVariables::Scalar::DetF);
+    auto[α_list, von_mises_list] = variables(InternalVariables::Scalar::EffectivePlasticStrain,
+                                             InternalVariables::Scalar::VonMisesStress);
 
     auto& C_list = variables(InternalVariables::Matrix::TruesdellModuli);
+
+    // Compute the linear strain gradient from the displacement gradient
+    ɛ_list = variables(InternalVariables::Tensor::DisplacementGradient)
+             | view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
     Matrix3 const I = Matrix3::Identity();
 
@@ -57,20 +55,18 @@ void J2Plasticity::update_internal_variables(double const Δt)
         auto& ɛ_p = ɛ_p_list[l];   // Plastic strain
         auto& σ = σ_list[l];       // Cauchy stress
         auto& α = α_list[l];       // Effective plastic strain
-
-        auto const& J = detF_list[l];
+        auto& von_mises = von_mises_list[l];
 
         if (α > 0.3)
         {
-            throw std::runtime_error("Excessive plastic strain at quadrature point " +
-                                     std::to_string(l) + "\n");
+            throw std::runtime_error("Excessive plastic strain at quadrature point "
+                                     + std::to_string(l) + "\n");
         }
-
-        // Elastic predictor
+        // Elastic stress predictor
         Matrix3 const σ_0 = λ_e * (ɛ - ɛ_p).trace() * I + 2.0 * μ_e * (ɛ - ɛ_p);
 
         // Compute the von Mises stress
-        const auto von_mises = von_mises_stress(σ_0);
+        von_mises = von_mises_stress(σ_0);
 
         σ = σ_0;
 
@@ -92,55 +88,50 @@ void J2Plasticity::update_internal_variables(double const Δt)
         while (f > 1.0e-4 && iterations < max_iterations)
         {
             // Increment in plasticity rate
-            const auto δλ = f / (3.0 * μ_e + material.hardening_modulus(α));
-
-            // Increment in plastic strain
-            Matrix3 const Δɛ_p = -δλ * std::sqrt(3.0 / 2.0) * normal;
-
-            // Plastic strain update
-            ɛ_p += Δɛ_p;
-
-            // Cauchy stress update
-            σ += 2.0 * μ_e * Δɛ_p;
-
-            // Accumulated plastic strain update
-            α += δλ;
+            const auto δλ = f / (3.0 * μ_e + material.hardening_modulus(α + Δλ));
 
             // Plastic rate update
             Δλ += δλ;
 
             // Evaluate the yield function
-            f = (von_mises - 3.0 * μ_e * Δλ) - material.yield_stress(α);
+            f = (von_mises - 3.0 * μ_e * Δλ) - material.yield_stress(α + Δλ);
 
             iterations++;
         }
 
-        std::cout << "Accumulated plastic strain " << α << std::endl;
+        // Plastic strain update
+        ɛ_p += Δλ * std::sqrt(3.0 / 2.0) * normal;
+
+        // Cauchy stress update
+        σ -= 3.0 * μ_e * Δλ * std::sqrt(2.0 / 3.0) * normal;
+
+        // Update the Von Mises stress
+        von_mises = von_mises_stress(σ);
+
+        // Accumulated plastic strain update
+        α += Δλ;
 
         if (iterations == max_iterations)
         {
-            std::cout << "Accumulated plastic strain " << α << std::endl;
-            std::cout << "Yield function after mapping " << f << std::endl;
-            std::cout << "New yield point " << material.yield_stress(α) / 1.0e6 << std::endl;
-            std::cout << "VonMises stress " << von_mises_stress(σ) << std::endl << std::endl;
+            std::cout << "Accumulated plastic strain " << α << "\n";
+            std::cout << "Yield function after mapping " << f << "\n";
+            std::cout << "Current yield stress " << material.yield_stress(α) << "\n";
+            std::cout << "Von Mises stress " << von_mises_stress(σ) << "\n"
+                      << "\n";
 
-            throw std::runtime_error("Radial return failure at global integration point " +
-                                     std::to_string(l) + "\n");
+            throw std::runtime_error("Radial return failure at global integration point "
+                                     + std::to_string(l) + "\n");
         }
         // Compute the elastic-plastic tangent modulus
-        C_list[l] = algorithmic_tangent(α, σ, σ_0, normal, J);
-
-        if ((C_list[l] - C_list[l].transpose()).norm() > 0.00001)
-        {
-            throw std::runtime_error("Matrix not symmetric!\n");
-        }
+        // C_list[l] = algorithmic_tangent(α, σ, σ_0, normal, J);
+        C_list[l] = increment_tangent(Δλ, von_mises_stress(σ_0));
     }
 }
 
-Matrix J2Plasticity::elastic_moduli() const
+CMatrix J2Plasticity::elastic_moduli() const
 {
     auto const[λ, μ] = material.Lame_parameters();
-    Matrix C(6, 6);
+    CMatrix C(6, 6);
     C << λ + 2.0 * μ, λ, λ, 0.0, 0.0, 0.0, //
         λ, λ + 2.0 * μ, λ, 0.0, 0.0, 0.0,  //
         λ, λ, λ + 2.0 * μ, 0.0, 0.0, 0.0,  //
@@ -150,11 +141,29 @@ Matrix J2Plasticity::elastic_moduli() const
     return C;
 }
 
-Matrix J2Plasticity::algorithmic_tangent(double const α,
-                                         Matrix3 const& σ,
-                                         Matrix3 const& σ_0,
-                                         Matrix3 const& normal,
-                                         double const J) const
+CMatrix J2Plasticity::dev_projection() const
+{
+    CMatrix C(6, 6);
+    C << 2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0, //
+        -1.0 / 3.0, 2.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,  //
+        -1.0 / 3.0, -1.0 / 3.0, 2.0 / 3.0, 0.0, 0.0, 0.0,  //
+        0.0, 0.0, 0.0, 0.5, 0.0, 0.0,                      //
+        0.0, 0.0, 0.0, 0.0, 0.5, 0.0,                      //
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.5;
+    return C;
+}
+
+CMatrix J2Plasticity::increment_tangent(double const Δλ, double const von_mises) const
+{
+    auto const G = material.mu();
+    return C_e - Δλ * 6 * G * G / von_mises * Id;
+}
+
+CMatrix J2Plasticity::algorithmic_tangent(double const α,
+                                          Matrix3 const& σ,
+                                          Matrix3 const& σ_0,
+                                          Matrix3 const& normal,
+                                          double const J) const
 {
     auto const[λ_e, μ_e] = material.Lame_parameters();
 
@@ -164,7 +173,7 @@ Matrix J2Plasticity::algorithmic_tangent(double const α,
 
     auto const γ_bar = γ - (1.0 - β);
 
-    Matrix C_alg(6, 6);
+    CMatrix C_alg(6, 6);
 
     auto diagonal = (4 * β * μ_e + 2 * μ_e + 3 * λ_e) / 3.0;
     auto off_diagonal = -(2 * β * μ_e - 2 * μ_e - 3 * λ_e) / 3.0;
@@ -181,11 +190,11 @@ Matrix J2Plasticity::algorithmic_tangent(double const α,
     return transformJaumannToTruesdellKirchoff(C_alg, σ, J);
 }
 
-Matrix J2Plasticity::transformJaumannToTruesdellKirchoff(Matrix const C_τ_J,
-                                                         Matrix3 const& σ,
-                                                         double const J) const
+CMatrix J2Plasticity::transformJaumannToTruesdellKirchoff(CMatrix const C_τ_J,
+                                                          Matrix3 const& σ,
+                                                          double const J) const
 {
-    Matrix Cdash(6, 6);
+    CMatrix Cdash(6, 6);
     // clang-format off
     Cdash << 2.0 * σ(0, 0),             0,             0,                         0,       σ(0, 2),                   σ(0, 1), //
                          0, 2.0 * σ(1, 1),             0,                   σ(1, 2),             0,                   σ(1, 0), //

@@ -8,6 +8,7 @@
 #include "constitutive/InternalVariables.hpp"
 
 #include "constitutive/AffineMicrosphere.hpp"
+#include "constitutive/HyperElasticPlastic.hpp"
 #include "constitutive/NeoHooke.hpp"
 
 using namespace neon;
@@ -17,7 +18,7 @@ std::string json_input_file()
     return "{\"Name\": \"rubber\", \"ElasticModulus\": 1.0, \"PoissonsRatio\": 2.0}";
 }
 
-constexpr auto internal_variable_size = 4;
+constexpr auto internal_variable_size = 2;
 
 TEST_CASE("Neo-Hookean model", "[NeoHooke]")
 {
@@ -148,4 +149,123 @@ TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
         for (auto& σ : σ_list) REQUIRE(σ.norm() != Approx(0.0));
     }
 }
-TEST_CASE("J2 plasticity model", "[J2Plasticity]") { REQUIRE(0 == 0); }
+TEST_CASE("J2 plasticity model", "[J2Plasticity]")
+{
+    // Create a json reader object from a string
+    std::string input_data =
+        "{\"Name\": \"steel\", \"ElasticModulus\": 200.0e9, \"PoissonsRatio\": 0.3, "
+        "\"YieldStress\": 200.0e6, \"IsotropicHardeningModulus\": 400.0e6}";
+
+    Json::Value material_data;
+    Json::Reader reader;
+
+    REQUIRE(reader.parse(input_data.c_str(), material_data));
+
+    InternalVariables variables(internal_variable_size);
+
+    // Add the required variables for an updated Lagrangian formulation
+    variables.add(InternalVariables::Tensor::DisplacementGradient,
+                  InternalVariables::Tensor::Cauchy);
+    variables.add(InternalVariables::Scalar::DetF);
+
+    J2Plasticity j2plasticity(variables, material_data);
+
+    // Get the tensor variables
+    auto[H_list, σ_list] = variables(InternalVariables::Tensor::DisplacementGradient,
+                                     InternalVariables::Tensor::Cauchy);
+
+    auto& J_list = variables(InternalVariables::Scalar::DetF);
+
+    auto& material_tangents = variables(InternalVariables::Matrix::TruesdellModuli);
+
+    for (auto& H : H_list) H = Matrix3::Zero();
+    for (auto& J : J_list) J = 1.0;
+
+    SECTION("Internal variables allocation")
+    {
+        REQUIRE(variables.has(InternalVariables::Scalar::VonMisesStress));
+        REQUIRE(variables.has(InternalVariables::Scalar::EffectivePlasticStrain));
+        REQUIRE(variables.has(InternalVariables::Tensor::LinearisedStrain));
+        REQUIRE(variables.has(InternalVariables::Tensor::LinearisedPlasticStrain));
+        REQUIRE(variables.has(InternalVariables::Matrix::TruesdellModuli));
+    }
+    SECTION("No load")
+    {
+        j2plasticity.update_internal_variables(1.0);
+
+        // Ensure symmetry is correct
+        for (auto const& C : material_tangents)
+        {
+            REQUIRE((C - C.transpose()).norm() == Approx(0.0));
+        }
+        for (auto& σ : σ_list) REQUIRE(σ.norm() == Approx(0.0));
+    }
+    SECTION("Uniaxial elastic load")
+    {
+        for (auto& H : H_list) H(2, 2) = 0.001;
+
+        j2plasticity.update_internal_variables(1.0);
+
+        auto[vm_list,
+             eff_plastic_list] = variables(InternalVariables::Scalar::VonMisesStress,
+                                           InternalVariables::Scalar::EffectivePlasticStrain);
+
+        // Ensure symmetry is correct
+        for (auto const& C : material_tangents)
+        {
+            REQUIRE((C - C.transpose()).norm() == Approx(0.0));
+        }
+        for (auto& σ : σ_list)
+        {
+            REQUIRE(σ.norm() != Approx(0.0));
+
+            // Shear components should be close to zero
+            REQUIRE(σ(0, 1) == Approx(0.0));
+            REQUIRE(σ(0, 2) == Approx(0.0));
+            REQUIRE(σ(1, 2) == Approx(0.0));
+            REQUIRE(σ(0, 0) > 0.0);
+            REQUIRE(σ(1, 1) > 0.0);
+            REQUIRE(σ(2, 2) > 0.0);
+        }
+        for (auto& ε_p_eff : eff_plastic_list) REQUIRE(ε_p_eff == Approx(0.0));
+        for (auto& vm : vm_list) REQUIRE(vm < 200.0e6);
+    }
+    SECTION("Plastic uniaxial elastic load")
+    {
+        for (auto& H : H_list) H(2, 2) = 0.002;
+
+        j2plasticity.update_internal_variables(1.0);
+
+        auto[vm_list,
+             eff_plastic_list] = variables(InternalVariables::Scalar::VonMisesStress,
+                                           InternalVariables::Scalar::EffectivePlasticStrain);
+
+        // Ensure symmetry is correct
+        for (auto const& C : material_tangents)
+        {
+            REQUIRE((C - C.transpose()).norm() == Approx(0.0));
+        }
+        for (auto& σ : σ_list)
+        {
+            REQUIRE(σ.norm() != Approx(0.0));
+
+            // Shear components should be close to zero
+            REQUIRE(σ(0, 1) == Approx(0.0));
+            REQUIRE(σ(0, 2) == Approx(0.0));
+            REQUIRE(σ(1, 2) == Approx(0.0));
+            REQUIRE(σ(0, 0) > 0.0);
+            REQUIRE(σ(1, 1) > 0.0);
+            REQUIRE(σ(2, 2) > 0.0);
+        }
+        for (auto& ε_p_eff : eff_plastic_list)
+        {
+            REQUIRE(ε_p_eff > 0.0);
+        }
+        for (auto& vm : vm_list)
+        {
+            // Should experience hardening
+            REQUIRE(vm <= 201.0e6);
+            REQUIRE(vm > 200.0e6);
+        }
+    }
+}
