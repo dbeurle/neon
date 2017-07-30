@@ -1,4 +1,5 @@
-#define CATCH_CONFIG_MAIN // This tells Catch to provide a main() - only do this in one cpp file
+#define CATCH_CONFIG_MAIN // This tells Catch to provide a main() - only do this in one
+                          // cpp file
 #include "catch.hpp"
 
 #include "solver/AdaptiveLoadStep.hpp"
@@ -42,7 +43,7 @@ TEST_CASE("AdaptiveIncrement")
     SECTION("Badly behaved nonlinear iteration")
     {
         auto last_good_load_factor = load.factor();
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 9; i++)
         {
             load.update_convergence_state(false);
             REQUIRE(load.factor() < last_good_load_factor);

@@ -101,7 +101,7 @@ protected:
     void check_increment_data(Json::Value const& increment_data);
 
 protected:
-    int const increment_limit = 5;   //!< Maximum allowable increments
+    int const increment_limit = 10;  //!< Maximum allowable increments
     int successful_increments = 0;   //!< Number of converged steps
     int consecutive_unconverged = 0; //!< Number of consecutive unsuccessful attempts
 
