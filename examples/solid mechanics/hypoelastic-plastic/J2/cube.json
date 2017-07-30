@@ -1,5 +1,5 @@
 {
-    "Name" : "Toy cube model",
+    "Name" : "J2Plasticity",
     "Cores" : 4,
     "Part": [{
         "Name" : "cube",
@@ -13,10 +13,18 @@
         "YieldStress" : 200.0e6,
         "PoissonsRatio" : 0.3
     }],
-    "Simulation" : [{
+    "SimulationCases" : [{
         "Name" : "Uniaxial",
 		"Type" : "SolidMechanics",
         "Solution" : "Equilibrium",
+        "Time" : {
+            "Period" : 1.0,
+            "Increments" : {
+                "Initial" : 0.1,
+                "Minimum" : 0.00001,
+                "Maximum" : 0.1
+            }
+        },
 		"Mesh" :
         [{
             "Name" : "cube",
@@ -51,20 +59,21 @@
                 "Name" : "ZLoad",
 				"Type" : "Displacement",
                 "Values" : {
-                    "z" : 1.03e-3
+                    "z" : 1.2e-3
                 }
             }]
         }],
 		"LinearSolver" :
         {
-		    "Solver" : "SparseLU",
+		    "Solver" : "pCG",
             "MaxIterations" : 1000,
             "MaxTolerance"  : 1.0e-6
         },
-        "Visualization" :
-        [{
-            "Fields" : ["Displacement", "CauchyStrain", "CauchyStress", "VonMises"]
-        }]
+        "Visualisation" :
+        {
+            "Fields" : ["Displacement", "LinearisedStrain", "LinearisedPlasticStrain",
+                        "CauchyStress", "VonMisesStress", "AccumulatedPlasticStrain"]
+        }
         }
     ]
 }
