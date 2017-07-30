@@ -330,13 +330,18 @@ TEST_CASE("Nodal ordering Adapater")
     {
         // Create a dummy connectivity set
         std::vector<List> nodal_connectivity = {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
-                                                {10, 11, 12, 13, 14, 15, 16, 17, 18, 19}};
+                                                {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}};
 
         node_adapter.convert_from_gmsh(nodal_connectivity, ElementTopology::Tetrahedron10);
 
-        REQUIRE(nodal_connectivity[0][6] == 8);
-        REQUIRE(nodal_connectivity[0][8] == 6);
-        REQUIRE(nodal_connectivity[1][6] == 18);
-        REQUIRE(nodal_connectivity[1][8] == 16);
+        REQUIRE(nodal_connectivity[0][0] == 3);
+        REQUIRE(nodal_connectivity[0][3] == 0);
+        REQUIRE(nodal_connectivity[0][4] == 9);
+        REQUIRE(nodal_connectivity[0][9] == 4);
+
+        REQUIRE(nodal_connectivity[1][0] == 3);
+        REQUIRE(nodal_connectivity[1][3] == 0);
+        REQUIRE(nodal_connectivity[1][4] == 9);
+        REQUIRE(nodal_connectivity[1][9] == 4);
     }
 }

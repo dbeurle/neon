@@ -125,25 +125,19 @@ void SimulationControl::parse()
                   << " into the mesh store\n";
     }
 
+    std::array<std::string, 5> const required_fields = {
+        {"Name", "Time", "Solution", "Visualisation", "LinearSolver"}};
+
     // Build a list of all the load steps for a given mesh
     for (auto const& simulation : root["SimulationCases"])
     {
-        if (!simulation.isMember("Name"))
-            throw std::runtime_error("A simulation case needs a \"Name\" field\n");
-
-        if (!simulation.isMember("Time"))
-            throw std::runtime_error("A simulation case needs a \"Time\" field\n");
-
-        if (!simulation.isMember("Solution"))
-            throw std::runtime_error("A simulation case needs a \"Solution\" field\n");
-
-        if (!simulation.isMember("Visualisation"))
-            throw std::runtime_error("A simulation case needs a \"Visualisation\" "
-                                     "field\n");
-
-        if (!simulation.isMember("LinearSolver"))
-            throw std::runtime_error("A simulation case needs a \"LinearSolver\" "
-                                     "field\n");
+        // Ensure the required fields exist
+        for (auto const& required_field : required_fields)
+        {
+            if (!simulation.isMember(required_field))
+                throw std::runtime_error("A simulation case needs a \"" + required_field
+                                         + "\" field\n");
+        }
 
         // Multiple meshes not supported
         assert(simulation["Mesh"].size() == 1);

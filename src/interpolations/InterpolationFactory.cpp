@@ -40,8 +40,8 @@ std::unique_ptr<VolumeInterpolation> make_volume_interpolation(
         case ElementTopology::Tetrahedron10:
         {
             return std::make_unique<Tetrahedron10>(
-                is_reduced ? TetrahedronQuadrature::Rule::FourPoint
-                           : TetrahedronQuadrature::Rule::FivePoint);
+                is_reduced ? TetrahedronQuadrature::Rule::OnePoint
+                           : TetrahedronQuadrature::Rule::FourPoint);
         }
         case ElementTopology::Prism6:
         case ElementTopology::Pyramid5:
