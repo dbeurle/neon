@@ -10,6 +10,7 @@
 #include "mesh/solid/femMesh.hpp"
 
 #include <iomanip>
+#include <thread>
 #include <unordered_set>
 
 #include <boost/filesystem.hpp>
@@ -18,6 +19,8 @@
 
 namespace neon
 {
+int SimulationControl::threads = std::thread::hardware_concurrency();
+
 SimulationControl::SimulationControl(std::string const& input_file_name)
     : input_file_name(input_file_name)
 {
@@ -66,7 +69,7 @@ void SimulationControl::parse()
     if (root["Material"].empty()) throw EmptyFieldException("Material");
     if (root["SimulationCases"].empty()) throw EmptyFieldException("SimulationCases");
 
-    if (!root["Cores"].empty()) threads = root["Cores"].asInt();
+    if (root.isMember("Cores")) threads = root["Cores"].asInt();
 
     std::unordered_set<std::string> material_names, part_names;
 

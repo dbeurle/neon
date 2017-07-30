@@ -1,6 +1,8 @@
 
 #include "Pastix.hpp"
 
+#include "SimulationControl.hpp"
+
 // Must be here
 #include <Eigen/PaStiXSupport>
 
@@ -19,7 +21,7 @@ void PaStiX::solve(const SparseMatrix& A, Vector& x, const Vector& b)
     pastix.iparm(3) = 1;
 
     // Number of threads
-    pastix.iparm(34) = std::thread::hardware_concurrency();
+    pastix.iparm(34) = SimulationControl::threads;
 
     // Number of Cuda devices
     // pastix.iparm(64) = 1;
