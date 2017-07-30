@@ -20,6 +20,7 @@ public:
 
     void start();
 
+    static int threads; //!< Number of hardware threads to use
 protected:
     void parse();
 
@@ -29,8 +30,6 @@ protected:
     void find_children(std::string const& parent_name, std::string const& next_parent_name);
 
 protected:
-    int threads = 1; //!< Number of hardware threads to use
-
     std::string input_file_name;
 
     // Store the name, mesh connectivity and material

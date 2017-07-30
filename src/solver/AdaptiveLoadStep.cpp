@@ -48,6 +48,12 @@ void AdaptiveLoadStep::update_convergence_state(bool is_converged)
 
         current_time = last_converged_time + dt;
 
+        if (current_time > final_time)
+        {
+            throw std::runtime_error("Minimum increment is not small enough to resolve "
+                                     "the step\n");
+        }
+
         std::cout << "\n"
                   << std::string(terminal_indent, ' ') << termcolor::yellow
                   << termcolor::bold << "Non-convergence detected - step time set to "

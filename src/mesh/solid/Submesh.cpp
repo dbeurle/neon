@@ -284,7 +284,7 @@ int femSubmesh::offset(int element, int quadrature_point) const
     return sf->quadrature().points() * element + quadrature_point;
 }
 
-std::tuple<Vector, Vector> femSubmesh::nodal_averaged_variable(
+femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(
     InternalVariables::Tensor const tensor_name) const
 {
     Vector count = Vector::Zero(material_coordinates->size() * 9);
@@ -312,6 +312,7 @@ std::tuple<Vector, Vector> femSubmesh::nodal_averaged_variable(
                     component(l) = tensor(ci, cj);
                 }
 
+                // Local extrapolation to the nodes
                 Vector const nodal_component = E * component;
 
                 for (auto n = 0; n < nodal_component.rows(); n++)
@@ -323,5 +324,40 @@ std::tuple<Vector, Vector> femSubmesh::nodal_averaged_variable(
         }
     }
     return {value, count};
+}
+
+femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(
+    InternalVariables::Scalar const scalar_name) const
+{
+    Vector count = Vector::Zero(material_coordinates->size() * 9);
+    Vector value = count;
+
+    auto const& scalar_list = variables(scalar_name);
+
+    auto const& E = sf->local_quadrature_extrapolation();
+
+    // Vector format of values
+    Vector component = Vector::Zero(sf->quadrature().points());
+
+    for (auto e = 0; e < elements(); ++e)
+    {
+        // Assemble these into the global value vector
+        auto const& node_list = local_node_list(e);
+
+        for (auto l = 0; l < sf->quadrature().points(); ++l)
+        {
+            component(l) = scalar_list[this->offset(e, l)];
+        }
+
+        // Local extrapolation to the nodes
+        Vector const nodal_component = E * component;
+
+        for (auto n = 0; n < nodal_component.rows(); n++)
+        {
+            value(node_list[n]) += nodal_component(n);
+            count(node_list[n]) += 1.0;
+        }
+    }
+    return std::make_tuple(value, count);
 }
 }

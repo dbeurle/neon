@@ -4,6 +4,8 @@
 
 #include "LinearSolver.hpp"
 
+#include "SimulationControl.hpp"
+
 #ifdef ENABLE_OPENMP
 #include <omp.h>
 #endif
@@ -38,7 +40,7 @@ pCG::pCG(double tol, int maxIter)
 void pCG::solve(SparseMatrix const& A, Vector& x, const Vector& b)
 {
 #ifdef ENABLE_OPENMP
-    omp_set_num_threads(std::thread::hardware_concurrency());
+    omp_set_num_threads(SimulationControl::threads);
 #endif
 
     Eigen::ConjugateGradient<SparseMatrix, Eigen::Lower | Eigen::Upper> pcg;

@@ -10,8 +10,14 @@ inline double double_dot(Matrix3 const& a, Matrix3 const& b)
     return (a.array() * b.array()).sum();
 }
 
+/** @return the volumetric part of the tensor */
+inline Matrix3 volumetric(Matrix3 const& a)
+{
+    return Matrix3::Identity() * a.trace() / 3.0;
+}
+
 /** @return the deviatoric part of the tensor */
-inline Matrix3 deviatoric(Matrix3 const& a) { return a - Matrix3::Identity() * a.trace() / 3.0; }
+inline Matrix3 deviatoric(Matrix3 const& a) { return a - volumetric(a); }
 
 /** Compute the von Mises stress based on the full stress tensor */
 inline double von_mises_stress(Matrix3 const& a)
@@ -70,7 +76,10 @@ inline double I1(Matrix3 const& a) { return a.trace(); }
  * \f}
  * @return Second invariant
  */
-inline double I2(Matrix3 const& a) { return 0.5 * (std::pow(a.trace(), 2) - (a * a).trace()); }
+inline double I2(Matrix3 const& a)
+{
+    return 0.5 * (std::pow(a.trace(), 2) - (a * a).trace());
+}
 
 /** @return Third invariant, which is the determinant of the tensor */
 inline double I3(Matrix3 const& a) { return a.determinant(); }
@@ -87,9 +96,9 @@ inline Matrix identity_expansion(Matrix const& H, int const nodal_dofs)
     return K;
 }
 
-inline Matrix fourth_order_identity()
+inline CMatrix fourth_order_identity()
 {
-    Matrix I(6, 6);
+    CMatrix I(6, 6);
     I << 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, //
         0.0, 1.0, 0.0, 0.0, 0.0, 0.0,  //
         0.0, 0.0, 1.0, 0.0, 0.0, 0.0,  //
@@ -99,9 +108,9 @@ inline Matrix fourth_order_identity()
     return I;
 }
 
-inline Matrix I_outer_I()
+inline CMatrix I_outer_I()
 {
-    Matrix i_o_i(6, 6);
+    CMatrix i_o_i(6, 6);
     i_o_i << 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, //
         1.0, 1.0, 1.0, 0.0, 0.0, 0.0,      //
         1.0, 1.0, 1.0, 0.0, 0.0, 0.0,      //
@@ -111,50 +120,5 @@ inline Matrix I_outer_I()
     return i_o_i;
 }
 
-inline Matrix outer_product(Matrix3 const& h)
-{
-    Matrix h_outer_h(6, 6);
-    h_outer_h << std::pow(h(0, 0), 2), //
-        h(0, 0) * h(1, 1),             //
-        h(0, 0) * h(2, 2),             //
-        h(0, 0) * h(1, 2),             //
-        h(0, 0) * h(0, 2),             //
-        h(0, 0) * h(0, 1),             //
-        //
-        h(0, 0) * h(1, 1),    //
-        std::pow(h(1, 1), 2), //
-        h(1, 1) * h(2, 2),    //
-        h(1, 1) * h(1, 2),    //
-        h(0, 2) * h(1, 1),    //
-        h(0, 1) * h(1, 1),    //
-                              //
-        h(0, 0) * h(2, 2),    //
-        h(1, 1) * h(2, 2),    //
-        std::pow(h(2, 2), 2), //
-        h(1, 2) * h(2, 2),    //
-        h(0, 2) * h(2, 2),    //
-        h(0, 1) * h(2, 2),    //
-                              //
-        h(0, 0) * h(1, 2),    //
-        h(1, 1) * h(1, 2),    //
-        h(1, 2) * h(2, 2),    //
-        std::pow(h(1, 2), 2), //
-        h(0, 2) * h(1, 2),    //
-        h(0, 1) * h(1, 2),    //
-                              //
-        h(0, 0) * h(0, 2),    //
-        h(0, 2) * h(1, 1),    //
-        h(0, 2) * h(2, 2),    //
-        h(0, 2) * h(1, 2),    //
-        std::pow(h(0, 2), 2), //
-        h(0, 1) * h(0, 2),    //
-                              //
-        h(0, 0) * h(0, 1),    //
-        h(0, 1) * h(1, 1),    //
-        h(0, 1) * h(2, 2),    //
-        h(0, 1) * h(1, 2),    //
-        h(0, 1) * h(0, 2),    //
-        std::pow(h(0, 1), 2); //
-    return h_outer_h;
-}
+inline CMatrix outer_product(Matrix3 const& h) { return voigt(h) * voigt(h).transpose(); }
 }
