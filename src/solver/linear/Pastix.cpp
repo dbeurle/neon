@@ -7,7 +7,7 @@
 #include <Eigen/PaStiXSupport>
 
 #include <chrono>
-#include <thread>
+#include <termcolor/termcolor.hpp>
 
 namespace neon
 {
@@ -18,7 +18,7 @@ void PaStiX::solve(const SparseMatrix& A, Vector& x, const Vector& b)
     Eigen::PastixLLT<Eigen::SparseMatrix<double>, Eigen::Upper> pastix;
 
     // Verbosity
-    pastix.iparm(3) = 1;
+    pastix.iparm(3) = 0;
 
     // Number of threads
     pastix.iparm(34) = SimulationControl::threads;
@@ -32,5 +32,7 @@ void PaStiX::solve(const SparseMatrix& A, Vector& x, const Vector& b)
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
+    std::cout << std::string(6, ' ') << "PaStiX LLT direct solver took "
+              << elapsed_seconds.count() << "s\n";
 }
 }
