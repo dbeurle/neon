@@ -323,7 +323,7 @@ femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(
             }
         }
     }
-    return std::make_tuple(value, count);
+    return {value, count};
 }
 
 femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(
