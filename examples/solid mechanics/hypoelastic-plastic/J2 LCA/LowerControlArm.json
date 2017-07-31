@@ -1,15 +1,15 @@
 {
     "Name" : "J2Plasticity",
-    "Cores" : 2,
+    "Cores" : 4,
     "Part": [{
         "Name" : "LowerControlArm",
         "Material" : "steel"
     }],
     "Material" : [{
         "Name" : "steel",
-        "ElasticModulus" : 200.0e9,
-        "IsotropicHardeningModulus" : 400.0e6,
-        "YieldStress" : 200.0e6,
+        "ElasticModulus" : 200.0e3,
+        "IsotropicHardeningModulus" : 400.0,
+        "YieldStress" : 200.0,
         "PoissonsRatio" : 0.3
     }],
     "SimulationCases" : [{
@@ -21,7 +21,7 @@
             "Increments" : {
                 "Initial" : 0.1,
                 "Minimum" : 0.00001,
-                "Maximum" : 0.1
+                "Maximum" : 1.0
             }
         },
 		"Mesh" :
@@ -30,7 +30,7 @@
             "ConstitutiveModel" : "J2",
             "ElementOptions" :
             {
-                "Quadrature" : "Reduced"
+                "Quadrature" : "Full"
             },
             "BoundaryConditions" :
             [{
@@ -46,15 +46,15 @@
                 "Name" : "Load",
                 "Type" : "Displacement",
                 "Values" : {
-                    "y" : 0.1
+                    "x" : 0.005
                 }
             }]
         }],
 		"LinearSolver" :
         {
 		    "Solver" : "Pastix",
-            "MaxIterations" : 1000,
-            "MaxTolerance"  : 1.0e-6
+            "MaxIterations" : 2000,
+            "MaxTolerance"  : 1.0e-8
         },
         "Visualisation" :
         {
