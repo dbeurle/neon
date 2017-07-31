@@ -329,7 +329,7 @@ femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(
 femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(
     InternalVariables::Scalar const scalar_name) const
 {
-    Vector count = Vector::Zero(material_coordinates->size() * 9);
+    Vector count = Vector::Zero(material_coordinates->size());
     Vector value = count;
 
     auto const& scalar_list = variables(scalar_name);
@@ -358,6 +358,6 @@ femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(
             count(node_list[n]) += 1.0;
         }
     }
-    return std::make_tuple(value, count);
+    return {value, count};
 }
 }
