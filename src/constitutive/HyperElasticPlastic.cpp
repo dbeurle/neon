@@ -74,7 +74,13 @@ void J2Plasticity::update_internal_variables(double const Δt)
         // and decide if the stress return needs to be computed
         auto f = von_mises - material.yield_stress(α);
 
-        if (f <= 0.0) continue;
+        if (f <= 0.0)
+        {
+            C_list[l] = C_e;
+            continue;
+        }
+
+        std::cout << "Plasticity detected\n";
 
         // Compute the normal direction to the yield surface which remains
         // constant throughout the radial return method
@@ -103,7 +109,7 @@ void J2Plasticity::update_internal_variables(double const Δt)
         ɛ_p += Δλ * std::sqrt(3.0 / 2.0) * normal;
 
         // Cauchy stress update
-        σ -= 3.0 * μ_e * Δλ * std::sqrt(2.0 / 3.0) * normal;
+        σ -= 2.0 * μ_e * Δλ * std::sqrt(3.0 / 2.0) * normal;
 
         // Update the Von Mises stress
         von_mises = von_mises_stress(σ);
@@ -124,7 +130,8 @@ void J2Plasticity::update_internal_variables(double const Δt)
         }
         // Compute the elastic-plastic tangent modulus
         // C_list[l] = algorithmic_tangent(α, σ, σ_0, normal, J);
-        C_list[l] = increment_tangent(Δλ, von_mises_stress(σ_0));
+        // C_list[l] = incremental_tangent(Δλ, von_mises_stress(σ_0));
+        C_list[l] = continuum_tangent(Δλ, α, von_mises_stress(σ_0), normal);
     }
 }
 
@@ -141,7 +148,7 @@ CMatrix J2Plasticity::elastic_moduli() const
     return C;
 }
 
-CMatrix J2Plasticity::dev_projection() const
+CMatrix J2Plasticity::deviatoric_projection() const
 {
     CMatrix C(6, 6);
     C << 2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0, //
@@ -153,10 +160,22 @@ CMatrix J2Plasticity::dev_projection() const
     return C;
 }
 
-CMatrix J2Plasticity::increment_tangent(double const Δλ, double const von_mises) const
+CMatrix J2Plasticity::incremental_tangent(double const Δλ, double const von_mises) const
 {
     auto const G = material.mu();
     return C_e - Δλ * 6 * G * G / von_mises * Id;
+}
+
+CMatrix J2Plasticity::continuum_tangent(double const Δλ,
+                                        double const α,
+                                        double const von_mises,
+                                        Matrix3 const& n) const
+{
+    auto const G = material.shear_modulus();
+    auto const H = material.hardening_modulus(α);
+    return C_e - 6.0 * std::pow(G, 2) * Δλ / von_mises * Id
+           + 6.0 * std::pow(G, 2) * (Δλ / von_mises - 1.0 / (3.0 * G + H)) * voigt(n)
+                 * voigt(n).transpose() * std::sqrt(2.0 / 3.0);
 }
 
 CMatrix J2Plasticity::algorithmic_tangent(double const α,
