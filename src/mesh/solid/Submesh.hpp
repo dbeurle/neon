@@ -47,16 +47,16 @@ public:
     auto const& constitutive() const { return *cm.get(); }
 
     /** @return the tangent consistent stiffness matrix */
-    std::tuple<List const&, Matrix> tangent_stiffness(int element) const;
+    std::tuple<List const&, Matrix> tangent_stiffness(int const element) const;
 
     /** @return the internal element force */
-    std::tuple<List const&, Vector> internal_force(int element) const;
+    std::tuple<List const&, Vector> internal_force(int const element) const;
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    std::tuple<List const&, Matrix> consistent_mass(int element) const;
+    std::tuple<List const&, Matrix> consistent_mass(int const element) const;
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    std::tuple<List const&, Vector> diagonal_mass(int element) const;
+    std::tuple<List const&, Vector> diagonal_mass(int const element) const;
 
     /** Update the internal variables for the mesh group
      *  Calls:

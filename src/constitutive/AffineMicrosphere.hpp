@@ -25,6 +25,8 @@ public:
 
     Material const& intrinsic_material() const override final { return material; };
 
+    virtual bool is_finite_deformation() const override final { return true; };
+
 protected:
     /**
      * \f{align*}{

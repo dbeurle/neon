@@ -1,5 +1,5 @@
 
-#include "HyperElasticPlastic.hpp"
+#include "J2Plasticity.hpp"
 
 #include "InternalVariables.hpp"
 
@@ -9,9 +9,8 @@
 
 namespace neon
 {
-FiniteJ2Plasticity::FiniteJ2Plasticity(InternalVariables& variables,
-                                       Json::Value const& material_data)
-    : HyperElasticPlastic(variables), material(material_data), C_e(elastic_moduli())
+J2Plasticity::J2Plasticity(InternalVariables& variables, Json::Value const& material_data)
+    : HypoElasticPlastic(variables), material(material_data)
 {
     variables.add(InternalVariables::Tensor::LinearisedStrain,
                   InternalVariables::Tensor::LinearisedPlasticStrain);
@@ -23,9 +22,9 @@ FiniteJ2Plasticity::FiniteJ2Plasticity(InternalVariables& variables,
     variables.add(InternalVariables::Matrix::TruesdellModuli, elastic_moduli());
 }
 
-FiniteJ2Plasticity::~FiniteJ2Plasticity() = default;
+J2Plasticity::~J2Plasticity() = default;
 
-void FiniteJ2Plasticity::update_internal_variables(double const Δt)
+void J2Plasticity::update_internal_variables(double const Δt)
 {
     using namespace ranges;
 
@@ -134,7 +133,7 @@ void FiniteJ2Plasticity::update_internal_variables(double const Δt)
     }
 }
 
-CMatrix FiniteJ2Plasticity::elastic_moduli() const
+CMatrix J2Plasticity::elastic_moduli() const
 {
     auto const[λ, μ] = material.Lame_parameters();
     CMatrix C(6, 6);
@@ -147,7 +146,7 @@ CMatrix FiniteJ2Plasticity::elastic_moduli() const
     return C;
 }
 
-CMatrix FiniteJ2Plasticity::deviatoric_projection() const
+CMatrix J2Plasticity::deviatoric_projection() const
 {
     CMatrix C(6, 6);
     C << 2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0, //
@@ -159,22 +158,22 @@ CMatrix FiniteJ2Plasticity::deviatoric_projection() const
     return C;
 }
 
-CMatrix FiniteJ2Plasticity::incremental_tangent(double const Δλ, double const von_mises) const
+CMatrix J2Plasticity::incremental_tangent(double const Δλ, double const von_mises) const
 {
     auto const G = material.mu();
     return C_e - Δλ * 6 * G * G / von_mises * I_dev;
 }
 
-CMatrix FiniteJ2Plasticity::algorithmic_tangent(double const Δλ,
-                                                double const α,
-                                                double const von_mises,
-                                                Matrix3 const& n) const
+CMatrix J2Plasticity::algorithmic_tangent(double const Δλ,
+                                          double const α,
+                                          double const von_mises,
+                                          Matrix3 const& n) const
 {
     auto const G = material.shear_modulus();
     auto const H = material.hardening_modulus(α);
-    auto const n_outer_n = voigt(n) * voigt(n).transpose();
-    return C_e - 6.0 * std::pow(G, 2) * Δλ / (3 * G + H) * n_outer_n
-           - 4.0 * std::pow(G, 2) * Δλ / von_mises * std::sqrt(3.0 / 2.0)
-                 * (I_dev - n_outer_n);
+
+    return C_e - Δλ * 6.0 * std::pow(G, 2) / von_mises * I_dev
+           + 6.0 * std::pow(G, 2) * (Δλ / von_mises - 1.0 / (3.0 * G + H)) * voigt(n)
+                 * voigt(n).transpose();
 }
 }

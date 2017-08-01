@@ -28,6 +28,8 @@ public:
     /** @return A base class reference to the common material properties */
     virtual Material const& intrinsic_material() const = 0;
 
+    virtual bool is_finite_deformation() const = 0;
+
 protected:
     InternalVariables& variables;
 };

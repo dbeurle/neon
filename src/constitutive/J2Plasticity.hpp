@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "ConstitutiveModel.hpp"
+#include "HypoElasticPlastic.hpp"
 
 #include "numeric/DenseTypes.hpp"
 
@@ -9,24 +9,18 @@
 
 namespace neon
 {
-class HyperElasticPlastic : public ConstitutiveModel
+class J2Plasticity : public HypoElasticPlastic
 {
 public:
-    HyperElasticPlastic(InternalVariables& variables) : ConstitutiveModel(variables) {}
-};
+    J2Plasticity(InternalVariables& variables, Json::Value const& material_data);
 
-class FiniteJ2Plasticity : public HyperElasticPlastic
-{
-public:
-    FiniteJ2Plasticity(InternalVariables& variables, Json::Value const& material_data);
-
-    ~FiniteJ2Plasticity();
+    ~J2Plasticity();
 
     void update_internal_variables(double const Δt) override final;
 
     Material const& intrinsic_material() const override final { return material; }
 
-    virtual bool is_finite_deformation() const override final { return true; };
+    virtual bool is_finite_deformation() const override final { return false; };
 
 protected:
     CMatrix elastic_moduli() const;

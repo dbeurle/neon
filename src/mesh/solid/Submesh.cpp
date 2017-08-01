@@ -58,24 +58,27 @@ void femSubmesh::save_internal_variables(bool const have_converged)
     }
 }
 
-std::tuple<List const&, Matrix> femSubmesh::tangent_stiffness(int element) const
+std::tuple<List const&, Matrix> femSubmesh::tangent_stiffness(int const element) const
 {
-    auto x = material_coordinates->current_configuration(local_node_list(element));
+    auto const x = material_coordinates->current_configuration(local_node_list(element));
+
+    Matrix const kmat = material_tangent_stiffness(x, element);
+
+    if (!cm->is_finite_deformation()) return {local_dof_list(element), kmat};
 
     Matrix const kgeo = geometric_tangent_stiffness(x, element);
-    Matrix const kmat = material_tangent_stiffness(x, element);
 
     return {local_dof_list(element), kmat + kgeo};
 }
 
-std::tuple<List const&, Vector> femSubmesh::internal_force(int element) const
+std::tuple<List const&, Vector> femSubmesh::internal_force(int const element) const
 {
     auto x = material_coordinates->current_configuration(local_node_list(element));
 
     return {local_dof_list(element), internal_nodal_force(x, element)};
 }
 
-Matrix femSubmesh::geometric_tangent_stiffness(Matrix const& x, int element) const
+Matrix femSubmesh::geometric_tangent_stiffness(Matrix const& x, int const element) const
 {
     auto const& σ_list = variables(InternalVariables::Tensor::Cauchy);
 
@@ -99,7 +102,7 @@ Matrix femSubmesh::geometric_tangent_stiffness(Matrix const& x, int element) con
     return identity_expansion(kgeo, dofs_per_node());
 }
 
-Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int element) const
+Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int const element) const
 {
     auto const local_dofs = nodes_per_element() * dofs_per_node();
 
@@ -122,7 +125,7 @@ Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int element) cons
     });
 }
 
-Vector femSubmesh::internal_nodal_force(Matrix const& x, int element) const
+Vector femSubmesh::internal_nodal_force(Matrix const& x, int const element) const
 {
     using RowMatrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 

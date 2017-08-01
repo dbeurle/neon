@@ -9,6 +9,7 @@
 
 #include "constitutive/AffineMicrosphere.hpp"
 #include "constitutive/HyperElasticPlastic.hpp"
+#include "constitutive/J2Plasticity.hpp"
 #include "constitutive/NeoHooke.hpp"
 
 using namespace neon;
@@ -38,6 +39,8 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
     REQUIRE(reader.parse(input_data.c_str(), material_data));
 
     NeoHooke neo_hooke(variables, material_data);
+
+    REQUIRE(neo_hooke.is_finite_deformation());
 
     // Get the tensor variables
     auto[F_list, σ_list] = variables(InternalVariables::Tensor::DeformationGradient,
@@ -104,6 +107,8 @@ TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
 
     AffineMicrosphere affine(variables, material_data);
 
+    REQUIRE(affine.is_finite_deformation());
+
     // Get the tensor variables
     auto[F_list, σ_list] = variables(InternalVariables::Tensor::DeformationGradient,
                                      InternalVariables::Tensor::Cauchy);
@@ -169,6 +174,8 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
     variables.add(InternalVariables::Scalar::DetF);
 
     J2Plasticity j2plasticity(variables, material_data);
+
+    REQUIRE(!j2plasticity.is_finite_deformation());
 
     // Get the tensor variables
     auto[H_list, σ_list] = variables(InternalVariables::Tensor::DisplacementGradient,
