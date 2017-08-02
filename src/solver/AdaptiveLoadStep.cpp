@@ -27,7 +27,7 @@ void AdaptiveLoadStep::update_convergence_state(bool is_converged)
         successful_increments++;
         last_converged_time = current_time;
 
-        is_applied = std::abs(current_time - final_time) < 1.0e-8;
+        is_applied = std::abs(current_time - final_time) < minimum_increment;
 
         if (is_applied) return;
 
