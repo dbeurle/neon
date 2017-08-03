@@ -42,43 +42,37 @@ protected:
 
 inline double NewmarkBeta::mass_scaling_factor() const
 {
-    auto const Δt = time_control.current_time_step_size();
-    auto const β = beta_parameter;
-    return 1.0 / (β * std::pow(Δt, 2));
+    auto const time_step_size = time_control.current_time_step_size();
+    return 1.0 / (beta_parameter * std::pow(time_step_size, 2));
 }
 
 inline Vector NewmarkBeta::approximate_displacements(Vector const& a,
                                                      Vector const& v,
                                                      Vector const& d) const
 {
-    auto const Δt = time_control.current_time_step_size();
-    auto const β = beta_parameter;
+    auto const time_step_size = time_control.current_time_step_size();
 
-    return d + Δt * v + std::pow(Δt, 2) / 2.0 * (1.0 - 2.0 * β) * a;
+    return d + time_step_size * v
+           + std::pow(time_step_size, 2) / 2.0 * (1.0 - 2.0 * beta_parameter) * a;
 }
 
 inline Vector NewmarkBeta::approximate_velocities(Vector const& a, Vector const& v) const
 {
-    auto const Δt = time_control.current_time_step_size();
-    auto const γ = artifical_viscosity;
-
-    return v + (1.0 - γ) * Δt * a;
+    auto const time_step_size = time_control.current_time_step_size();
+    return v + (1.0 - artifical_viscosity) * time_step_size * a;
 }
 
 inline Vector NewmarkBeta::accelerations(Vector const& a, Vector const& v, Vector const& d)
 {
-    auto const Δt = time_control.current_time_step_size();
-    auto const β = beta_parameter;
-
+    auto const time_step_size = time_control.current_time_step_size();
     a_old = a;
 
-    return 1.0 / (β * std::pow(Δt, 2)) * (d - approximate_displacements(a, v, d));
+    return 1.0 / (beta_parameter * std::pow(time_step_size, 2))
+           * (d - approximate_displacements(a, v, d));
 }
 inline Vector NewmarkBeta::velocities(Vector const& a, Vector const& v) const
 {
-    auto const Δt = time_control.current_time_step_size();
-    auto const γ = artifical_viscosity;
-
-    return approximate_velocities(a_old, v) + γ * Δt * a;
+    auto const time_step_size = time_control.current_time_step_size();
+    return approximate_velocities(a_old, v) + artifical_viscosity * time_step_size * a;
 }
 }

@@ -7,9 +7,9 @@
 
 namespace neon
 {
-double zero_trunc_poisson_pmf(double const λ, int const k)
+double zero_trunc_poisson_pmf(double const mean, int const k)
 {
-    return std::exp(k * std::log(λ) - std::lgamma(k + 1)) / (std::exp(λ) - 1.0);
+    return std::exp(k * std::log(mean) - std::lgamma(k + 1)) / (std::exp(mean) - 1.0);
 }
 
 MicromechanicalElastomer::MicromechanicalElastomer(Json::Value const& material_data)

@@ -64,7 +64,7 @@ public:
      *  \sa update_Jacobian_determinants()
      *  \sa check_element_distortion()
      */
-    void update_internal_variables(double const Δt = 1.0);
+    void update_internal_variables(double const time_step_size = 1.0);
 
     /**
      * Compute the local deformation gradient

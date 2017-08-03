@@ -16,7 +16,7 @@ public:
 
     ~J2Plasticity();
 
-    void update_internal_variables(double const Δt) override final;
+    void update_internal_variables(double const time_step_size) override final;
 
     Material const& intrinsic_material() const override final { return material; }
 
@@ -27,10 +27,11 @@ protected:
 
     CMatrix deviatoric_projection() const;
 
-    CMatrix incremental_tangent(double const Δλ, double const von_mises) const;
+    CMatrix incremental_tangent(double const plastic_increment,
+                                double const von_mises) const;
 
-    CMatrix algorithmic_tangent(double const Δλ,
-                                double const α,
+    CMatrix algorithmic_tangent(double const plastic_increment,
+                                double const accumulated_plastic_strain,
                                 double const von_mises,
                                 Matrix3 const& n) const;
 
