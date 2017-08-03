@@ -36,10 +36,10 @@ public:
     double number_of_initial_segments() const { return N0_avg; }
 
     /** @return the current number of chains in the network */
-    double update_chains(double const n, double const Δt) const;
+    double update_chains(double const n, double const time_step_size) const;
 
     /** @return the new segments.  Compute probability based on evolution equation */
-    double update_segments(double const N, double const Δt);
+    double update_segments(double const N, double const time_step_size);
 
     /** @return a pair (N, fraction) of the thresholded probability mass function */
     auto const& segment_probability() const { return probability_segments_pairs; }
@@ -75,14 +75,16 @@ inline double MicromechanicalElastomer::shear_modulus(double const n) const
     return n * boltzmann_constant * temperature;
 }
 
-inline double MicromechanicalElastomer::update_chains(double const n, double const Δt) const
+inline double MicromechanicalElastomer::update_chains(double const n,
+                                                      double const time_step_size) const
 {
-    return n / (1.0 + chain_decay_rate * Δt);
+    return n / (1.0 + chain_decay_rate * time_step_size);
 }
 
-inline double MicromechanicalElastomer::update_segments(double const N, double const Δt)
+inline double MicromechanicalElastomer::update_segments(double const N,
+                                                        double const time_step_size)
 {
     compute_probability_and_segments(N);
-    return N / (1.0 + Δt * segment_decay_rate);
+    return N / (1.0 + time_step_size * segment_decay_rate);
 }
 }

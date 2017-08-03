@@ -219,7 +219,7 @@ void femStaticMatrix::perform_equilibrium_iterations()
     Vector delta_d = Vector::Zero(fem_mesh.active_dofs());
 
     // Full Newton-Raphson iteration to solve nonlinear equations
-    auto constexpr max_iterations = 15;
+    auto constexpr max_iterations = 10;
     auto current_iteration = 0;
 
     while (current_iteration < max_iterations)

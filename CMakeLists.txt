@@ -9,7 +9,7 @@ option(ENABLE_NATIVE "Optimised specifically for current architecture" OFF)
 option(ENABLE_CUDA "Enable CUDA linear solver" OFF)
 
 if (ENABLE_NATIVE)
-    add_definitions("-march=native -ffast-math")
+    add_definitions("-march=native")
 endif()
 
 if (ENABLE_CUDA)

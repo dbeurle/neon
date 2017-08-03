@@ -47,16 +47,16 @@ public:
     auto const& constitutive() const { return *cm.get(); }
 
     /** @return the tangent consistent stiffness matrix */
-    std::tuple<List const&, Matrix> tangent_stiffness(int element) const;
+    std::tuple<List const&, Matrix> tangent_stiffness(int const element) const;
 
     /** @return the internal element force */
-    std::tuple<List const&, Vector> internal_force(int element) const;
+    std::tuple<List const&, Vector> internal_force(int const element) const;
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    std::tuple<List const&, Matrix> consistent_mass(int element) const;
+    std::tuple<List const&, Matrix> consistent_mass(int const element) const;
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    std::tuple<List const&, Vector> diagonal_mass(int element) const;
+    std::tuple<List const&, Vector> diagonal_mass(int const element) const;
 
     /** Update the internal variables for the mesh group
      *  Calls:
@@ -64,7 +64,7 @@ public:
      *  \sa update_Jacobian_determinants()
      *  \sa check_element_distortion()
      */
-    void update_internal_variables(double const Δt = 1.0);
+    void update_internal_variables(double const time_step_size = 1.0);
 
     /**
      * Compute the local deformation gradient

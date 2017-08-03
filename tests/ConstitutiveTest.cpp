@@ -9,6 +9,7 @@
 
 #include "constitutive/AffineMicrosphere.hpp"
 #include "constitutive/HyperElasticPlastic.hpp"
+#include "constitutive/J2Plasticity.hpp"
 #include "constitutive/NeoHooke.hpp"
 
 using namespace neon;
@@ -39,15 +40,17 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
 
     NeoHooke neo_hooke(variables, material_data);
 
+    REQUIRE(neo_hooke.is_finite_deformation());
+
     // Get the tensor variables
-    auto[F_list, σ_list] = variables(InternalVariables::Tensor::DeformationGradient,
-                                     InternalVariables::Tensor::Cauchy);
+    auto[F_list, cauchy_list] = variables(InternalVariables::Tensor::DeformationGradient,
+                                          InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables(InternalVariables::Scalar::DetF);
 
     // Ensure the internal variables are allocated correctly
     REQUIRE(F_list.size() == internal_variable_size);
-    REQUIRE(σ_list.size() == internal_variable_size);
+    REQUIRE(cauchy_list.size() == internal_variable_size);
     REQUIRE(J_list.size() == internal_variable_size);
 
     // Fill with identity matrix
@@ -58,7 +61,7 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
 
     SECTION("Update of internal variables")
     {
-        for (auto& σ : σ_list) REQUIRE(σ.norm() == Approx(0.0));
+        for (auto& cauchy : cauchy_list) REQUIRE(cauchy.norm() == Approx(0.0));
     }
     SECTION("Check of continuum tangent")
     {
@@ -104,9 +107,11 @@ TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
 
     AffineMicrosphere affine(variables, material_data);
 
+    REQUIRE(affine.is_finite_deformation());
+
     // Get the tensor variables
-    auto[F_list, σ_list] = variables(InternalVariables::Tensor::DeformationGradient,
-                                     InternalVariables::Tensor::Cauchy);
+    auto[F_list, cauchy_list] = variables(InternalVariables::Tensor::DeformationGradient,
+                                          InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables(InternalVariables::Scalar::DetF);
 
@@ -127,7 +132,7 @@ TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
             REQUIRE((C - C.transpose()).norm() == Approx(0.0));
         }
 
-        for (auto& σ : σ_list) REQUIRE(σ.norm() == Approx(0.0));
+        for (auto& cauchy : cauchy_list) REQUIRE(cauchy.norm() == Approx(0.0));
     }
     SECTION("Affine model under uniaxial load")
     {
@@ -146,7 +151,7 @@ TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
             REQUIRE((C - C.transpose()).norm() == Approx(0.0));
         }
 
-        for (auto& σ : σ_list) REQUIRE(σ.norm() != Approx(0.0));
+        for (auto& cauchy : cauchy_list) REQUIRE(cauchy.norm() != Approx(0.0));
     }
 }
 TEST_CASE("J2 plasticity model", "[J2Plasticity]")
@@ -170,9 +175,11 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
 
     J2Plasticity j2plasticity(variables, material_data);
 
+    REQUIRE(!j2plasticity.is_finite_deformation());
+
     // Get the tensor variables
-    auto[H_list, σ_list] = variables(InternalVariables::Tensor::DisplacementGradient,
-                                     InternalVariables::Tensor::Cauchy);
+    auto[H_list, cauchy_list] = variables(InternalVariables::Tensor::DisplacementGradient,
+                                          InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables(InternalVariables::Scalar::DetF);
 
@@ -198,7 +205,7 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
         {
             REQUIRE((C - C.transpose()).norm() == Approx(0.0));
         }
-        for (auto& σ : σ_list) REQUIRE(σ.norm() == Approx(0.0));
+        for (auto& cauchy : cauchy_list) REQUIRE(cauchy.norm() == Approx(0.0));
     }
     SECTION("Uniaxial elastic load")
     {
@@ -215,19 +222,19 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
         {
             REQUIRE((C - C.transpose()).norm() == Approx(0.0));
         }
-        for (auto& σ : σ_list)
+        for (auto& cauchy : cauchy_list)
         {
-            REQUIRE(σ.norm() != Approx(0.0));
+            REQUIRE(cauchy.norm() != Approx(0.0));
 
             // Shear components should be close to zero
-            REQUIRE(σ(0, 1) == Approx(0.0));
-            REQUIRE(σ(0, 2) == Approx(0.0));
-            REQUIRE(σ(1, 2) == Approx(0.0));
-            REQUIRE(σ(0, 0) > 0.0);
-            REQUIRE(σ(1, 1) > 0.0);
-            REQUIRE(σ(2, 2) > 0.0);
+            REQUIRE(cauchy(0, 1) == Approx(0.0));
+            REQUIRE(cauchy(0, 2) == Approx(0.0));
+            REQUIRE(cauchy(1, 2) == Approx(0.0));
+            REQUIRE(cauchy(0, 0) > 0.0);
+            REQUIRE(cauchy(1, 1) > 0.0);
+            REQUIRE(cauchy(2, 2) > 0.0);
         }
-        for (auto& ε_p_eff : eff_plastic_list) REQUIRE(ε_p_eff == Approx(0.0));
+        for (auto& strain_p_eff : eff_plastic_list) REQUIRE(strain_p_eff == Approx(0.0));
         for (auto& vm : vm_list) REQUIRE(vm < 200.0e6);
     }
     SECTION("Plastic uniaxial elastic load")
@@ -245,21 +252,21 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
         {
             REQUIRE((C - C.transpose()).norm() == Approx(0.0));
         }
-        for (auto& σ : σ_list)
+        for (auto& cauchy : cauchy_list)
         {
-            REQUIRE(σ.norm() != Approx(0.0));
+            REQUIRE(cauchy.norm() != Approx(0.0));
 
             // Shear components should be close to zero
-            REQUIRE(σ(0, 1) == Approx(0.0));
-            REQUIRE(σ(0, 2) == Approx(0.0));
-            REQUIRE(σ(1, 2) == Approx(0.0));
-            REQUIRE(σ(0, 0) > 0.0);
-            REQUIRE(σ(1, 1) > 0.0);
-            REQUIRE(σ(2, 2) > 0.0);
+            REQUIRE(cauchy(0, 1) == Approx(0.0));
+            REQUIRE(cauchy(0, 2) == Approx(0.0));
+            REQUIRE(cauchy(1, 2) == Approx(0.0));
+            REQUIRE(cauchy(0, 0) > 0.0);
+            REQUIRE(cauchy(1, 1) > 0.0);
+            REQUIRE(cauchy(2, 2) > 0.0);
         }
-        for (auto& ε_p_eff : eff_plastic_list)
+        for (auto& strain_p_eff : eff_plastic_list)
         {
-            REQUIRE(ε_p_eff > 0.0);
+            REQUIRE(strain_p_eff > 0.0);
         }
         for (auto& vm : vm_list)
         {

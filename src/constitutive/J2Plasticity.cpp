@@ -1,5 +1,5 @@
 
-#include "HyperElasticPlastic.hpp"
+#include "J2Plasticity.hpp"
 
 #include "InternalVariables.hpp"
 
@@ -9,9 +9,8 @@
 
 namespace neon
 {
-FiniteJ2Plasticity::FiniteJ2Plasticity(InternalVariables& variables,
-                                       Json::Value const& material_data)
-    : HyperElasticPlastic(variables), material(material_data), C_e(elastic_moduli())
+J2Plasticity::J2Plasticity(InternalVariables& variables, Json::Value const& material_data)
+    : HypoElasticPlastic(variables), material(material_data)
 {
     variables.add(InternalVariables::Tensor::LinearisedStrain,
                   InternalVariables::Tensor::LinearisedPlasticStrain);
@@ -23,13 +22,13 @@ FiniteJ2Plasticity::FiniteJ2Plasticity(InternalVariables& variables,
     variables.add(InternalVariables::Matrix::TruesdellModuli, elastic_moduli());
 }
 
-FiniteJ2Plasticity::~FiniteJ2Plasticity() = default;
+J2Plasticity::~J2Plasticity() = default;
 
-void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
+void J2Plasticity::update_internal_variables(double const time_step_size)
 {
     using namespace ranges;
 
-    auto const shear_modulus = material.shear_modulus();
+    auto const shear_modulus = material.mu();
     auto const lambda_e = material.lambda();
 
     // Extract the internal variables
@@ -62,12 +61,6 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
                                                                                // plastic
                                                                                // strain
         auto& von_mises = von_mises_list[l];
-
-        if (accumulated_plastic_strain > 0.3)
-        {
-            throw std::runtime_error("Excessive plastic strain at quadrature point "
-                                     + std::to_string(l) + "\n");
-        }
 
         // Elastic stress predictor
         Matrix3 const cauchy_stress_0 = lambda_e * (strain - strain_p).trace() * I
@@ -152,7 +145,7 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
     }
 }
 
-CMatrix FiniteJ2Plasticity::elastic_moduli() const
+CMatrix J2Plasticity::elastic_moduli() const
 {
     auto const[lambda, shear_modulus] = material.Lame_parameters();
     CMatrix C(6, 6);
@@ -165,7 +158,7 @@ CMatrix FiniteJ2Plasticity::elastic_moduli() const
     return C;
 }
 
-CMatrix FiniteJ2Plasticity::deviatoric_projection() const
+CMatrix J2Plasticity::deviatoric_projection() const
 {
     CMatrix C(6, 6);
     C << 2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0, //
@@ -177,23 +170,23 @@ CMatrix FiniteJ2Plasticity::deviatoric_projection() const
     return C;
 }
 
-CMatrix FiniteJ2Plasticity::incremental_tangent(double const plastic_increment,
-                                                double const von_mises) const
+CMatrix J2Plasticity::incremental_tangent(double const plastic_increment,
+                                          double const von_mises) const
 {
-    auto const G = material.shear_modulus();
+    auto const G = material.mu();
     return C_e - plastic_increment * 6.0 * G * G / von_mises * I_dev;
 }
 
-CMatrix FiniteJ2Plasticity::algorithmic_tangent(double const plastic_increment,
-                                                double const accumulated_plastic_strain,
-                                                double const von_mises,
-                                                Matrix3 const& n) const
+CMatrix J2Plasticity::algorithmic_tangent(double const plastic_increment,
+                                          double const accumulated_plastic_strain,
+                                          double const von_mises,
+                                          Matrix3 const& n) const
 {
     auto const G = material.shear_modulus();
     auto const H = material.hardening_modulus(accumulated_plastic_strain);
-    auto const n_outer_n = voigt(n) * voigt(n).transpose();
-    return C_e - 6.0 * std::pow(G, 2) * plastic_increment / (3.0 * G + H) * n_outer_n
-           - 4.0 * std::pow(G, 2) * plastic_increment / von_mises * std::sqrt(3.0 / 2.0)
-                 * (I_dev - n_outer_n);
+
+    return C_e - plastic_increment * 6.0 * std::pow(G, 2) / von_mises * I_dev
+           + 6.0 * std::pow(G, 2) * (plastic_increment / von_mises - 1.0 / (3.0 * G + H))
+                 * voigt(n) * voigt(n).transpose();
 }
 }

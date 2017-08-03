@@ -53,19 +53,19 @@ TEST_CASE("Linear elastic material", "[LinearElastic]")
     REQUIRE(linear_elastic.elastic_modulus() == Approx(200.0e9));
 
     auto const E = linear_elastic.elastic_modulus();
-    auto const ν = linear_elastic.Poissons_ratio();
+    auto const v = linear_elastic.Poissons_ratio();
 
     // Check Lamé parameters
-    REQUIRE(linear_elastic.lambda() == Approx(E * ν / ((1.0 + ν) * (1.0 - 2.0 * ν))));
-    REQUIRE(linear_elastic.mu() == Approx(E / (2.0 * (1.0 + ν))));
+    REQUIRE(linear_elastic.lambda() == Approx(E * v / ((1.0 + v) * (1.0 - 2.0 * v))));
+    REQUIRE(linear_elastic.mu() == Approx(E / (2.0 * (1.0 + v))));
 
-    auto const[λ, μ] = linear_elastic.Lame_parameters();
+    auto const[lambda, shear_modulus] = linear_elastic.Lame_parameters();
 
-    REQUIRE(λ == Approx(linear_elastic.lambda()));
-    REQUIRE(μ == Approx(linear_elastic.mu()));
+    REQUIRE(lambda == Approx(linear_elastic.lambda()));
+    REQUIRE(shear_modulus == Approx(linear_elastic.mu()));
 
-    REQUIRE(linear_elastic.bulk_modulus() == Approx(λ + 2.0 / 3.0 * μ));
-    REQUIRE(linear_elastic.shear_modulus() == Approx(μ));
+    REQUIRE(linear_elastic.bulk_modulus() == Approx(lambda + 2.0 / 3.0 * shear_modulus));
+    REQUIRE(linear_elastic.shear_modulus() == Approx(shear_modulus));
 }
 TEST_CASE("Perfect plastic material", "[PerfectPlasticElastic]")
 {
@@ -123,17 +123,17 @@ TEST_CASE("Micromechanical elastomer", "[MicromechanicalElastomer]")
         REQUIRE(accumulate(elastomer.segment_probability(),
                            0.0,
                            [](auto const& psum, auto const& tpl) {
-                               auto const[N, β] = tpl;
-                               return psum + β;
+                               auto const[N, factor] = tpl;
+                               return psum + factor;
                            })
                 == Approx(1.0));
     }
     SECTION("Sanity check the updates routine")
     {
-        auto constexpr Δt = 1.0;
+        auto constexpr time_step_size = 1.0;
 
         // The updated values should be less than the originals
-        REQUIRE(elastomer.update_chains(n, Δt) < n);
-        REQUIRE(elastomer.update_segments(N, Δt) < N);
+        REQUIRE(elastomer.update_chains(n, time_step_size) < n);
+        REQUIRE(elastomer.update_segments(N, time_step_size) < N);
     }
 }

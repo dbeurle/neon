@@ -21,9 +21,11 @@ public:
     explicit AffineMicrosphere(InternalVariables& variables,
                                Json::Value const& material_data);
 
-    virtual void update_internal_variables(double const Δt) override;
+    virtual void update_internal_variables(double const time_step_size) override;
 
     Material const& intrinsic_material() const override final { return material; };
+
+    virtual bool is_finite_deformation() const override final { return true; };
 
 protected:
     /**
@@ -53,7 +55,7 @@ protected:
          n \psi_f^{'}(\lambda) &= \frac{3N - \lambda^2}{N - \lambda^2}
        }
      */
-    double pade_first(double const λ, double const N) const;
+    double pade_first(double const micro_stretch, double const N) const;
 
     /**
      * Compute the Padé approximation of the inverse Langevin stretch model
@@ -61,14 +63,14 @@ protected:
          n \psi_f^{''}(\lambda) &= \frac{\lambda^4 + 3N^2}{(N - \lambda^2)^2}
        }
      */
-    double pade_second(double const λ, double const N) const;
+    double pade_second(double const micro_stretch, double const N) const;
 
     /**
      *\f{align*}{
      * \boldsymbol{\tau} &= p \boldsymbol{g}^{-1} + \mathbb{P} : \bar{\boldsymbol{\tau}}
      * \f}
      */
-    Matrix3 deviatoric_projection(double const pressure, Matrix3 const& τ_dev) const;
+    Matrix3 deviatoric_projection(double const pressure, Matrix3 const& stress_dev) const;
 
     /**
      *\f{align*}{
@@ -77,7 +79,7 @@ protected:
      (\bar{\boldsymbol{\tau}} \otimes \boldsymbol{g}^{-1} + \boldsymbol{g}^{-1} \otimes
      \bar{\boldsymbol{\tau}}) \right] : \mathbb{P} \f}
      */
-    CMatrix deviatoric_projection(CMatrix const& C_dev, Matrix3 const& τ_dev) const;
+    CMatrix deviatoric_projection(CMatrix const& C_dev, Matrix3 const& stress_dev) const;
 
     /**
      * @param N number of segments per chain
@@ -111,29 +113,31 @@ inline double AffineMicrosphere::volumetric_free_energy_second_derivative(
     return bulk_modulus / 2.0 * (1.0 + 1.0 / std::pow(J, 2));
 }
 
-inline double AffineMicrosphere::pade_first(double const λ, double const N) const
+inline double AffineMicrosphere::pade_first(double const micro_stretch, double const N) const
 {
-    return (3.0 * N - std::pow(λ, 2)) / (N - std::pow(λ, 2));
+    return (3.0 * N - std::pow(micro_stretch, 2)) / (N - std::pow(micro_stretch, 2));
 }
 
-inline double AffineMicrosphere::pade_second(double const λ, double const N) const
+inline double AffineMicrosphere::pade_second(double const micro_stretch, double const N) const
 {
-    return (std::pow(λ, 4) + 3 * std::pow(N, 2)) / std::pow(N - std::pow(λ, 2), 2);
+    return (std::pow(micro_stretch, 4) + 3 * std::pow(N, 2))
+           / std::pow(N - std::pow(micro_stretch, 2), 2);
 }
 
 inline CMatrix AffineMicrosphere::deviatoric_projection(CMatrix const& C_dev,
-                                                        Matrix3 const& τ_dev) const
+                                                        Matrix3 const& stress_dev) const
 {
     return (CMatrix(6, 6) << 1.0 / 9.0
                                  * (4 * C_dev(0, 0) - 4 * C_dev(0, 1) - 4 * C_dev(0, 2)
                                     + C_dev(1, 1) + 2 * C_dev(1, 2) + C_dev(2, 2)
-                                    + 4 * τ_dev.trace()), //
+                                    + 4 * stress_dev.trace()), //
             1.0 / 9.0
                 * (-2 * C_dev(0, 0) + 5 * C_dev(0, 1) - C_dev(0, 2) - 2 * C_dev(1, 1)
-                   - C_dev(1, 2) + C_dev(2, 2) - 2.0 * τ_dev.trace()), //
+                   - C_dev(1, 2) + C_dev(2, 2) - 2.0 * stress_dev.trace()), //
             1.0 / 9.0
                 * (-2 * C_dev(0, 0) - C_dev(0, 1) + 4 * C_dev(0, 2) + C_dev(1, 1)
-                   - C_dev(1, 2) + C_dev(2, 0) - 2 * C_dev(2, 2) - 2.0 * τ_dev.trace()), //
+                   - C_dev(1, 2) + C_dev(2, 0) - 2 * C_dev(2, 2)
+                   - 2.0 * stress_dev.trace()),                    //
             2.0 / 3.0 * (C_dev(0, 3) - C_dev(1, 3) - C_dev(2, 3)), //
             2.0 / 3.0 * (C_dev(0, 4) - C_dev(1, 4) - C_dev(2, 4)), //
             2.0 / 3.0 * (C_dev(0, 5) - C_dev(1, 5) - C_dev(2, 5)), //
@@ -141,15 +145,15 @@ inline CMatrix AffineMicrosphere::deviatoric_projection(CMatrix const& C_dev,
             1.0 / 9.0
                 * (-2 * C_dev(0, 0) + C_dev(0, 1) + C_dev(0, 2) + 4 * C_dev(1, 0)
                    - 2 * C_dev(1, 1) - 2 * C_dev(1, 2) - 2 * C_dev(2, 0) + C_dev(2, 1)
-                   + C_dev(2, 2) - 2.0 * τ_dev.trace()), //
+                   + C_dev(2, 2) - 2.0 * stress_dev.trace()), //
             1.0 / 9.0
                 * (C_dev(0, 0) - 2 * C_dev(0, 1) + C_dev(0, 2) - 2 * C_dev(1, 0)
                    + 4 * C_dev(1, 1) - 2 * C_dev(1, 2) + C_dev(2, 0) - 2 * C_dev(2, 1)
-                   + C_dev(2, 2) + 4 * τ_dev.trace()), //
+                   + C_dev(2, 2) + 4 * stress_dev.trace()), //
             1.0 / 9.0
                 * (C_dev(0, 0) + C_dev(0, 1) - 2 * C_dev(0, 2) - 2 * C_dev(1, 0)
                    - 2 * C_dev(1, 1) + 4 * C_dev(1, 2) + C_dev(2, 0) + C_dev(2, 1)
-                   - 2 * C_dev(2, 2) - 2.0 * τ_dev.trace()),            //
+                   - 2 * C_dev(2, 2) - 2.0 * stress_dev.trace()),       //
             1.0 / 3.0 * (-C_dev(0, 3) + 2 * C_dev(1, 3) - C_dev(2, 3)), //
             1.0 / 3.0 * (-C_dev(0, 4) + 2 * C_dev(1, 4) - C_dev(2, 4)), //
             1.0 / 3.0 * (-C_dev(0, 5) + 2 * C_dev(1, 5) - C_dev(2, 5)), //
@@ -157,15 +161,15 @@ inline CMatrix AffineMicrosphere::deviatoric_projection(CMatrix const& C_dev,
             1.0 / 9.0
                 * (-2 * C_dev(0, 0) + C_dev(0, 1) + C_dev(0, 2) - 2 * C_dev(1, 0)
                    + C_dev(1, 1) + C_dev(1, 2) + 4 * C_dev(2, 0) - 2 * C_dev(2, 1)
-                   - 2 * C_dev(2, 2) - 2.0 * τ_dev.trace()), //
+                   - 2 * C_dev(2, 2) - 2.0 * stress_dev.trace()), //
             1.0 / 9.0
                 * (C_dev(0, 0) - 2 * C_dev(0, 1) + C_dev(0, 2) + C_dev(1, 0)
                    - 2 * C_dev(1, 1) + C_dev(1, 2) - 2 * C_dev(2, 0) + 4 * C_dev(2, 1)
-                   - 2 * C_dev(2, 2) - 2.0 * τ_dev.trace()), //
+                   - 2 * C_dev(2, 2) - 2.0 * stress_dev.trace()), //
             1.0 / 9.0
                 * (C_dev(0, 0) + C_dev(0, 1) - 2 * C_dev(0, 2) + C_dev(1, 0) + C_dev(1, 1)
                    - 2 * C_dev(1, 2) - 2 * C_dev(2, 0) - 2 * C_dev(2, 1) + 4 * C_dev(2, 2)
-                   + 4 * τ_dev.trace()),                                //
+                   + 4 * stress_dev.trace()),                           //
             1.0 / 3.0 * (-C_dev(0, 3) - C_dev(1, 3) + 2 * C_dev(2, 3)), //
             1.0 / 3.0 * (-C_dev(0, 4) - C_dev(1, 4) + 2 * C_dev(2, 4)), //
             1.0 / 3.0 * (-C_dev(0, 5) - C_dev(1, 5) + 2 * C_dev(2, 5)), //
@@ -173,7 +177,7 @@ inline CMatrix AffineMicrosphere::deviatoric_projection(CMatrix const& C_dev,
             1.0 / 3.0 * (2 * C_dev(3, 0) - C_dev(3, 1) - C_dev(3, 2)),  //
             1.0 / 3.0 * (-C_dev(3, 0) + 2 * C_dev(3, 1) - C_dev(3, 2)), //
             1.0 / 3.0 * (-C_dev(3, 0) - C_dev(3, 1) + 2 * C_dev(3, 2)), //
-            C_dev(3, 3) + τ_dev.trace() / 3.0,                          //
+            C_dev(3, 3) + stress_dev.trace() / 3.0,                     //
             C_dev(3, 4),                                                //
             C_dev(3, 5),                                                //
 
@@ -181,7 +185,7 @@ inline CMatrix AffineMicrosphere::deviatoric_projection(CMatrix const& C_dev,
             1.0 / 3.0 * (-C_dev(4, 0) + 2 * C_dev(4, 1) - C_dev(4, 2)), //
             1.0 / 3.0 * (-C_dev(4, 0) - C_dev(4, 1) + 2 * C_dev(4, 2)), //
             C_dev(4, 3),                                                //
-            C_dev(4, 4) + τ_dev.trace() / 3.0,                          //
+            C_dev(4, 4) + stress_dev.trace() / 3.0,                     //
             C_dev(4, 5),                                                //
 
             1.0 / 3.0 * (2 * C_dev(5, 0) - C_dev(5, 1) - C_dev(5, 2)),  //
@@ -189,7 +193,7 @@ inline CMatrix AffineMicrosphere::deviatoric_projection(CMatrix const& C_dev,
             1.0 / 3.0 * (-C_dev(5, 0) - C_dev(5, 1) + 2 * C_dev(5, 2)), //
             C_dev(5, 3),                                                //
             C_dev(5, 4),                                                //
-            C_dev(5, 5) + τ_dev.trace() / 3.0)
+            C_dev(5, 5) + stress_dev.trace() / 3.0)
         .finished();
 }
 
@@ -204,9 +208,10 @@ inline Matrix3 AffineMicrosphere::compute_kirchhoff_stress(Matrix3 const& unimod
                                      Vector3 const t = unimodular_F * r;
 
                                      // Microstretches
-                                     auto const λ = t.norm();
+                                     auto const micro_stretch = t.norm();
 
-                                     return pade_first(λ, N) * t * t.transpose();
+                                     return pade_first(micro_stretch, N) * t
+                                            * t.transpose();
                                  });
 }
 
@@ -221,10 +226,11 @@ inline CMatrix AffineMicrosphere::compute_material_matrix(Matrix3 const& unimodu
                                      auto const t = unimodular_F * r;
 
                                      // Microstretches
-                                     auto const λ = t.norm();
+                                     auto const micro_stretch = t.norm();
 
-                                     auto const a = std::pow(λ, -2)
-                                                    * (pade_second(λ, N) - pade_first(λ, N));
+                                     auto const a = std::pow(micro_stretch, -2)
+                                                    * (pade_second(micro_stretch, N)
+                                                       - pade_first(micro_stretch, N));
 
                                      return a * voigt(t * t.transpose())
                                             * voigt(t * t.transpose()).transpose();
@@ -234,9 +240,9 @@ inline CMatrix AffineMicrosphere::compute_material_matrix(Matrix3 const& unimodu
 template <typename MatrixTp, typename Functor>
 inline MatrixTp AffineMicrosphere::weighting(MatrixTp accumulator, Functor f) const
 {
-    for (auto const & [ N, β ] : material.segment_probability())
+    for (auto const & [ N, factor ] : material.segment_probability())
     {
-        accumulator.noalias() += f(N) * β;
+        accumulator.noalias() += f(N) * factor;
     }
     return accumulator;
 }

@@ -14,6 +14,7 @@
 
 #include <json/json.h>
 #include <range/v3/view.hpp>
+#include <termcolor/termcolor.hpp>
 
 #include <cfenv>
 
@@ -58,26 +59,29 @@ void femSubmesh::save_internal_variables(bool const have_converged)
     }
 }
 
-std::tuple<List const&, Matrix> femSubmesh::tangent_stiffness(int element) const
+std::tuple<List const&, Matrix> femSubmesh::tangent_stiffness(int const element) const
 {
-    auto x = material_coordinates->current_configuration(local_node_list(element));
+    auto const x = material_coordinates->current_configuration(local_node_list(element));
+
+    Matrix const kmat = material_tangent_stiffness(x, element);
+
+    if (!cm->is_finite_deformation()) return {local_dof_list(element), kmat};
 
     Matrix const kgeo = geometric_tangent_stiffness(x, element);
-    Matrix const kmat = material_tangent_stiffness(x, element);
 
     return {local_dof_list(element), kmat + kgeo};
 }
 
-std::tuple<List const&, Vector> femSubmesh::internal_force(int element) const
+std::tuple<List const&, Vector> femSubmesh::internal_force(int const element) const
 {
     auto x = material_coordinates->current_configuration(local_node_list(element));
 
     return {local_dof_list(element), internal_nodal_force(x, element)};
 }
 
-Matrix femSubmesh::geometric_tangent_stiffness(Matrix const& x, int element) const
+Matrix femSubmesh::geometric_tangent_stiffness(Matrix const& x, int const element) const
 {
-    auto const& σ_list = variables(InternalVariables::Tensor::Cauchy);
+    auto const& cauchy_list = variables(InternalVariables::Tensor::Cauchy);
 
     auto n = nodes_per_element();
 
@@ -89,17 +93,18 @@ Matrix femSubmesh::geometric_tangent_stiffness(Matrix const& x, int element) con
 
                                   auto const Jacobian = local_deformation_gradient(rhea, x);
 
-                                  Matrix3 const σ = σ_list[offset(element, l)];
+                                  Matrix3 const cauchy = cauchy_list[offset(element, l)];
 
                                   // Compute the symmetric gradient operator
                                   const auto L = (rhea * Jacobian.inverse()).transpose();
 
-                                  return L.transpose() * σ * L * Jacobian.determinant();
+                                  return L.transpose() * cauchy * L
+                                         * Jacobian.determinant();
                               });
     return identity_expansion(kgeo, dofs_per_node());
 }
 
-Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int element) const
+Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int const element) const
 {
     auto const local_dofs = nodes_per_element() * dofs_per_node();
 
@@ -122,11 +127,11 @@ Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int element) cons
     });
 }
 
-Vector femSubmesh::internal_nodal_force(Matrix const& x, int element) const
+Vector femSubmesh::internal_nodal_force(Matrix const& x, int const element) const
 {
     using RowMatrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
-    auto const& σ_list = variables(InternalVariables::Tensor::Cauchy);
+    auto const& cauchy_list = variables(InternalVariables::Tensor::Cauchy);
 
     auto const[m, n] = std::make_tuple(nodes_per_element(), dofs_per_node());
 
@@ -138,22 +143,22 @@ Vector femSubmesh::internal_nodal_force(Matrix const& x, int element) const
                                         auto const Jacobian = local_deformation_gradient(dN,
                                                                                          x);
 
-                                        auto const σ = σ_list[offset(element, l)];
+                                        auto const cauchy = cauchy_list[offset(element, l)];
 
                                         // Compute the symmetric gradient operator
                                         auto const Bt = dN * Jacobian.inverse();
 
-                                        return Bt * σ * Jacobian.determinant();
+                                        return Bt * cauchy * Jacobian.determinant();
                                     });
     // Convert into a vector for the vector assembly operation
     return Eigen::Map<RowMatrix>(fint.data(), m * n, 1);
 }
 
-std::tuple<List const&, Matrix> femSubmesh::consistent_mass(int element) const
+std::tuple<List const&, Matrix> femSubmesh::consistent_mass(int const element) const
 {
     auto X = material_coordinates->initial_configuration(local_node_list(element));
 
-    auto const ρ_0 = cm->intrinsic_material().initial_density();
+    auto const density_0 = cm->intrinsic_material().initial_density();
 
     auto m = sf->quadrature()
                  .integrate(Matrix::Zero(nodes_per_element(), nodes_per_element()).eval(),
@@ -162,12 +167,13 @@ std::tuple<List const&, Matrix> femSubmesh::consistent_mass(int element) const
 
                                 auto const Jacobian = local_deformation_gradient(dN, X);
 
-                                return N * ρ_0 * N.transpose() * Jacobian.determinant();
+                                return N * density_0 * N.transpose()
+                                       * Jacobian.determinant();
                             });
     return {local_dof_list(element), identity_expansion(m, dofs_per_node())};
 }
 
-std::tuple<List const&, Vector> femSubmesh::diagonal_mass(int element) const
+std::tuple<List const&, Vector> femSubmesh::diagonal_mass(int const element) const
 {
     auto const & [ dofs, consistent_m ] = this->consistent_mass(element);
 
@@ -179,7 +185,7 @@ std::tuple<List const&, Vector> femSubmesh::diagonal_mass(int element) const
     return {local_dof_list(element), diagonal_m};
 }
 
-void femSubmesh::update_internal_variables(double const Δt)
+void femSubmesh::update_internal_variables(double const time_step_size)
 {
     std::feclearexcept(FE_ALL_EXCEPT);
 
@@ -189,7 +195,7 @@ void femSubmesh::update_internal_variables(double const Δt)
 
     check_element_distortion();
 
-    cm->update_internal_variables(Δt);
+    cm->update_internal_variables(time_step_size);
 
     if (std::fetestexcept(FE_INVALID))
     {
@@ -219,8 +225,9 @@ void femSubmesh::update_deformation_measures()
 
             if (F.determinant() < 0.0)
             {
-                std::cout << "F.det = " << F.determinant() << std::endl;
-                throw DistortedElement(element, l);
+                std::cout << termcolor::yellow << "Distorted element (" << element << ", "
+                          << l << ") with j = " << F.determinant() << termcolor::reset
+                          << std::endl;
             }
 
             // Gradient operator in index notation
