@@ -20,4 +20,4 @@ after_success:
     - docker cp neon-docker:/app/neon/build/coverage.info .
     - docker cp neon-docker:/app/neon/build/coverage_output .
     - ls coverage_output
-    - coveralls --gcov-options '\-lp'
+    - coveralls -r coverage_output
