@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.8)
 project(neonfe C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
-add_definitions("-Wall")
+add_definitions("-Wall -Wno-sign-compare -Wno-unused-variable -Wno-maybe-uninitialized")
 
 option(ENABLE_NATIVE "Optimise for current architecture" OFF)
 option(ENABLE_CUDA "Enable CUDA linear solver" OFF)
