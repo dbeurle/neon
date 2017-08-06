@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/dbeurle/neon.svg?branch=master)](https://travis-ci.org/dbeurle/neon)
+
 # neon
 A non-linear finite element code.  This project is still under development and is not considered stable.
 
@@ -12,14 +14,14 @@ The external dependencies are:
  - A c++17 compatible compiler with unicode support (clang 4.0 or clang 5.0 development)
  - Jsoncpp for processing mesh files
  - OpenMP for parallelisation
- 
+
 Other dependencies are pulled in during build time with `CMake` and include
 
  - Eigen
  - Range v3
  - Termcolor for colour terminal support
  - Catch for unit testing
- 
+
 For best performance build with native optimisations on for the machine you are using.  This will automatically trigger Eigen to use wider SIMD instruction when available on native architecture at the expense of portability.
 
 The build instructions for debug are
