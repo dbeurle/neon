@@ -1,0 +1,13 @@
+diff --git a/src/cmake_modules/PastixLibSrc.cmake b/src/cmake_modules/PastixLibSrc.cmake
+index 3945b93..9914f25 100644
+--- a/src/cmake_modules/PastixLibSrc.cmake
++++ b/src/cmake_modules/PastixLibSrc.cmake
+@@ -152,7 +152,7 @@ set(PASTIX_LIB_SRC_FACT
+   sopalin/src/starpu_updo.c)
+ 
+ set(MURGE_LIB_SRC
+-  sopalin/src/murge_fortran.c
++  sopalin/src/pastix_fortran.c
+   sopalin/src/murge.c
+   sopalin/src/zmurge.c
+   sopalin/src/dmurge.c
