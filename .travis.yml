@@ -16,6 +16,8 @@ script:
     - docker exec neon-docker /bin/bash -c "cd neon && mkdir build && cd build && cmake -DENABLE_COVERAGE=TRUE .. && make all -j4 && ctest"
 
 after_success:
+    - docker exec neon-docker /bin/bash -c "pip install --user cpp-coveralls"
     - docker exec neon-docker /bin/bash -c "cd neon/build && make coverage"
-    - docker cp neon-docker:/app/neon/build/coverage.info .
-    - cpp-coveralls --lcov-file=coverage.info --no-gcov
+    - docker exec neon-docker /bin/bash -c "cd neon/build && cpp-coveralls --lcov-file=coverage.info --no-gcov"
+    # - docker cp neon-docker:/app/neon/build/coverage.info .
+    # - cpp-coveralls --lcov-file=coverage.info --no-gcov
