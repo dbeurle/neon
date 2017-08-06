@@ -13,11 +13,10 @@ before_install:
 script:
     # Initialise the docker container and use exec to drive it
     - docker run --name neon-docker -d -t neon /bin/bash
-    - docker exec neon-docker /bin/bash -c "cd neon && mkdir build && cd build && cmake .. && make all -j4 && ctest"
-
+    - docker exec neon-docker /bin/bash -c "cd neon && mkdir build && cd build && cmake -DENABLE_COVERAGE=TRUE .. && make all -j4 && ctest"
 
 after_success:
-    - docker exec neon-docker /bin/bash -c "cd neon/build && cmake -DENABLE_COVERAGE=ON .. && make coverage"
+    - docker exec neon-docker /bin/bash -c "cd neon/build && make coverage"
     - docker cp neon-docker:/app/neon/build/coverage.info .
     - docker cp neon-docker:/app/neon/build/coverage_output .
     - ls
