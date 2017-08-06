@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/dbeurle/neon.svg?branch=master)](https://travis-ci.org/dbeurle/neon)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # neon
 A non-linear finite element code.  This project is still under development and is not considered stable.
