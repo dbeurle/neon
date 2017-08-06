@@ -17,7 +17,5 @@ script:
 
 after_success:
     - docker exec neon-docker /bin/bash -c "cd neon/build && make coverage"
-    - docker cp neon-docker:/app/neon/build/src .
-    - ls
-    - ls src/
-    - coveralls --gcov-options '\-lp'
+    - docker cp neon-docker:/app/neon/build/coverage.info .
+    - cpp-coveralls --lcov-file=coverage.info --no-gcov
