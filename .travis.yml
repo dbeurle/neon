@@ -10,3 +10,6 @@ before_install:
 - docker pull dbeurle/neon
 - docker run -d dbeurle/neon /bin/sh -c "cd /app/neon/build; ctest;"
 - docker ps -a
+
+script:
+- ctest
