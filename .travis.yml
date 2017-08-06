@@ -19,6 +19,3 @@ after_success:
     - docker exec neon-docker /bin/bash -c "pip install cpp-coveralls"
     - docker exec neon-docker /bin/bash -c "cd neon/build && make coverage"
     - docker exec neon-docker /bin/bash -c "cd neon/build && cpp-coveralls --lcov-file=coverage.info --no-gcov"
-    # - cd neon
-    # - docker cp neon-docker:/app/neon/build/coverage.info .
-    # - cpp-coveralls --lcov-file=coverage.info --no-gcov
