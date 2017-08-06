@@ -8,8 +8,7 @@ services:
 
 before_install:
 - docker pull dbeurle/neon
-- docker run -d dbeurle/neon /bin/sh -c "cd /app/neon/build; ctest;"
-- docker ps -a
+- docker build dbeurle/neon
 
 script:
-- ctest
+- docker run -it dbeurle/neon /bin/bash && /app/neon/build/ctest
