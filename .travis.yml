@@ -1,50 +1,13 @@
 
-language: cpp
-
 sudo: required
 
-compiler:
-  - clang
-
-matrix:
-    include:
-        # - os: linux
-        #   addons:
-        #       apt:
-        #           sources:
-        #               - llvm-toolchain-trusty-4.0
-        #           packages:
-        #               - clang-4.0
-        #   env:
-        #       - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
-
-        - os: linux
-          addons:
-            apt:
-              sources:
-                  - llvm-toolchain-trusty
-              packages:
-                  - clang-5.0
-          env:
-            - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
+services:
+    - docker
 
 before_install:
-  # Update cmake to c++17 version
-  - mkdir $HOME/usr
-  - export PATH="$HOME/usr/bin:$PATH"
-  - wget https://cmake.org/files/v3.8/cmake-3.8.2-Linux-x86_64.sh
-  - chmod +x cmake-3.8.2-Linux-x86_64.sh
-  - ./cmake-3.8.2-Linux-x86_64.sh --prefix=$HOME/usr --exclude-subdir --skip-license
-  # Other deps
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-  - sudo apt-get -qq update
-  - sudo apt-get install g++-6 libgcc-6-dev libvtk6-dev libboost-all-dev libmumps-seq-dev libjsoncpp-dev -y
-  - eval "${MATRIX_EVAL}"
+- docker pull dbeurle/neon
+- docker run -d dbeurle/neon /bin/sh -c "cd /app/neon/build; ctest;"
+- docker ps -a
 
-before_script:
-    - mkdir build
-    - cd build
-    - cmake ..
-
-script:
-    make all
+# script:
+# - bundle exec rake test
