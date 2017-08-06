@@ -3,15 +3,14 @@
 
 #include "SimulationControl.hpp"
 
-// Must be here
-#include <Eigen/PaStiXSupport>
-
 #include <chrono>
 #include <termcolor/termcolor.hpp>
 
+#include <Eigen/PaStiXSupport>
+
 namespace neon
 {
-void PaStiX::solve(const SparseMatrix& A, Vector& x, const Vector& b)
+void PaStiX::solve(SparseMatrix const& A, Vector& x, Vector const& b)
 {
     auto start = std::chrono::high_resolution_clock::now();
 
