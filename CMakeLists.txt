@@ -3,20 +3,27 @@ cmake_minimum_required(VERSION 3.8)
 project(neonfe C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
-add_definitions("-Wall -Wno-sign-compare -Wno-unused-variable -Wno-maybe-uninitialized")
+add_definitions("-Wall -Wno-sign-compare -Wno-unused-variable -Wno-uninitialized")
 
-option(ENABLE_NATIVE "Optimise for current architecture" OFF)
+set(EXT_PROJECTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 option(ENABLE_CUDA "Enable CUDA linear solver" OFF)
-
-if (ENABLE_NATIVE)
-    add_definitions("-march=native")
-endif()
+option(ENABLE_NATIVE "Optimise for current architecture" OFF)
+OPTION(ENABLE_COVERAGE "Set compiler flag for coverage analysis" FALSE)
 
 if (ENABLE_CUDA)
     find_package(CUDA REQUIRED)
 endif()
 
-set(EXT_PROJECTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external")
+if (ENABLE_NATIVE)
+    add_definitions("-march=native -mtune=native")
+endif()
+
+if (ENABLE_COVERAGE)
+    include(Coverage)
+endif()
+
 add_subdirectory(${EXT_PROJECTS_DIR}/catch)
 add_subdirectory(${EXT_PROJECTS_DIR}/eigen3)
 add_subdirectory(${EXT_PROJECTS_DIR}/range-v3)
@@ -27,8 +34,6 @@ include_directories(${CATCH_INCLUDE_DIR}
                     ${EIGEN_INCLUDE_DIR}
                     ${TERMCOLOR_INCLUDE_DIR}
                     ${COMMON_INCLUDES})
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 find_package(VTK COMPONENTS vtkIOXML REQUIRED)
 include(${VTK_USE_FILE})

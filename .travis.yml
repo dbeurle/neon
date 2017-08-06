@@ -7,7 +7,15 @@ services:
     - docker
 
 before_install:
+- pip install --user coveralls
 - docker build -t neon .
 
 script:
-- docker run -it neon /bin/bash -c "cd neon && mkdir build && cd build && cmake .. && make all -j4 && ctest"
+- docker run -it neon /bin/bash -c "cd neon && mkdir build && cd build && cmake .. && make all -j4 && ctest" && tail -f /dev/null
+
+after_success:
+    - docker ps
+    - pwd
+    - ls
+    - cd ..
+    - if [[ "$CXX" =~ ^g.* ]]; then coveralls --gcov-options '\-lp'; fi
