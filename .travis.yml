@@ -7,8 +7,7 @@ services:
     - docker
 
 before_install:
-- docker pull dbeurle/neon
-- docker build dbeurle/neon
+- docker build -t neon .
 
 script:
-- docker run -it dbeurle/neon /bin/bash && /app/neon/build/ctest
+- docker run -it neon /bin/bash -c "cd neon && mkdir build && cd build && cmake .. && make all -j4 && ctest"
