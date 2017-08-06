@@ -7,14 +7,15 @@ services:
     - docker
 
 before_install:
-- pip install --user coveralls
-- docker build -t neon .
+    - pip install --user coveralls
+    - docker build -t neon .
 
 script:
-- docker run -it neon /bin/bash -c "cd neon && mkdir build && cd build && cmake .. && make all -j4 && ctest" && tail -f /dev/null
+    - docker run -d -t neon /bin/bash -c "cd neon && mkdir build && cd build && cmake .. && make all -j4 && ctest"
 
 after_success:
     - docker ps
+    - docker cp
     - pwd
     - ls
     - cd ..
