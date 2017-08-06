@@ -1,6 +1,8 @@
 
 #include "AdaptiveLoadStep.hpp"
 
+#include "numeric/DenseTypes.hpp"
+
 #include <exception>
 #include <range/v3/algorithm.hpp>
 #include <termcolor/termcolor.hpp>
@@ -27,7 +29,7 @@ void AdaptiveLoadStep::update_convergence_state(bool is_converged)
         successful_increments++;
         last_converged_time = current_time;
 
-        is_applied = std::abs(current_time - final_time) < minimum_increment;
+        is_applied = is_approx(current_time, final_time);
 
         if (is_applied) return;
 
