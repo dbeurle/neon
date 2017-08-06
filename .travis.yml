@@ -17,7 +17,7 @@ script:
 
 after_success:
     - docker exec neon-docker /bin/bash -c "cd neon/build && make coverage"
-    - docker cp neon-docker:/app/neon/build/coverage.info .
-    - docker cp neon-docker:/app/neon/build/coverage_output .
+    - docker cp neon-docker:/app/neon/build/* .
     - ls coverage_output
+    - ls coverage_output/src
     - coveralls -r coverage_output
