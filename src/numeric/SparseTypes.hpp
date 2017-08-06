@@ -8,10 +8,11 @@ namespace neon
 {
 using SparseMatrix = Eigen::SparseMatrix<double, Eigen::RowMajor>;
 
+template <class IndexTp>
 class Doublet
 {
 public:
-    Doublet(const int& i, const int& j) : m_row(i), m_col(j) {}
+    Doublet(IndexTp const& i, IndexTp const& j) : m_row(i), m_col(j) {}
     /** @return the row index of the element */
     const auto& row() const { return m_row; }
     /** @returns the column index of the element */
@@ -20,6 +21,6 @@ public:
     auto value() const { return 0.0; }
 
 protected:
-    int m_row, m_col;
+    IndexTp m_row, m_col;
 };
 }
