@@ -1,0 +1,5 @@
+<map id="neon::NumericalQuadrature::integrate" name="neon::NumericalQuadrature::integrate">
+<area shape="rect" id="node2" href="$classneon_1_1AffineMicrosphere.html#a34503c57cf229f92d58365d45d8a39dc" title="neon::AffineMicrosphere\l::compute_kirchhoff_stress" alt="" coords="235,39,415,80"/>
+<area shape="rect" id="node3" href="$classneon_1_1AffineMicrosphere.html#ae6fbab77ef4d201ef8aa019235aac269" title="neon::AffineMicrosphere\l::update_internal_variables" alt="" coords="463,5,640,47"/>
+<area shape="rect" id="node4" href="$classneon_1_1AffineMicrosphere.html#a2aa9098fb29ba340ff3dd5cfc00ed46f" title="neon::AffineMicrosphere\l::intrinsic_material" alt="" coords="470,71,633,112"/>
+</map>

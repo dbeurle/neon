@@ -1,5 +1,4 @@
 *.vtu
 *.pvd
 build/*
-docs/html/*
 docs/latex/*

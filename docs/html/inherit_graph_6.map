@@ -1,0 +1,8 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classneon_1_1LinearSolver.html" title="neon::LinearSolver" alt="" coords="5,107,136,133"/>
+<area shape="rect" id="node2" href="$classneon_1_1BiCGSTAB.html" title="neon::BiCGSTAB" alt="" coords="184,5,309,32"/>
+<area shape="rect" id="node3" href="$classneon_1_1MUMPS.html" title="neon::MUMPS" alt="" coords="193,56,301,83"/>
+<area shape="rect" id="node4" href="$classneon_1_1PaStiX.html" title="neon::PaStiX" alt="" coords="197,107,296,133"/>
+<area shape="rect" id="node5" href="$classneon_1_1pCG.html" title="neon::pCG" alt="" coords="204,157,289,184"/>
+<area shape="rect" id="node6" href="$classneon_1_1SparseLU.html" title="neon::SparseLU" alt="" coords="189,208,305,235"/>
+</map>

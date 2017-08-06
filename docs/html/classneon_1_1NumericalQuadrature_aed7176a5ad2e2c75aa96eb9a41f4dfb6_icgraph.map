@@ -1,0 +1,8 @@
+<map id="neon::NumericalQuadrature::points" name="neon::NumericalQuadrature::points">
+<area shape="rect" id="node2" href="$classneon_1_1NumericalQuadrature.html#a132861ccaee57e629e116eb9b014a3a9" title="neon::NumericalQuadrature\l::integrate" alt="" coords="235,37,416,79"/>
+<area shape="rect" id="node6" href="$classneon_1_1NumericalQuadrature.html#a2f3bccc13ba51c31ad886a77d991f4e5" title="neon::NumericalQuadrature\l::evaluate" alt="" coords="235,103,416,144"/>
+<area shape="rect" id="node3" href="$classneon_1_1AffineMicrosphere.html#a34503c57cf229f92d58365d45d8a39dc" title="neon::AffineMicrosphere\l::compute_kirchhoff_stress" alt="" coords="467,37,647,79"/>
+<area shape="rect" id="node4" href="$classneon_1_1AffineMicrosphere.html#ae6fbab77ef4d201ef8aa019235aac269" title="neon::AffineMicrosphere\l::update_internal_variables" alt="" coords="699,5,876,47"/>
+<area shape="rect" id="node5" href="$classneon_1_1AffineMicrosphere.html#a2aa9098fb29ba340ff3dd5cfc00ed46f" title="neon::AffineMicrosphere\l::intrinsic_material" alt="" coords="706,71,869,112"/>
+<area shape="rect" id="node7" href="$classneon_1_1UnitSphereQuadrature.html#ad5eaed54ea17bb3a979930fab994c314" title="neon::UnitSphereQuadrature\l::UnitSphereQuadrature" alt="" coords="464,103,651,144"/>
+</map>
