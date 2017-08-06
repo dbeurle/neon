@@ -17,7 +17,7 @@ script:
 
 
 after_success:
-    - docker exec neon-docker /bin/bash -c "cmake -DENABLE_COVERAGE=ON .. && make coverage"
+    - docker exec neon-docker /bin/bash -c "cd neon/build && cmake -DENABLE_COVERAGE=ON .. && make coverage"
     - docker cp neon-docker:/app/neon/build/coverage.info .
     - docker cp neon-docker:/app/neon/build/coverage_output .
     - ls
