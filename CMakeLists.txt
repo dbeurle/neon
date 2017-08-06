@@ -5,7 +5,7 @@ project(neonfe C CXX)
 set(CMAKE_CXX_STANDARD 17)
 add_definitions("-Wall")
 
-option(ENABLE_NATIVE "Optimised specifically for current architecture" OFF)
+option(ENABLE_NATIVE "Optimise for current architecture" OFF)
 option(ENABLE_CUDA "Enable CUDA linear solver" OFF)
 
 if (ENABLE_NATIVE)
@@ -13,7 +13,7 @@ if (ENABLE_NATIVE)
 endif()
 
 if (ENABLE_CUDA)
-    find_package(CUDA)
+    find_package(CUDA REQUIRED)
 endif()
 
 set(EXT_PROJECTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external")
