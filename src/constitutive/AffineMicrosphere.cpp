@@ -59,9 +59,9 @@ void AffineMicrosphere::update_internal_variables(double const time_step_size)
                  return material.update_segments(N, time_step_size);
              });
 
-/*----------------------------------------------------------------------------*
- *                          Stress computation                                *
- *----------------------------------------------------------------------------*/
+    /*----------------------------------------------------------------------------*
+     *                          Stress computation                                *
+     *----------------------------------------------------------------------------*/
 
 #pragma omp parallel for
     for (auto l = 0; l < F_list.size(); ++l)
