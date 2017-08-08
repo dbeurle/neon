@@ -1,0 +1,71 @@
+{
+    "Name" : "Plate",
+    "Cores" : 2,
+    "Part": [{
+        "Name" : "plate",
+        "Material" : "steel"
+    }],
+    "Material" : [{
+        "Name" : "steel",
+        "ElasticModulus" : 200.0e9,
+        "IsotropicHardeningModulus" : 400.0e6,
+        "YieldStress" : 200.0e6,
+        "PoissonsRatio" : 0.3
+    }],
+    "SimulationCases" : [{
+        "Name" : "Uniaxial",
+		"Type" : "SolidMechanics",
+        "Solution" : "Equilibrium",
+        "Time" : {
+            "Period" : 1.0,
+            "Increments" : {
+                "Initial" : 0.1,
+                "Minimum" : 0.00001,
+                "Maximum" : 1.0
+            }
+        },
+		"Mesh" :
+        [{
+            "Name" : "plate",
+            "ConstitutiveModel" : "J2",
+            "ElementOptions" :
+            {
+                "Quadrature" : "Reduced"
+            },
+            "BoundaryConditions" :
+            [{
+                "Name" : "x-sym",
+                "Type" : "Displacement",
+                "Values" : {
+                    "x" : 0.0
+                }
+            },
+            {
+                "Name" : "y-sym",
+                "Type" : "Displacement",
+                "Values" : {
+                    "y" : 0.0
+                }
+            },
+            {
+                "Name" : "load",
+                "Type" : "Displacement",
+                "Values" : {
+                    "x" : 0.00001
+                }
+            }]
+        }],
+		"LinearSolver" :
+        {
+		    "Solver" : "MUMPS",
+            "MaxIterations" : 2000,
+            "MaxTolerance"  : 1.0e-8
+        },
+        "Visualisation" :
+        {
+            "Fields" : ["Displacement", "LinearisedStrain", "LinearisedPlasticStrain",
+                        "CauchyStress", "VonMisesStress", "AccumulatedPlasticStrain"]
+        }
+        }
+    ]
+}
