@@ -34,7 +34,7 @@ void femStaticMatrix::compute_sparsity_pattern()
 {
     // auto start = std::chrono::high_resolution_clock::now();
 
-    std::vector<Doublet> doublets;
+    std::vector<Doublet<int>> doublets;
     doublets.reserve(fem_mesh.active_dofs());
 
     Kt.resize(fem_mesh.active_dofs(), fem_mesh.active_dofs());

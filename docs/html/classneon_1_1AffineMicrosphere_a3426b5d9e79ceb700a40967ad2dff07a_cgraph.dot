@@ -1,0 +1,15 @@
+digraph "neon::AffineMicrosphere::update_internal_variables"
+{
+ // INTERACTIVE_SVG=YES
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node10 [label="neon::AffineMicrosphere\l::update_internal_variables",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node10 -> Node11 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node11 [label="neon::LinearElastic\l::LameConstants",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classneon_1_1LinearElastic.html#ae6d16cce57a57310e751b852b289cea2"];
+  Node11 -> Node12 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node12 [label="neon::LinearElastic::mu",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classneon_1_1LinearElastic.html#ab0bb733a9b4f7131a58a6da7be4ccdcc"];
+  Node11 -> Node13 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node13 [label="neon::LinearElastic\l::lambda",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classneon_1_1LinearElastic.html#a0d41b106614c2e50b1eb658bc447dd86"];
+  Node13 -> Node12 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+}

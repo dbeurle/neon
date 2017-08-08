@@ -49,8 +49,6 @@ bool NewmarkBeta::time_loop()
 bool NewmarkBeta::are_parameters_unstable() const
 {
     // Unconditional stability condition
-    if (beta_parameter >= artifical_viscosity / 2.0 >= 0.25) return false;
-
-    return true;
+    return beta_parameter < artifical_viscosity / 2.0 || artifical_viscosity / 2.0 < 0.25;
 }
 }

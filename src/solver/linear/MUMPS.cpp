@@ -36,7 +36,9 @@ void MUMPS::solve(SparseMatrix const& A, Vector& x, Vector const& b)
     x = b;
 
     // Check for a square matrix
-    assert(A.rows() == A.cols() == x.size() == b.size());
+    assert(A.rows() == A.cols());
+    assert(x.size() == b.size());
+    assert(A.cols() == x.size());
 
     using MUMPSadapter = MUMPSWrapper<double>;
 
