@@ -7,6 +7,7 @@
 #include "mesh/solid/Submesh.hpp"
 
 #include "mesh/solid/boundary/Dirichlet.hpp"
+#include "mesh/solid/boundary/NonFollowerLoad.hpp"
 
 #include <json/forwards.h>
 #include <map>
@@ -69,9 +70,11 @@ protected:
 
     std::vector<femSubmesh> submeshes;
 
+    // Boundary conditions for this mesh
     std::map<std::string, std::vector<Dirichlet>> displacement_bcs;
+    std::map<std::string, std::vector<NonFollowerLoadBoundary>> nf_loads;
 
-    const std::unordered_map<std::string, int> dof_table = {{"x", 0}, {"y", 1}, {"z", 2}};
+    std::unordered_map<std::string, int> const dof_table = {{"x", 0}, {"y", 1}, {"z", 2}};
 };
 }
 }

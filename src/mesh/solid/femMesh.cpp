@@ -30,7 +30,7 @@ femMesh::femMesh(BasicMesh const& basic_mesh,
         submeshes.emplace_back(material_data, simulation_data, material_coordinates, submesh);
     }
 
-    allocate_boundary_conditions(simulation_data["BoundaryConditions"], basic_mesh);
+    allocate_boundary_conditions(simulation_data, basic_mesh);
 }
 
 int femMesh::active_dofs() const { return 3 * material_coordinates->size(); }
@@ -77,10 +77,12 @@ void femMesh::save_internal_variables(bool const have_converged)
     for (auto& submesh : submeshes) submesh.save_internal_variables(have_converged);
 }
 
-void femMesh::allocate_boundary_conditions(Json::Value const& boundary_data,
+void femMesh::allocate_boundary_conditions(Json::Value const& simulation_data,
                                            BasicMesh const& basic_mesh)
 {
     using namespace ranges;
+
+    auto const& boundary_data = simulation_data["BoundaryConditions"];
 
     // Populate the boundary meshes
     for (auto const& boundary : boundary_data)
@@ -106,6 +108,16 @@ void femMesh::allocate_boundary_conditions(Json::Value const& boundary_data,
         }
         else if (boundary_type == "Traction")
         {
+            for (auto const& name : boundary["Values"].getMemberNames())
+            {
+                auto const& dof_offset = dof_table.find(name)->second;
+
+                nf_loads[boundary_name].emplace_back(material_coordinates,
+                                                     basic_mesh.meshes(boundary_name),
+                                                     dof_offset,
+                                                     boundary["Values"][name].asDouble(),
+                                                     simulation_data);
+            }
         }
         else
         {
