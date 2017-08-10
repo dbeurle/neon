@@ -1,0 +1,75 @@
+{
+    "Name" : "NeoHookeModel",
+    "Cores" : 2,
+    "Part": [{
+        "Name" : "ElastomerTestSpecimen",
+        "Material" : "rubber",
+        "MeshFormat" : "gmsh"
+    }],
+    "Material" : [{
+        "Name" : "rubber",
+        "ElasticModulus" : 10.0e6,
+        "PoissonsRatio" : 0.45
+    }],
+    "SimulationCases" : [{
+        "Name" : "Uniaxial",
+		"Type" : "SolidMechanics",
+        "Solution" : "Equilibrium",
+        "Time" : {
+            "Period" : 1.0,
+            "Increments" : {
+                "Initial" : 0.1,
+                "Minimum" : 0.001,
+                "Maximum" : 1.0
+            }
+        },
+		"Mesh" :
+        [{
+            "Name" : "ElastomerTestSpecimen",
+            "ConstitutiveModel" : "AffineMicrosphere",
+            "ElementOptions" :
+            {
+                "Quadrature" : "Full"
+            },
+            "BoundaryConditions" :
+            [{
+                "Name" : "x-sym",
+                "Type" : "Displacement",
+                "Values" : {
+                    "x" : 0.0
+                }
+            },
+            {
+                "Name" : "z-sym",
+                "Type" : "Displacement",
+                "Values" : {
+                    "z" : 0.0
+                }
+            },
+            {
+                "Name" : "base",
+                "Type" : "Displacement",
+                "Values" : {
+                    "y" : 0.0
+                }
+            },
+            {
+                "Name" : "load",
+				"Type" : "Traction",
+                "Values" : {
+                    "y" : 5.0e6
+                }
+            }]
+        }],
+		"LinearSolver" :
+        {
+		    "Solver" : "pCG",
+            "MaxIterations" : 1000,
+            "Tolerance"  : 1.0e-6
+        },
+        "Visualisation" :
+        {
+            "Fields" : ["Displacement", "DeformationGradient", "CauchyStress"]
+        }
+    }]
+}
