@@ -82,7 +82,7 @@ void AffineMicrosphere::update_internal_variables(double const time_step_size)
 
     // Perform the projection of the stresses
     cauchy_stress_list = view::zip(deviatoric_stress_list, detF_list, n_list)
-                         | view::transform([&, this](auto const& tpl) -> Matrix3 {
+                         | view::transform([&](auto const& tpl) -> Matrix3 {
 
                                auto const & [ cauchy_stress_dev, J, n ] = tpl;
 
