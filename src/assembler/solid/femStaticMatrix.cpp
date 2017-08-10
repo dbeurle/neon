@@ -249,6 +249,7 @@ void femStaticMatrix::apply_displacement_boundaries()
 void femStaticMatrix::perform_equilibrium_iterations()
 {
     Vector delta_d = Vector::Zero(fem_mesh.active_dofs());
+    Vector d_new = d;
 
     // Full Newton-Raphson iteration to solve nonlinear equations
     auto constexpr max_iterations = 10;
@@ -274,9 +275,9 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
         linear_solver->solve(Kt, delta_d, -residual);
 
-        d += delta_d;
+        d_new += delta_d;
 
-        fem_mesh.update_internal_variables(d, adaptive_load.increment());
+        fem_mesh.update_internal_variables(d_new, adaptive_load.increment());
 
         print_convergence_progress(delta_d.norm(), residual.norm());
 
@@ -286,21 +287,18 @@ void femStaticMatrix::perform_equilibrium_iterations()
         std::cout << std::string(6, ' ') << "Equilibrium iteration required "
                   << elapsed_seconds.count() << "s\n";
 
-        if (is_converged(delta_d.norm(), residual.norm()))
-        {
-            break;
-        }
+        if (is_converged(delta_d.norm(), residual.norm())) break;
+
         current_iteration++;
     }
     adaptive_load.update_convergence_state(current_iteration != max_iterations);
     fem_mesh.save_internal_variables(current_iteration != max_iterations);
 
-    std::cout << "\n"
-              << std::string(4, ' ') << "Writing solution to file for step "
-              << adaptive_load.step() << "\n";
-
     if (current_iteration != max_iterations)
+    {
+        d = d_new;
         visualisation.write(adaptive_load.step(), adaptive_load.time());
+    }
 }
 
 void femStaticMatrix::print_convergence_progress(double const delta_d_norm,

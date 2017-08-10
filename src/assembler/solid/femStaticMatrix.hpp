@@ -82,7 +82,7 @@ protected:
     SparseMatrix Kt; //!< Tangent matrix stiffness
     Vector fint;     //!< Internal force vector
     Vector fext;     //!< External force vector
-    Vector d;        //!< Displacement
+    Vector d;        //!< Displacement vector
 
     std::unique_ptr<LinearSolver> linear_solver;
 };
