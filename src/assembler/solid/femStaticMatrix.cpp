@@ -264,7 +264,7 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
         compute_internal_force();
 
-        compute_external_force(adaptive_load.increment());
+        compute_external_force(adaptive_load.factor());
 
         Vector residual = fint - fext;
 
