@@ -49,7 +49,9 @@ public:
     /** Mutable access to the sub-meshes */
     std::vector<femSubmesh>& meshes() { return submeshes; }
 
-    auto const& dirichlet_boundary_map() const { return displacement_bcs; }
+    auto const& displacement_boundaries() const { return displacement_bcs; }
+
+    auto const& nonfollower_load_boundaries() const { return nf_loads; }
 
     auto const& coordinates() const { return *(material_coordinates.get()); }
 
