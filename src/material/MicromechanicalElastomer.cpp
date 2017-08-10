@@ -7,18 +7,19 @@
 
 namespace neon
 {
-double zero_trunc_poisson_pmf(double const mean, int const k)
+double binomial_coefficient(double const mean, double const probability_success = 0.5)
 {
-    return std::exp(k * std::log(mean) - std::lgamma(k + 1)) / (std::exp(mean) - 1.0);
+    return std::exp(std::lgamma(n + 1) - std::lgamma(k + 1) - std::lgamma(n - k + 1));
 }
 
 MicromechanicalElastomer::MicromechanicalElastomer(Json::Value const& material_data)
     : LinearElastic(material_data)
 {
-    if (!material_data.isMember("SegmentsPerChain"))
+    if (!material_data.isMember("NumberOfSegmentBins"))
     {
-        throw std::runtime_error("SegmentsPerChain not specified in material data\n");
+        throw std::runtime_error("NumberOfSegmentBins not specified in material data\n");
     }
+
     N0_avg = material_data["SegmentsPerChain"].asDouble();
 
     chain_decay_rate = material_data.isMember("ChainDecayRate")
@@ -34,18 +35,5 @@ MicromechanicalElastomer::MicromechanicalElastomer(Json::Value const& material_d
     compute_probability_and_segments(N0_avg);
 }
 
-void MicromechanicalElastomer::compute_probability_and_segments(double const N)
-{
-    probability_segments_pairs.clear();
-    probability_segments_pairs.reserve(N * 2);
-
-    for (auto k = 2; k < N * 2; ++k)
-    {
-        // Filter out the insignificant pmf
-        if (auto const pmf = zero_trunc_poisson_pmf(N, k); pmf > 1.0e-6)
-        {
-            probability_segments_pairs.emplace_back(k, pmf);
-        }
-    }
-}
+void MicromechanicalElastomer::compute_probability_and_segments(double const N) {}
 }

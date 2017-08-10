@@ -25,7 +25,7 @@ public:
      * Compute the shear modulus assuming the temperature is 298K according to
      * the formula μ = n / (k * T)
      * @param n number of chains
-     * @return the time varying shear modulus
+     * @return the shear modulus from entropy elastic theory
      */
     double shear_modulus(double const n) const;
 
@@ -40,9 +40,6 @@ public:
 
     /** @return the new segments.  Compute probability based on evolution equation */
     double update_segments(double const N, double const time_step_size);
-
-    /** @return a pair (N, fraction) of the thresholded probability mass function */
-    auto const& segment_probability() const { return probability_segments_pairs; }
 
 protected:
     /**
@@ -64,7 +61,7 @@ protected:
     double chain_decay_rate;
     double segment_decay_rate;
 
-    std::vector<std::pair<double, double>> probability_segments_pairs;
+    std::vector<double> segment_bins;
 
     double const boltzmann_constant = 1.38064852e-23;
     double const temperature = 298.0;
@@ -78,7 +75,7 @@ inline double MicromechanicalElastomer::shear_modulus(double const n) const
 inline double MicromechanicalElastomer::update_chains(double const n,
                                                       double const time_step_size) const
 {
-    return n / (1.0 + chain_decay_rate * time_step_size);
+    return n / (1.0 + 0.0001 * time_step_size);
 }
 
 inline double MicromechanicalElastomer::update_segments(double const N,

@@ -240,10 +240,10 @@ inline CMatrix AffineMicrosphere::compute_material_matrix(Matrix3 const& unimodu
 template <typename MatrixTp, typename Functor>
 inline MatrixTp AffineMicrosphere::weighting(MatrixTp accumulator, Functor f) const
 {
-    for (auto const & [ N, factor ] : material.segment_probability())
-    {
-        accumulator.noalias() += f(N) * factor;
-    }
+    // for (auto const & [ N, factor ] : material.segment_probability())
+    // {
+    //     accumulator.noalias() += f(N) * factor;
+    // }
     return accumulator;
 }
 }
