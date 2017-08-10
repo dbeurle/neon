@@ -1,6 +1,6 @@
 {
     "Name" : "NeoHookeModel",
-    "Cores" : 4,
+    "Cores" : 2,
     "Part": [{
         "Name" : "ElastomerTestSpecimen",
         "Material" : "rubber",
@@ -29,7 +29,7 @@
             "ConstitutiveModel" : "NeoHooke",
             "ElementOptions" :
             {
-                "Quadrature" : "Reduced"
+                "Quadrature" : "Full"
             },
             "BoundaryConditions" :
             [{
@@ -55,9 +55,9 @@
             },
             {
                 "Name" : "load",
-				"Type" : "Displacement",
+				"Type" : "Traction",
                 "Values" : {
-                    "y" : 0.01
+                    "y" : 5.0e6
                 }
             }]
         }],
