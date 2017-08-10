@@ -90,15 +90,14 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
         auto plastic_increment = 0.0;
 
         // Perform the return mapping algorithm
-        int iterations = 0, max_iterations = 25;
+        int iterations = 0, max_iterations = 50;
         while (f > 1.0e-4 && iterations < max_iterations)
         {
+            auto const H = material.hardening_modulus(accumulated_plastic_strain
+                                                      + plastic_increment);
+
             // Increment in plasticity rate
-            const auto plastic_increment_delta = f
-                                                 / (3.0 * shear_modulus
-                                                    + material.hardening_modulus(
-                                                          accumulated_plastic_strain
-                                                          + plastic_increment));
+            const auto plastic_increment_delta = f / (3.0 * shear_modulus + H);
 
             // Plastic rate update
             plastic_increment += plastic_increment_delta;
@@ -173,8 +172,8 @@ CMatrix J2Plasticity::deviatoric_projection() const
 CMatrix J2Plasticity::incremental_tangent(double const plastic_increment,
                                           double const von_mises) const
 {
-    auto const G = material.mu();
-    return C_e - plastic_increment * 6.0 * G * G / von_mises * I_dev;
+    auto const G = material.shear_modulus();
+    return C_e - plastic_increment * 6.0 * std::pow(G, 2) / von_mises * I_dev;
 }
 
 CMatrix J2Plasticity::algorithmic_tangent(double const plastic_increment,
