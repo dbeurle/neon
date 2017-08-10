@@ -3,8 +3,6 @@
 
 #include "numeric/SparseTypes.hpp"
 
-#include <string>
-
 namespace neon
 {
 /**
@@ -25,7 +23,6 @@ protected:
      */
     struct SolverParam
     {
-    public:
         SolverParam(double tol, int iter) : tolerance(tol), max_iterations(iter) {}
         double tolerance;
         int max_iterations;
