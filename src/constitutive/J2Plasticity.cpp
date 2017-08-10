@@ -28,7 +28,7 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
 {
     using namespace ranges;
 
-    auto const shear_modulus = material.mu();
+    auto const shear_modulus = material.shear_modulus();
     auto const lambda_e = material.lambda();
 
     // Extract the internal variables
