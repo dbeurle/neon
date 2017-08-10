@@ -19,7 +19,7 @@
         "Time" : {
             "Period" : 1.0,
             "Increments" : {
-                "Initial" : 0.1,
+                "Initial" : 0.4,
                 "Minimum" : 0.00001,
                 "Maximum" : 0.1
             }
@@ -48,18 +48,25 @@
                 }
             },
             {
-                "Name" : "load",
+                "Name" : "z-sym",
                 "Type" : "Displacement",
                 "Values" : {
-                    "x" : 0.001
+                    "z" : 0.0
+                }
+            },
+            {
+                "Name" : "load",
+                "Type" : "Traction",
+                "Values" : {
+                    "x" : 2.0e2
                 }
             }]
         }],
 		"LinearSolver" :
         {
-		    "Solver" : "Pastix",
-            "MaxIterations" : 2000,
-            "MaxTolerance"  : 1.0e-8
+		    "Solver" : "pCG",
+            "MaxIterations" : 3000,
+            "Tolerance"  : 1.0e-8
         },
         "Visualisation" :
         {

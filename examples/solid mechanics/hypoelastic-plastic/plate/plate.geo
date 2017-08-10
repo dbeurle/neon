@@ -6,3 +6,6 @@ Physical Surface("y-sym") = {1};
 Physical Surface("load") = {2};
 //+
 Physical Volume("plate") = {1};
+//+
+Physical Surface("z-sym") = {6};
+
