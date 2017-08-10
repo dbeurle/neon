@@ -41,6 +41,7 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
     NeoHooke neo_hooke(variables, material_data);
 
     REQUIRE(neo_hooke.is_finite_deformation());
+    REQUIRE(neo_hooke.intrinsic_material().name() == "rubber");
 
     // Get the tensor variables
     auto[F_list, cauchy_list] = variables(InternalVariables::Tensor::DeformationGradient,
@@ -108,6 +109,7 @@ TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
     AffineMicrosphere affine(variables, material_data);
 
     REQUIRE(affine.is_finite_deformation());
+    REQUIRE(affine.intrinsic_material().name() == "rubber");
 
     // Get the tensor variables
     auto[F_list, cauchy_list] = variables(InternalVariables::Tensor::DeformationGradient,
@@ -175,8 +177,6 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
 
     J2Plasticity j2plasticity(variables, material_data);
 
-    REQUIRE(!j2plasticity.is_finite_deformation());
-
     // Get the tensor variables
     auto[H_list, cauchy_list] = variables(InternalVariables::Tensor::DisplacementGradient,
                                           InternalVariables::Tensor::Cauchy);
@@ -188,8 +188,11 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
     for (auto& H : H_list) H = Matrix3::Zero();
     for (auto& J : J_list) J = 1.0;
 
-    SECTION("Internal variables allocation")
+    SECTION("Sanity checks")
     {
+        REQUIRE(j2plasticity.is_finite_deformation() == false);
+        REQUIRE(j2plasticity.intrinsic_material().name() == "steel");
+
         REQUIRE(variables.has(InternalVariables::Scalar::VonMisesStress));
         REQUIRE(variables.has(InternalVariables::Scalar::EffectivePlasticStrain));
         REQUIRE(variables.has(InternalVariables::Tensor::LinearisedStrain));
@@ -239,7 +242,7 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
     }
     SECTION("Plastic uniaxial elastic load")
     {
-        for (auto& H : H_list) H(2, 2) = 0.002;
+        for (auto& H : H_list) H(2, 2) = 0.003;
 
         j2plasticity.update_internal_variables(1.0);
 
