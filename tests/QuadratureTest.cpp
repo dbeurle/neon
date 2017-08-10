@@ -12,6 +12,7 @@
 
 #include "interpolations/Hexahedron8.hpp"
 #include "interpolations/Quadrilateral4.hpp"
+#include "interpolations/Quadrilateral8.hpp"
 #include "interpolations/Tetrahedron10.hpp"
 #include "interpolations/Tetrahedron4.hpp"
 #include "interpolations/Triangle3.hpp"
@@ -28,14 +29,17 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
         // Check 1 and 8 point rule
         QuadrilateralQuadrature q1(QuadrilateralQuadrature::Rule::OnePoint);
         QuadrilateralQuadrature q4(QuadrilateralQuadrature::Rule::FourPoint);
+        QuadrilateralQuadrature q9(QuadrilateralQuadrature::Rule::NinePoint);
 
         REQUIRE(q1.points() == 1);
         REQUIRE(q4.points() == 4);
+        REQUIRE(q9.points() == 9);
 
         REQUIRE(ranges::accumulate(q1.weights(), 0.0) == Approx(4.0));
         REQUIRE(ranges::accumulate(q4.weights(), 0.0) == Approx(4.0));
+        REQUIRE(ranges::accumulate(q9.weights(), 0.0) == Approx(4.0));
     }
-    SECTION("Quadrilateral interpolation function - three point")
+    SECTION("Quadrilateral4 interpolation function - one point")
     {
         Quadrilateral4 quad4(QuadrilateralQuadrature::Rule::OnePoint);
 
@@ -43,8 +47,18 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
         REQUIRE(quad4.quadrature().points() == 1);
         REQUIRE(quad4.local_quadrature_extrapolation().rows() == 4);
         REQUIRE(quad4.local_quadrature_extrapolation().cols() == 1);
+
+        quad4.quadrature().for_each([&](auto const& femval, auto const& l) {
+
+            auto const & [ N, rhea ] = femval;
+
+            REQUIRE(N.sum() == Approx(1.0));
+
+            REQUIRE(rhea.col(0).sum() == Approx(0.0));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0));
+        });
     }
-    SECTION("Quadrilateral interpolation function - four point")
+    SECTION("Quadrilateral4 interpolation function - four point")
     {
         Quadrilateral4 quad4(QuadrilateralQuadrature::Rule::FourPoint);
 
@@ -52,6 +66,54 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
         REQUIRE(quad4.quadrature().points() == 4);
         REQUIRE(quad4.local_quadrature_extrapolation().rows() == 4);
         REQUIRE(quad4.local_quadrature_extrapolation().cols() == 4);
+
+        quad4.quadrature().for_each([&](auto const& femval, auto const& l) {
+
+            auto const & [ N, rhea ] = femval;
+
+            REQUIRE(N.sum() == Approx(1.0));
+
+            REQUIRE(rhea.col(0).sum() == Approx(0.0));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0));
+        });
+    }
+    SECTION("Quadrilateral8 interpolation function - four point")
+    {
+        Quadrilateral8 quad8(QuadrilateralQuadrature::Rule::FourPoint);
+
+        REQUIRE(quad8.nodes() == 8);
+        REQUIRE(quad8.quadrature().points() == 4);
+        REQUIRE(quad8.local_quadrature_extrapolation().rows() == 8);
+        REQUIRE(quad8.local_quadrature_extrapolation().cols() == 4);
+
+        quad8.quadrature().for_each([&](auto const& femval, auto const& l) {
+
+            auto const & [ N, rhea ] = femval;
+
+            REQUIRE(N.sum() == Approx(1.0));
+
+            REQUIRE(rhea.col(0).sum() == Approx(0.0));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0));
+        });
+    }
+    SECTION("Quadrilateral8 interpolation function - nine point")
+    {
+        Quadrilateral8 quad8(QuadrilateralQuadrature::Rule::NinePoint);
+
+        REQUIRE(quad8.nodes() == 8);
+        REQUIRE(quad8.quadrature().points() == 9);
+        REQUIRE(quad8.local_quadrature_extrapolation().rows() == 8);
+        REQUIRE(quad8.local_quadrature_extrapolation().cols() == 9);
+
+        quad8.quadrature().for_each([&](auto const& femval, auto const& l) {
+
+            auto const & [ N, rhea ] = femval;
+
+            REQUIRE(N.sum() == Approx(1.0));
+
+            REQUIRE(rhea.col(0).sum() == Approx(0.0));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0));
+        });
     }
 }
 TEST_CASE("Triangle quadrature scheme test", "[TriangleQuadrature]")
@@ -79,6 +141,16 @@ TEST_CASE("Triangle quadrature scheme test", "[TriangleQuadrature]")
         REQUIRE(tri3.quadrature().points() == 1);
         REQUIRE(tri3.local_quadrature_extrapolation().rows() == 3);
         REQUIRE(tri3.local_quadrature_extrapolation().cols() == 1);
+
+        tri3.quadrature().for_each([&](auto const& femval, auto const& l) {
+
+            auto const & [ N, rhea ] = femval;
+
+            REQUIRE(N.sum() == Approx(1.0));
+
+            REQUIRE(rhea.col(0).sum() == Approx(0.0));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0));
+        });
     }
     SECTION("Triangle6 interpolation function - three point")
     {
@@ -86,6 +158,16 @@ TEST_CASE("Triangle quadrature scheme test", "[TriangleQuadrature]")
 
         REQUIRE(tri6.nodes() == 6);
         REQUIRE(tri6.quadrature().points() == 3);
+
+        tri6.quadrature().for_each([&](auto const& femval, auto const& l) {
+
+            auto const & [ N, rhea ] = femval;
+
+            REQUIRE(N.sum() == Approx(1.0));
+
+            REQUIRE(rhea.col(0).sum() == Approx(0.0));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0));
+        });
     }
     SECTION("Triangle6 interpolation function - four point")
     {
@@ -93,6 +175,16 @@ TEST_CASE("Triangle quadrature scheme test", "[TriangleQuadrature]")
 
         REQUIRE(tri6.nodes() == 6);
         REQUIRE(tri6.quadrature().points() == 4);
+
+        tri6.quadrature().for_each([&](auto const& femval, auto const& l) {
+
+            auto const & [ N, rhea ] = femval;
+
+            REQUIRE(N.sum() == Approx(1.0));
+
+            REQUIRE(rhea.col(0).sum() == Approx(0.0));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0));
+        });
     }
 }
 TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")

@@ -3,6 +3,7 @@
 
 #include "interpolations/Hexahedron8.hpp"
 #include "interpolations/Quadrilateral4.hpp"
+#include "interpolations/Quadrilateral8.hpp"
 #include "interpolations/Tetrahedron10.hpp"
 #include "interpolations/Tetrahedron4.hpp"
 #include "interpolations/Triangle3.hpp"
@@ -91,6 +92,12 @@ std::unique_ptr<SurfaceInterpolation> make_surface_interpolation(
         case ElementTopology::Triangle3:
         {
             return std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint);
+        }
+        case ElementTopology::Quadrilateral8:
+        {
+            return std::make_unique<Quadrilateral8>(
+                is_reduced ? QuadrilateralQuadrature::Rule::FourPoint
+                           : QuadrilateralQuadrature::Rule::NinePoint);
         }
         default:
             throw std::runtime_error("Surface element shape not implemented for "

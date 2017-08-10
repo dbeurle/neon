@@ -59,21 +59,12 @@ void Quadrilateral4::precompute_shape_functions()
 
 double Quadrilateral4::compute_measure(Matrix const& nodal_coordinates)
 {
-    auto face_area = 0.0;
+    return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
+        auto const & [ N, dN ] = femval;
 
-    Matrix rhea(4, 2);
-    Matrix planarCoordinates = project_to_plane(nodal_coordinates);
+        Matrix2 const Jacobian = project_to_plane(nodal_coordinates) * dN;
 
-    // TODO Fix this to use the integrator
-    // for (int l = 0; l < quadraturePoints; ++l)
-    // {
-    // 	rhea.col(0) = dN_dXi.col(l);
-    // 	rhea.col(1) = dN_dEta.col(l);
-    //
-    // 	Eigen::Matrix2d Jacobian = reducedPoints * rhea;
-    //
-    // 	face_area += Jacobian.determinant() * quadratureWeight(l);
-    // }
-    return face_area;
+        return Jacobian.determinant();
+    });
 }
 }
