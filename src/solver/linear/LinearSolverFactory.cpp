@@ -6,6 +6,7 @@
 
 #include <exception>
 #include <memory>
+#include <string>
 
 #include <json/json.h>
 
@@ -52,8 +53,8 @@ std::unique_ptr<LinearSolver> make_linear_solver(Json::Value const& solver_data)
     }
     else if (solver_name == "BiCGStab")
     {
-        if (not solver_data["Tolerance"].empty() and
-            not solver_data["MaxIterations"].empty())
+        if (not solver_data["Tolerance"].empty()
+            and not solver_data["MaxIterations"].empty())
         {
             return std::make_unique<BiCGSTAB>(solver_data["Tolerance"].asDouble(),
                                               solver_data["MaxIterations"].asInt());

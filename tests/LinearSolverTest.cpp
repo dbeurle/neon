@@ -11,9 +11,7 @@
 
 using namespace neon;
 
-/**
- * Create a SPD matrix for solver testing
- */
+/** Create a SPD matrix for solver testing */
 SparseMatrix create_sparse_matrix()
 {
     std::vector<Eigen::Triplet<double>> triplets = {{0, 0, 2.0},
@@ -32,9 +30,7 @@ SparseMatrix create_sparse_matrix()
     return A;
 }
 
-/**
- * Create an example right hand side
- */
+/** Create an example right hand side */
 Vector create_right_hand_side()
 {
     Eigen::VectorXd b(3);
@@ -44,6 +40,7 @@ Vector create_right_hand_side()
     return b;
 }
 
+/** The known solution */
 Vector solution()
 {
     Vector x(3);
