@@ -27,8 +27,7 @@ std::tuple<List const&, Vector> Traction::external_force(int const element,
 
     // Perform the computation of the external load vector
     auto const f_ext = sf->quadrature().integrate(Vector::Zero(X.cols()).eval(),
-                                                  [&, this](auto const& femval,
-                                                            auto const& l) {
+                                                  [&](auto const& femval, auto const& l) {
                                                       auto const & [ N, dN ] = femval;
 
                                                       auto const j = (X * dN).determinant();
