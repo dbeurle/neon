@@ -93,6 +93,12 @@ std::unique_ptr<SurfaceInterpolation> make_surface_interpolation(
         {
             return std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint);
         }
+        case ElementTopology::Triangle6:
+        {
+            return std::make_unique<Triangle6>(is_reduced
+                                                   ? TriangleQuadrature::Rule::OnePoint
+                                                   : TriangleQuadrature::Rule::ThreePoint);
+        }
         case ElementTopology::Quadrilateral8:
         {
             return std::make_unique<Quadrilateral8>(
