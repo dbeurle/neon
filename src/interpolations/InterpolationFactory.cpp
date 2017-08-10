@@ -7,6 +7,7 @@
 #include "interpolations/Tetrahedron10.hpp"
 #include "interpolations/Tetrahedron4.hpp"
 #include "interpolations/Triangle3.hpp"
+#include "interpolations/Triangle6.hpp"
 
 #include <stdexcept>
 
