@@ -99,20 +99,40 @@ TEST_CASE("Traction test for triangle", "[Traction]")
     std::vector<List> nodal_connectivity = {{0, 1, 2}};
     std::vector<List> dof_list = {{0, 3, 6}};
 
-    Traction traction(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
-                      nodal_connectivity,
-                      material_coordinates,
-                      1.0,  // Prescribed load
-                      true, // Is load ramped
-                      0     // Dof offset
-    );
+    SECTION("Unit load")
+    {
+        Traction traction(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
+                          nodal_connectivity,
+                          material_coordinates,
+                          1.0,  // Prescribed load
+                          true, // Is load ramped
+                          0     // Dof offset
+        );
 
-    REQUIRE(traction.elements() == 1);
+        REQUIRE(traction.elements() == 1);
 
-    auto const & [ dofs, t ] = traction.external_force(0, 1.0);
+        auto const & [ dofs, t ] = traction.external_force(0, 1.0);
 
-    REQUIRE((t - 1.0 / 6.0 * Vector3::Ones()).norm() == Approx(0.0));
-    REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
+        REQUIRE((t - 1.0 / 6.0 * Vector3::Ones()).norm() == Approx(0.0));
+        REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
+    }
+    SECTION("Twice unit load")
+    {
+        Traction traction(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
+                          nodal_connectivity,
+                          material_coordinates,
+                          2.0,  // Prescribed load
+                          true, // Is load ramped
+                          0     // Dof offset
+        );
+
+        REQUIRE(traction.elements() == 1);
+
+        auto const & [ dofs, t ] = traction.external_force(0, 1.0);
+
+        REQUIRE((t - 2.0 / 6.0 * Vector3::Ones()).norm() == Approx(0.0));
+        REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
+    }
 }
 TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
 {

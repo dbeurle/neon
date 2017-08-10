@@ -18,6 +18,7 @@ femStaticMatrix::femStaticMatrix(femMesh& fem_mesh,
       visualisation(std::move(visualisation)),
       adaptive_load(increment_data),
       fint(Vector::Zero(fem_mesh.active_dofs())),
+      fext(Vector::Zero(fem_mesh.active_dofs())),
       d(Vector::Zero(fem_mesh.active_dofs())),
       linear_solver(make_linear_solver(solver_data))
 {
@@ -63,6 +64,63 @@ void femStaticMatrix::compute_sparsity_pattern()
 
     // std::cout << "  Sparsity pattern with " << Kt.nonZeros() << " non-zeros took "
     //           << elapsed_seconds.count() << "s\n";
+}
+
+void femStaticMatrix::compute_internal_force()
+{
+    // auto start = std::chrono::high_resolution_clock::now();
+
+    fint.setZero();
+
+    for (auto const& submesh : fem_mesh.meshes())
+    {
+        for (auto element = 0; element < submesh.elements(); ++element)
+        {
+            auto const & [ dofs, fe_int ] = submesh.internal_force(element);
+
+            for (auto a = 0; a < fe_int.size(); ++a)
+            {
+                fint(dofs[a]) += fe_int(a);
+            }
+        }
+    }
+
+    // auto end = std::chrono::high_resolution_clock::now();
+    // std::chrono::duration<double> elapsed_seconds = end - start;
+
+    // std::cout << "  Assembly of internal forces took " << elapsed_seconds.count() <<
+    // "s\n";
+}
+
+void femStaticMatrix::compute_external_force(double const load_factor)
+{
+    auto start = std::chrono::high_resolution_clock::now();
+
+    fext.setZero();
+
+    for (auto const & [ name, nf_loads ] : fem_mesh.nonfollower_load_boundaries())
+    {
+        for (auto const& nf_load : nf_loads)
+        {
+            for (auto const& mesh : nf_load.boundaries())
+            {
+                for (auto element = 0; element < mesh.elements(); ++element)
+                {
+                    auto const &
+                        [ dofs, fe_ext ] = mesh.external_force(element, load_factor);
+
+                    for (auto a = 0; a < fe_ext.size(); ++a)
+                    {
+                        fext(dofs[a]) += fe_ext(a);
+                    }
+                }
+            }
+        }
+    }
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::cout << std::string(6, ' ') << "External forces assembly took "
+              << elapsed_seconds.count() << "s\n";
 }
 
 void femStaticMatrix::solve()
@@ -123,37 +181,11 @@ void femStaticMatrix::assemble_stiffness()
               << elapsed_seconds.count() << "s\n";
 }
 
-void femStaticMatrix::compute_internal_force()
-{
-    // auto start = std::chrono::high_resolution_clock::now();
-
-    fint.setZero();
-
-    for (auto const& submesh : fem_mesh.meshes())
-    {
-        for (auto element = 0; element < submesh.elements(); ++element)
-        {
-            auto const & [ dofs, fe_int ] = submesh.internal_force(element);
-
-            for (auto a = 0; a < fe_int.size(); ++a)
-            {
-                fint(dofs[a]) += fe_int(a);
-            }
-        }
-    }
-
-    // auto end = std::chrono::high_resolution_clock::now();
-    // std::chrono::duration<double> elapsed_seconds = end - start;
-
-    // std::cout << "  Assembly of internal forces took " << elapsed_seconds.count() <<
-    // "s\n";
-}
-
 void femStaticMatrix::enforce_dirichlet_conditions(SparseMatrix& A, Vector& x, Vector& b)
 {
     // auto start = std::chrono::high_resolution_clock::now();
 
-    for (auto const & [ name, dirichlet_boundaries ] : fem_mesh.dirichlet_boundary_map())
+    for (auto const & [ name, dirichlet_boundaries ] : fem_mesh.displacement_boundaries())
     {
         for (auto const& dirichlet_boundary : dirichlet_boundaries)
         {
@@ -197,7 +229,7 @@ void femStaticMatrix::apply_displacement_boundaries()
 {
     // auto start = std::chrono::high_resolution_clock::now();
 
-    for (auto const & [ name, dirichlet_boundaries ] : fem_mesh.dirichlet_boundary_map())
+    for (auto const & [ name, dirichlet_boundaries ] : fem_mesh.displacement_boundaries())
     {
         for (auto const& dirichlet_boundary : dirichlet_boundaries)
         {
@@ -232,7 +264,9 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
         compute_internal_force();
 
-        Vector residual = fint; // - fext
+        compute_external_force(adaptive_load.increment());
+
+        Vector residual = fint - fext;
 
         assemble_stiffness();
 

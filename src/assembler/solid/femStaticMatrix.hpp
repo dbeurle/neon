@@ -39,6 +39,8 @@ protected:
 
     void compute_internal_force();
 
+    void compute_external_force(double const load_factor);
+
     /**
      * Assembles the material and geometric matrices, checking for allocation
      * already performed
@@ -79,6 +81,7 @@ protected:
 
     SparseMatrix Kt; //!< Tangent matrix stiffness
     Vector fint;     //!< Internal force vector
+    Vector fext;     //!< External force vector
     Vector d;        //!< Displacement
 
     std::unique_ptr<LinearSolver> linear_solver;
