@@ -95,6 +95,10 @@ void Visualisation::write(int const time_step, double const total_time)
 {
     if (time_step % write_every != 0) return;
 
+    std::cout << "\n"
+              << std::string(4, ' ') << "Writing solution to file for step " << time_step
+              << "\n";
+
     auto const vtk_filename = file_name + "_" + std::to_string(time_step) + ".vtu";
 
     // Only write out the differences in the simulation, the nodal connectivity
