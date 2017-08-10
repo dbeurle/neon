@@ -7,10 +7,10 @@
     }],
     "Material" : [{
         "Name" : "steel",
-        "ElasticModulus" : 200.0e9,
-        "IsotropicHardeningModulus" : 400.0e6,
-        "YieldStress" : 200.0e6,
-        "PoissonsRatio" : 0.3
+        "ElasticModulus" : 200.0e3,
+        "IsotropicHardeningModulus" : 200.0,
+        "YieldStress" : 200.0,
+        "PoissonsRatio" : 0.28
     }],
     "SimulationCases" : [{
         "Name" : "Uniaxial",
@@ -21,7 +21,7 @@
             "Increments" : {
                 "Initial" : 0.1,
                 "Minimum" : 0.00001,
-                "Maximum" : 1.0
+                "Maximum" : 0.1
             }
         },
 		"Mesh" :
@@ -30,7 +30,7 @@
             "ConstitutiveModel" : "J2",
             "ElementOptions" :
             {
-                "Quadrature" : "Reduced"
+                "Quadrature" : "Full"
             },
             "BoundaryConditions" :
             [{
@@ -51,13 +51,13 @@
                 "Name" : "load",
                 "Type" : "Displacement",
                 "Values" : {
-                    "x" : 0.00001
+                    "x" : 0.001
                 }
             }]
         }],
 		"LinearSolver" :
         {
-		    "Solver" : "MUMPS",
+		    "Solver" : "Pastix",
             "MaxIterations" : 2000,
             "MaxTolerance"  : 1.0e-8
         },
