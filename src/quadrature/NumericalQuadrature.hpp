@@ -36,6 +36,22 @@ public:
         }
         return integral;
     }
+    /**
+
+     * Perform the numerical integration of a lambda function.
+     * @param integral - Initial value for the numerical integration
+     * @param f - A lambda function that accepts an femValue and quadrature point
+     * @return The numerically integrated scalar
+     */
+    template <typename Functor>
+    double integrate(double integral, Functor&& f) const
+    {
+        for (int l = 0; l < points(); ++l)
+        {
+            integral += f(femvals[l], l) * w[l];
+        }
+        return integral;
+    }
 
     template <typename Functor>
     void for_each(Functor&& eval_func) const

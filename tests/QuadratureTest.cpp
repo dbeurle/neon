@@ -268,6 +268,94 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
         REQUIRE(tet10.local_quadrature_extrapolation().rows() == 10);
         REQUIRE(tet10.local_quadrature_extrapolation().cols() == 5);
     }
+    SECTION("Tetrahedron10 Jacobian and volume check")
+    {
+        // Check that we have a Jacobian of one with a parent element
+        Matrix x(10, 3);
+        x << 1.0, 0.0, 0.0, //
+            0.0, 1.0, 0.0,  //
+            0.0, 0.0, 1.0,  //
+            0.0, 0.0, 0.0,  //
+            0.5, 0.5, 0.0,  //
+            0.0, 0.5, 0.5,  //
+            0.0, 0.0, 0.5,  //
+            0.5, 0.0, 0.0,  //
+            0.5, 0.0, 0.5,  //
+            0.0, 0.5, 0.0;
+        x.transposeInPlace();
+
+        SECTION("One point")
+        {
+            Tetrahedron10 tet10(TetrahedronQuadrature::Rule::OnePoint);
+
+            tet10.quadrature().for_each([&](auto const& femval, auto const& l) {
+
+                auto const & [ N, rhea ] = femval;
+
+                Matrix3 const Jacobian = x * rhea;
+
+                REQUIRE(Jacobian.determinant() == Approx(1.0));
+
+            });
+            double vol = tet10.quadrature()
+                             .integrate(0.0, [&](auto const& femval, auto const& l) {
+                                 auto const & [ N, rhea ] = femval;
+
+                                 Matrix3 const Jacobian = x * rhea;
+
+                                 return Jacobian.determinant();
+                             });
+            REQUIRE(vol == Approx(1.0 / 6.0));
+        }
+        SECTION("Four point")
+        {
+            Tetrahedron10 tet10(TetrahedronQuadrature::Rule::FourPoint);
+
+            tet10.quadrature().for_each([&](auto const& femval, auto const& l) {
+
+                auto const & [ N, rhea ] = femval;
+
+                Matrix3 const Jacobian = x * rhea;
+
+                REQUIRE(Jacobian.determinant() == Approx(1.0));
+
+            });
+
+            double vol = tet10.quadrature()
+                             .integrate(0.0, [&](auto const& femval, auto const& l) {
+                                 auto const & [ N, rhea ] = femval;
+
+                                 Matrix3 const Jacobian = x * rhea;
+
+                                 return Jacobian.determinant();
+                             });
+            REQUIRE(vol == Approx(1.0 / 6.0));
+        }
+        SECTION("Five point")
+        {
+            Tetrahedron10 tet10(TetrahedronQuadrature::Rule::FivePoint);
+
+            tet10.quadrature().for_each([&](auto const& femval, auto const& l) {
+
+                auto const & [ N, rhea ] = femval;
+
+                Matrix3 const Jacobian = x * rhea;
+
+                REQUIRE(Jacobian.determinant() == Approx(1.0));
+
+            });
+
+            double vol = tet10.quadrature()
+                             .integrate(0.0, [&](auto const& femval, auto const& l) {
+                                 auto const & [ N, rhea ] = femval;
+
+                                 Matrix3 const Jacobian = x * rhea;
+
+                                 return Jacobian.determinant();
+                             });
+            REQUIRE(vol == Approx(1.0 / 6.0));
+        }
+    }
 }
 TEST_CASE("Prism quadrature scheme test", "[PrismQuadrature]")
 {
