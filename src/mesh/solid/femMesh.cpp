@@ -4,7 +4,6 @@
 #include "mesh/BasicMesh.hpp"
 
 #include <exception>
-
 #include <memory>
 #include <numeric>
 
@@ -98,6 +97,12 @@ void femMesh::allocate_boundary_conditions(Json::Value const& simulation_data,
             {
                 auto const& dof_offset = dof_table.find(name)->second;
 
+                if (dof_table.find(name) == dof_table.end())
+                {
+                    throw std::runtime_error("x, y or z are acceptable "
+                                             "coordinates\n");
+                }
+
                 displacement_bcs[boundary_name]
                     .emplace_back(view::transform(dirichlet_dofs,
                                                   [&](auto const& dof) {
@@ -110,6 +115,12 @@ void femMesh::allocate_boundary_conditions(Json::Value const& simulation_data,
         {
             for (auto const& name : boundary["Values"].getMemberNames())
             {
+                if (dof_table.find(name) == dof_table.end())
+                {
+                    throw std::runtime_error("x, y or z are acceptable "
+                                             "coordinates\n");
+                }
+
                 auto const& dof_offset = dof_table.find(name)->second;
 
                 nf_loads[boundary_name].emplace_back(material_coordinates,
