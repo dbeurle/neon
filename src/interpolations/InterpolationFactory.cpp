@@ -2,8 +2,10 @@
 #include "InterpolationFactory.hpp"
 
 #include "interpolations/Hexahedron8.hpp"
+#include "interpolations/Quadrilateral4.hpp"
 #include "interpolations/Tetrahedron10.hpp"
 #include "interpolations/Tetrahedron4.hpp"
+#include "interpolations/Triangle3.hpp"
 
 #include <stdexcept>
 
@@ -11,6 +13,13 @@
 
 namespace neon::solid
 {
+bool is_reduced_integration(Json::Value const& simulation_data)
+{
+    return simulation_data["ElementOptions"]["Quadrature"].empty()
+               ? false
+               : simulation_data["ElementOptions"]["Quadrature"].asString() == "Reduced";
+}
+
 /** Factory method for the three dimensional shape functions */
 std::unique_ptr<VolumeInterpolation> make_volume_interpolation(
     ElementTopology const topology, Json::Value const& simulation_data)
@@ -20,10 +29,7 @@ std::unique_ptr<VolumeInterpolation> make_volume_interpolation(
         throw std::runtime_error("Missing \"Part\": \"ElementOptions\"");
     }
 
-    auto is_reduced = simulation_data["ElementOptions"]["Quadrature"].empty()
-                          ? false
-                          : simulation_data["ElementOptions"]["Quadrature"].asString()
-                                == "Reduced";
+    auto is_reduced = is_reduced_integration(simulation_data);
 
     switch (topology)
     {
@@ -64,10 +70,33 @@ std::unique_ptr<VolumeInterpolation> make_volume_interpolation(
     return nullptr;
 }
 
-std::unique_ptr<VolumeInterpolation> make_surface_interpolation(
+std::unique_ptr<SurfaceInterpolation> make_surface_interpolation(
     ElementTopology const topology, Json::Value const& simulation_data)
 {
-    throw std::runtime_error("No available surface interpolations\n");
+    if (!simulation_data.isMember("ElementOptions"))
+    {
+        throw std::runtime_error("Missing \"Part\": \"ElementOptions\"");
+    }
+
+    auto is_reduced = is_reduced_integration(simulation_data);
+
+    switch (topology)
+    {
+        case ElementTopology::Quadrilateral4:
+        {
+            return std::make_unique<Quadrilateral4>(
+                is_reduced ? QuadrilateralQuadrature::Rule::OnePoint
+                           : QuadrilateralQuadrature::Rule::FourPoint);
+        }
+        case ElementTopology::Triangle3:
+        {
+            return std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint);
+        }
+        default:
+            throw std::runtime_error("Surface element shape not implemented for "
+                                     "continuum simulations\n");
+            break;
+    }
     return nullptr;
 }
 }

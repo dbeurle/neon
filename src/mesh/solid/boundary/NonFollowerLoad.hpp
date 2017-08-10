@@ -2,6 +2,7 @@
 #pragma once
 
 #include "interpolations/SurfaceInterpolation.hpp"
+#include "mesh/SubMesh.hpp"
 #include "mesh/solid/MaterialCoordinates.hpp"
 #include "mesh/solid/boundary/Boundary.hpp"
 #include "numeric/DenseTypes.hpp"
@@ -46,12 +47,19 @@ protected:
 class Traction : public NonFollowerLoad
 {
 public:
-    Traction(std::vector<List> const& nodal_connectivity,
-             std::shared_ptr<MaterialCoordinates>&& material_coordinates,
-             double const prescribed_load,
-             bool const is_load_ramped,
-             int const dof_offset,
-             std::unique_ptr<SurfaceInterpolation>&& sf);
+    /**
+     * Construct the object by forwarding the constructor arguments for the
+     * parent via a variadic template.  The correct constructor arguments
+     * are given by \sa NonFollowerLoad
+     * @param sf Unique pointer to a surface interpolation
+     * @param args See \sa NonFollowerLoad constructor arguments
+     */
+    template <typename... NonFollowerLoadArgs>
+    explicit Traction(std::unique_ptr<SurfaceInterpolation>&& sf,
+                      NonFollowerLoadArgs... args)
+        : NonFollowerLoad(args...), sf(std::move(sf))
+    {
+    }
 
     virtual std::tuple<List const&, Vector> external_force(
         int const element, double const load_factor) const override;
@@ -68,6 +76,12 @@ protected:
 class NonFollowerLoadBoundary
 {
 public:
+    explicit NonFollowerLoadBoundary(std::shared_ptr<MaterialCoordinates>& material_coordinates,
+                                     std::vector<SubMesh> const& submeshes,
+                                     int const dof_offset,
+                                     double const prescribed_load,
+                                     Json::Value const& simulation_data);
+
     auto const& boundaries() const { return nf_loads; }
 
 protected:

@@ -1,6 +1,7 @@
 
 #include "NonFollowerLoad.hpp"
 
+#include "interpolations/InterpolationFactory.hpp"
 #include "mesh/DofAllocator.hpp"
 
 namespace neon::solid
@@ -18,20 +19,6 @@ NonFollowerLoad::NonFollowerLoad(std::vector<List> const& nodal_connectivity,
 {
 }
 
-Traction::Traction(std::vector<List> const& nodal_connectivity,
-                   std::shared_ptr<MaterialCoordinates>&& material_coordinates,
-                   double const prescribed_load,
-                   bool const is_load_ramped,
-                   int const dof_offset,
-                   std::unique_ptr<SurfaceInterpolation>&& sf)
-    : NonFollowerLoad(nodal_connectivity,
-                      material_coordinates,
-                      prescribed_load,
-                      is_load_ramped,
-                      dof_offset),
-      sf(std::move(sf))
-{
-}
 std::tuple<List const&, Vector> Traction::external_force(int const element,
                                                          double const load_factor) const
 {
@@ -51,5 +38,24 @@ std::tuple<List const&, Vector> Traction::external_force(int const element,
                                                              * N * j;
                                                   });
     return {dof_list.at(element), f_ext};
+}
+
+NonFollowerLoadBoundary::NonFollowerLoadBoundary(
+    std::shared_ptr<MaterialCoordinates>& material_coordinates,
+    std::vector<SubMesh> const& submeshes,
+    int const dof_offset,
+    double const prescribed_load,
+    Json::Value const& simulation_data)
+{
+    // Populate the entire mesh
+    for (auto const& mesh : submeshes)
+    {
+        nf_loads.emplace_back(make_surface_interpolation(mesh.topology(), simulation_data),
+                              mesh.connectivities(),
+                              material_coordinates,
+                              prescribed_load,
+                              true,
+                              dof_offset);
+    }
 }
 }

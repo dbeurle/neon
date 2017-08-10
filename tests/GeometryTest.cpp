@@ -298,7 +298,7 @@ TEST_CASE("Solid mesh test")
 
     SECTION("Check Dirichlet boundaries")
     {
-        auto const& map = fem_mesh.dirichlet_boundary_map();
+        auto const& map = fem_mesh.displacement_boundaries();
 
         // See if correctly input in the map
         REQUIRE(map.find("bottom") != map.end());
