@@ -277,7 +277,7 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
         d_new += delta_d;
 
-        fem_mesh.update_internal_variables(d_new, adaptive_load.increment());
+        fem_mesh.update_internal_variables(d_new);
 
         print_convergence_progress(delta_d.norm(), residual.norm());
 
@@ -291,6 +291,7 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
         current_iteration++;
     }
+
     adaptive_load.update_convergence_state(current_iteration != max_iterations);
     fem_mesh.save_internal_variables(current_iteration != max_iterations);
 
