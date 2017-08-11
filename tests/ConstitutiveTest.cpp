@@ -97,9 +97,14 @@ TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
     variables.add(InternalVariables::Scalar::DetF);
 
     // Create a json reader object from a string
-    std::string input_data =
-        "{\"Name\": \"rubber\", \"ElasticModulus\": 1.0, \"PoissonsRatio\": 2.0, "
-        "\"SegmentsPerChain\" : 25}";
+    std::string input_data = "{\"Name\" : \"rubber\", "
+                             "\"ElasticModulus\" : 10.0e6, "
+                             "\"PoissonsRatio\" : 0.45, "
+                             "\"Segments\" : { "
+                             "\"Groups\" : 5, "
+                             "\"Average\" : 50, "
+                             "\"StandardDeviation\" : 10, "
+                             "\"ScissionLikelihood\" : 0.0001}}";
 
     Json::Value material_data;
     Json::Reader reader;

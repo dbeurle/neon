@@ -21,67 +21,42 @@ class MicromechanicalElastomer : public LinearElastic
 public:
     MicromechanicalElastomer(Json::Value const& material_data);
 
+    int const groups() const { return number_of_groups; }
+
     /**
      * Compute the shear modulus assuming the temperature is 298K according to
      * the formula μ = n / (k * T)
      * @param n number of chains
      * @return the shear modulus from entropy elastic theory
      */
-    double shear_modulus(double const n) const;
+    auto const& shear_moduli_groups() const { return shear_moduli; }
 
-    /** @return number of initial chains */
-    double number_of_initial_chains() const { return n0; }
+    /** @return vector of chain groups from initial material properties */
+    auto const& chain_groups() const { return chains; }
 
-    /** @return number of initial segments */
-    double number_of_initial_segments() const { return N0_avg; }
+    /** @return vector of segment groups from initial material properties */
+    auto const& segment_groups() const { return segments; }
 
     /** @return the current number of chains in the network */
-    double update_chains(double const n, double const time_step_size) const;
+    std::vector<double> update_chains(std::vector<double> const& chains_old,
+                                      double const time_step_size);
 
-    /** @return the new segments.  Compute probability based on evolution equation */
-    double update_segments(double const N, double const time_step_size);
-
-protected:
-    /**
-     * Evaluates the probabilty mass function and populates
-     * a vector with the number of segments per chain and the corresponding
-     * mass density from the probability function.  For physicality, these
-     * are drawn from a zero truncated Poisson PMF \sa zero_trunc_poisson_pmf.
-     *
-     * WARNING: This operation is wildly expensive to compute, so a threshold
-     * for the inclusion of the segments per chain is required but will always
-     * underestimate the stress in the material by approximately 1%
-     */
-    void compute_probability_and_segments(double const N);
+    std::vector<double> compute_shear_moduli(std::vector<double> const& chains);
 
 protected:
-    double n0;     // !< Initial number of chains
-    double N0_avg; //!< Initial average segments per chain
+    void compute_chains_and_segments(Json::Value const& segments_data);
 
-    double chain_decay_rate;
-    double segment_decay_rate;
+protected:
+    double p_scission = 0.0; //!< Probability that a segment is scissioned
 
-    std::vector<double> segment_bins;
+    int number_of_groups = 1;
+
+    std::vector<double> segments;
+    std::vector<double> chains;
+
+    std::vector<double> shear_moduli;
 
     double const boltzmann_constant = 1.38064852e-23;
     double const temperature = 298.0;
 };
-
-inline double MicromechanicalElastomer::shear_modulus(double const n) const
-{
-    return n * boltzmann_constant * temperature;
-}
-
-inline double MicromechanicalElastomer::update_chains(double const n,
-                                                      double const time_step_size) const
-{
-    return n / (1.0 + 0.0001 * time_step_size);
-}
-
-inline double MicromechanicalElastomer::update_segments(double const N,
-                                                        double const time_step_size)
-{
-    compute_probability_and_segments(N);
-    return N / (1.0 + time_step_size * segment_decay_rate);
-}
 }

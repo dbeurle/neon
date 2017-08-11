@@ -20,6 +20,7 @@ class InternalVariables
 {
 public:
     using Scalars = std::vector<double>;
+    using Vectors = std::vector<std::vector<double>>;
     using Tensors = std::vector<Matrix3>;
     using Matrices = std::vector<CMatrix>;
 
@@ -42,9 +43,12 @@ public:
         GreenLagrange
     };
 
+    enum class Vector { Chains, Segments, ShearModuli };
+
     enum class Scalar {
-        Chains,   // Chains for the micromechanical model
-        Segments, // Segments for the micromechanical model
+        Chains,      // Chains for the micromechanical model
+        Segments,    // Segments for the micromechanical model
+        ShearModuli, // Shear moduli
         VonMisesStress,
         EffectivePlasticStrain,
         DetF0, // Reference Jacobian determinant

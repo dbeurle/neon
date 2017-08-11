@@ -90,7 +90,7 @@ protected:
     CMatrix compute_material_matrix(Matrix3 const& unimodular_F, double const N) const;
 
     template <typename MatrixTp, typename Functor>
-    MatrixTp weighting(MatrixTp accumulator, Functor f) const;
+    MatrixTp weighting(std::vector<double> const& G, MatrixTp accumulator, Functor f) const;
 
 protected:
     MicromechanicalElastomer material;
@@ -238,12 +238,14 @@ inline CMatrix AffineMicrosphere::compute_material_matrix(Matrix3 const& unimodu
 }
 
 template <typename MatrixTp, typename Functor>
-inline MatrixTp AffineMicrosphere::weighting(MatrixTp accumulator, Functor f) const
+inline MatrixTp AffineMicrosphere::weighting(std::vector<double> const& G,
+                                             MatrixTp accumulator,
+                                             Functor f) const
 {
-    // for (auto const & [ N, factor ] : material.segment_probability())
-    // {
-    //     accumulator.noalias() += f(N) * factor;
-    // }
+    for (int i = 0; i < material.segment_groups().size(); i++)
+    {
+        accumulator.noalias() += f(material.segment_groups()[i]) * G[i];
+    }
     return accumulator;
 }
 }

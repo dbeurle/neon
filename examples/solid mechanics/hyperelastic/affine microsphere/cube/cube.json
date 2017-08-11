@@ -10,9 +10,12 @@
         "Name" : "rubber",
         "ElasticModulus" : 10.0e6,
         "PoissonsRatio" : 0.46,
-        "SegmentsPerChain": 25,
-        "ChainDecayRate" : 2.0e-7,
-        "SegmentDecayRate" : 2.0e-11
+        "Segments" : {
+            "Groups" : 5,
+            "Average" : 50,
+            "StandardDeviation" : 10,
+            "ScissionLikelihood" : 1e-13
+        }
     }],
     "SimulationCases" : [{
         "Name" : "Load",
@@ -36,7 +39,7 @@
             "ConstitutiveModel" : "AffineMicrosphere",
             "ElementOptions" :
             {
-                "Quadrature" : "Reduced"
+                "Quadrature" : "Full"
             },
             "BoundaryConditions" :
             [{
@@ -91,8 +94,7 @@
                 "Maximum" : 500.0
             }
         },
-		"Mesh" :
-        [{
+		"Mesh" : [{
             "Name" : "cube"
         }],
         "LinearSolver" : {
@@ -116,11 +118,9 @@
                 "Maximum" : 1.0
             }
         },
-        "Mesh" :
-        [{
+        "Mesh" : [{
             "Name" : "cube",
-            "BoundaryConditions" :
-            [{
+            "BoundaryConditions" : [{
                 "Name" : "Xsym",
                 "Type" : "Displacement",
                 "Values" : {
@@ -154,11 +154,8 @@
             "MaxIterations" : 1000,
             "Tolerance"  : 1.0e-8
         },
-        "Visualisation" :
-        [{
+        "Visualisation" : {
             "Fields" : ["Displacement", "CauchyStress"]
-        }]
-    }
-
-]
+        }
+    }]
 }

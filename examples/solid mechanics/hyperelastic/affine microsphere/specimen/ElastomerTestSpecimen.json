@@ -3,16 +3,21 @@
     "Cores" : 2,
     "Part": [{
         "Name" : "ElastomerTestSpecimen",
-        "Material" : "rubber",
-        "MeshFormat" : "gmsh"
+        "Material" : "rubber"
     }],
     "Material" : [{
         "Name" : "rubber",
         "ElasticModulus" : 10.0e6,
-        "PoissonsRatio" : 0.45
+        "PoissonsRatio" : 0.45,
+        "Segments" : {
+            "Groups" : 5,
+            "Average" : 50,
+            "StandardDeviation" : 10,
+            "ScissionLikelihood" : 0.0001
+        }
     }],
     "SimulationCases" : [{
-        "Name" : "Uniaxial",
+        "Name" : "Load",
 		"Type" : "SolidMechanics",
         "Solution" : "Equilibrium",
         "Time" : {
@@ -23,16 +28,13 @@
                 "Maximum" : 1.0
             }
         },
-		"Mesh" :
-        [{
+		"Mesh" : [{
             "Name" : "ElastomerTestSpecimen",
             "ConstitutiveModel" : "AffineMicrosphere",
-            "ElementOptions" :
-            {
+            "ElementOptions" : {
                 "Quadrature" : "Full"
             },
-            "BoundaryConditions" :
-            [{
+            "BoundaryConditions" : [{
                 "Name" : "x-sym",
                 "Type" : "Displacement",
                 "Values" : {
@@ -55,21 +57,98 @@
             },
             {
                 "Name" : "load",
-				"Type" : "Traction",
+				"Type" : "Displacement",
+                "LoadVariation" : "Ramp",
                 "Values" : {
-                    "y" : 5.0e6
+                    "y" : 0.0005
                 }
             }]
         }],
-		"LinearSolver" :
-        {
+		"LinearSolver" : {
 		    "Solver" : "pCG",
             "MaxIterations" : 1000,
-            "Tolerance"  : 1.0e-6
+            "Tolerance"  : 1.0e-8
         },
-        "Visualisation" :
-        {
-            "Fields" : ["Displacement", "DeformationGradient", "CauchyStress"]
+        "Visualisation" : {
+            "Fields" : ["Displacement", "DeformationGradient", "CauchyStress"],
+            "WriteEvery": 20
+        }
+    },
+    {
+        "Name" : "Relaxation",
+        "Inherits" : "Load",
+        "Solution" : "Equilibrium",
+        "Time" : {
+            "Period" : 5184000.0,
+            "Increments" : {
+                "Initial" : 1.0,
+                "Minimum" : 0.001,
+                "Maximum" : 500.0
+            }
+        },
+		"Mesh" : [{
+            "Name" : "ElastomerTestSpecimen"
+        }],
+        "LinearSolver" : {
+		    "Solver" : "pCG",
+            "MaxIterations" : 1000,
+            "Tolerance"  : 1.0e-8
+        },
+        "Visualisation" : {
+            "Fields" : ["Displacement", "CauchyStress"]
+        }
+    },
+    {
+        "Name" : "Unloading",
+        "Inherits" : "Relaxation",
+        "Solution" : "Equilibrium",
+        "Time" : {
+            "Period" : 1.0,
+            "Increments" : {
+                "Initial" : 0.1,
+                "Minimum" : 0.001,
+                "Maximum" : 1.0
+            }
+        },
+        "Mesh" : [{
+            "Name" : "ElastomerTestSpecimen",
+            "BoundaryConditions" :
+            [{
+                "Name" : "Xsym",
+                "Type" : "Displacement",
+                "Values" : {
+                    "x" : 0.0
+                }
+            },
+            {
+                "Name" : "Ysym",
+                "Type" : "Displacement",
+                "Values" : {
+                    "y" : 0.0
+                }
+            },
+            {
+                "Name" : "Zsym",
+                "Type" : "Displacement",
+                "Values" : {
+                    "z" : 0.0
+                }
+            },
+            {
+                "Name" : "ZLoad",
+                "Type" : "Displacement",
+                "Values" : {
+                    "z" : 0.0
+                }
+            }]
+        }],
+        "LinearSolver" : {
+		    "Solver" : "pCG",
+            "MaxIterations" : 1000,
+            "Tolerance"  : 1.0e-8
+        },
+        "Visualisation" : {
+            "Fields" : ["Displacement", "CauchyStress"]
         }
     }]
 }

@@ -33,9 +33,14 @@ std::string isotropic_plastic_input()
 
 std::string micromechanical_input()
 {
-    return "{\"Name\": \"steel\", \"ElasticModulus\": 10.0e6, \"PoissonsRatio\": 0.48, "
-           "\"SegmentsPerChain\": 25, \"ChainDecayRate\": 1.0e-6, "
-           "\"SegmentDecayRate\":1.0e-6}";
+    return "{\"Name\" : \"rubber\", "
+           "\"ElasticModulus\" : 10.0e6, "
+           "\"PoissonsRatio\" : 0.45, "
+           "\"Segments\" : { "
+           "\"Groups\" : 5, "
+           "\"Average\" : 50, "
+           "\"StandardDeviation\" : 10, "
+           "\"ScissionLikelihood\" : 0.0001}}";
 }
 
 TEST_CASE("Linear elastic material", "[LinearElastic]")
@@ -109,31 +114,24 @@ TEST_CASE("Micromechanical elastomer", "[MicromechanicalElastomer]")
     REQUIRE(material_file.parse(micromechanical_input().c_str(), material_data));
     MicromechanicalElastomer elastomer(material_data);
 
-    auto constexpr N = 25.0;
-    auto constexpr n = 821124278313831795984957440.0;
+    // Initial chains and segment groups
+    auto const chain_group_initial = elastomer.chain_groups();
+    auto const segment_group_initial = elastomer.segment_groups();
 
-    REQUIRE(elastomer.number_of_initial_chains() == Approx(n));
-    REQUIRE(elastomer.number_of_initial_segments() == Approx(25));
-
-    SECTION("Sanity check the segment probability")
+    SECTION("Perform time step")
     {
-        using namespace ranges;
+        auto const chain_group = elastomer.update_chains(elastomer.chain_groups(), 100.0);
+        auto const shear_moduli = elastomer.compute_shear_moduli(chain_group);
+        auto const segment_group = elastomer.segment_groups();
 
-        // Check that the probabilities all sum to one (or very close)
-        REQUIRE(accumulate(elastomer.segment_probability(),
-                           0.0,
-                           [](auto const& psum, auto const& tpl) {
-                               auto const[N, factor] = tpl;
-                               return psum + factor;
-                           })
-                == Approx(1.0));
-    }
-    SECTION("Sanity check the updates routine")
-    {
-        auto constexpr time_step_size = 1.0;
+        REQUIRE(chain_group.size() == segment_group.size());
 
-        // The updated values should be less than the originals
-        REQUIRE(elastomer.update_chains(n, time_step_size) < n);
-        REQUIRE(elastomer.update_segments(N, time_step_size) < N);
+        // Ensure we have a decrease in the number of chains
+        for (auto i = 0; i < chain_group.size(); i++)
+        {
+            REQUIRE(chain_group.at(i) < chain_group_initial.at(i));
+            REQUIRE(segment_group.at(i) == segment_group_initial.at(i));
+            REQUIRE(shear_moduli.at(i) > 0.0);
+        }
     }
 }
