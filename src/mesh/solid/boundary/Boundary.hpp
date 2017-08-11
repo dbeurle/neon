@@ -18,7 +18,7 @@ public:
 
     /** Update the prescribed value and load application to ramped or instantaneous */
     void internal_restart(double const prescribed_value_new,
-                          bool const is_load_ramped = false);
+                          bool const is_load_ramped = true);
 
     /** Maintains the previous load and does not ramp */
     void internal_restart();
