@@ -56,6 +56,10 @@ void AdaptiveLoadStep::update_convergence_state(bool is_converged)
                                      "the step\n");
         }
 
+        if (current_time < total_time)
+            throw std::runtime_error("Step has reduced below the final time for the "
+                                     "last load case\n");
+
         std::cout << "\n"
                   << std::string(terminal_indent, ' ') << termcolor::yellow
                   << termcolor::bold << "Non-convergence detected - step time set to "
