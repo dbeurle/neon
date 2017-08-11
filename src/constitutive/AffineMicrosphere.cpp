@@ -58,7 +58,7 @@ void AffineMicrosphere::update_internal_variables(double const time_step_size)
     auto& n_list = variables(InternalVariables::Scalar::Chains);
     auto& G_list = variables(InternalVariables::Scalar::ShearModuli);
 
-    // Update the number of chains in the network
+    // Update the material properties
     n_list = material.update_chains(n_list, time_step_size);
     G_list = material.compute_shear_moduli(n_list);
 
