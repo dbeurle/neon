@@ -118,6 +118,8 @@ TEST_CASE("Micromechanical elastomer", "[MicromechanicalElastomer]")
     auto const chain_group_initial = elastomer.chain_groups();
     auto const segment_group_initial = elastomer.segment_groups();
 
+    REQUIRE(elastomer.groups() == 5);
+
     SECTION("Perform time step")
     {
         auto const chain_group = elastomer.update_chains(elastomer.chain_groups(), 100.0);

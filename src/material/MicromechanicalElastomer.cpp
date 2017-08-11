@@ -59,7 +59,7 @@ void MicromechanicalElastomer::compute_chains_and_segments(Json::Value const& se
                                  "data\n");
     }
 
-    auto const number_of_groups = segments_data["Groups"].asInt();
+    number_of_groups = segments_data["Groups"].asInt();
 
     p_scission = segments_data["ScissionLikelihood"].asDouble();
 
