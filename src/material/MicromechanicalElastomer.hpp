@@ -51,10 +51,7 @@ protected:
 
     int number_of_groups = 1;
 
-    std::vector<double> segments;
-    std::vector<double> chains;
-
-    std::vector<double> shear_moduli;
+    std::vector<double> segments, chains, shear_moduli;
 
     double const boltzmann_constant = 1.38064852e-23;
     double const temperature = 298.0;

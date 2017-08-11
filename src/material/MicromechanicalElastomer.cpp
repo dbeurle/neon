@@ -60,7 +60,6 @@ void MicromechanicalElastomer::compute_chains_and_segments(Json::Value const& se
     }
 
     number_of_groups = segments_data["Groups"].asInt();
-
     p_scission = segments_data["ScissionLikelihood"].asDouble();
 
     auto const N_avg = segments_data["Average"].asInt();
@@ -106,11 +105,11 @@ std::vector<double> MicromechanicalElastomer::update_chains(
 }
 
 std::vector<double> MicromechanicalElastomer::compute_shear_moduli(
-    std::vector<double> const& chains)
+    std::vector<double> const& chains_new)
 {
     using namespace ranges;
 
-    return chains | view::transform([&](auto const& n) {
+    return chains_new | view::transform([&](auto const& n) {
                return n * boltzmann_constant * temperature;
            });
 }
