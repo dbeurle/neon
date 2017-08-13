@@ -1,6 +1,12 @@
 
+#pragma once
+
+#ifdef ENABLE_CUDA
 
 #include "LinearSolver.hpp"
+
+#include <cuda/cublas_v2.h>
+#include <cuda/cusparse.h>
 
 namespace neon
 {
@@ -12,17 +18,33 @@ namespace neon
 class ConjugateGradientGPU : public LinearSolver
 {
 public:
-    ConjugateGradientGPU();
+    explicit ConjugateGradientGPU();
 
-    ConjugateGradientGPU(double const residual_tolerance);
+    explicit ConjugateGradientGPU(double const residual_tolerance);
 
-    ConjugateGradientGPU(int const maxIter);
+    explicit ConjugateGradientGPU(int const maxIter);
 
-    ConjugateGradientGPU(double const residual_tolerance, int const maxIter);
+    explicit ConjugateGradientGPU(double const residual_tolerance, int const maxIter);
+
+    ~ConjugateGradientGPU();
 
     void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
 
 protected:
+    void allocate_device_memory(SparseMatrix const& A, Vector& x, Vector const& b);
+
     void find_compute_device();
+
+protected:
+    // Device side pointers
+    int *d_col, *d_row;
+    double *d_val, *d_x;
+
+    double *d_r, *d_p, *d_omega, *d_y;
+
+    cublasHandle_t cublasHandle = 0;
+    cusparseHandle_t cusparseHandle = 0;
+    cusparseMatDescr_t descr = 0;
 };
 }
+#endif

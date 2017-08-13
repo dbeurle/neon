@@ -30,6 +30,8 @@ protected:
     };
 
 protected:
+    bool build_sparsity_pattern = true;
+
     SolverParam solverParam; //!< POD for the solver parameters
 };
 

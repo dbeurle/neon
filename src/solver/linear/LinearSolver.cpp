@@ -67,7 +67,6 @@ void ConjugateGradient::solve(SparseMatrix const& A, Vector& x, const Vector& b)
             "increasing the maximum number of iterations or use a different "
             "solver\n");
     }
-    // std::cout << "    Linear solver took " << elapsed_seconds.count() << "s\n";
 }
 
 BiCGSTAB::BiCGSTAB(double tol) { solverParam.tolerance = tol; }

@@ -24,24 +24,36 @@
  * benchmarking purposes.
  */
 
-#ifdef ENABLE_CUDA
-
 #include "ConjugateGradientGPU.hpp"
 
-#include <chrono>
+#ifdef ENABLE_CUDA
+
 #include <cmath>
 
 #include <cuda/cuda_runtime.h>
-
-#include <cuda/cublas_v2.h>
-#include <cuda/cusparse.h>
 
 #include "helper_cuda.h"
 #include "helper_functions.h"
 
 namespace neon
 {
-ConjugateGradientGPU::ConjugateGradientGPU() { this->find_compute_device(); }
+ConjugateGradientGPU::ConjugateGradientGPU()
+{
+    this->find_compute_device();
+
+    // Create CUBLAS context
+    checkCudaErrors(cublasCreate(&cublasHandle));
+
+    // Create CUSPARSE context
+    checkCudaErrors(cusparseCreate(&cusparseHandle));
+
+    // Description of the A matrix
+    checkCudaErrors(cusparseCreateMatDescr(&descr));
+
+    // Define the properties of the matrix
+    cusparseSetMatType(descr, CUSPARSE_MATRIX_TYPE_GENERAL);
+    cusparseSetMatIndexBase(descr, CUSPARSE_INDEX_BASE_ZERO);
+}
 
 ConjugateGradientGPU::ConjugateGradientGPU(double const tol) : ConjugateGradientGPU()
 {
@@ -60,8 +72,27 @@ ConjugateGradientGPU::ConjugateGradientGPU(double const tol, int const maxIter)
     solverParam.tolerance = tol;
 }
 
+ConjugateGradientGPU::~ConjugateGradientGPU()
+{
+    // Destroy contexts
+    cusparseDestroy(cusparseHandle);
+    cublasDestroy(cublasHandle);
+
+    // Free device memory
+    cudaFree(d_col);
+    cudaFree(d_row);
+    cudaFree(d_val);
+    cudaFree(d_x);
+    cudaFree(d_y);
+    cudaFree(d_r);
+    cudaFree(d_p);
+    cudaFree(d_omega);
+}
+
 void ConjugateGradientGPU::solve(SparseMatrix const& A, Vector& x, Vector const& b)
 {
+    this->allocate_device_memory(A, x, b);
+
     auto const max_iter = solverParam.max_iterations;
     auto const tol = solverParam.tolerance;
 
@@ -72,47 +103,13 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, Vector& x, Vector const&
 
     x.setZero();
 
-    // Create CUBLAS context
-    cublasHandle_t cublasHandle = 0;
-    cublasStatus_t cublasStatus = cublasCreate(&cublasHandle);
-    checkCudaErrors(cublasStatus);
-
-    // Create CUSPARSE context
-    cusparseHandle_t cusparseHandle = 0;
-    cusparseStatus_t cusparseStatus = cusparseCreate(&cusparseHandle);
-    checkCudaErrors(cusparseStatus);
-
-    // Description of the A matrix
-    cusparseMatDescr_t descr = 0;
-    cusparseStatus = cusparseCreateMatDescr(&descr);
-    checkCudaErrors(cusparseStatus);
-
-    // Define the properties of the matrix
-    cusparseSetMatType(descr, CUSPARSE_MATRIX_TYPE_GENERAL);
-    cusparseSetMatIndexBase(descr, CUSPARSE_INDEX_BASE_ZERO);
-
-    // Allocate required memory
-    int *d_col, *d_row;
-    double *d_val, *d_x;
-    double *d_r, *d_p, *d_omega, *d_y;
-
-    checkCudaErrors(cudaMalloc((void**)&d_col, A.nonZeros() * sizeof(int)));
-    checkCudaErrors(cudaMalloc((void**)&d_row, (N + 1) * sizeof(int)));
-    checkCudaErrors(cudaMalloc((void**)&d_val, A.nonZeros() * sizeof(double)));
-    checkCudaErrors(cudaMalloc((void**)&d_x, N * sizeof(double)));
-    checkCudaErrors(cudaMalloc((void**)&d_y, N * sizeof(double)));
-    checkCudaErrors(cudaMalloc((void**)&d_r, N * sizeof(double)));
-    checkCudaErrors(cudaMalloc((void**)&d_p, N * sizeof(double)));
-    checkCudaErrors(cudaMalloc((void**)&d_omega, N * sizeof(double)));
-
-    cudaMemcpy(d_col, A.innerIndexPtr(), A.nonZeros() * sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_row, A.outerIndexPtr(), (N + 1) * sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_val, A.valuePtr(), A.nonZeros() * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(d_x, x.data(), N * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(d_r, b.data(), N * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_val, A.valuePtr(), A.nonZeros() * sizeof(double), cudaMemcpyHostToDevice);
 
     int k = 0;
     double r0 = 0.0, r1 = 0.0;
+
     cublasDdot(cublasHandle, N, d_r, 1, d_r, 1, &r1);
 
     while (std::sqrt(r1) > tol && k < max_iter)
@@ -168,20 +165,31 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, Vector& x, Vector const&
 
     // Copy device solution to the host
     cudaMemcpy(x.data(), d_x, N * sizeof(double), cudaMemcpyDeviceToHost);
+}
 
-    // Destroy contexts
-    cusparseDestroy(cusparseHandle);
-    cublasDestroy(cublasHandle);
+void ConjugateGradientGPU::allocate_device_memory(SparseMatrix const& A,
+                                                  Vector& x,
+                                                  Vector const& b)
+{
+    // If this isn't our first time using the compute device or
+    // the sparsity pattern hasn't changed, then we save on the allocation
+    if (!build_sparsity_pattern) return;
 
-    // Free device memory
-    cudaFree(d_col);
-    cudaFree(d_row);
-    cudaFree(d_val);
-    cudaFree(d_x);
-    cudaFree(d_y);
-    cudaFree(d_r);
-    cudaFree(d_p);
-    cudaFree(d_omega);
+    auto const N = A.cols();
+
+    checkCudaErrors(cudaMalloc((void**)&d_col, A.nonZeros() * sizeof(int)));
+    checkCudaErrors(cudaMalloc((void**)&d_row, (N + 1) * sizeof(int)));
+    checkCudaErrors(cudaMalloc((void**)&d_val, A.nonZeros() * sizeof(double)));
+    checkCudaErrors(cudaMalloc((void**)&d_x, N * sizeof(double)));
+    checkCudaErrors(cudaMalloc((void**)&d_y, N * sizeof(double)));
+    checkCudaErrors(cudaMalloc((void**)&d_r, N * sizeof(double)));
+    checkCudaErrors(cudaMalloc((void**)&d_p, N * sizeof(double)));
+    checkCudaErrors(cudaMalloc((void**)&d_omega, N * sizeof(double)));
+
+    cudaMemcpy(d_row, A.outerIndexPtr(), (N + 1) * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_col, A.innerIndexPtr(), A.nonZeros() * sizeof(int), cudaMemcpyHostToDevice);
+
+    build_sparsity_pattern = false;
 }
 
 void ConjugateGradientGPU::find_compute_device()
