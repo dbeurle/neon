@@ -1,7 +1,7 @@
 // Code from http://matveichev.blogspot.de/2013/12/building-hexagonal-meshes-with-gmsh.html
 // x, y, z, hs
 
-elements = 2;
+elements = 1;
 
 x = 1.0;
 y = 1.0;
@@ -50,9 +50,6 @@ Transfinite Surface "*";
 Recombine Surface "*";
 Transfinite Volume "*";
 
-//Physical Surface("top") = {20};
-//Physical Surface("bottom") = {16};
-//Physical Surface("sides") = {14, 24, 18, 22};
 Physical Volume("cube") = {26};
 Physical Surface("Xsym") = {22};
 Physical Surface("Ysym") = {18};
