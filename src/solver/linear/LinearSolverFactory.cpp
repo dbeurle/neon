@@ -1,6 +1,10 @@
 
 #include "LinearSolver.hpp"
 
+#ifdef ENABLE_CUDA
+#include "ConjugateGradientGPU.hpp"
+#endif
+
 #include "MUMPS.hpp"
 #include "Pastix.hpp"
 
@@ -28,28 +32,59 @@ std::unique_ptr<LinearSolver> make_linear_solver(Json::Value const& solver_data)
     {
         return std::make_unique<SparseLU>();
     }
-    else if (solver_name == "pCG")
+    else if (solver_name == "ConjugateGradient")
     {
         if (solver_data.isMember("Tolerance") && solver_data.isMember("MaxIterations"))
         {
-            return std::make_unique<pCG>(solver_data["Tolerance"].asDouble(),
-                                         solver_data["MaxIterations"].asInt());
+            return std::make_unique<ConjugateGradient>(solver_data["Tolerance"].asDouble(),
+                                                       solver_data["MaxIterations"].asInt());
         }
         else if (solver_data.isMember("Tolerance"))
         {
             // todo add messages in these statements to print out
             // to a file that other options have not been set
             // and explain how to set them
-            return std::make_unique<pCG>(solver_data["Tolerance"].asDouble());
+            return std::make_unique<ConjugateGradient>(solver_data["Tolerance"].asDouble());
         }
         else if (solver_data.isMember("MaxIterations"))
         {
-            return std::make_unique<pCG>(solver_data["MaxIterations"].asInt());
+            return std::make_unique<ConjugateGradient>(solver_data["MaxIterations"].asInt());
         }
         else
         {
-            return std::make_unique<pCG>();
+            return std::make_unique<ConjugateGradient>();
         }
+    }
+
+    else if (solver_name == "ConjugateGradientGPU")
+    {
+#ifdef ENABLE_CUDA
+        if (solver_data.isMember("Tolerance") && solver_data.isMember("MaxIterations"))
+        {
+            return std::make_unique<ConjugateGradientGPU>(solver_data["Tolerance"].asDouble(),
+                                                          solver_data["MaxIterations"].asInt());
+        }
+        else if (solver_data.isMember("Tolerance"))
+        {
+            // todo add messages in these statements to print out
+            // to a file that other options have not been set
+            // and explain how to set them
+            return std::make_unique<ConjugateGradientGPU>(
+                solver_data["Tolerance"].asDouble());
+        }
+        else if (solver_data.isMember("MaxIterations"))
+        {
+            return std::make_unique<ConjugateGradientGPU>(
+                solver_data["MaxIterations"].asInt());
+        }
+        else
+        {
+            return std::make_unique<ConjugateGradientGPU>();
+        }
+#else
+        throw std::runtime_error("ConjugateGradientGPU is only available when neon is "
+                                 "compiled with -DENABLE_CUDA=ON\n");
+#endif
     }
     else if (solver_name == "BiCGStab")
     {

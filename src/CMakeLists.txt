@@ -19,6 +19,9 @@ target_link_libraries(neon
                       ${BLAS_LIBRARIES}
                       ${VTK_LIBRARIES}
                       ${Hwloc_LIBRARIES}
+                      ${CUDA_LIBRARIES}
+                      ${CUDA_CUBLAS_LIBRARIES}
+                      ${CUDA_cusparse_LIBRARY}
                       pastix
                       scotch
                       scotcherr)

@@ -45,7 +45,7 @@ public:
 };
 
 /**
- * pCG is a simple solver wrapper for the preconditioned conjugate gradient
+ * ConjugateGradient is a simple solver wrapper for the preconditioned conjugate gradient
  * solver from Eigen.  This is a multithreaded solver when beneficial.
  * The preconditioner available is incomplete Cholesky, LU and simple Jacobi.
  *
@@ -53,13 +53,13 @@ public:
  * solution as a starting point.  This is useful in time analyses
  * when the solution is not expected to change significantly.
  */
-class pCG : public LinearSolver
+class ConjugateGradient : public LinearSolver
 {
 public:
-    pCG() = default;
-    pCG(double residual_tolerance);
-    pCG(int maxIter);
-    pCG(double residual_tolerance, int maxIter);
+    ConjugateGradient() = default;
+    ConjugateGradient(double residual_tolerance);
+    ConjugateGradient(int maxIter);
+    ConjugateGradient(double residual_tolerance, int maxIter);
 
     void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
 };

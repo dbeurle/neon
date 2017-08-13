@@ -27,17 +27,20 @@ void SparseLU::solve(SparseMatrix const& A, Vector& x, Vector const& b)
     x = sparseLU.solve(b);
 }
 
-pCG::pCG(double tol) { solverParam.tolerance = tol; }
+ConjugateGradient::ConjugateGradient(double tol) { solverParam.tolerance = tol; }
 
-pCG::pCG(int maxIter) { solverParam.max_iterations = maxIter; }
+ConjugateGradient::ConjugateGradient(int maxIter)
+{
+    solverParam.max_iterations = maxIter;
+}
 
-pCG::pCG(double tol, int maxIter)
+ConjugateGradient::ConjugateGradient(double tol, int maxIter)
 {
     solverParam.max_iterations = maxIter;
     solverParam.tolerance = tol;
 }
 
-void pCG::solve(SparseMatrix const& A, Vector& x, const Vector& b)
+void ConjugateGradient::solve(SparseMatrix const& A, Vector& x, const Vector& b)
 {
 #ifdef ENABLE_OPENMP
     omp_set_num_threads(SimulationControl::threads);
