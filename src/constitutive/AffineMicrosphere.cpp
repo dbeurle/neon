@@ -43,8 +43,8 @@ AffineMicrosphere::AffineMicrosphere(InternalVariables& variables,
 void AffineMicrosphere::update_internal_variables(double const time_step_size)
 {
     using namespace ranges;
-    using view::zip;
     using view::transform;
+    using view::zip;
 
     // TODO Change these back once OpenMP allows structured bindings
 
@@ -64,9 +64,9 @@ void AffineMicrosphere::update_internal_variables(double const time_step_size)
 
     auto const K = material.bulk_modulus();
 
-/*----------------------------------------------------------------------------*
- *                          Stress computation                                *
- *----------------------------------------------------------------------------*/
+    /*----------------------------------------------------------------------------*
+     *                          Stress computation                                *
+     *----------------------------------------------------------------------------*/
 
 #pragma omp parallel for
     for (auto l = 0; l < F_list.size(); ++l)
@@ -88,9 +88,7 @@ void AffineMicrosphere::update_internal_variables(double const time_step_size)
 
                                auto const & [ cauchy_stress_dev, J ] = tpl;
 
-                               auto const pressure = J
-                                                     * volumetric_free_energy_derivative(J,
-                                                                                         K);
+                               auto const pressure = J * volumetric_free_energy_dJ(J, K);
 
                                return deviatoric_projection(pressure, cauchy_stress_dev)
                                       / J;
@@ -110,8 +108,8 @@ void AffineMicrosphere::update_internal_variables(double const time_step_size)
         auto const& cauchy_stress_dev = dev_stress_list[l];
         auto const& J = detF_list[l];
 
-        auto const pressure = J * volumetric_free_energy_derivative(J, K);
-        auto const kappa = std::pow(J, 2) * volumetric_free_energy_second_derivative(J, K);
+        auto const pressure = J * volumetric_free_energy_dJ(J, K);
+        auto const kappa = std::pow(J, 2) * volumetric_free_energy_second_d2J(J, K);
 
         Matrix3 const unimodular_F = std::pow(J, -1.0 / 3.0) * F;
 
@@ -146,5 +144,118 @@ Matrix3 AffineMicrosphere::deviatoric_projection(double const pressure,
         -cauchy_stress_dev(0, 0) / 3.0 - cauchy_stress_dev(1, 1) / 3.0
             + 2.0 * cauchy_stress_dev(2, 2) / 3.0;
     return pressure * Matrix3::Identity() + P_double_dot_stress_dev;
+}
+
+CMatrix AffineMicrosphere::deviatoric_projection(CMatrix const& C_dev,
+                                                 Matrix3 const& stress_dev) const
+{
+    return (CMatrix(6, 6) << 1.0 / 9.0
+                                 * (4 * C_dev(0, 0) - 4 * C_dev(0, 1) - 4 * C_dev(0, 2)
+                                    + C_dev(1, 1) + 2 * C_dev(1, 2) + C_dev(2, 2)
+                                    + 4 * stress_dev.trace()), //
+            1.0 / 9.0
+                * (-2 * C_dev(0, 0) + 5 * C_dev(0, 1) - C_dev(0, 2) - 2 * C_dev(1, 1)
+                   - C_dev(1, 2) + C_dev(2, 2) - 2.0 * stress_dev.trace()), //
+            1.0 / 9.0
+                * (-2 * C_dev(0, 0) - C_dev(0, 1) + 4 * C_dev(0, 2) + C_dev(1, 1)
+                   - C_dev(1, 2) + C_dev(2, 0) - 2 * C_dev(2, 2)
+                   - 2.0 * stress_dev.trace()),                    //
+            2.0 / 3.0 * (C_dev(0, 3) - C_dev(1, 3) - C_dev(2, 3)), //
+            2.0 / 3.0 * (C_dev(0, 4) - C_dev(1, 4) - C_dev(2, 4)), //
+            2.0 / 3.0 * (C_dev(0, 5) - C_dev(1, 5) - C_dev(2, 5)), //
+
+            1.0 / 9.0
+                * (-2 * C_dev(0, 0) + C_dev(0, 1) + C_dev(0, 2) + 4 * C_dev(1, 0)
+                   - 2 * C_dev(1, 1) - 2 * C_dev(1, 2) - 2 * C_dev(2, 0) + C_dev(2, 1)
+                   + C_dev(2, 2) - 2.0 * stress_dev.trace()), //
+            1.0 / 9.0
+                * (C_dev(0, 0) - 2 * C_dev(0, 1) + C_dev(0, 2) - 2 * C_dev(1, 0)
+                   + 4 * C_dev(1, 1) - 2 * C_dev(1, 2) + C_dev(2, 0) - 2 * C_dev(2, 1)
+                   + C_dev(2, 2) + 4 * stress_dev.trace()), //
+            1.0 / 9.0
+                * (C_dev(0, 0) + C_dev(0, 1) - 2 * C_dev(0, 2) - 2 * C_dev(1, 0)
+                   - 2 * C_dev(1, 1) + 4 * C_dev(1, 2) + C_dev(2, 0) + C_dev(2, 1)
+                   - 2 * C_dev(2, 2) - 2.0 * stress_dev.trace()),       //
+            1.0 / 3.0 * (-C_dev(0, 3) + 2 * C_dev(1, 3) - C_dev(2, 3)), //
+            1.0 / 3.0 * (-C_dev(0, 4) + 2 * C_dev(1, 4) - C_dev(2, 4)), //
+            1.0 / 3.0 * (-C_dev(0, 5) + 2 * C_dev(1, 5) - C_dev(2, 5)), //
+
+            1.0 / 9.0
+                * (-2 * C_dev(0, 0) + C_dev(0, 1) + C_dev(0, 2) - 2 * C_dev(1, 0)
+                   + C_dev(1, 1) + C_dev(1, 2) + 4 * C_dev(2, 0) - 2 * C_dev(2, 1)
+                   - 2 * C_dev(2, 2) - 2.0 * stress_dev.trace()), //
+            1.0 / 9.0
+                * (C_dev(0, 0) - 2 * C_dev(0, 1) + C_dev(0, 2) + C_dev(1, 0)
+                   - 2 * C_dev(1, 1) + C_dev(1, 2) - 2 * C_dev(2, 0) + 4 * C_dev(2, 1)
+                   - 2 * C_dev(2, 2) - 2.0 * stress_dev.trace()), //
+            1.0 / 9.0
+                * (C_dev(0, 0) + C_dev(0, 1) - 2 * C_dev(0, 2) + C_dev(1, 0) + C_dev(1, 1)
+                   - 2 * C_dev(1, 2) - 2 * C_dev(2, 0) - 2 * C_dev(2, 1) + 4 * C_dev(2, 2)
+                   + 4 * stress_dev.trace()),                           //
+            1.0 / 3.0 * (-C_dev(0, 3) - C_dev(1, 3) + 2 * C_dev(2, 3)), //
+            1.0 / 3.0 * (-C_dev(0, 4) - C_dev(1, 4) + 2 * C_dev(2, 4)), //
+            1.0 / 3.0 * (-C_dev(0, 5) - C_dev(1, 5) + 2 * C_dev(2, 5)), //
+
+            1.0 / 3.0 * (2 * C_dev(3, 0) - C_dev(3, 1) - C_dev(3, 2)),  //
+            1.0 / 3.0 * (-C_dev(3, 0) + 2 * C_dev(3, 1) - C_dev(3, 2)), //
+            1.0 / 3.0 * (-C_dev(3, 0) - C_dev(3, 1) + 2 * C_dev(3, 2)), //
+            C_dev(3, 3) + stress_dev.trace() / 3.0,                     //
+            C_dev(3, 4),                                                //
+            C_dev(3, 5),                                                //
+
+            1.0 / 3.0 * (2 * C_dev(4, 0) - C_dev(4, 1) - C_dev(4, 2)),  //
+            1.0 / 3.0 * (-C_dev(4, 0) + 2 * C_dev(4, 1) - C_dev(4, 2)), //
+            1.0 / 3.0 * (-C_dev(4, 0) - C_dev(4, 1) + 2 * C_dev(4, 2)), //
+            C_dev(4, 3),                                                //
+            C_dev(4, 4) + stress_dev.trace() / 3.0,                     //
+            C_dev(4, 5),                                                //
+
+            1.0 / 3.0 * (2 * C_dev(5, 0) - C_dev(5, 1) - C_dev(5, 2)),  //
+            1.0 / 3.0 * (-C_dev(5, 0) + 2 * C_dev(5, 1) - C_dev(5, 2)), //
+            1.0 / 3.0 * (-C_dev(5, 0) - C_dev(5, 1) + 2 * C_dev(5, 2)), //
+            C_dev(5, 3),                                                //
+            C_dev(5, 4),                                                //
+            C_dev(5, 5) + stress_dev.trace() / 3.0)
+        .finished();
+}
+
+Matrix3 AffineMicrosphere::compute_kirchhoff_stress(Matrix3 const& unimodular_F,
+                                                    double const N) const
+{
+    return unit_sphere.integrate(Matrix3::Zero().eval(),
+                                 [&](auto const& coordinates, auto const& l) -> Matrix3 {
+                                     auto const & [ r, r_outer_r ] = coordinates;
+
+                                     // Deformed tangents
+                                     Vector3 const t = unimodular_F * r;
+
+                                     // Microstretches
+                                     auto const micro_stretch = t.norm();
+
+                                     return pade_first(micro_stretch, N) * t
+                                            * t.transpose();
+                                 });
+}
+
+CMatrix AffineMicrosphere::compute_material_matrix(Matrix3 const& unimodular_F,
+                                                   double const N) const
+{
+    return unit_sphere.integrate(CMatrix::Zero(6, 6).eval(),
+                                 [&](auto const& coordinates, auto const& l) -> CMatrix {
+                                     auto const & [ r, r_outer_r ] = coordinates;
+
+                                     // Deformed tangents
+                                     auto const t = unimodular_F * r;
+
+                                     // Microstretches
+                                     auto const micro_stretch = t.norm();
+
+                                     auto const a = std::pow(micro_stretch, -2)
+                                                    * (pade_second(micro_stretch, N)
+                                                       - pade_first(micro_stretch, N));
+
+                                     return a * voigt(t * t.transpose())
+                                            * voigt(t * t.transpose()).transpose();
+                                 });
 }
 }

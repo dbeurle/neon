@@ -107,9 +107,7 @@ std::vector<double> MicromechanicalElastomer::update_chains(
 std::vector<double> MicromechanicalElastomer::compute_shear_moduli(
     std::vector<double> const& chains_new)
 {
-    using namespace ranges;
-
-    return chains_new | view::transform([&](auto const& n) {
+    return chains_new | ranges::view::transform([&](auto const& n) {
                return n * boltzmann_constant * temperature;
            });
 }

@@ -1,0 +1,79 @@
+{
+    "Name" : "J2Plasticity",
+    "Cores" : 1,
+    "Part": [{
+        "Name" : "cube",
+        "Material" : "steel",
+        "MeshFormat" : "gmsh"
+    }],
+    "Material" : [{
+        "Name" : "steel",
+        "ElasticModulus" : 210.0e9,
+        "IsotropicHardeningModulus" : 400.0e6,
+        "YieldStress" : 300.0e6,
+        "PoissonsRatio" : 0.3
+    }],
+    "SimulationCases" : [{
+        "Name" : "Uniaxial",
+		"Type" : "SolidMechanics",
+        "Solution" : "Equilibrium",
+        "Time" : {
+            "Period" : 1.0,
+            "Increments" : {
+                "Initial" : 0.1,
+                "Minimum" : 0.00001,
+                "Maximum" : 0.1
+            }
+        },
+		"Mesh" :
+        [{
+            "Name" : "cube",
+            "ConstitutiveModel" : "J2",
+            "ElementOptions" :
+            {
+                "Quadrature" : "Full"
+            },
+            "BoundaryConditions" :
+            [{
+                "Name" : "Xsym",
+                "Type" : "Displacement",
+                "Values" : {
+                    "x" : 0.0
+                }
+            },
+            {
+                "Name" : "Ysym",
+                "Type" : "Displacement",
+                "Values" : {
+                    "y" : 0.0
+                }
+            },
+            {
+                "Name" : "Zsym",
+                "Type" : "Displacement",
+                "Values" : {
+                    "z" : 0.0
+                }
+            },
+            {
+                "Name" : "ZLoad",
+				"Type" : "Displacement",
+                "Values" : {
+                    "z" : 2.0e-3
+                }
+            }]
+        }],
+		"LinearSolver" :
+        {
+		    "Solver" : "Pastix",
+            "MaxIterations" : 1000,
+            "MaxTolerance"  : 1.0e-6
+        },
+        "Visualisation" :
+        {
+            "Fields" : ["Displacement", "LinearisedStrain", "LinearisedPlasticStrain",
+                        "CauchyStress", "VonMisesStress", "AccumulatedPlasticStrain"]
+        }
+        }
+    ]
+}

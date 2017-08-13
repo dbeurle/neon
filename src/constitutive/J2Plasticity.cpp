@@ -54,12 +54,10 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
     // Perform the update algorithm for each quadrature point
     for (auto l = 0; l < strain_list.size(); l++)
     {
-        auto const& strain = strain_list[l];         // Total strain
-        auto& strain_p = strain_p_list[l];           // Plastic strain
-        auto& cauchy_stress = cauchy_stress_list[l]; // Cauchy stress
-        auto& accumulated_plastic_strain = accumulated_plastic_strain_list[l]; // Effective
-                                                                               // plastic
-                                                                               // strain
+        auto const& strain = strain_list[l];
+        auto& strain_p = strain_p_list[l];
+        auto& cauchy_stress = cauchy_stress_list[l];
+        auto& accumulated_plastic_strain = accumulated_plastic_strain_list[l];
         auto& von_mises = von_mises_list[l];
 
         // Elastic stress predictor

@@ -77,7 +77,7 @@ protected:
     bool is_sparsity_computed = false;
 
     double residual_tolerance = 1.0e-4;
-    double displacement_tolerance = 1.0e-6;
+    double displacement_tolerance = 1.0e-8;
 
     SparseMatrix Kt; //!< Tangent matrix stiffness
     Vector fint;     //!< Internal force vector
