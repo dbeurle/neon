@@ -86,7 +86,8 @@ ConjugateGradientGPU::~ConjugateGradientGPU()
     cudaFree(d_y);
     cudaFree(d_r);
     cudaFree(d_p);
-    cudaFree(d_omega);
+    cudaFree(d_Ap);
+    cudaFree(d_z);
 }
 
 void ConjugateGradientGPU::solve(SparseMatrix const& A, Vector& x, Vector const& b)
@@ -103,14 +104,31 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, Vector& x, Vector const&
 
     x.setZero();
 
+    Vector diagonal_entries = A.diagonal().cwiseInverse();
+
     cudaMemcpy(d_x, x.data(), N * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(d_r, b.data(), N * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_z, diagonal_entries.data(), N * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(d_val, A.valuePtr(), A.nonZeros() * sizeof(double), cudaMemcpyHostToDevice);
 
     int k = 0;
     double r0 = 0.0, r1 = 0.0;
 
+    // r * r.transpose()
     cublasDdot(cublasHandle, N, d_r, 1, d_r, 1, &r1);
+
+    cublasDsbmv(cublasHandle,
+                CUBLAS_FILL_MODE_LOWER,
+                N,
+                0,     // #subdiagonals
+                &one,  // scaling factor for diagonal
+                d_z,   // Diagonal matrix
+                1,     // Leading dimension
+                d_r,   // x
+                1,     // incx
+                &zero, // scaling for no data
+                d_z,   // output vector
+                1);
 
     while (std::sqrt(r1) > tol && k < max_iter)
     {
@@ -118,44 +136,54 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, Vector& x, Vector const&
 
         if (k == 1)
         {
+            // p = r
             cublasDcopy(cublasHandle, N, d_r, 1, d_p, 1);
         }
         else
         {
             double beta = r1 / r0;
+            // p <= p * beta
             cublasDscal(cublasHandle, N, &beta, d_p, 1);
+
+            //  p = p + r
             cublasDaxpy(cublasHandle, N, &one, d_r, 1, d_p, 1);
         }
 
-        // Perform A * x = b
+        // Perform y = alpha * A * x + beta * y
+        // Results A * p
         cusparseDcsrmv(cusparseHandle,
                        CUSPARSE_OPERATION_NON_TRANSPOSE,
-                       N,
-                       N,
+                       N, // rows
+                       N, // cols
                        A.nonZeros(),
-                       &one,
+                       &one, // alpha
                        descr,
-                       d_val,
-                       d_row,
-                       d_col,
-                       d_p,
-                       &zero,
-                       d_omega);
+                       d_val, // values
+                       d_row, // row ptr
+                       d_col, // col ptr
+                       d_p,   // x
+                       &zero, // beta
+                       d_Ap); // y
 
-        double dot = 0.0;
+        double p_dot_Ap = 0.0;
 
-        cublasDdot(cublasHandle, N, d_p, 1, d_omega, 1, &dot);
+        // p' * Ap
+        cublasDdot(cublasHandle, N, d_p, 1, d_Ap, 1, &p_dot_Ap);
 
-        double alpha = r1 / dot;
+        // r1 == old residual
+        double alpha = r1 / p_dot_Ap;
 
+        // x <= alpha * p + x
         cublasDaxpy(cublasHandle, N, &alpha, d_p, 1, d_x, 1);
 
         double nalpha = -alpha;
 
-        cublasDaxpy(cublasHandle, N, &nalpha, d_omega, 1, d_r, 1);
+        // r = r - alpha * Ap;
+        cublasDaxpy(cublasHandle, N, &nalpha, d_Ap, 1, d_r, 1);
 
         r0 = r1;
 
+        // r' * r and store in r1
         cublasDdot(cublasHandle, N, d_r, 1, d_r, 1, &r1);
     }
 
@@ -184,7 +212,8 @@ void ConjugateGradientGPU::allocate_device_memory(SparseMatrix const& A,
     checkCudaErrors(cudaMalloc((void**)&d_y, N * sizeof(double)));
     checkCudaErrors(cudaMalloc((void**)&d_r, N * sizeof(double)));
     checkCudaErrors(cudaMalloc((void**)&d_p, N * sizeof(double)));
-    checkCudaErrors(cudaMalloc((void**)&d_omega, N * sizeof(double)));
+    checkCudaErrors(cudaMalloc((void**)&d_Ap, N * sizeof(double)));
+    checkCudaErrors(cudaMalloc((void**)&d_z, N * sizeof(double)));
 
     cudaMemcpy(d_row, A.outerIndexPtr(), (N + 1) * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_col, A.innerIndexPtr(), A.nonZeros() * sizeof(int), cudaMemcpyHostToDevice);

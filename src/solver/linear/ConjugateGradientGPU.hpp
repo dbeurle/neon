@@ -40,7 +40,7 @@ protected:
     int *d_col, *d_row;
     double *d_val, *d_x;
 
-    double *d_r, *d_p, *d_omega, *d_y;
+    double *d_r, *d_p, *d_Ap, *d_y, *d_z;
 
     cublasHandle_t cublasHandle = 0;
     cusparseHandle_t cusparseHandle = 0;
