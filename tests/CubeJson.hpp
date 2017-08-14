@@ -146,6 +146,6 @@ inline std::string simulation_data_traction_json()
 
 inline std::string solver_data_json()
 {
-    return "{\"Solver\" : \"pCG\", \"MaxIterations\" : 6000, "
+    return "{\"Solver\" : \"ConjugateGradient\", \"MaxIterations\" : 6000, "
            " \"MaxTolerance\" : 1e-6 }";
 }
