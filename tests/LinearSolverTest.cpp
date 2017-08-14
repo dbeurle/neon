@@ -56,7 +56,7 @@ TEST_CASE("Linear solver test suite")
 
     SECTION("Preconditioned Conjugate Gradient Default")
     {
-        std::string solver_str = "{\"Solver\":\"pCG\"}";
+        std::string solver_str = "{\"Solver\":\"ConjugateGradient\"}";
 
         Json::Value solver_data;
         Json::Reader solver_file;
@@ -71,7 +71,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Conjugate Gradient Tolerance")
     {
-        std::string solver_str = "{\"Solver\":\"pCG\",\"Tolerance\":1e-8}";
+        std::string solver_str = "{\"Solver\":\"ConjugateGradient\",\"Tolerance\":1e-8}";
 
         Json::Value solver_data;
         Json::Reader solver_file;
@@ -86,7 +86,8 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Conjugate Gradient Iterations")
     {
-        std::string solver_str = "{\"Solver\":\"pCG\",\"MaxIterations\":100}";
+        std::string
+            solver_str = "{\"Solver\":\"ConjugateGradient\",\"MaxIterations\":100}";
 
         Json::Value solver_data;
         Json::Reader solver_file;
@@ -101,8 +102,8 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Conjugate Gradient Iterations and Tolerance")
     {
-        std::string
-            solver_str = "{\"Solver\":\"pCG\",\"MaxIterations\":100,\"Tolerance\":1e-8}";
+        std::string solver_str = "{\"Solver\":\"ConjugateGradient\",\"MaxIterations\":"
+                                 "100,\"Tolerance\":1e-8}";
 
         Json::Value solver_data;
         Json::Reader solver_file;
