@@ -104,33 +104,17 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, Vector& x, Vector const&
 
     x.setZero();
 
-    Vector diagonal_entries = A.diagonal().cwiseInverse();
-
     cudaMemcpy(d_x, x.data(), N * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(d_r, b.data(), N * sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_z, diagonal_entries.data(), N * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(d_val, A.valuePtr(), A.nonZeros() * sizeof(double), cudaMemcpyHostToDevice);
 
     int k = 0;
-    double r0 = 0.0, r1 = 0.0;
+    double residual_old = 0.0, residual = 0.0;
 
     // r * r.transpose()
-    cublasDdot(cublasHandle, N, d_r, 1, d_r, 1, &r1);
+    cublasDdot(cublasHandle, N, d_r, 1, d_r, 1, &residual);
 
-    cublasDsbmv(cublasHandle,
-                CUBLAS_FILL_MODE_LOWER,
-                N,
-                0,     // #subdiagonals
-                &one,  // scaling factor for diagonal
-                d_z,   // Diagonal matrix
-                1,     // Leading dimension
-                d_r,   // x
-                1,     // incx
-                &zero, // scaling for no data
-                d_z,   // output vector
-                1);
-
-    while (std::sqrt(r1) > tol && k < max_iter)
+    while (std::sqrt(residual) > tol && k < max_iter)
     {
         k++;
 
@@ -141,7 +125,7 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, Vector& x, Vector const&
         }
         else
         {
-            double beta = r1 / r0;
+            double beta = residual / residual_old;
             // p <= p * beta
             cublasDscal(cublasHandle, N, &beta, d_p, 1);
 
@@ -170,8 +154,8 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, Vector& x, Vector const&
         // p' * Ap
         cublasDdot(cublasHandle, N, d_p, 1, d_Ap, 1, &p_dot_Ap);
 
-        // r1 == old residual
-        double alpha = r1 / p_dot_Ap;
+        // residual == old residual
+        double alpha = residual / p_dot_Ap;
 
         // x <= alpha * p + x
         cublasDaxpy(cublasHandle, N, &alpha, d_p, 1, d_x, 1);
@@ -181,15 +165,24 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, Vector& x, Vector const&
         // r = r - alpha * Ap;
         cublasDaxpy(cublasHandle, N, &nalpha, d_Ap, 1, d_r, 1);
 
-        r0 = r1;
+        residual_old = residual;
 
-        // r' * r and store in r1
-        cublasDdot(cublasHandle, N, d_r, 1, d_r, 1, &r1);
+        // r' * r and store in residual
+        cublasDdot(cublasHandle, N, d_r, 1, d_r, 1, &residual);
     }
 
-    std::cout << "Conjugate gradient iteration = " << k
-              << ", residual = " << std::sqrt(r1) << " \n";
-    std::cout << "Convergence Test: " << (k <= max_iter ? "OK" : "FAIL") << " \n";
+    std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << k
+              << " (max. " << solverParam.max_iterations
+              << "), estimated error: " << std::sqrt(residual) << " (min. "
+              << solverParam.tolerance << ")\n";
+
+    if (k >= solverParam.max_iterations)
+    {
+        throw std::runtime_error(
+            "Conjugate gradient solver maximum iterations reached.  Try "
+            "increasing the maximum number of iterations or use a different "
+            "solver\n");
+    }
 
     // Copy device solution to the host
     cudaMemcpy(x.data(), d_x, N * sizeof(double), cudaMemcpyDeviceToHost);
