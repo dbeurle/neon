@@ -1,16 +1,17 @@
 {
-    "Name" : "Plate",
-    "Cores" : 4,
+    "Name" : "J2Plasticity",
+    "Cores" : 2,
     "Part": [{
-        "Name" : "plate",
-        "Material" : "steel"
+        "Name" : "cube",
+        "Material" : "steel",
+        "MeshFormat" : "gmsh"
     }],
     "Material" : [{
         "Name" : "steel",
-        "ElasticModulus" : 200.0e3,
-        "IsotropicHardeningModulus" : 200.0,
-        "YieldStress" : 200.0,
-        "PoissonsRatio" : 0.28
+        "ElasticModulus" : 200.0e9,
+        "IsotropicHardeningModulus" : 400.0e6,
+        "YieldStress" : 200.0e6,
+        "PoissonsRatio" : 0.3
     }],
     "SimulationCases" : [{
         "Name" : "Uniaxial",
@@ -19,14 +20,14 @@
         "Time" : {
             "Period" : 1.0,
             "Increments" : {
-                "Initial" : 0.4,
+                "Initial" : 0.1,
                 "Minimum" : 0.00001,
                 "Maximum" : 0.1
             }
         },
 		"Mesh" :
         [{
-            "Name" : "plate",
+            "Name" : "cube",
             "ConstitutiveModel" : "J2",
             "ElementOptions" :
             {
@@ -34,38 +35,38 @@
             },
             "BoundaryConditions" :
             [{
-                "Name" : "x-sym",
+                "Name" : "Xsym",
                 "Type" : "Displacement",
                 "Values" : {
                     "x" : 0.0
                 }
             },
             {
-                "Name" : "y-sym",
+                "Name" : "Ysym",
                 "Type" : "Displacement",
                 "Values" : {
                     "y" : 0.0
                 }
             },
             {
-                "Name" : "z-sym",
+                "Name" : "Zsym",
                 "Type" : "Displacement",
                 "Values" : {
                     "z" : 0.0
                 }
             },
             {
-                "Name" : "load",
-                "Type" : "Traction",
+                "Name" : "ZLoad",
+				"Type" : "Displacement",
                 "Values" : {
-                    "x" : 2.0e2
+                    "z" : 1.2e-3
                 }
             }]
         }],
 		"LinearSolver" :
         {
 		    "Solver" : "ConjugateGradientGPU",
-            "MaxIterations" : 3000,
+            "MaxIterations" : 1000,
             "Tolerance"  : 1.0e-8
         },
         "Visualisation" :
