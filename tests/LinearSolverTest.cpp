@@ -221,6 +221,71 @@ TEST_CASE("Linear solver test suite")
         REQUIRE((x - solution()).norm() == Approx(0.0));
         REQUIRE((A * x - b).norm() == Approx(0.0));
     }
+#ifdef ENABLE_CUDA
+    SECTION("GPU Preconditioned Conjugate Gradient Default")
+    {
+        std::string solver_str = "{\"Solver\":\"ConjugateGradientGPU\"}";
+
+        Json::Value solver_data;
+        Json::Reader solver_file;
+        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        auto linear_solver = make_linear_solver(solver_data);
+
+        linear_solver->solve(A, x, b);
+
+        REQUIRE((x - solution()).norm() == Approx(0.0));
+        REQUIRE((A * x - b).norm() == Approx(0.0));
+    }
+    SECTION("GPU Preconditioned Conjugate Gradient Tolerance")
+    {
+        std::string
+            solver_str = "{\"Solver\":\"ConjugateGradientGPU\",\"Tolerance\":1e-8}";
+
+        Json::Value solver_data;
+        Json::Reader solver_file;
+        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        auto linear_solver = make_linear_solver(solver_data);
+
+        linear_solver->solve(A, x, b);
+
+        REQUIRE((x - solution()).norm() == Approx(0.0));
+        REQUIRE((A * x - b).norm() == Approx(0.0));
+    }
+    SECTION("GPU Preconditioned Conjugate Gradient Iterations")
+    {
+        std::string
+            solver_str = "{\"Solver\":\"ConjugateGradientGPU\",\"MaxIterations\":100}";
+
+        Json::Value solver_data;
+        Json::Reader solver_file;
+        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        auto linear_solver = make_linear_solver(solver_data);
+
+        linear_solver->solve(A, x, b);
+
+        REQUIRE((x - solution()).norm() == Approx(0.0));
+        REQUIRE((A * x - b).norm() == Approx(0.0));
+    }
+    SECTION("GPU Preconditioned Conjugate Gradient Iterations and Tolerance")
+    {
+        std::string solver_str = "{\"Solver\":\"ConjugateGradientGPU\",\"MaxIterations\":"
+                                 "100,\"Tolerance\":1e-8}";
+
+        Json::Value solver_data;
+        Json::Reader solver_file;
+        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        auto linear_solver = make_linear_solver(solver_data);
+
+        linear_solver->solve(A, x, b);
+
+        REQUIRE((x - solution()).norm() == Approx(0.0));
+        REQUIRE((A * x - b).norm() == Approx(0.0));
+    }
+#endif
     SECTION("Error")
     {
         std::string solver_str = "{\"Solver\":\"PurpleMonkey\"}";
