@@ -19,7 +19,7 @@
         "Time" : {
             "Period" : 1.0,
             "Increments" : {
-                "Initial" : 0.4,
+                "Initial" : 0.1,
                 "Minimum" : 0.00001,
                 "Maximum" : 0.1
             }
@@ -58,7 +58,7 @@
                 "Name" : "load",
                 "Type" : "Traction",
                 "Values" : {
-                    "x" : 2.0e2
+                    "x" : 1.5e2
                 }
             }]
         }],
