@@ -25,18 +25,24 @@ void AdaptiveLoadStep::update_convergence_state(bool is_converged)
 
     if (is_converged)
     {
-        consecutive_unconverged = 0;
-        successful_increments++;
+        last_converged_time_step_size = current_time - last_converged_time;
         last_converged_time = current_time;
 
         is_applied = is_approx(current_time, final_time);
 
         if (is_applied) return;
 
-        double const new_time = std::min(forward_factor * current_time,
+        double const new_time = std::min(consecutive_unconverged > 0
+                                                 || consecutive_converged < 4
+                                             ? last_converged_time_step_size + current_time
+                                             : forward_factor * current_time,
                                          current_time + maximum_increment);
 
         current_time = std::min(new_time, final_time);
+
+        consecutive_unconverged = 0;
+        consecutive_converged++;
+        successful_increments++;
 
         std::cout << std::string(terminal_indent, ' ') << termcolor::green
                   << termcolor::bold << "Convergence detected - step time set to "
@@ -67,6 +73,7 @@ void AdaptiveLoadStep::update_convergence_state(bool is_converged)
                   << termcolor::reset << std::flush;
 
         consecutive_unconverged++;
+        consecutive_converged = 0;
 
         if (consecutive_unconverged == increment_limit)
         {
@@ -84,8 +91,9 @@ void AdaptiveLoadStep::reset(Json::Value const& new_increment_data)
     this->parse_input(new_increment_data);
 
     is_applied = false;
-    last_converged_time = 0.0;
-    consecutive_unconverged = 0;
+
+    last_converged_time = last_converged_time_step_size = 0.0;
+    consecutive_unconverged = consecutive_converged = 0;
 }
 
 void AdaptiveLoadStep::parse_input(Json::Value const& increment_data)
