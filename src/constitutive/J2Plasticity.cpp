@@ -89,7 +89,7 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
 
         // Perform the return mapping algorithm
         int iterations = 0, max_iterations = 50;
-        while (f > 1.0e-4 && iterations < max_iterations)
+        while (f > 1.0e-10 && iterations < max_iterations)
         {
             auto const H = material.hardening_modulus(accumulated_plastic_strain
                                                       + plastic_increment);
