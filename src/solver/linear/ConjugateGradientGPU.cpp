@@ -25,6 +25,7 @@
  */
 
 #include "ConjugateGradientGPU.hpp"
+#include "Exceptions.hpp"
 
 #ifdef ENABLE_CUDA
 
@@ -178,10 +179,7 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, Vector& x, Vector const&
 
     if (k >= solverParam.max_iterations)
     {
-        throw std::runtime_error(
-            "Conjugate gradient solver maximum iterations reached.  Try "
-            "increasing the maximum number of iterations or use a different "
-            "solver\n");
+        throw computational_error("Conjugate gradient solver maximum iterations reached");
     }
 
     // Copy device solution to the host

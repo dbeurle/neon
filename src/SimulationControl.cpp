@@ -1,7 +1,7 @@
 
 #include "SimulationControl.hpp"
 
-#include "PreprocessorExceptions.hpp"
+#include "Exceptions.hpp"
 
 #include "assembler/solid/femStaticMatrix.hpp"
 
@@ -60,14 +60,14 @@ void SimulationControl::parse()
 
     if (!reader.parse(file, root, false))
     {
-        throw JsonFileParseException(reader.getFormattedErrorMessages());
+        throw std::runtime_error(reader.getFormattedErrorMessages());
     }
 
     // Check the important fields exist before anything else is done
-    if (root["Part"].empty()) throw EmptyFieldException("Part");
-    if (root["Name"].empty()) throw EmptyFieldException("Name");
-    if (root["Material"].empty()) throw EmptyFieldException("Material");
-    if (root["SimulationCases"].empty()) throw EmptyFieldException("SimulationCases");
+    if (!root.isMember("Part")) throw std::runtime_error("Part");
+    if (!root.isMember("Name")) throw std::runtime_error("Name");
+    if (!root.isMember("Material")) throw std::runtime_error("Material");
+    if (!root.isMember("SimulationCases")) throw std::runtime_error("SimulationCases");
 
     if (root.isMember("Cores")) threads = root["Cores"].asInt();
 
@@ -76,7 +76,7 @@ void SimulationControl::parse()
     // Load in all the material names
     for (auto const& material : root["Material"])
     {
-        if (material["Name"].empty()) throw EmptyFieldException("Material: Name");
+        if (material["Name"].empty()) throw std::runtime_error("Material: Name");
 
         auto const[it, inserted] = material_names.emplace(material["Name"].asString());
 
@@ -86,7 +86,7 @@ void SimulationControl::parse()
     // Load in all the part names and error check
     for (auto const& part : root["Part"])
     {
-        if (part["Name"].empty()) throw EmptyFieldException("Part: Name");
+        if (part["Name"].empty()) throw std::runtime_error("Part: Name");
 
         if (ranges::find(material_names, part["Material"].asString())
             == material_names.end())
@@ -116,7 +116,7 @@ void SimulationControl::parse()
 
         if (!mesh_reader.parse(mesh_input_stream, mesh_file, false))
         {
-            throw JsonFileParseException(mesh_reader.getFormattedErrorMessages());
+            throw std::runtime_error(mesh_reader.getFormattedErrorMessages());
         }
 
         mesh_store.try_emplace(part["Name"].asString(), mesh_file, material);

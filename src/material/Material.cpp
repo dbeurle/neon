@@ -1,7 +1,7 @@
 
 #include "Material.hpp"
 
-#include "MaterialExceptions.hpp"
+#include "Exceptions.hpp"
 
 #include <json/value.h>
 
@@ -23,7 +23,8 @@ Material::Material(Json::Value const& intrinsic_material_data)
 double Material::initial_density() const
 {
     if (!is_density_specified)
-        throw std::runtime_error("Density was requested, but not specified in the input file\n");
+        throw std::runtime_error("Density was requested, but not specified in the input "
+                                 "file\n");
     return density_0;
 }
 }

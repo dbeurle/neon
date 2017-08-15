@@ -1,7 +1,7 @@
 
 #include "Submesh.hpp"
 
-#include "PreprocessorExceptions.hpp"
+#include "Exceptions.hpp"
 
 #include "constitutive/ConstitutiveModelFactory.hpp"
 #include "interpolations/InterpolationFactory.hpp"
@@ -10,13 +10,12 @@
 #include "mesh/solid/MaterialCoordinates.hpp"
 #include "numeric/Operators.hpp"
 
+#include <cfenv>
 #include <chrono>
 
 #include <json/json.h>
 #include <range/v3/view.hpp>
 #include <termcolor/termcolor.hpp>
-
-#include <cfenv>
 
 namespace neon::solid
 {
@@ -199,7 +198,7 @@ void femSubmesh::update_internal_variables(double const time_step_size)
 
     if (std::fetestexcept(FE_INVALID))
     {
-        throw std::runtime_error("Floating point error reported\n");
+        throw computational_error("Floating point error reported\n");
     }
 }
 
@@ -223,11 +222,11 @@ void femSubmesh::update_deformation_measures()
             Matrix3 const F_0 = local_deformation_gradient(rhea, X);
             Matrix3 const F = local_deformation_gradient(rhea, x);
 
-            if (F.determinant() < 0.0)
+            if (auto const j = F.determinant(); j < 0.0)
             {
-                std::cout << termcolor::yellow << "Distorted element (" << element << ", "
-                          << l << ") with j = " << F.determinant() << termcolor::reset
-                          << std::endl;
+                throw computational_error("Distorted element (" + std::to_string(element)
+                                          + ", " + std::to_string(l)
+                                          + ") with j = " + std::to_string(j));
             }
 
             // Gradient operator in index notation
@@ -268,7 +267,10 @@ void femSubmesh::check_element_distortion() const
 
         auto const element = std::floor(static_cast<double>(i) / sf->quadrature().points());
         auto const quadrature_point = i % sf->quadrature().points();
-        throw DistortedElement(element, quadrature_point);
+
+        throw computational_error("Global mapping assumption violated at element "
+                                  + std::to_string(element) + " and local quadrature point "
+                                  + std::to_string(quadrature_point));
     }
 }
 

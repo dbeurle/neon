@@ -1,5 +1,6 @@
 
 #include "MUMPS.hpp"
+#include "Exceptions.hpp"
 
 #include <Eigen/Sparse>
 
@@ -124,13 +125,13 @@ void MUMPS::solve(SparseMatrix const& A, Vector& x, Vector const& b)
     MUMPSadapter::mumps_c(info);
 
     if (info.info[0] < 0)
-        throw std::runtime_error("Error in analysis phase of MUMPS solver\n");
+        throw computational_error("Error in analysis phase of MUMPS solver\n");
 
     // Factorization phase
     info.job = 2;
     MUMPSadapter::mumps_c(info);
 
-    if (info.info[0] < 0) throw std::runtime_error("Error in factorisation phase\n");
+    if (info.info[0] < 0) throw computational_error("Error in factorisation phase\n");
 
     info.rhs = x.data();
     info.nrhs = 1;
@@ -141,13 +142,13 @@ void MUMPS::solve(SparseMatrix const& A, Vector& x, Vector const& b)
     MUMPSadapter::mumps_c(info);
 
     if (info.info[0] < 0)
-        throw std::runtime_error("Error in back-substitution phase of MUMPS solver\n");
+        throw computational_error("Error in back-substitution phase of MUMPS solver\n");
 
     // Take out the trash
     info.job = -2;
     MUMPSadapter::mumps_c(info);
 
-    if (info.info[0] < 0) throw std::runtime_error("Error in cleanup phase\n");
+    if (info.info[0] < 0) throw computational_error("Error in cleanup phase\n");
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;

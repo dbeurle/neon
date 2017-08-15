@@ -7,9 +7,9 @@
 #include "NeoHooke.hpp"
 
 #include "InternalVariables.hpp"
-#include "PreprocessorExceptions.hpp"
 
 #include <json/value.h>
+#include <stdexcept>
 
 namespace neon
 {
@@ -21,7 +21,7 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& va
 {
     if (simulation_data["ConstitutiveModel"].empty())
     {
-        throw EmptyFieldException("Part: ConstitutiveModel");
+        throw std::runtime_error("Missing \"Part\": \"ConstitutiveModel\"");
     }
 
     auto const& model_name = simulation_data["ConstitutiveModel"].asString();

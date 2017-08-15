@@ -3,7 +3,7 @@
 
 #include <json/json.h>
 
-#include "MaterialExceptions.hpp"
+#include "Exceptions.hpp"
 
 namespace neon
 {
@@ -23,8 +23,8 @@ LinearElastic::LinearElastic(Json::Value const& material_data) : Material(materi
         E = 9 * K * G / (3 * K + G);
         nu = (3 * K - 2 * G) / (3 * K + G);
     }
-    else if (material_data.isMember("ElasticModulus") &&
-             material_data.isMember("PoissonsRatio"))
+    else if (material_data.isMember("ElasticModulus")
+             && material_data.isMember("PoissonsRatio"))
     {
         E = material_data["ElasticModulus"].asDouble();
         nu = material_data["PoissonsRatio"].asDouble();

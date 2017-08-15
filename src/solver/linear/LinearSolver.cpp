@@ -4,6 +4,7 @@
 
 #include "LinearSolver.hpp"
 
+#include "Exceptions.hpp"
 #include "SimulationControl.hpp"
 
 #ifdef ENABLE_OPENMP
@@ -62,10 +63,8 @@ void ConjugateGradient::solve(SparseMatrix const& A, Vector& x, const Vector& b)
 
     if (pcg.iterations() >= solverParam.max_iterations)
     {
-        throw std::runtime_error(
-            "Conjugate gradient solver maximum iterations reached.  Try "
-            "increasing the maximum number of iterations or use a different "
-            "solver\n");
+        throw computational_error("Conjugate gradient solver maximum iterations "
+                                  "reached\n");
     }
 }
 
@@ -86,16 +85,13 @@ void BiCGSTAB::solve(const SparseMatrix& A, Vector& x, const Vector& b)
     bicgstab.setTolerance(solverParam.tolerance);
     bicgstab.setMaxIterations(solverParam.max_iterations);
 
-    auto start = std::chrono::high_resolution_clock::now();
-
     bicgstab.compute(A);
 
     x = bicgstab.solve(b);
 
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
-
-    std::cout << "#iterations:     " << bicgstab.iterations();
-    std::cout << "estimated error: " << bicgstab.error();
+    std::cout << std::string(6, ' ')
+              << "Conjugate Gradient iterations: " << bicgstab.iterations() << " (max. "
+              << solverParam.max_iterations << "), estimated error: " << bicgstab.error()
+              << " (min. " << solverParam.tolerance << ")\n";
 }
 }

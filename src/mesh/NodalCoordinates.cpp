@@ -1,7 +1,7 @@
 
 #include "NodalCoordinates.hpp"
 
-#include "PreprocessorExceptions.hpp"
+#include "Exceptions.hpp"
 
 #include <json/json.h>
 
@@ -11,7 +11,8 @@ NodalCoordinates::NodalCoordinates(Vector coordinates) : X(coordinates) {}
 
 NodalCoordinates::NodalCoordinates(Json::Value const& mesh_file)
 {
-    if (mesh_file["Nodes"].empty()) throw EmptyFieldException("Nodes");
+    if (mesh_file["Nodes"].empty())
+        throw std::runtime_error("The mesh file is missing the \"Nodes\" field");
 
     auto const& coordinates = mesh_file["Nodes"][0]["Coordinates"];
 

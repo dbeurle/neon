@@ -1,9 +1,9 @@
 
 #include "SubMesh.hpp"
 
+#include "Exceptions.hpp"
 #include "NodalCoordinates.hpp"
 #include "NodeOrderingAdapter.hpp"
-#include "PreprocessorExceptions.hpp"
 
 #include <json/json.h>
 #include <range/v3/action.hpp>
@@ -13,9 +13,21 @@ namespace neon
 SubMesh::SubMesh(Json::Value const& mesh)
 {
     // Error checking for empty fields
-    if (mesh["Name"].empty()) throw EmptyFieldException("Name");
-    if (mesh["Type"].empty()) throw EmptyFieldException("Type");
-    if (mesh["NodalConnectivity"].empty()) throw EmptyFieldException("NodalConnectivity");
+    if (!mesh.isMember("Name"))
+    {
+        throw std::runtime_error("The element group in the mesh file is missing the "
+                                 "\"Name\" field");
+    }
+    if (!mesh.isMember("Type"))
+    {
+        throw std::runtime_error("The element group in the mesh file is missing the "
+                                 "\"Type\" field");
+    }
+    if (!mesh.isMember("NodalConnectivity"))
+    {
+        throw std::runtime_error("The element group in the mesh file is missing the "
+                                 "\"NodalConnectivity\" field");
+    }
 
     element_topology = adapter.gmsh_type_to_enum(mesh["Type"].asInt());
 
@@ -40,7 +52,8 @@ List SubMesh::unique_connectivities() const
     return std::ref(nodal_connectivity) | action::join | action::sort | action::unique;
 }
 
-Matrix SubMesh::gather_coordinates(NodalCoordinates const& nodal_coordinates, int const element) const
+Matrix SubMesh::gather_coordinates(NodalCoordinates const& nodal_coordinates,
+                                   int const element) const
 {
     return nodal_coordinates[local_node_list(element)];
 }

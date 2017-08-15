@@ -1,6 +1,7 @@
 
 #include "femStaticMatrix.hpp"
 
+#include "Exceptions.hpp"
 #include "solver/linear/LinearSolverFactory.hpp"
 
 #include <chrono>
@@ -255,50 +256,66 @@ void femStaticMatrix::perform_equilibrium_iterations()
     auto constexpr max_iterations = 10;
     auto current_iteration = 0;
 
-    while (current_iteration < max_iterations)
+    try
     {
-        auto start = std::chrono::high_resolution_clock::now();
+        while (current_iteration < max_iterations)
+        {
+            auto start = std::chrono::high_resolution_clock::now();
 
-        std::cout << std::string(4, ' ') << termcolor::blue << termcolor::bold
-                  << "Newton-Raphson iteration " << current_iteration << termcolor::reset
-                  << std::endl;
+            std::cout << std::string(4, ' ') << termcolor::blue << termcolor::bold
+                      << "Newton-Raphson iteration " << current_iteration
+                      << termcolor::reset << std::endl;
 
-        compute_internal_force();
+            compute_internal_force();
 
-        compute_external_force(adaptive_load.factor());
+            compute_external_force(adaptive_load.factor());
 
-        Vector residual = fint - fext;
+            Vector residual = fint - fext;
 
-        assemble_stiffness();
+            assemble_stiffness();
 
-        enforce_dirichlet_conditions(Kt, delta_d, residual);
+            enforce_dirichlet_conditions(Kt, delta_d, residual);
 
-        linear_solver->solve(Kt, delta_d, -residual);
+            linear_solver->solve(Kt, delta_d, -residual);
 
-        d_new += delta_d;
+            d_new += delta_d;
 
-        fem_mesh.update_internal_variables(d_new);
+            fem_mesh.update_internal_variables(d_new);
 
-        print_convergence_progress(delta_d.norm(), residual.norm());
+            print_convergence_progress(delta_d.norm(), residual.norm());
 
-        auto end = std::chrono::high_resolution_clock::now();
+            auto end = std::chrono::high_resolution_clock::now();
 
-        std::chrono::duration<double> elapsed_seconds = end - start;
-        std::cout << std::string(6, ' ') << "Equilibrium iteration required "
-                  << elapsed_seconds.count() << "s\n";
+            std::chrono::duration<double> elapsed_seconds = end - start;
+            std::cout << std::string(6, ' ') << "Equilibrium iteration required "
+                      << elapsed_seconds.count() << "s\n";
 
-        if (is_converged(delta_d.norm(), residual.norm())) break;
+            if (is_converged(delta_d.norm(), residual.norm())) break;
 
-        current_iteration++;
+            current_iteration++;
+        }
+
+        adaptive_load.update_convergence_state(current_iteration != max_iterations);
+        fem_mesh.save_internal_variables(current_iteration != max_iterations);
+
+        if (current_iteration != max_iterations)
+        {
+            d = d_new;
+            visualisation.write(adaptive_load.step(), adaptive_load.time());
+        }
     }
-
-    adaptive_load.update_convergence_state(current_iteration != max_iterations);
-    fem_mesh.save_internal_variables(current_iteration != max_iterations);
-
-    if (current_iteration != max_iterations)
+    catch (computational_error& comp_error)
     {
-        d = d_new;
-        visualisation.write(adaptive_load.step(), adaptive_load.time());
+        std::cout << std::endl
+                  << termcolor::bold << termcolor::yellow << std::string(6, ' ')
+                  << comp_error.what() << termcolor::reset << std::endl;
+
+        adaptive_load.update_convergence_state(false);
+        fem_mesh.save_internal_variables(false);
+    }
+    catch (...)
+    {
+        throw;
     }
 }
 
