@@ -40,7 +40,7 @@ void femStaticMatrix::compute_sparsity_pattern()
 
     Kt.resize(fem_mesh.active_dofs(), fem_mesh.active_dofs());
 
-    for (const auto& submesh : fem_mesh.meshes())
+    for (auto const& submesh : fem_mesh.meshes())
     {
         // Loop over the elements and add in the non-zero components
         for (auto element = 0; element < submesh.elements(); element++)
