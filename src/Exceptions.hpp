@@ -73,20 +73,6 @@ protected:
     std::string outputRequest;
 };
 
-class UnknownBoundaryTypeException : public Exception
-{
-public:
-    UnknownBoundaryTypeException(const std::string& boundaryType)
-        : boundaryType(boundaryType)
-    {
-    }
-
-    const char* what() const noexcept;
-
-protected:
-    std::string boundaryType;
-};
-
 class MaterialPropertyException : public Exception
 {
 public:

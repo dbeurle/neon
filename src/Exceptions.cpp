@@ -3,20 +3,6 @@
 
 namespace neon
 {
-const char* UnknownBoundaryTypeException::what() const noexcept
-{
-    std::cout << "\n!! Error: Boundary type \"" << boundaryType << "\" in " << input_file
-              << " not recognized.  The recognized boudary types are: \n"
-                 "Traction \n"
-                 "Pressure \n"
-                 "DistributedForce \n"
-                 "Robin \n"
-                 "Temperature \n"
-                 "HeatFlux\n";
-    // todo Add the solver context to which each of these boundary conditions apply
-    return nullptr;
-}
-
 const char* MaterialPropertyException::what() const noexcept
 {
     std::cout << "\n!! Error: " << property << " has not been provided in " << input_file;
