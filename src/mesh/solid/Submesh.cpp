@@ -10,13 +10,13 @@
 #include "mesh/solid/MaterialCoordinates.hpp"
 #include "numeric/Operators.hpp"
 
+#include <cfenv>
 #include <chrono>
+#include <omp.h>
 
 #include <json/json.h>
 #include <range/v3/view.hpp>
 #include <termcolor/termcolor.hpp>
-
-#include <cfenv>
 
 namespace neon::solid
 {
