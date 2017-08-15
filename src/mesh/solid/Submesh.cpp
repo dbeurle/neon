@@ -232,11 +232,8 @@ void femSubmesh::update_deformation_measures()
             // Gradient operator in index notation
             auto const& B_0t = rhea * F_0.inverse();
 
-            // Nodal displacement matrix
-            auto const u = x - X;
-
             // Displacement gradient
-            Matrix3 const H = u * B_0t;
+            Matrix3 const H = (x - X) * B_0t;
 
             H_list[offset(element, l)] = H;
             F_list[offset(element, l)] = F * F_0.inverse();
