@@ -64,7 +64,6 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
         Matrix3 const cauchy_stress_0 = lambda_e * (strain - strain_p).trace() * I
                                         + 2.0 * shear_modulus * (strain - strain_p);
 
-        // Compute the von Mises stress
         von_mises = von_mises_stress(cauchy_stress_0);
 
         cauchy_stress = cauchy_stress_0;
@@ -73,6 +72,8 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
         // and decide if the stress return needs to be computed
         auto f = von_mises - material.yield_stress(accumulated_plastic_strain);
 
+        // If this quadrature point is elastic, then set the tangent to the
+        // elastic modulus
         if (f <= 0.0)
         {
             C_list[l] = C_e;
@@ -84,40 +85,33 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
         Matrix3 const normal = deviatoric(cauchy_stress_0)
                                / deviatoric(cauchy_stress_0).norm();
 
-        // Initialize the plastic increment
         auto plastic_increment = 0.0;
 
-        // Perform the return mapping algorithm
+        // Newton Raphson iterations for non-linear hardening
         int iterations = 0, max_iterations = 50;
         while (f > 1.0e-10 && iterations < max_iterations)
         {
             auto const H = material.hardening_modulus(accumulated_plastic_strain
                                                       + plastic_increment);
 
-            // Increment in plasticity rate
             const auto plastic_increment_delta = f / (3.0 * shear_modulus + H);
 
-            // Plastic rate update
             plastic_increment += plastic_increment_delta;
 
-            // Evaluate the yield function
             f = (von_mises - 3.0 * shear_modulus * plastic_increment)
                 - material.yield_stress(accumulated_plastic_strain + plastic_increment);
 
             iterations++;
         }
 
-        // Plastic strain update
+        // Return mapping algorithm
         strain_p += plastic_increment * std::sqrt(3.0 / 2.0) * normal;
 
-        // Cauchy stress update
         cauchy_stress -= 2.0 * shear_modulus * plastic_increment * std::sqrt(3.0 / 2.0)
                          * normal;
 
-        // Update the Von Mises stress
         von_mises = von_mises_stress(cauchy_stress);
 
-        // Accumulated plastic strain update
         accumulated_plastic_strain += plastic_increment;
 
         if (iterations == max_iterations)
@@ -134,7 +128,7 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
             throw std::runtime_error("Radial return failure at global integration point "
                                      + std::to_string(l) + "\n");
         }
-        // Compute the elastic-plastic tangent modulus
+
         C_list[l] = algorithmic_tangent(plastic_increment,
                                         accumulated_plastic_strain,
                                         von_mises_stress(cauchy_stress_0),

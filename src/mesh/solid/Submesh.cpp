@@ -12,6 +12,7 @@
 
 #include <cfenv>
 #include <chrono>
+#include <omp.h>
 
 #include <json/json.h>
 #include <range/v3/view.hpp>
@@ -84,22 +85,21 @@ Matrix femSubmesh::geometric_tangent_stiffness(Matrix const& x, int const elemen
 
     auto n = nodes_per_element();
 
-    Matrix const
-        kgeo = sf->quadrature()
-                   .integrate(Matrix::Zero(n, n).eval(),
-                              [&](auto const& femval, auto const& l) -> Matrix {
-                                  auto const & [ N, rhea ] = femval;
+    // clang-format off
+    Matrix const kgeo = sf->quadrature().integrate(Matrix::Zero(n, n).eval(),
+                                                   [&](auto const& femval, auto const& l) -> Matrix {
+                                                        auto const & [ N, rhea ] = femval;
 
-                                  auto const Jacobian = local_deformation_gradient(rhea, x);
+                                                        auto const Jacobian = local_deformation_gradient(rhea, x);
 
-                                  Matrix3 const cauchy = cauchy_list[offset(element, l)];
+                                                        Matrix3 const cauchy = cauchy_list[offset(element, l)];
 
-                                  // Compute the symmetric gradient operator
-                                  const auto L = (rhea * Jacobian.inverse()).transpose();
+                                                        // Compute the symmetric gradient operator
+                                                        auto const L = (rhea * Jacobian.inverse()).transpose();
 
-                                  return L.transpose() * cauchy * L
-                                         * Jacobian.determinant();
-                              });
+                                                        return L.transpose() * cauchy * L * Jacobian.determinant();
+                                                    });
+    // clang-format on
     return identity_expansion(kgeo, dofs_per_node());
 }
 
@@ -232,11 +232,8 @@ void femSubmesh::update_deformation_measures()
             // Gradient operator in index notation
             auto const& B_0t = rhea * F_0.inverse();
 
-            // Nodal displacement matrix
-            auto const u = x - X;
-
             // Displacement gradient
-            Matrix3 const H = u * B_0t;
+            Matrix3 const H = (x - X) * B_0t;
 
             H_list[offset(element, l)] = H;
             F_list[offset(element, l)] = F * F_0.inverse();
