@@ -101,8 +101,10 @@ protected:
     void check_increment_data(Json::Value const& increment_data);
 
 protected:
-    int const increment_limit = 10;  //!< Maximum allowable increments
-    int successful_increments = 0;   //!< Number of converged steps
+    int const increment_limit = 10; //!< Maximum allowable increments
+    int successful_increments = 0;  //!< Number of converged steps
+
+    int consecutive_converged = 0;   //!< Number of consecutive successful attempts
     int consecutive_unconverged = 0; //!< Number of consecutive unsuccessful attempts
 
     double initial_time = 1.0;
@@ -112,6 +114,7 @@ protected:
     double total_time = 0.0; //!< Time history for multi-step simulations
 
     double last_converged_time = 0.0; //!< Last time when convergence was reached
+    double last_converged_time_step_size = 0.0; //!< Last good timestep size
 
     double minimum_increment; //!< Minimum increment allowed by the algorithm
     double maximum_increment; //!< Maximum increment allowed by the algorithm

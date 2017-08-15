@@ -86,7 +86,8 @@ ConjugateGradientGPU::~ConjugateGradientGPU()
     cudaFree(d_y);
     cudaFree(d_r);
     cudaFree(d_p);
-    cudaFree(d_omega);
+    cudaFree(d_Ap);
+    cudaFree(d_z);
 }
 
 void ConjugateGradientGPU::solve(SparseMatrix const& A, Vector& x, Vector const& b)
@@ -108,60 +109,80 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, Vector& x, Vector const&
     cudaMemcpy(d_val, A.valuePtr(), A.nonZeros() * sizeof(double), cudaMemcpyHostToDevice);
 
     int k = 0;
-    double r0 = 0.0, r1 = 0.0;
+    double residual_old = 0.0, residual = 0.0;
 
-    cublasDdot(cublasHandle, N, d_r, 1, d_r, 1, &r1);
+    // r * r.transpose()
+    cublasDdot(cublasHandle, N, d_r, 1, d_r, 1, &residual);
 
-    while (std::sqrt(r1) > tol && k < max_iter)
+    while (std::sqrt(residual) > tol && k < max_iter)
     {
         k++;
 
         if (k == 1)
         {
+            // p = r
             cublasDcopy(cublasHandle, N, d_r, 1, d_p, 1);
         }
         else
         {
-            double beta = r1 / r0;
+            double beta = residual / residual_old;
+            // p <= p * beta
             cublasDscal(cublasHandle, N, &beta, d_p, 1);
+
+            //  p = p + r
             cublasDaxpy(cublasHandle, N, &one, d_r, 1, d_p, 1);
         }
 
-        // Perform A * x = b
+        // Perform y = alpha * A * x + beta * y
+        // Results A * p
         cusparseDcsrmv(cusparseHandle,
                        CUSPARSE_OPERATION_NON_TRANSPOSE,
-                       N,
-                       N,
+                       N, // rows
+                       N, // cols
                        A.nonZeros(),
-                       &one,
+                       &one, // alpha
                        descr,
-                       d_val,
-                       d_row,
-                       d_col,
-                       d_p,
-                       &zero,
-                       d_omega);
+                       d_val, // values
+                       d_row, // row ptr
+                       d_col, // col ptr
+                       d_p,   // x
+                       &zero, // beta
+                       d_Ap); // y
 
-        double dot = 0.0;
+        double p_dot_Ap = 0.0;
 
-        cublasDdot(cublasHandle, N, d_p, 1, d_omega, 1, &dot);
+        // p' * Ap
+        cublasDdot(cublasHandle, N, d_p, 1, d_Ap, 1, &p_dot_Ap);
 
-        double alpha = r1 / dot;
+        // residual == old residual
+        double alpha = residual / p_dot_Ap;
 
+        // x <= alpha * p + x
         cublasDaxpy(cublasHandle, N, &alpha, d_p, 1, d_x, 1);
 
         double nalpha = -alpha;
 
-        cublasDaxpy(cublasHandle, N, &nalpha, d_omega, 1, d_r, 1);
+        // r = r - alpha * Ap;
+        cublasDaxpy(cublasHandle, N, &nalpha, d_Ap, 1, d_r, 1);
 
-        r0 = r1;
+        residual_old = residual;
 
-        cublasDdot(cublasHandle, N, d_r, 1, d_r, 1, &r1);
+        // r' * r and store in residual
+        cublasDdot(cublasHandle, N, d_r, 1, d_r, 1, &residual);
     }
 
-    std::cout << "Conjugate gradient iteration = " << k
-              << ", residual = " << std::sqrt(r1) << " \n";
-    std::cout << "Convergence Test: " << (k <= max_iter ? "OK" : "FAIL") << " \n";
+    std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << k
+              << " (max. " << solverParam.max_iterations
+              << "), estimated error: " << std::sqrt(residual) << " (min. "
+              << solverParam.tolerance << ")\n";
+
+    if (k >= solverParam.max_iterations)
+    {
+        throw std::runtime_error(
+            "Conjugate gradient solver maximum iterations reached.  Try "
+            "increasing the maximum number of iterations or use a different "
+            "solver\n");
+    }
 
     // Copy device solution to the host
     cudaMemcpy(x.data(), d_x, N * sizeof(double), cudaMemcpyDeviceToHost);
@@ -184,7 +205,8 @@ void ConjugateGradientGPU::allocate_device_memory(SparseMatrix const& A,
     checkCudaErrors(cudaMalloc((void**)&d_y, N * sizeof(double)));
     checkCudaErrors(cudaMalloc((void**)&d_r, N * sizeof(double)));
     checkCudaErrors(cudaMalloc((void**)&d_p, N * sizeof(double)));
-    checkCudaErrors(cudaMalloc((void**)&d_omega, N * sizeof(double)));
+    checkCudaErrors(cudaMalloc((void**)&d_Ap, N * sizeof(double)));
+    checkCudaErrors(cudaMalloc((void**)&d_z, N * sizeof(double)));
 
     cudaMemcpy(d_row, A.outerIndexPtr(), (N + 1) * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_col, A.innerIndexPtr(), A.nonZeros() * sizeof(int), cudaMemcpyHostToDevice);
