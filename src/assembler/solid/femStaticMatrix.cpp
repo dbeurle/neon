@@ -307,7 +307,7 @@ void femStaticMatrix::perform_equilibrium_iterations()
     catch (computational_error& comp_error)
     {
         std::cout << std::endl
-                  << termcolor::bold << termcolor::yellow << std::string(6, ' ')
+                  << std::string(6, ' ') << termcolor::bold << termcolor::yellow
                   << comp_error.what() << termcolor::reset << std::endl;
 
         adaptive_load.update_convergence_state(false);
