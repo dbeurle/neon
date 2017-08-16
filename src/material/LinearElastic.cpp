@@ -17,17 +17,17 @@ LinearElastic::LinearElastic(Json::Value const& material_data) : Material(materi
     {
         // Fill the elastic modulus and Poisson's ratio from the bulk and shear
         // moduli
-        auto const K = material_data["BulkModulus"].asDouble();
-        auto const G = material_data["ShearModulus"].asDouble();
-
-        E = 9 * K * G / (3 * K + G);
-        nu = (3 * K - 2 * G) / (3 * K + G);
+        K = material_data["BulkModulus"].asDouble();
+        G = material_data["ShearModulus"].asDouble();
     }
     else if (material_data.isMember("ElasticModulus")
              && material_data.isMember("PoissonsRatio"))
     {
-        E = material_data["ElasticModulus"].asDouble();
-        nu = material_data["PoissonsRatio"].asDouble();
+        auto const E = material_data["ElasticModulus"].asDouble();
+        auto const nu = material_data["PoissonsRatio"].asDouble();
+
+        K = E / (3.0 * (1.0 - 2.0 * nu));
+        G = E / (2.0 * (1.0 + nu));
     }
     else
     {

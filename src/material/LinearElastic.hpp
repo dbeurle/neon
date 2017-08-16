@@ -13,28 +13,28 @@ public:
     LinearElastic(Json::Value const& material_data);
 
     /** @return Elastic modulus */
-    auto elastic_modulus() const { return E; }
+    auto elastic_modulus() const { return 9.0 * K * G / (3.0 * K + G); }
 
     /** @return The Poisson's ratio */
-    auto Poissons_ratio() const { return nu; }
+    auto Poissons_ratio() const { return (3.0 * K - 2.0 * G) / (2.0 * (3.0 * K + G)); }
 
     /** Compute the Lame parameter \f[ \mu = \frac{E}{2(1+\nu)} \f] */
-    auto mu() const { return E / (2.0 * (1.0 + nu)); }
+    auto mu() const { return G; }
 
     /** Compute the Lame parameter \f[ \lambda = \frac{\nu E}{(1+\nu)(1-2\nu)} \f] */
-    auto lambda() const { return E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu)); }
+    auto lambda() const { return K - 2.0 * G / 3.0; }
 
     /** @return Bulk modulus \sa lambda \sa mu */
-    auto bulk_modulus() const { return lambda() + 2.0 / 3.0 * mu(); }
+    auto bulk_modulus() const { return K; }
 
     /** @return Shear modulus \sa mu */
-    auto shear_modulus() const { return mu(); }
+    auto shear_modulus() const { return G; }
 
-    /** @return a pair of Lame's parameters with lambda and mu respectively */
+    /** @return a pair of Lame's parameters lambda and mu respectively */
     auto Lame_parameters() const { return std::make_pair(lambda(), mu()); }
 
 protected:
-    double E;  //!< Elastic modulus
-    double nu; //!< Poisson's ratio
+    double K; //!< Bulk modulus
+    double G; //!< Shear modulus
 };
 }
