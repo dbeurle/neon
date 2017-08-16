@@ -40,7 +40,16 @@ std::string isotropic_plastic_input()
 {
     std::string plastic = perfect_plastic_input();
     plastic.pop_back();
-    return plastic + ",\"IsotropicHardeningModulus\": 400.0e6}";
+    return plastic
+           + ",\"IsotropicHardeningModulus\": 400.0e6, \"IsotropicKinematicModulus\": "
+             "100.0e6}";
+}
+
+std::string perfect_plastic_input_incorrect()
+{
+    std::string linear = linear_material_input();
+    linear.pop_back();
+    return linear + ",\"Yieldress\": 200.0e6}";
 }
 
 std::string micromechanical_input()
@@ -132,6 +141,17 @@ TEST_CASE("Isotropic hardening", "[IsotropicPlasticElastic]")
 
     REQUIRE(iso_plastic_elastic.hardening_modulus(0.0) == Approx(400.0e6));
     REQUIRE(iso_plastic_elastic.hardening_modulus(1.0) == Approx(400.0e6));
+
+    REQUIRE(iso_plastic_elastic.kinematic_modulus(0.0) == Approx(100.0e6));
+}
+TEST_CASE("Missing yield stress", "[IsotropicPlasticElastic]")
+{
+    Json::Value material_data;
+    Json::Reader material_file;
+
+    REQUIRE(material_file.parse(perfect_plastic_input_incorrect().c_str(), material_data));
+
+    REQUIRE_THROWS_AS(IsotropicElasticPlastic(material_data), MaterialPropertyException);
 }
 TEST_CASE("Micromechanical elastomer", "[MicromechanicalElastomer]")
 {
