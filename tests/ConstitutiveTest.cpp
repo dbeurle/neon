@@ -12,7 +12,10 @@
 #include "constitutive/J2Plasticity.hpp"
 #include "constitutive/NeoHooke.hpp"
 
+#include "constitutive/ConstitutiveModelFactory.hpp"
+
 using namespace neon;
+using namespace neon::solid;
 
 std::string json_input_file()
 {
@@ -33,15 +36,18 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
     // Create a json reader object from a string
     auto input_data = json_input_file();
 
-    Json::Value material_data;
+    std::string simulation_input = "{\"ConstitutiveModel\" : \"NeoHooke\"}";
+
+    Json::Value material_data, simulation_data;
     Json::Reader reader;
 
     REQUIRE(reader.parse(input_data.c_str(), material_data));
+    REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
 
-    NeoHooke neo_hooke(variables, material_data);
+    auto neo_hooke = make_constitutive_model(variables, material_data, simulation_data);
 
-    REQUIRE(neo_hooke.is_finite_deformation());
-    REQUIRE(neo_hooke.intrinsic_material().name() == "rubber");
+    REQUIRE(neo_hooke->is_finite_deformation());
+    REQUIRE(neo_hooke->intrinsic_material().name() == "rubber");
 
     // Get the tensor variables
     auto[F_list, cauchy_list] = variables(InternalVariables::Tensor::DeformationGradient,
@@ -58,7 +64,7 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
     for (auto& F : F_list) F = Matrix3::Identity();
     for (auto& J : J_list) J = 1.0;
 
-    neo_hooke.update_internal_variables(1.0);
+    neo_hooke->update_internal_variables(1.0);
 
     SECTION("Update of internal variables")
     {
@@ -106,15 +112,18 @@ TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
                              "\"StandardDeviation\" : 10, "
                              "\"ScissionLikelihood\" : 0.0001}}";
 
-    Json::Value material_data;
+    std::string simulation_input = "{\"ConstitutiveModel\" : \"AffineMicrosphere\"}";
+
+    Json::Value material_data, simulation_data;
     Json::Reader reader;
 
     REQUIRE(reader.parse(input_data.c_str(), material_data));
+    REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
 
-    AffineMicrosphere affine(variables, material_data);
+    auto affine = make_constitutive_model(variables, material_data, simulation_data);
 
-    REQUIRE(affine.is_finite_deformation());
-    REQUIRE(affine.intrinsic_material().name() == "rubber");
+    REQUIRE(affine->is_finite_deformation());
+    REQUIRE(affine->intrinsic_material().name() == "rubber");
 
     // Get the tensor variables
     auto[F_list, cauchy_list] = variables(InternalVariables::Tensor::DeformationGradient,
@@ -131,7 +140,7 @@ TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
         // Fill with identity matrix
         for (auto& F : F_list) F = Matrix3::Identity();
 
-        affine.update_internal_variables(1.0);
+        affine->update_internal_variables(1.0);
 
         // Ensure symmetry is correct
         for (auto const& C : material_tangents)
@@ -150,7 +159,7 @@ TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
             F(2, 2) = 1.0 / std::sqrt(1.1);
         }
 
-        affine.update_internal_variables(1.0);
+        affine->update_internal_variables(1.0);
 
         // Ensure symmetry is correct
         for (auto const& C : material_tangents)
@@ -168,10 +177,14 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
         "{\"Name\": \"steel\", \"ElasticModulus\": 200.0e9, \"PoissonsRatio\": 0.3, "
         "\"YieldStress\": 200.0e6, \"IsotropicHardeningModulus\": 400.0e6}";
 
-    Json::Value material_data;
+    std::string simulation_input = "{\"ConstitutiveModel\" : \"J2\"}";
+
+    Json::Value material_data, simulation_data;
+
     Json::Reader reader;
 
     REQUIRE(reader.parse(input_data.c_str(), material_data));
+    REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
 
     InternalVariables variables(internal_variable_size);
 
@@ -180,7 +193,7 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
                   InternalVariables::Tensor::Cauchy);
     variables.add(InternalVariables::Scalar::DetF);
 
-    J2Plasticity j2plasticity(variables, material_data);
+    auto j2plasticity = make_constitutive_model(variables, material_data, simulation_data);
 
     // Get the tensor variables
     auto[H_list, cauchy_list] = variables(InternalVariables::Tensor::DisplacementGradient,
@@ -195,8 +208,8 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
 
     SECTION("Sanity checks")
     {
-        REQUIRE(j2plasticity.is_finite_deformation() == false);
-        REQUIRE(j2plasticity.intrinsic_material().name() == "steel");
+        REQUIRE(j2plasticity->is_finite_deformation() == false);
+        REQUIRE(j2plasticity->intrinsic_material().name() == "steel");
 
         REQUIRE(variables.has(InternalVariables::Scalar::VonMisesStress));
         REQUIRE(variables.has(InternalVariables::Scalar::EffectivePlasticStrain));
@@ -206,7 +219,7 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
     }
     SECTION("No load")
     {
-        j2plasticity.update_internal_variables(1.0);
+        j2plasticity->update_internal_variables(1.0);
 
         // Ensure symmetry is correct
         for (auto const& C : material_tangents)
@@ -219,7 +232,7 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
     {
         for (auto& H : H_list) H(2, 2) = 0.001;
 
-        j2plasticity.update_internal_variables(1.0);
+        j2plasticity->update_internal_variables(1.0);
 
         auto[vm_list,
              eff_plastic_list] = variables(InternalVariables::Scalar::VonMisesStress,
@@ -249,7 +262,7 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
     {
         for (auto& H : H_list) H(2, 2) = 0.003;
 
-        j2plasticity.update_internal_variables(1.0);
+        j2plasticity->update_internal_variables(1.0);
 
         auto[vm_list,
              eff_plastic_list] = variables(InternalVariables::Scalar::VonMisesStress,
