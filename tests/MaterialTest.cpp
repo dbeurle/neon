@@ -10,11 +10,23 @@
 #include "material/LinearElastic.hpp"
 #include "material/MicromechanicalElastomer.hpp"
 
+#include "Exceptions.hpp"
+
 using namespace neon;
 
 std::string linear_material_input()
 {
     return "{\"Name\": \"steel\", \"ElasticModulus\": 200.0e9, \"PoissonsRatio\": 0.3}";
+}
+
+std::string linear_material_input_incompressible()
+{
+    return "{\"Name\": \"steel\", \"BulkModulus\": 200.0e9, \"ShearModulus\": 100.0e6}";
+}
+
+std::string linear_material_input_incorrect()
+{
+    return "{\"Name\": \"steel\", \"Elastiodulus\": 200.0e9, \"PssonsRatio\": 0.3}";
 }
 
 std::string perfect_plastic_input()
@@ -28,7 +40,16 @@ std::string isotropic_plastic_input()
 {
     std::string plastic = perfect_plastic_input();
     plastic.pop_back();
-    return plastic + ",\"IsotropicHardeningModulus\": 400.0e6}";
+    return plastic
+           + ",\"IsotropicHardeningModulus\": 400.0e6, \"IsotropicKinematicModulus\": "
+             "100.0e6}";
+}
+
+std::string perfect_plastic_input_incorrect()
+{
+    std::string linear = linear_material_input();
+    linear.pop_back();
+    return linear + ",\"Yieldress\": 200.0e6}";
 }
 
 std::string micromechanical_input()
@@ -48,29 +69,44 @@ TEST_CASE("Linear elastic material", "[LinearElastic]")
     Json::Value material_data;
     Json::Reader material_file;
 
-    REQUIRE(material_file.parse(linear_material_input().c_str(), material_data));
+    SECTION("Linear elastic properties")
+    {
+        REQUIRE(material_file.parse(linear_material_input().c_str(), material_data));
 
-    LinearElastic linear_elastic(material_data);
+        LinearElastic linear_elastic(material_data);
 
-    REQUIRE(linear_elastic.name() == "steel");
+        REQUIRE(linear_elastic.name() == "steel");
 
-    REQUIRE(linear_elastic.Poissons_ratio() == Approx(0.3));
-    REQUIRE(linear_elastic.elastic_modulus() == Approx(200.0e9));
+        REQUIRE(linear_elastic.Poissons_ratio() == Approx(0.3));
+        REQUIRE(linear_elastic.elastic_modulus() == Approx(200.0e9));
 
-    auto const E = linear_elastic.elastic_modulus();
-    auto const v = linear_elastic.Poissons_ratio();
+        auto const E = linear_elastic.elastic_modulus();
+        auto const v = linear_elastic.Poissons_ratio();
 
-    // Check Lamé parameters
-    REQUIRE(linear_elastic.lambda() == Approx(E * v / ((1.0 + v) * (1.0 - 2.0 * v))));
-    REQUIRE(linear_elastic.mu() == Approx(E / (2.0 * (1.0 + v))));
+        // Check Lamé parameters
+        REQUIRE(linear_elastic.lambda() == Approx(E * v / ((1.0 + v) * (1.0 - 2.0 * v))));
+        REQUIRE(linear_elastic.mu() == Approx(E / (2.0 * (1.0 + v))));
 
-    auto const[lambda, shear_modulus] = linear_elastic.Lame_parameters();
+        auto const[lambda, shear_modulus] = linear_elastic.Lame_parameters();
 
-    REQUIRE(lambda == Approx(linear_elastic.lambda()));
-    REQUIRE(shear_modulus == Approx(linear_elastic.mu()));
+        REQUIRE(lambda == Approx(linear_elastic.lambda()));
+        REQUIRE(shear_modulus == Approx(linear_elastic.mu()));
+    }
+    SECTION("Incompressible elastic properties")
+    {
+        REQUIRE(material_file.parse(linear_material_input_incompressible().c_str(),
+                                    material_data));
+        LinearElastic linear_elastic(material_data);
 
-    REQUIRE(linear_elastic.bulk_modulus() == Approx(lambda + 2.0 / 3.0 * shear_modulus));
-    REQUIRE(linear_elastic.shear_modulus() == Approx(shear_modulus));
+        REQUIRE(linear_elastic.bulk_modulus() == Approx(200.0e9));
+        REQUIRE(linear_elastic.shear_modulus() == Approx(100.0e6));
+    }
+    SECTION("Incorrect elastic properties")
+    {
+        REQUIRE(material_file.parse(linear_material_input_incorrect().c_str(),
+                                    material_data));
+        REQUIRE_THROWS_AS(LinearElastic(material_data), MaterialPropertyException);
+    }
 }
 TEST_CASE("Perfect plastic material", "[PerfectPlasticElastic]")
 {
@@ -105,6 +141,17 @@ TEST_CASE("Isotropic hardening", "[IsotropicPlasticElastic]")
 
     REQUIRE(iso_plastic_elastic.hardening_modulus(0.0) == Approx(400.0e6));
     REQUIRE(iso_plastic_elastic.hardening_modulus(1.0) == Approx(400.0e6));
+
+    REQUIRE(iso_plastic_elastic.kinematic_modulus(0.0) == Approx(100.0e6));
+}
+TEST_CASE("Missing yield stress", "[IsotropicPlasticElastic]")
+{
+    Json::Value material_data;
+    Json::Reader material_file;
+
+    REQUIRE(material_file.parse(perfect_plastic_input_incorrect().c_str(), material_data));
+
+    REQUIRE_THROWS_AS(IsotropicElasticPlastic(material_data), MaterialPropertyException);
 }
 TEST_CASE("Micromechanical elastomer", "[MicromechanicalElastomer]")
 {
