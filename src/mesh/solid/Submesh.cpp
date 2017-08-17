@@ -7,6 +7,7 @@
 #include "interpolations/InterpolationFactory.hpp"
 
 #include "material/Material.hpp"
+#include "mesh/DofAllocator.hpp"
 #include "mesh/solid/MaterialCoordinates.hpp"
 #include "numeric/Operators.hpp"
 
@@ -44,7 +45,7 @@ femSubmesh::femSubmesh(Json::Value const& material_data,
     }
     variables.commit();
 
-    allocate_dof_list(this->dofs_per_node());
+    dof_list = allocate_dof_list(this->dofs_per_node(), nodal_connectivity);
 }
 
 void femSubmesh::save_internal_variables(bool const have_converged)
@@ -268,20 +269,7 @@ void femSubmesh::check_element_distortion() const
     }
 }
 
-void femSubmesh::allocate_dof_list(int const nodal_dofs)
-{
-    using namespace ranges;
-
-    dof_list = nodal_connectivity | view::transform([=](auto const& node_list) {
-                   return view::for_each(node_list, [=](int const local_node) {
-                       return view::ints(0, nodal_dofs) | view::transform([=](int const nodal_dof) {
-                                  return local_node * nodal_dofs + nodal_dof;
-                              });
-                   });
-               });
-}
-
-int femSubmesh::offset(int element, int quadrature_point) const
+int femSubmesh::offset(int const element, int const quadrature_point) const
 {
     return sf->quadrature().points() * element + quadrature_point;
 }

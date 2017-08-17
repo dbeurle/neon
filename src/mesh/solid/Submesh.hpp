@@ -137,10 +137,8 @@ protected:
      */
     Vector internal_nodal_force(Matrix const& configuration, int element) const;
 
-    void allocate_dof_list(int const nodal_dofs);
-
     /** @return the index into the internal variable store */
-    int offset(int element, int quadraturePoint) const;
+    int offset(int const element, int const quadraturePoint) const;
 
 private:
     std::shared_ptr<MaterialCoordinates> material_coordinates;
