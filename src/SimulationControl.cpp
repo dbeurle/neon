@@ -50,8 +50,7 @@ void SimulationControl::parse()
     std::cout << std::setw(welcome_message.length() + 9) << std::setfill('=') << "\n";
     std::cout << termcolor::reset << std::endl << std::setfill(' ');
 
-    std::cout << std::string(2, ' ') << termcolor::bold
-              << "Preprocessing mesh and simulation data\n"
+    std::cout << std::string(2, ' ') << termcolor::bold << "Preprocessing mesh and simulation data\n"
               << termcolor::reset;
 
     std::ifstream file(input_file_name);
@@ -88,8 +87,7 @@ void SimulationControl::parse()
     {
         if (part["Name"].empty()) throw std::runtime_error("Part: Name");
 
-        if (ranges::find(material_names, part["Material"].asString())
-            == material_names.end())
+        if (ranges::find(material_names, part["Material"].asString()) == material_names.end())
         {
             throw std::runtime_error("The part material was not found in the provided "
                                      "materials\n");
@@ -106,11 +104,9 @@ void SimulationControl::parse()
         Json::Value mesh_file;
         Json::Reader mesh_reader;
 
-        auto const material = *ranges::find_if(root["Material"],
-                                               [&part](auto const& material) {
-                                                   return material["Name"].asString()
-                                                          == part["Material"].asString();
-                                               });
+        auto const material = *ranges::find_if(root["Material"], [&part](auto const& material) {
+            return material["Name"].asString() == part["Material"].asString();
+        });
 
         std::ifstream mesh_input_stream(part["Name"].asString() + ".mesh");
 
@@ -145,8 +141,7 @@ void SimulationControl::parse()
         // Make sure the simulation mesh exists in the mesh store
         if (mesh_store.find(simulation["Mesh"][0]["Name"].asString()) == mesh_store.end())
         {
-            throw std::runtime_error("Mesh name \""
-                                     + simulation["Mesh"][0]["Name"].asString()
+            throw std::runtime_error("Mesh name \"" + simulation["Mesh"][0]["Name"].asString()
                                      + "\" was not found in the mesh store");
         }
     }
@@ -178,11 +173,10 @@ void SimulationControl::start()
 
         auto simulation_mesh = mesh_store.find(mesh_data["Name"].asString());
 
-        std::cout << std::string(4, ' ') << "Module \"" << simulation["Type"].asString()
-                  << "\"\n";
+        std::cout << std::string(4, ' ') << "Module \"" << simulation["Type"].asString() << "\"\n";
 
-        std::cout << std::string(4, ' ') << "Solution \""
-                  << simulation["Solution"].asString() << "\"\n";
+        std::cout << std::string(4, ' ') << "Solution \"" << simulation["Solution"].asString()
+                  << "\"\n";
 
         auto const & [ mesh, material ] = simulation_mesh->second;
 
@@ -200,9 +194,8 @@ void SimulationControl::start()
         for (auto const& next_step : multistep_simulations[simulation["Name"].asString()])
         {
             std::cout << termcolor::bold << "\n"
-                      << std::string(2, ' ') << "Simulating case \""
-                      << next_step["Name"].asString() << "\"" << termcolor::reset
-                      << std::endl
+                      << std::string(2, ' ') << "Simulating case \"" << next_step["Name"].asString()
+                      << "\"" << termcolor::reset << std::endl
                       << std::endl;
 
             // Update the mesh with an internal restart
@@ -231,8 +224,7 @@ void SimulationControl::build_simulation_tree()
 
     for (auto const & [ name, queue ] : multistep_simulations)
     {
-        std::cout << std::string(4, ' ') << "Simulation \"" << name
-                  << "\" is continued by:\n";
+        std::cout << std::string(4, ' ') << "Simulation \"" << name << "\" is continued by:\n";
         for (auto const& item : queue)
         {
             std::cout << "\t\"" << item["Name"].asString() << "\"" << std::endl;

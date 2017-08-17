@@ -52,8 +52,7 @@ List SubMesh::unique_connectivities() const
     return std::ref(nodal_connectivity) | action::join | action::sort | action::unique;
 }
 
-Matrix SubMesh::gather_coordinates(NodalCoordinates const& nodal_coordinates,
-                                   int const element) const
+Matrix SubMesh::gather_coordinates(NodalCoordinates const& nodal_coordinates, int const element) const
 {
     return nodal_coordinates[local_node_list(element)];
 }

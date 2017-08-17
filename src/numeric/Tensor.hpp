@@ -11,10 +11,7 @@ inline double double_dot(Matrix3 const& a, Matrix3 const& b)
 }
 
 /** @return the volumetric part of the tensor */
-inline Matrix3 volumetric(Matrix3 const& a)
-{
-    return Matrix3::Identity() * a.trace() / 3.0;
-}
+inline Matrix3 volumetric(Matrix3 const& a) { return Matrix3::Identity() * a.trace() / 3.0; }
 
 /** @return the deviatoric part of the tensor */
 inline Matrix3 deviatoric(Matrix3 const& a) { return a - volumetric(a); }
@@ -76,10 +73,7 @@ inline double I1(Matrix3 const& a) { return a.trace(); }
  * \f}
  * @return Second invariant
  */
-inline double I2(Matrix3 const& a)
-{
-    return 0.5 * (std::pow(a.trace(), 2) - (a * a).trace());
-}
+inline double I2(Matrix3 const& a) { return 0.5 * (std::pow(a.trace(), 2) - (a * a).trace()); }
 
 /** @return Third invariant, which is the determinant of the tensor */
 inline double I3(Matrix3 const& a) { return a.determinant(); }

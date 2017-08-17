@@ -32,8 +32,7 @@ void AdaptiveLoadStep::update_convergence_state(bool is_converged)
 
         if (is_applied) return;
 
-        double const new_time = std::min(consecutive_unconverged > 0
-                                                 || consecutive_converged < 4
+        double const new_time = std::min(consecutive_unconverged > 0 || consecutive_converged < 4
                                              ? last_converged_time_step_size + current_time
                                              : forward_factor * current_time,
                                          current_time + maximum_increment);
@@ -44,9 +43,9 @@ void AdaptiveLoadStep::update_convergence_state(bool is_converged)
         consecutive_converged++;
         successful_increments++;
 
-        std::cout << std::string(terminal_indent, ' ') << termcolor::green
-                  << termcolor::bold << "Convergence detected - step time set to "
-                  << current_time << " for next attempt\n"
+        std::cout << std::string(terminal_indent, ' ') << termcolor::green << termcolor::bold
+                  << "Convergence detected - step time set to " << current_time
+                  << " for next attempt\n"
                   << termcolor::reset << std::flush;
     }
     else
@@ -67,9 +66,8 @@ void AdaptiveLoadStep::update_convergence_state(bool is_converged)
                                      "last load case\n");
 
         std::cout << "\n"
-                  << std::string(terminal_indent, ' ') << termcolor::yellow
-                  << termcolor::bold << "Non-convergence detected - step time set to "
-                  << current_time << "\n"
+                  << std::string(terminal_indent, ' ') << termcolor::yellow << termcolor::bold
+                  << "Non-convergence detected - step time set to " << current_time << "\n"
                   << termcolor::reset << std::flush;
 
         consecutive_unconverged++;

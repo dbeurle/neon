@@ -113,7 +113,7 @@ protected:
 
     double total_time = 0.0; //!< Time history for multi-step simulations
 
-    double last_converged_time = 0.0; //!< Last time when convergence was reached
+    double last_converged_time = 0.0;           //!< Last time when convergence was reached
     double last_converged_time_step_size = 0.0; //!< Last good timestep size
 
     double minimum_increment; //!< Minimum increment allowed by the algorithm

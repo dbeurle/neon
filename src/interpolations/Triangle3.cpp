@@ -58,9 +58,7 @@ void Triangle3::precompute_shape_functions()
         local_nodal_coordinates(a, 0) = r;
         local_nodal_coordinates(a, 1) = s;
     }
-    compute_extrapolation_matrix(N_matrix,
-                                 local_nodal_coordinates,
-                                 local_quadrature_coordinates);
+    compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
 }
 
 double Triangle3::compute_measure(Matrix const& nodal_coordinates)

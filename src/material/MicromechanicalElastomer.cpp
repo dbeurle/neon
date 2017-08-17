@@ -93,8 +93,8 @@ void MicromechanicalElastomer::compute_chains_and_segments(Json::Value const& se
                              [&](auto const N) { return N <= N_avg; });
 }
 
-std::vector<double> MicromechanicalElastomer::update_chains(
-    std::vector<double> const& chains_old, double const time_step_size)
+std::vector<double> MicromechanicalElastomer::update_chains(std::vector<double> const& chains_old,
+                                                            double const time_step_size)
 {
     using namespace ranges;
 
@@ -104,8 +104,7 @@ std::vector<double> MicromechanicalElastomer::update_chains(
            });
 }
 
-std::vector<double> MicromechanicalElastomer::compute_shear_moduli(
-    std::vector<double> const& chains_new)
+std::vector<double> MicromechanicalElastomer::compute_shear_moduli(std::vector<double> const& chains_new)
 {
     return chains_new | ranges::view::transform([&](auto const& n) {
                return n * boltzmann_constant * temperature;
