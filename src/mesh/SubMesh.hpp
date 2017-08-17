@@ -1,11 +1,12 @@
 
 #pragma once
 
-#include <json/forwards.h>
-
+#include "constitutive/ConstitutiveModel.hpp"
 #include "mesh/ElementTopology.hpp"
 #include "mesh/NodeOrderingAdapter.hpp"
 #include "numeric/DenseTypes.hpp"
+
+#include <json/forwards.h>
 
 namespace neon
 {
