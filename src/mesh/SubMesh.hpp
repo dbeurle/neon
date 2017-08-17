@@ -37,10 +37,6 @@ public:
     auto const& connectivities() const { return nodal_connectivity; }
 
 protected:
-    /** @return coordinates given a Nodes class and  */
-    Matrix gather_coordinates(NodalCoordinates const& nodal_coordinates, int const element) const;
-
-protected:
     ElementTopology element_topology;
     NodeOrderingAdapter adapter;
     std::vector<List> nodal_connectivity;
