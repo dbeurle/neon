@@ -26,8 +26,7 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
     InternalVariables variables(internal_variable_size);
 
     // Add the required variables for an updated Lagrangian formulation
-    variables.add(InternalVariables::Tensor::DeformationGradient,
-                  InternalVariables::Tensor::Cauchy);
+    variables.add(InternalVariables::Tensor::DeformationGradient, InternalVariables::Tensor::Cauchy);
     variables.add(InternalVariables::Scalar::DetF);
 
     // Create a json reader object from a string
@@ -91,8 +90,7 @@ TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
     InternalVariables variables(internal_variable_size);
 
     // Add the required variables for an updated Lagrangian formulation
-    variables.add(InternalVariables::Tensor::DeformationGradient,
-                  InternalVariables::Tensor::Cauchy);
+    variables.add(InternalVariables::Tensor::DeformationGradient, InternalVariables::Tensor::Cauchy);
 
     variables.add(InternalVariables::Scalar::DetF);
 
@@ -164,9 +162,9 @@ TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
 TEST_CASE("J2 plasticity model", "[J2Plasticity]")
 {
     // Create a json reader object from a string
-    std::string input_data =
-        "{\"Name\": \"steel\", \"ElasticModulus\": 200.0e9, \"PoissonsRatio\": 0.3, "
-        "\"YieldStress\": 200.0e6, \"IsotropicHardeningModulus\": 400.0e6}";
+    std::string
+        input_data = "{\"Name\": \"steel\", \"ElasticModulus\": 200.0e9, \"PoissonsRatio\": 0.3, "
+                     "\"YieldStress\": 200.0e6, \"IsotropicHardeningModulus\": 400.0e6}";
 
     Json::Value material_data;
     Json::Reader reader;
@@ -176,8 +174,7 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
     InternalVariables variables(internal_variable_size);
 
     // Add the required variables for an updated Lagrangian formulation
-    variables.add(InternalVariables::Tensor::DisplacementGradient,
-                  InternalVariables::Tensor::Cauchy);
+    variables.add(InternalVariables::Tensor::DisplacementGradient, InternalVariables::Tensor::Cauchy);
     variables.add(InternalVariables::Scalar::DetF);
 
     J2Plasticity j2plasticity(variables, material_data);
@@ -221,9 +218,8 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
 
         j2plasticity.update_internal_variables(1.0);
 
-        auto[vm_list,
-             eff_plastic_list] = variables(InternalVariables::Scalar::VonMisesStress,
-                                           InternalVariables::Scalar::EffectivePlasticStrain);
+        auto[vm_list, eff_plastic_list] = variables(InternalVariables::Scalar::VonMisesStress,
+                                                    InternalVariables::Scalar::EffectivePlasticStrain);
 
         // Ensure symmetry is correct
         for (auto const& C : material_tangents)
@@ -251,9 +247,8 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
 
         j2plasticity.update_internal_variables(1.0);
 
-        auto[vm_list,
-             eff_plastic_list] = variables(InternalVariables::Scalar::VonMisesStress,
-                                           InternalVariables::Scalar::EffectivePlasticStrain);
+        auto[vm_list, eff_plastic_list] = variables(InternalVariables::Scalar::VonMisesStress,
+                                                    InternalVariables::Scalar::EffectivePlasticStrain);
 
         // Ensure symmetry is correct
         for (auto const& C : material_tangents)
