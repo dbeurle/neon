@@ -20,6 +20,10 @@ namespace solid
 {
 class MaterialCoordinates;
 
+/**
+ * femSubmesh provides the element local routines for computing the system
+ * components for a three-dimensional continuum mechanics discretisation.
+ */
 class femSubmesh : public SubMesh
 {
 public:
