@@ -59,20 +59,6 @@ protected:
     std::string duplParameter;
 };
 
-class UnknownOutputRequestException : public Exception
-{
-public:
-    UnknownOutputRequestException(std::string outputRequest)
-        : outputRequest(outputRequest)
-    {
-    }
-
-    const char* what() const noexcept;
-
-protected:
-    std::string outputRequest;
-};
-
 class MaterialPropertyException : public Exception
 {
 public:
@@ -103,8 +89,7 @@ public:
 
     const char* what() const noexcept
     {
-        std::cout << "\n!! Error: Key " << missing_key
-                  << " not found in an internal datastructure\n";
+        std::cout << "\n!! Error: Key " << missing_key << " not found in an internal datastructure\n";
         return nullptr;
     }
 
