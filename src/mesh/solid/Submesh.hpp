@@ -33,7 +33,7 @@ public:
                         SubMesh const& submesh);
 
     /** @return list of global degrees of freedom for an element */
-    List const& local_dof_list(int element) const { return dof_list.at(element); }
+    List const& local_dof_list(int const element) const { return dof_list.at(element); }
 
     /** @return The internal variable store */
     InternalVariables const& internal_variables() const { return variables; }
