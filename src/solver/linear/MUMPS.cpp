@@ -124,8 +124,7 @@ void MUMPS::solve(SparseMatrix const& A, Vector& x, Vector const& b)
     info.job = 1;
     MUMPSadapter::mumps_c(info);
 
-    if (info.info[0] < 0)
-        throw computational_error("Error in analysis phase of MUMPS solver\n");
+    if (info.info[0] < 0) throw computational_error("Error in analysis phase of MUMPS solver\n");
 
     // Factorization phase
     info.job = 2;
@@ -153,7 +152,6 @@ void MUMPS::solve(SparseMatrix const& A, Vector& x, Vector const& b)
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
 
-    std::cout << std::string(6, ' ') << "MUMPS solver took " << elapsed_seconds.count()
-              << "s\n";
+    std::cout << std::string(6, ' ') << "MUMPS solver took " << elapsed_seconds.count() << "s\n";
 }
 }

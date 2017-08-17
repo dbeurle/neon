@@ -139,8 +139,7 @@ Vector femSubmesh::internal_nodal_force(Matrix const& x, int const element) cons
                                     [&](auto const& femval, auto const& l) -> RowMatrix {
                                         auto const & [ N, dN ] = femval;
 
-                                        auto const Jacobian = local_deformation_gradient(dN,
-                                                                                         x);
+                                        auto const Jacobian = local_deformation_gradient(dN, x);
 
                                         auto const cauchy = cauchy_list[offset(element, l)];
 
@@ -159,16 +158,15 @@ std::tuple<List const&, Matrix> femSubmesh::consistent_mass(int const element) c
 
     auto const density_0 = cm->intrinsic_material().initial_density();
 
-    auto m = sf->quadrature()
-                 .integrate(Matrix::Zero(nodes_per_element(), nodes_per_element()).eval(),
-                            [&](auto const& femval, auto const& l) -> Matrix {
-                                auto const & [ N, dN ] = femval;
+    auto m = sf->quadrature().integrate(Matrix::Zero(nodes_per_element(), nodes_per_element()).eval(),
+                                        [&](auto const& femval, auto const& l) -> Matrix {
+                                            auto const & [ N, dN ] = femval;
 
-                                auto const Jacobian = local_deformation_gradient(dN, X);
+                                            auto const Jacobian = local_deformation_gradient(dN, X);
 
-                                return N * density_0 * N.transpose()
-                                       * Jacobian.determinant();
-                            });
+                                            return N * density_0 * N.transpose()
+                                                   * Jacobian.determinant();
+                                        });
     return {local_dof_list(element), identity_expansion(m, dofs_per_node())};
 }
 
@@ -224,9 +222,8 @@ void femSubmesh::update_deformation_measures()
 
             if (auto const j = F.determinant(); j < 0.0)
             {
-                throw computational_error("Distorted element (" + std::to_string(element)
-                                          + ", " + std::to_string(l)
-                                          + ") with j = " + std::to_string(j));
+                throw computational_error("Distorted element (" + std::to_string(element) + ", "
+                                          + std::to_string(l) + ") with j = " + std::to_string(j));
             }
 
             // Gradient operator in index notation
@@ -277,10 +274,9 @@ void femSubmesh::allocate_dof_list(int const nodal_dofs)
 
     dof_list = nodal_connectivity | view::transform([=](auto const& node_list) {
                    return view::for_each(node_list, [=](int const local_node) {
-                       return view::ints(0, nodal_dofs)
-                              | view::transform([=](int const nodal_dof) {
-                                    return local_node * nodal_dofs + nodal_dof;
-                                });
+                       return view::ints(0, nodal_dofs) | view::transform([=](int const nodal_dof) {
+                                  return local_node * nodal_dofs + nodal_dof;
+                              });
                    });
                });
 }
@@ -290,8 +286,7 @@ int femSubmesh::offset(int element, int quadrature_point) const
     return sf->quadrature().points() * element + quadrature_point;
 }
 
-femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(
-    InternalVariables::Tensor const tensor_name) const
+femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(InternalVariables::Tensor const tensor_name) const
 {
     Vector count = Vector::Zero(material_coordinates->size() * 9);
     Vector value = count;
@@ -332,8 +327,7 @@ femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(
     return {value, count};
 }
 
-femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(
-    InternalVariables::Scalar const scalar_name) const
+femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(InternalVariables::Scalar const scalar_name) const
 {
     Vector count = Vector::Zero(material_coordinates->size());
     Vector value = count;

@@ -17,8 +17,7 @@ public:
     explicit Boundary(double const prescribed_value, bool const is_load_ramped);
 
     /** Update the prescribed value and load application to ramped or instantaneous */
-    void internal_restart(double const prescribed_value_new,
-                          bool const is_load_ramped = true);
+    void internal_restart(double const prescribed_value_new, bool const is_load_ramped = true);
 
     /** Maintains the previous load and does not ramp */
     void internal_restart();
@@ -31,8 +30,7 @@ public:
      */
     auto interpolate_prescribed_value(double const load_factor) const
     {
-        return is_load_ramped ? (value_new - value_old) * load_factor + value_old
-                              : value_new;
+        return is_load_ramped ? (value_new - value_old) * load_factor + value_old : value_new;
     }
 
 private:

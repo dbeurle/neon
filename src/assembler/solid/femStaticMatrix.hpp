@@ -61,8 +61,7 @@ protected:
     bool is_converged(double const inc_disp_norm, double const residual_norm) const;
 
     /** Pretty printer for the convergence of the Newton-Raphson solver */
-    void print_convergence_progress(double const delta_d_norm,
-                                    double const residual_norm) const;
+    void print_convergence_progress(double const delta_d_norm, double const residual_norm) const;
 
 private:
     void perform_equilibrium_iterations();
@@ -87,8 +86,7 @@ protected:
     std::unique_ptr<LinearSolver> linear_solver;
 };
 
-inline bool femStaticMatrix::is_converged(double const inc_disp_norm,
-                                          double const residual_norm) const
+inline bool femStaticMatrix::is_converged(double const inc_disp_norm, double const residual_norm) const
 {
     return inc_disp_norm <= displacement_tolerance && residual_norm <= residual_tolerance;
 }

@@ -6,8 +6,7 @@
 
 namespace neon
 {
-NewmarkBeta::NewmarkBeta(Json::Value const& time_solver_data)
-    : time_control(time_solver_data)
+NewmarkBeta::NewmarkBeta(Json::Value const& time_solver_data) : time_control(time_solver_data)
 {
     if (time_solver_data["IntegrationOptions"].empty())
     {
@@ -30,8 +29,7 @@ NewmarkBeta::NewmarkBeta(Json::Value const& time_solver_data)
         if (time_solver_data["IntegrationOptions"]["BetaParameter"].empty())
             throw std::runtime_error("IterationOptions - BetaParameter was not set\n");
 
-        artifical_viscosity = time_solver_data["IntegrationOptions"]["ViscousDamping"]
-                                  .asDouble();
+        artifical_viscosity = time_solver_data["IntegrationOptions"]["ViscousDamping"].asDouble();
 
         beta_parameter = time_solver_data["IntegrationOptions"]["BetaParameter"].asDouble();
     }

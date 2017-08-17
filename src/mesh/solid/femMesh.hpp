@@ -58,8 +58,7 @@ public:
 protected:
     void check_boundary_conditions(Json::Value const& boundary_data) const;
 
-    void allocate_boundary_conditions(Json::Value const& boundary_data,
-                                      BasicMesh const& basic_mesh);
+    void allocate_boundary_conditions(Json::Value const& boundary_data, BasicMesh const& basic_mesh);
 
     /** \sa internal_restart */
     void reallocate_boundary_conditions(Json::Value const& boundary_data);

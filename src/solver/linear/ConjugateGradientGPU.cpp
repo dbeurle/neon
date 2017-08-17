@@ -172,10 +172,9 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, Vector& x, Vector const&
         cublasDdot(cublasHandle, N, d_r, 1, d_r, 1, &residual);
     }
 
-    std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << k
-              << " (max. " << solverParam.max_iterations
-              << "), estimated error: " << std::sqrt(residual) << " (min. "
-              << solverParam.tolerance << ")\n";
+    std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << k << " (max. "
+              << solverParam.max_iterations << "), estimated error: " << std::sqrt(residual)
+              << " (min. " << solverParam.tolerance << ")\n";
 
     if (k >= solverParam.max_iterations)
     {
@@ -186,9 +185,7 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, Vector& x, Vector const&
     cudaMemcpy(x.data(), d_x, N * sizeof(double), cudaMemcpyDeviceToHost);
 }
 
-void ConjugateGradientGPU::allocate_device_memory(SparseMatrix const& A,
-                                                  Vector& x,
-                                                  Vector const& b)
+void ConjugateGradientGPU::allocate_device_memory(SparseMatrix const& A, Vector& x, Vector const& b)
 {
     // If this isn't our first time using the compute device or
     // the sparsity pattern hasn't changed, then we save on the allocation
@@ -229,9 +226,8 @@ void ConjugateGradientGPU::find_compute_device()
     checkCudaErrors(cudaGetDeviceProperties(&deviceProp, devID));
 
     // Statistics about the GPU device
-    std::cout << "> GPU device has " << deviceProp.multiProcessorCount
-              << " Multi-Processors, SM " << deviceProp.major << "." << deviceProp.minor
-              << " compute capabilities\n\n";
+    std::cout << "> GPU device has " << deviceProp.multiProcessorCount << " Multi-Processors, SM "
+              << deviceProp.major << "." << deviceProp.minor << " compute capabilities\n\n";
 
     if (deviceProp.major * 0x10 + deviceProp.minor < 0x11)
     {

@@ -27,8 +27,8 @@ public:
                              int const nodal_dofs = 3);
 
     /** @return an element external force vector for a given element */
-    virtual std::tuple<List const&, Vector> external_force(
-        int const element, double const load_factor) const = 0;
+    virtual std::tuple<List const&, Vector> external_force(int const element,
+                                                           double const load_factor) const = 0;
 
     auto elements() const { return nodal_connectivity.size(); }
 
@@ -55,14 +55,13 @@ public:
      * @param args See \sa NonFollowerLoad constructor arguments
      */
     template <typename... NonFollowerLoadArgs>
-    explicit Traction(std::unique_ptr<SurfaceInterpolation>&& sf,
-                      NonFollowerLoadArgs... args)
+    explicit Traction(std::unique_ptr<SurfaceInterpolation>&& sf, NonFollowerLoadArgs... args)
         : NonFollowerLoad(args...), sf(std::move(sf))
     {
     }
 
-    virtual std::tuple<List const&, Vector> external_force(
-        int const element, double const load_factor) const override;
+    virtual std::tuple<List const&, Vector> external_force(int const element,
+                                                           double const load_factor) const override;
 
 protected:
     std::unique_ptr<SurfaceInterpolation> sf;

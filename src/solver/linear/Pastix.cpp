@@ -31,8 +31,8 @@ void PaStiX::solve(SparseMatrix const& A, Vector& x, Vector const& b)
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
-    std::cout << std::string(6, ' ') << "PaStiX LLT direct solver took "
-              << elapsed_seconds.count() << "s\n";
+    std::cout << std::string(6, ' ') << "PaStiX LLT direct solver took " << elapsed_seconds.count()
+              << "s\n";
 }
 }
 
