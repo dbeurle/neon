@@ -85,6 +85,29 @@ TEST_CASE("Boundary unit test", "[Boundary]")
         REQUIRE(boundary.interpolate_prescribed_value(0.5) == Approx(2.0));
         REQUIRE(boundary.interpolate_prescribed_value(1.0) == Approx(2.0));
     }
+    SECTION("Do nothing restart")
+    {
+        Boundary boundary(2.0, true);
+        boundary.internal_restart();
+        REQUIRE(boundary.interpolate_prescribed_value(0.0) == Approx(2.0));
+        REQUIRE(boundary.interpolate_prescribed_value(1.0) == Approx(2.0));
+    }
+    SECTION("Updated value restart instantaneous")
+    {
+        Boundary boundary(2.0, true);
+        boundary.internal_restart(3.0, false);
+        REQUIRE(boundary.interpolate_prescribed_value(0.0) == Approx(3.0));
+        REQUIRE(boundary.interpolate_prescribed_value(0.5) == Approx(3.0));
+        REQUIRE(boundary.interpolate_prescribed_value(1.0) == Approx(3.0));
+    }
+    SECTION("Updated value restart with ramped")
+    {
+        Boundary boundary(2.0, true);
+        boundary.internal_restart(3.0, true);
+        REQUIRE(boundary.interpolate_prescribed_value(0.0) == Approx(2.0));
+        REQUIRE(boundary.interpolate_prescribed_value(0.5) == Approx(2.5));
+        REQUIRE(boundary.interpolate_prescribed_value(1.0) == Approx(3.0));
+    }
 }
 TEST_CASE("Traction test for triangle", "[Traction]")
 {
@@ -177,11 +200,7 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
 
     // Insert this information into the nonfollower load boundary class
     // using the simulation data for the cube
-    NonFollowerLoadBoundary nf_loads(material_coordinates,
-                                     submeshes,
-                                     1,
-                                     1.0e-3,
-                                     simulation_data);
+    NonFollowerLoadBoundary nf_loads(material_coordinates, submeshes, 1, 1.0e-3, simulation_data);
 
     auto const & [ dofs_tri, f_tri ] = nf_loads.boundaries().at(0).external_force(0, 1.0);
     auto const & [ dofs_quad, f_quad ] = nf_loads.boundaries().at(1).external_force(0, 1.0);

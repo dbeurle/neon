@@ -32,19 +32,17 @@ std::tuple<List const&, Vector> Traction::external_force(int const element,
 
                                                       auto const j = (X * dN).determinant();
 
-                                                      return interpolate_prescribed_value(
-                                                                 load_factor)
+                                                      return interpolate_prescribed_value(load_factor)
                                                              * N * j;
                                                   });
     return {dof_list.at(element), f_ext};
 }
 
-NonFollowerLoadBoundary::NonFollowerLoadBoundary(
-    std::shared_ptr<MaterialCoordinates>& material_coordinates,
-    std::vector<SubMesh> const& submeshes,
-    int const dof_offset,
-    double const prescribed_load,
-    Json::Value const& simulation_data)
+NonFollowerLoadBoundary::NonFollowerLoadBoundary(std::shared_ptr<MaterialCoordinates>& material_coordinates,
+                                                 std::vector<SubMesh> const& submeshes,
+                                                 int const dof_offset,
+                                                 double const prescribed_load,
+                                                 Json::Value const& simulation_data)
 {
     // Populate the entire mesh
     for (auto const& mesh : submeshes)

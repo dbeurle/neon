@@ -40,9 +40,8 @@ void femMesh::internal_restart(Json::Value const& simulation_data)
     {
         for (auto & [ name, boundaries ] : displacement_bcs)
         {
-            std::cout << termcolor::yellow << std::string(2, ' ')
-                      << "Boundary conditions for \"" << name
-                      << "\" have been inherited from the last load step"
+            std::cout << termcolor::yellow << std::string(2, ' ') << "Boundary conditions for \""
+                      << name << "\" have been inherited from the last load step"
                       << termcolor::reset << std::endl;
 
             for (auto& boundary : boundaries) boundary.internal_restart();
@@ -67,8 +66,8 @@ void femMesh::update_internal_variables(Vector const& u, double const time_step_
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
 
-    std::cout << std::string(6, ' ') << "Internal variable update took "
-              << elapsed_seconds.count() << "s\n";
+    std::cout << std::string(6, ' ') << "Internal variable update took " << elapsed_seconds.count()
+              << "s\n";
 }
 
 void femMesh::save_internal_variables(bool const have_converged)
@@ -88,8 +87,7 @@ void femMesh::allocate_boundary_conditions(Json::Value const& simulation_data,
     {
         auto const& boundary_name = boundary["Name"].asString();
 
-        if (auto const& boundary_type = boundary["Type"].asString();
-            boundary_type == "Displacement")
+        if (auto const& boundary_type = boundary["Type"].asString(); boundary_type == "Displacement")
         {
             auto const dirichlet_dofs = filter_dof_list(basic_mesh.meshes(boundary_name));
 
@@ -103,12 +101,12 @@ void femMesh::allocate_boundary_conditions(Json::Value const& simulation_data,
                                              "coordinates\n");
                 }
 
-                displacement_bcs[boundary_name]
-                    .emplace_back(view::transform(dirichlet_dofs,
-                                                  [&](auto const& dof) {
-                                                      return dof + dof_offset;
-                                                  }),
-                                  boundary["Values"][name].asDouble());
+                displacement_bcs[boundary_name].emplace_back(view::transform(dirichlet_dofs,
+                                                                             [&](auto const& dof) {
+                                                                                 return dof
+                                                                                        + dof_offset;
+                                                                             }),
+                                                             boundary["Values"][name].asDouble());
             }
         }
         else if (boundary_type == "Traction")
@@ -132,8 +130,7 @@ void femMesh::allocate_boundary_conditions(Json::Value const& simulation_data,
         }
         else
         {
-            throw std::runtime_error("BoundaryCondition \"" + boundary_type
-                                     + "\" is not recognised");
+            throw std::runtime_error("BoundaryCondition \"" + boundary_type + "\" is not recognised");
         }
     }
 }

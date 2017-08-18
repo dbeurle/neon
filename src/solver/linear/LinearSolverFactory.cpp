@@ -69,13 +69,11 @@ std::unique_ptr<LinearSolver> make_linear_solver(Json::Value const& solver_data)
             // todo add messages in these statements to print out
             // to a file that other options have not been set
             // and explain how to set them
-            return std::make_unique<ConjugateGradientGPU>(
-                solver_data["Tolerance"].asDouble());
+            return std::make_unique<ConjugateGradientGPU>(solver_data["Tolerance"].asDouble());
         }
         else if (solver_data.isMember("MaxIterations"))
         {
-            return std::make_unique<ConjugateGradientGPU>(
-                solver_data["MaxIterations"].asInt());
+            return std::make_unique<ConjugateGradientGPU>(solver_data["MaxIterations"].asInt());
         }
         else
         {
@@ -88,8 +86,7 @@ std::unique_ptr<LinearSolver> make_linear_solver(Json::Value const& solver_data)
     }
     else if (solver_name == "BiCGStab")
     {
-        if (not solver_data["Tolerance"].empty()
-            and not solver_data["MaxIterations"].empty())
+        if (not solver_data["Tolerance"].empty() and not solver_data["MaxIterations"].empty())
         {
             return std::make_unique<BiCGSTAB>(solver_data["Tolerance"].asDouble(),
                                               solver_data["MaxIterations"].asInt());

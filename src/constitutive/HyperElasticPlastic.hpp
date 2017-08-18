@@ -33,8 +33,7 @@ protected:
 
     CMatrix deviatoric_projection() const;
 
-    CMatrix incremental_tangent(double const plastic_increment,
-                                double const von_mises) const;
+    CMatrix incremental_tangent(double const plastic_increment, double const von_mises) const;
 
     CMatrix algorithmic_tangent(double const plastic_increment,
                                 double const accumulated_plastic_strain,

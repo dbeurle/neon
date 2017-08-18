@@ -18,8 +18,7 @@ public:
      * @param variables Reference to internal state variable store
      * @param data Json object with material data
      */
-    explicit AffineMicrosphere(InternalVariables& variables,
-                               Json::Value const& material_data);
+    explicit AffineMicrosphere(InternalVariables& variables, Json::Value const& material_data);
 
     virtual void update_internal_variables(double const time_step_size) override;
 
@@ -45,8 +44,7 @@ protected:
      \frac{1}{J^2}\right) \f}
      * \sa volumetric_free_energy_dJ
      */
-    double volumetric_free_energy_second_d2J(double const J,
-                                             double const bulk_modulus) const;
+    double volumetric_free_energy_second_d2J(double const J, double const bulk_modulus) const;
 
     /**
      * Compute the Padé approximation of the inverse Langevin stretch model
@@ -116,8 +114,8 @@ inline double AffineMicrosphere::volumetric_free_energy_dJ(double const J,
     return bulk_modulus / 2.0 * (J - 1.0 / J);
 }
 
-inline double AffineMicrosphere::volumetric_free_energy_second_d2J(
-    double const J, double const bulk_modulus) const
+inline double AffineMicrosphere::volumetric_free_energy_second_d2J(double const J,
+                                                                   double const bulk_modulus) const
 {
     return bulk_modulus / 2.0 * (1.0 + 1.0 / std::pow(J, 2));
 }

@@ -23,8 +23,8 @@ bool is_reduced_integration(Json::Value const& simulation_data)
 }
 
 /** Factory method for the three dimensional shape functions */
-std::unique_ptr<VolumeInterpolation> make_volume_interpolation(
-    ElementTopology const topology, Json::Value const& simulation_data)
+std::unique_ptr<VolumeInterpolation> make_volume_interpolation(ElementTopology const topology,
+                                                               Json::Value const& simulation_data)
 {
     if (!simulation_data.isMember("ElementOptions"))
     {
@@ -37,9 +37,8 @@ std::unique_ptr<VolumeInterpolation> make_volume_interpolation(
     {
         case ElementTopology::Hexahedron8:
         {
-            return std::make_unique<Hexahedron8>(
-                is_reduced ? HexahedronQuadrature::Rule::OnePoint
-                           : HexahedronQuadrature::Rule::EightPoint);
+            return std::make_unique<Hexahedron8>(is_reduced ? HexahedronQuadrature::Rule::OnePoint
+                                                            : HexahedronQuadrature::Rule::EightPoint);
         }
         case ElementTopology::Tetrahedron4:
         {
@@ -47,9 +46,9 @@ std::unique_ptr<VolumeInterpolation> make_volume_interpolation(
         }
         case ElementTopology::Tetrahedron10:
         {
-            return std::make_unique<Tetrahedron10>(
-                is_reduced ? TetrahedronQuadrature::Rule::OnePoint
-                           : TetrahedronQuadrature::Rule::FourPoint);
+            return std::make_unique<Tetrahedron10>(is_reduced
+                                                       ? TetrahedronQuadrature::Rule::OnePoint
+                                                       : TetrahedronQuadrature::Rule::FourPoint);
         }
         case ElementTopology::Prism6:
         case ElementTopology::Pyramid5:
@@ -72,8 +71,8 @@ std::unique_ptr<VolumeInterpolation> make_volume_interpolation(
     return nullptr;
 }
 
-std::unique_ptr<SurfaceInterpolation> make_surface_interpolation(
-    ElementTopology const topology, Json::Value const& simulation_data)
+std::unique_ptr<SurfaceInterpolation> make_surface_interpolation(ElementTopology const topology,
+                                                                 Json::Value const& simulation_data)
 {
     if (!simulation_data.isMember("ElementOptions"))
     {
@@ -86,9 +85,9 @@ std::unique_ptr<SurfaceInterpolation> make_surface_interpolation(
     {
         case ElementTopology::Quadrilateral4:
         {
-            return std::make_unique<Quadrilateral4>(
-                is_reduced ? QuadrilateralQuadrature::Rule::OnePoint
-                           : QuadrilateralQuadrature::Rule::FourPoint);
+            return std::make_unique<Quadrilateral4>(is_reduced
+                                                        ? QuadrilateralQuadrature::Rule::OnePoint
+                                                        : QuadrilateralQuadrature::Rule::FourPoint);
         }
         case ElementTopology::Triangle3:
         {
@@ -96,15 +95,14 @@ std::unique_ptr<SurfaceInterpolation> make_surface_interpolation(
         }
         case ElementTopology::Triangle6:
         {
-            return std::make_unique<Triangle6>(is_reduced
-                                                   ? TriangleQuadrature::Rule::OnePoint
-                                                   : TriangleQuadrature::Rule::ThreePoint);
+            return std::make_unique<Triangle6>(is_reduced ? TriangleQuadrature::Rule::OnePoint
+                                                          : TriangleQuadrature::Rule::ThreePoint);
         }
         case ElementTopology::Quadrilateral8:
         {
-            return std::make_unique<Quadrilateral8>(
-                is_reduced ? QuadrilateralQuadrature::Rule::FourPoint
-                           : QuadrilateralQuadrature::Rule::NinePoint);
+            return std::make_unique<Quadrilateral8>(is_reduced
+                                                        ? QuadrilateralQuadrature::Rule::FourPoint
+                                                        : QuadrilateralQuadrature::Rule::NinePoint);
         }
         default:
             throw std::runtime_error("Surface element shape not implemented for "

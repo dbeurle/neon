@@ -52,9 +52,7 @@ void Quadrilateral4::precompute_shape_functions()
         local_nodal_coordinates(a, 0) = xi_a;
         local_nodal_coordinates(a, 1) = eta_a;
     }
-    compute_extrapolation_matrix(N_matrix,
-                                 local_nodal_coordinates,
-                                 local_quadrature_coordinates);
+    compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
 }
 
 double Quadrilateral4::compute_measure(Matrix const& nodal_coordinates)

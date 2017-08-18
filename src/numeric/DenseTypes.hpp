@@ -27,8 +27,9 @@ using List = std::vector<int>;
 using femValue = std::tuple<Vector, Matrix>;
 
 template <class T>
-typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type is_approx(
-    T const x, T const y, int const ulp = 2)
+typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type is_approx(T const x,
+                                                                                   T const y,
+                                                                                   int const ulp = 2)
 {
     // Taken and modified from
     // http://en.cppreference.com/w/cpp/types/numeric_limits/epsilon

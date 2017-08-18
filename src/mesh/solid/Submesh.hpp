@@ -72,8 +72,7 @@ public:
      * @param rhea Shape function gradients at quadrature point
      * @param configuration Configuration of the element (coordinates)
      */
-    static Matrix3 local_deformation_gradient(Matrix const& rhea,
-                                              Matrix const& configuration)
+    static Matrix3 local_deformation_gradient(Matrix const& rhea, Matrix const& configuration)
     {
         return configuration * rhea;
     }
@@ -90,8 +89,7 @@ public:
     Matrix3 deformation_gradient(Matrix const& rhea, Matrix const& X, Matrix const& x)
     {
         // Deformation gradient in the reference and current configuration
-        return local_deformation_gradient(rhea, x)
-               * local_deformation_gradient(rhea, X).inverse();
+        return local_deformation_gradient(rhea, x) * local_deformation_gradient(rhea, X).inverse();
     }
 
     ValueCount nodal_averaged_variable(InternalVariables::Tensor const tensor_name) const;

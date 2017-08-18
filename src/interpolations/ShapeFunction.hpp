@@ -50,10 +50,9 @@ protected:
 };
 
 template <typename Quadrature>
-void ShapeFunction<Quadrature>::compute_extrapolation_matrix(
-    Matrix const N,
-    Matrix const local_nodal_coordinates,
-    Matrix const local_quadrature_coordinates)
+void ShapeFunction<Quadrature>::compute_extrapolation_matrix(Matrix const N,
+                                                             Matrix const local_nodal_coordinates,
+                                                             Matrix const local_quadrature_coordinates)
 {
     // Take short names for consistency with algorithm
     auto const n = local_nodal_coordinates.rows();

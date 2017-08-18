@@ -30,10 +30,7 @@ void SparseLU::solve(SparseMatrix const& A, Vector& x, Vector const& b)
 
 ConjugateGradient::ConjugateGradient(double tol) { solverParam.tolerance = tol; }
 
-ConjugateGradient::ConjugateGradient(int maxIter)
-{
-    solverParam.max_iterations = maxIter;
-}
+ConjugateGradient::ConjugateGradient(int maxIter) { solverParam.max_iterations = maxIter; }
 
 ConjugateGradient::ConjugateGradient(double tol, int maxIter)
 {
@@ -56,9 +53,8 @@ void ConjugateGradient::solve(SparseMatrix const& A, Vector& x, const Vector& b)
 
     x = pcg.solveWithGuess(b, x);
 
-    std::cout << std::string(6, ' ')
-              << "Conjugate Gradient iterations: " << pcg.iterations() << " (max. "
-              << solverParam.max_iterations << "), estimated error: " << pcg.error()
+    std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << pcg.iterations()
+              << " (max. " << solverParam.max_iterations << "), estimated error: " << pcg.error()
               << " (min. " << solverParam.tolerance << ")\n";
 
     if (pcg.iterations() >= solverParam.max_iterations)
@@ -89,9 +85,9 @@ void BiCGSTAB::solve(const SparseMatrix& A, Vector& x, const Vector& b)
 
     x = bicgstab.solve(b);
 
-    std::cout << std::string(6, ' ')
-              << "Conjugate Gradient iterations: " << bicgstab.iterations() << " (max. "
-              << solverParam.max_iterations << "), estimated error: " << bicgstab.error()
-              << " (min. " << solverParam.tolerance << ")\n";
+    std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << bicgstab.iterations()
+              << " (max. " << solverParam.max_iterations
+              << "), estimated error: " << bicgstab.error() << " (min. " << solverParam.tolerance
+              << ")\n";
 }
 }

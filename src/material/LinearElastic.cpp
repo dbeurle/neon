@@ -20,8 +20,7 @@ LinearElastic::LinearElastic(Json::Value const& material_data) : Material(materi
         K = material_data["BulkModulus"].asDouble();
         G = material_data["ShearModulus"].asDouble();
     }
-    else if (material_data.isMember("ElasticModulus")
-             && material_data.isMember("PoissonsRatio"))
+    else if (material_data.isMember("ElasticModulus") && material_data.isMember("PoissonsRatio"))
     {
         auto const E = material_data["ElasticModulus"].asDouble();
         auto const nu = material_data["PoissonsRatio"].asDouble();

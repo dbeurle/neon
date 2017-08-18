@@ -99,8 +99,6 @@ void Tetrahedron10::precompute_shape_functions()
         local_nodal_coordinates(a, 1) = s;
         local_nodal_coordinates(a, 2) = t;
     }
-    compute_extrapolation_matrix(N_matrix,
-                                 local_nodal_coordinates,
-                                 local_quadrature_coordinates);
+    compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
 }
 }

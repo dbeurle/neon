@@ -12,10 +12,7 @@ femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh,
                                    Visualisation&& visualisation,
                                    Json::Value const& solver_data,
                                    Json::Value const& time_data)
-    : femStaticMatrix(fem_mesh,
-                      std::forward<Visualisation>(visualisation),
-                      solver_data,
-                      time_data),
+    : femStaticMatrix(fem_mesh, std::forward<Visualisation>(visualisation), solver_data, time_data),
       a(Vector::Zero(fem_mesh.active_dofs())),
       v(Vector::Zero(fem_mesh.active_dofs())),
       newmark(time_data)

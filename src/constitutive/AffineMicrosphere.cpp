@@ -14,8 +14,7 @@
 
 namespace neon
 {
-AffineMicrosphere::AffineMicrosphere(InternalVariables& variables,
-                                     Json::Value const& material_data)
+AffineMicrosphere::AffineMicrosphere(InternalVariables& variables, Json::Value const& material_data)
     : Hyperelastic(variables), material(material_data)
 {
     variables.add(InternalVariables::Matrix::TruesdellModuli, 6);
@@ -23,8 +22,7 @@ AffineMicrosphere::AffineMicrosphere(InternalVariables& variables,
     // Deviatoric stress
     variables.add(InternalVariables::Tensor::Kirchhoff);
 
-    variables.add(InternalVariables::Scalar::Chains,
-                  InternalVariables::Scalar::ShearModuli);
+    variables.add(InternalVariables::Scalar::Chains, InternalVariables::Scalar::ShearModuli);
 
     // Shrink these down to the correct size
     variables(InternalVariables::Scalar::Chains).resize(material.groups(), 0.0);
@@ -83,16 +81,14 @@ void AffineMicrosphere::update_internal_variables(double const time_step_size)
     }
 
     // Perform the projection of the stresses
-    cauchy_stress_list = zip(dev_stress_list, detF_list)
-                         | transform([&](auto const& tpl) -> Matrix3 {
+    cauchy_stress_list = zip(dev_stress_list, detF_list) | transform([&](auto const& tpl) -> Matrix3 {
 
-                               auto const & [ cauchy_stress_dev, J ] = tpl;
+                             auto const & [ cauchy_stress_dev, J ] = tpl;
 
-                               auto const pressure = J * volumetric_free_energy_dJ(J, K);
+                             auto const pressure = J * volumetric_free_energy_dJ(J, K);
 
-                               return deviatoric_projection(pressure, cauchy_stress_dev)
-                                      / J;
-                           });
+                             return deviatoric_projection(pressure, cauchy_stress_dev) / J;
+                         });
 
     /*------------------------------------------------------------------------*
      *                     Tangent material computation                       *
@@ -119,8 +115,8 @@ void AffineMicrosphere::update_internal_variables(double const time_step_size)
                                            return compute_material_matrix(unimodular_F, N);
                                        });
 
-        D_list[l] = deviatoric_projection(Ddev, cauchy_stress_dev)
-                    + (kappa + pressure) * IoI - 2.0 * pressure * I;
+        D_list[l] = deviatoric_projection(Ddev, cauchy_stress_dev) + (kappa + pressure) * IoI
+                    - 2.0 * pressure * I;
     }
 }
 
@@ -128,8 +124,7 @@ Matrix3 AffineMicrosphere::deviatoric_projection(double const pressure,
                                                  Matrix3 const& cauchy_stress_dev) const
 {
     Matrix3 P_double_dot_stress_dev;
-    P_double_dot_stress_dev << 2.0 * cauchy_stress_dev(0, 0) / 3.0
-                                   - cauchy_stress_dev(1, 1) / 3.0
+    P_double_dot_stress_dev << 2.0 * cauchy_stress_dev(0, 0) / 3.0 - cauchy_stress_dev(1, 1) / 3.0
                                    - cauchy_stress_dev(2, 2) / 3.0, //
         cauchy_stress_dev(0, 1),                                    //
         cauchy_stress_dev(0, 2),                                    //
@@ -146,48 +141,45 @@ Matrix3 AffineMicrosphere::deviatoric_projection(double const pressure,
     return pressure * Matrix3::Identity() + P_double_dot_stress_dev;
 }
 
-CMatrix AffineMicrosphere::deviatoric_projection(CMatrix const& C_dev,
-                                                 Matrix3 const& stress_dev) const
+CMatrix AffineMicrosphere::deviatoric_projection(CMatrix const& C_dev, Matrix3 const& stress_dev) const
 {
     return (CMatrix(6, 6) << 1.0 / 9.0
-                                 * (4 * C_dev(0, 0) - 4 * C_dev(0, 1) - 4 * C_dev(0, 2)
-                                    + C_dev(1, 1) + 2 * C_dev(1, 2) + C_dev(2, 2)
-                                    + 4 * stress_dev.trace()), //
+                                 * (4 * C_dev(0, 0) - 4 * C_dev(0, 1) - 4 * C_dev(0, 2) + C_dev(1, 1)
+                                    + 2 * C_dev(1, 2) + C_dev(2, 2) + 4 * stress_dev.trace()), //
             1.0 / 9.0
-                * (-2 * C_dev(0, 0) + 5 * C_dev(0, 1) - C_dev(0, 2) - 2 * C_dev(1, 1)
-                   - C_dev(1, 2) + C_dev(2, 2) - 2.0 * stress_dev.trace()), //
-            1.0 / 9.0
-                * (-2 * C_dev(0, 0) - C_dev(0, 1) + 4 * C_dev(0, 2) + C_dev(1, 1)
-                   - C_dev(1, 2) + C_dev(2, 0) - 2 * C_dev(2, 2)
-                   - 2.0 * stress_dev.trace()),                    //
-            2.0 / 3.0 * (C_dev(0, 3) - C_dev(1, 3) - C_dev(2, 3)), //
-            2.0 / 3.0 * (C_dev(0, 4) - C_dev(1, 4) - C_dev(2, 4)), //
-            2.0 / 3.0 * (C_dev(0, 5) - C_dev(1, 5) - C_dev(2, 5)), //
-
-            1.0 / 9.0
-                * (-2 * C_dev(0, 0) + C_dev(0, 1) + C_dev(0, 2) + 4 * C_dev(1, 0)
-                   - 2 * C_dev(1, 1) - 2 * C_dev(1, 2) - 2 * C_dev(2, 0) + C_dev(2, 1)
+                * (-2 * C_dev(0, 0) + 5 * C_dev(0, 1) - C_dev(0, 2) - 2 * C_dev(1, 1) - C_dev(1, 2)
                    + C_dev(2, 2) - 2.0 * stress_dev.trace()), //
             1.0 / 9.0
-                * (C_dev(0, 0) - 2 * C_dev(0, 1) + C_dev(0, 2) - 2 * C_dev(1, 0)
-                   + 4 * C_dev(1, 1) - 2 * C_dev(1, 2) + C_dev(2, 0) - 2 * C_dev(2, 1)
-                   + C_dev(2, 2) + 4 * stress_dev.trace()), //
+                * (-2 * C_dev(0, 0) - C_dev(0, 1) + 4 * C_dev(0, 2) + C_dev(1, 1) - C_dev(1, 2)
+                   + C_dev(2, 0) - 2 * C_dev(2, 2) - 2.0 * stress_dev.trace()), //
+            2.0 / 3.0 * (C_dev(0, 3) - C_dev(1, 3) - C_dev(2, 3)),              //
+            2.0 / 3.0 * (C_dev(0, 4) - C_dev(1, 4) - C_dev(2, 4)),              //
+            2.0 / 3.0 * (C_dev(0, 5) - C_dev(1, 5) - C_dev(2, 5)),              //
+
             1.0 / 9.0
-                * (C_dev(0, 0) + C_dev(0, 1) - 2 * C_dev(0, 2) - 2 * C_dev(1, 0)
-                   - 2 * C_dev(1, 1) + 4 * C_dev(1, 2) + C_dev(2, 0) + C_dev(2, 1)
-                   - 2 * C_dev(2, 2) - 2.0 * stress_dev.trace()),       //
+                * (-2 * C_dev(0, 0) + C_dev(0, 1) + C_dev(0, 2) + 4 * C_dev(1, 0) - 2 * C_dev(1, 1)
+                   - 2 * C_dev(1, 2) - 2 * C_dev(2, 0) + C_dev(2, 1) + C_dev(2, 2)
+                   - 2.0 * stress_dev.trace()), //
+            1.0 / 9.0
+                * (C_dev(0, 0) - 2 * C_dev(0, 1) + C_dev(0, 2) - 2 * C_dev(1, 0) + 4 * C_dev(1, 1)
+                   - 2 * C_dev(1, 2) + C_dev(2, 0) - 2 * C_dev(2, 1) + C_dev(2, 2)
+                   + 4 * stress_dev.trace()), //
+            1.0 / 9.0
+                * (C_dev(0, 0) + C_dev(0, 1) - 2 * C_dev(0, 2) - 2 * C_dev(1, 0) - 2 * C_dev(1, 1)
+                   + 4 * C_dev(1, 2) + C_dev(2, 0) + C_dev(2, 1) - 2 * C_dev(2, 2)
+                   - 2.0 * stress_dev.trace()),                         //
             1.0 / 3.0 * (-C_dev(0, 3) + 2 * C_dev(1, 3) - C_dev(2, 3)), //
             1.0 / 3.0 * (-C_dev(0, 4) + 2 * C_dev(1, 4) - C_dev(2, 4)), //
             1.0 / 3.0 * (-C_dev(0, 5) + 2 * C_dev(1, 5) - C_dev(2, 5)), //
 
             1.0 / 9.0
-                * (-2 * C_dev(0, 0) + C_dev(0, 1) + C_dev(0, 2) - 2 * C_dev(1, 0)
-                   + C_dev(1, 1) + C_dev(1, 2) + 4 * C_dev(2, 0) - 2 * C_dev(2, 1)
-                   - 2 * C_dev(2, 2) - 2.0 * stress_dev.trace()), //
+                * (-2 * C_dev(0, 0) + C_dev(0, 1) + C_dev(0, 2) - 2 * C_dev(1, 0) + C_dev(1, 1)
+                   + C_dev(1, 2) + 4 * C_dev(2, 0) - 2 * C_dev(2, 1) - 2 * C_dev(2, 2)
+                   - 2.0 * stress_dev.trace()), //
             1.0 / 9.0
-                * (C_dev(0, 0) - 2 * C_dev(0, 1) + C_dev(0, 2) + C_dev(1, 0)
-                   - 2 * C_dev(1, 1) + C_dev(1, 2) - 2 * C_dev(2, 0) + 4 * C_dev(2, 1)
-                   - 2 * C_dev(2, 2) - 2.0 * stress_dev.trace()), //
+                * (C_dev(0, 0) - 2 * C_dev(0, 1) + C_dev(0, 2) + C_dev(1, 0) - 2 * C_dev(1, 1)
+                   + C_dev(1, 2) - 2 * C_dev(2, 0) + 4 * C_dev(2, 1) - 2 * C_dev(2, 2)
+                   - 2.0 * stress_dev.trace()), //
             1.0 / 9.0
                 * (C_dev(0, 0) + C_dev(0, 1) - 2 * C_dev(0, 2) + C_dev(1, 0) + C_dev(1, 1)
                    - 2 * C_dev(1, 2) - 2 * C_dev(2, 0) - 2 * C_dev(2, 1) + 4 * C_dev(2, 2)
@@ -219,8 +211,7 @@ CMatrix AffineMicrosphere::deviatoric_projection(CMatrix const& C_dev,
         .finished();
 }
 
-Matrix3 AffineMicrosphere::compute_kirchhoff_stress(Matrix3 const& unimodular_F,
-                                                    double const N) const
+Matrix3 AffineMicrosphere::compute_kirchhoff_stress(Matrix3 const& unimodular_F, double const N) const
 {
     return unit_sphere.integrate(Matrix3::Zero().eval(),
                                  [&](auto const& coordinates, auto const& l) -> Matrix3 {
@@ -232,13 +223,11 @@ Matrix3 AffineMicrosphere::compute_kirchhoff_stress(Matrix3 const& unimodular_F,
                                      // Microstretches
                                      auto const micro_stretch = t.norm();
 
-                                     return pade_first(micro_stretch, N) * t
-                                            * t.transpose();
+                                     return pade_first(micro_stretch, N) * t * t.transpose();
                                  });
 }
 
-CMatrix AffineMicrosphere::compute_material_matrix(Matrix3 const& unimodular_F,
-                                                   double const N) const
+CMatrix AffineMicrosphere::compute_material_matrix(Matrix3 const& unimodular_F, double const N) const
 {
     return unit_sphere.integrate(CMatrix::Zero(6, 6).eval(),
                                  [&](auto const& coordinates, auto const& l) -> CMatrix {

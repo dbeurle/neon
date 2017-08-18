@@ -66,8 +66,7 @@ Visualisation::Visualisation(std::string file_name,
                 && string_to_scalar.find(*field_name) == string_to_scalar.end()
                 && *field_name != "Displacement")
             {
-                throw std::runtime_error("Field name " + *field_name
-                                         + " is not a valid variable\n");
+                throw std::runtime_error("Field name " + *field_name + " is not a valid variable\n");
             }
         }
     }
@@ -96,8 +95,7 @@ void Visualisation::write(int const time_step, double const total_time)
     if (time_step % write_every != 0) return;
 
     std::cout << "\n"
-              << std::string(4, ' ') << "Writing solution to file for step " << time_step
-              << "\n";
+              << std::string(4, ' ') << "Writing solution to file for step " << time_step << "\n";
 
     auto const vtk_filename = file_name + "_" + std::to_string(time_step) + ".vtu";
 
@@ -116,8 +114,7 @@ void Visualisation::write(int const time_step, double const total_time)
         }
         else if (field == "Displacement")
         {
-            unstructured_mesh->GetPointData()->AddArray(
-                fem_mesh.coordinates().vtk_displacement());
+            unstructured_mesh->GetPointData()->AddArray(fem_mesh.coordinates().vtk_displacement());
         }
         else
         {
@@ -134,19 +131,18 @@ void Visualisation::write(int const time_step, double const total_time)
 
     unstructured_mesh_writer->Write();
 
-    pvd_file << std::string(4, ' ') << "<DataSet timestep = \""
-             << std::to_string(total_time) << "\" file = \"" << file_name << "_"
-             << std::to_string(time_step) << ".vtu\" />\n";
+    pvd_file << std::string(4, ' ') << "<DataSet timestep = \"" << std::to_string(total_time)
+             << "\" file = \"" << file_name << "_" << std::to_string(time_step) << ".vtu\" />\n";
 }
 
 void Visualisation::allocate_field_maps()
 {
-    string_to_tensor =
-        {{"CauchyStress", InternalVariables::Tensor::Cauchy},
-         {"LinearisedStrain", InternalVariables::Tensor::LinearisedStrain},
-         {"LinearisedPlasticStrain", InternalVariables::Tensor::LinearisedPlasticStrain},
-         {"DeformationGradient", InternalVariables::Tensor::DeformationGradient},
-         {"DisplacementGradient", InternalVariables::Tensor::DisplacementGradient}};
+    string_to_tensor = {{"CauchyStress", InternalVariables::Tensor::Cauchy},
+                        {"LinearisedStrain", InternalVariables::Tensor::LinearisedStrain},
+                        {"LinearisedPlasticStrain",
+                         InternalVariables::Tensor::LinearisedPlasticStrain},
+                        {"DeformationGradient", InternalVariables::Tensor::DeformationGradient},
+                        {"DisplacementGradient", InternalVariables::Tensor::DisplacementGradient}};
 
     string_to_scalar = {{"AccumulatedPlasticStrain",
                          InternalVariables::Scalar::EffectivePlasticStrain},
@@ -170,8 +166,7 @@ void Visualisation::allocate_static_mesh()
             {
                 vtk_node_list->InsertNextId(static_cast<long>(node));
             }
-            unstructured_mesh->InsertNextCell(adapter.to_vtk(submesh.topology()),
-                                              vtk_node_list);
+            unstructured_mesh->InsertNextCell(adapter.to_vtk(submesh.topology()), vtk_node_list);
         }
     }
     unstructured_mesh->GetPointData()->AddArray(fem_mesh.coordinates().vtk_displacement());

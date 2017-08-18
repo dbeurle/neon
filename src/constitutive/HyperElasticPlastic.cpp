@@ -9,8 +9,7 @@
 
 namespace neon
 {
-FiniteJ2Plasticity::FiniteJ2Plasticity(InternalVariables& variables,
-                                       Json::Value const& material_data)
+FiniteJ2Plasticity::FiniteJ2Plasticity(InternalVariables& variables, Json::Value const& material_data)
     : HyperElasticPlastic(variables), material(material_data), C_e(elastic_moduli())
 {
     variables.add(InternalVariables::Tensor::LinearisedStrain,
@@ -55,9 +54,9 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
     // Perform the update algorithm for each quadrature point
     for (auto l = 0; l < strain_list.size(); l++)
     {
-        auto const& strain = strain_list[l];         // Total strain
-        auto& strain_p = strain_p_list[l];           // Plastic strain
-        auto& cauchy_stress = cauchy_stress_list[l]; // Cauchy stress
+        auto const& strain = strain_list[l];                                   // Total strain
+        auto& strain_p = strain_p_list[l];                                     // Plastic strain
+        auto& cauchy_stress = cauchy_stress_list[l];                           // Cauchy stress
         auto& accumulated_plastic_strain = accumulated_plastic_strain_list[l]; // Effective
                                                                                // plastic
                                                                                // strain
@@ -90,8 +89,7 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
 
         // Compute the normal direction to the yield surface which remains
         // constant throughout the radial return method
-        Matrix3 const normal = deviatoric(cauchy_stress_0)
-                               / deviatoric(cauchy_stress_0).norm();
+        Matrix3 const normal = deviatoric(cauchy_stress_0) / deviatoric(cauchy_stress_0).norm();
 
         // Initialize the plastic increment
         auto plastic_increment = 0.0;
@@ -121,8 +119,7 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
         strain_p += plastic_increment * std::sqrt(3.0 / 2.0) * normal;
 
         // Cauchy stress update
-        cauchy_stress -= 2.0 * shear_modulus * plastic_increment * std::sqrt(3.0 / 2.0)
-                         * normal;
+        cauchy_stress -= 2.0 * shear_modulus * plastic_increment * std::sqrt(3.0 / 2.0) * normal;
 
         // Update the Von Mises stress
         von_mises = von_mises_stress(cauchy_stress);
@@ -133,8 +130,7 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
         if (iterations == max_iterations)
         {
             std::cout << "MAXIMUM NUMBER OF ITERATIONS IN RADIAL RETURN REACHED\n";
-            std::cout << "Accumulated plastic strain " << accumulated_plastic_strain
-                      << "\n";
+            std::cout << "Accumulated plastic strain " << accumulated_plastic_strain << "\n";
             std::cout << "Yield function after mapping " << f << "\n";
             std::cout << "Current yield stress "
                       << material.yield_stress(accumulated_plastic_strain) << "\n";

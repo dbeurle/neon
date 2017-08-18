@@ -82,8 +82,7 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
 
         // Compute the normal direction to the yield surface which remains
         // constant throughout the radial return method
-        Matrix3 const normal = deviatoric(cauchy_stress_0)
-                               / deviatoric(cauchy_stress_0).norm();
+        Matrix3 const normal = deviatoric(cauchy_stress_0) / deviatoric(cauchy_stress_0).norm();
 
         auto plastic_increment = 0.0;
 
@@ -91,8 +90,7 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
         int iterations = 0, max_iterations = 50;
         while (f > 1.0e-10 && iterations < max_iterations)
         {
-            auto const H = material.hardening_modulus(accumulated_plastic_strain
-                                                      + plastic_increment);
+            auto const H = material.hardening_modulus(accumulated_plastic_strain + plastic_increment);
 
             const auto plastic_increment_delta = f / (3.0 * shear_modulus + H);
 
@@ -107,8 +105,7 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
         // Return mapping algorithm
         strain_p += plastic_increment * std::sqrt(3.0 / 2.0) * normal;
 
-        cauchy_stress -= 2.0 * shear_modulus * plastic_increment * std::sqrt(3.0 / 2.0)
-                         * normal;
+        cauchy_stress -= 2.0 * shear_modulus * plastic_increment * std::sqrt(3.0 / 2.0) * normal;
 
         von_mises = von_mises_stress(cauchy_stress);
 
@@ -117,8 +114,7 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
         if (iterations == max_iterations)
         {
             std::cout << "MAXIMUM NUMBER OF ITERATIONS IN RADIAL RETURN REACHED\n";
-            std::cout << "Accumulated plastic strain " << accumulated_plastic_strain
-                      << "\n";
+            std::cout << "Accumulated plastic strain " << accumulated_plastic_strain << "\n";
             std::cout << "Yield function after mapping " << f << "\n";
             std::cout << "Current yield stress "
                       << material.yield_stress(accumulated_plastic_strain) << "\n";
@@ -161,8 +157,7 @@ CMatrix J2Plasticity::deviatoric_projection() const
     return C;
 }
 
-CMatrix J2Plasticity::incremental_tangent(double const plastic_increment,
-                                          double const von_mises) const
+CMatrix J2Plasticity::incremental_tangent(double const plastic_increment, double const von_mises) const
 {
     auto const G = material.shear_modulus();
     return C_e - plastic_increment * 6.0 * std::pow(G, 2) / von_mises * I_dev;
@@ -177,7 +172,7 @@ CMatrix J2Plasticity::algorithmic_tangent(double const plastic_increment,
     auto const H = material.hardening_modulus(accumulated_plastic_strain);
 
     return C_e - plastic_increment * 6.0 * std::pow(G, 2) / von_mises * I_dev
-           + 6.0 * std::pow(G, 2) * (plastic_increment / von_mises - 1.0 / (3.0 * G + H))
-                 * voigt(n) * voigt(n).transpose();
+           + 6.0 * std::pow(G, 2) * (plastic_increment / von_mises - 1.0 / (3.0 * G + H)) * voigt(n)
+                 * voigt(n).transpose();
 }
 }

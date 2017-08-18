@@ -107,8 +107,7 @@ void femStaticMatrix::compute_external_force(double const load_factor)
             {
                 for (auto element = 0; element < mesh.elements(); ++element)
                 {
-                    auto const &
-                        [ dofs, fe_ext ] = mesh.external_force(element, load_factor);
+                    auto const & [ dofs, fe_ext ] = mesh.external_force(element, load_factor);
 
                     for (auto a = 0; a < fe_ext.size(); ++a)
                     {
@@ -120,15 +119,15 @@ void femStaticMatrix::compute_external_force(double const load_factor)
     }
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
-    std::cout << std::string(6, ' ') << "External forces assembly took "
-              << elapsed_seconds.count() << "s\n";
+    std::cout << std::string(6, ' ') << "External forces assembly took " << elapsed_seconds.count()
+              << "s\n";
 }
 
 void femStaticMatrix::solve()
 {
     // Perform Newton-Raphson iterations
-    std::cout << std::string(4, ' ') << "Non-linear equation system has "
-              << fem_mesh.active_dofs() << " degrees of freedom\n";
+    std::cout << std::string(4, ' ') << "Non-linear equation system has " << fem_mesh.active_dofs()
+              << " degrees of freedom\n";
 
     while (!adaptive_load.is_fully_applied())
     {
@@ -263,8 +262,8 @@ void femStaticMatrix::perform_equilibrium_iterations()
             auto start = std::chrono::high_resolution_clock::now();
 
             std::cout << std::string(4, ' ') << termcolor::blue << termcolor::bold
-                      << "Newton-Raphson iteration " << current_iteration
-                      << termcolor::reset << std::endl;
+                      << "Newton-Raphson iteration " << current_iteration << termcolor::reset
+                      << std::endl;
 
             compute_internal_force();
 
@@ -307,7 +306,7 @@ void femStaticMatrix::perform_equilibrium_iterations()
     catch (computational_error& comp_error)
     {
         std::cout << std::endl
-                  << termcolor::bold << termcolor::yellow << std::string(6, ' ')
+                  << std::string(6, ' ') << termcolor::bold << termcolor::yellow
                   << comp_error.what() << termcolor::reset << std::endl;
 
         adaptive_load.update_convergence_state(false);
@@ -342,7 +341,7 @@ void femStaticMatrix::print_convergence_progress(double const delta_d_norm,
     {
         std::cout << termcolor::yellow;
     }
-    std::cout << termcolor::bold << "Residual force norm " << residual_norm
-              << termcolor::reset << "\n";
+    std::cout << termcolor::bold << "Residual force norm " << residual_norm << termcolor::reset
+              << "\n";
 }
 }

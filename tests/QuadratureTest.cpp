@@ -391,14 +391,13 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
                     REQUIRE(Jacobian.determinant() == Approx(1.0));
 
                 });
-                double vol = tet10.quadrature()
-                                 .integrate(0.0, [&](auto const& femval, auto const& l) {
-                                     auto const & [ N, rhea ] = femval;
+                double vol = tet10.quadrature().integrate(0.0, [&](auto const& femval, auto const& l) {
+                    auto const & [ N, rhea ] = femval;
 
-                                     Matrix3 const Jacobian = x * rhea;
+                    Matrix3 const Jacobian = x * rhea;
 
-                                     return Jacobian.determinant();
-                                 });
+                    return Jacobian.determinant();
+                });
                 REQUIRE(vol == Approx(1.0 / 6.0));
             }
             SECTION("Four point")
@@ -415,14 +414,13 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
 
                 });
 
-                double vol = tet10.quadrature()
-                                 .integrate(0.0, [&](auto const& femval, auto const& l) {
-                                     auto const & [ N, rhea ] = femval;
+                double vol = tet10.quadrature().integrate(0.0, [&](auto const& femval, auto const& l) {
+                    auto const & [ N, rhea ] = femval;
 
-                                     Matrix3 const Jacobian = x * rhea;
+                    Matrix3 const Jacobian = x * rhea;
 
-                                     return Jacobian.determinant();
-                                 });
+                    return Jacobian.determinant();
+                });
                 REQUIRE(vol == Approx(1.0 / 6.0));
             }
             SECTION("Five point")
@@ -439,14 +437,13 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
 
                 });
 
-                double vol = tet10.quadrature()
-                                 .integrate(0.0, [&](auto const& femval, auto const& l) {
-                                     auto const & [ N, rhea ] = femval;
+                double vol = tet10.quadrature().integrate(0.0, [&](auto const& femval, auto const& l) {
+                    auto const & [ N, rhea ] = femval;
 
-                                     Matrix3 const Jacobian = x * rhea;
+                    Matrix3 const Jacobian = x * rhea;
 
-                                     return Jacobian.determinant();
-                                 });
+                    return Jacobian.determinant();
+                });
                 REQUIRE(vol == Approx(1.0 / 6.0));
             }
         }
@@ -474,14 +471,14 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
 
             x.transposeInPlace();
 
-            double const vol = tet10.quadrature()
-                                   .integrate(0.0, [&](auto const& femval, auto const& l) {
-                                       auto const & [ N, dN ] = femval;
+            double const vol = tet10.quadrature().integrate(0.0,
+                                                            [&](auto const& femval, auto const& l) {
+                                                                auto const & [ N, dN ] = femval;
 
-                                       Matrix3 const Jacobian = x * dN;
+                                                                Matrix3 const Jacobian = x * dN;
 
-                                       return Jacobian.determinant();
-                                   });
+                                                                return Jacobian.determinant();
+                                                            });
 
             REQUIRE(vol == Approx(1.0 / (6.0 * std::sqrt(2.0))));
         }
