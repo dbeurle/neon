@@ -113,19 +113,19 @@ void AdaptiveLoadStep::parse_input(Json::Value const& increment_data)
 
 void AdaptiveLoadStep::check_increment_data(Json::Value const& increment_data)
 {
-    if (increment_data["Period"].empty())
+    if (!increment_data.isMember("Period"))
         throw std::runtime_error("Time data requires a \"Period\" value\n");
 
-    if (increment_data["Increments"].empty())
+    if (!increment_data.isMember("Increments"))
         throw std::runtime_error("\"Increments\" not provided!\n");
 
-    if (increment_data["Increments"]["Initial"].empty())
+    if (!increment_data["Increments"].isMember("Initial"))
         throw std::runtime_error("Increment-Initial data not provided!\n");
 
-    if (increment_data["Increments"]["Minimum"].empty())
+    if (!increment_data["Increments"].isMember("Minimum"))
         throw std::runtime_error("Increment-Minimum data not provided!\n");
 
-    if (increment_data["Increments"]["Maximum"].empty())
+    if (!increment_data["Increments"].isMember("Maximum"))
         throw std::runtime_error("Increment-Maximum data not provided!\n");
 }
 }
