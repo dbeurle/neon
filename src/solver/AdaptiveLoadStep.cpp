@@ -59,12 +59,13 @@ void AdaptiveLoadStep::update_convergence_state(bool is_converged)
         if (current_time > final_time)
         {
             throw std::runtime_error("Minimum increment is not small enough to resolve "
-                                     "the step\n");
+                                     "the time step\n");
         }
-
-        if (current_time < total_time)
+        if (current_time < 0.0)
+        {
             throw std::runtime_error("Step has reduced below the final time for the "
                                      "last load case\n");
+        }
 
         std::cout << "\n"
                   << std::string(terminal_indent, ' ') << termcolor::yellow
