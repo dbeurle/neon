@@ -29,7 +29,7 @@ NodalCoordinates::NodalCoordinates(Json::Value const& mesh_file)
     }
 }
 
-Vector NodalCoordinates::operator[](List const& local_node_list) const
+Vector NodalCoordinates::coordinates(List const& local_node_list) const
 {
     Vector local_coordinates(local_node_list.size() * 3);
 

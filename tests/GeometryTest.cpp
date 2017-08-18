@@ -88,10 +88,10 @@ TEST_CASE("Basic mesh test")
 
     SECTION("Test corner vertices")
     {
-        REQUIRE((nodal_coordinates[{0}] - Vector3(0.0, 0.0, 0.0)).norm() == Approx(0.0));
-        REQUIRE((nodal_coordinates[{1}] - Vector3(1.0, 0.0, 0.0)).norm() == Approx(0.0));
-        REQUIRE((nodal_coordinates[{2}] - Vector3(0.0, 1.0, 0.0)).norm() == Approx(0.0));
-        REQUIRE((nodal_coordinates[{3}] - Vector3(1.0, 1.0, 0.0)).norm() == Approx(0.0));
+        REQUIRE((nodal_coordinates.coordinates({0}) - Vector3(0.0, 0.0, 0.0)).norm() == Approx(0.0));
+        REQUIRE((nodal_coordinates.coordinates({1}) - Vector3(1.0, 0.0, 0.0)).norm() == Approx(0.0));
+        REQUIRE((nodal_coordinates.coordinates({2}) - Vector3(0.0, 1.0, 0.0)).norm() == Approx(0.0));
+        REQUIRE((nodal_coordinates.coordinates({3}) - Vector3(1.0, 1.0, 0.0)).norm() == Approx(0.0));
     }
     SECTION("Test mesh data for boundary and volume elements")
     {

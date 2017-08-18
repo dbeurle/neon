@@ -24,7 +24,7 @@ public:
     Vector const& coordinates() const { return X; }
 
     /** @return the coordinates using fancy indexing */
-    Vector operator[](List const& local_node_list) const;
+    Vector coordinates(List const& local_node_list) const;
 
 protected:
     Vector X; //!< Reference configuration encoded as (x1, y1, z1, x2, y2, z2)
