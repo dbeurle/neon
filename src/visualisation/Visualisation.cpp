@@ -181,6 +181,11 @@ void Visualisation::write_tensor_field(std::string const& pretty_name,
     // Add internal variables
     for (auto const& submesh : fem_mesh.meshes())
     {
+        if (!submesh.internal_variables().has(tensor_enum))
+        {
+            throw std::runtime_error("Internal variable " + pretty_name + " does not exist");
+        }
+
         auto const[value, count] = submesh.nodal_averaged_variable(tensor_enum);
         nodal_averaged_value += value;
         running_count += count;
