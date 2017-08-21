@@ -35,8 +35,7 @@ public:
         // Deformation measures
         LinearisedStrain,
         LinearisedPlasticStrain, // Small strain
-        RateOfDeformation,
-        RateOfDeformationPlastic,
+        HenckyStrainElastic,
         DeformationGradient,
         DeformationGradientPlastic,
         DisplacementGradient,

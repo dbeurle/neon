@@ -1,25 +1,29 @@
 
 #include "HyperElasticPlastic.hpp"
 
+#include "Exceptions.hpp"
 #include "InternalVariables.hpp"
 
 #include <iostream>
 #include <json/value.h>
 #include <range/v3/view.hpp>
+#include <unsupported/Eigen/MatrixFunctions>
 
 namespace neon
 {
 FiniteJ2Plasticity::FiniteJ2Plasticity(InternalVariables& variables, Json::Value const& material_data)
     : HyperElasticPlastic(variables), material(material_data), C_e(elastic_moduli())
 {
-    variables.add(InternalVariables::Tensor::LinearisedStrain,
-                  InternalVariables::Tensor::LinearisedPlasticStrain);
-
     variables.add(InternalVariables::Scalar::VonMisesStress,
                   InternalVariables::Scalar::EffectivePlasticStrain);
 
+    variables.add(InternalVariables::Tensor::HenckyStrainElastic,
+                  InternalVariables::Tensor::DeformationGradientPlastic);
+
     // Add material tangent with the linear elasticity moduli
     variables.add(InternalVariables::Matrix::TruesdellModuli, elastic_moduli());
+
+    std::cout << "Constructed finite strain J2 plasticity model\n";
 }
 
 FiniteJ2Plasticity::~FiniteJ2Plasticity() = default;
@@ -32,11 +36,20 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
     auto const lambda_e = material.lambda();
 
     // Extract the internal variables
-    auto[strain_p_list,
-         strain_list,
-         cauchy_stress_list] = variables(InternalVariables::Tensor::LinearisedPlasticStrain,
-                                         InternalVariables::Tensor::LinearisedStrain,
-                                         InternalVariables::Tensor::Cauchy);
+    auto[F_list, strain_e_list, cauchy_stress_list] = variables(InternalVariables::Tensor::DeformationGradient,
+                                                                InternalVariables::Tensor::HenckyStrainElastic,
+                                                                InternalVariables::Tensor::Cauchy);
+
+    auto const F_old_list = variables[InternalVariables::Tensor::DeformationGradient];
+
+    auto const F_inc_list = view::zip(F_list, F_old_list) | view::transform([](auto const& tpl) {
+                                auto const & [ F, F_old ] = tpl;
+                                // std::cout << "F_n+1\n"
+                                //           << F << "\n\nF_n\n"
+                                //           << F_old << "\n\ndF\n"
+                                //           << F * F_old.inverse() << "\n";
+                                return F * F_old.inverse();
+                            });
 
     // Retrieve the accumulated internal variables
     auto[accumulated_plastic_strain_list,
@@ -45,35 +58,39 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
 
     auto& C_list = variables(InternalVariables::Matrix::TruesdellModuli);
 
-    // Compute the linear strain gradient from the displacement gradient
-    strain_list = variables(InternalVariables::Tensor::DisplacementGradient)
-                  | view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
-
-    Matrix3 const I = Matrix3::Identity();
-
     // Perform the update algorithm for each quadrature point
-    for (auto l = 0; l < strain_list.size(); l++)
+    for (auto l = 0; l < F_list.size(); l++)
     {
-        auto const& strain = strain_list[l];                                   // Total strain
-        auto& strain_p = strain_p_list[l];                                     // Plastic strain
-        auto& cauchy_stress = cauchy_stress_list[l];                           // Cauchy stress
-        auto& accumulated_plastic_strain = accumulated_plastic_strain_list[l]; // Effective
-                                                                               // plastic
-                                                                               // strain
-        auto& von_mises = von_mises_list[l];
+        auto const& F_inc = F_inc_list[l];
 
-        if (accumulated_plastic_strain > 0.3)
-        {
-            throw std::runtime_error("Excessive plastic strain at quadrature point "
-                                     + std::to_string(l) + "\n");
-        }
+        auto& cauchy_stress = cauchy_stress_list[l];
+        auto& accumulated_plastic_strain = accumulated_plastic_strain_list[l];
+        auto& von_mises = von_mises_list[l];
+        auto& strain_e = strain_e_list[l];
+
+        // Elastic trial deformation gradient
+        Matrix3 const B_e = (2.0 * strain_e).exp();
+
+        if (l == 1) std::cout << "Elastic left Cauchy-Green\n" << B_e << std::endl;
+
+        // Elastic trial left Cauchy-Green deformation tensor
+        Matrix3 const B_e_trial = F_inc * B_e * F_inc.transpose();
+
+        // Trial Logarithmic elastic strain
+        strain_e = 1.0 / 2.0 * B_e_trial.log();
+
+        if (l == 1) std::cout << "Logarithmic trial strain\n" << strain_e << std::endl;
 
         // Elastic stress predictor
-        Matrix3 const cauchy_stress_0 = lambda_e * (strain - strain_p).trace() * I
-                                        + 2.0 * shear_modulus * (strain - strain_p);
+        Matrix3 const cauchy_stress_0 = lambda_e * strain_e.trace() * Matrix3::Identity()
+                                        + 2.0 * shear_modulus * strain_e;
+
+        if (l == 1) std::cout << "Trial stress\n" << cauchy_stress_0 << std::endl;
 
         // Compute the von Mises stress
         von_mises = von_mises_stress(cauchy_stress_0);
+
+        if (l == 1) std::cout << "Von Mises = " << von_mises / 1.0e6 << std::endl;
 
         cauchy_stress = cauchy_stress_0;
 
@@ -87,6 +104,8 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
             continue;
         }
 
+        if (l == 1) std::cout << "\nQUADRATURE POINT PLASTIC\n";
+
         // Compute the normal direction to the yield surface which remains
         // constant throughout the radial return method
         Matrix3 const normal = deviatoric(cauchy_stress_0) / deviatoric(cauchy_stress_0).norm();
@@ -96,14 +115,12 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
 
         // Perform the return mapping algorithm
         int iterations = 0, max_iterations = 25;
-        while (f > 1.0e-4 && iterations < max_iterations)
+        while (f > 1.0e-10 && iterations < max_iterations)
         {
+            auto const H = material.hardening_modulus(accumulated_plastic_strain + plastic_increment);
+
             // Increment in plasticity rate
-            const auto plastic_increment_delta = f
-                                                 / (3.0 * shear_modulus
-                                                    + material.hardening_modulus(
-                                                          accumulated_plastic_strain
-                                                          + plastic_increment));
+            const auto plastic_increment_delta = f / (3.0 * shear_modulus + H);
 
             // Plastic rate update
             plastic_increment += plastic_increment_delta;
@@ -116,15 +133,18 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
         }
 
         // Plastic strain update
-        strain_p += plastic_increment * std::sqrt(3.0 / 2.0) * normal;
+        // F_p = (plastic_increment * std::sqrt(3.0 / 2.0) * normal);
 
-        // Cauchy stress update
+        if (l == 1) std::cout << ">>>Elastic strain before dec\n" << strain_e << std::endl;
+
+        strain_e -= plastic_increment * std::sqrt(3.0 / 2.0) * normal;
+
+        if (l == 1) std::cout << ">>>Elastic strain after dec\n" << strain_e << std::endl;
+
         cauchy_stress -= 2.0 * shear_modulus * plastic_increment * std::sqrt(3.0 / 2.0) * normal;
 
-        // Update the Von Mises stress
         von_mises = von_mises_stress(cauchy_stress);
 
-        // Accumulated plastic strain update
         accumulated_plastic_strain += plastic_increment;
 
         if (iterations == max_iterations)
@@ -137,8 +157,8 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
             std::cout << "Von Mises stress " << von_mises_stress(cauchy_stress) << "\n"
                       << "\n";
 
-            throw std::runtime_error("Radial return failure at global integration point "
-                                     + std::to_string(l) + "\n");
+            throw computational_error("Radial return failure at global integration point "
+                                      + std::to_string(l) + "\n");
         }
         // Compute the elastic-plastic tangent modulus
         C_list[l] = algorithmic_tangent(plastic_increment,
@@ -171,13 +191,6 @@ CMatrix FiniteJ2Plasticity::deviatoric_projection() const
         0.0, 0.0, 0.0, 0.0, 0.5, 0.0,                      //
         0.0, 0.0, 0.0, 0.0, 0.0, 0.5;
     return C;
-}
-
-CMatrix FiniteJ2Plasticity::incremental_tangent(double const plastic_increment,
-                                                double const von_mises) const
-{
-    auto const G = material.shear_modulus();
-    return C_e - plastic_increment * 6.0 * G * G / von_mises * I_dev;
 }
 
 CMatrix FiniteJ2Plasticity::algorithmic_tangent(double const plastic_increment,
