@@ -58,12 +58,13 @@ void AdaptiveLoadStep::update_convergence_state(bool is_converged)
         if (current_time > final_time)
         {
             throw std::runtime_error("Minimum increment is not small enough to resolve "
-                                     "the step\n");
+                                     "the time step\n");
         }
-
-        if (current_time < total_time)
+        if (current_time < 0.0)
+        {
             throw std::runtime_error("Step has reduced below the final time for the "
                                      "last load case\n");
+        }
 
         std::cout << "\n"
                   << std::string(terminal_indent, ' ') << termcolor::yellow << termcolor::bold
@@ -111,19 +112,19 @@ void AdaptiveLoadStep::parse_input(Json::Value const& increment_data)
 
 void AdaptiveLoadStep::check_increment_data(Json::Value const& increment_data)
 {
-    if (increment_data["Period"].empty())
+    if (!increment_data.isMember("Period"))
         throw std::runtime_error("Time data requires a \"Period\" value\n");
 
-    if (increment_data["Increments"].empty())
+    if (!increment_data.isMember("Increments"))
         throw std::runtime_error("\"Increments\" not provided!\n");
 
-    if (increment_data["Increments"]["Initial"].empty())
+    if (!increment_data["Increments"].isMember("Initial"))
         throw std::runtime_error("Increment-Initial data not provided!\n");
 
-    if (increment_data["Increments"]["Minimum"].empty())
+    if (!increment_data["Increments"].isMember("Minimum"))
         throw std::runtime_error("Increment-Minimum data not provided!\n");
 
-    if (increment_data["Increments"]["Maximum"].empty())
+    if (!increment_data["Increments"].isMember("Maximum"))
         throw std::runtime_error("Increment-Maximum data not provided!\n");
 }
 }
