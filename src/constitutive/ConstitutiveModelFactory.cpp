@@ -10,15 +10,13 @@
 #include <json/value.h>
 #include <stdexcept>
 
-namespace neon
-{
-namespace solid
+namespace neon::solid
 {
 std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& variables,
                                                            Json::Value const& material_data,
                                                            Json::Value const& simulation_data)
 {
-    if (simulation_data["ConstitutiveModel"].empty())
+    if (!simulation_data.isMember("ConstitutiveModel"))
     {
         throw std::runtime_error("Missing \"ConstitutiveModel\" in \"Mesh\"");
     }
@@ -41,12 +39,23 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& va
     {
         return std::make_unique<FiniteJ2Plasticity>(variables, material_data);
     }
-
     throw std::runtime_error("The model name " + model_name + " is not recognised\n"
                              + "Supported models are \"NeoHooke\", \"AffineMicrosphere\" "
                                "and \"J2\"\n");
-
     return nullptr;
 }
+}
+
+namespace neon::diffusion
+{
+std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& variables,
+                                                           Json::Value const& material_data,
+                                                           Json::Value const& simulation_data)
+{
+    if (!simulation_data.isMember("ConstitutiveModel"))
+    {
+        throw std::runtime_error("Missing \"ConstitutiveModel\" in \"Mesh\"");
+    }
+    return nullptr;
 }
 }

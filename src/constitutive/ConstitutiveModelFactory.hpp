@@ -16,4 +16,10 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& va
                                                            Json::Value const& material_data,
                                                            Json::Value const& simulation_data);
 }
+namespace diffusion
+{
+std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& variables,
+                                                           Json::Value const& material_data,
+                                                           Json::Value const& simulation_data);
+}
 }
