@@ -16,27 +16,34 @@ public:
 
     ~J2Plasticity();
 
-    void update_internal_variables(double const time_step_size) override final;
+    void update_internal_variables(double const time_step_size) override;
 
-    Material const& intrinsic_material() const override final { return material; }
+    Material const& intrinsic_material() const override { return material; }
 
-    virtual bool is_finite_deformation() const override final { return false; };
+    virtual bool is_finite_deformation() const override { return false; };
 
 protected:
+    Matrix3 compute_cauchy_stress(Matrix3 const& elastic_strain) const;
+
     CMatrix elastic_moduli() const;
 
     CMatrix deviatoric_projection() const;
-
-    CMatrix incremental_tangent(double const plastic_increment, double const von_mises) const;
 
     CMatrix algorithmic_tangent(double const plastic_increment,
                                 double const accumulated_plastic_strain,
                                 double const von_mises,
                                 Matrix3 const& n) const;
 
-private:
+protected:
     IsotropicElasticPlastic material;
     CMatrix const C_e = elastic_moduli();
     CMatrix const I_dev = deviatoric_projection();
 };
+
+inline Matrix3 J2Plasticity::compute_cauchy_stress(Matrix3 const& elastic_strain) const
+{
+    auto const G = material.shear_modulus();
+    auto const lambda_e = material.lambda();
+    return lambda_e * elastic_strain.trace() * Matrix3::Identity() + 2.0 * G * elastic_strain;
+}
 }

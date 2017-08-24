@@ -61,8 +61,7 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
         auto& von_mises = von_mises_list[l];
 
         // Elastic stress predictor
-        Matrix3 const cauchy_stress_0 = lambda_e * (strain - strain_p).trace() * I
-                                        + 2.0 * shear_modulus * (strain - strain_p);
+        Matrix3 const cauchy_stress_0 = compute_cauchy_stress(strain - strain_p);
 
         von_mises = von_mises_stress(cauchy_stress_0);
 
@@ -101,7 +100,6 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
 
             iterations++;
         }
-
         // Return mapping algorithm
         strain_p += plastic_increment * std::sqrt(3.0 / 2.0) * normal;
 
@@ -155,12 +153,6 @@ CMatrix J2Plasticity::deviatoric_projection() const
         0.0, 0.0, 0.0, 0.0, 0.5, 0.0,                      //
         0.0, 0.0, 0.0, 0.0, 0.0, 0.5;
     return C;
-}
-
-CMatrix J2Plasticity::incremental_tangent(double const plastic_increment, double const von_mises) const
-{
-    auto const G = material.shear_modulus();
-    return C_e - plastic_increment * 6.0 * std::pow(G, 2) / von_mises * I_dev;
 }
 
 CMatrix J2Plasticity::algorithmic_tangent(double const plastic_increment,

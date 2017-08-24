@@ -1,12 +1,11 @@
 
 #include "ConstitutiveModelFactory.hpp"
 
-#include "AffineMicrosphere.hpp"
-#include "HyperElasticPlastic.hpp"
 #include "J2Plasticity.hpp"
-#include "NeoHooke.hpp"
 
-#include "InternalVariables.hpp"
+#include "AffineMicrosphere.hpp"
+#include "FiniteJ2Plasticity.hpp"
+#include "NeoHooke.hpp"
 
 #include <json/value.h>
 #include <stdexcept>
