@@ -202,56 +202,54 @@ std::tuple<Vector3, std::array<Matrix3, 3>, int> FiniteJ2Plasticity::compute_eig
         E[2] = Matrix3::Identity() - E[1];
     }
     return {x, E, unique_eigenvalues};
-
-    // auto const I1 = X.trace();
-    // auto const I2 = 0.5 * (std::pow(X.trace(), 2) - (X * X).trace());
-    // auto const I3 = X.determinant();
-    //
-    // auto const R = (-2.0 * I1 + 9.0 * I1 * I2 - 27.0 * I3) / 54.0;
-    // auto const Q = (std::pow(I1, 2) - 3.0 * I2) / 9.0;
-    //
-    // auto const theta = std::acos(R / std::sqrt(std::pow(Q, 3)));
-    //
-    // Vector3 x(-2.0 * std::sqrt(Q) * std::cos(theta / 3.0) + I1 / 3.0,
-    //           -2.0 * std::sqrt(Q) * std::cos((theta + 2.0 * M_PI) / 3.0) + I1 / 3.0,
-    //           -2.0 * std::sqrt(Q) * std::cos((theta - 2.0 * M_PI) / 3.0) + I1 / 3.0);
-    //
-    // std::array<Matrix3, 3> E;
-    // int repeated_eigenvalues = 0;
-    //
-    // // Perform checks to determine if there are repeated eigenvalues
-    // if (!is_approx(x1, x2) && !is_approx(x2, x3) && !is_approx(x1, x3))
-    // {
-    //     for (int i = 0; i < 3; i++)
-    //     {
-    //         E[i] = x(i) / (2.0 * std::pow(x(i), 3) - I1 * std::pow(x(i), 2) + I3)
-    //                * (X * X - (I1 - x(i)) * X + I3 / x(i) * Matrix3::Identity());
-    //     }
-    // }
-    // else if (!is_approx(x1, x2) && is_approx(x2, x3))
-    // {
-    //     repeated_eigenvalue = 1;
-    // }
-    // else
-    // {
-    //     E[0] = Matrix3::Identity();
-    //     repeated_eigenvalue = 2;
-    // }
 }
 
 CMatrix FiniteJ2Plasticity::derivative_tensor_log(Matrix3 const& Be_trial) const
 {
     auto const[e, E_list, unique_eigenvalues] = compute_eigenvalues_eigenprojections(Be_trial);
 
-    CMatrix L = CMatrix::Zero(6, 6);
-
     if (unique_eigenvalues == 3)
     {
-        for (int i = 0; i < 3; i++)
-        {
-            L.noalias() += Isym;
-        }
+        return derivative_tensor_log_equal(e, E_list, {{0, 1, 2}})
+               + derivative_tensor_log_equal(e, E_list, {{2, 0, 1}})
+               + derivative_tensor_log_equal(e, E_list, {{1, 2, 0}});
     }
+    CMatrix L = CMatrix::Zero(6, 6);
     return L;
 }
 }
+
+// auto const I1 = X.trace();
+// auto const I2 = 0.5 * (std::pow(X.trace(), 2) - (X * X).trace());
+// auto const I3 = X.determinant();
+//
+// auto const R = (-2.0 * I1 + 9.0 * I1 * I2 - 27.0 * I3) / 54.0;
+// auto const Q = (std::pow(I1, 2) - 3.0 * I2) / 9.0;
+//
+// auto const theta = std::acos(R / std::sqrt(std::pow(Q, 3)));
+//
+// Vector3 x(-2.0 * std::sqrt(Q) * std::cos(theta / 3.0) + I1 / 3.0,
+//           -2.0 * std::sqrt(Q) * std::cos((theta + 2.0 * M_PI) / 3.0) + I1 / 3.0,
+//           -2.0 * std::sqrt(Q) * std::cos((theta - 2.0 * M_PI) / 3.0) + I1 / 3.0);
+//
+// std::array<Matrix3, 3> E;
+// int repeated_eigenvalues = 0;
+//
+// // Perform checks to determine if there are repeated eigenvalues
+// if (!is_approx(x1, x2) && !is_approx(x2, x3) && !is_approx(x1, x3))
+// {
+//     for (int i = 0; i < 3; i++)
+//     {
+//         E[i] = x(i) / (2.0 * std::pow(x(i), 3) - I1 * std::pow(x(i), 2) + I3)
+//                * (X * X - (I1 - x(i)) * X + I3 / x(i) * Matrix3::Identity());
+//     }
+// }
+// else if (!is_approx(x1, x2) && is_approx(x2, x3))
+// {
+//     repeated_eigenvalue = 1;
+// }
+// else
+// {
+//     E[0] = Matrix3::Identity();
+//     repeated_eigenvalue = 2;
+// }

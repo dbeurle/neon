@@ -30,6 +30,10 @@ protected:
 
     CMatrix derivative_tensor_log(Matrix3 const& Be_trial) const;
 
+    CMatrix derivative_tensor_log_equal(Vector3 const& e,
+                                        std::array<Matrix3, 3> const& E,
+                                        std::array<int, 3> permutation) const;
+
     CMatrix deformation_part(Matrix3 const& Be_trial) const;
 
     CMatrix stress_part(Matrix3 const& cauchy_stress) const;
@@ -37,4 +41,16 @@ protected:
 protected:
     CMatrix const Isym = fourth_order_identity();
 };
+
+inline CMatrix FiniteJ2Plasticity::derivative_tensor_log_equal(Vector3 const& x,
+                                                               std::array<Matrix3, 3> const& E,
+                                                               std::array<int, 3> permutation) const
+{
+    // BUG Fix the first 2*Isym as placeholder for proper dX^2 / dX expression
+    auto const[a, b, c] = permutation;
+    return std::log(x(a)) / ((x(a) - x(b)) * (x(a) - x(c)))
+               * (2.0 * Isym - (x(b) - x(c)) * Isym - (2.0 * x(a) - x(b) - x(c)) * outer_product(E[a])
+                  - (x(b) - x(c)) * (outer_product(E[b]) - outer_product(E[c])))
+           + 1.0 / x(a) * outer_product(E[a]);
+}
 }
