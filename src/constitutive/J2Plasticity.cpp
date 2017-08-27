@@ -59,21 +59,24 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
         auto& von_mises = von_mises_list[l];
 
         // Elastic stress predictor
-        Matrix3 const cauchy_stress_0 = cauchy_stress = compute_cauchy_stress(strain - strain_p);
+        cauchy_stress = compute_cauchy_stress(strain - strain_p);
 
-        von_mises = von_mises_stress(cauchy_stress_0);
+        // Trial von Mises stress
+        von_mises = von_mises_stress(cauchy_stress);
 
         // If this quadrature point is elastic, then set the tangent to the
-        // elastic modulus
+        // elastic modulus and continue to the next quadrature point
         if (evaluate_yield_function(von_mises, accumulated_plastic_strain) <= 0.0)
         {
             C_list[l] = C_e;
             continue;
         }
 
+        auto const von_mises_trial = von_mises;
+
         // Compute the normal direction to the yield surface which remains
         // constant throughout the radial return method
-        Matrix3 const normal = deviatoric(cauchy_stress_0) / deviatoric(cauchy_stress_0).norm();
+        Matrix3 const normal = deviatoric(cauchy_stress) / deviatoric(cauchy_stress).norm();
 
         auto const plastic_increment = perform_radial_return(von_mises, accumulated_plastic_strain);
 
@@ -87,7 +90,7 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
 
         C_list[l] = algorithmic_tangent(plastic_increment,
                                         accumulated_plastic_strain,
-                                        von_mises_stress(cauchy_stress_0),
+                                        von_mises_trial,
                                         normal);
     }
 }
