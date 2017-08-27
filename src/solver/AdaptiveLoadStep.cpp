@@ -68,7 +68,7 @@ void AdaptiveLoadStep::update_convergence_state(bool is_converged)
 
         std::cout << "\n"
                   << std::string(terminal_indent, ' ') << termcolor::yellow << termcolor::bold
-                  << "Non-convergence detected - step time set to " << current_time << "\n"
+                  << "Non-convergence detected.  Performing increment reduction.\n"
                   << termcolor::reset << std::flush;
 
         consecutive_unconverged++;
