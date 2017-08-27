@@ -11,6 +11,18 @@
 
 namespace neon
 {
+/**
+ * FiniteJ2Plasticity is a material model for the large strain deformation
+ * according to the J2 yield theory.  This implementation follows the steps
+ * outlined in Computational Methods for Plasticity by Neto et.al, 2008
+ * on pages 598.  This does not use the principal stress formulation in order
+ * to reuse methods from J2Plasticity.
+ *
+ * This class is responsible for computation of the Cauchy stress and the material
+ * tangent matrix for use in the Newton Raphson iterations.
+ *
+ * \sa J2Plasticity
+ */
 class FiniteJ2Plasticity : public J2Plasticity
 {
 public:
