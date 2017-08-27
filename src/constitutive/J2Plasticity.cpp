@@ -1,6 +1,7 @@
 
 #include "J2Plasticity.hpp"
 
+#include "Exceptions.hpp"
 #include "InternalVariables.hpp"
 
 #include <iostream>
@@ -29,7 +30,6 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
     using namespace ranges;
 
     auto const shear_modulus = material.shear_modulus();
-    auto const lambda_e = material.lambda();
 
     // Extract the internal variables
     auto[strain_p_list,
@@ -49,8 +49,6 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
     strain_list = variables(InternalVariables::Tensor::DisplacementGradient)
                   | view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
-    Matrix3 const I = Matrix3::Identity();
-
     // Perform the update algorithm for each quadrature point
     for (auto l = 0; l < strain_list.size(); l++)
     {
@@ -61,19 +59,13 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
         auto& von_mises = von_mises_list[l];
 
         // Elastic stress predictor
-        Matrix3 const cauchy_stress_0 = compute_cauchy_stress(strain - strain_p);
+        Matrix3 const cauchy_stress_0 = cauchy_stress = compute_cauchy_stress(strain - strain_p);
 
         von_mises = von_mises_stress(cauchy_stress_0);
 
-        cauchy_stress = cauchy_stress_0;
-
-        // Compute the initial estimate of the yield function for the material
-        // and decide if the stress return needs to be computed
-        auto f = von_mises - material.yield_stress(accumulated_plastic_strain);
-
         // If this quadrature point is elastic, then set the tangent to the
         // elastic modulus
-        if (f <= 0.0)
+        if (evaluate_yield_function(von_mises, accumulated_plastic_strain) <= 0.0)
         {
             C_list[l] = C_e;
             continue;
@@ -83,24 +75,8 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
         // constant throughout the radial return method
         Matrix3 const normal = deviatoric(cauchy_stress_0) / deviatoric(cauchy_stress_0).norm();
 
-        auto plastic_increment = 0.0;
+        auto const plastic_increment = perform_radial_return(von_mises, accumulated_plastic_strain);
 
-        // Newton Raphson iterations for non-linear hardening
-        int iterations = 0, max_iterations = 50;
-        while (f > 1.0e-10 && iterations < max_iterations)
-        {
-            auto const H = material.hardening_modulus(accumulated_plastic_strain + plastic_increment);
-
-            const auto plastic_increment_delta = f / (3.0 * shear_modulus + H);
-
-            plastic_increment += plastic_increment_delta;
-
-            f = (von_mises - 3.0 * shear_modulus * plastic_increment)
-                - material.yield_stress(accumulated_plastic_strain + plastic_increment);
-
-            iterations++;
-        }
-        // Return mapping algorithm
         strain_p += plastic_increment * std::sqrt(3.0 / 2.0) * normal;
 
         cauchy_stress -= 2.0 * shear_modulus * plastic_increment * std::sqrt(3.0 / 2.0) * normal;
@@ -108,20 +84,6 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
         von_mises = von_mises_stress(cauchy_stress);
 
         accumulated_plastic_strain += plastic_increment;
-
-        if (iterations == max_iterations)
-        {
-            std::cout << "MAXIMUM NUMBER OF ITERATIONS IN RADIAL RETURN REACHED\n";
-            std::cout << "Accumulated plastic strain " << accumulated_plastic_strain << "\n";
-            std::cout << "Yield function after mapping " << f << "\n";
-            std::cout << "Current yield stress "
-                      << material.yield_stress(accumulated_plastic_strain) << "\n";
-            std::cout << "Von Mises stress " << von_mises_stress(cauchy_stress) << "\n"
-                      << "\n";
-
-            throw std::runtime_error("Radial return failure at global integration point "
-                                     + std::to_string(l) + "\n");
-        }
 
         C_list[l] = algorithmic_tangent(plastic_increment,
                                         accumulated_plastic_strain,
@@ -166,5 +128,50 @@ CMatrix J2Plasticity::algorithmic_tangent(double const plastic_increment,
     return C_e - plastic_increment * 6.0 * std::pow(G, 2) / von_mises * I_dev
            + 6.0 * std::pow(G, 2) * (plastic_increment / von_mises - 1.0 / (3.0 * G + H)) * voigt(n)
                  * voigt(n).transpose();
+}
+
+double J2Plasticity::perform_radial_return(double const von_mises,
+                                           double const accumulated_plastic_strain) const
+{
+    auto const shear_modulus = material.shear_modulus();
+
+    auto plastic_increment = 0.0;
+
+    double f = evaluate_yield_function(von_mises, accumulated_plastic_strain, plastic_increment);
+
+    // Perform the non-linear hardening solve
+    int iterations = 0, max_iterations = 25;
+    while (f > 1.0e-10 && iterations < max_iterations)
+    {
+        auto const H = material.hardening_modulus(accumulated_plastic_strain + plastic_increment);
+
+        const auto plastic_increment_delta = f / (3.0 * shear_modulus + H);
+
+        plastic_increment += plastic_increment_delta;
+
+        f = evaluate_yield_function(von_mises, accumulated_plastic_strain, plastic_increment);
+
+        iterations++;
+    }
+    if (iterations == max_iterations)
+    {
+        std::cout << "MAXIMUM NUMBER OF ITERATIONS IN RADIAL RETURN REACHED\n";
+        std::cout << "Accumulated plastic strain " << accumulated_plastic_strain << "\n";
+        std::cout << "Yield function after mapping " << f << "\n";
+        std::cout << "Current yield stress " << material.yield_stress(accumulated_plastic_strain)
+                  << "\n";
+        throw computational_error("Radial return failure\n");
+    }
+    return plastic_increment;
+}
+
+double J2Plasticity::evaluate_yield_function(double const von_mises,
+                                             double const accumulated_plastic_strain,
+                                             double const plastic_increment) const
+{
+    auto const shear_modulus = material.shear_modulus();
+
+    return (von_mises - 3.0 * shear_modulus * plastic_increment)
+           - material.yield_stress(accumulated_plastic_strain + plastic_increment);
 }
 }

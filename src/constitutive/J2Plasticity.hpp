@@ -34,6 +34,22 @@ protected:
                                 double const von_mises,
                                 Matrix3 const& n) const;
 
+    /**
+     * Performs the radial return algorithm with nonlinear hardening for
+     * projecting the stress onto the yield surface.  This provides the plastic
+     * increment required for updating the internal variables
+     */
+    double perform_radial_return(double const von_mises,
+                                 double const accumulated_plastic_strain) const;
+
+    /**
+     * Evaluates the yield function and returns greater than zero if
+     * the yield function has been violated
+     */
+    double evaluate_yield_function(double const von_mises,
+                                   double const accumulated_plastic_strain,
+                                   double const plastic_increment = 0.0) const;
+
 protected:
     IsotropicElasticPlastic material;
     CMatrix const C_e = elastic_moduli();
