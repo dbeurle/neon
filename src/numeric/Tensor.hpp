@@ -114,5 +114,10 @@ inline CMatrix I_outer_I()
     return i_o_i;
 }
 
-inline CMatrix outer_product(Matrix3 const& h) { return voigt(h) * voigt(h).transpose(); }
+inline CMatrix outer_product(Matrix3 const& a, Matrix3 const& b)
+{
+    return voigt(a) * voigt(b).transpose();
+}
+
+inline CMatrix outer_product(Matrix3 const& h) { return outer_product(h, h); }
 }
