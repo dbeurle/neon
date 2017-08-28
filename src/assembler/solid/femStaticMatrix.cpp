@@ -145,8 +145,6 @@ void femStaticMatrix::solve()
 
 void femStaticMatrix::assemble_stiffness()
 {
-    using ranges::accumulate;
-
     if (!is_sparsity_computed) compute_sparsity_pattern();
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -183,46 +181,39 @@ void femStaticMatrix::assemble_stiffness()
 
 void femStaticMatrix::enforce_dirichlet_conditions(SparseMatrix& A, Vector& x, Vector& b)
 {
-    // auto start = std::chrono::high_resolution_clock::now();
-
     for (auto const & [ name, dirichlet_boundaries ] : fem_mesh.displacement_boundaries())
     {
         for (auto const& dirichlet_boundary : dirichlet_boundaries)
         {
             for (auto const& fixed_dof : dirichlet_boundary.dof_view())
             {
-                auto const diagonal_entry = Kt.coeffRef(fixed_dof, fixed_dof);
+                auto const diagonal_entry = A.coeffRef(fixed_dof, fixed_dof);
 
                 x(fixed_dof) = b(fixed_dof) = 0.0;
 
                 std::vector<int> non_zero_visitor;
 
                 // Zero the rows and columns
-                for (SparseMatrix::InnerIterator it(Kt, fixed_dof); it; ++it)
+                for (SparseMatrix::InnerIterator it(A, fixed_dof); it; ++it)
                 {
                     // Set the value of the col or row resp. to zero
                     it.valueRef() = 0.0;
-                    non_zero_visitor.push_back(Kt.IsRowMajor ? it.col() : it.row());
+                    non_zero_visitor.push_back(A.IsRowMajor ? it.col() : it.row());
                 }
 
                 // Zero the row or col respectively
                 for (auto const& non_zero : non_zero_visitor)
                 {
-                    const auto row = Kt.IsRowMajor ? non_zero : fixed_dof;
-                    const auto col = Kt.IsRowMajor ? fixed_dof : non_zero;
+                    const auto row = A.IsRowMajor ? non_zero : fixed_dof;
+                    const auto col = A.IsRowMajor ? fixed_dof : non_zero;
 
-                    Kt.coeffRef(row, col) = 0.0;
+                    A.coeffRef(row, col) = 0.0;
                 }
                 // Reset the diagonal to the same value to preserve conditioning
-                Kt.coeffRef(fixed_dof, fixed_dof) = diagonal_entry;
+                A.coeffRef(fixed_dof, fixed_dof) = diagonal_entry;
             }
         }
     }
-    // auto end = std::chrono::high_resolution_clock::now();
-    // std::chrono::duration<double> elapsed_seconds = end - start;
-
-    // std::cout << "  Dirichlet conditions enforced in " << elapsed_seconds.count() <<
-    // "s\n";
 }
 
 void femStaticMatrix::apply_displacement_boundaries()
