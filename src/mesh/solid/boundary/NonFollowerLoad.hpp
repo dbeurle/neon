@@ -3,8 +3,8 @@
 
 #include "interpolations/SurfaceInterpolation.hpp"
 #include "mesh/SubMesh.hpp"
+#include "mesh/common/Neumann.hpp"
 #include "mesh/solid/MaterialCoordinates.hpp"
-#include "mesh/solid/boundary/Boundary.hpp"
 #include "numeric/DenseTypes.hpp"
 
 #include <memory>
@@ -16,7 +16,7 @@ namespace neon::solid
  * the body throughout the simulation.  Every non-follower load will contribute
  * to the external force vector, whether from a volume or a surface load.
  */
-class NonFollowerLoad : public Boundary
+class NonFollowerLoad : public Neumann
 {
 public:
     explicit NonFollowerLoad(std::vector<List> const& nodal_connectivity,
@@ -30,12 +30,7 @@ public:
     virtual std::tuple<List const&, Vector> external_force(int const element,
                                                            double const load_factor) const = 0;
 
-    auto elements() const { return nodal_connectivity.size(); }
-
 protected:
-    std::vector<List> nodal_connectivity;
-    std::vector<List> dof_list;
-
     std::shared_ptr<MaterialCoordinates> material_coordinates;
 };
 
@@ -50,9 +45,9 @@ public:
     /**
      * Construct the object by forwarding the constructor arguments for the
      * parent via a variadic template.  The correct constructor arguments
-     * are given by \sa NonFollowerLoad
+     * are given by NonFollowerLoad
      * @param sf Unique pointer to a surface interpolation
-     * @param args See \sa NonFollowerLoad constructor arguments
+     * @param args See NonFollowerLoad constructor arguments
      */
     template <typename... NonFollowerLoadArgs>
     explicit Traction(std::unique_ptr<SurfaceInterpolation>&& sf, NonFollowerLoadArgs... args)
@@ -68,9 +63,9 @@ protected:
 };
 
 /**
- * NonFollowerLoadBoundary contains the boundary conditions which contributed to
- * the external force vector.  This includes tractions, pressures and nodal
- * forces defined in the initial configuration
+ * NonFollowerLoadBoundary contains the boundary conditions which contribute to
+ * the external force vector.  This can include tractions, pressures, nodal
+ * forces and volume forces computed in the initial configuration
  */
 class NonFollowerLoadBoundary
 {

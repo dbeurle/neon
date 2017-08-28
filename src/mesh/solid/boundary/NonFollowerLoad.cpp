@@ -12,9 +12,10 @@ NonFollowerLoad::NonFollowerLoad(std::vector<List> const& nodal_connectivity,
                                  bool const is_load_ramped,
                                  int const dof_offset,
                                  int const nodal_dofs)
-    : Boundary(prescribed_load, is_load_ramped),
-      nodal_connectivity(nodal_connectivity),
-      dof_list(filter_dof_list(nodal_dofs, dof_offset, nodal_connectivity)),
+    : Neumann(nodal_connectivity,
+              filter_dof_list(nodal_dofs, dof_offset, nodal_connectivity),
+              prescribed_load,
+              is_load_ramped),
       material_coordinates(material_coordinates)
 {
 }
