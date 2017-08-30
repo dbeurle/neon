@@ -119,7 +119,7 @@ void SimulationControl::parse()
               << termcolor::reset << std::endl;
 }
 
-void SimulationControl::start(bool const is_initital_pass)
+void SimulationControl::start(bool const is_initial_pass)
 {
     // It is desirable to have multiple load steps throughout the simulation.
     // This can be achieved by stepping through each simulation and performing
@@ -128,7 +128,7 @@ void SimulationControl::start(bool const is_initital_pass)
     {
         if (!simulation["Inherits"].empty()) continue;
 
-        if (!is_initital_pass)
+        if (!is_initial_pass)
         {
             std::cout << std::string(2, ' ') << termcolor::bold << "Simulating case \""
                       << simulation["Name"].asString() << "\"" << termcolor::reset << std::endl
@@ -139,7 +139,7 @@ void SimulationControl::start(bool const is_initital_pass)
 
         auto simulation_mesh = mesh_store.find(mesh_data["Name"].asString());
 
-        if (!is_initital_pass)
+        if (!is_initial_pass)
         {
             std::cout << std::string(4, ' ') << "Module \"" << simulation["Type"].asString()
                       << "\"\n";
@@ -159,11 +159,11 @@ void SimulationControl::start(bool const is_initital_pass)
                                           simulation["NonlinearOptions"],
                                           simulation["Time"]);
 
-        if (!is_initital_pass) fem_matrix.solve();
+        if (!is_initial_pass) fem_matrix.solve();
 
         for (auto const& next_step : multistep_simulations[simulation["Name"].asString()])
         {
-            if (!is_initital_pass)
+            if (!is_initial_pass)
             {
                 std::cout << termcolor::bold << "\n"
                           << std::string(2, ' ') << "Simulating case \""
@@ -175,10 +175,10 @@ void SimulationControl::start(bool const is_initital_pass)
 
             fem_matrix.internal_restart(next_step["LinearSolver"], next_step["Time"]);
 
-            if (!is_initital_pass) fem_matrix.solve();
+            if (!is_initial_pass) fem_matrix.solve();
         }
     }
-    if (is_initital_pass) this->start(false);
+    if (is_initial_pass) this->start(false);
 }
 
 void SimulationControl::build_simulation_tree()
