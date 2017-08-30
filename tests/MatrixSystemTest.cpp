@@ -25,15 +25,15 @@ std::string const time_json("{\"Period\" : 1.0, \"Increments\": { "
                             "\"Initial\" : 1.0, \"Minimum\" : 0.001, \"Maximum\" : 10.0 }}");
 
 std::string const nonlinear_options_json("{\"NonlinearOptions\" : { "
-                                         "\"DisplacementIncrementTolerance\" : 1.0e-5, "
-                                         "\"ResidualForceTolerance\" : 0.001}}");
+                                         "\"DisplacementTolerance\" : 1.0e-5, "
+                                         "\"ResidualTolerance\" : 0.001}}");
 
 std::string const nonlinear_options_disp_broken_json("{\"NonlinearOptions\" : { "
                                                      "\"DisacementIncrementTolerance\" : 1.0e-5, "
-                                                     "\"ResidualForceTolerance\" : 0.001}}");
+                                                     "\"ResidualTolerance\" : 0.001}}");
 
 std::string const nonlinear_options_force_broken_json("{\"NonlinearOptions\" : { "
-                                                      "\"DisplacementIncrementTolerance\" : "
+                                                      "\"DisplacementTolerance\" : "
                                                       "1.0e-5, "
                                                       "\"ResidForceTolerance\" : 0.001}}");
 

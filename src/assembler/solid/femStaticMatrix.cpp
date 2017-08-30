@@ -25,19 +25,19 @@ femStaticMatrix::femStaticMatrix(femMesh& fem_mesh,
       d(Vector::Zero(fem_mesh.active_dofs())),
       linear_solver(make_linear_solver(solver_data))
 {
-    if (!nonlinear_data.isMember("DisplacementIncrementTolerance"))
+    if (!nonlinear_data.isMember("DisplacementTolerance"))
     {
-        throw std::runtime_error("DisplacementIncrementTolerance not specified in "
+        throw std::runtime_error("DisplacementTolerance not specified in "
                                  "NonlinearOptions");
     }
-    if (!nonlinear_data.isMember("ResidualForceTolerance"))
+    if (!nonlinear_data.isMember("ResidualTolerance"))
     {
-        throw std::runtime_error("ResidualForceTolerance not specified in "
+        throw std::runtime_error("ResidualTolerance not specified in "
                                  "NonlinearOptions");
     }
 
-    residual_tolerance = nonlinear_data["ResidualForceTolerance"].asDouble();
-    displacement_tolerance = nonlinear_data["DisplacementIncrementTolerance"].asDouble();
+    residual_tolerance = nonlinear_data["ResidualTolerance"].asDouble();
+    displacement_tolerance = nonlinear_data["DisplacementTolerance"].asDouble();
 }
 
 femStaticMatrix::~femStaticMatrix() = default;
