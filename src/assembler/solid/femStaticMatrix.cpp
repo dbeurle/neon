@@ -6,6 +6,7 @@
 
 #include <chrono>
 
+#include <json/value.h>
 #include <omp.h>
 #include <termcolor/termcolor.hpp>
 
@@ -14,6 +15,7 @@ namespace neon::solid
 femStaticMatrix::femStaticMatrix(femMesh& fem_mesh,
                                  Visualisation&& visualisation,
                                  Json::Value const& solver_data,
+                                 Json::Value const& nonlinear_data,
                                  Json::Value const& increment_data)
     : fem_mesh(fem_mesh),
       visualisation(std::move(visualisation)),
@@ -23,19 +25,32 @@ femStaticMatrix::femStaticMatrix(femMesh& fem_mesh,
       d(Vector::Zero(fem_mesh.active_dofs())),
       linear_solver(make_linear_solver(solver_data))
 {
+    if (!nonlinear_data.isMember("DisplacementIncrementTolerance"))
+    {
+        throw std::runtime_error("DisplacementIncrementTolerance not specified in "
+                                 "NonlinearOptions");
+    }
+    if (!nonlinear_data.isMember("ResidualForceTolerance"))
+    {
+        throw std::runtime_error("ResidualForceTolerance not specified in "
+                                 "NonlinearOptions");
+    }
+
+    residual_tolerance = nonlinear_data["ResidualForceTolerance"].asDouble();
+    displacement_tolerance = nonlinear_data["DisplacementIncrementTolerance"].asDouble();
 }
 
 femStaticMatrix::~femStaticMatrix() = default;
 
-void femStaticMatrix::internal_restart(Json::Value const& new_increment_data)
+void femStaticMatrix::internal_restart(Json::Value const& solver_data,
+                                       Json::Value const& new_increment_data)
 {
     adaptive_load.reset(new_increment_data);
+    linear_solver = make_linear_solver(solver_data);
 }
 
 void femStaticMatrix::compute_sparsity_pattern()
 {
-    // auto start = std::chrono::high_resolution_clock::now();
-
     std::vector<Doublet<int>> doublets;
     doublets.reserve(fem_mesh.active_dofs());
 
@@ -59,18 +74,10 @@ void femStaticMatrix::compute_sparsity_pattern()
     Kt.finalize();
 
     is_sparsity_computed = true;
-
-    // auto end = std::chrono::high_resolution_clock::now();
-    // std::chrono::duration<double> elapsed_seconds = end - start;
-
-    // std::cout << "  Sparsity pattern with " << Kt.nonZeros() << " non-zeros took "
-    //           << elapsed_seconds.count() << "s\n";
 }
 
 void femStaticMatrix::compute_internal_force()
 {
-    // auto start = std::chrono::high_resolution_clock::now();
-
     fint.setZero();
 
     for (auto const& submesh : fem_mesh.meshes())
@@ -85,12 +92,6 @@ void femStaticMatrix::compute_internal_force()
             }
         }
     }
-
-    // auto end = std::chrono::high_resolution_clock::now();
-    // std::chrono::duration<double> elapsed_seconds = end - start;
-
-    // std::cout << "  Assembly of internal forces took " << elapsed_seconds.count() <<
-    // "s\n";
 }
 
 void femStaticMatrix::compute_external_force(double const load_factor)

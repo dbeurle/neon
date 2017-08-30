@@ -21,11 +21,12 @@ public:
     explicit femStaticMatrix(femMesh& fem_mesh,
                              Visualisation&& visualisation,
                              Json::Value const& solver_data,
+                             Json::Value const& nonlinear_data,
                              Json::Value const& increment_data);
 
     ~femStaticMatrix();
 
-    void internal_restart(Json::Value const& new_increment_data);
+    void internal_restart(Json::Value const& solver_data, Json::Value const& new_increment_data);
 
     virtual void solve();
 
@@ -75,8 +76,8 @@ protected:
 
     bool is_sparsity_computed = false;
 
-    double residual_tolerance = 1.0e-4;
-    double displacement_tolerance = 1.0e-8;
+    double residual_tolerance = 1.0e-5;
+    double displacement_tolerance = 1.0e-5;
 
     SparseMatrix Kt; //!< Tangent matrix stiffness
     Vector fint;     //!< Internal force vector

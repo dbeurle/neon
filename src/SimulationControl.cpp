@@ -121,8 +121,8 @@ void SimulationControl::parse()
                   << " into the mesh store\n";
     }
 
-    std::array<std::string, 5> const required_fields = {
-        {"Name", "Time", "Solution", "Visualisation", "LinearSolver"}};
+    std::array<std::string, 6> const required_fields = {
+        {"Name", "Time", "Solution", "Visualisation", "LinearSolver", "NonlinearOptions"}};
 
     // Build a list of all the load steps for a given mesh
     for (auto const& simulation : root["SimulationCases"])
@@ -187,6 +187,7 @@ void SimulationControl::start()
                                                         fem_mesh,
                                                         simulation["Visualisation"]),
                                           simulation["LinearSolver"],
+                                          simulation["NonlinearOptions"],
                                           simulation["Time"]);
 
         fem_matrix.solve();
