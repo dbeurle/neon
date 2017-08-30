@@ -19,7 +19,7 @@ class SimulationControl
 public:
     explicit SimulationControl(std::string const& input_file_name);
 
-    void start();
+    void start(bool const is_initital_pass = true);
 
     static int threads; //!< Number of hardware threads to use
 protected:

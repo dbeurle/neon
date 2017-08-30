@@ -119,7 +119,7 @@ void SimulationControl::parse()
               << termcolor::reset << std::endl;
 }
 
-void SimulationControl::start()
+void SimulationControl::start(bool const is_initital_pass)
 {
     // It is desirable to have multiple load steps throughout the simulation.
     // This can be achieved by stepping through each simulation and performing
@@ -128,18 +128,24 @@ void SimulationControl::start()
     {
         if (!simulation["Inherits"].empty()) continue;
 
-        std::cout << std::string(2, ' ') << termcolor::bold << "Simulating case \""
-                  << simulation["Name"].asString() << "\"" << termcolor::reset << std::endl
-                  << std::endl;
+        if (!is_initital_pass)
+        {
+            std::cout << std::string(2, ' ') << termcolor::bold << "Simulating case \""
+                      << simulation["Name"].asString() << "\"" << termcolor::reset << std::endl
+                      << std::endl;
+        }
 
         auto const& mesh_data = simulation["Mesh"][0];
 
         auto simulation_mesh = mesh_store.find(mesh_data["Name"].asString());
 
-        std::cout << std::string(4, ' ') << "Module \"" << simulation["Type"].asString() << "\"\n";
-
-        std::cout << std::string(4, ' ') << "Solution \"" << simulation["Solution"].asString()
-                  << "\"\n";
+        if (!is_initital_pass)
+        {
+            std::cout << std::string(4, ' ') << "Module \"" << simulation["Type"].asString()
+                      << "\"\n";
+            std::cout << std::string(4, ' ') << "Solution \"" << simulation["Solution"].asString()
+                      << "\"\n";
+        }
 
         auto const & [ mesh, material ] = simulation_mesh->second;
 
@@ -153,22 +159,26 @@ void SimulationControl::start()
                                           simulation["NonlinearOptions"],
                                           simulation["Time"]);
 
-        fem_matrix.solve();
+        if (!is_initital_pass) fem_matrix.solve();
 
         for (auto const& next_step : multistep_simulations[simulation["Name"].asString()])
         {
-            std::cout << termcolor::bold << "\n"
-                      << std::string(2, ' ') << "Simulating case \"" << next_step["Name"].asString()
-                      << "\"" << termcolor::reset << std::endl
-                      << std::endl;
+            if (!is_initital_pass)
+            {
+                std::cout << termcolor::bold << "\n"
+                          << std::string(2, ' ') << "Simulating case \""
+                          << next_step["Name"].asString() << "\"" << termcolor::reset << std::endl
+                          << std::endl;
+            }
 
             fem_mesh.internal_restart(next_step["Mesh"][0]);
 
             fem_matrix.internal_restart(next_step["LinearSolver"], next_step["Time"]);
 
-            fem_matrix.solve();
+            if (!is_initital_pass) fem_matrix.solve();
         }
     }
+    if (is_initital_pass) this->start(false);
 }
 
 void SimulationControl::build_simulation_tree()
