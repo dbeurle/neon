@@ -2,7 +2,7 @@
 #pragma once
 
 #include "mesh/BasicMesh.hpp"
-#include "modules/AbstractModule.hpp"
+// #include "modules/AbstractModule.hpp"
 
 #include <map>
 #include <memory>
@@ -53,7 +53,7 @@ protected:
 
     std::map<std::string, std::vector<Json::Value>> multistep_simulations;
 
-    std::vector<std::unique_ptr<AbstractModule>> modules;
+    // std::vector<std::unique_ptr<AbstractModule>> modules;
 
     Json::Value root; // The file input
 };
