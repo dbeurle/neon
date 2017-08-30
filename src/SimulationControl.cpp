@@ -2,16 +2,14 @@
 #include "SimulationControl.hpp"
 
 #include "Exceptions.hpp"
+#include "mesh/solid/femMesh.hpp"
 
 #include "assembler/solid/femStaticMatrix.hpp"
 
 #include "assembler/solid/femDynamicMatrix.hpp"
 
-#include "mesh/solid/femMesh.hpp"
-
 #include <iomanip>
 #include <thread>
-#include <unordered_set>
 
 #include <boost/filesystem.hpp>
 #include <json/reader.h>
@@ -42,13 +40,7 @@ void SimulationControl::parse()
 {
     auto start = std::chrono::high_resolution_clock::now();
 
-    std::string const welcome_message("neon - a non-linear finite element code");
-
-    std::cout << termcolor::bold;
-    std::cout << std::setw(welcome_message.length() + 9) << std::setfill('=') << "\n";
-    std::cout << std::string(4, ' ') << welcome_message << "\n";
-    std::cout << std::setw(welcome_message.length() + 9) << std::setfill('=') << "\n";
-    std::cout << termcolor::reset << std::endl << std::setfill(' ');
+    this->print_banner();
 
     std::cout << std::string(2, ' ') << termcolor::bold << "Preprocessing mesh and simulation data\n"
               << termcolor::reset;
@@ -62,41 +54,12 @@ void SimulationControl::parse()
         throw std::runtime_error(reader.getFormattedErrorMessages());
     }
 
-    // Check the important fields exist before anything else is done
-    if (!root.isMember("Part")) throw std::runtime_error("Part");
-    if (!root.isMember("Name")) throw std::runtime_error("Name");
-    if (!root.isMember("Material")) throw std::runtime_error("Material");
-    if (!root.isMember("SimulationCases")) throw std::runtime_error("SimulationCases");
+    this->check_input_fields(root);
 
     if (root.isMember("Cores")) threads = root["Cores"].asInt();
 
-    std::unordered_set<std::string> material_names, part_names;
-
-    // Load in all the material names
-    for (auto const& material : root["Material"])
-    {
-        if (material["Name"].empty()) throw std::runtime_error("Material: Name");
-
-        auto const[it, inserted] = material_names.emplace(material["Name"].asString());
-
-        if (!inserted) throw DuplicateNameException("Material");
-    }
-
-    // Load in all the part names and error check
-    for (auto const& part : root["Part"])
-    {
-        if (part["Name"].empty()) throw std::runtime_error("Part: Name");
-
-        if (ranges::find(material_names, part["Material"].asString()) == material_names.end())
-        {
-            throw std::runtime_error("The part material was not found in the provided "
-                                     "materials\n");
-        }
-
-        auto const[it, inserted] = part_names.emplace(part["Name"].asString());
-
-        if (!inserted) throw DuplicateNameException("Part");
-    }
+    auto const material_names = this->parse_material_names(root["Material"]);
+    auto const part_names = this->parse_part_names(root["Part"], material_names);
 
     // Add in the parts and populate the mesh stores
     for (auto const& part : root["Part"])
@@ -135,7 +98,7 @@ void SimulationControl::parse()
                                          + "\" field\n");
         }
 
-        // Multiple meshes not supported
+        // Multibody simulations not (yet) supported
         assert(simulation["Mesh"].size() == 1);
 
         // Make sure the simulation mesh exists in the mesh store
@@ -160,7 +123,7 @@ void SimulationControl::start()
 {
     // It is desirable to have multiple load steps throughout the simulation.
     // This can be achieved by stepping through each simulation and performing
-    // a continuation, reusing the old time data from the previous load step.
+    // an internal restart, using the data from the previous time step.
     for (auto const& simulation : root["SimulationCases"])
     {
         if (!simulation["Inherits"].empty()) continue;
@@ -199,11 +162,9 @@ void SimulationControl::start()
                       << "\"" << termcolor::reset << std::endl
                       << std::endl;
 
-            // Update the mesh with an internal restart
             fem_mesh.internal_restart(next_step["Mesh"][0]);
 
-            // Update the matrix with the new time solution
-            fem_matrix.internal_restart(next_step["Time"]);
+            fem_matrix.internal_restart(next_step["LinearSolver"], next_step["Time"]);
 
             fem_matrix.solve();
         }
@@ -240,12 +201,73 @@ void SimulationControl::find_children(std::string const& parent_name,
     {
         if (simulation["Inherits"].empty()) continue;
 
-        if (auto const& name = simulation["Inherits"].asString(); name == next_parent_name)
+        if (simulation["Inherits"].asString() == next_parent_name)
         {
             multistep_simulations[parent_name].push_back(simulation);
             // Recursive step
             find_children(parent_name, simulation["Name"].asString());
         }
     }
+}
+
+void SimulationControl::print_banner() const
+{
+    std::string const welcome_message("neon - a non-linear finite element code");
+
+    std::cout << termcolor::bold;
+    std::cout << std::setw(welcome_message.length() + 9) << std::setfill('=') << "\n";
+    std::cout << std::string(4, ' ') << welcome_message << "\n";
+    std::cout << std::setw(welcome_message.length() + 9) << std::setfill('=') << "\n";
+    std::cout << termcolor::reset << std::endl << std::setfill(' ');
+}
+
+void SimulationControl::check_input_fields(Json::Value const& root) const
+{
+    // Check the important fields exist before anything else is done
+    if (!root.isMember("Part")) throw std::runtime_error("Part is not in input file");
+    if (!root.isMember("Name")) throw std::runtime_error("Name is not in input file");
+    if (!root.isMember("Material")) throw std::runtime_error("Material is not in input file");
+    if (!root.isMember("SimulationCases"))
+        throw std::runtime_error("SimulationCases is not in input file");
+}
+
+/** Extract the material names from the input file */
+std::unordered_set<std::string> SimulationControl::parse_material_names(Json::Value const& materials) const
+{
+    std::unordered_set<std::string> material_names;
+
+    for (auto const& material : root["Material"])
+    {
+        if (material["Name"].empty()) throw std::runtime_error("Material: Name");
+
+        auto const[it, inserted] = material_names.emplace(material["Name"].asString());
+
+        if (!inserted) throw DuplicateNameException("Material");
+    }
+    return material_names;
+}
+
+/** Extract the part names from the input file */
+std::unordered_set<std::string> SimulationControl::parse_part_names(
+    Json::Value const& parts, std::unordered_set<std::string> const& material_names) const
+{
+    std::unordered_set<std::string> part_names;
+
+    // Load in all the part names and error check
+    for (auto const& part : root["Part"])
+    {
+        if (part["Name"].empty()) throw std::runtime_error("Part: Name");
+
+        if (ranges::find(material_names, part["Material"].asString()) == material_names.end())
+        {
+            throw std::runtime_error("The part material was not found in the provided "
+                                     "materials\n");
+        }
+
+        auto const[it, inserted] = part_names.emplace(part["Name"].asString());
+
+        if (!inserted) throw DuplicateNameException("Part");
+    }
+    return part_names;
 }
 }
