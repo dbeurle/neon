@@ -34,7 +34,7 @@ protected:
     void print_banner() const;
 
     /** Factory method to create simulation modules */
-    std::unique_ptr<AbstractModule> make_module() const;
+    // std::unique_ptr<AbstractModule> make_module() const;
 
     void check_input_fields(Json::Value const& root) const;
 
