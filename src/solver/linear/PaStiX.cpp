@@ -1,5 +1,5 @@
 
-#include "Pastix.hpp"
+#include "PaStiX.hpp"
 
 #include "SimulationControl.hpp"
 
@@ -10,11 +10,11 @@
 
 namespace neon
 {
-void PaStiX::solve(SparseMatrix const& A, Vector& x, Vector const& b)
+void PaStiXLDLT::solve(SparseMatrix const& A, Vector& x, Vector const& b)
 {
     auto start = std::chrono::high_resolution_clock::now();
 
-    Eigen::PastixLLT<Eigen::SparseMatrix<double>, Eigen::Upper> pastix;
+    Eigen::PastixLDLT<Eigen::SparseMatrix<double>, Eigen::Upper> pastix;
 
     // Verbosity
     pastix.iparm(3) = 0;
@@ -31,7 +31,35 @@ void PaStiX::solve(SparseMatrix const& A, Vector& x, Vector const& b)
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
-    std::cout << std::string(6, ' ') << "PaStiX LLT direct solver took " << elapsed_seconds.count()
+    std::cout << std::string(6, ' ') << "PaStiX LDLT direct solver took " << elapsed_seconds.count()
+              << "s\n";
+}
+
+void PaStiXLU::solve(SparseMatrix const& A, Vector& x, Vector const& b)
+{
+    auto start = std::chrono::high_resolution_clock::now();
+
+    // BUG Likely not going to work with unsymmetric matrix because of row and
+    // column ordering change.  Should give the transpose of the matrix but
+    // unsure why Eigen can't handle this
+    Eigen::PastixLU<Eigen::SparseMatrix<double>> pastix;
+
+    // Verbosity
+    pastix.iparm(3) = 0;
+
+    // Number of threads
+    pastix.iparm(34) = SimulationControl::threads;
+
+    // Number of Cuda devices
+    // pastix.iparm(64) = 1;
+
+    pastix.compute(A);
+
+    x = pastix.solve(b);
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::cout << std::string(6, ' ') << "PaStiX LU direct solver took " << elapsed_seconds.count()
               << "s\n";
 }
 }
