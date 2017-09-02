@@ -6,7 +6,7 @@
 #include "mesh/solid/MaterialCoordinates.hpp"
 #include "mesh/solid/Submesh.hpp"
 
-#include "mesh/solid/boundary/Dirichlet.hpp"
+#include "mesh/common/Dirichlet.hpp"
 #include "mesh/solid/boundary/NonFollowerLoad.hpp"
 
 #include <json/forwards.h>

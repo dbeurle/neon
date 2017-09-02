@@ -13,6 +13,7 @@ public:
     explicit femDynamicMatrix(femMesh& fem_mesh,
                               Visualisation&& visualisation,
                               Json::Value const& solver_data,
+                              Json::Value const& nonlinear_data,
                               Json::Value const& time_data);
 
     ~femDynamicMatrix() = default;
