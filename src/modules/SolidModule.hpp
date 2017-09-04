@@ -3,6 +3,7 @@
 
 #include "AbstractModule.hpp"
 
+#include "assembler/solid/femStaticMatrix.hpp"
 #include "mesh/solid/femMesh.hpp"
 
 namespace neon
@@ -15,14 +16,14 @@ class SolidModule : public AbstractModule
 {
 public:
     template <typename... args>
-    SolidModule(args...) : fem_mesh(args...), fem_matrix()
+    SolidModule(args...)
     {
     }
 
     virtual void perform_simulation() override final {}
 
 protected:
-    solid::femMesh fem_mesh;     //!< Mesh with the solid routines
-    solid::femMatrix fem_matrix; //!< Nonlinear solver routines
+    // solid::femMesh fem_mesh;           //!< Mesh with the solid routines
+    // solid::femStaticMatrix fem_matrix; //!< Nonlinear solver routines
 };
 }

@@ -8,7 +8,7 @@
 
 namespace neon
 {
-std::unique_ptr<AbstractModule> SimulationControl::make_module(Json::Value const& simulation) const
+std::unique_ptr<AbstractModule> make_module(Json::Value const& simulation)
 {
     if (auto const& module_type = simulation["Type"].asString(); module_type == "SolidMechanics")
     {
