@@ -27,7 +27,8 @@ std::unique_ptr<LinearSolver> make_linear_solver(Json::Value const& solver_data,
     }
     else if (solver_name == "MUMPS")
     {
-        return std::make_unique<MUMPS>();
+        if (is_spd) return std::make_unique<MUMPSLLT>();
+        return std::make_unique<MUMPSLU>();
     }
     else if (solver_name == "Direct")
     {
