@@ -11,19 +11,22 @@
 namespace neon
 {
 /**
+<<<<<<< HEAD
  * ConjugateGradientGPU is a GPU based solver using the conjugate
+=======
+ * ConjugateGradientGPU is a GPU based solver using the preconditioned conjugate
+>>>>>>> f94aec2b5e8c283f14be77fe759b1025ba7d7f5c
  * gradient solver from the CUDA examples.
  */
-class ConjugateGradientGPU : public LinearSolver
+class ConjugateGradientGPU : public IterativeLinearSolver
 {
 public:
     explicit ConjugateGradientGPU();
-
     explicit ConjugateGradientGPU(double const residual_tolerance);
+    explicit ConjugateGradientGPU(int const max_iterations);
+    explicit ConjugateGradientGPU(double const residual_tolerance, int const max_iterations);
 
-    explicit ConjugateGradientGPU(int const maxIter);
-
-    explicit ConjugateGradientGPU(double const residual_tolerance, int const maxIter);
+    using IterativeLinearSolver::IterativeLinearSolver;
 
     ~ConjugateGradientGPU();
 

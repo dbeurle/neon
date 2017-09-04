@@ -56,7 +56,7 @@ TEST_CASE("Linear solver test suite")
 
     SECTION("Preconditioned Conjugate Gradient Default")
     {
-        std::string solver_str = "{\"Solver\":\"ConjugateGradient\"}";
+        std::string solver_str = "{\"Solver\":\"Iterative\"}";
 
         Json::Value solver_data;
         Json::Reader solver_file;
@@ -71,7 +71,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Conjugate Gradient Tolerance")
     {
-        std::string solver_str = "{\"Solver\":\"ConjugateGradient\",\"Tolerance\":1e-8}";
+        std::string solver_str = "{\"Solver\":\"Iterative\",\"Tolerance\":1e-8}";
 
         Json::Value solver_data;
         Json::Reader solver_file;
@@ -86,7 +86,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Conjugate Gradient Iterations")
     {
-        std::string solver_str = "{\"Solver\":\"ConjugateGradient\",\"MaxIterations\":100}";
+        std::string solver_str = "{\"Solver\":\"Iterative\",\"MaxIterations\":100}";
 
         Json::Value solver_data;
         Json::Reader solver_file;
@@ -101,7 +101,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Conjugate Gradient Iterations and Tolerance")
     {
-        std::string solver_str = "{\"Solver\":\"ConjugateGradient\",\"MaxIterations\":"
+        std::string solver_str = "{\"Solver\":\"Iterative\",\"MaxIterations\":"
                                  "100,\"Tolerance\":1e-8}";
 
         Json::Value solver_data;
@@ -117,13 +117,13 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Bi-conjugate Gradient Stab Default")
     {
-        std::string solver_str = "{\"Solver\":\"BiCGStab\"}";
+        std::string solver_str = "{\"Solver\":\"Iterative\"}";
 
         Json::Value solver_data;
         Json::Reader solver_file;
         REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
 
-        auto linear_solver = make_linear_solver(solver_data);
+        auto linear_solver = make_linear_solver(solver_data, false);
 
         linear_solver->solve(A, x, b);
 
@@ -132,13 +132,13 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Bi-conjugate Gradient Stab Tolerance")
     {
-        std::string solver_str = "{\"Solver\":\"BiCGStab\",\"Tolerance\":1e-8}";
+        std::string solver_str = "{\"Solver\":\"Iterative\",\"Tolerance\":1e-8}";
 
         Json::Value solver_data;
         Json::Reader solver_file;
         REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
 
-        auto linear_solver = make_linear_solver(solver_data);
+        auto linear_solver = make_linear_solver(solver_data, false);
 
         linear_solver->solve(A, x, b);
 
@@ -147,13 +147,13 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Bi-conjugate Gradient Stab Iterations")
     {
-        std::string solver_str = "{\"Solver\":\"BiCGStab\",\"MaxIterations\":100}";
+        std::string solver_str = "{\"Solver\":\"Iterative\",\"MaxIterations\":100}";
 
         Json::Value solver_data;
         Json::Reader solver_file;
         REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
 
-        auto linear_solver = make_linear_solver(solver_data);
+        auto linear_solver = make_linear_solver(solver_data, false);
 
         linear_solver->solve(A, x, b);
 
@@ -162,14 +162,14 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Bi-conjugate Gradient Stab Iterations and Tolerance")
     {
-        std::string solver_str = "{\"Solver\":\"BiCGStab\",\"MaxIterations\":100,"
+        std::string solver_str = "{\"Solver\":\"Iterative\",\"MaxIterations\":100,"
                                  "\"Tolerance\":1e-8}";
 
         Json::Value solver_data;
         Json::Reader solver_file;
         REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
 
-        auto linear_solver = make_linear_solver(solver_data);
+        auto linear_solver = make_linear_solver(solver_data, false);
 
         linear_solver->solve(A, x, b);
 
@@ -178,7 +178,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("PaStiX")
     {
-        std::string solver_str = "{\"Solver\":\"Pastix\"}";
+        std::string solver_str = "{\"Solver\":\"PaStiX\"}";
 
         Json::Value solver_data;
         Json::Reader solver_file;
@@ -208,7 +208,22 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("SparseLU")
     {
-        std::string solver_str = "{\"Solver\":\"SparseLU\"}";
+        std::string solver_str = "{\"Solver\":\"Direct\"}";
+
+        Json::Value solver_data;
+        Json::Reader solver_file;
+        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        auto linear_solver = make_linear_solver(solver_data, false);
+
+        linear_solver->solve(A, x, b);
+
+        REQUIRE((x - solution()).norm() == Approx(0.0));
+        REQUIRE((A * x - b).norm() == Approx(0.0));
+    }
+    SECTION("SparseLDLT")
+    {
+        std::string solver_str = "{\"Solver\":\"Direct\"}";
 
         Json::Value solver_data;
         Json::Reader solver_file;
@@ -224,7 +239,7 @@ TEST_CASE("Linear solver test suite")
 #ifdef ENABLE_CUDA
     SECTION("GPU Preconditioned Conjugate Gradient Default")
     {
-        std::string solver_str = "{\"Solver\":\"ConjugateGradientGPU\"}";
+        std::string solver_str = "{\"Solver\":\"IterativeGPU\"}";
 
         Json::Value solver_data;
         Json::Reader solver_file;
@@ -239,7 +254,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("GPU Preconditioned Conjugate Gradient Tolerance")
     {
-        std::string solver_str = "{\"Solver\":\"ConjugateGradientGPU\",\"Tolerance\":1e-8}";
+        std::string solver_str = "{\"Solver\":\"IterativeGPU\",\"Tolerance\":1e-8}";
 
         Json::Value solver_data;
         Json::Reader solver_file;
@@ -254,7 +269,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("GPU Preconditioned Conjugate Gradient Iterations")
     {
-        std::string solver_str = "{\"Solver\":\"ConjugateGradientGPU\",\"MaxIterations\":100}";
+        std::string solver_str = "{\"Solver\":\"IterativeGPU\",\"MaxIterations\":100}";
 
         Json::Value solver_data;
         Json::Reader solver_file;
@@ -269,7 +284,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("GPU Preconditioned Conjugate Gradient Iterations and Tolerance")
     {
-        std::string solver_str = "{\"Solver\":\"ConjugateGradientGPU\",\"MaxIterations\":"
+        std::string solver_str = "{\"Solver\":\"IterativeGPU\",\"MaxIterations\":"
                                  "100,\"Tolerance\":1e-8}";
 
         Json::Value solver_data;

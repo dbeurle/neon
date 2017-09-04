@@ -11,7 +11,7 @@ namespace neon
  *
  * TODO Put link to the solver website and documentation
  */
-class MUMPS : public LinearSolver
+class MUMPS : public DirectLinearSolver
 {
 public:
     enum Ordering { AMD, AMF = 2, Scotch, Pord, Metis, QAMD, Automatic };

@@ -38,7 +38,7 @@
 
 namespace neon
 {
-ConjugateGradientGPU::ConjugateGradientGPU()
+ConjugateGradientGPU::ConjugateGradientGPU() : IterativeLinearSolver()
 {
     this->find_compute_device();
 
@@ -56,21 +56,21 @@ ConjugateGradientGPU::ConjugateGradientGPU()
     cusparseSetMatIndexBase(descr, CUSPARSE_INDEX_BASE_ZERO);
 }
 
-ConjugateGradientGPU::ConjugateGradientGPU(double const tol) : ConjugateGradientGPU()
+ConjugateGradientGPU::ConjugateGradientGPU(double const residual_tolerance) : ConjugateGradientGPU()
 {
-    solverParam.tolerance = tol;
+    this->residual_tolerance = residual_tolerance;
 }
 
-ConjugateGradientGPU::ConjugateGradientGPU(int const maxIter) : ConjugateGradientGPU()
+ConjugateGradientGPU::ConjugateGradientGPU(int const max_iterations) : ConjugateGradientGPU()
 {
-    solverParam.max_iterations = maxIter;
+    this->max_iterations = max_iterations;
 }
 
-ConjugateGradientGPU::ConjugateGradientGPU(double const tol, int const maxIter)
+ConjugateGradientGPU::ConjugateGradientGPU(double const residual_tolerance, int const max_iterations)
     : ConjugateGradientGPU()
 {
-    solverParam.max_iterations = maxIter;
-    solverParam.tolerance = tol;
+    this->residual_tolerance = residual_tolerance;
+    this->max_iterations = max_iterations;
 }
 
 ConjugateGradientGPU::~ConjugateGradientGPU()
@@ -95,9 +95,6 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, Vector& x, Vector const&
 {
     this->allocate_device_memory(A, x, b);
 
-    auto const max_iter = solverParam.max_iterations;
-    auto const tol = solverParam.tolerance;
-
     constexpr double one = 1.0;
     constexpr double zero = 0.0;
 
@@ -115,7 +112,7 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, Vector& x, Vector const&
     // r * r.transpose()
     cublasDdot(cublasHandle, N, d_r, 1, d_r, 1, &residual);
 
-    while (std::sqrt(residual) > tol && k < max_iter)
+    while (std::sqrt(residual) > residual_tolerance && k < max_iterations)
     {
         k++;
 
@@ -173,10 +170,10 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, Vector& x, Vector const&
     }
 
     std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << k << " (max. "
-              << solverParam.max_iterations << "), estimated error: " << std::sqrt(residual)
-              << " (min. " << solverParam.tolerance << ")\n";
+              << max_iterations << "), estimated error: " << std::sqrt(residual) << " (min. "
+              << residual_tolerance << ")\n";
 
-    if (k >= solverParam.max_iterations)
+    if (k >= max_iterations)
     {
         throw computational_error("Conjugate gradient solver maximum iterations reached");
     }
