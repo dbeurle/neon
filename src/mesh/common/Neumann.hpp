@@ -10,7 +10,8 @@ namespace neon
 /**
  * Neumann is a base class for Neumann type boundary conditions.  This includes
  * the nodal connectivities and degrees of freedom lists.  Derived classes must
- * implement shape functions
+ * implement shape functions and the appropriate finite element approximation
+ * for the given problem
  */
 class Neumann : public Boundary
 {
