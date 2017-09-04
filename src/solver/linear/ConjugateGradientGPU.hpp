@@ -11,9 +11,8 @@
 namespace neon
 {
 /**
- * ConjugateGradientGPU is a GPU based solver using the preconditioned conjugate
- * gradient solver from the CUDA examples.  The preconditioner is the diagonal
- * preconditioner.
+ * ConjugateGradientGPU is a GPU based solver using the conjugate
+ * gradient solver from the CUDA examples.
  */
 class ConjugateGradientGPU : public LinearSolver
 {
