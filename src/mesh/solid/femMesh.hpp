@@ -33,7 +33,7 @@ public:
      * resulting matrix from this mesh is symmetric.  TODO implement this
      * once there is an unsymmetric operation.  \sa LinearSolver
      */
-    bool is_symmetric() const { true; }
+    bool is_symmetric() const { return true; }
 
     /** Reset the boundary conditions */
     void internal_restart(Json::Value const& simulation_data);
