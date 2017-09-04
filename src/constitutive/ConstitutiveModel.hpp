@@ -30,6 +30,8 @@ public:
 
     virtual bool is_finite_deformation() const = 0;
 
+    virtual bool is_symmetric() const { return true; };
+
 protected:
     InternalVariables& variables;
 };
