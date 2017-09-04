@@ -2,8 +2,8 @@
 #pragma once
 
 #include "mesh/BasicMesh.hpp"
-// #include "modules/AbstractModule.hpp"
 
+#include <list>
 #include <map>
 #include <memory>
 #include <string>
@@ -14,12 +14,16 @@
 
 namespace neon
 {
+class AbstractModule;
+
 class SimulationControl
 {
 public:
     explicit SimulationControl(std::string const& input_file_name);
 
-    void start(bool const is_initial_pass = true);
+    ~SimulationControl();
+
+    void start();
 
     static int threads; //!< Number of hardware threads to use
 protected:
@@ -32,9 +36,6 @@ protected:
 
     /** Print the welcome banner to the terminal */
     void print_banner() const;
-
-    /** Factory method to create simulation modules */
-    // std::unique_ptr<AbstractModule> make_module() const;
 
     void check_input_fields(Json::Value const& root) const;
 
@@ -51,9 +52,9 @@ protected:
     // Store the name, mesh connectivity and material
     std::map<std::string, std::pair<BasicMesh, Json::Value>> mesh_store;
 
-    std::map<std::string, std::vector<Json::Value>> multistep_simulations;
+    std::map<std::string, std::list<Json::Value>> multistep_simulations;
 
-    // std::vector<std::unique_ptr<AbstractModule>> modules;
+    std::vector<std::unique_ptr<AbstractModule>> modules;
 
     Json::Value root; // The file input
 };
