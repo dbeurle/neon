@@ -1,6 +1,6 @@
 {
     "Name" : "J2Plasticity",
-    "Cores" : 4,
+    "Cores" : 2,
     "Part": [{
         "Name" : "LowerControlArm",
         "Material" : "steel"
@@ -19,8 +19,8 @@
         "Time" : {
             "Period" : 1.0,
             "Increments" : {
-                "Initial" : 0.1,
-                "Minimum" : 0.00001,
+                "Initial" : 1.0,
+                "Minimum" : 0.01,
                 "Maximum" : 1.0
             }
         },
@@ -53,8 +53,8 @@
 		"LinearSolver" :
         {
 		    "Solver" : "Pastix",
-            "MaxIterations" : 2000,
-            "MaxTolerance"  : 1.0e-8
+            "Tolerance"  : 1.0e-7,
+            "MaxIterations" : 2000
         },
         "Visualisation" :
         {
