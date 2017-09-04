@@ -1,4 +1,0 @@
-<map id="neon::solid::femStaticMatrix::compute_sparsity_pattern" name="neon::solid::femStaticMatrix::compute_sparsity_pattern">
-<area shape="rect" id="node2" href="$classneon_1_1solid_1_1femStaticMatrix.html#a38f9c7ef5b0a03920dd67cc054a83042" title="neon::solid::femStaticMatrix\l::assemble_stiffness" alt="" coords="239,5,424,47"/>
-<area shape="rect" id="node3" href="$classneon_1_1solid_1_1femStaticMatrix.html#a9d09a3000b8ab1f5088e65a991325514" title="neon::solid::femStaticMatrix\l::apply_displacement_boundaries" alt="" coords="472,35,687,76"/>
-</map>

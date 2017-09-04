@@ -1,6 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classneon_1_1Material.html" title="neon::Material" alt="" coords="5,31,109,57"/>
-<area shape="rect" id="node2" href="$classneon_1_1LinearElastic.html" title="neon::LinearElastic" alt="" coords="157,31,291,57"/>
-<area shape="rect" id="node3" href="$classneon_1_1IsotropicElasticPlastic.html" title="neon::IsotropicElasticPlastic" alt="" coords="352,5,540,32"/>
-<area shape="rect" id="node4" href="$classneon_1_1MicromechanicalElastomer.html" title="neon::MicromechanicalElastomer" alt="" coords="339,56,553,83"/>
-</map>

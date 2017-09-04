@@ -1,6 +1,0 @@
-<map id="neon::AdaptiveLoadStep::update_convergence_state" name="neon::AdaptiveLoadStep::update_convergence_state">
-<area shape="rect" id="node2" href="$classneon_1_1solid_1_1femStaticMatrix.html#a9d09a3000b8ab1f5088e65a991325514" title="neon::solid::femStaticMatrix\l::apply_displacement_boundaries" alt="" coords="452,35,667,76"/>
-<area shape="rect" id="node5" href="$classneon_1_1AdaptiveLoadStep.html#a1ccc0de1f228c0b0a495ac5e6a1419d4" title="neon::AdaptiveLoadStep\l::step" alt="" coords="240,64,404,105"/>
-<area shape="rect" id="node3" href="$classneon_1_1solid_1_1femStaticMatrix.html#a1b4ec4af5d4aa93d28a374c0f4f7e5d3" title="neon::solid::femStaticMatrix\l::compute_sparsity_pattern" alt="" coords="715,5,900,47"/>
-<area shape="rect" id="node4" href="$classneon_1_1solid_1_1femStaticMatrix.html#a38f9c7ef5b0a03920dd67cc054a83042" title="neon::solid::femStaticMatrix\l::assemble_stiffness" alt="" coords="948,35,1133,76"/>
-</map>

@@ -1,5 +1,0 @@
-<map id="neon::Boundary" name="neon::Boundary">
-<area shape="rect" id="node2" href="$classneon_1_1solid_1_1Dirichlet.html" title="neon::solid::Dirichlet" alt="" coords="5,80,147,107"/>
-<area shape="rect" id="node3" href="$classneon_1_1solid_1_1NonFollowerLoad.html" title="neon::solid::NonFollowerLoad" alt="" coords="171,80,365,107"/>
-<area shape="rect" id="node4" href="$classneon_1_1solid_1_1Traction.html" title="neon::solid::Traction" alt="" coords="198,155,338,181"/>
-</map>

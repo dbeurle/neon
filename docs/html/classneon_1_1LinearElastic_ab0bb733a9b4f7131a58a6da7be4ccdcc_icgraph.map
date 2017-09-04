@@ -1,5 +1,0 @@
-<map id="neon::LinearElastic::mu" name="neon::LinearElastic::mu">
-<area shape="rect" id="node2" href="$classneon_1_1LinearElastic.html#ae5a85019b094ea54a8c0914620213a0c" title="neon::LinearElastic\l::bulk_modulus" alt="" coords="213,5,346,47"/>
-<area shape="rect" id="node3" href="$classneon_1_1LinearElastic.html#a229a5c3662c559f56dd054da8cc696e4" title="neon::LinearElastic\l::shear_modulus" alt="" coords="213,71,346,112"/>
-<area shape="rect" id="node4" href="$classneon_1_1LinearElastic.html#a84f36a87ccea5ecf7c0ba152add70fc5" title="neon::LinearElastic\l::Lame_parameters" alt="" coords="212,136,347,177"/>
-</map>

@@ -1,6 +1,0 @@
-<map id="neon::AffineMicrosphere::compute_kirchhoff_stress" name="neon::AffineMicrosphere::compute_kirchhoff_stress">
-<area shape="rect" id="node2" href="$classneon_1_1NumericalQuadrature.html#a132861ccaee57e629e116eb9b014a3a9" title="neon::NumericalQuadrature\l::integrate" alt="" coords="250,8,431,49"/>
-<area shape="rect" id="node4" href="$classneon_1_1MicromechanicalElastomer.html#aaa830ce016c4832b69ad66413cbffc7f" title="neon::MicromechanicalElastomer\l::segment_probability" alt="" coords="233,75,448,116"/>
-<area shape="rect" id="node3" href="$classneon_1_1NumericalQuadrature.html#aed7176a5ad2e2c75aa96eb9a41f4dfb6" title="neon::NumericalQuadrature\l::points" alt="" coords="513,5,694,47"/>
-<area shape="rect" id="node5" href="$classneon_1_1MicromechanicalElastomer.html#aab4b7bfc80786688b65c944d482bbb66" title="neon::MicromechanicalElastomer\l::compute_probability_and\l_segments" alt="" coords="496,71,711,127"/>
-</map>
