@@ -25,7 +25,15 @@ public:
             Json::Value const& material_data,
             Json::Value const& simulation_data);
 
-    int active_dofs() const;
+    /** The number of active degrees of freedom in this mesh */
+    auto active_dofs() const { return 3 * material_coordinates->size(); }
+
+    /**
+     * Checks the boundary conditions and constitutive model to ensure
+     * resulting matrix from this mesh is symmetric.  TODO implement this
+     * once there is an unsymmetric operation.  \sa LinearSolver
+     */
+    bool is_symmetric() const { true; }
 
     /** Reset the boundary conditions */
     void internal_restart(Json::Value const& simulation_data);

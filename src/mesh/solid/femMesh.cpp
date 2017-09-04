@@ -32,8 +32,6 @@ femMesh::femMesh(BasicMesh const& basic_mesh,
     allocate_boundary_conditions(simulation_data, basic_mesh);
 }
 
-int femMesh::active_dofs() const { return 3 * material_coordinates->size(); }
-
 void femMesh::internal_restart(Json::Value const& simulation_data)
 {
     if (!simulation_data.isMember("BoundaryConditions"))
