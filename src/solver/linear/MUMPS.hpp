@@ -22,7 +22,7 @@ public:
     // 6   Job = 1 && Job = 2 && Job = 3
     enum Job {
         Terminate = -2,
-        Initialization = -1,
+        Initialisation = -1,
         Analysis = 1,
         Factorisation = 2,
         BackSubstitution = 3
@@ -38,11 +38,13 @@ protected:
      * diagonal values if the only_upper flag is set, otherwise expand
      * the entire matrix into compressed coordinate (COO) format
      */
-    void allocate_coordinate_format_storage(SparseMatrix const& A, bool const only_upper);
+    virtual void allocate_coordinate_format_storage(SparseMatrix const& A) = 0;
+
+    void internal_solve(SparseMatrix const& A, Vector& x, Vector const& b, int const symmetric_flag);
 
 protected:
-    std::vector<int> irn, jcn; //!< Row and column index storage (uncompressed)
-    std::vector<double> a;     //!< Sparse matrix coefficients
+    std::vector<int> rows, cols;      //!< Row and column index storage (uncompressed)
+    std::vector<double> coefficients; //!< Sparse matrix coefficients
 };
 
 /**
@@ -54,6 +56,9 @@ class MUMPSLLT : public MUMPS
 {
 public:
     void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
+
+protected:
+    virtual void allocate_coordinate_format_storage(SparseMatrix const& A) override final;
 };
 
 /**
@@ -65,5 +70,8 @@ class MUMPSLU : public MUMPS
 {
 public:
     void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
+
+protected:
+    virtual void allocate_coordinate_format_storage(SparseMatrix const& A) override final;
 };
 }
