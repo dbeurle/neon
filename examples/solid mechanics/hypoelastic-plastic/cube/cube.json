@@ -17,6 +17,10 @@
         "Name" : "Uniaxial",
 		"Type" : "SolidMechanics",
         "Solution" : "Equilibrium",
+        "NonlinearOptions" : {
+            "DisplacementIncrementTolerance" : 1e-5,
+            "ResidualForceTolerance" : 1e-3
+        },
         "Time" : {
             "Period" : 1.0,
             "Increments" : {
