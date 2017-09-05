@@ -7,6 +7,22 @@ A non-linear finite element code.  This project is still under development and i
 
 ## Building
 
+### Docker build
+
+Go to the top level directory in the git repository and enter
+
+- `sudo docker build -t neon .`
+
+This will pull down the base image and then clone the git repository inside the docker container.  The original hosting can be found at https://hub.docker.com/r/dbeurle/neon/
+
+Once this is completed, enter the following commands to enter the docker container
+
+- `sudo docker run -i -t neon /bin/bash`
+
+The instructions in the section below can now be followed with the copy of the repository inside the docker container without worrying about dependencies.
+
+### Linux
+
 The external dependencies are:
  - Boost filesystem
  - Pastix and MUMPS for direct linear solvers
@@ -35,11 +51,25 @@ and for release mode with optimisations
 
 - `mkdir build && cd build/`
 - `cmake -DCMAKE_BUILD_TYPE=Release ..`
-- `make all`
+- `make all -j<# cpus>`
+- `make install`
 
-For checking the successful compilation of the program, invoke the test suite by
+If the code is only used on a particular machine, then machine specification optimisations can be invoked by specifying the `CMake` symbol
+- `-DENABLE_NATIVE=1`
 
-`ctest`
+which enables the compiler to generate the best machine code for your platform.
+
+If you have an NVIDIA graphics card, then you can use the CUDA enabled iterative solvers by specifying the `CMake` symbol
+
+- `-DENABLE_CUDA=1`
+
+For checking the successful compilation of the program, invoke the test suite by executing
+
+- `ctest`
+
+in the build directory.
+
+
 
 ## Licensing
 
