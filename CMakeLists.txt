@@ -65,3 +65,5 @@ add_subdirectory(tests)
 add_executable(neonfe src/neon.cpp)
 
 target_link_libraries(neonfe neon)
+
+install(TARGETS neonfe RUNTIME DESTINATION bin)
