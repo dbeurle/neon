@@ -1,10 +1,9 @@
 {
-    "Name" : "J2Plasticity",
+    "Name" : "CubeExample",
     "Cores" : 1,
     "Part": [{
         "Name" : "cube",
-        "Material" : "steel",
-        "MeshFormat" : "gmsh"
+        "Material" : "steel"
     }],
     "Material" : [{
         "Name" : "steel",
@@ -14,9 +13,13 @@
         "PoissonsRatio" : 0.3
     }],
     "SimulationCases" : [{
-        "Name" : "Uniaxial",
+        "Name" : "UniaxialLoad",
 		"Type" : "SolidMechanics",
         "Solution" : "Equilibrium",
+        "NonlinearOptions" : {
+            "DisplacementTolerance" : 1.0e-5,
+            "ResidualTolerance" : 1.0e-5
+        },
         "Time" : {
             "Period" : 1.0,
             "Increments" : {
@@ -25,8 +28,7 @@
                 "Maximum" : 0.1
             }
         },
-		"Mesh" :
-        [{
+		"Mesh" : [{
             "Name" : "cube",
             "ConstitutiveModel" : "J2",
             "ElementOptions" :
@@ -63,14 +65,10 @@
                 }
             }]
         }],
-		"LinearSolver" :
-        {
-		    "Solver" : "Pastix",
-            "MaxIterations" : 1000,
-            "MaxTolerance"  : 1.0e-6
+		"LinearSolver" : {
+		    "Solver" : "MUMPS"
         },
-        "Visualisation" :
-        {
+        "Visualisation" : {
             "Fields" : ["Displacement", "LinearisedStrain", "LinearisedPlasticStrain",
                         "CauchyStress", "VonMisesStress", "AccumulatedPlasticStrain"]
         }
