@@ -65,12 +65,11 @@
         }],
 		"LinearSolver" :
         {
-		    "Solver" : "Pastix",
+		    "Solver" : "PaStiX",
             "MaxIterations" : 1000,
             "MaxTolerance"  : 1.0e-10
         },
-        "Visualisation" :
-        {
+        "Visualisation" : {
             "Fields" : ["Displacement", "CauchyStress", "VonMisesStress", "AccumulatedPlasticStrain"]
         }
         }
