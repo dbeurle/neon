@@ -16,24 +16,25 @@
         "Name" : "Uniaxial",
 		"Type" : "SolidMechanics",
         "Solution" : "Equilibrium",
+        "NonlinearOptions" : {
+            "DisplacementTolerance" : 1.0e-5,
+            "ResidualTolerance" : 1.0e-5
+        },
         "Time" : {
             "Period" : 1.0,
             "Increments" : {
-                "Initial" : 0.1,
+                "Initial" : 1.0,
                 "Minimum" : 0.00001,
-                "Maximum" : 0.1
+                "Maximum" : 0.2
             }
         },
-		"Mesh" :
-        [{
+		"Mesh" : [{
             "Name" : "plate",
             "ConstitutiveModel" : "J2",
-            "ElementOptions" :
-            {
+            "ElementOptions" : {
                 "Quadrature" : "Full"
             },
-            "BoundaryConditions" :
-            [{
+            "BoundaryConditions" : [{
                 "Name" : "x-sym",
                 "Type" : "Displacement",
                 "Values" : {
@@ -62,14 +63,12 @@
                 }
             }]
         }],
-		"LinearSolver" :
-        {
-		    "Solver" : "ConjugateGradientGPU",
+		"LinearSolver" :  {
+		    "Solver" : "Iterative",
             "MaxIterations" : 3000,
             "Tolerance"  : 1.0e-8
         },
-        "Visualisation" :
-        {
+        "Visualisation" : {
             "Fields" : ["Displacement", "LinearisedStrain", "LinearisedPlasticStrain",
                         "CauchyStress", "VonMisesStress", "AccumulatedPlasticStrain"]
         }
