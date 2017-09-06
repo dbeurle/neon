@@ -138,6 +138,8 @@ void femStaticMatrix::solve()
 
         apply_displacement_boundaries();
 
+        compute_external_force(adaptive_load.factor());
+
         fem_mesh.update_internal_variables(d, adaptive_load.increment());
 
         perform_equilibrium_iterations();
@@ -258,8 +260,6 @@ void femStaticMatrix::perform_equilibrium_iterations()
                       << std::endl;
 
             compute_internal_force();
-
-            compute_external_force(adaptive_load.factor());
 
             Vector residual = fint - fext;
 
