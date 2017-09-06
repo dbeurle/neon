@@ -18,8 +18,8 @@
 		"Type" : "SolidMechanics",
         "Solution" : "Equilibrium",
         "NonlinearOptions" : {
-            "DisplacementIncrementTolerance" : 1e-5,
-            "ResidualForceTolerance" : 1e-3
+            "DisplacementTolerance" : 1e-5,
+            "ResidualTolerance" : 1e-3
         },
         "Time" : {
             "Period" : 1.0,
@@ -29,8 +29,7 @@
                 "Maximum" : 0.1
             }
         },
-		"Mesh" :
-        [{
+		"Mesh" : [{
             "Name" : "cube",
             "ConstitutiveModel" : "J2",
             "ElementOptions" :
@@ -67,14 +66,10 @@
                 }
             }]
         }],
-		"LinearSolver" :
-        {
-		    "Solver" : "Pastix",
-            "MaxIterations" : 1000,
-            "MaxTolerance"  : 1.0e-6
+		"LinearSolver" : {
+		    "Solver" : "PaStiX"
         },
-        "Visualisation" :
-        {
+        "Visualisation" : {
             "Fields" : ["Displacement", "LinearisedStrain", "LinearisedPlasticStrain",
                         "CauchyStress", "VonMisesStress", "AccumulatedPlasticStrain"]
         }

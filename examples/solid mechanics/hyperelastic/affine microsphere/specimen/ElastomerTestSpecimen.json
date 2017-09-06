@@ -20,6 +20,10 @@
         "Name" : "Load",
 		"Type" : "SolidMechanics",
         "Solution" : "Equilibrium",
+        "NonlinearOptions" : {
+            "DisplacementTolerance" : 1.0e-5,
+            "ResidualTolerance" : 1.0e-5
+        },
         "Time" : {
             "Period" : 1.0,
             "Increments" : {
@@ -65,7 +69,7 @@
             }]
         }],
 		"LinearSolver" : {
-		    "Solver" : "ConjugateGradient",
+		    "Solver" : "Iterative",
             "MaxIterations" : 3000,
             "Tolerance"  : 1.0e-8
         },

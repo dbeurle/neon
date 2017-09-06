@@ -33,12 +33,10 @@
                 "Maximum" : 1.0
             }
         },
-		"Mesh" :
-        [{
+		"Mesh" : [{
             "Name" : "cube",
             "ConstitutiveModel" : "AffineMicrosphere",
-            "ElementOptions" :
-            {
+            "ElementOptions" : {
                 "Quadrature" : "Full"
             },
             "BoundaryConditions" :
@@ -73,7 +71,7 @@
             }]
         }],
 		"LinearSolver" : {
-		    "Solver" : "pCG",
+		    "Solver" : "Iterative",
             "MaxIterations" : 3000,
             "Tolerance"  : 1.0e-8
         },
@@ -86,6 +84,10 @@
         "Name" : "Relaxation",
         "Inherits" : "Load",
         "Solution" : "Equilibrium",
+        "NonlinearOptions" : {
+            "ResidualTolerance" : 1.0e-5,
+            "DisplacementTolerance" : 1.0e-5
+        },
         "Time" : {
             "Period" : 5184000.0,
             "Increments" : {
@@ -98,7 +100,7 @@
             "Name" : "cube"
         }],
         "LinearSolver" : {
-		    "Solver" : "Pastix",
+		    "Solver" : "Iterative",
             "MaxIterations" : 1000,
             "Tolerance"  : 1.0e-8
         },
@@ -110,6 +112,10 @@
         "Name" : "Unloading",
         "Inherits" : "Relaxation",
         "Solution" : "Equilibrium",
+        "NonlinearOptions" : {
+            "ResidualTolerance" : 1.0e-5,
+            "DisplacementTolerance" : 1.0e-5
+        },
         "Time" : {
             "Period" : 1.0,
             "Increments" : {
@@ -150,7 +156,7 @@
             }]
         }],
         "LinearSolver" : {
-		    "Solver" : "pCG",
+		    "Solver" : "Iterative",
             "MaxIterations" : 1000,
             "Tolerance"  : 1.0e-8
         },

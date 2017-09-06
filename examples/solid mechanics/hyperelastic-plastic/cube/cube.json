@@ -59,7 +59,7 @@
                 "Name" : "ZLoad",
 				"Type" : "Displacement",
                 "Values" : {
-                    "z" : 1.0e-5
+                    "z" : 1.0e-6
                 }
             }]
         }],
