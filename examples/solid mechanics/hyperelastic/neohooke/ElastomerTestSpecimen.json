@@ -15,6 +15,10 @@
         "Name" : "Uniaxial",
 		"Type" : "SolidMechanics",
         "Solution" : "Equilibrium",
+        "NonlinearOptions" : {
+            "DisplacementTolerance" : 1.0e-5,
+            "ResidualTolerance" : 1.0e-5
+        },
         "Time" : {
             "Period" : 1.0,
             "Increments" : {
@@ -61,14 +65,12 @@
                 }
             }]
         }],
-		"LinearSolver" :
-        {
-		    "Solver" : "pCG",
+		"LinearSolver" : {
+		    "Solver" : "Iterative",
             "MaxIterations" : 1000,
             "Tolerance"  : 1.0e-6
         },
-        "Visualisation" :
-        {
+        "Visualisation" : {
             "Fields" : ["Displacement", "DeformationGradient", "CauchyStress"]
         }
     }]
