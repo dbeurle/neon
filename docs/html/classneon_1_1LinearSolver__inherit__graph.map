@@ -1,7 +1,0 @@
-<map id="neon::LinearSolver" name="neon::LinearSolver">
-<area shape="rect" id="node2" href="$classneon_1_1BiCGSTAB.html" title="neon::BiCGSTAB" alt="" coords="5,80,131,107"/>
-<area shape="rect" id="node3" href="$classneon_1_1MUMPS.html" title="neon::MUMPS" alt="" coords="155,80,263,107"/>
-<area shape="rect" id="node4" href="$classneon_1_1PaStiX.html" title="neon::PaStiX" alt="" coords="288,80,387,107"/>
-<area shape="rect" id="node5" href="$classneon_1_1pCG.html" title="neon::pCG" alt="" coords="411,80,496,107"/>
-<area shape="rect" id="node6" href="$classneon_1_1SparseLU.html" title="neon::SparseLU" alt="" coords="521,80,637,107"/>
-</map>

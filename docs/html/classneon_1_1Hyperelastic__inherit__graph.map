@@ -1,5 +1,0 @@
-<map id="neon::Hyperelastic" name="neon::Hyperelastic">
-<area shape="rect" id="node3" href="$classneon_1_1AffineMicrosphere.html" title="neon::AffineMicrosphere" alt="" coords="5,155,168,181"/>
-<area shape="rect" id="node4" href="$classneon_1_1NeoHooke.html" title="neon::NeoHooke" alt="" coords="192,155,312,181"/>
-<area shape="rect" id="node2" href="$classneon_1_1ConstitutiveModel.html" title="neon::ConstitutiveModel" alt="" coords="88,5,251,32"/>
-</map>

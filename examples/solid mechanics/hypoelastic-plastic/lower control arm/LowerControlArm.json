@@ -1,37 +1,32 @@
 {
     "Name" : "J2Plasticity",
-    "Cores" : 1,
+    "Cores" : 2,
     "Part": [{
-        "Name" : "cube",
-        "Material" : "steel",
-        "MeshFormat" : "gmsh"
+        "Name" : "LowerControlArm",
+        "Material" : "steel"
     }],
     "Material" : [{
         "Name" : "steel",
-        "ElasticModulus" : 210.0e9,
-        "IsotropicHardeningModulus" : 400.0e6,
-        "YieldStress" : 300.0e6,
+        "ElasticModulus" : 200.0e3,
+        "IsotropicHardeningModulus" : 400.0,
+        "YieldStress" : 200.0,
         "PoissonsRatio" : 0.3
     }],
     "SimulationCases" : [{
         "Name" : "Uniaxial",
 		"Type" : "SolidMechanics",
         "Solution" : "Equilibrium",
-        "NonlinearOptions" : {
-            "DisplacementIncrementTolerance" : 1e-5,
-            "ResidualForceTolerance" : 1e-3
-        },
         "Time" : {
             "Period" : 1.0,
             "Increments" : {
-                "Initial" : 0.1,
-                "Minimum" : 0.00001,
-                "Maximum" : 0.1
+                "Initial" : 1.0,
+                "Minimum" : 0.01,
+                "Maximum" : 1.0
             }
         },
 		"Mesh" :
         [{
-            "Name" : "cube",
+            "Name" : "LowerControlArm",
             "ConstitutiveModel" : "J2",
             "ElementOptions" :
             {
@@ -39,39 +34,27 @@
             },
             "BoundaryConditions" :
             [{
-                "Name" : "Xsym",
+                "Name" : "Bearing",
                 "Type" : "Displacement",
                 "Values" : {
-                    "x" : 0.0
-                }
-            },
-            {
-                "Name" : "Ysym",
-                "Type" : "Displacement",
-                "Values" : {
-                    "y" : 0.0
-                }
-            },
-            {
-                "Name" : "Zsym",
-                "Type" : "Displacement",
-                "Values" : {
+                    "x" : 0.0,
+                    "y" : 0.0,
                     "z" : 0.0
                 }
             },
             {
-                "Name" : "ZLoad",
-				"Type" : "Displacement",
+                "Name" : "Load",
+                "Type" : "Displacement",
                 "Values" : {
-                    "z" : 2.0e-3
+                    "x" : 0.005
                 }
             }]
         }],
 		"LinearSolver" :
         {
 		    "Solver" : "Pastix",
-            "MaxIterations" : 1000,
-            "MaxTolerance"  : 1.0e-6
+            "Tolerance"  : 1.0e-7,
+            "MaxIterations" : 2000
         },
         "Visualisation" :
         {

@@ -1,5 +1,0 @@
-<map id="neon::AdaptiveLoadStep::increment" name="neon::AdaptiveLoadStep::increment">
-<area shape="rect" id="node2" href="$classneon_1_1solid_1_1femStaticMatrix.html#a1b4ec4af5d4aa93d28a374c0f4f7e5d3" title="neon::solid::femStaticMatrix\l::compute_sparsity_pattern" alt="" coords="217,56,403,97"/>
-<area shape="rect" id="node4" href="$classneon_1_1solid_1_1femStaticMatrix.html#a9d09a3000b8ab1f5088e65a991325514" title="neon::solid::femStaticMatrix\l::apply_displacement_boundaries" alt="" coords="684,64,899,105"/>
-<area shape="rect" id="node3" href="$classneon_1_1solid_1_1femStaticMatrix.html#a38f9c7ef5b0a03920dd67cc054a83042" title="neon::solid::femStaticMatrix\l::assemble_stiffness" alt="" coords="451,5,636,47"/>
-</map>

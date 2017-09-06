@@ -30,31 +30,63 @@ struct MUMPSWrapper<double>
     static void mumps_c(MUMPS_STRUC_C& info) { dmumps_c(&info); }
 };
 
-void MUMPS::solve(SparseMatrix const& A, Vector& x, Vector const& b)
+void MUMPSLU::allocate_coordinate_format_storage(SparseMatrix const& A)
+{
+    rows.clear();
+    cols.clear();
+    coefficients.clear();
+
+    rows.reserve(A.nonZeros());
+    cols.reserve(A.nonZeros());
+    coefficients.reserve(A.nonZeros());
+
+    for (auto k = 0, nonzeros = 0; k < A.outerSize(); ++k)
+    {
+        for (SparseMatrix::InnerIterator it(A, k); it; ++it)
+        {
+            coefficients.emplace_back(it.value());
+            rows.emplace_back(it.row() + 1);
+            cols.emplace_back(it.col() + 1);
+        }
+    }
+}
+
+void MUMPSLLT::allocate_coordinate_format_storage(SparseMatrix const& A)
+{
+    rows.clear();
+    cols.clear();
+    coefficients.clear();
+
+    rows.reserve(A.nonZeros());
+    cols.reserve(A.nonZeros());
+    coefficients.reserve(A.nonZeros());
+
+    // Decompress the upper part of the sparse matrix
+    for (auto k = 0; k < A.outerSize(); ++k)
+    {
+        for (SparseMatrix::InnerIterator it(A, k); it; ++it)
+        {
+            if (it.col() >= it.row())
+            {
+                coefficients.emplace_back(it.value());
+                rows.emplace_back(it.row() + 1);
+                cols.emplace_back(it.col() + 1);
+            }
+        }
+    }
+}
+
+void MUMPS::internal_solve(SparseMatrix const& A, Vector& x, Vector const& b, int const symmetric_flag)
 {
     auto start = std::chrono::high_resolution_clock::now();
 
     x = b;
 
-    // Check for a square matrix
-    assert(A.rows() == A.cols());
-    assert(x.size() == b.size());
-    assert(A.cols() == x.size());
+    using MUMPSAdapter = MUMPSWrapper<double>;
 
-    using MUMPSadapter = MUMPSWrapper<double>;
+    MUMPSAdapter::MUMPS_STRUC_C info;
 
-    MUMPSadapter::MUMPS_STRUC_C info;
-
-    // Jobs in MUMPS use the following:
-    // -1  Solver initialization
-    // -2  Termination
-    // 1   Perform the analysis
-    // 2   Perform the factorization
-    // 3   Compute the solution
-    // 4   Job = 1 && Job = 2
-    // 5   Job = 2 && Job = 3
-    // 6   Job = 1 && Job = 2 && Job = 3
-    info.job = -1;
+    info.job = Job::Initialisation;
 
     // Par determines parallel data location
     // 0  : Host is not involved with computes
@@ -63,12 +95,9 @@ void MUMPS::solve(SparseMatrix const& A, Vector& x, Vector const& b)
     info.comm_fortran = -987654;
 
     // Symmetric matrix flag
-    // 0  A is unsymmetric
-    // 1  A is SPD
-    // 2  A is general symmetric
-    info.sym = 0;
+    info.sym = symmetric_flag;
 
-    MUMPSadapter::mumps_c(info);
+    MUMPSAdapter::mumps_c(info);
 
     // Verbosity levels
     info.icntl[0] = 1;
@@ -77,75 +106,47 @@ void MUMPS::solve(SparseMatrix const& A, Vector& x, Vector const& b)
     info.icntl[3] = 1;
 
     // Ordering algorithm
-    // 0 	AMD
-    // 2 	AMF
-    // 3 	Scotch
-    // 4	Pord
-    // 5	Metis
-    // 6    QAMD
-    // 7    Automatic based on matrix
-    info.icntl[6] = 7;
+    info.icntl[6] = Ordering::Automatic;
 
     // Iterative refinement
     info.icntl[9] = 100;
 
     // Compute the residual
-    // 0	No residuals
-    // 1 	Expensive (condition number etc)
-    // 2 	Cheap residuals
-    info.icntl[10] = 2;
+    info.icntl[10] = Residual::Cheap;
 
     info.n = A.rows();
-    info.nz = A.nonZeros();
+    info.nz = coefficients.size();
 
-    // Convert to MUMPS representation of the matrix
-
-    // Temporary matrix storage
-    std::vector<int> irn(info.nz);
-    std::vector<int> jcn(info.nz);
-    std::vector<double> a(info.nz);
-
-    // Decompress the sparse matrix
-    for (auto k = 0, nonzeros = 0; k < A.outerSize(); ++k)
-    {
-        for (SparseMatrix::InnerIterator it(A, k); it; ++it, ++nonzeros)
-        {
-            a[nonzeros] = it.value();
-            irn[nonzeros] = it.row() + 1;
-            jcn[nonzeros] = it.col() + 1;
-        }
-    }
-
-    info.a = a.data();
-    info.irn = irn.data();
-    info.jcn = jcn.data();
+    info.a = coefficients.data();
+    info.irn = rows.data();
+    info.jcn = cols.data();
 
     // Analysis phase
     info.job = 1;
-    MUMPSadapter::mumps_c(info);
+    MUMPSAdapter::mumps_c(info);
 
     if (info.info[0] < 0) throw computational_error("Error in analysis phase of MUMPS solver\n");
 
     // Factorization phase
-    info.job = 2;
-    MUMPSadapter::mumps_c(info);
+    info.job = Job::Factorisation;
+    MUMPSAdapter::mumps_c(info);
 
-    if (info.info[0] < 0) throw computational_error("Error in factorisation phase\n");
+    if (info.info[0] < 0)
+        throw computational_error("Error in factorisation phase of MUMPS solver\n");
 
     info.rhs = x.data();
     info.nrhs = 1;
     info.lrhs = info.n;
 
-    // Back substitution
-    info.job = 3;
-    MUMPSadapter::mumps_c(info);
+    info.job = Job::BackSubstitution;
+    MUMPSAdapter::mumps_c(info);
 
     if (info.info[0] < 0)
-        throw computational_error("Error in back-substitution phase of MUMPS solver\n");
+        throw computational_error("Error in back substitution phase of MUMPS solver\n");
 
     // Take out the trash
-    info.job = -2;
-    MUMPSadapter::mumps_c(info);
+    info.job = Job::Terminate;
+    MUMPSAdapter::mumps_c(info);
 
     if (info.info[0] < 0) throw computational_error("Error in cleanup phase\n");
 
@@ -153,5 +154,17 @@ void MUMPS::solve(SparseMatrix const& A, Vector& x, Vector const& b)
     std::chrono::duration<double> elapsed_seconds = end - start;
 
     std::cout << std::string(6, ' ') << "MUMPS solver took " << elapsed_seconds.count() << "s\n";
+}
+
+void MUMPSLU::solve(SparseMatrix const& A, Vector& x, Vector const& b)
+{
+    this->allocate_coordinate_format_storage(A);
+    internal_solve(A, x, b, MatrixProperty::Unsymmetric);
+}
+
+void MUMPSLLT::solve(SparseMatrix const& A, Vector& x, Vector const& b)
+{
+    this->allocate_coordinate_format_storage(A);
+    internal_solve(A, x, b, MatrixProperty::SPD);
 }
 }

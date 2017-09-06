@@ -1,5 +1,0 @@
-<map id="neon::solid::femSubmesh::geometric_tangent_stiffness" name="neon::solid::femSubmesh::geometric_tangent_stiffness">
-<area shape="rect" id="node2" href="$classneon_1_1solid_1_1femSubmesh.html#abdc355d969d95032d707ab251e4db75d" title="neon::solid::femSubmesh\l::tangent_stiffness" alt="" coords="248,5,419,47"/>
-<area shape="rect" id="node4" href="$classneon_1_1solid_1_1femSubmesh.html#ab924d16740c35a9af36eb08fab10391b" title="neon::solid::femSubmesh\l::deformation_gradient" alt="" coords="248,71,419,112"/>
-<area shape="rect" id="node3" href="$classneon_1_1solid_1_1femSubmesh.html#a6e725b9d73d74ff4f5971f2f7f74225c" title="neon::solid::femSubmesh\l::internal_variables" alt="" coords="467,5,637,47"/>
-</map>

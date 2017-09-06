@@ -1,6 +1,0 @@
-<map id="neon::SurfaceInterpolation" name="neon::SurfaceInterpolation">
-<area shape="rect" id="node3" href="$classneon_1_1Quadrilateral4.html" title="neon::Quadrilateral4" alt="" coords="5,169,144,196"/>
-<area shape="rect" id="node4" href="$classneon_1_1Triangle3.html" title="neon::Triangle3" alt="" coords="169,169,279,196"/>
-<area shape="rect" id="node5" href="$classneon_1_1Triangle6.html" title="neon::Triangle6" alt="" coords="303,169,414,196"/>
-<area shape="rect" id="node2" href="$classneon_1_1ShapeFunction.html" title="neon::ShapeFunction\l\&lt; SurfaceQuadrature \&gt;" alt="" coords="147,5,301,47"/>
-</map>

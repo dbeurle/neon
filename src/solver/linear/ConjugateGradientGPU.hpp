@@ -11,7 +11,7 @@
 namespace neon
 {
 /**
- * ConjugateGradientGPU is a GPU based solver using the preconditioned conjugate
+ * ConjugateGradientGPU is a GPU based solver using the conjugate
  * gradient solver from the CUDA examples.
  */
 class ConjugateGradientGPU : public IterativeLinearSolver

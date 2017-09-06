@@ -4,6 +4,10 @@
 #include "Exceptions.hpp"
 #include "mesh/solid/femMesh.hpp"
 
+#include "modules/ModuleFactory.hpp"
+
+#include "modules/AbstractModule.hpp"
+
 #include "assembler/solid/femStaticMatrix.hpp"
 
 #include "assembler/solid/femDynamicMatrix.hpp"
@@ -35,6 +39,8 @@ SimulationControl::SimulationControl(std::string const& input_file_name)
 
     this->parse();
 }
+
+SimulationControl::~SimulationControl() = default;
 
 void SimulationControl::parse()
 {
@@ -84,8 +90,12 @@ void SimulationControl::parse()
                   << " into the mesh store\n";
     }
 
-    std::array<std::string, 6> const required_fields = {
-        {"Name", "Time", "Solution", "Visualisation", "LinearSolver", "NonlinearOptions"}};
+    std::vector<std::string> const required_fields{"Name",
+                                                   "Time",
+                                                   "Solution",
+                                                   "Visualisation",
+                                                   "LinearSolver",
+                                                   "NonlinearOptions"};
 
     // Build a list of all the load steps for a given mesh
     for (auto const& simulation : root["SimulationCases"])
@@ -94,10 +104,11 @@ void SimulationControl::parse()
         for (auto const& required_field : required_fields)
         {
             if (!simulation.isMember(required_field))
+            {
                 throw std::runtime_error("A simulation case needs a \"" + required_field
                                          + "\" field\n");
+            }
         }
-
         // Multibody simulations not (yet) supported
         assert(simulation["Mesh"].size() == 1);
 
@@ -108,7 +119,6 @@ void SimulationControl::parse()
                                      + "\" was not found in the mesh store");
         }
     }
-
     build_simulation_tree();
 
     auto end = std::chrono::high_resolution_clock::now();
@@ -119,8 +129,22 @@ void SimulationControl::parse()
               << termcolor::reset << std::endl;
 }
 
-void SimulationControl::start(bool const is_initial_pass)
+void SimulationControl::start()
 {
+    // Allocate the modules storage, which automatically checks for correct input
+    // and throws the appropriate exception when an error is detected
+    for (auto const & [ name, simulations ] : multistep_simulations)
+    {
+        std::cout << "Name : " << name << std::endl;
+        for (auto const& simulation : simulations)
+        {
+            std::cout << simulation.toStyledString() << std::endl;
+            modules.emplace_back(make_module(simulation));
+        }
+    }
+    // Run the simulations
+    for (auto const& module : modules) module->perform_simulation();
+
     // It is desirable to have multiple load steps throughout the simulation.
     // This can be achieved by stepping through each simulation and performing
     // an internal restart, using the data from the previous time step.
@@ -128,24 +152,17 @@ void SimulationControl::start(bool const is_initial_pass)
     {
         if (!simulation["Inherits"].empty()) continue;
 
-        if (!is_initial_pass)
-        {
-            std::cout << std::string(2, ' ') << termcolor::bold << "Simulating case \""
-                      << simulation["Name"].asString() << "\"" << termcolor::reset << std::endl
-                      << std::endl;
-        }
+        std::cout << std::string(2, ' ') << termcolor::bold << "Simulating case \""
+                  << simulation["Name"].asString() << "\"" << termcolor::reset << std::endl
+                  << std::endl;
 
         auto const& mesh_data = simulation["Mesh"][0];
 
         auto simulation_mesh = mesh_store.find(mesh_data["Name"].asString());
 
-        if (!is_initial_pass)
-        {
-            std::cout << std::string(4, ' ') << "Module \"" << simulation["Type"].asString()
-                      << "\"\n";
-            std::cout << std::string(4, ' ') << "Solution \"" << simulation["Solution"].asString()
-                      << "\"\n";
-        }
+        std::cout << std::string(4, ' ') << "Module \"" << simulation["Type"].asString() << "\"\n";
+        std::cout << std::string(4, ' ') << "Solution \"" << simulation["Solution"].asString()
+                  << "\"\n";
 
         auto const & [ mesh, material ] = simulation_mesh->second;
 
@@ -159,26 +176,22 @@ void SimulationControl::start(bool const is_initial_pass)
                                           simulation["NonlinearOptions"],
                                           simulation["Time"]);
 
-        if (!is_initial_pass) fem_matrix.solve();
+        fem_matrix.solve();
 
         for (auto const& next_step : multistep_simulations[simulation["Name"].asString()])
         {
-            if (!is_initial_pass)
-            {
-                std::cout << termcolor::bold << "\n"
-                          << std::string(2, ' ') << "Simulating case \""
-                          << next_step["Name"].asString() << "\"" << termcolor::reset << std::endl
-                          << std::endl;
-            }
+            std::cout << termcolor::bold << "\n"
+                      << std::string(2, ' ') << "Simulating case \"" << next_step["Name"].asString()
+                      << "\"" << termcolor::reset << std::endl
+                      << std::endl;
 
             fem_mesh.internal_restart(next_step["Mesh"][0]);
 
             fem_matrix.internal_restart(next_step["LinearSolver"], next_step["Time"]);
 
-            if (!is_initial_pass) fem_matrix.solve();
+            fem_matrix.solve();
         }
     }
-    if (is_initial_pass) this->start(false);
 }
 
 void SimulationControl::build_simulation_tree()
@@ -188,8 +201,9 @@ void SimulationControl::build_simulation_tree()
     // Build a list of all the load steps for a given mesh
     for (auto const& simulation : root["SimulationCases"])
     {
-        if (simulation["Inherits"].empty())
+        if (!simulation.isMember("Inherits"))
         {
+            multistep_simulations[simulation["Name"].asString()].emplace_front(simulation);
             find_children(simulation["Name"].asString(), simulation["Name"].asString());
         }
     }
@@ -209,7 +223,7 @@ void SimulationControl::find_children(std::string const& parent_name,
 {
     for (auto const& simulation : root["SimulationCases"])
     {
-        if (simulation["Inherits"].empty()) continue;
+        if (!simulation.isMember("Inherits")) continue;
 
         if (simulation["Inherits"].asString() == next_parent_name)
         {

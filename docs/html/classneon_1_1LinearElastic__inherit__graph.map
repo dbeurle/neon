@@ -1,5 +1,0 @@
-<map id="neon::LinearElastic" name="neon::LinearElastic">
-<area shape="rect" id="node3" href="$classneon_1_1IsotropicElasticPlastic.html" title="neon::IsotropicElasticPlastic" alt="" coords="5,155,193,181"/>
-<area shape="rect" id="node4" href="$classneon_1_1MicromechanicalElastomer.html" title="neon::MicromechanicalElastomer" alt="" coords="217,155,432,181"/>
-<area shape="rect" id="node2" href="$classneon_1_1Material.html" title="neon::Material" alt="" coords="159,5,263,32"/>
-</map>

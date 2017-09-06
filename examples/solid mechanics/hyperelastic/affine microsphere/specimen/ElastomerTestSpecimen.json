@@ -1,5 +1,5 @@
 {
-    "Name" : "NeoHookeModel",
+    "Name" : "SpecimenAgeing",
     "Cores" : 2,
     "Part": [{
         "Name" : "ElastomerTestSpecimen",
@@ -8,12 +8,12 @@
     "Material" : [{
         "Name" : "rubber",
         "ElasticModulus" : 10.0e6,
-        "PoissonsRatio" : 0.45,
+        "PoissonsRatio" : 0.4,
         "Segments" : {
             "Groups" : 5,
             "Average" : 50,
-            "StandardDeviation" : 10,
-            "ScissionLikelihood" : 0.0001
+            "StandardDeviation" : 5,
+            "ScissionLikelihood" : 1e-8
         }
     }],
     "SimulationCases" : [{
@@ -23,9 +23,9 @@
         "Time" : {
             "Period" : 1.0,
             "Increments" : {
-                "Initial" : 0.1,
+                "Initial" : 0.01,
                 "Minimum" : 0.001,
-                "Maximum" : 1.0
+                "Maximum" : 0.01
             }
         },
 		"Mesh" : [{
@@ -60,18 +60,18 @@
 				"Type" : "Displacement",
                 "LoadVariation" : "Ramp",
                 "Values" : {
-                    "y" : 0.0005
+                    "y" : 1.0e-1
                 }
             }]
         }],
 		"LinearSolver" : {
-		    "Solver" : "pCG",
-            "MaxIterations" : 1000,
+		    "Solver" : "ConjugateGradient",
+            "MaxIterations" : 3000,
             "Tolerance"  : 1.0e-8
         },
         "Visualisation" : {
             "Fields" : ["Displacement", "DeformationGradient", "CauchyStress"],
-            "WriteEvery": 20
+            "WriteEvery": 2
         }
     },
     {
@@ -83,7 +83,7 @@
             "Increments" : {
                 "Initial" : 1.0,
                 "Minimum" : 0.001,
-                "Maximum" : 500.0
+                "Maximum" : 50000.0
             }
         },
 		"Mesh" : [{
