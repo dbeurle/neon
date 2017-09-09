@@ -120,11 +120,13 @@ inline std::string simulation_data_json()
            //
            "{\"Name\" : \"bottom\", "
            "\"Type\" : \"Displacement\","
-           "\"Values\" : {\"x\" : 0.0, \"y\" : 0.0, \"z\" : 0.0}}, "
+           "\"Time\" : [0.0, 1.0],"
+           "\"Values\" : {\"x\" : [0.0, 0.0], \"y\" : [0.0, 0.0], \"z\" : [0.0, 0.0]}}, "
            //
            "{\"Name\" : \"top\", "
            "\"Type\" : \"Displacement\","
-           "\"Values\" : {\"z\" : 1.0e-3}}],"
+           "\"Time\" : [0.0, 1.0],"
+           "\"Values\" : {\"z\" : [0.0, 1.0e-3]}}],"
            //
            "\"ConstitutiveModel\" : \"NeoHooke\", "
            "\"ElementOptions\" : {\"Quadrature\" : \"Reduced\"}, "
@@ -137,7 +139,8 @@ inline std::string simulation_data_traction_json()
            //
            "{\"Name\" : \"Ysym\", "
            "\"Type\" : \"Traction\", "
-           "\"Values\" : {\"y\" : 1.0e-3}} ], "
+           "\"Time\" : [0.0, 1.0],"
+           "\"Values\" : {\"y\" : [0.0, 1.0e-3]}} ], "
            //
            "\"ConstitutiveModel\" : \"NeoHooke\", "
            "\"ElementOptions\" : {\"Quadrature\" : \"Reduced\"}, "

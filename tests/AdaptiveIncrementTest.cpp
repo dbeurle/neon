@@ -28,7 +28,7 @@ TEST_CASE("AdaptiveIncrement")
 
     REQUIRE(time_file.parse(increment_json().c_str(), time_data));
 
-    AdaptiveLoadStep load(time_data);
+    AdaptiveLoadStep load(time_data, {0.0, 1.0});
 
     SECTION("Basic operation")
     {

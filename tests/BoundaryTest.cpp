@@ -73,9 +73,15 @@ TEST_CASE("Dof List Filter", "[DofAllocator]")
 }
 TEST_CASE("Boundary unit test", "[Boundary]")
 {
+    Json::Reader reader;
+    Json::Value times, loads;
+
     SECTION("Check time data saved correctly")
     {
-        Boundary boundary({0.0, 1.0, 2.0, 3.0}, {0.0, 0.5, 1.0, 1.5});
+        REQUIRE(reader.parse("[0.0, 1.0, 2.0, 3.0]", times));
+        REQUIRE(reader.parse("[0.0, 0.5, 1.0, 1.5]", loads));
+
+        Boundary boundary(times, loads);
 
         auto const time_history = boundary.time_history();
 
@@ -86,7 +92,10 @@ TEST_CASE("Boundary unit test", "[Boundary]")
     }
     SECTION("Time and load history interpolation test")
     {
-        Boundary boundary({0.0, 1.0, 2.0, 3.0}, {0.0, 0.5, 1.0, 1.5});
+        REQUIRE(reader.parse("[0.0, 1.0, 2.0, 3.0]", times));
+        REQUIRE(reader.parse("[0.0, 0.5, 1.0, 1.5]", loads));
+
+        Boundary boundary(times, loads);
 
         REQUIRE(boundary.interpolate_prescribed_load(0.75) == Approx(0.375));
         REQUIRE(boundary.interpolate_prescribed_load(0.5) == Approx(0.25));
@@ -99,16 +108,25 @@ TEST_CASE("Boundary unit test", "[Boundary]")
     }
     SECTION("Non-matching length error test")
     {
-        REQUIRE_THROWS_AS(Boundary({0.0, 1.0, 3.0}, {0.0, 0.5, 1.0, 1.5}), std::runtime_error);
+        REQUIRE(reader.parse("[0.0, 1.0, 3.0]", times));
+        REQUIRE(reader.parse("[0.0, 0.5, 1.0, 1.5]", loads));
+
+        REQUIRE_THROWS_AS(Boundary(times, loads), std::runtime_error);
     }
     SECTION("Unordered time error test")
     {
-        REQUIRE_THROWS_AS(Boundary({0.0, 10.0, 3.0}, {0.0, 0.5, 1.0}), std::runtime_error);
+        REQUIRE(reader.parse("[0.0, 10.0, 3.0]", times));
+        REQUIRE(reader.parse("[0.0, 0.5, 1.0]", loads));
+
+        REQUIRE_THROWS_AS(Boundary(times, loads), std::runtime_error);
     }
 }
 TEST_CASE("Traction test for triangle", "[Traction]")
 {
     using namespace neon::solid;
+
+    Json::Reader reader;
+    Json::Value times, loads;
 
     // Build a right angled triangle
     Vector coordinates(9);
@@ -121,13 +139,16 @@ TEST_CASE("Traction test for triangle", "[Traction]")
 
     SECTION("Unit load")
     {
+        REQUIRE(reader.parse("[0.0, 1.0]", times));
+        REQUIRE(reader.parse("[0.0, 1.0]", loads));
+
         Traction traction(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
                           nodal_connectivity,
                           material_coordinates,
-                          1.0,  // Prescribed load
-                          true, // Is load ramped
-                          0     // Dof offset
-        );
+                          times,
+                          loads,
+                          0,
+                          3);
 
         REQUIRE(traction.elements() == 1);
 
@@ -138,13 +159,16 @@ TEST_CASE("Traction test for triangle", "[Traction]")
     }
     SECTION("Twice unit load")
     {
+        REQUIRE(reader.parse("[0.0, 1.0]", times));
+        REQUIRE(reader.parse("[0.0, 2.0]", loads));
+
         Traction traction(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
                           nodal_connectivity,
                           material_coordinates,
-                          2.0,  // Prescribed load
-                          true, // Is load ramped
-                          0     // Dof offset
-        );
+                          times,
+                          loads,
+                          0,
+                          3);
 
         REQUIRE(traction.elements() == 1);
 
@@ -178,11 +202,15 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
     std::array<int, 4> const known_dofs_quad{{1, 4, 7, 10}};
 
     Json::Value tri_mesh_data, quad_mesh_data, simulation_data;
-    Json::Reader tri_mesh_file, quad_mesh_file, simulation_file;
+    Json::Value times, loads;
+    Json::Reader reader;
 
-    REQUIRE(tri_mesh_file.parse(trimesh.c_str(), tri_mesh_data));
-    REQUIRE(quad_mesh_file.parse(quadmesh.c_str(), quad_mesh_data));
-    REQUIRE(simulation_file.parse(simulation_data_traction_json().c_str(), simulation_data));
+    REQUIRE(reader.parse(trimesh.c_str(), tri_mesh_data));
+    REQUIRE(reader.parse(quadmesh.c_str(), quad_mesh_data));
+    REQUIRE(reader.parse(simulation_data_traction_json().c_str(), simulation_data));
+
+    REQUIRE(reader.parse("[0.0, 1.0]", times));
+    REQUIRE(reader.parse("[0.0, 1.0e-3]", loads));
 
     std::vector<SubMesh> submeshes = {tri_mesh_data, quad_mesh_data};
 
@@ -197,7 +225,7 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
 
     // Insert this information into the nonfollower load boundary class
     // using the simulation data for the cube
-    NonFollowerLoadBoundary nf_loads(material_coordinates, submeshes, 1, 1.0e-3, simulation_data);
+    NonFollowerLoadBoundary nf_loads(material_coordinates, submeshes, times, loads, simulation_data, 0);
 
     auto const & [ dofs_tri, f_tri ] = nf_loads.boundaries().at(0).external_force(0, 1.0);
     auto const & [ dofs_quad, f_quad ] = nf_loads.boundaries().at(1).external_force(0, 1.0);

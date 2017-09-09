@@ -7,7 +7,7 @@
 #include "mesh/ElementTopology.hpp"
 #include "mesh/NodeOrderingAdapter.hpp"
 
-#include "mesh/solid/MaterialCoordinates.hpp"
+#include "mesh/MaterialCoordinates.hpp"
 #include "mesh/solid/Submesh.hpp"
 #include "mesh/solid/femMesh.hpp"
 
@@ -27,7 +27,7 @@ TEST_CASE("Testing material coordinates", "[MaterialCoordinates]")
 
     // Setup the test case
     NodalCoordinates nodes(coordinates);
-    solid::MaterialCoordinates material_coordinates(coordinates);
+    MaterialCoordinates material_coordinates(coordinates);
 
     // Test with a random displacement vector
     Vector local_displacements = Vector::Random(9);
@@ -159,8 +159,6 @@ TEST_CASE("Basic mesh test")
 }
 TEST_CASE("Solid submesh test")
 {
-    using solid::MaterialCoordinates;
-
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh
     Json::Value mesh_data, material_data, simulation_data;
@@ -250,7 +248,6 @@ TEST_CASE("Solid submesh test")
 }
 TEST_CASE("Solid mesh test")
 {
-    using solid::MaterialCoordinates;
     using solid::femMesh;
 
     // Read in a cube mesh from the json input file and use this to

@@ -5,7 +5,7 @@
 
 #include "mesh/BasicMesh.hpp"
 
-#include "mesh/solid/MaterialCoordinates.hpp"
+#include "mesh/MaterialCoordinates.hpp"
 #include "mesh/solid/Submesh.hpp"
 #include "mesh/solid/femMesh.hpp"
 
@@ -41,7 +41,6 @@ std::string const visualisation_json("{\"Fields\" : [\"Displacement\", \"CauchyS
 
 TEST_CASE("Nonlinear system equilibrium solver test")
 {
-    using solid::MaterialCoordinates;
     using solid::femMesh;
     using solid::femStaticMatrix;
 

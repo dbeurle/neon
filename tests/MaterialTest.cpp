@@ -67,11 +67,11 @@ std::string micromechanical_input()
 TEST_CASE("Linear elastic material", "[LinearElastic]")
 {
     Json::Value material_data;
-    Json::Reader material_file;
+    Json::Reader reader;
 
     SECTION("Linear elastic properties")
     {
-        REQUIRE(material_file.parse(linear_material_input().c_str(), material_data));
+        REQUIRE(reader.parse(linear_material_input().c_str(), material_data));
 
         LinearElastic linear_elastic(material_data);
 
@@ -94,8 +94,7 @@ TEST_CASE("Linear elastic material", "[LinearElastic]")
     }
     SECTION("Incompressible elastic properties")
     {
-        REQUIRE(material_file.parse(linear_material_input_incompressible().c_str(),
-                                    material_data));
+        REQUIRE(reader.parse(linear_material_input_incompressible().c_str(), material_data));
         LinearElastic linear_elastic(material_data);
 
         REQUIRE(linear_elastic.bulk_modulus() == Approx(200.0e9));
@@ -103,17 +102,16 @@ TEST_CASE("Linear elastic material", "[LinearElastic]")
     }
     SECTION("Incorrect elastic properties")
     {
-        REQUIRE(material_file.parse(linear_material_input_incorrect().c_str(),
-                                    material_data));
+        REQUIRE(reader.parse(linear_material_input_incorrect().c_str(), material_data));
         REQUIRE_THROWS_AS(LinearElastic(material_data), MaterialPropertyException);
     }
 }
 TEST_CASE("Perfect plastic material", "[PerfectPlasticElastic]")
 {
     Json::Value material_data;
-    Json::Reader material_file;
+    Json::Reader reader;
 
-    REQUIRE(material_file.parse(perfect_plastic_input().c_str(), material_data));
+    REQUIRE(reader.parse(perfect_plastic_input().c_str(), material_data));
 
     IsotropicElasticPlastic perfect_plastic_elastic(material_data);
 
@@ -128,9 +126,9 @@ TEST_CASE("Perfect plastic material", "[PerfectPlasticElastic]")
 TEST_CASE("Isotropic hardening", "[IsotropicPlasticElastic]")
 {
     Json::Value material_data;
-    Json::Reader material_file;
+    Json::Reader reader;
 
-    REQUIRE(material_file.parse(isotropic_plastic_input().c_str(), material_data));
+    REQUIRE(reader.parse(isotropic_plastic_input().c_str(), material_data));
 
     IsotropicElasticPlastic iso_plastic_elastic(material_data);
 
@@ -147,18 +145,18 @@ TEST_CASE("Isotropic hardening", "[IsotropicPlasticElastic]")
 TEST_CASE("Missing yield stress", "[IsotropicPlasticElastic]")
 {
     Json::Value material_data;
-    Json::Reader material_file;
+    Json::Reader reader;
 
-    REQUIRE(material_file.parse(perfect_plastic_input_incorrect().c_str(), material_data));
+    REQUIRE(reader.parse(perfect_plastic_input_incorrect().c_str(), material_data));
 
     REQUIRE_THROWS_AS(IsotropicElasticPlastic(material_data), MaterialPropertyException);
 }
 TEST_CASE("Micromechanical elastomer", "[MicromechanicalElastomer]")
 {
     Json::Value material_data;
-    Json::Reader material_file;
+    Json::Reader reader;
 
-    REQUIRE(material_file.parse(micromechanical_input().c_str(), material_data));
+    REQUIRE(reader.parse(micromechanical_input().c_str(), material_data));
     MicromechanicalElastomer elastomer(material_data);
 
     // Initial chains and segment groups
