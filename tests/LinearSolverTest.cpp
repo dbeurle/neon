@@ -176,7 +176,7 @@ TEST_CASE("Linear solver test suite")
         REQUIRE((x - solution()).norm() == Approx(0.0));
         REQUIRE((A * x - b).norm() == Approx(0.0));
     }
-    SECTION("PaStiX")
+    SECTION("PaStiX SPD")
     {
         std::string solver_str = "{\"Solver\":\"PaStiX\"}";
 
@@ -185,6 +185,21 @@ TEST_CASE("Linear solver test suite")
         REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
 
         auto linear_solver = make_linear_solver(solver_data);
+
+        linear_solver->solve(A, x, b);
+
+        REQUIRE((x - solution()).norm() == Approx(0.0));
+        REQUIRE((A * x - b).norm() == Approx(0.0));
+    }
+    SECTION("PaStiX LU")
+    {
+        std::string solver_str = "{\"Solver\":\"PaStiX\"}";
+
+        Json::Value solver_data;
+        Json::Reader solver_file;
+        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        auto linear_solver = make_linear_solver(solver_data, false);
 
         linear_solver->solve(A, x, b);
 
