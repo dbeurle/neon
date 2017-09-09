@@ -11,8 +11,7 @@ namespace neon::diffusion
 {
 femStaticMatrix::femStaticMatrix(femMesh& fem_mesh,
                                  Visualisation&& visualisation,
-                                 Json::Value const& solver_data,
-                                 Json::Value const& increment_data)
+                                 Json::Value const& solver_data)
     : fem_mesh(fem_mesh),
       visualisation(std::move(visualisation)),
       f(Vector::Zero(fem_mesh.active_dofs())),

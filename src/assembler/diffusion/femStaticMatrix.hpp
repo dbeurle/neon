@@ -31,8 +31,7 @@ class femStaticMatrix
 public:
     explicit femStaticMatrix(femMesh& fem_mesh,
                              Visualisation&& visualisation,
-                             Json::Value const& solver_data,
-                             Json::Value const& increment_data);
+                             Json::Value const& solver_data);
 
     ~femStaticMatrix();
 
