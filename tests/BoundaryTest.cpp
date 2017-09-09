@@ -225,7 +225,7 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
 
     // Insert this information into the nonfollower load boundary class
     // using the simulation data for the cube
-    NonFollowerLoadBoundary nf_loads(material_coordinates, submeshes, times, loads, simulation_data, 0);
+    NonFollowerLoadBoundary nf_loads(material_coordinates, submeshes, times, loads, simulation_data, 1);
 
     auto const & [ dofs_tri, f_tri ] = nf_loads.boundaries().at(0).external_force(0, 1.0);
     auto const & [ dofs_quad, f_quad ] = nf_loads.boundaries().at(1).external_force(0, 1.0);
