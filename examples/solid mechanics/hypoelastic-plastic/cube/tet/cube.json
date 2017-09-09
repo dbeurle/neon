@@ -31,8 +31,7 @@
 		"Mesh" : [{
             "Name" : "cube",
             "ConstitutiveModel" : "J2",
-            "ElementOptions" :
-            {
+            "ElementOptions" : {
                 "Quadrature" : "Full"
             },
             "BoundaryConditions" :
@@ -72,6 +71,5 @@
             "Fields" : ["Displacement", "LinearisedStrain", "LinearisedPlasticStrain",
                         "CauchyStress", "VonMisesStress", "AccumulatedPlasticStrain"]
         }
-        }
-    ]
+    }]
 }
