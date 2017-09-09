@@ -1,13 +1,12 @@
 
 #pragma once
 
+#include "mesh/common/Neumann.hpp"
+
 #include "interpolations/InterpolationFactory.hpp"
 #include "mesh/MaterialCoordinates.hpp"
 #include "mesh/SubMesh.hpp"
-#include "mesh/common/Neumann.hpp"
 #include "numeric/DenseTypes.hpp"
-
-#include <memory>
 
 namespace neon::solid
 {

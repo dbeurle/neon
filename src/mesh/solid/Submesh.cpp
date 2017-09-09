@@ -5,7 +5,6 @@
 
 #include "constitutive/ConstitutiveModelFactory.hpp"
 #include "interpolations/InterpolationFactory.hpp"
-
 #include "material/Material.hpp"
 #include "mesh/DofAllocator.hpp"
 #include "mesh/MaterialCoordinates.hpp"
