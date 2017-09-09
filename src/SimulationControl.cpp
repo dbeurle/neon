@@ -71,7 +71,6 @@ void SimulationControl::parse()
     for (auto const& part : root["Part"])
     {
         Json::Value mesh_file;
-        Json::Reader mesh_reader;
 
         auto const material = *ranges::find_if(root["Material"], [&part](auto const& material) {
             return material["Name"].asString() == part["Material"].asString();
@@ -79,9 +78,9 @@ void SimulationControl::parse()
 
         std::ifstream mesh_input_stream(part["Name"].asString() + ".mesh");
 
-        if (!mesh_reader.parse(mesh_input_stream, mesh_file, false))
+        if (!reader.parse(mesh_input_stream, mesh_file, false))
         {
-            throw std::runtime_error(mesh_reader.getFormattedErrorMessages());
+            throw std::runtime_error(reader.getFormattedErrorMessages());
         }
 
         mesh_store.try_emplace(part["Name"].asString(), mesh_file, material);
@@ -140,7 +139,6 @@ void SimulationControl::start()
             modules.emplace_back(make_module(simulation, mesh_store));
         }
     }
-    // Run the simulations
     for (auto const& module : modules) module->perform_simulation();
 }
 
