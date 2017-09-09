@@ -21,4 +21,9 @@ std::unique_ptr<VolumeInterpolation> make_volume_interpolation(ElementTopology c
 std::unique_ptr<SurfaceInterpolation> make_surface_interpolation(ElementTopology const topology,
                                                                  Json::Value const& simulation_data);
 }
+namespace diffusion
+{
+using solid::make_surface_interpolation;
+using solid::make_volume_interpolation;
+}
 }

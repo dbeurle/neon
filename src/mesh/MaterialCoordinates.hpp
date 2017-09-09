@@ -10,7 +10,7 @@
 class vtkPoints;
 class vtkDoubleArray;
 
-namespace neon::solid
+namespace neon
 {
 class MaterialCoordinates : public NodalCoordinates
 {

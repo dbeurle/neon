@@ -4,7 +4,7 @@
 #include "vtkDoubleArray.h"
 #include "vtkPoints.h"
 
-namespace neon::solid
+namespace neon
 {
 MaterialCoordinates::MaterialCoordinates(Vector const& initial_coordinates)
     : NodalCoordinates(initial_coordinates), x(initial_coordinates)

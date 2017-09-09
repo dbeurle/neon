@@ -5,11 +5,13 @@ namespace neon
 {
 Neumann::Neumann(std::vector<List> const& nodal_connectivity,
                  std::vector<List> const& dof_list,
-                 double const prescribed_value,
-                 bool const is_load_ramped)
-    : Boundary(prescribed_value, is_load_ramped),
+                 std::shared_ptr<MaterialCoordinates>& material_coordinates,
+                 Json::Value const& times,
+                 Json::Value const& loads)
+    : Boundary(times, loads),
       nodal_connectivity(nodal_connectivity),
-      dof_list(dof_list)
+      dof_list(dof_list),
+      material_coordinates(material_coordinates)
 {
 }
 }

@@ -73,40 +73,37 @@ TEST_CASE("Dof List Filter", "[DofAllocator]")
 }
 TEST_CASE("Boundary unit test", "[Boundary]")
 {
-    SECTION("Ramped load")
+    SECTION("Check time data saved correctly")
     {
-        Boundary boundary(2.0, true);
-        REQUIRE(boundary.interpolate_prescribed_value(0.5) == Approx(1.0));
-        REQUIRE(boundary.interpolate_prescribed_value(1.0) == Approx(2.0));
+        Boundary boundary({0.0, 1.0, 2.0, 3.0}, {0.0, 0.5, 1.0, 1.5});
+
+        auto const time_history = boundary.time_history();
+
+        REQUIRE(time_history[0] == Approx(0.0));
+        REQUIRE(time_history[1] == Approx(1.0));
+        REQUIRE(time_history[2] == Approx(2.0));
+        REQUIRE(time_history[3] == Approx(3.0));
     }
-    SECTION("Instantaneous load")
+    SECTION("Time and load history interpolation test")
     {
-        Boundary boundary(2.0, false);
-        REQUIRE(boundary.interpolate_prescribed_value(0.5) == Approx(2.0));
-        REQUIRE(boundary.interpolate_prescribed_value(1.0) == Approx(2.0));
+        Boundary boundary({0.0, 1.0, 2.0, 3.0}, {0.0, 0.5, 1.0, 1.5});
+
+        REQUIRE(boundary.interpolate_prescribed_load(0.75) == Approx(0.375));
+        REQUIRE(boundary.interpolate_prescribed_load(0.5) == Approx(0.25));
+        REQUIRE(boundary.interpolate_prescribed_load(1.0) == Approx(0.5));
+        REQUIRE(boundary.interpolate_prescribed_load(1.9) == Approx(0.95));
+        REQUIRE(boundary.interpolate_prescribed_load(2.0) == Approx(1.0));
+        REQUIRE(boundary.interpolate_prescribed_load(2.5) == Approx(1.25));
+        REQUIRE(boundary.interpolate_prescribed_load(3.0) == Approx(1.5));
+        REQUIRE(boundary.interpolate_prescribed_load(2.9999999999999) == Approx(1.5));
     }
-    SECTION("Do nothing restart")
+    SECTION("Non-matching length error test")
     {
-        Boundary boundary(2.0, true);
-        boundary.internal_restart();
-        REQUIRE(boundary.interpolate_prescribed_value(0.0) == Approx(2.0));
-        REQUIRE(boundary.interpolate_prescribed_value(1.0) == Approx(2.0));
+        REQUIRE_THROWS_AS(Boundary({0.0, 1.0, 3.0}, {0.0, 0.5, 1.0, 1.5}), std::runtime_error);
     }
-    SECTION("Updated value restart instantaneous")
+    SECTION("Unordered time error test")
     {
-        Boundary boundary(2.0, true);
-        boundary.internal_restart(3.0, false);
-        REQUIRE(boundary.interpolate_prescribed_value(0.0) == Approx(3.0));
-        REQUIRE(boundary.interpolate_prescribed_value(0.5) == Approx(3.0));
-        REQUIRE(boundary.interpolate_prescribed_value(1.0) == Approx(3.0));
-    }
-    SECTION("Updated value restart with ramped")
-    {
-        Boundary boundary(2.0, true);
-        boundary.internal_restart(3.0, true);
-        REQUIRE(boundary.interpolate_prescribed_value(0.0) == Approx(2.0));
-        REQUIRE(boundary.interpolate_prescribed_value(0.5) == Approx(2.5));
-        REQUIRE(boundary.interpolate_prescribed_value(1.0) == Approx(3.0));
+        REQUIRE_THROWS_AS(Boundary({0.0, 10.0, 3.0}, {0.0, 0.5, 1.0}), std::runtime_error);
     }
 }
 TEST_CASE("Traction test for triangle", "[Traction]")

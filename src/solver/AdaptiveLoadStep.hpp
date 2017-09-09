@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <queue>
 #include <tuple>
 #include <vector>
 
@@ -70,7 +71,7 @@ namespace neon
 class AdaptiveLoadStep
 {
 public:
-    AdaptiveLoadStep(Json::Value const& increment_data);
+    AdaptiveLoadStep(Json::Value const& increment_data, std::vector<double> mandatory_time_history);
 
     /** Check if the load increment is finalised */
     bool is_fully_applied() const { return is_applied; }
@@ -91,7 +92,7 @@ public:
     auto step() const { return successful_increments; }
 
     /** Update the convergence state to determine the next increment */
-    void update_convergence_state(bool is_converged);
+    void update_convergence_state(bool const is_converged);
 
     void reset(Json::Value const& new_increment_data);
 
@@ -99,6 +100,11 @@ protected:
     void parse_input(Json::Value const& increment_data);
 
     void check_increment_data(Json::Value const& increment_data);
+
+    bool is_highly_nonlinear() const
+    {
+        return consecutive_unconverged > 0 || consecutive_converged < 4;
+    }
 
 protected:
     int const increment_limit = 10; //!< Maximum allowable increments
@@ -120,5 +126,7 @@ protected:
     double maximum_increment; //!< Maximum increment allowed by the algorithm
 
     bool is_applied = false;
+
+    std::priority_queue<double, std::vector<double>, std::greater<double>> time_queue;
 };
 }

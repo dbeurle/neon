@@ -3,8 +3,8 @@
 
 namespace neon
 {
-Dirichlet::Dirichlet(List dofs, double const prescribed_value, bool const is_load_ramped)
-    : Boundary(prescribed_value, is_load_ramped), dofs(dofs)
+Dirichlet::Dirichlet(List dofs, Json::Value const& times, Json::Value const& loads)
+    : Boundary(times, loads), dofs(dofs)
 {
 }
 }

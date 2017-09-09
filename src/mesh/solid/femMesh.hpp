@@ -3,10 +3,9 @@
 
 #include "numeric/DenseTypes.hpp"
 
-#include "mesh/solid/MaterialCoordinates.hpp"
-#include "mesh/solid/Submesh.hpp"
-
+#include "mesh/MaterialCoordinates.hpp"
 #include "mesh/common/Dirichlet.hpp"
+#include "mesh/solid/Submesh.hpp"
 #include "mesh/solid/boundary/NonFollowerLoad.hpp"
 
 #include <json/forwards.h>
@@ -61,12 +60,26 @@ public:
 
     auto const& nonfollower_load_boundaries() const { return nf_loads; }
 
+    /**
+     * Gathers the time history for each boundary condition and
+     * returns a sorted vector which may contain traces of duplicates.
+     *
+     * \sa AdaptiveLoadStep
+     */
+    std::vector<double> time_history() const;
+
     auto const& coordinates() const { return *(material_coordinates.get()); }
 
 protected:
     void check_boundary_conditions(Json::Value const& boundary_data) const;
 
     void allocate_boundary_conditions(Json::Value const& boundary_data, BasicMesh const& basic_mesh);
+
+    void allocate_displacement_boundary(Json::Value const& boundary, BasicMesh const& basic_mesh);
+
+    void allocate_traction_boundary(Json::Value const& simulation_data,
+                                    Json::Value const& boundary,
+                                    BasicMesh const& basic_mesh);
 
     /** \sa internal_restart */
     void reallocate_boundary_conditions(Json::Value const& boundary_data);

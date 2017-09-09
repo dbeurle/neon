@@ -138,7 +138,7 @@ void SimulationControl::start()
         std::cout << "Name : " << name << std::endl;
         for (auto const& simulation : simulations)
         {
-            std::cout << simulation.toStyledString() << std::endl;
+            // std::cout << simulation.toStyledString() << std::endl;
             modules.emplace_back(make_module(simulation));
         }
     }
@@ -255,7 +255,6 @@ void SimulationControl::check_input_fields(Json::Value const& root) const
         throw std::runtime_error("SimulationCases is not in input file");
 }
 
-/** Extract the material names from the input file */
 std::unordered_set<std::string> SimulationControl::parse_material_names(Json::Value const& materials) const
 {
     std::unordered_set<std::string> material_names;
@@ -271,7 +270,6 @@ std::unordered_set<std::string> SimulationControl::parse_material_names(Json::Va
     return material_names;
 }
 
-/** Extract the part names from the input file */
 std::unordered_set<std::string> SimulationControl::parse_part_names(
     Json::Value const& parts, std::unordered_set<std::string> const& material_names) const
 {

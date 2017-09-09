@@ -19,7 +19,7 @@ femStaticMatrix::femStaticMatrix(femMesh& fem_mesh,
                                  Json::Value const& increment_data)
     : fem_mesh(fem_mesh),
       visualisation(std::move(visualisation)),
-      adaptive_load(increment_data),
+      adaptive_load(increment_data, fem_mesh.time_history()),
       fint(Vector::Zero(fem_mesh.active_dofs())),
       fext(Vector::Zero(fem_mesh.active_dofs())),
       d(Vector::Zero(fem_mesh.active_dofs())),
@@ -35,7 +35,6 @@ femStaticMatrix::femStaticMatrix(femMesh& fem_mesh,
         throw std::runtime_error("ResidualTolerance not specified in "
                                  "NonlinearOptions");
     }
-
     residual_tolerance = nonlinear_data["ResidualTolerance"].asDouble();
     displacement_tolerance = nonlinear_data["DisplacementTolerance"].asDouble();
 }
@@ -221,8 +220,6 @@ void femStaticMatrix::enforce_dirichlet_conditions(SparseMatrix& A, Vector& x, V
 
 void femStaticMatrix::apply_displacement_boundaries()
 {
-    // auto start = std::chrono::high_resolution_clock::now();
-
     for (auto const & [ name, dirichlet_boundaries ] : fem_mesh.displacement_boundaries())
     {
         for (auto const& dirichlet_boundary : dirichlet_boundaries)
@@ -233,11 +230,6 @@ void femStaticMatrix::apply_displacement_boundaries()
             }
         }
     }
-
-    // auto end = std::chrono::high_resolution_clock::now();
-    // std::chrono::duration<double> elapsed_seconds = end - start;
-
-    // std::cout << "  Displacements applied in " << elapsed_seconds.count() << "s\n";
 }
 
 void femStaticMatrix::perform_equilibrium_iterations()

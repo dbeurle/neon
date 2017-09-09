@@ -8,7 +8,7 @@
 
 #include "material/Material.hpp"
 #include "mesh/DofAllocator.hpp"
-#include "mesh/solid/MaterialCoordinates.hpp"
+#include "mesh/MaterialCoordinates.hpp"
 #include "numeric/Operators.hpp"
 
 #include <cfenv>

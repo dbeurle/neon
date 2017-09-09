@@ -11,12 +11,18 @@
 
 namespace neon
 {
-AdaptiveLoadStep::AdaptiveLoadStep(Json::Value const& increment_data)
+AdaptiveLoadStep::AdaptiveLoadStep(Json::Value const& increment_data,
+                                   std::vector<double> mandatory_time_history)
 {
+    // Set the time history to the
+    for (auto const& t : mandatory_time_history) time_queue.push(t);
+
+    if (is_approx(time_queue.top(), 0.0)) time_queue.pop();
+
     this->parse_input(increment_data);
 }
 
-void AdaptiveLoadStep::update_convergence_state(bool is_converged)
+void AdaptiveLoadStep::update_convergence_state(bool const is_converged)
 {
     auto constexpr cutback_factor = 0.5;
     auto constexpr forward_factor = 2.0;
@@ -25,19 +31,23 @@ void AdaptiveLoadStep::update_convergence_state(bool is_converged)
 
     if (is_converged)
     {
+        time_queue.pop();
+
         last_converged_time_step_size = current_time - last_converged_time;
         last_converged_time = current_time;
 
-        is_applied = is_approx(current_time, final_time);
+        is_applied = is_approx(current_time, final_time) || time_queue.empty();
 
         if (is_applied) return;
 
-        double const new_time = std::min(consecutive_unconverged > 0 || consecutive_converged < 4
+        // If the previous iterations required cut backs, then the next steps
+        // should proceed slowly in the nonlinear region
+        double const new_time = std::min(is_highly_nonlinear()
                                              ? last_converged_time_step_size + current_time
                                              : forward_factor * current_time,
                                          current_time + maximum_increment);
 
-        current_time = std::min(new_time, final_time);
+        current_time = std::min(time_queue.top(), std::min(new_time, final_time));
 
         consecutive_unconverged = 0;
         consecutive_converged++;
@@ -107,7 +117,7 @@ void AdaptiveLoadStep::parse_input(Json::Value const& increment_data)
 
     final_time = increment_data["Period"].asDouble();
 
-    current_time = initial_time;
+    current_time = std::min(time_queue.top(), initial_time);
 }
 
 void AdaptiveLoadStep::check_increment_data(Json::Value const& increment_data)

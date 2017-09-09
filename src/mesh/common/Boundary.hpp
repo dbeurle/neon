@@ -1,6 +1,11 @@
 
 #pragma once
 
+#include <utility>
+#include <vector>
+
+#include <json/forwards.h>
+
 namespace neon
 {
 /**
@@ -14,7 +19,7 @@ namespace neon
 class Boundary
 {
 public:
-    explicit Boundary(double const prescribed_value, bool const is_load_ramped);
+    explicit Boundary(Json::Value const& times, Json::Value const& loads);
 
     /** Update the prescribed value and load application to ramped or instantaneous */
     void internal_restart(double const prescribed_value_new, bool const is_load_ramped = true);
@@ -22,21 +27,17 @@ public:
     /** Maintains the previous load and does not ramp */
     void internal_restart();
 
+    std::vector<double> time_history() const;
+
     /**
      * Interpolates linearly between the old prescribed boundary value and
      * the newly prescribed boundary value.  This takes into account if the
      * load is ramped or propogated from the previous load/time step
      * @return an interpolated value
      */
-    auto interpolate_prescribed_value(double const load_factor) const
-    {
-        return is_load_ramped ? (value_new - value_old) * load_factor + value_old : value_new;
-    }
+    double interpolate_prescribed_load(double const step_time) const;
 
 private:
-    bool is_load_ramped;
-
-    double value_old = 0.0;
-    double value_new = 0.0;
+    std::vector<std::pair<double, double>> time_load;
 };
 }

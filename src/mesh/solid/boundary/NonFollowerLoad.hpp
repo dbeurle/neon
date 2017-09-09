@@ -1,10 +1,10 @@
 
 #pragma once
 
-#include "interpolations/SurfaceInterpolation.hpp"
+#include "interpolations/InterpolationFactory.hpp"
+#include "mesh/MaterialCoordinates.hpp"
 #include "mesh/SubMesh.hpp"
 #include "mesh/common/Neumann.hpp"
-#include "mesh/solid/MaterialCoordinates.hpp"
 #include "numeric/DenseTypes.hpp"
 
 #include <memory>
@@ -12,55 +12,11 @@
 namespace neon::solid
 {
 /**
- * NonfollowerLoad is a base class for the class of loads which do not follow
- * the body throughout the simulation.  Every non-follower load will contribute
- * to the external force vector, whether from a volume or a surface load.
- */
-class NonFollowerLoad : public Neumann
-{
-public:
-    explicit NonFollowerLoad(std::vector<List> const& nodal_connectivity,
-                             std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                             double const prescribed_load,
-                             bool const is_load_ramped,
-                             int const dof_offset,
-                             int const nodal_dofs = 3);
-
-    /** @return an element external force vector for a given element */
-    virtual std::tuple<List const&, Vector> external_force(int const element,
-                                                           double const load_factor) const = 0;
-
-protected:
-    std::shared_ptr<MaterialCoordinates> material_coordinates;
-};
-
-/**
  * Traction is a non-follower load that has a surface interpolation and
  * computes the element external load vector contribution to the system of
  * equations \sa NonFollowerLoad
  */
-class Traction : public NonFollowerLoad
-{
-public:
-    /**
-     * Construct the object by forwarding the constructor arguments for the
-     * parent via a variadic template.  The correct constructor arguments
-     * are given by NonFollowerLoad
-     * @param sf Unique pointer to a surface interpolation
-     * @param args See NonFollowerLoad constructor arguments
-     */
-    template <typename... NonFollowerLoadArgs>
-    explicit Traction(std::unique_ptr<SurfaceInterpolation>&& sf, NonFollowerLoadArgs... args)
-        : NonFollowerLoad(args...), sf(std::move(sf))
-    {
-    }
-
-    virtual std::tuple<List const&, Vector> external_force(int const element,
-                                                           double const load_factor) const override;
-
-protected:
-    std::unique_ptr<SurfaceInterpolation> sf;
-};
+using Traction = SurfaceLoad<SurfaceInterpolation>;
 
 /**
  * NonFollowerLoadBoundary contains the boundary conditions which contribute to
@@ -72,13 +28,26 @@ class NonFollowerLoadBoundary
 public:
     explicit NonFollowerLoadBoundary(std::shared_ptr<MaterialCoordinates>& material_coordinates,
                                      std::vector<SubMesh> const& submeshes,
-                                     int const dof_offset,
-                                     double const prescribed_load,
-                                     Json::Value const& simulation_data);
+                                     Json::Value const& times,
+                                     Json::Value const& loads,
+                                     Json::Value const& simulation_data,
+                                     int const dof_offset)
+    {
+        for (auto const& mesh : submeshes)
+        {
+            surface_loads.emplace_back(make_surface_interpolation(mesh.topology(), simulation_data),
+                                       mesh.connectivities(),
+                                       material_coordinates,
+                                       times,
+                                       loads,
+                                       dof_offset,
+                                       3);
+        }
+    }
 
-    auto const& boundaries() const { return nf_loads; }
+    auto const& boundaries() const { return surface_loads; }
 
 protected:
-    std::vector<Traction> nf_loads;
+    std::vector<Traction> surface_loads;
 };
 }
