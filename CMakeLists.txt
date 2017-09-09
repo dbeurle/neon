@@ -10,7 +10,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 option(ENABLE_CUDA "Enable CUDA linear solver" OFF)
 option(ENABLE_NATIVE "Optimise for current architecture" OFF)
-OPTION(ENABLE_COVERAGE "Set compiler flag for coverage analysis" FALSE)
+OPTION(ENABLE_COVERAGE "Set compiler flag for coverage analysis" OFF)
 
 if (ENABLE_CUDA)
     find_package(CUDA REQUIRED)
