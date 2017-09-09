@@ -1,13 +1,16 @@
 
-foreach(test GeometryTest
-             MaterialTest
-             ConstitutiveTest
-             QuadratureTest
-             MatrixSystemTest
+foreach(test
              AdaptiveIncrementTest
              BoundaryTest
+             ConstitutiveTest
+             GeometryTest
+             LinearSolverTest
+             MaterialTest
+             MatrixSystemTest
+             ModuleTest
+             QuadratureTest
              TensorTest
-             LinearSolverTest)
+             )
     add_executable(${test} ${test}.cpp)
     add_dependencies(${test} catch)
     target_link_libraries(${test} LINK_PUBLIC neon)

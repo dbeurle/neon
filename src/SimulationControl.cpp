@@ -135,63 +135,13 @@ void SimulationControl::start()
     // and throws the appropriate exception when an error is detected
     for (auto const & [ name, simulations ] : multistep_simulations)
     {
-        std::cout << "Name : " << name << std::endl;
         for (auto const& simulation : simulations)
         {
-            // std::cout << simulation.toStyledString() << std::endl;
-            modules.emplace_back(make_module(simulation));
+            modules.emplace_back(make_module(simulation, mesh_store));
         }
     }
     // Run the simulations
     for (auto const& module : modules) module->perform_simulation();
-
-    // It is desirable to have multiple load steps throughout the simulation.
-    // This can be achieved by stepping through each simulation and performing
-    // an internal restart, using the data from the previous time step.
-    for (auto const& simulation : root["SimulationCases"])
-    {
-        if (!simulation["Inherits"].empty()) continue;
-
-        std::cout << std::string(2, ' ') << termcolor::bold << "Simulating case \""
-                  << simulation["Name"].asString() << "\"" << termcolor::reset << std::endl
-                  << std::endl;
-
-        auto const& mesh_data = simulation["Mesh"][0];
-
-        auto simulation_mesh = mesh_store.find(mesh_data["Name"].asString());
-
-        std::cout << std::string(4, ' ') << "Module \"" << simulation["Type"].asString() << "\"\n";
-        std::cout << std::string(4, ' ') << "Solution \"" << simulation["Solution"].asString()
-                  << "\"\n";
-
-        auto const & [ mesh, material ] = simulation_mesh->second;
-
-        solid::femMesh fem_mesh(mesh, material, mesh_data);
-
-        solid::femStaticMatrix fem_matrix(fem_mesh,
-                                          Visualisation(root["Name"].asString(),
-                                                        fem_mesh,
-                                                        simulation["Visualisation"]),
-                                          simulation["LinearSolver"],
-                                          simulation["NonlinearOptions"],
-                                          simulation["Time"]);
-
-        fem_matrix.solve();
-
-        for (auto const& next_step : multistep_simulations[simulation["Name"].asString()])
-        {
-            std::cout << termcolor::bold << "\n"
-                      << std::string(2, ' ') << "Simulating case \"" << next_step["Name"].asString()
-                      << "\"" << termcolor::reset << std::endl
-                      << std::endl;
-
-            fem_mesh.internal_restart(next_step["Mesh"][0]);
-
-            fem_matrix.internal_restart(next_step["LinearSolver"], next_step["Time"]);
-
-            fem_matrix.solve();
-        }
-    }
 }
 
 void SimulationControl::build_simulation_tree()

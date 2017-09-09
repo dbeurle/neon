@@ -2,17 +2,28 @@
 #include "ModuleFactory.hpp"
 
 #include "DiffusionModule.hpp"
-#include "SolidModule.hpp"
+#include "SolidMechanicsModule.hpp"
 
 #include <json/value.h>
 
 namespace neon
 {
-std::unique_ptr<AbstractModule> make_module(Json::Value const& simulation)
+std::unique_ptr<AbstractModule> make_module(
+    Json::Value const& simulation,
+    std::map<std::string, std::pair<BasicMesh, Json::Value>> const& mesh_store)
 {
+    auto const& mesh_data = simulation["Mesh"][0];
+
+    auto simulation_mesh = mesh_store.find(mesh_data["Name"].asString());
+
+    std::cout << std::string(4, ' ') << "Module \"" << simulation["Type"].asString() << "\"\n";
+    std::cout << std::string(4, ' ') << "Solution \"" << simulation["Solution"].asString() << "\"\n";
+
+    auto const & [ mesh, material ] = simulation_mesh->second;
+
     if (auto const& module_type = simulation["Type"].asString(); module_type == "SolidMechanics")
     {
-        return std::make_unique<SolidModule>();
+        return std::make_unique<SolidMechanicsModule>(mesh, material, simulation);
     }
     else if (module_type == "TemperatureDiffusion")
     {
