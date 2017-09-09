@@ -20,7 +20,8 @@ FiniteJ2Plasticity::FiniteJ2Plasticity(InternalVariables& variables, Json::Value
     variables.add(InternalVariables::Tensor::HenckyStrainElastic);
 
     // Add material tangent with the linear elasticity moduli
-    variables.add(InternalVariables::Matrix::TruesdellModuli, elastic_moduli());
+    variables.add(InternalVariables::Matrix::TruesdellModuli,
+                  consistent_tangent(1.0, Matrix3::Zero(), Matrix3::Zero(), C_e));
 
     std::cout << "Constructed finite strain J2 plasticity model\n";
 }
@@ -67,20 +68,32 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
         auto& von_mises = von_mises_list[l];
         auto& log_strain_e = log_strain_e_list[l];
 
+        std::cout << "log strain elastic\n" << log_strain_e << std::endl;
+
         // Elastic trial deformation gradient
         Matrix3 const B_e = (2.0 * log_strain_e).exp();
+
+        std::cout << "B elastic\n" << B_e << std::endl;
+
+        std::cout << "Finc\n" << F_inc << std::endl;
 
         // Elastic trial left Cauchy-Green deformation tensor
         Matrix3 const B_e_trial = F_inc * B_e * F_inc.transpose();
 
+        std::cout << "B elastic trial\n" << B_e_trial << std::endl;
+
         // Trial Logarithmic elastic strain
         log_strain_e = 0.5 * B_e_trial.log();
+
+        std::cout << "log strain elastic\n" << log_strain_e << std::endl;
 
         // Elastic stress predictor
         cauchy_stress = compute_cauchy_stress(log_strain_e) / J;
 
         // Trial von Mises stress
         von_mises = von_mises_stress(cauchy_stress);
+
+        std::cout << "von Mises " << von_mises << std::endl;
 
         // Compute the initial estimate of the yield function for the material
         // and decide if the stress return needs to be computed
@@ -163,7 +176,8 @@ std::tuple<Vector3, std::array<Matrix3, 3>, bool, std::array<int, 3>> FiniteJ2Pl
     std::array<int, 3> abc_ordering{{0, 1, 2}};
 
     // Need to check if there are repeated eigenvalues to machine precision
-    if (x.norm() < 1.0e-2 || (is_approx(x(0), x(1)) && is_approx(x(1), x(2))))
+    // if (x.norm() < 1.0e-2 || (is_approx(x(0), x(1)) && is_approx(x(1), x(2))))
+    if (is_approx(x(0), x(1)) && is_approx(x(1), x(2)))
     {
         std::cout << "We have repeated eigenvalues!\n" << x << std::endl;
         E[0] = Matrix3::Identity();
