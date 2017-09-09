@@ -46,6 +46,7 @@ protected:
      */
     void compute_sparsity_pattern();
 
+    /** Assembles the external contribution vector */
     void compute_external_force(double const load_factor = 1.0);
 
     /** Assembles the conductivity matrix */

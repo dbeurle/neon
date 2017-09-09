@@ -1,0 +1,26 @@
+
+#pragma once
+
+#include "ConstitutiveModel.hpp"
+
+#include "material/LinearDiffusion.hpp"
+
+namespace neon
+{
+/**
+ * IsotropicDiffusion computes the isotropic constitutive matrix for linear
+ * and isotropic diffusion problems.
+ */
+class IsotropicDiffusion : public ConstitutiveModel
+{
+public:
+    IsotropicDiffusion(InternalVariables& variables, Json::Value const& material_data);
+
+    void update_internal_variables(double const time_step_size) override;
+
+    Material const& intrinsic_material() const override { return material; }
+
+protected:
+    LinearDiffusion material;
+};
+}

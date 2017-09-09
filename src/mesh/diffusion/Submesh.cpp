@@ -50,7 +50,7 @@ std::tuple<List const&, Matrix> femSubmesh::tangent_stiffness(int const element)
 
     auto const n = nodes_per_element();
 
-    auto const& D_Vec = variables(InternalVariables::Matrix::TruesdellModuli);
+    auto const& D_Vec = variables(InternalVariables::Tensor::Conductivity);
 
     Matrix const kmat = sf->quadrature()
                             .integrate(Matrix::Zero(n, n).eval(),
