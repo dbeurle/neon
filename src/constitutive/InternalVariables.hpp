@@ -27,6 +27,7 @@ public:
     enum class Matrix { TruesdellModuli };
 
     enum class Tensor {
+        /* Tensors for solid mechanics applications */
         // Stress measures
         Cauchy,
         Kirchhoff,
@@ -39,7 +40,9 @@ public:
         DeformationGradient,
         DeformationGradientPlastic,
         DisplacementGradient,
-        GreenLagrange
+        GreenLagrange,
+        /* Tensors for diffusion applications */
+        Conductivity
     };
 
     enum class Vector { Chains, Segments, ShearModuli };
