@@ -93,8 +93,7 @@ void SimulationControl::parse()
                                                    "Time",
                                                    "Solution",
                                                    "Visualisation",
-                                                   "LinearSolver",
-                                                   "NonlinearOptions"};
+                                                   "LinearSolver"};
 
     // Build a list of all the load steps for a given mesh
     for (auto const& simulation : root["SimulationCases"])
