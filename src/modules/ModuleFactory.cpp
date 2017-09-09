@@ -1,7 +1,7 @@
 
 #include "ModuleFactory.hpp"
 
-#include "DiffusionModule.hpp"
+#include "LinearDiffusionModule.hpp"
 #include "SolidMechanicsModule.hpp"
 
 #include <json/value.h>
@@ -30,9 +30,9 @@ std::unique_ptr<AbstractModule> make_module(
         }
         return std::make_unique<SolidMechanicsModule>(mesh, material, simulation);
     }
-    else if (module_type == "TemperatureDiffusion")
+    else if (module_type == "HeatDiffusion")
     {
-        return std::make_unique<LinearDiffusionModule>();
+        return std::make_unique<LinearDiffusionModule>(mesh, material, simulation);
     }
     else
     {

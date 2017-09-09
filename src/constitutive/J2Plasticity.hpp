@@ -20,7 +20,7 @@ public:
 
     Material const& intrinsic_material() const override { return material; }
 
-    virtual bool is_finite_deformation() const override { return false; };
+    virtual bool is_finite_deformation() const override { return false; }
 
 protected:
     Matrix3 compute_cauchy_stress(Matrix3 const& elastic_strain) const;

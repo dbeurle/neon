@@ -29,9 +29,7 @@ namespace neon::diffusion
 class femStaticMatrix
 {
 public:
-    explicit femStaticMatrix(femMesh& fem_mesh,
-                             Visualisation&& visualisation,
-                             Json::Value const& solver_data);
+    explicit femStaticMatrix(femMesh& fem_mesh, Json::Value const& solver_data);
 
     ~femStaticMatrix();
 
@@ -71,8 +69,6 @@ protected:
 
 protected:
     femMesh& fem_mesh;
-
-    Visualisation visualisation;
 
     bool is_sparsity_computed = false;
 

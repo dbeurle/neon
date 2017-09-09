@@ -9,9 +9,13 @@ namespace neon
 {
 LinearDiffusion::LinearDiffusion(Json::Value const& material_data) : Material(material_data)
 {
-    if (material_data.isMember("Diffusivity"))
+    if (material_data.isMember("Conductivity"))
     {
-        diffusivity = material_data["Diffusivity"].asDouble();
+        conductivity = material_data["Conductivity"].asDouble();
+    }
+    if (material_data.isMember("SpecificHeat"))
+    {
+        Cp = material_data["SpecificHeat"].asDouble();
     }
     else
     {

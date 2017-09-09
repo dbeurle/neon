@@ -9,11 +9,8 @@
 
 namespace neon::diffusion
 {
-femStaticMatrix::femStaticMatrix(femMesh& fem_mesh,
-                                 Visualisation&& visualisation,
-                                 Json::Value const& solver_data)
+femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& solver_data)
     : fem_mesh(fem_mesh),
-      visualisation(std::move(visualisation)),
       f(Vector::Zero(fem_mesh.active_dofs())),
       d(Vector::Zero(fem_mesh.active_dofs())),
       linear_solver(make_linear_solver(solver_data))
@@ -89,6 +86,8 @@ void femStaticMatrix::solve()
     apply_dirichlet_conditions(K, d, f);
 
     linear_solver->solve(K, d, f);
+
+    std::cout << "Temperature results\n" << d << std::endl;
 }
 
 void femStaticMatrix::assemble_stiffness()

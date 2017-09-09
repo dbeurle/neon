@@ -20,6 +20,8 @@ public:
 
     Material const& intrinsic_material() const override { return material; }
 
+    bool is_finite_deformation() const override { return false; }
+
 protected:
     LinearDiffusion material;
 };

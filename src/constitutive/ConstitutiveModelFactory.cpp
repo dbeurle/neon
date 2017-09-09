@@ -7,6 +7,8 @@
 #include "FiniteJ2Plasticity.hpp"
 #include "NeoHooke.hpp"
 
+#include "IsotropicDiffusion.hpp"
+
 #include <json/value.h>
 #include <stdexcept>
 
@@ -55,6 +57,13 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& va
     if (!simulation_data.isMember("ConstitutiveModel"))
     {
         throw std::runtime_error("Missing \"ConstitutiveModel\" in \"Mesh\"");
+    }
+
+    auto const& model_name = simulation_data["ConstitutiveModel"].asString();
+
+    if (model_name == "IsotropicDiffusion")
+    {
+        return std::make_unique<IsotropicDiffusion>(variables, material_data);
     }
     return nullptr;
 }
