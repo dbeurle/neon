@@ -1,9 +1,9 @@
 
 #pragma once
 
+#include "io/FileIO.hpp"
 #include "mesh/diffusion/femMesh.hpp"
 #include "numeric/SparseTypes.hpp"
-#include "visualisation/Visualisation.hpp"
 
 #include <json/forwards.h>
 
@@ -29,7 +29,7 @@ namespace neon::diffusion
 class femStaticMatrix
 {
 public:
-    explicit femStaticMatrix(femMesh& fem_mesh, Json::Value const& solver_data);
+    explicit femStaticMatrix(femMesh& fem_mesh, Json::Value const& solver_data, FileIO&& file_io);
 
     ~femStaticMatrix();
 
@@ -75,6 +75,8 @@ protected:
     SparseMatrix K; //!< Conductivity matrix
     Vector f;       //!< Heat vector
     Vector d;       //!< Temperature vector
+
+    FileIO file_io;
 
     std::unique_ptr<LinearSolver> linear_solver;
 };

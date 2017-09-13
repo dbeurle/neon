@@ -9,10 +9,11 @@
 
 namespace neon::diffusion
 {
-femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& solver_data)
+femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& solver_data, FileIO&& file_io)
     : fem_mesh(fem_mesh),
       f(Vector::Zero(fem_mesh.active_dofs())),
       d(Vector::Zero(fem_mesh.active_dofs())),
+      file_io(std::move(file_io)),
       linear_solver(make_linear_solver(solver_data))
 {
 }
@@ -87,7 +88,7 @@ void femStaticMatrix::solve()
 
     linear_solver->solve(K, d, f);
 
-    std::cout << "Temperature results\n" << d << std::endl;
+    file_io.write(0, 0.0, d);
 }
 
 void femStaticMatrix::assemble_stiffness()
