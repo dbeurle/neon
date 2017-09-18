@@ -69,7 +69,7 @@ void femMesh::allocate_boundary_conditions(Json::Value const& simulation_data,
                                                       boundary["Time"],
                                                       boundary["Value"]);
         }
-        else if (boundary_type == "Flux")
+        else if (boundary_type == "HeatFlux")
         {
             surface_bcs[boundary_name].emplace_back(material_coordinates,
                                                     basic_mesh.meshes(boundary_name),
@@ -88,11 +88,11 @@ void femMesh::check_boundary_conditions(Json::Value const& boundary_data) const
 {
     for (auto const& boundary : boundary_data)
     {
-        if (boundary["Name"].empty())
+        if (!boundary.isMember("Name"))
         {
             throw std::runtime_error("Missing \"Name\" in BoundaryConditions\n");
         }
-        if (boundary["Type"].empty())
+        if (!boundary.isMember("Type"))
         {
             throw std::runtime_error("Missing \"Type\" in BoundaryConditions\n");
         }

@@ -1,89 +1,100 @@
-//
-// #include "femDynamicMatrix.hpp"
-//
-// #include "solver/linear/LinearSolver.hpp"
-//
-// #include <chrono>
-// #include <termcolor/termcolor.hpp>
-//
-// namespace neon::diffusion
-// {
-// femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh,
-//                                    Visualisation&& visualisation,
-//                                    Json::Value const& solver_data,
-//                                    Json::Value const& time_data)
-//     : femStaticMatrix(fem_mesh, std::forward<Visualisation>(visualisation), solver_data,
-//     time_data),
-//       a(Vector::Zero(fem_mesh.active_dofs())),
-//       v(Vector::Zero(fem_mesh.active_dofs())),
-//       newmark(time_data)
-// {
-// }
-//
-// void femDynamicMatrix::solve()
-// {
-//     // Perform Newton-Raphson iterations
-//     std::cout << "Solving " << fem_mesh.active_dofs() << " degrees of freedom\n";
-//
-//     assemble_mass();
-//
-//     apply_displacement_boundaries();
-//
-//     // TODO Put the internal variable update here
-//
-//     std::cout << "Initial displacements\n" << d << std::endl;
-//
-//     compute_internal_force();
-//     std::cout << "Initial internal force vector\n" << fint << std::endl;
-//
-//     auto f = -fint;
-//
-//     // Compute initial accelerations (a = inv(M) * f) where f = fext - fint
-//     a = M.cwiseInverse().cwiseProduct(f);
-//
-//     std::cout << "Initial trial accelerations\n" << a << std::endl;
-//
-//     // Estimate solution
-//     // d = newmark.approximate_displacements(a, v, d);
-//
-//     std::cout << "Newmark trial displacements\n" << d << std::endl;
-//
-//     while (newmark.time_loop())
-//     {
-//         std::cout << "Performing time step\n";
-//
-//         perform_equilibrium_iterations();
-//
-//         // fem_mesh.write();
-//     }
-//     std::cout << "Solver routine finished\n";
-// }
-//
-// void femDynamicMatrix::assemble_mass()
-// {
-//     auto start = std::chrono::high_resolution_clock::now();
-//
-//     M = Vector::Zero(fem_mesh.active_dofs());
-//
-//     for (auto const& submesh : fem_mesh.meshes())
-//     {
-//         for (auto element = 0; element < submesh.elements(); ++element)
-//         {
-//             auto const[dofs, m] = submesh.diagonal_mass(element);
-//
-//             for (auto a = 0; a < dofs.size(); a++)
-//             {
-//                 M(dofs[a]) += m(a);
-//             }
-//         }
-//     }
-//
-//     auto end = std::chrono::high_resolution_clock::now();
-//     std::chrono::duration<double> elapsed_seconds = end - start;
-//
-//     std::cout << "  Assembly of mass matrix took " << elapsed_seconds.count() << "s\n";
-// }
-//
+
+#include "femDynamicMatrix.hpp"
+
+#include "solver/linear/LinearSolver.hpp"
+
+#include <chrono>
+#include <json/value.h>
+#include <termcolor/termcolor.hpp>
+
+namespace neon::diffusion
+{
+femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh,
+                                   Json::Value const& simulation_data,
+                                   FileIO&& file_io)
+    : femStaticMatrix(fem_mesh, simulation_data, std::move(file_io)),
+      time_solver(simulation_data["Time"])
+{
+}
+
+void femDynamicMatrix::solve()
+{
+    // Perform time dependent solution
+    std::cout << "Solving " << fem_mesh.active_dofs() << " degrees of freedom\n";
+
+    assemble_mass();
+
+    // apply_displacement_boundaries();
+
+    // SparseMatrix const A = M - time_step_size * K;
+
+    while (time_solver.loop())
+    {
+        std::cout << "Performing time step\n";
+
+        // perform_equilibrium_iterations();
+
+        // fem_mesh.write();
+    }
+    std::cout << "Solver routine finished\n";
+}
+
+void femDynamicMatrix::assemble_mass()
+{
+    auto start = std::chrono::high_resolution_clock::now();
+
+    // std::vector<Doublet<int>> doublets;
+    //
+    // for (auto const& submesh : fem_mesh.meshes())
+    // {
+    //     for (auto element = 0; element < submesh.elements(); ++element)
+    //     {
+    //         auto const[dofs, m] = submesh.consistent_mass(element);
+    //
+    //         for (auto b = 0; b < dofs.size(); b++)
+    //         {
+    //             for (auto a = 0; a < dofs.size(); a++)
+    //             {
+    //                 M.coeffRef(dofs[a], dofs[b]) += m(a, b);
+    //             }
+    //         }
+    //     }
+    // }
+    //
+    // for (auto element = 0; element < submesh.elements(); element++)
+    // {
+    //     for (auto const& p : submesh.local_dof_list(element))
+    //     {
+    //         for (auto const& q : submesh.local_dof_list(element))
+    //         {
+    //             doublets.emplace_back(p, q);
+    //         }
+    //     }
+    // }
+    // for (auto const& submesh : fem_mesh.meshes())
+    // {
+    //     for (auto element = 0; element < submesh.elements(); ++element)
+    //     {
+    //         auto const[dofs, m] = submesh.consistent_mass(element);
+    //
+    //         for (auto b = 0; b < dofs.size(); b++)
+    //         {
+    //             for (auto a = 0; a < dofs.size(); a++)
+    //             {
+    //                 M.coeffRef(dofs[a], dofs[b]) += m(a, b);
+    //             }
+    //         }
+    //     }
+    // }
+    //
+    // M.setFromTriplets(doublets.begin(), doublets.end());
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end - start;
+
+    std::cout << "  Assembly of mass matrix took " << elapsed_seconds.count() << "s\n";
+}
+
 // void femDynamicMatrix::perform_equilibrium_iterations()
 // {
 //     Vector delta_d = Vector::Zero(fem_mesh.active_dofs());
@@ -141,4 +152,4 @@
 //         throw std::runtime_error("Newton-Raphson iterations failed to converged.\n");
 //     }
 // }
-// }
+}

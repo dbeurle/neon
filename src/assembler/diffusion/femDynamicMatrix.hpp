@@ -10,21 +10,19 @@ namespace neon::diffusion
 class femDynamicMatrix : public femStaticMatrix
 {
 public:
-    explicit femDynamicMatrix(femMesh& fem_mesh,
-                              Visualisation&& visualisation,
-                              Json::Value const& solver_data,
-                              Json::Value const& time_data);
+    explicit femDynamicMatrix(femMesh& fem_mesh, Json::Value const& simulation_data, FileIO&& file_io);
 
     ~femDynamicMatrix() = default;
 
     void solve() override final;
 
 protected:
+    /** Assembles the consistent (full) mass matrix */
     void assemble_mass();
 
 protected:
-    Vector M; //!< Diagonal mass matrix
+    SparseMatrix M; //!< Consistent mass matrix
 
-    GeneralisedTrapezoidal trapezoidal;
+    GeneralisedTrapezoidal time_solver;
 };
 }

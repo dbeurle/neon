@@ -45,7 +45,7 @@ public:
         Conductivity
     };
 
-    enum class Vector { Chains, Segments, ShearModuli };
+    enum class Vector { Chains, Segments, ShearModuli, HeatFlux };
 
     enum class Scalar {
         Chains,      // Chains for the micromechanical model

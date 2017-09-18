@@ -16,12 +16,17 @@ std::unique_ptr<AbstractModule> make_module(
 
     auto simulation_mesh = mesh_store.find(mesh_data["Name"].asString());
 
-    std::cout << std::string(4, ' ') << "Module \"" << simulation["Type"].asString() << "\"\n";
-    std::cout << std::string(4, ' ') << "Solution \"" << simulation["Solution"].asString() << "\"\n";
+    auto const& name = simulation["Name"].asString();
+    auto const& module_type = simulation["Module"].asString();
+    auto const& solution_type = simulation["Solution"].asString();
+
+    std::cout << std::string(4, ' ') << "Name \"" << name << "\"\n";
+    std::cout << std::string(4, ' ') << "Module \"" << module_type << "\"\n";
+    std::cout << std::string(4, ' ') << "Solution \"" << solution_type << "\"\n";
 
     auto const & [ mesh, material ] = simulation_mesh->second;
 
-    if (auto const& module_type = simulation["Type"].asString(); module_type == "SolidMechanics")
+    if (module_type == "SolidMechanics")
     {
         if (!simulation.isMember("NonlinearOptions"))
         {
@@ -32,12 +37,24 @@ std::unique_ptr<AbstractModule> make_module(
     }
     else if (module_type == "HeatDiffusion")
     {
-        return std::make_unique<LinearDiffusionModule>(mesh, material, simulation);
+        if (solution_type == "Equilibrium")
+        {
+            return std::make_unique<LinearDiffusionModule<diffusion::femStaticMatrix>>(mesh,
+                                                                                       material,
+                                                                                       simulation);
+        }
+        else if (solution_type == "Transient")
+        {
+            return std::make_unique<LinearDiffusionModule<diffusion::femDynamicMatrix>>(mesh,
+                                                                                        material,
+                                                                                        simulation);
+        }
+        throw std::runtime_error("Solution " + solution_type
+                                 + " is not recognised.  Use \"Equilibrium\" or \"Transient\"\n");
     }
-    else
-    {
-        throw std::runtime_error("Module " + module_type + " is not recognised\n");
-    }
+    throw std::runtime_error("Module " + module_type
+                             + " is not recognised.  Use \"SolidMechanics\" or "
+                               "\"HeatDiffusion\"\n");
     return nullptr;
 }
 }

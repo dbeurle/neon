@@ -5,16 +5,17 @@
 #include "solver/linear/LinearSolverFactory.hpp"
 
 #include <chrono>
+#include <json/value.h>
 #include <omp.h>
 
 namespace neon::diffusion
 {
-femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& solver_data, FileIO&& file_io)
+femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& simulation_data, FileIO&& file_io)
     : fem_mesh(fem_mesh),
       f(Vector::Zero(fem_mesh.active_dofs())),
       d(Vector::Zero(fem_mesh.active_dofs())),
       file_io(std::move(file_io)),
-      linear_solver(make_linear_solver(solver_data))
+      linear_solver(make_linear_solver(simulation_data["LinearSolver"]))
 {
 }
 

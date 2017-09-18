@@ -53,11 +53,12 @@ void SimulationControl::parse()
 
     std::ifstream file(input_file_name);
 
-    Json::Reader reader;
+    // Json::Reader reader;
+    Json::CharReaderBuilder reader;
 
-    if (!reader.parse(file, root, false))
+    if (JSONCPP_STRING input_errors; !Json::parseFromStream(reader, file, &root, &input_errors))
     {
-        throw std::runtime_error(reader.getFormattedErrorMessages());
+        throw std::runtime_error(input_errors);
     }
 
     this->check_input_fields(root);
@@ -70,17 +71,18 @@ void SimulationControl::parse()
     // Add in the parts and populate the mesh stores
     for (auto const& part : root["Part"])
     {
-        Json::Value mesh_file;
-
         auto const material = *ranges::find_if(root["Material"], [&part](auto const& material) {
             return material["Name"].asString() == part["Material"].asString();
         });
 
         std::ifstream mesh_input_stream(part["Name"].asString() + ".mesh");
 
-        if (!reader.parse(mesh_input_stream, mesh_file, false))
+        Json::Value mesh_file;
+
+        if (JSONCPP_STRING mesh_errors;
+            !Json::parseFromStream(reader, mesh_input_stream, &mesh_file, &mesh_errors))
         {
-            throw std::runtime_error(reader.getFormattedErrorMessages());
+            throw std::runtime_error(mesh_errors);
         }
 
         mesh_store.try_emplace(part["Name"].asString(), mesh_file, material);
