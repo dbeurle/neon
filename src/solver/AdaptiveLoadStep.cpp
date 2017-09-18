@@ -31,6 +31,8 @@ void AdaptiveLoadStep::update_convergence_state(bool const is_converged)
 
     if (is_converged)
     {
+        if (current_time >= time_queue.top()) time_queue.pop();
+
         last_converged_time_step_size = current_time - last_converged_time;
         last_converged_time = current_time;
 
@@ -45,16 +47,7 @@ void AdaptiveLoadStep::update_convergence_state(bool const is_converged)
                                              : forward_factor * current_time,
                                          current_time + maximum_increment);
 
-        current_time = std::min(new_time, final_time);
-
-        if (time_queue.top() < current_time)
-        {
-            current_time = time_queue.top();
-        }
-        else
-        {
-            time_queue.pop();
-        }
+        current_time = std::min(time_queue.top(), std::min(new_time, final_time));
 
         consecutive_unconverged = 0;
         consecutive_converged++;
