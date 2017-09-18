@@ -3,14 +3,11 @@ cmake_minimum_required(VERSION 3.8)
 project(neonfe C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
-add_definitions("-Wall -Wno-sign-compare -Wno-unused-variable -Wno-uninitialized")
-
-set(EXT_PROJECTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+add_definitions("-Wall -Wno-sign-compare -Wno-unused-variable -Wno-uninitialized -Wno-inconsistent-missing-override -Wno-unknown-pragmas")
 
 option(ENABLE_CUDA "Enable CUDA linear solver" OFF)
 option(ENABLE_NATIVE "Optimise for current architecture" OFF)
-OPTION(ENABLE_COVERAGE "Set compiler flag for coverage analysis" OFF)
+option(ENABLE_COVERAGE "Set compiler flag for coverage analysis" OFF)
 
 if (ENABLE_CUDA)
     find_package(CUDA REQUIRED)
@@ -25,10 +22,13 @@ if (ENABLE_COVERAGE)
     include(Coverage)
 endif()
 
-add_subdirectory(${EXT_PROJECTS_DIR}/catch)
-add_subdirectory(${EXT_PROJECTS_DIR}/eigen3)
-add_subdirectory(${EXT_PROJECTS_DIR}/range-v3)
-add_subdirectory(${EXT_PROJECTS_DIR}/termcolor)
+set(EXTERNAL_PROJECTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+add_subdirectory(${EXTERNAL_PROJECTS_DIR}/catch)
+add_subdirectory(${EXTERNAL_PROJECTS_DIR}/eigen3)
+add_subdirectory(${EXTERNAL_PROJECTS_DIR}/range-v3)
+add_subdirectory(${EXTERNAL_PROJECTS_DIR}/termcolor)
 
 include_directories(${CATCH_INCLUDE_DIR}
                     ${RV3_INCLUDE_DIR}
@@ -52,7 +52,7 @@ find_package(MUMPS REQUIRED)
 include_directories(${MUMPS_INCLUDE_DIR})
 
 find_package(Jsoncpp REQUIRED)
-include_directories(${JSONCPP_INCLUDE_DIRS})
+include_directories(${JSONCPP_INCLUDE_DIR})
 
 find_package(HwLoc REQUIRED)
 

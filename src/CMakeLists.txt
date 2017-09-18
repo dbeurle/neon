@@ -8,13 +8,11 @@ add_library(neon ${NEON_SOURCES})
 
 target_compile_options(neon PUBLIC $<$<CONFIG:RELEASE>:-O3 -DNDEBUG>)
 
-add_dependencies(neon eigen3)
-add_dependencies(neon range-v3)
-add_dependencies(neon termcolor)
+add_dependencies(neon eigen3 range-v3 termcolor)
 
 target_link_libraries(neon
                       ${Boost_LIBRARIES}
-                      ${JSONCPP_LIBRARIES}
+                      ${JSONCPP_LIBRARY}
                       ${MUMPS_LIBRARY}
                       ${BLAS_LIBRARIES}
                       ${VTK_LIBRARIES}
