@@ -63,8 +63,11 @@ protected:
     double pade_second(double const micro_stretch, double const N) const;
 
     /**
-     *\f{align*}{
-      \boldsymbol{\tau} &= p \boldsymbol{g}^{-1} + \mathbb{P} : \bar{\boldsymbol{\tau}} \f}
+     * Compute the deviatoric projection of the stress tensor according to
+     * \f{align*}{
+       \boldsymbol{\tau} &= p \boldsymbol{g}^{-1} + \mathbb{P} : \bar{\boldsymbol{\tau}} \f}
+     * @param pressure Hydrostatic pressure
+     * @param stress_dev Stress tensor from unit sphere homogenisation
      */
     Matrix3 deviatoric_projection(double const pressure, Matrix3 const& stress_dev) const;
 
@@ -103,8 +106,9 @@ protected:
 
     UnitSphereQuadrature unit_sphere;
 
-    CMatrix const IoI = I_outer_I();
-    CMatrix const I = fourth_order_identity();
+    CMatrix const IoI = I_outer_I();           //!< Outer product
+    CMatrix const I = fourth_order_identity(); //!< Fourth order identity
+    CMatrix const P = deviatoric_voigt();      //!< Deviatoric fourth order tensor
 };
 
 inline double AffineMicrosphere::volumetric_free_energy_dJ(double const J,
