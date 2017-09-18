@@ -42,9 +42,9 @@ inline Matrix3 rate_of_deformation(Matrix3 const& F_dot, Matrix3 const& F)
     return symmetric(velocity_gradient(F_dot, F));
 }
 
-inline Eigen::Matrix<double, 6, 1> voigt(Matrix3 const& a)
+inline Vector6 voigt(Matrix3 const& a)
 {
-    Eigen::Matrix<double, 6, 1> b;
+    Vector6 b;
     b << a(0, 0), a(1, 1), a(2, 2), a(1, 2), a(0, 2), a(0, 1);
     return b;
 }
@@ -90,6 +90,29 @@ inline Matrix identity_expansion(Matrix const& H, int const nodal_dofs)
     return K;
 }
 
+/**
+ * \fn
+ * Compute the deviatoric tensor in Voigt notation according to
+ * \f$ \mathbb{P} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) -
+ * \frac{1}{3}\delta_{ij} \delta_{kl} \f$
+ */
+inline CMatrix deviatoric_voigt()
+{
+    CMatrix A(6, 6);
+    A << 2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0, //
+        -1.0 / 3.0, 2.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,  //
+        -1.0 / 3.0, -1.0 / 3.0, 2.0 / 3.0, 0.0, 0.0, 0.0,  //
+        0.0, 0.0, 0.0, 0.5, 0.0, 0.0,                      //
+        0.0, 0.0, 0.0, 0.0, 0.5, 0.0,                      //
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.5;
+    return A;
+}
+
+/**
+ * \fn
+ * Compute the fourth order symmetric identity tensor in Voigt notation according to
+ * \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
+ */
 inline CMatrix fourth_order_identity()
 {
     CMatrix I(6, 6);
@@ -120,4 +143,12 @@ inline CMatrix outer_product(Matrix3 const& a, Matrix3 const& b)
 }
 
 inline CMatrix outer_product(Matrix3 const& h) { return outer_product(h, h); }
+
+inline CMatrix mandel_notation(CMatrix A)
+{
+    A.block<3, 3>(0, 3) *= std::sqrt(2);
+    A.block<3, 3>(3, 0) *= std::sqrt(2);
+    A.block<3, 3>(3, 3) *= 2.0;
+    return A;
+}
 }
