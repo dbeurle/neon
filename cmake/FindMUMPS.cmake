@@ -52,7 +52,7 @@ if (${MUMPS_INCLUDE_PREFIX} MATCHES "MUMPS")
 	set(MUMPS_INCLUDE_DIR "${MUMPS_INCLUDE_DIR}/MUMPS")
 endif()
 
-# handle the QUIETLY and REQUIRED arguments and set JSONCPP_FOUND to TRUE
+# handle the QUIETLY and REQUIRED arguments and set MUMPS_FOUND to TRUE
 # if all listed variables are TRUE, hide their existence from configuration view
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(MUMPS DEFAULT_MSG MUMPS_INCLUDE_DIR MUMPS_LIBRARY)
