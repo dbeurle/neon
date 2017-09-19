@@ -3,7 +3,7 @@
 
 #include "HypoElasticPlastic.hpp"
 
-#include "numeric/DenseTypes.hpp"
+#include "numeric/Tensor.hpp"
 
 #include "material/IsotropicElasticPlastic.hpp"
 
@@ -53,7 +53,7 @@ protected:
 protected:
     IsotropicElasticPlastic material;
     CMatrix const C_e = elastic_moduli();
-    CMatrix const I_dev = deviatoric_projection();
+    CMatrix const I_dev = deviatoric_voigt();
 };
 
 inline Matrix3 J2Plasticity::compute_cauchy_stress(Matrix3 const& elastic_strain) const

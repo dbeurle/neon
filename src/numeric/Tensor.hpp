@@ -49,7 +49,7 @@ inline Vector6 voigt(Matrix3 const& a)
     return b;
 }
 
-inline Matrix3 voigt_to_matrix(Vector const& a)
+inline Matrix3 voigt_to_matrix(Vector6 const& a)
 {
     Matrix3 b;
     b << a(0), a(5), a(4), //

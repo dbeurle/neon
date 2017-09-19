@@ -108,18 +108,6 @@ CMatrix J2Plasticity::elastic_moduli() const
     return C;
 }
 
-CMatrix J2Plasticity::deviatoric_projection() const
-{
-    CMatrix C(6, 6);
-    C << 2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0, //
-        -1.0 / 3.0, 2.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,  //
-        -1.0 / 3.0, -1.0 / 3.0, 2.0 / 3.0, 0.0, 0.0, 0.0,  //
-        0.0, 0.0, 0.0, 0.5, 0.0, 0.0,                      //
-        0.0, 0.0, 0.0, 0.0, 0.5, 0.0,                      //
-        0.0, 0.0, 0.0, 0.0, 0.0, 0.5;
-    return C;
-}
-
 CMatrix J2Plasticity::algorithmic_tangent(double const plastic_increment,
                                           double const accumulated_plastic_strain,
                                           double const von_mises,

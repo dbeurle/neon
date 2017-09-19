@@ -122,8 +122,9 @@ void AffineMicrosphere::update_internal_variables(double const time_step_size)
 
 Matrix3 AffineMicrosphere::deviatoric_projection(double const p, Matrix3 const& cauchy_stress_dev) const
 {
-    return p * Matrix3::Identity() + voigt_to_matrix(this->P * voigt(cauchy_stress_dev));
-
+    return p * Matrix3::Identity() + voigt_to_matrix(P * voigt(cauchy_stress_dev));
+    // Matrix3 const test_tensor = voigt_to_matrix(P * voigt(cauchy_stress_dev));
+    //
     // Matrix3 P_double_dot_stress_dev;
     // P_double_dot_stress_dev << 2.0 * cauchy_stress_dev(0, 0) / 3.0 - cauchy_stress_dev(1, 1)
     // / 3.0
@@ -140,17 +141,21 @@ Matrix3 AffineMicrosphere::deviatoric_projection(double const p, Matrix3 const& 
     //     cauchy_stress_dev(1, 2), //
     //     -cauchy_stress_dev(0, 0) / 3.0 - cauchy_stress_dev(1, 1) / 3.0
     //         + 2.0 * cauchy_stress_dev(2, 2) / 3.0;
-    // return pressure * Matrix3::Identity() + P_double_dot_stress_dev;
+    //
+    // std::cout << (test_tensor - P_double_dot_stress_dev).norm() << std::endl;
+    //
+    // return p * Matrix3::Identity() + P_double_dot_stress_dev;
 }
 
 CMatrix AffineMicrosphere::deviatoric_projection(CMatrix const& C_dev, Matrix3 const& stress_dev) const
 {
-    auto const D = C_dev
-                   + 2.0 / 3.0
-                         * (stress_dev.trace() * I - outer_product(stress_dev, Matrix3::Identity())
-                            - outer_product(Matrix3::Identity(), stress_dev));
-
-    return mandel_notation(P) * D * mandel_notation(P);
+    // auto const D = C_dev
+    //                + 2.0 / 3.0
+    //                      * (stress_dev.trace() * I - outer_product(stress_dev,
+    //                      Matrix3::Identity())
+    //                         - outer_product(Matrix3::Identity(), stress_dev));
+    //
+    // return mandel_notation(P) * D * mandel_notation(P);
 
     return (CMatrix(6, 6) << 1.0 / 9.0
                                  * (4 * C_dev(0, 0) - 4 * C_dev(0, 1) - 4 * C_dev(0, 2) + C_dev(1, 1)
