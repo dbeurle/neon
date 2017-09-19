@@ -5,6 +5,8 @@ project(neonfe C CXX)
 set(CMAKE_CXX_STANDARD 17)
 add_definitions("-Wall -Wno-sign-compare -Wno-unused-variable -Wno-uninitialized -Wno-inconsistent-missing-override -Wno-unknown-pragmas")
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 option(ENABLE_CUDA "Enable CUDA linear solver" OFF)
 option(ENABLE_NATIVE "Optimise for current architecture" OFF)
 option(ENABLE_COVERAGE "Set compiler flag for coverage analysis" OFF)
@@ -23,7 +25,6 @@ if (ENABLE_COVERAGE)
 endif()
 
 set(EXTERNAL_PROJECTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 add_subdirectory(${EXTERNAL_PROJECTS_DIR}/catch)
 add_subdirectory(${EXTERNAL_PROJECTS_DIR}/eigen3)
