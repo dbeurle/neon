@@ -1,0 +1,55 @@
+{
+    "Name" : "LinearTemperatureDiffusion",
+    "Cores" : 1,
+    "Part": [{
+        "Name" : "cube",
+        "Material" : "steel"
+    }],
+    "Material" : [{
+        "Name" : "steel",
+        "Conductivity" : 386.0,
+        "SpecificHeat" : 380.0,
+        "Density" : 8754.0
+    }],
+    "SimulationCases" : [{
+        "Name" : "FixedTemperatures",
+		"Type" : "HeatDiffusion",
+        "Solution" : "Equilibrium",
+        "Time" : {
+            "Period" : 1.0,
+            "Increments" : {
+                "Initial" : 1.0,
+                "Minimum" : 0.00001,
+                "Maximum" : 1.0
+            }
+        },
+		"Mesh" : [{
+            "Name" : "cube",
+            "ConstitutiveModel" : "IsotropicDiffusion",
+            "ElementOptions" : {
+                "Quadrature" : "Full"
+            },
+            "BoundaryConditions" :
+            [{
+                "Name" : "Bottom",
+                "Type" : "Temperature",
+                "Time" : [0.0, 1.0],
+                "Value" : [20.0, 20.0]
+            },
+            {
+                "Name" : "Top",
+                "Type" : "Temperature",
+                "Time" : [0.0, 1.0],
+                "Value" : [10.0, 10.0]
+            }]
+        }],
+		"LinearSolver" : {
+		    "Solver" : "PaStiX"
+        },
+        "Visualisation" : {
+            "Fields" : ["Displacement", "LinearisedStrain", "LinearisedPlasticStrain",
+                        "CauchyStress", "VonMisesStress", "AccumulatedPlasticStrain"]
+        }
+        }
+    ]
+}
