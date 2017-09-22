@@ -42,22 +42,6 @@ inline Matrix3 rate_of_deformation(Matrix3 const& F_dot, Matrix3 const& F)
     return symmetric(velocity_gradient(F_dot, F));
 }
 
-inline Vector6 voigt(Matrix3 const& a)
-{
-    Vector6 b;
-    b << a(0, 0), a(1, 1), a(2, 2), a(1, 2), a(0, 2), a(0, 1);
-    return b;
-}
-
-inline Matrix3 voigt_to_matrix(Vector6 const& a)
-{
-    Matrix3 b;
-    b << a(0), a(5), a(4), //
-        a(5), a(1), a(3),  //
-        a(4), a(3), a(2);
-    return b;
-}
-
 /**
  * I1 returns the coefficient I1, the first stress invariant,
  * which is equal to the trace
@@ -90,56 +74,204 @@ inline Matrix identity_expansion(Matrix const& H, int const nodal_dofs)
     return K;
 }
 
+/*!
+ * Handles the representation of common tensors (deviatoric, identity, etc)
+ * in Voigt notation suitable for the computation of tensor operations leveraging
+ * matrix-vector or matrix-matrix operations.
+ * \addtogroup voigt
+ * @{
+ */
+namespace voigt
+{
 /**
- * \fn
+ * Compute the outer product in Voigt notation according to
+ * \f$ \mathbb{\mathbf{1} \otimes \mathbf{1}} = \delta_{ij} \delta_{kl} \f$
+ */
+inline CMatrix I_outer_I()
+{
+    // clang-format off
+    return (CMatrix(6, 6) << 1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
+                             1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
+                             1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
+                             0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                             0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                             0.0, 0.0, 0.0, 0.0, 0.0, 0.0).finished();
+    // clang-format on
+}
+
+//! Kinetic description of tensor to voigt notation where off diagonal components
+//! are multiplied by a factor of two
+namespace kinematic
+{
+/**
+ * Convert second order tensor to Voigt notation according to
+ * \f$ \begin{bmatrix} \varepsilon_{11} \\ \varepsilon_{22} \\ \varepsilon_{33} \\ 2\varepsilon_{23}
+ * \\ 2\varepsilon_{13} \\
+ * 2\varepsilon_{12} \end{bmatrix} = \begin{bmatrix} \varepsilon_{11} & \varepsilon_{12} &
+ * \varepsilon_{13} \\ \varepsilon_{21} & \varepsilon_{22} & \varepsilon_{23} \\ \varepsilon_{31} &
+ * \varepsilon_{32} & \varepsilon_{33} \end{bmatrix} \f$
+ */
+inline Vector6 to(Matrix3 const& a)
+{
+    return (Vector6(6) << a(0, 0), a(1, 1), a(2, 2), 2.0 * a(1, 2), 2.0 * a(0, 2), 2.0 * a(0, 1))
+        .finished();
+}
+
+/**
+ * Convert Voigt notation to second order tensor according to
+ * \f$  \begin{bmatrix} \varepsilon_{11} & \varepsilon_{12} &
+ * \varepsilon_{13} \\ \varepsilon_{21} & \varepsilon_{22} & \varepsilon_{23} \\ \varepsilon_{31} &
+ * \varepsilon_{32} & \varepsilon_{33} \end{bmatrix} = \begin{bmatrix} \varepsilon_{11} \\
+ * \varepsilon_{22} \\ \varepsilon_{33} \\ 2\varepsilon_{23}
+ * \\ 2\varepsilon_{13} \\ 2\varepsilon_{12} \end{bmatrix} \f$
+ */
+inline Matrix3 from(Vector6 const& a)
+{
+    // clang-format off
+    return (Matrix3(3, 3) <<     a(0), a(5)/2.0, a(4)/2.0,
+                             a(5)/2.0,     a(1),     a(3),
+                             a(4)/2.0, a(3)/2.0,     a(2)).finished();
+    // clang-format on
+}
+
+/**
  * Compute the deviatoric tensor in Voigt notation according to
  * \f$ \mathbb{P} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) -
  * \frac{1}{3}\delta_{ij} \delta_{kl} \f$
  */
-inline CMatrix deviatoric_voigt()
+inline CMatrix deviatoric()
 {
-    CMatrix A(6, 6);
-    A << 2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0, //
-        -1.0 / 3.0, 2.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,  //
-        -1.0 / 3.0, -1.0 / 3.0, 2.0 / 3.0, 0.0, 0.0, 0.0,  //
-        0.0, 0.0, 0.0, 0.5, 0.0, 0.0,                      //
-        0.0, 0.0, 0.0, 0.0, 0.5, 0.0,                      //
-        0.0, 0.0, 0.0, 0.0, 0.0, 0.5;
-    return A;
+    // clang-format off
+    return (CMatrix(6, 6) << 2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,
+                            -1.0 / 3.0,  2.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,
+                            -1.0 / 3.0, -1.0 / 3.0,  2.0 / 3.0, 0.0, 0.0, 0.0,
+                                   0.0,        0.0,        0.0, 0.5, 0.0, 0.0,
+                                   0.0,        0.0,        0.0, 0.0, 0.5, 0.0,
+                                   0.0,        0.0,        0.0, 0.0, 0.0, 0.5).finished();
+    // clang-format on
 }
 
 /**
- * \fn
  * Compute the fourth order symmetric identity tensor in Voigt notation according to
  * \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
  */
 inline CMatrix fourth_order_identity()
 {
-    CMatrix I(6, 6);
-    I << 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, //
-        0.0, 1.0, 0.0, 0.0, 0.0, 0.0,  //
-        0.0, 0.0, 1.0, 0.0, 0.0, 0.0,  //
-        0.0, 0.0, 0.0, 0.5, 0.0, 0.0,  //
-        0.0, 0.0, 0.0, 0.0, 0.5, 0.0,  //
-        0.0, 0.0, 0.0, 0.0, 0.0, 0.5;
-    return I;
+    // clang-format off
+    return (CMatrix(6, 6) << 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                             0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+                             0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+                             0.0, 0.0, 0.0, 0.5, 0.0, 0.0,
+                             0.0, 0.0, 0.0, 0.0, 0.5, 0.0,
+                             0.0, 0.0, 0.0, 0.0, 0.0, 0.5).finished();
+    // clang-format on
 }
 
-inline CMatrix I_outer_I()
+/**
+ * Compute the fourth order symmetric identity tensor in Voigt notation according to
+ * \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
+ */
+inline CMatrix identity()
 {
-    CMatrix i_o_i(6, 6);
-    i_o_i << 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, //
-        1.0, 1.0, 1.0, 0.0, 0.0, 0.0,      //
-        1.0, 1.0, 1.0, 0.0, 0.0, 0.0,      //
-        0.0, 0.0, 0.0, 0.0, 0.0, 0.0,      //
-        0.0, 0.0, 0.0, 0.0, 0.0, 0.0,      //
-        0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
-    return i_o_i;
+    // clang-format off
+    return (CMatrix(6, 6) << 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                             0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+                             0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+                             0.0, 0.0, 0.0, 0.5, 0.0, 0.0,
+                             0.0, 0.0, 0.0, 0.0, 0.5, 0.0,
+                             0.0, 0.0, 0.0, 0.0, 0.0, 0.5).finished();
+    // clang-format on
 }
+}
+
+//! Kinetic description of tensor to voigt notation where off diagonal components
+//! are not multiplied by a factor of two
+namespace kinetic
+{
+/**
+ * Convert second order tensor to Voigt notation according to
+ * \f$ \begin{bmatrix} \sigma_{11} \\ \sigma_{22} \\ \sigma_{33} \\ \sigma_{23} \\ \sigma_{13} \\
+ * \sigma_{12} \end{bmatrix} = \begin{bmatrix} \sigma_{11} & \sigma_{12} & \sigma_{13} \\
+ * \sigma_{21} & \sigma_{22} & \sigma_{23} \\ \sigma_{31} & \sigma_{32} & \sigma_{33} \end{bmatrix}
+ * \f$
+ */
+inline Vector6 to(Matrix3 const& a)
+{
+    return (Vector6(6) << a(0, 0), a(1, 1), a(2, 2), a(1, 2), a(0, 2), a(0, 1)).finished();
+}
+
+/**
+ * Convert Voigt notation to second order tensor according to
+ * \f$ \begin{bmatrix} \sigma_{11} & \sigma_{12} & \sigma_{13} \\
+ * \sigma_{21} & \sigma_{22} & \sigma_{23} \\ \sigma_{31} & \sigma_{32} & \sigma_{33} \end{bmatrix}
+ * = \begin{bmatrix} \sigma_{11} \\ \sigma_{22} \\ \sigma_{33} \\ \sigma_{23} \\ \sigma_{13} \\
+ * \sigma_{12} \end{bmatrix}
+ * \f$
+ */
+inline Matrix3 from(Vector6 const& a)
+{
+    // clang-format off
+    return (Matrix3(3, 3) << a(0), a(5), a(4),
+                             a(5), a(1), a(3),
+                             a(4), a(3), a(2)).finished();
+    // clang-format on
+}
+
+/**
+ * Compute the deviatoric tensor in Voigt notation according to
+ * \f$ \mathbb{P} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) -
+ * \frac{1}{3}\delta_{ij} \delta_{kl} \f$
+ */
+inline CMatrix deviatoric()
+{
+    // clang-format off
+    return (CMatrix(6, 6) << 2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,
+                            -1.0 / 3.0,  2.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,
+                            -1.0 / 3.0, -1.0 / 3.0,  2.0 / 3.0, 0.0, 0.0, 0.0,
+                                   0.0,        0.0,        0.0, 1.0, 0.0, 0.0,
+                                   0.0,        0.0,        0.0, 0.0, 1.0, 0.0,
+                                   0.0,        0.0,        0.0, 0.0, 0.0, 1.0).finished();
+    // clang-format on
+}
+
+/**
+ * Compute the fourth order symmetric identity tensor in Voigt notation according to
+ * \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
+ */
+inline CMatrix fourth_order_identity()
+{
+    // clang-format off
+    return (CMatrix(6, 6) << 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                             0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+                             0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+                             0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+                             0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+                             0.0, 0.0, 0.0, 0.0, 0.0, 1.0).finished();
+    // clang-format on
+}
+
+/**
+ * Compute the fourth order symmetric identity tensor in Voigt notation according to
+ * \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
+ */
+inline CMatrix identity()
+{
+    // clang-format off
+    return (CMatrix(6, 6) << 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                             0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+                             0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+                             0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+                             0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+                             0.0, 0.0, 0.0, 0.0, 0.0, 1.0).finished();
+    // clang-format on
+}
+}
+}
+/*! @} End of Doxygen Groups */
 
 inline CMatrix outer_product(Matrix3 const& a, Matrix3 const& b)
 {
-    return voigt(a) * voigt(b).transpose();
+    return voigt::kinetic::to(a) * voigt::kinetic::to(b).transpose();
 }
 
 inline CMatrix outer_product(Matrix3 const& h) { return outer_product(h, h); }
