@@ -106,9 +106,9 @@ protected:
 
     UnitSphereQuadrature unit_sphere;
 
-    CMatrix const IoI = I_outer_I();           //!< Outer product
-    CMatrix const I = fourth_order_identity(); //!< Fourth order identity
-    CMatrix const P = deviatoric_voigt();      //!< Deviatoric fourth order tensor
+    CMatrix const IoI = voigt::I_outer_I();                      //! Outer product
+    CMatrix const I = voigt::kinematic::fourth_order_identity(); //! Fourth order identity
+    CMatrix const P = voigt::kinematic::deviatoric();            //! Deviatoric fourth order tensor
 };
 
 inline double AffineMicrosphere::volumetric_free_energy_dJ(double const J,
