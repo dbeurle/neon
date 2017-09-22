@@ -98,14 +98,15 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
 CMatrix J2Plasticity::elastic_moduli() const
 {
     auto const[lambda, shear_modulus] = material.Lame_parameters();
-    CMatrix C(6, 6);
-    C << lambda + 2.0 * shear_modulus, lambda, lambda, 0.0, 0.0, 0.0, //
-        lambda, lambda + 2.0 * shear_modulus, lambda, 0.0, 0.0, 0.0,  //
-        lambda, lambda, lambda + 2.0 * shear_modulus, 0.0, 0.0, 0.0,  //
-        0.0, 0.0, 0.0, shear_modulus, 0.0, 0.0,                       //
-        0.0, 0.0, 0.0, 0.0, shear_modulus, 0.0,                       //
-        0.0, 0.0, 0.0, 0.0, 0.0, shear_modulus;
-    return C;
+
+    // clang-format off
+    return (CMatrix(6, 6) << lambda + 2.0 * shear_modulus, lambda, lambda, 0.0, 0.0, 0.0,
+                             lambda, lambda + 2.0 * shear_modulus, lambda, 0.0, 0.0, 0.0,
+                             lambda, lambda, lambda + 2.0 * shear_modulus, 0.0, 0.0, 0.0,
+                             0.0, 0.0, 0.0, shear_modulus, 0.0, 0.0,
+                             0.0, 0.0, 0.0, 0.0, shear_modulus, 0.0,
+                             0.0, 0.0, 0.0, 0.0, 0.0, shear_modulus).finished();
+    // clang-format on
 }
 
 CMatrix J2Plasticity::algorithmic_tangent(double const plastic_increment,
@@ -117,8 +118,8 @@ CMatrix J2Plasticity::algorithmic_tangent(double const plastic_increment,
     auto const H = material.hardening_modulus(accumulated_plastic_strain);
 
     return C_e - plastic_increment * 6.0 * std::pow(G, 2) / von_mises * I_dev
-           + 6.0 * std::pow(G, 2) * (plastic_increment / von_mises - 1.0 / (3.0 * G + H)) * voigt(n)
-                 * voigt(n).transpose();
+           + 6.0 * std::pow(G, 2) * (plastic_increment / von_mises - 1.0 / (3.0 * G + H))
+                 * outer_product(n, n);
 }
 
 double J2Plasticity::perform_radial_return(double const von_mises,
@@ -136,7 +137,7 @@ double J2Plasticity::perform_radial_return(double const von_mises,
     {
         auto const H = material.hardening_modulus(accumulated_plastic_strain + plastic_increment);
 
-        const auto plastic_increment_delta = f / (3.0 * shear_modulus + H);
+        auto const plastic_increment_delta = f / (3.0 * shear_modulus + H);
 
         plastic_increment += plastic_increment_delta;
 
