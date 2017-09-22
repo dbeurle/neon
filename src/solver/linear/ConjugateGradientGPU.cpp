@@ -158,9 +158,8 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, Vector& x, Vector const&
         // x <= alpha * p + x
         cublasDaxpy(cublasHandle, N, &alpha, d_p, 1, d_x, 1);
 
-        double nalpha = -alpha;
-
         // r = r - alpha * Ap;
+        double nalpha = -alpha;
         cublasDaxpy(cublasHandle, N, &nalpha, d_Ap, 1, d_r, 1);
 
         residual_old = residual;
