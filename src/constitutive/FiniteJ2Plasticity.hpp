@@ -129,7 +129,7 @@ protected:
     CMatrix mandel_transformation() const;
 
 protected:
-    CMatrix const Isym = fourth_order_identity();
+    CMatrix const Isym = voigt::kinematic::fourth_order_identity();
     CMatrix const M = mandel_transformation();
 };
 }
