@@ -132,7 +132,8 @@ void Visualisation::write(int const time_step, double const total_time)
     unstructured_mesh_writer->Write();
 
     pvd_file << std::string(4, ' ') << "<DataSet timestep = \"" << std::to_string(total_time)
-             << "\" file = \"" << file_name << "_" << std::to_string(time_step) << ".vtu\" />\n";
+             << "\" file = \"" << file_name << "_" << std::to_string(time_step) << ".vtu\" />"
+             << std::endl;
 }
 
 void Visualisation::allocate_field_maps()
