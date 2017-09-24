@@ -131,9 +131,10 @@ void femStaticMatrix::solve()
 
     while (!adaptive_load.is_fully_applied())
     {
-        std::cout << termcolor::magenta << termcolor::bold << "\n"
-                  << std::string(4, ' ') << "Performing equilibrium iterations for time "
-                  << adaptive_load.step_time() << termcolor::reset << std::endl;
+        std::cout << "\n"
+                  << std::string(4, ' ') << termcolor::magenta << termcolor::bold
+                  << "Performing equilibrium iterations for time " << adaptive_load.step_time()
+                  << termcolor::reset << std::endl;
 
         apply_displacement_boundaries();
 
