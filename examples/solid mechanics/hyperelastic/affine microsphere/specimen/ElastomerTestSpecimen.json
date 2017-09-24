@@ -29,7 +29,7 @@
             "Increments" : {
                 "Initial" : 1.0,
                 "Minimum" : 0.1,
-                "Maximum" : 4000.0
+                "Maximum" : 10000.0
             }
         },
 		"Mesh" : [{
