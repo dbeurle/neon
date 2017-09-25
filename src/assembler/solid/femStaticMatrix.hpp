@@ -59,10 +59,14 @@ protected:
     void apply_displacement_boundaries();
 
     /** Equilibrium iteration convergence criteria */
-    bool is_converged(double const inc_disp_norm, double const residual_norm) const;
+    bool is_iteration_converged() const;
 
     /** Pretty printer for the convergence of the Newton-Raphson solver */
-    void print_convergence_progress(double const delta_d_norm, double const residual_norm) const;
+    void print_convergence_progress() const;
+
+    void update_relative_norms(int const current_iteration,
+                               Vector const& delta_d,
+                               Vector const& residual);
 
 private:
     void perform_equilibrium_iterations();
@@ -79,6 +83,11 @@ protected:
     double residual_tolerance = 1.0e-5;
     double displacement_tolerance = 1.0e-5;
 
+    double first_displacement_norm = 1.0;
+    double first_residual_norm = 1.0;
+    double relative_displacement_norm;
+    double relative_force_norm;
+
     SparseMatrix Kt; //!< Tangent matrix stiffness
     Vector fint;     //!< Internal force vector
     Vector fext;     //!< External force vector
@@ -87,8 +96,9 @@ protected:
     std::unique_ptr<LinearSolver> linear_solver;
 };
 
-inline bool femStaticMatrix::is_converged(double const inc_disp_norm, double const residual_norm) const
+inline bool femStaticMatrix::is_iteration_converged() const
 {
-    return inc_disp_norm <= displacement_tolerance && residual_norm <= residual_tolerance;
+    return relative_displacement_norm <= displacement_tolerance
+           && relative_force_norm <= residual_tolerance;
 }
 }

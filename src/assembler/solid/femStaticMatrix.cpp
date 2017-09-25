@@ -238,11 +238,13 @@ void femStaticMatrix::perform_equilibrium_iterations()
     Vector d_new = d;
 
     // Full Newton-Raphson iteration to solve nonlinear equations
-    auto constexpr max_iterations = 10;
-    auto current_iteration = 0;
+    auto constexpr max_iterations{10};
+    auto current_iteration{0};
 
     try
     {
+        compute_internal_force();
+
         while (current_iteration < max_iterations)
         {
             auto start = std::chrono::high_resolution_clock::now();
@@ -250,8 +252,6 @@ void femStaticMatrix::perform_equilibrium_iterations()
             std::cout << std::string(4, ' ') << termcolor::blue << termcolor::bold
                       << "Newton-Raphson iteration " << current_iteration << termcolor::reset
                       << std::endl;
-
-            compute_internal_force();
 
             Vector residual = fint - fext;
 
@@ -265,15 +265,17 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
             fem_mesh.update_internal_variables(d_new);
 
-            print_convergence_progress(delta_d.norm(), residual.norm());
+            compute_internal_force();
 
-            auto end = std::chrono::high_resolution_clock::now();
+            update_relative_norms(current_iteration, delta_d, residual);
 
-            std::chrono::duration<double> elapsed_seconds = end - start;
+            print_convergence_progress();
+
+            auto const elapsed_seconds = std::chrono::high_resolution_clock::now() - start;
             std::cout << std::string(6, ' ') << "Equilibrium iteration required "
                       << elapsed_seconds.count() << "s\n";
 
-            if (is_converged(delta_d.norm(), residual.norm())) break;
+            if (is_iteration_converged()) break;
 
             current_iteration++;
         }
@@ -302,11 +304,24 @@ void femStaticMatrix::perform_equilibrium_iterations()
     }
 }
 
-void femStaticMatrix::print_convergence_progress(double const delta_d_norm,
-                                                 double const residual_norm) const
+void femStaticMatrix::update_relative_norms(int const current_iteration,
+                                            Vector const& delta_d,
+                                            Vector const& residual)
+{
+    if (current_iteration == 0)
+    {
+        first_displacement_norm = delta_d.norm();
+        first_residual_norm = residual.norm();
+    }
+
+    relative_displacement_norm = delta_d.norm() / first_displacement_norm;
+    relative_force_norm = residual.norm() / first_residual_norm;
+}
+
+void femStaticMatrix::print_convergence_progress() const
 {
     std::cout << std::string(6, ' ') << termcolor::bold;
-    if (delta_d_norm <= displacement_tolerance)
+    if (relative_displacement_norm <= displacement_tolerance)
     {
         std::cout << termcolor::green;
     }
@@ -314,10 +329,10 @@ void femStaticMatrix::print_convergence_progress(double const delta_d_norm,
     {
         std::cout << termcolor::yellow;
     }
-    std::cout << "Incremental displacement norm " << delta_d_norm << "\n"
+    std::cout << "Incremental displacement norm " << relative_displacement_norm << "\n"
               << termcolor::reset << std::string(6, ' ');
 
-    if (residual_norm <= residual_tolerance)
+    if (relative_force_norm <= residual_tolerance)
     {
         std::cout << termcolor::green;
     }
@@ -325,7 +340,7 @@ void femStaticMatrix::print_convergence_progress(double const delta_d_norm,
     {
         std::cout << termcolor::yellow;
     }
-    std::cout << termcolor::bold << "Residual force norm " << residual_norm << termcolor::reset
-              << "\n";
+    std::cout << termcolor::bold << "Residual force norm " << relative_force_norm
+              << termcolor::reset << "\n";
 }
 }
