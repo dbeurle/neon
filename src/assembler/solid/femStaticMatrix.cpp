@@ -21,8 +21,6 @@ femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& simulatio
       d(Vector::Zero(fem_mesh.active_dofs())),
       linear_solver(make_linear_solver(simulation["LinearSolver"]))
 {
-    std::cout << "Constructed a fem matrix" << std::endl;
-
     if (!simulation["NonlinearOptions"].isMember("DisplacementTolerance"))
     {
         throw std::runtime_error("DisplacementTolerance not specified in "
@@ -266,11 +264,12 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
             compute_internal_force();
 
-            update_relative_norms(current_iteration, delta_d, residual);
+            update_relative_norms(current_iteration, delta_d.norm(), residual.norm());
 
             print_convergence_progress();
 
-            auto const elapsed_seconds = std::chrono::high_resolution_clock::now() - start;
+            auto const end = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> const elapsed_seconds = end - start;
             std::cout << std::string(6, ' ') << "Equilibrium iteration required "
                       << elapsed_seconds.count() << "s\n";
 
@@ -304,17 +303,17 @@ void femStaticMatrix::perform_equilibrium_iterations()
 }
 
 void femStaticMatrix::update_relative_norms(int const current_iteration,
-                                            Vector const& delta_d,
-                                            Vector const& residual)
+                                            double const delta_d_norm,
+                                            double const residual_norm)
 {
     if (current_iteration == 0)
     {
-        first_displacement_norm = delta_d.norm();
-        first_residual_norm = residual.norm();
+        first_displacement_norm = delta_d_norm;
+        first_residual_norm = residual_norm;
     }
 
-    relative_displacement_norm = delta_d.norm() / first_displacement_norm;
-    relative_force_norm = residual.norm() / first_residual_norm;
+    relative_displacement_norm = delta_d_norm / first_displacement_norm;
+    relative_force_norm = residual_norm / first_residual_norm;
 }
 
 void femStaticMatrix::print_convergence_progress() const

@@ -62,8 +62,8 @@ protected:
     void print_convergence_progress() const;
 
     void update_relative_norms(int const current_iteration,
-                               Vector const& delta_d,
-                               Vector const& residual);
+                               double const delta_d_norm,
+                               double const residual_norm);
 
 private:
     void perform_equilibrium_iterations();
