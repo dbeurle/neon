@@ -4,7 +4,8 @@
 #include "mesh/solid/femMesh.hpp"
 #include "numeric/SparseTypes.hpp"
 #include "solver/AdaptiveLoadStep.hpp"
-#include "visualisation/Visualisation.hpp"
+
+#include "io/FileIO.hpp"
 
 #include <json/forwards.h>
 
@@ -18,11 +19,7 @@ namespace neon::solid
 class femStaticMatrix
 {
 public:
-    explicit femStaticMatrix(femMesh& fem_mesh,
-                             Visualisation&& visualisation,
-                             Json::Value const& solver_data,
-                             Json::Value const& nonlinear_data,
-                             Json::Value const& increment_data);
+    explicit femStaticMatrix(femMesh& fem_mesh, Json::Value const& simulation);
 
     ~femStaticMatrix();
 
@@ -40,7 +37,7 @@ protected:
 
     void compute_internal_force();
 
-    void compute_external_force(double const load_factor);
+    void compute_external_force(double const compute_external_force);
 
     /**
      * Assembles the material and geometric matrices, checking for allocation
@@ -70,7 +67,7 @@ private:
 protected:
     femMesh& fem_mesh;
 
-    Visualisation visualisation;
+    FileIO file_io;
 
     AdaptiveLoadStep adaptive_load;
 

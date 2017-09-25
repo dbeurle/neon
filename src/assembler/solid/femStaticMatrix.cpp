@@ -12,31 +12,29 @@
 
 namespace neon::solid
 {
-femStaticMatrix::femStaticMatrix(femMesh& fem_mesh,
-                                 Visualisation&& visualisation,
-                                 Json::Value const& solver_data,
-                                 Json::Value const& nonlinear_data,
-                                 Json::Value const& increment_data)
+femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& simulation)
     : fem_mesh(fem_mesh),
-      visualisation(std::move(visualisation)),
-      adaptive_load(increment_data, fem_mesh.time_history()),
+      file_io(simulation["Name"].asString(), simulation["Visualisation"], fem_mesh),
+      adaptive_load(simulation["Time"], fem_mesh.time_history()),
       fint(Vector::Zero(fem_mesh.active_dofs())),
       fext(Vector::Zero(fem_mesh.active_dofs())),
       d(Vector::Zero(fem_mesh.active_dofs())),
-      linear_solver(make_linear_solver(solver_data))
+      linear_solver(make_linear_solver(simulation["LinearSolver"]))
 {
-    if (!nonlinear_data.isMember("DisplacementTolerance"))
+    std::cout << "Constructed a fem matrix" << std::endl;
+
+    if (!simulation["NonlinearOptions"].isMember("DisplacementTolerance"))
     {
         throw std::runtime_error("DisplacementTolerance not specified in "
                                  "NonlinearOptions");
     }
-    if (!nonlinear_data.isMember("ResidualTolerance"))
+    if (!simulation["NonlinearOptions"].isMember("ResidualTolerance"))
     {
         throw std::runtime_error("ResidualTolerance not specified in "
                                  "NonlinearOptions");
     }
-    residual_tolerance = nonlinear_data["ResidualTolerance"].asDouble();
-    displacement_tolerance = nonlinear_data["DisplacementTolerance"].asDouble();
+    residual_tolerance = simulation["NonlinearOptions"]["ResidualTolerance"].asDouble();
+    displacement_tolerance = simulation["NonlinearOptions"]["DisplacementTolerance"].asDouble();
 }
 
 femStaticMatrix::~femStaticMatrix() = default;
@@ -93,7 +91,7 @@ void femStaticMatrix::compute_internal_force()
     }
 }
 
-void femStaticMatrix::compute_external_force(double const load_factor)
+void femStaticMatrix::compute_external_force(double const step_time)
 {
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -107,7 +105,7 @@ void femStaticMatrix::compute_external_force(double const load_factor)
             {
                 for (auto element = 0; element < mesh.elements(); ++element)
                 {
-                    auto const & [ dofs, fe_ext ] = mesh.external_force(element, load_factor);
+                    auto const & [ dofs, fe_ext ] = mesh.external_force(element, step_time);
 
                     for (auto a = 0; a < fe_ext.size(); ++a)
                     {
@@ -138,7 +136,7 @@ void femStaticMatrix::solve()
 
         apply_displacement_boundaries();
 
-        compute_external_force(adaptive_load.factor());
+        compute_external_force(adaptive_load.step_time());
 
         fem_mesh.update_internal_variables(d, adaptive_load.increment());
 
@@ -227,7 +225,7 @@ void femStaticMatrix::apply_displacement_boundaries()
         {
             for (auto const& dof : dirichlet_boundary.dof_view())
             {
-                d(dof) = dirichlet_boundary.value_view(adaptive_load.factor());
+                d(dof) = dirichlet_boundary.value_view(adaptive_load.step_time());
             }
         }
     }
@@ -285,7 +283,7 @@ void femStaticMatrix::perform_equilibrium_iterations()
         if (current_iteration != max_iterations)
         {
             d = d_new;
-            visualisation.write(adaptive_load.step(), adaptive_load.time());
+            file_io.write(adaptive_load.step(), adaptive_load.time());
         }
     }
     catch (computational_error& comp_error)

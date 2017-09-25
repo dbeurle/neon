@@ -19,6 +19,12 @@ public:
                          Json::Value const& material,
                          Json::Value const& simulation);
 
+    ~SolidMechanicsModule() = default;
+
+    SolidMechanicsModule(SolidMechanicsModule const&) = delete;
+
+    SolidMechanicsModule(SolidMechanicsModule&&) = default;
+
     virtual void perform_simulation() override final { fem_matrix.solve(); }
 
 protected:

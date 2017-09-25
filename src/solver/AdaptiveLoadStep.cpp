@@ -38,6 +38,10 @@ void AdaptiveLoadStep::update_convergence_state(bool const is_converged)
 
         is_applied = is_approx(current_time, final_time) || time_queue.empty();
 
+        consecutive_unconverged = 0;
+        consecutive_converged++;
+        successful_increments++;
+
         if (is_applied) return;
 
         // If the previous iterations required cut backs, then the next steps
@@ -48,10 +52,6 @@ void AdaptiveLoadStep::update_convergence_state(bool const is_converged)
                                          current_time + maximum_increment);
 
         current_time = std::min(time_queue.top(), std::min(new_time, final_time));
-
-        consecutive_unconverged = 0;
-        consecutive_converged++;
-        successful_increments++;
 
         std::cout << std::string(terminal_indent, ' ') << termcolor::green << termcolor::bold
                   << "Convergence detected - step time set to " << current_time
