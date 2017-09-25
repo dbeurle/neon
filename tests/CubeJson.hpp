@@ -130,8 +130,27 @@ inline std::string simulation_data_json()
            //
            "\"ConstitutiveModel\" : \"NeoHooke\", "
            "\"ElementOptions\" : {\"Quadrature\" : \"Reduced\"}, "
-           "\"Name\" : \"cube\"}";
+           "\"Name\" : \"cube\", "
+           //
+           "\"Visualisation\" : {\"Fields\" : [\"Displacement\", \"CauchyStress\"]},"
+           //
+           "\"NonlinearOptions\" : { "
+           "\"DisplacementTolerance\" : 1.0e-5, "
+           "\"ResidualTolerance\" : 0.001},"
+           //
+           "\"Time\" : {\"Period\" : 1.0, \"Increments\": { "
+           "\"Initial\" : 1.0, \"Minimum\" : 0.001, \"Maximum\" : 10.0 }},"
+           "\"LinearSolver\" : {\"Solver\" : \"Iterative\"}}";
 }
+
+std::string const nonlinear_options_disp_broken_json("{\"NonlinearOptions\" : { "
+                                                     "\"DisacementIncrementTolerance\" : 1.0e-5, "
+                                                     "\"ResidualTolerance\" : 0.001}}");
+
+std::string const nonlinear_options_force_broken_json("{\"NonlinearOptions\" : { "
+                                                      "\"DisplacementTolerance\" : "
+                                                      "1.0e-5, "
+                                                      "\"ResidForceTolerance\" : 0.001}}");
 
 inline std::string simulation_data_traction_json()
 {

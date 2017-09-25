@@ -90,7 +90,7 @@ TEST_CASE("Boundary unit test", "[Boundary]")
         REQUIRE(time_history[2] == Approx(2.0));
         REQUIRE(time_history[3] == Approx(3.0));
     }
-    SECTION("Time and load history interpolation test")
+    SECTION("Monotonic loading interpolation test")
     {
         REQUIRE(reader.parse("[0.0, 1.0, 2.0, 3.0]", times));
         REQUIRE(reader.parse("[0.0, 0.5, 1.0, 1.5]", loads));
@@ -105,6 +105,19 @@ TEST_CASE("Boundary unit test", "[Boundary]")
         REQUIRE(boundary.interpolate_prescribed_load(2.5) == Approx(1.25));
         REQUIRE(boundary.interpolate_prescribed_load(3.0) == Approx(1.5));
         REQUIRE(boundary.interpolate_prescribed_load(2.9999999999999) == Approx(1.5));
+    }
+    SECTION("Unload interpolation test")
+    {
+        REQUIRE(reader.parse("[0.0, 1.0, 2.0]", times));
+        REQUIRE(reader.parse("[0.0, 1.0, 0.0]", loads));
+
+        Boundary boundary(times, loads);
+
+        REQUIRE(boundary.interpolate_prescribed_load(0.0) == Approx(0.0));
+        REQUIRE(boundary.interpolate_prescribed_load(0.5) == Approx(0.5));
+        REQUIRE(boundary.interpolate_prescribed_load(1.0) == Approx(1.0));
+        REQUIRE(boundary.interpolate_prescribed_load(1.5) == Approx(0.5));
+        REQUIRE(boundary.interpolate_prescribed_load(2.0) == Approx(0.0));
     }
     SECTION("Non-matching length error test")
     {

@@ -33,7 +33,7 @@ TEST_CASE("AdaptiveIncrement")
     SECTION("Basic operation")
     {
         REQUIRE(!load.is_fully_applied());
-        REQUIRE(load.factor() == Approx(1.0));
+        REQUIRE(load.step_time() == Approx(1.0));
     }
     SECTION("Well behaved nonlinear iteration")
     {
@@ -42,11 +42,11 @@ TEST_CASE("AdaptiveIncrement")
     }
     SECTION("Badly behaved nonlinear iteration")
     {
-        auto last_good_load_factor = load.factor();
+        auto last_good_load_factor = load.step_time();
         for (int i = 0; i < 9; i++)
         {
             load.update_convergence_state(false);
-            REQUIRE(load.factor() < last_good_load_factor);
+            REQUIRE(load.step_time() < last_good_load_factor);
         }
         REQUIRE_THROWS_AS(load.update_convergence_state(false), std::runtime_error);
     }

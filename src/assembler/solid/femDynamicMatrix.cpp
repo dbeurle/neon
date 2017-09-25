@@ -4,23 +4,16 @@
 #include "solver/linear/LinearSolver.hpp"
 
 #include <chrono>
+#include <json/value.h>
 #include <termcolor/termcolor.hpp>
 
 namespace neon::solid
 {
-femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh,
-                                   Visualisation&& visualisation,
-                                   Json::Value const& solver_data,
-                                   Json::Value const& nonlinear_data,
-                                   Json::Value const& time_data)
-    : femStaticMatrix(fem_mesh,
-                      std::forward<Visualisation>(visualisation),
-                      solver_data,
-                      nonlinear_data,
-                      time_data),
+femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh, Json::Value const& simulation)
+    : femStaticMatrix(fem_mesh, simulation),
       a(Vector::Zero(fem_mesh.active_dofs())),
       v(Vector::Zero(fem_mesh.active_dofs())),
-      newmark(time_data)
+      newmark(simulation["Time"])
 {
 }
 

@@ -82,9 +82,6 @@ public:
     /** Get the time only for the current load case */
     double step_time() const { return current_time; }
 
-    /** Get the fraction through the adaptive incrementation */
-    double factor() const { return current_time / final_time; }
-
     /** Get the pseudo time step size */
     double increment() const { return current_time - last_converged_time; }
 
