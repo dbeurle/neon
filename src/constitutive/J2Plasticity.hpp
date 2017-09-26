@@ -52,14 +52,8 @@ protected:
 
 protected:
     IsotropicElasticPlastic material;
+
     CMatrix const C_e = elastic_moduli();
     CMatrix const I_dev = voigt::kinematic::deviatoric();
 };
-
-inline Matrix3 J2Plasticity::compute_cauchy_stress(Matrix3 const& elastic_strain) const
-{
-    auto const G = material.shear_modulus();
-    auto const lambda_e = material.lambda();
-    return lambda_e * elastic_strain.trace() * Matrix3::Identity() + 2.0 * G * elastic_strain;
-}
 }

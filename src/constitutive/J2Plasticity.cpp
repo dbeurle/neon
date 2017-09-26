@@ -166,4 +166,11 @@ double J2Plasticity::evaluate_yield_function(double const von_mises,
     return (von_mises - 3.0 * shear_modulus * plastic_increment)
            - material.yield_stress(accumulated_plastic_strain + plastic_increment);
 }
+
+Matrix3 J2Plasticity::compute_cauchy_stress(Matrix3 const& elastic_strain) const
+{
+    auto const G = material.shear_modulus();
+    auto const lambda_e = material.lambda();
+    return lambda_e * elastic_strain.trace() * Matrix3::Identity() + 2.0 * G * elastic_strain;
+}
 }
