@@ -10,22 +10,22 @@
         "ElasticModulus" : 200.0e3,
         "IsotropicHardeningModulus" : 200.0,
         "YieldStress" : 200.0,
-        "PoissonsRatio" : 0.28
+        "PoissonsRatio" : 0.30
     }],
     "SimulationCases" : [{
         "Name" : "Uniaxial",
 		"Module" : "SolidMechanics",
         "Solution" : "Equilibrium",
         "NonlinearOptions" : {
-            "DisplacementTolerance" : 1.0e-5,
-            "ResidualTolerance" : 1.0e-5
+            "DisplacementTolerance" : 1.0e-3,
+            "ResidualTolerance" : 1.0e-3
         },
         "Time" : {
             "Period" : 1.0,
             "Increments" : {
-                "Initial" : 0.5,
+                "Initial" : 1.0,
                 "Minimum" : 0.00001,
-                "Maximum" : 0.2
+                "Maximum" : 1.0
             }
         },
 		"Mesh" : [{
@@ -68,7 +68,7 @@
             }]
         }],
 		"LinearSolver" :  {
-		    "Solver" : "PaStiX",
+		    "Solver" : "Iterative",
             "MaxIterations" : 3000,
             "Tolerance"  : 1.0e-8
         },
