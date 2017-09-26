@@ -62,10 +62,6 @@ void AffineMicrosphere::update_internal_variables(double const time_step_size)
 
     auto const K = material.bulk_modulus();
 
-    /*----------------------------------------------------------------------------*
-     *                          Stress computation                                *
-     *----------------------------------------------------------------------------*/
-
 #pragma omp parallel for
     for (auto l = 0; l < F_list.size(); ++l)
     {
@@ -89,10 +85,6 @@ void AffineMicrosphere::update_internal_variables(double const time_step_size)
 
                              return deviatoric_projection(pressure, cauchy_stress_dev) / J;
                          });
-
-    /*------------------------------------------------------------------------*
-     *                     Tangent material computation                       *
-     *------------------------------------------------------------------------*/
 
     // Compute tangent moduli
     auto& D_list = variables(InternalVariables::Matrix::TruesdellModuli);
@@ -122,8 +114,6 @@ void AffineMicrosphere::update_internal_variables(double const time_step_size)
 
 Matrix3 AffineMicrosphere::deviatoric_projection(double const p, Matrix3 const& cauchy_stress_dev) const
 {
-    auto const P = voigt::kinetic::deviatoric();
-
     return p * Matrix3::Identity() + voigt::kinetic::from(P * voigt::kinetic::to(cauchy_stress_dev));
 }
 
