@@ -55,6 +55,8 @@ include_directories(${MUMPS_INCLUDE_DIR})
 find_package(Jsoncpp REQUIRED)
 include_directories(${JSONCPP_INCLUDE_DIR})
 
+find_package(BLAS REQUIRED)
+
 find_package(HwLoc REQUIRED)
 
 include_directories("${CMAKE_SOURCE_DIR}/src")
