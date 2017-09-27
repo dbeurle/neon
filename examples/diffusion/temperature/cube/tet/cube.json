@@ -8,14 +8,16 @@
     "Material" : [{
         "Name" : "steel",
         "Conductivity" : 386.0,
-        "SpecificHeat" : 390.0
+        "SpecificHeat" : 390.0,
+        "Density" : 7800
     }],
     "SimulationCases" : [{
         "Name" : "Uniaxial",
-		"Type" : "HeatDiffusion",
-        "Solution" : "Equilibrium",
+		"Module" : "HeatDiffusion",
+        "Solution" : "Transient",
         "Time" : {
             "Period" : 1.0,
+            "Method" : "ImplicitEuler",
             "Increments" : {
                 "Initial" : 0.1,
                 "Minimum" : 0.00001,
