@@ -24,13 +24,23 @@ void femDynamicMatrix::solve()
 
     assemble_mass();
 
-    // apply_displacement_boundaries();
+    std::cout << M << std::endl;
 
-    // SparseMatrix const A = M - time_step_size * K;
+    compute_external_force();
+
+    assemble_stiffness();
+
+    std::cout << std::endl << K << std::endl;
+
+    SparseMatrix A = M - time_solver.current_time_step_size() * K;
 
     while (time_solver.loop())
     {
         std::cout << "Performing time step\n";
+
+        apply_dirichlet_conditions(A, d, f);
+
+        linear_solver->solve(A, d, f);
 
         // perform_equilibrium_iterations();
 
@@ -43,56 +53,47 @@ void femDynamicMatrix::assemble_mass()
 {
     auto start = std::chrono::high_resolution_clock::now();
 
-    // std::vector<Doublet<int>> doublets;
-    //
-    // for (auto const& submesh : fem_mesh.meshes())
-    // {
-    //     for (auto element = 0; element < submesh.elements(); ++element)
-    //     {
-    //         auto const[dofs, m] = submesh.consistent_mass(element);
-    //
-    //         for (auto b = 0; b < dofs.size(); b++)
-    //         {
-    //             for (auto a = 0; a < dofs.size(); a++)
-    //             {
-    //                 M.coeffRef(dofs[a], dofs[b]) += m(a, b);
-    //             }
-    //         }
-    //     }
-    // }
-    //
-    // for (auto element = 0; element < submesh.elements(); element++)
-    // {
-    //     for (auto const& p : submesh.local_dof_list(element))
-    //     {
-    //         for (auto const& q : submesh.local_dof_list(element))
-    //         {
-    //             doublets.emplace_back(p, q);
-    //         }
-    //     }
-    // }
-    // for (auto const& submesh : fem_mesh.meshes())
-    // {
-    //     for (auto element = 0; element < submesh.elements(); ++element)
-    //     {
-    //         auto const[dofs, m] = submesh.consistent_mass(element);
-    //
-    //         for (auto b = 0; b < dofs.size(); b++)
-    //         {
-    //             for (auto a = 0; a < dofs.size(); a++)
-    //             {
-    //                 M.coeffRef(dofs[a], dofs[b]) += m(a, b);
-    //             }
-    //         }
-    //     }
-    // }
-    //
-    // M.setFromTriplets(doublets.begin(), doublets.end());
+    M.resize(fem_mesh.active_dofs(), fem_mesh.active_dofs());
 
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::vector<Doublet<int>> doublets;
+    doublets.reserve(fem_mesh.active_dofs());
 
-    std::cout << "  Assembly of mass matrix took " << elapsed_seconds.count() << "s\n";
+    for (auto const& submesh : fem_mesh.meshes())
+    {
+        for (auto element = 0; element < submesh.elements(); element++)
+        {
+            for (auto const& p : submesh.local_dof_list(element))
+            {
+                for (auto const& q : submesh.local_dof_list(element))
+                {
+                    doublets.emplace_back(p, q);
+                }
+            }
+        }
+    }
+    M.setFromTriplets(doublets.begin(), doublets.end());
+
+    for (auto const& submesh : fem_mesh.meshes())
+    {
+        for (auto element = 0; element < submesh.elements(); ++element)
+        {
+            auto const[dofs, m] = submesh.consistent_mass(element);
+
+            for (auto b = 0; b < dofs.size(); b++)
+            {
+                for (auto a = 0; a < dofs.size(); a++)
+                {
+                    M.coeffRef(dofs[a], dofs[b]) += m(a, b);
+                }
+            }
+        }
+    }
+
+    auto const end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> const elapsed_seconds = end - start;
+
+    std::cout << std::string(4, ' ') << "Assembly of mass matrix took " << elapsed_seconds.count()
+              << "s\n";
 }
 
 // void femDynamicMatrix::perform_equilibrium_iterations()
