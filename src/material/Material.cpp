@@ -18,6 +18,12 @@ Material::Material(Json::Value const& intrinsic_material_data)
     {
         density_0 = intrinsic_material_data["Density"].asDouble();
     }
+
+    is_specific_heat_specified = intrinsic_material_data.isMember("SpecificHeat");
+    if (is_specific_heat_specified)
+    {
+        c_p = intrinsic_material_data["SpecificHeat"].asDouble();
+    }
 }
 
 double Material::initial_density() const
@@ -26,5 +32,13 @@ double Material::initial_density() const
         throw std::runtime_error("Density was requested, but not specified in the input "
                                  "file\n");
     return density_0;
+}
+
+double Material::specific_heat() const
+{
+    if (!is_specific_heat_specified)
+        throw std::runtime_error("Density was requested, but not specified in the input "
+                                 "file\n");
+    return c_p;
 }
 }
