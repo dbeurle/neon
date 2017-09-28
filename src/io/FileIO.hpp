@@ -24,7 +24,7 @@ class FileIO
 public:
     explicit FileIO(std::string file_name, Json::Value const& visualisation_data);
 
-    ~FileIO();
+    virtual ~FileIO();
 
     FileIO(FileIO&&) = default;
 
@@ -101,8 +101,6 @@ public:
     explicit FileIO(std::string file_name,
                     Json::Value const& visualisation_data,
                     femMesh const& fem_mesh);
-
-    ~FileIO();
 
     FileIO(FileIO&&) = default;
 

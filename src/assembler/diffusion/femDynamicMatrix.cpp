@@ -9,13 +9,13 @@
 
 namespace neon::diffusion
 {
-femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh,
-                                   Json::Value const& simulation_data,
-                                   FileIO&& file_io)
-    : femStaticMatrix(fem_mesh, simulation_data, std::move(file_io)),
-      time_solver(simulation_data["Time"])
+femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh, Json::Value const& simulation_data)
+    : femStaticMatrix(fem_mesh, simulation_data), time_solver(simulation_data["Time"])
 {
+    d = 250.0 * Vector::Ones(fem_mesh.active_dofs());
 }
+
+femDynamicMatrix::~femDynamicMatrix() { std::cout << "Dtor femdynamicmatrix" << std::endl; }
 
 void femDynamicMatrix::solve()
 {
@@ -24,34 +24,38 @@ void femDynamicMatrix::solve()
 
     assemble_mass();
 
-    std::cout << M << std::endl;
+    assemble_stiffness();
 
     compute_external_force();
 
-    assemble_stiffness();
-
-    std::cout << std::endl << K << std::endl;
-
-    SparseMatrix A = M - time_solver.current_time_step_size() * K;
-
     while (time_solver.loop())
     {
-        std::cout << "Performing time step\n";
+        auto const start = std::chrono::high_resolution_clock::now();
 
-        apply_dirichlet_conditions(A, d, f);
+        std::cout << std::string(4, ' ') << termcolor::blue << termcolor::bold
+                  << "Time step: " << time_solver.iteration()
+                  << ", time: " << time_solver.current_time() << termcolor::reset << std::endl;
 
-        linear_solver->solve(A, d, f);
+        SparseMatrix A = M + time_solver.current_time_step_size() * K;
 
-        // perform_equilibrium_iterations();
+        Vector b = M * d + time_solver.current_time_step_size() * f;
 
-        // fem_mesh.write();
+        apply_dirichlet_conditions(A, d, b);
+
+        linear_solver->solve(A, d, b);
+
+        auto const end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> const elapsed_seconds = end - start;
+        std::cout << std::string(6, ' ') << "Time step required " << elapsed_seconds.count() << "s\n";
+
+        file_io.write(time_solver.iteration(), time_solver.current_time(), d);
     }
-    std::cout << "Solver routine finished\n";
+    std::cout << "Solver routine completed\n";
 }
 
 void femDynamicMatrix::assemble_mass()
 {
-    auto start = std::chrono::high_resolution_clock::now();
+    auto const start = std::chrono::high_resolution_clock::now();
 
     M.resize(fem_mesh.active_dofs(), fem_mesh.active_dofs());
 
@@ -72,6 +76,9 @@ void femDynamicMatrix::assemble_mass()
         }
     }
     M.setFromTriplets(doublets.begin(), doublets.end());
+    M.coeffs() = 0.0;
+
+    doublets.clear();
 
     for (auto const& submesh : fem_mesh.meshes())
     {
@@ -95,62 +102,4 @@ void femDynamicMatrix::assemble_mass()
     std::cout << std::string(4, ' ') << "Assembly of mass matrix took " << elapsed_seconds.count()
               << "s\n";
 }
-
-// void femDynamicMatrix::perform_equilibrium_iterations()
-// {
-//     Vector delta_d = Vector::Zero(fem_mesh.active_dofs());
-//
-//     // Full Newton-Raphson iteration to solve nonlinear equations
-//     auto constexpr max_iterations = 20;
-//     auto current_iteration = 0;
-//     auto constexpr tolerance = 1.0e-5;
-//
-//     while (current_iteration < max_iterations)
-//     {
-//         std::cout << "\n  Newton-Raphson iteration " << current_iteration << "\n\n";
-//
-//         compute_internal_force();
-//
-//         a = newmark.accelerations(a, v, d);
-//         v = newmark.velocities(a, v);
-//
-//         std::cout << "\nAcceleration\n\n" << a << std::endl;
-//         std::cout << "\nVelocity\n\n" << v << std::endl;
-//         std::cout << "\nDisplacement\n\n" << d << std::endl;
-//
-//         auto f = -fint;
-//
-//         Vector residual = M.cwiseProduct(a) - f;
-//
-//         // Build A = 1 / (β Δt^2) * M + K_int - K_ext
-//         assemble_stiffness();
-//         Kt.diagonal() += newmark.mass_scaling_factor() * M.diagonal();
-//
-//         enforce_dirichlet_conditions(Kt, delta_d, residual);
-//
-//         std::cout << "\nResidual\n\n" << residual << std::endl;
-//
-//         // if (auto norm = delta_d.norm(); norm > tolerance)
-//         //     std::cout <<
-//
-//         std::cout << "    Displacement norm " << delta_d.norm() << ", residual norm "
-//                   << residual.norm() << "\n";
-//
-//         if (delta_d.norm() < tolerance && residual.norm() < tolerance) break;
-//
-//         linear_solver->solve(Kt, delta_d, -residual);
-//
-//         d += delta_d;
-//
-//         fem_mesh.update_internal_variables(d, newmark.time_step_size());
-//
-//         // fem_mesh.write(current_iteration);
-//
-//         current_iteration++;
-//     }
-//     if (current_iteration == max_iterations)
-//     {
-//         throw std::runtime_error("Newton-Raphson iterations failed to converged.\n");
-//     }
-// }
 }

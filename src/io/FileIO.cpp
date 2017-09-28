@@ -28,6 +28,8 @@ namespace neon
 FileIO::FileIO(std::string file_name, Json::Value const& visualisation_data)
     : file_name(file_name), unstructured_mesh(vtkSmartPointer<vtkUnstructuredGrid>::New())
 {
+    std::cout << "Parent ctor" << std::endl;
+
     if (visualisation_data.isMember("WriteEvery"))
     {
         write_every = visualisation_data["WriteEvery"].asInt();
@@ -42,7 +44,7 @@ FileIO::FileIO(std::string file_name, Json::Value const& visualisation_data)
 
     pvd_file << "<?xml version=\"1.0\"?>\n";
     pvd_file << "<VTKFile type=\"Collection\" version=\"0.1\">\n";
-    pvd_file << std::string(2, ' ') << "<Collection>\n";
+    pvd_file << std::string(2, ' ') << "<Collection>" << std::endl;
 
     unstructured_mesh->Allocate();
 
@@ -58,9 +60,10 @@ FileIO::FileIO(std::string file_name, Json::Value const& visualisation_data)
 FileIO::~FileIO()
 {
     std::cout << "Calling parent dtor" << std::endl;
+
     // Close off the last of the file for the timestepping
     pvd_file << std::string(2, ' ') << "</Collection>\n"
-             << "</VTKFile>\n";
+             << "</VTKFile>" << std::endl;
     pvd_file.close();
 }
 
@@ -82,7 +85,8 @@ void FileIO::write_to_file(int const time_step, double const total_time)
 
     // Update the pvd file for timestep mapping
     pvd_file << std::string(4, ' ') << "<DataSet timestep = \"" << std::to_string(total_time)
-             << "\" file = \"" << file_name << "_" << std::to_string(time_step) << ".vtu\" />\n";
+             << "\" file = \"" << file_name << "_" << std::to_string(time_step) << ".vtu\" />"
+             << std::endl;
 }
 
 void FileIO::add_field(std::string const& name, Vector const& field, int const components)
@@ -210,6 +214,7 @@ namespace diffusion
 FileIO::FileIO(std::string file_name, Json::Value const& visualisation_data, femMesh const& fem_mesh)
     : neon::FileIO(file_name, visualisation_data), fem_mesh(fem_mesh)
 {
+    std::cout << "ctor diffusion" << std::endl;
     // Check the output set against the known values for this module
     for (auto const& output : output_set)
     {
@@ -221,8 +226,6 @@ FileIO::FileIO(std::string file_name, Json::Value const& visualisation_data, fem
     }
     add_mesh();
 }
-
-FileIO::~FileIO() { std::cout << "Calling diffusion dtor" << std::endl; }
 
 void FileIO::write(int const time_step, double const total_time, Vector const& temperature)
 {

@@ -10,11 +10,11 @@
 
 namespace neon::diffusion
 {
-femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& simulation_data, FileIO&& file_io)
+femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& simulation_data)
     : fem_mesh(fem_mesh),
       f(Vector::Zero(fem_mesh.active_dofs())),
       d(Vector::Zero(fem_mesh.active_dofs())),
-      file_io(std::move(file_io)),
+      file_io(simulation_data["Name"].asString(), simulation_data["Visualisation"], fem_mesh),
       linear_solver(make_linear_solver(simulation_data["LinearSolver"]))
 {
 }
@@ -72,7 +72,7 @@ void femStaticMatrix::compute_external_force(double const load_factor)
     }
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
-    std::cout << std::string(6, ' ') << "External load assembly took " << elapsed_seconds.count()
+    std::cout << std::string(6, ' ') << "External forces assembly took " << elapsed_seconds.count()
               << "s\n";
 }
 
@@ -162,7 +162,7 @@ void femStaticMatrix::apply_dirichlet_conditions(SparseMatrix& A, Vector& x, Vec
                 }
 
                 // Reset the diagonal to the same value to preserve condition number
-                K.coeffRef(fixed_dof, fixed_dof) = diagonal_entry;
+                A.coeffRef(fixed_dof, fixed_dof) = diagonal_entry;
                 b(fixed_dof) = diagonal_entry * x(fixed_dof);
             }
         }

@@ -54,7 +54,10 @@ GeneralisedTrapezoidal::GeneralisedTrapezoidal(Json::Value const& time_data)
 
 bool GeneralisedTrapezoidal::loop()
 {
-    //
-    return false;
+    current_time_step++;
+
+    time += time_step_size;
+
+    return time < final_time;
 }
 }
