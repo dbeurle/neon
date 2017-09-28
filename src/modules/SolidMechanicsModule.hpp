@@ -19,7 +19,7 @@ public:
                          Json::Value const& material,
                          Json::Value const& simulation);
 
-    ~SolidMechanicsModule() = default;
+    virtual ~SolidMechanicsModule() = default;
 
     SolidMechanicsModule(SolidMechanicsModule const&) = delete;
 

@@ -15,8 +15,6 @@ femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh, Json::Value const& simulat
     d = 250.0 * Vector::Ones(fem_mesh.active_dofs());
 }
 
-femDynamicMatrix::~femDynamicMatrix() { std::cout << "Dtor femdynamicmatrix" << std::endl; }
-
 void femDynamicMatrix::solve()
 {
     // Perform time dependent solution

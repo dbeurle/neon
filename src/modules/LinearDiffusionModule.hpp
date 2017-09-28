@@ -17,14 +17,16 @@ template <typename femMatrix_Tp>
 class LinearDiffusionModule : public AbstractModule
 {
 public:
-    LinearDiffusionModule(BasicMesh const& mesh,
-                          Json::Value const& material,
-                          Json::Value const& simulation)
+    explicit LinearDiffusionModule(BasicMesh const& mesh,
+                                   Json::Value const& material,
+                                   Json::Value const& simulation)
         : fem_mesh(mesh, material, simulation["Mesh"][0]), fem_matrix(fem_mesh, simulation)
     {
     }
 
-    virtual void perform_simulation() override final { fem_matrix.solve(); }
+    virtual ~LinearDiffusionModule() = default;
+
+    void perform_simulation() override final { fem_matrix.solve(); }
 
 protected:
     diffusion::femMesh fem_mesh;
