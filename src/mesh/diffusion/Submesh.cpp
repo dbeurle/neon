@@ -75,7 +75,8 @@ std::tuple<List const&, Matrix> femSubmesh::consistent_mass(int const element) c
 {
     auto X = material_coordinates->current_configuration(local_node_list(element));
 
-    auto const density_0 = cm->intrinsic_material().initial_density();
+    auto const density = cm->intrinsic_material().initial_density();
+    auto const specific_heat = cm->intrinsic_material().specific_heat();
 
     auto m = sf->quadrature().integrate(Matrix::Zero(nodes_per_element(), nodes_per_element()).eval(),
                                         [&](auto const& femval, auto const& l) -> Matrix {
@@ -83,7 +84,7 @@ std::tuple<List const&, Matrix> femSubmesh::consistent_mass(int const element) c
 
                                             auto const Jacobian = local_jacobian(dN, X);
 
-                                            return N * density_0 * N.transpose()
+                                            return N * density * specific_heat * N.transpose()
                                                    * Jacobian.determinant();
                                         });
     return {local_dof_list(element), m};
