@@ -9,17 +9,17 @@
         "Name" : "steel",
         "Conductivity" : 386.0,
         "SpecificHeat" : 390.0,
-        "Density" : 7800
+        "Density" : 7800.0
     }],
     "SimulationCases" : [{
         "Name" : "Uniaxial",
 		"Module" : "HeatDiffusion",
         "Solution" : "Transient",
         "Time" : {
-            "Period" : 1.0,
+            "Period" : 10.0,
             "Method" : "ImplicitEuler",
             "Increments" : {
-                "Initial" : 0.1,
+                "Initial" : 2.0,
                 "Minimum" : 0.00001,
                 "Maximum" : 0.1
             }
@@ -30,25 +30,29 @@
             "ElementOptions" : {
                 "Quadrature" : "Full"
             },
+            "InitialConditions" : {
+                "Uniform" : 298.0
+            },
             "BoundaryConditions" :
             [{
                 "Name" : "cold",
                 "Type" : "Temperature",
-                "Time" : [0.0, 1.0],
-                "Value" : [10.0, 10.0]
+                "Time" : [0.0, 5000.0],
+                "Value" : [200.0, 200.0]
             },
             {
                 "Name" : "hot",
-				"Type" : "Temperature",
-                "Time" : [0.0, 1.0],
-                "Value" :  [5.0, 5.0]
+                "Type" : "HeatFlux",
+                "Time" : [0.0, 5000.0],
+                "Value" :  [100.0, 100.0]
             }]
         }],
 		"LinearSolver" : {
-		    "Solver" : "MUMPS"
+		    "Solver" : "Iterative"
         },
         "Visualisation" : {
-            "Fields" : ["Temperature"]
+            "Fields" : ["Temperature"],
+            "WriteEvery" : 2
         }
     }]
 }

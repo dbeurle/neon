@@ -1,6 +1,6 @@
 {
     "Name" : "Plate",
-    "Cores" : 4,
+    "Cores" : 2,
     "Part": [{
         "Name" : "plate",
         "Material" : "steel"
@@ -17,8 +17,8 @@
 		"Module" : "SolidMechanics",
         "Solution" : "Equilibrium",
         "NonlinearOptions" : {
-            "DisplacementTolerance" : 1.0e-3,
-            "ResidualTolerance" : 1.0e-3
+            "DisplacementTolerance" : 1.0e-4,
+            "ResidualTolerance" : 1.0e-4
         },
         "Time" : {
             "Period" : 1.0,
@@ -68,9 +68,9 @@
             }]
         }],
 		"LinearSolver" :  {
-		    "Solver" : "Iterative",
-            "MaxIterations" : 3000,
-            "Tolerance"  : 1.0e-8
+		    "Solver" : "PaStiX",
+	            "MaxIterations" : 3000,
+        	    "Tolerance"  : 1.0e-8
         },
         "Visualisation" : {
             "Fields" : ["Displacement", "LinearisedStrain", "LinearisedPlasticStrain",

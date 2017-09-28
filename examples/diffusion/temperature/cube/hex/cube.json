@@ -12,7 +12,7 @@
     }],
     "SimulationCases" : [{
         "Name" : "Uniaxial",
-		"Type" : "HeatDiffusion",
+	"Module" : "HeatDiffusion",
         "Solution" : "Equilibrium",
         "Time" : {
             "Period" : 1.0,
@@ -22,7 +22,7 @@
                 "Maximum" : 1.0
             }
         },
-		"Mesh" : [{
+	"Mesh" : [{
             "Name" : "cube",
             "ConstitutiveModel" : "IsotropicDiffusion",
             "ElementOptions" : {
@@ -37,7 +37,7 @@
             },
             {
                 "Name" : "hot",
-				"Type" : "Temperature",
+		"Type" : "HeatFlux",
                 "Time" : [0.0, 1.0],
                 "Value" :  [5.0, 5.0]
             }]
