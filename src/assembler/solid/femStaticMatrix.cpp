@@ -240,15 +240,15 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
     try
     {
-        compute_internal_force();
-
         while (current_iteration < max_iterations)
         {
-            auto start = std::chrono::high_resolution_clock::now();
+            auto const start = std::chrono::high_resolution_clock::now();
 
             std::cout << std::string(4, ' ') << termcolor::blue << termcolor::bold
                       << "Newton-Raphson iteration " << current_iteration << termcolor::reset
                       << std::endl;
+
+            compute_internal_force();
 
             Vector residual = fint - fext;
 
@@ -261,8 +261,6 @@ void femStaticMatrix::perform_equilibrium_iterations()
             d_new += delta_d;
 
             fem_mesh.update_internal_variables(d_new);
-
-            compute_internal_force();
 
             update_relative_norms(current_iteration, delta_d.norm(), residual.norm());
 
