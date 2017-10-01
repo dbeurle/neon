@@ -20,7 +20,7 @@ using CMatrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::Col
 using Vector = Eigen::Matrix<double, Eigen::Dynamic, 1>;
 using Vector2 = Eigen::Vector2d;
 using Vector3 = Eigen::Vector3d;
-using Vector6 = Eigen::Matrix<double, 6, 1>;
+using Vector6 = Eigen::Matrix<double, 6, 1, Eigen::ColMajor, 6, 1>;
 
 using Array = Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic>;
 using List = std::vector<int>;

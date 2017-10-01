@@ -59,10 +59,18 @@ public:
     {
     }
 
-    std::tuple<List const&, Vector> external_force(int const element, double const load_factor) const
+    /**
+     * Compute the external force due to a Neumann type boundary condition.
+     * This computes the following integral on a boundary element
+
+     */
+    virtual std::tuple<List const&, Vector> external_force(int const element,
+                                                           double const load_factor) const override
     {
-        auto X = material_coordinates->initial_configuration(nodal_connectivity.at(element));
-        X = sf->project_to_plane(X);
+        auto const X = sf->project_to_plane(
+            material_coordinates->initial_configuration(nodal_connectivity[element]));
+
+        auto const h = interpolate_prescribed_load(load_factor);
 
         // Perform the computation of the external load vector
         auto const f_ext = sf->quadrature().integrate(Vector::Zero(X.cols()).eval(),
@@ -71,11 +79,9 @@ public:
 
                                                           auto const j = (X * dN).determinant();
 
-                                                          return interpolate_prescribed_load(
-                                                                     load_factor)
-                                                                 * N * j;
+                                                          return h * N * j;
                                                       });
-        return {dof_list.at(element), f_ext};
+        return {dof_list[element], f_ext};
     }
 
 protected:
@@ -104,7 +110,7 @@ public:
 
     std::tuple<List const&, Vector> external_force(int const element, double const load_factor) const
     {
-        auto X = material_coordinates->initial_configuration(nodal_connectivity.at(element));
+        auto const X = material_coordinates->initial_configuration(nodal_connectivity[element]);
 
         // Perform the computation of the external load vector
         auto const f_ext = sf->quadrature().integrate(Vector::Zero(X.cols()).eval(),
@@ -113,11 +119,9 @@ public:
 
                                                           auto const j = (X * dN).determinant();
 
-                                                          return interpolate_prescribed_load(
-                                                                     load_factor)
-                                                                 * N * j;
+                                                          return N * j;
                                                       });
-        return {dof_list.at(element), f_ext};
+        return {dof_list.at(element), interpolate_prescribed_load(load_factor) * f_ext};
     }
 
 protected:

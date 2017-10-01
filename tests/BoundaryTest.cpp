@@ -191,6 +191,61 @@ TEST_CASE("Traction test for triangle", "[Traction]")
         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
     }
 }
+// TEST_CASE("Pressure test for triangle", "[Pressure]")
+// {
+//     using namespace neon::solid;
+//
+//     Json::Reader reader;
+//     Json::Value times, loads;
+//
+//     // Build a right angled triangle
+//     Vector coordinates(9);
+//     coordinates << 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0;
+//
+//     auto material_coordinates = std::make_shared<MaterialCoordinates>(coordinates);
+//
+//     std::vector<List> const nodal_connectivity = {{0, 1, 2}};
+//     std::vector<List> const dof_list = {{0, 1, 2, 3, 4, 5, 6, 7, 8}};
+//
+//     SECTION("Unit load")
+//     {
+//         REQUIRE(reader.parse("[0.0, 1.0]", times));
+//         REQUIRE(reader.parse("[0.0, 1.0]", loads));
+//
+//         Pressure pressure(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
+//                           nodal_connectivity,
+//                           material_coordinates,
+//                           times,
+//                           loads,
+//                           3);
+//
+//         REQUIRE(pressure.elements() == 1);
+//
+//         auto const & [ dofs, t ] = pressure.external_force(0, 1.0);
+//
+//         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
+//         REQUIRE((t - 1.0 / 6.0 * Vector3::Ones()).norm() == Approx(0.0));
+//     }
+//     SECTION("Twice unit load")
+//     {
+//         REQUIRE(reader.parse("[0.0, 1.0]", times));
+//         REQUIRE(reader.parse("[0.0, 2.0]", loads));
+//
+//         Pressure pressure(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
+//                           nodal_connectivity,
+//                           material_coordinates,
+//                           times,
+//                           loads,
+//                           3);
+//
+//         REQUIRE(pressure.elements() == 1);
+//
+//         auto const & [ dofs, t ] = pressure.external_force(0, 1.0);
+//
+//         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
+//         REQUIRE((t - 2.0 / 6.0 * Vector3::Ones()).norm() == Approx(0.0));
+//     }
+// }
 TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
 {
     // Test the construction and population of a mixed quadrilateral and

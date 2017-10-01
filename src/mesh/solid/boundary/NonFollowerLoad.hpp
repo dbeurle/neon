@@ -18,6 +18,24 @@ namespace neon::solid
 using Traction = SurfaceLoad<SurfaceInterpolation>;
 
 /**
+ * Pressure is responsible for computing the resulting force addition from a
+ * uniform pressure load that does not follow the deformation of the body.
+ */
+class Pressure : public Traction
+{
+public:
+    Pressure(std::unique_ptr<SurfaceInterpolation>&& sf,
+             std::vector<List> const& nodal_connectivity,
+             std::shared_ptr<MaterialCoordinates>& material_coordinates,
+             Json::Value const& time_history,
+             Json::Value const& load_history,
+             int const nodal_dofs);
+
+    virtual std::tuple<List const&, Vector> external_force(int const element,
+                                                           double const load_factor) const override;
+};
+
+/**
  * NonFollowerLoadBoundary contains the boundary conditions which contribute to
  * the external force vector.  This can include tractions, pressures, nodal
  * forces and volume forces computed in the initial configuration
@@ -30,19 +48,7 @@ public:
                                      Json::Value const& times,
                                      Json::Value const& loads,
                                      Json::Value const& simulation_data,
-                                     int const dof_offset)
-    {
-        for (auto const& mesh : submeshes)
-        {
-            surface_loads.emplace_back(make_surface_interpolation(mesh.topology(), simulation_data),
-                                       mesh.connectivities(),
-                                       material_coordinates,
-                                       times,
-                                       loads,
-                                       dof_offset,
-                                       3);
-        }
-    }
+                                     int const dof_offset);
 
     auto const& boundaries() const { return surface_loads; }
 
