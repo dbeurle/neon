@@ -12,8 +12,6 @@ class femDynamicMatrix : public femStaticMatrix
 public:
     explicit femDynamicMatrix(femMesh& fem_mesh, Json::Value const& simulation_data);
 
-    ~femDynamicMatrix();
-
     void solve() override final;
 
 protected:

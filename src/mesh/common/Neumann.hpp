@@ -59,7 +59,13 @@ public:
     {
     }
 
-    std::tuple<List const&, Vector> external_force(int const element, double const load_factor) const
+    /**
+     * Compute the external force due to a Neumann type boundary condition.
+     * This computes the following integral on a boundary element
+
+     */
+    virtual std::tuple<List const&, Vector> external_force(int const element,
+                                                           double const load_factor) const override
     {
         auto const X = sf->project_to_plane(
             material_coordinates->initial_configuration(nodal_connectivity[element]));
@@ -104,7 +110,7 @@ public:
 
     std::tuple<List const&, Vector> external_force(int const element, double const load_factor) const
     {
-        auto X = material_coordinates->initial_configuration(nodal_connectivity.at(element));
+        auto const X = material_coordinates->initial_configuration(nodal_connectivity[element]);
 
         auto const f = interpolate_prescribed_load(load_factor);
 
@@ -117,7 +123,7 @@ public:
 
                                                           return f * N * j;
                                                       });
-        return {dof_list.at(element), f_ext};
+        return {dof_list.at(element), interpolate_prescribed_load(load_factor) * f_ext};
     }
 
 protected:

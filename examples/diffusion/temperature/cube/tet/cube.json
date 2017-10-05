@@ -16,7 +16,7 @@
 		"Module" : "HeatDiffusion",
         "Solution" : "Transient",
         "Time" : {
-            "Period" : 10.0,
+            "Period" : 10000.0,
             "Method" : "ImplicitEuler",
             "Increments" : {
                 "Initial" : 2.0,
@@ -52,7 +52,7 @@
         },
         "Visualisation" : {
             "Fields" : ["Temperature"],
-            "WriteEvery" : 2
+            "WriteEvery" : 10
         }
     }]
 }

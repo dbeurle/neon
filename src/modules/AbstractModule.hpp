@@ -16,6 +16,8 @@ class AbstractModule
 public:
     virtual void perform_simulation() = 0;
 
+    virtual ~AbstractModule() = default;
+
 protected:
     std::map<std::string, std::vector<Json::Value>> multistep_simulations;
 };

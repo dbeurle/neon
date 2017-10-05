@@ -15,8 +15,6 @@ femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh, Json::Value const& simulat
     d = 250.0 * Vector::Ones(fem_mesh.active_dofs());
 }
 
-femDynamicMatrix::~femDynamicMatrix() { std::cout << "Dtor femdynamicmatrix" << std::endl; }
-
 void femDynamicMatrix::solve()
 {
     // Perform time dependent solution
@@ -32,9 +30,9 @@ void femDynamicMatrix::solve()
     {
         auto const start = std::chrono::high_resolution_clock::now();
 
-        std::cout << std::string(4, ' ') << termcolor::blue << termcolor::bold
-                  << "Time step: " << time_solver.iteration()
-                  << ", time: " << time_solver.current_time() << termcolor::reset << std::endl;
+        std::cout << std::string(4, ' ') << termcolor::blue << termcolor::bold << "Time step "
+                  << time_solver.iteration() << ", simulation time: " << time_solver.current_time()
+                  << termcolor::reset << std::endl;
 
         SparseMatrix A = M + time_solver.current_time_step_size() * K;
 
@@ -46,7 +44,7 @@ void femDynamicMatrix::solve()
 
         auto const end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> const elapsed_seconds = end - start;
-        std::cout << std::string(6, ' ') << "Time step required " << elapsed_seconds.count() << "s\n";
+        std::cout << std::string(6, ' ') << "Time step took " << elapsed_seconds.count() << "s\n";
 
         file_io.write(time_solver.iteration(), time_solver.current_time(), d);
     }
@@ -55,8 +53,6 @@ void femDynamicMatrix::solve()
 
 void femDynamicMatrix::assemble_mass()
 {
-    auto const start = std::chrono::high_resolution_clock::now();
-
     M.resize(fem_mesh.active_dofs(), fem_mesh.active_dofs());
 
     std::vector<Doublet<int>> doublets;
@@ -80,16 +76,23 @@ void femDynamicMatrix::assemble_mass()
 
     doublets.clear();
 
+    auto const start = std::chrono::high_resolution_clock::now();
+
     for (auto const& submesh : fem_mesh.meshes())
     {
+#pragma omp parallel for
         for (auto element = 0; element < submesh.elements(); ++element)
         {
-            auto const[dofs, m] = submesh.consistent_mass(element);
+            // auto const[dofs, m] = submesh.consistent_mass(element);
+            auto const& tpl = submesh.consistent_mass(element);
+            auto const& dofs = std::get<0>(tpl);
+            auto const& m = std::get<1>(tpl);
 
             for (auto b = 0; b < dofs.size(); b++)
             {
                 for (auto a = 0; a < dofs.size(); a++)
                 {
+#pragma omp atomic
                     M.coeffRef(dofs[a], dofs[b]) += m(a, b);
                 }
             }
@@ -99,7 +102,6 @@ void femDynamicMatrix::assemble_mass()
     auto const end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> const elapsed_seconds = end - start;
 
-    std::cout << std::string(4, ' ') << "Assembly of mass matrix took " << elapsed_seconds.count()
-              << "s\n";
+    std::cout << std::string(6, ' ') << "Mass assembly took " << elapsed_seconds.count() << "s\n";
 }
 }

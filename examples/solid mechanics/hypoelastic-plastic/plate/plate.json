@@ -60,11 +60,12 @@
             },
             {
                 "Name" : "load",
-                "Type" : "Traction",
+                "Type" : "Pressure",
                 "Time" : [0.0, 1.0],
-                "Values" : {
-                    "x" : [0.0, 1.5e2]
-                }
+		"Values" : [0.0, -1.5e2]
+                //"Values" : {
+                //    "x" : [0.0, -1.5e2]
+                //}
             }]
         }],
 		"LinearSolver" :  {

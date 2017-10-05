@@ -162,7 +162,7 @@ void SimulationControl::build_simulation_tree()
         std::cout << std::string(4, ' ') << "Simulation \"" << name << "\" is continued by:\n";
         for (auto const& item : queue)
         {
-            std::cout << "\t\"" << item["Name"].asString() << "\"" << std::endl;
+            std::cout << std::string(4, ' ') << "\"" << item["Name"].asString() << "\"" << std::endl;
         }
     }
 }
