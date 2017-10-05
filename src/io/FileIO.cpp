@@ -28,8 +28,6 @@ namespace neon
 FileIO::FileIO(std::string file_name, Json::Value const& visualisation_data)
     : file_name(file_name), unstructured_mesh(vtkSmartPointer<vtkUnstructuredGrid>::New())
 {
-    std::cout << "Parent ctor" << std::endl;
-
     if (visualisation_data.isMember("WriteEvery"))
     {
         write_every = visualisation_data["WriteEvery"].asInt();
