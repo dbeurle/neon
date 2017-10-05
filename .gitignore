@@ -2,3 +2,4 @@
 *.pvd
 build/*
 docs/latex/*
+docs/html/*
