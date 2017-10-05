@@ -4,7 +4,6 @@
 #include "numeric/DenseTypes.hpp"
 
 #include <functional>
-#include <iostream>
 
 #include <range/v3/algorithm.hpp>
 #include <range/v3/view.hpp>
@@ -18,10 +17,14 @@ Boundary::Boundary(Json::Value const& times, Json::Value const& loads)
     using namespace ranges;
 
     if (times.size() < 2)
+    {
         throw std::runtime_error("\"Time\" is not a vector of at least two elements");
+    }
 
     if (loads.size() < 2)
+    {
         throw std::runtime_error("Boundary value is not a vector of at least two elements");
+    }
 
     if (times.size() != loads.size())
     {
@@ -45,8 +48,11 @@ std::vector<double> Boundary::time_history() const { return time_load | ranges::
 
 double Boundary::interpolate_prescribed_load(double const step_time) const
 {
-    using namespace ranges;
+    using ranges::adjacent_find;
+    using ranges::find_if;
+    using ranges::next;
 
+    // Find if we have a time that matches exactly to a load
     if (auto match = find_if(time_load,
                              [&](auto const& value) { return is_approx(value.first, step_time); });
         match != time_load.end())
@@ -54,6 +60,7 @@ double Boundary::interpolate_prescribed_load(double const step_time) const
         return (*match).second;
     }
 
+    // Otherwise we need to interpolate between the values
     auto const lower_position = adjacent_find(time_load, [&](auto const& left, auto const& right) {
         return left.first < step_time && step_time < right.first;
     });

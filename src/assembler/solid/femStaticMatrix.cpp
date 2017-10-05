@@ -91,29 +91,36 @@ void femStaticMatrix::compute_internal_force()
 
 void femStaticMatrix::compute_external_force(double const step_time)
 {
-    auto start = std::chrono::high_resolution_clock::now();
+    auto const start = std::chrono::high_resolution_clock::now();
 
     fext.setZero();
 
     for (auto const & [ name, nf_loads ] : fem_mesh.nonfollower_load_boundaries())
     {
-        for (auto const& nf_load : nf_loads)
+        for (auto const & [ is_dof_active, boundary_conditions ] : nf_loads.interface())
         {
-            for (auto const& mesh : nf_load.boundaries())
-            {
-                for (auto element = 0; element < mesh.elements(); ++element)
-                {
-                    auto const & [ dofs, fe_ext ] = mesh.external_force(element, step_time);
+            if (!is_dof_active) continue;
 
-                    for (auto a = 0; a < fe_ext.size(); ++a)
+            for (auto const& boundary_condition : boundary_conditions)
+            {
+                // clang-format off
+                std::visit([&](auto const& mesh) {
+                    for (auto element = 0; element < mesh.elements(); ++element)
                     {
-                        fext(dofs[a]) += fe_ext(a);
+                       auto const & [ dofs, fe_ext ] = mesh.external_force(element, step_time);
+
+                       for (auto a = 0; a < fe_ext.size(); ++a)
+                       {
+                           fext(dofs[a]) += fe_ext(a);
+                       }
                     }
-                }
+                },
+                boundary_condition);
+                // clang-format on
             }
         }
     }
-    auto end = std::chrono::high_resolution_clock::now();
+    auto const end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
     std::cout << std::string(6, ' ') << "External forces assembly took " << elapsed_seconds.count()
               << "s\n";

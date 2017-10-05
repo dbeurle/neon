@@ -1,10 +1,13 @@
 
 #pragma once
 
+#include <array>
 #include <utility>
 #include <vector>
 
 #include <json/forwards.h>
+
+#include "numeric/DenseTypes.hpp"
 
 namespace neon
 {
@@ -21,11 +24,7 @@ class Boundary
 public:
     explicit Boundary(Json::Value const& times, Json::Value const& loads);
 
-    /** Update the prescribed value and load application to ramped or instantaneous */
-    void internal_restart(double const prescribed_value_new, bool const is_load_ramped = true);
-
-    /** Maintains the previous load and does not ramp */
-    void internal_restart();
+    ~Boundary() = default;
 
     std::vector<double> time_history() const;
 
@@ -36,6 +35,8 @@ public:
      * @return an interpolated value
      */
     double interpolate_prescribed_load(double const step_time) const;
+
+    Vector3 interpolate_prescribed_loads(double const step_time) const;
 
 private:
     std::vector<std::pair<double, double>> time_load;

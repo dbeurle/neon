@@ -10,6 +10,7 @@
 
 #include <json/forwards.h>
 #include <map>
+#include <variant>
 
 namespace neon
 {
@@ -19,6 +20,9 @@ namespace solid
 {
 class femMesh
 {
+public:
+    using BoundaryType = std::variant<Traction, Pressure, BodyForce>;
+
 public:
     femMesh(BasicMesh const& basic_mesh,
             Json::Value const& material_data,
@@ -33,9 +37,6 @@ public:
      * once there is an unsymmetric operation.  \sa LinearSolver
      */
     bool is_symmetric() const { return true; }
-
-    /** Reset the boundary conditions */
-    void internal_restart(Json::Value const& simulation_data);
 
     /**
      * Deform the body by updating the displacement x = X + u
@@ -58,7 +59,7 @@ public:
 
     auto const& displacement_boundaries() const { return displacement_bcs; }
 
-    auto const& nonfollower_load_boundaries() const { return nf_loads; }
+    auto const& nonfollower_load_boundaries() const { return nonfollower_loads; }
 
     /**
      * Gathers the time history for each boundary condition and
@@ -77,12 +78,7 @@ protected:
 
     void allocate_displacement_boundary(Json::Value const& boundary, BasicMesh const& basic_mesh);
 
-    void allocate_traction_boundary(Json::Value const& simulation_data,
-                                    Json::Value const& boundary,
-                                    BasicMesh const& basic_mesh);
-
-    /** \sa internal_restart */
-    void reallocate_boundary_conditions(Json::Value const& boundary_data);
+    bool is_nonfollower_load(std::string const& boundary_type) const;
 
     /** Collapse the nodal connectivity arrays from the submesh for a node list */
     List filter_dof_list(std::vector<SubMesh> const& boundary_mesh) const;
@@ -94,7 +90,7 @@ protected:
 
     // Boundary conditions for this mesh
     std::map<std::string, std::vector<Dirichlet>> displacement_bcs;
-    std::map<std::string, std::vector<NonFollowerLoadBoundary>> nf_loads;
+    std::map<std::string, NonFollowerLoadBoundary> nonfollower_loads;
 
     std::unordered_map<std::string, int> const dof_table = {{"x", 0}, {"y", 1}, {"z", 2}};
 };

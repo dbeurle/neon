@@ -31,27 +31,6 @@ femMesh::femMesh(BasicMesh const& basic_mesh,
     allocate_boundary_conditions(simulation_data, basic_mesh);
 }
 
-void femMesh::internal_restart(Json::Value const& simulation_data)
-{
-    // if (!simulation_data.isMember("BoundaryConditions"))
-    // {
-    //     for (auto & [ name, boundaries ] : displacement_bcs)
-    //     {
-    //         std::cout << termcolor::yellow << std::string(2, ' ') << "Boundary conditions for \""
-    //                   << name << "\" have been inherited from the last load step"
-    //                   << termcolor::reset << std::endl;
-    //
-    //         for (auto& boundary : boundaries) boundary.internal_restart();
-    //     }
-    // }
-    // else
-    // {
-    //     auto const& boundary_data = simulation_data["BoundaryConditions"];
-    //     check_boundary_conditions(boundary_data);
-    //     reallocate_boundary_conditions(boundary_data);
-    // }
-}
-
 void femMesh::update_internal_variables(Vector const& u, double const time_step_size)
 {
     auto start = std::chrono::high_resolution_clock::now();
@@ -72,6 +51,11 @@ void femMesh::save_internal_variables(bool const have_converged)
     for (auto& submesh : submeshes) submesh.save_internal_variables(have_converged);
 }
 
+bool femMesh::is_nonfollower_load(std::string const& boundary_type) const
+{
+    return boundary_type == "Traction" || boundary_type == "Pressure" || boundary_type == "BodyForce";
+}
+
 void femMesh::allocate_boundary_conditions(Json::Value const& simulation_data,
                                            BasicMesh const& basic_mesh)
 {
@@ -80,13 +64,21 @@ void femMesh::allocate_boundary_conditions(Json::Value const& simulation_data,
     // Populate the boundary conditions and their corresponding mesh
     for (auto const& boundary : boundary_data)
     {
-        if (auto const& boundary_type = boundary["Type"].asString(); boundary_type == "Displacement")
+        auto const& boundary_name = boundary["Name"].asString();
+        auto const& boundary_type = boundary["Type"].asString();
+
+        if (boundary_type == "Displacement")
         {
             this->allocate_displacement_boundary(boundary, basic_mesh);
         }
-        else if (boundary_type == "Traction")
+        else if (is_nonfollower_load(boundary_type))
         {
-            this->allocate_traction_boundary(simulation_data, boundary, basic_mesh);
+            nonfollower_loads.emplace(boundary_name,
+                                      NonFollowerLoadBoundary(material_coordinates,
+                                                              basic_mesh.meshes(boundary_name),
+                                                              simulation_data,
+                                                              boundary,
+                                                              dof_table));
         }
         else
         {
@@ -123,51 +115,6 @@ void femMesh::allocate_displacement_boundary(Json::Value const& boundary, BasicM
     }
 }
 
-void femMesh::allocate_traction_boundary(Json::Value const& simulation_data,
-                                         Json::Value const& boundary,
-                                         BasicMesh const& basic_mesh)
-{
-    using namespace ranges;
-
-    auto const& boundary_name = boundary["Name"].asString();
-
-    for (auto const& name : boundary["Values"].getMemberNames())
-    {
-        if (dof_table.find(name) == dof_table.end())
-        {
-            throw std::runtime_error("x, y or z are acceptable coordinates\n");
-        }
-
-        nf_loads[boundary_name].emplace_back(material_coordinates,
-                                             basic_mesh.meshes(boundary_name),
-                                             boundary["Time"],
-                                             boundary["Values"][name],
-                                             simulation_data,
-                                             dof_table.find(name)->second);
-    }
-}
-
-void femMesh::reallocate_boundary_conditions(Json::Value const& boundary_data)
-{
-    // using namespace ranges;
-    //
-    // for (auto const& boundary : boundary_data)
-    // {
-    //     auto const& boundary_name = boundary["Name"].asString();
-    //
-    //     if (boundary["Type"].asString() == "Displacement")
-    //     {
-    //         for (auto const& name : boundary["Values"].getMemberNames())
-    //         {
-    //             for (auto& dirichlet_boundary : displacement_bcs[boundary_name])
-    //             {
-    //                 dirichlet_boundary.internal_restart(boundary["Values"][name].asDouble());
-    //             }
-    //         }
-    //     }
-    // }
-}
-
 std::vector<double> femMesh::time_history() const
 {
     std::vector<double> history;
@@ -180,13 +127,19 @@ std::vector<double> femMesh::time_history() const
             history |= ranges::action::push_back(boundary.time_history());
         }
     }
-    for (auto const & [ key, nf_load ] : nf_loads)
+    for (auto const & [ key, nonfollower_load ] : nonfollower_loads)
     {
-        for (auto const& boundary : nf_load)
+        for (auto const & [ is_dof_active, boundaries ] : nonfollower_load.interface())
         {
-            for (auto const& surface_mesh : boundary.boundaries())
+            if (!is_dof_active) continue;
+
+            for (auto const& boundary_variant : boundaries)
             {
-                history |= ranges::action::push_back(surface_mesh.time_history());
+                std::visit(
+                    [&](auto const& surface_mesh) {
+                        history |= ranges::action::push_back(surface_mesh.time_history());
+                    },
+                    boundary_variant);
             }
         }
     }

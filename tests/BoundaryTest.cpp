@@ -191,6 +191,65 @@ TEST_CASE("Traction test for triangle", "[Traction]")
         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
     }
 }
+TEST_CASE("Pressure test for triangle", "[Pressure]")
+{
+    using namespace neon::solid;
+
+    Json::Reader reader;
+    Json::Value times, loads;
+
+    // Build a right angled triangle
+    Vector coordinates(9);
+    coordinates << 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0;
+
+    auto material_coordinates = std::make_shared<MaterialCoordinates>(coordinates);
+
+    std::vector<List> nodal_connectivity = {{0, 1, 2}};
+    std::vector<List> dof_list = {{0, 1, 2, 3, 4, 5, 6, 7, 8}};
+
+    SECTION("Unit load")
+    {
+        REQUIRE(reader.parse("[0.0, 1.0]", times));
+        REQUIRE(reader.parse("[0.0, -1.0]", loads));
+
+        Pressure pressure(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
+                          nodal_connectivity,
+                          material_coordinates,
+                          times,
+                          loads,
+                          3);
+
+        REQUIRE(pressure.elements() == 1);
+
+        auto const & [ dofs, f_ext ] = pressure.external_force(0, 1.0);
+
+        REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
+
+        // Compare the z-component to the analytical solution
+        REQUIRE((Vector3(f_ext(2), f_ext(5), f_ext(8)) - 1.0 / 6.0 * Vector3::Ones()).norm()
+                == Approx(0.0));
+    }
+    SECTION("Twice unit load")
+    {
+        REQUIRE(reader.parse("[0.0, 1.0]", times));
+        REQUIRE(reader.parse("[0.0, -2.0]", loads));
+
+        Pressure pressure(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
+                          nodal_connectivity,
+                          material_coordinates,
+                          times,
+                          loads,
+                          3);
+
+        REQUIRE(pressure.elements() == 1);
+
+        auto const & [ dofs, f_ext ] = pressure.external_force(0, 1.0);
+
+        REQUIRE((Vector3(f_ext(2), f_ext(5), f_ext(8)) - 2.0 / 6.0 * Vector3::Ones()).norm()
+                == Approx(0.0));
+        REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
+    }
+}
 TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
 {
     // Test the construction and population of a mixed quadrilateral and
@@ -215,15 +274,11 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
     std::array<int, 4> const known_dofs_quad{{1, 4, 7, 10}};
 
     Json::Value tri_mesh_data, quad_mesh_data, simulation_data;
-    Json::Value times, loads;
     Json::Reader reader;
 
     REQUIRE(reader.parse(trimesh.c_str(), tri_mesh_data));
     REQUIRE(reader.parse(quadmesh.c_str(), quad_mesh_data));
     REQUIRE(reader.parse(simulation_data_traction_json().c_str(), simulation_data));
-
-    REQUIRE(reader.parse("[0.0, 1.0]", times));
-    REQUIRE(reader.parse("[0.0, 1.0e-3]", loads));
 
     std::vector<SubMesh> submeshes = {tri_mesh_data, quad_mesh_data};
 
@@ -236,21 +291,46 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
     REQUIRE(submeshes.at(0).nodes_per_element() == 3);
     REQUIRE(submeshes.at(1).nodes_per_element() == 4);
 
+    Json::Value boundary;
+    REQUIRE(reader.parse("{\"Time\":[0.0, 1.0], \"Values\":{\"x\":[0.0, 1.0e-3]}}", boundary));
+
     // Insert this information into the nonfollower load boundary class
     // using the simulation data for the cube
-    NonFollowerLoadBoundary nf_loads(material_coordinates, submeshes, times, loads, simulation_data, 1);
+    NonFollowerLoadBoundary loads(material_coordinates,
+                                  submeshes,
+                                  simulation_data,
+                                  boundary,
+                                  {{"x", 0}, {"y", 1}, {"z", 2}});
 
-    auto const & [ dofs_tri, f_tri ] = nf_loads.boundaries().at(0).external_force(0, 1.0);
-    auto const & [ dofs_quad, f_quad ] = nf_loads.boundaries().at(1).external_force(0, 1.0);
+    for (auto const & [ is_dof_active, meshes ] : loads.interface())
+    {
+        if (is_dof_active)
+        {
+            std::visit(
+                [&](auto const& mesh) {
 
-    // Check sizes
-    REQUIRE(dofs_tri.size() == 3);
-    REQUIRE(f_tri.rows() == 3);
+                    auto const & [ dofs_tri, f_tri ] = mesh.external_force(0, 1.0);
 
-    REQUIRE(dofs_quad.size() == 4);
-    REQUIRE(f_quad.rows() == 4);
+                    REQUIRE(dofs_tri.size() == 3);
+                    REQUIRE(f_tri.rows() == 3);
 
-    // Check dofs are correctly written
-    REQUIRE(view::set_difference(dofs_tri, known_dofs_tri).empty());
-    REQUIRE(view::set_difference(dofs_quad, known_dofs_quad).empty());
+                    // Check dofs are correctly written
+                    REQUIRE(view::set_difference(dofs_tri, known_dofs_tri).empty());
+                },
+                meshes.at(0));
+
+            std::visit(
+                [&](auto const& mesh) {
+
+                    auto const & [ dofs_quad, f_quad ] = mesh.external_force(0, 1.0);
+
+                    REQUIRE(dofs_quad.size() == 4);
+                    REQUIRE(f_quad.rows() == 4);
+
+                    // Check dofs are correctly written
+                    REQUIRE(view::set_difference(dofs_quad, known_dofs_quad).empty());
+                },
+                meshes.at(1));
+        }
+    }
 }

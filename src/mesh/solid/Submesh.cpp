@@ -128,8 +128,6 @@ Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int const element
 
 Vector femSubmesh::internal_nodal_force(Matrix const& x, int const element) const
 {
-    using RowMatrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-
     auto const& cauchy_list = variables(InternalVariables::Tensor::Cauchy);
 
     auto const[m, n] = std::make_tuple(nodes_per_element(), dofs_per_node());
