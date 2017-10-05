@@ -13,6 +13,8 @@
 namespace neon
 {
 using Matrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>;
+using RowMatrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+
 using Matrix2 = Eigen::Matrix<double, 2, 2>;
 using Matrix3 = Eigen::Matrix<double, 3, 3>;
 using CMatrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor, 6, 6>;
