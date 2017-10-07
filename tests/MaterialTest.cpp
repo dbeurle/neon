@@ -10,6 +10,8 @@
 #include "material/LinearElastic.hpp"
 #include "material/MicromechanicalElastomer.hpp"
 
+#include "material/LinearDiffusion.hpp"
+
 #include "Exceptions.hpp"
 
 using namespace neon;
@@ -17,6 +19,12 @@ using namespace neon;
 std::string linear_material_input()
 {
     return "{\"Name\": \"steel\", \"ElasticModulus\": 200.0e9, \"PoissonsRatio\": 0.3}";
+}
+
+std::string linear_diffusion_material_input()
+{
+    return "{\"Name\": \"steel\", \"Density\": 7800.0, \"Conductivity\": 300.0, \"SpecificHeat\": "
+           "280.0}";
 }
 
 std::string linear_material_input_incompressible()
@@ -181,4 +189,17 @@ TEST_CASE("Micromechanical elastomer", "[MicromechanicalElastomer]")
             REQUIRE(shear_moduli.at(i) > 0.0);
         }
     }
+}
+TEST_CASE("Diffusion material", "[LinearDiffusion]")
+{
+    Json::Value material_data;
+    Json::Reader reader;
+
+    REQUIRE(reader.parse(linear_diffusion_material_input().c_str(), material_data));
+
+    LinearDiffusion linear_diffusion(material_data);
+
+    REQUIRE(linear_diffusion.initial_density() == Approx(7800.0));
+    REQUIRE(linear_diffusion.conductivity_coefficient() == Approx(300.0));
+    REQUIRE(linear_diffusion.specific_heat() == Approx(280.0));
 }
