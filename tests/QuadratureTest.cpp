@@ -58,6 +58,17 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
             REQUIRE(rhea.col(1).sum() == Approx(0.0));
         });
     }
+    SECTION("Quadrilateral4 surface area - one point")
+    {
+        Quadrilateral4 quad4(QuadrilateralQuadrature::Rule::OnePoint);
+
+        Matrix x(3, 4);
+        x << 0.0, 1.0, 1.0, 0.0, //
+            0.0, 0.0, 1.0, 1.0,  //
+            0.0, 0.0, 0.0, 0.0;
+
+        REQUIRE(quad4.compute_measure(x) == Approx(1.0));
+    }
     SECTION("Quadrilateral4 interpolation function - four point")
     {
         Quadrilateral4 quad4(QuadrilateralQuadrature::Rule::FourPoint);
@@ -76,6 +87,17 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
             REQUIRE(rhea.col(0).sum() == Approx(0.0));
             REQUIRE(rhea.col(1).sum() == Approx(0.0));
         });
+    }
+    SECTION("Quadrilateral4 surface area - four point")
+    {
+        Quadrilateral4 quad4(QuadrilateralQuadrature::Rule::FourPoint);
+
+        Matrix x(3, 4);
+        x << 0.0, 1.0, 1.0, 0.0, //
+            0.0, 0.0, 1.0, 1.0,  //
+            0.0, 0.0, 0.0, 0.0;
+
+        REQUIRE(quad4.compute_measure(x) == Approx(1.0));
     }
     SECTION("Quadrilateral8 interpolation function - four point")
     {
@@ -96,6 +118,17 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
             REQUIRE(rhea.col(1).sum() == Approx(0.0));
         });
     }
+    SECTION("Quadrilateral8 surface area - four point")
+    {
+        Quadrilateral8 quad8(QuadrilateralQuadrature::Rule::FourPoint);
+
+        Matrix x(3, 8);
+        x << 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5, 0.0, //
+            0.0, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5,  //
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
+
+        REQUIRE(quad8.compute_measure(x) == Approx(1.0));
+    }
     SECTION("Quadrilateral8 interpolation function - nine point")
     {
         Quadrilateral8 quad8(QuadrilateralQuadrature::Rule::NinePoint);
@@ -114,6 +147,17 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
             REQUIRE(rhea.col(0).sum() == Approx(0.0));
             REQUIRE(rhea.col(1).sum() == Approx(0.0));
         });
+    }
+    SECTION("Quadrilateral8 interpolation function - nine point")
+    {
+        Quadrilateral8 quad8(QuadrilateralQuadrature::Rule::NinePoint);
+
+        Matrix x(3, 8);
+        x << 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5, 0.0, //
+            0.0, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5,  //
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
+
+        REQUIRE(quad8.compute_measure(x) == Approx(1.0));
     }
 }
 TEST_CASE("Triangle quadrature scheme test", "[TriangleQuadrature]")
@@ -186,6 +230,18 @@ TEST_CASE("Triangle quadrature scheme test", "[TriangleQuadrature]")
             REQUIRE(rhea.col(1).sum() == Approx(0.0));
         });
     }
+    SECTION("Triangle3 surface area")
+    {
+        Triangle3 tri3(TriangleQuadrature::Rule::OnePoint);
+
+        Matrix x(3, 3);
+        x << 0.0, 0.0, 0.0, //
+            1.0, 0.0, 0.0,  //
+            0.0, 1.0, 0.0;
+        x.transposeInPlace();
+
+        REQUIRE(tri3.compute_measure(x) == Approx(0.5));
+    }
 }
 TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
 {
@@ -201,7 +257,6 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
         REQUIRE(ranges::accumulate(One.weights(), 0.0) == Approx(8.0));
         REQUIRE(ranges::accumulate(Eight.weights(), 0.0) == Approx(8.0));
     }
-
     SECTION("Hexahedron8 OnePoint Evaluation")
     {
         Hexahedron8 hex8(HexahedronQuadrature::Rule::OnePoint);
