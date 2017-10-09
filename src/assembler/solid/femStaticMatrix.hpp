@@ -37,7 +37,11 @@ protected:
 
     void compute_internal_force();
 
-    void compute_external_force(double const compute_external_force);
+    /**
+     * Computes the external force contributions to the system of equations.
+     * \sa NonFollowerLoadBoundary
+     */
+    void compute_external_force(double const time_step);
 
     /**
      * Assembles the material and geometric matrices, checking for allocation
