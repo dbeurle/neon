@@ -501,11 +501,25 @@ TEST_CASE("Prism quadrature scheme test", "[PrismQuadrature]")
 }
 TEST_CASE("Unit sphere quadrature scheme test", "[UnitSphereQuadrature]")
 {
-    SECTION("Unit sphere unit test")
+    SECTION("BO21 rule test")
     {
-        UnitSphereQuadrature unit_sphere;
+        UnitSphereQuadrature unit_sphere(UnitSphereQuadrature::Rule::BO21);
 
         REQUIRE(unit_sphere.points() == 21);
+        REQUIRE(ranges::accumulate(unit_sphere.weights(), 0.0) == Approx(1.0));
+
+        for (auto const& coordinate : unit_sphere.coordinates())
+        {
+            auto const & [ l, x, y, z ] = coordinate;
+            Vector3 norm_check(x, y, z);
+            REQUIRE(norm_check.norm() == Approx(1.0));
+        }
+    }
+    SECTION("BO33 rule test")
+    {
+        UnitSphereQuadrature unit_sphere(UnitSphereQuadrature::Rule::BO33);
+
+        REQUIRE(unit_sphere.points() == 33);
         REQUIRE(ranges::accumulate(unit_sphere.weights(), 0.0) == Approx(1.0));
 
         for (auto const& coordinate : unit_sphere.coordinates())
