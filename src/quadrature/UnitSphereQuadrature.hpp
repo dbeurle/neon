@@ -1,4 +1,6 @@
 
+#pragma once
+
 #include "NumericalQuadrature.hpp"
 
 namespace neon
