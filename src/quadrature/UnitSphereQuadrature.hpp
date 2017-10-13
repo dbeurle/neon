@@ -15,7 +15,7 @@ public:
      * symmetry of constitutive equations - A comparative study
      * by Ehret et.al.
      */
-    enum class Rule { BO21, BO33 };
+    enum class Rule { BO21, BO33, FM900 };
 
 public:
     /** Fill the quadrature coordinates and weightings */

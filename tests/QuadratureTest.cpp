@@ -584,4 +584,18 @@ TEST_CASE("Unit sphere quadrature scheme test", "[UnitSphereQuadrature]")
             REQUIRE(norm_check.norm() == Approx(1.0));
         }
     }
+    SECTION("FM900 rule test")
+    {
+        UnitSphereQuadrature unit_sphere(UnitSphereQuadrature::Rule::FM900);
+
+        REQUIRE(unit_sphere.points() == 900);
+        REQUIRE(ranges::accumulate(unit_sphere.weights(), 0.0) == Approx(12.5663706143));
+
+        for (auto const& coordinate : unit_sphere.coordinates())
+        {
+            auto const & [ l, x, y, z ] = coordinate;
+            Vector3 norm_check(x, y, z);
+            REQUIRE(norm_check.norm() == Approx(1.0));
+        }
+    }
 }
