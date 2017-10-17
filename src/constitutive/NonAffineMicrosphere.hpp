@@ -98,7 +98,8 @@ protected:
 
 protected:
     double non_affine_stretch_parameter{1.0}; //!< Three-dimensional locking characteristics
-    double non_affine_tube_parameter{1.0};    //!< Additional constraint stiffness
+    double non_affine_tube_parameter{1.0};    //!< Shape of constraint stress
+    double effective_tube_geometry{1.0};      //!< Additional constraint stiffness
 };
 
 inline Matrix6 NonAffineMicrosphere::compute_o_dot_product(Vector3 const& n) const

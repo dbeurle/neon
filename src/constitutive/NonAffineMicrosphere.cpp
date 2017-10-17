@@ -84,13 +84,10 @@ void NonAffineMicrosphere::update_internal_variables(double const time_step_size
         Matrix6 const K = compute_K_tensor(F_deviatoric);
         Matrix6 const G = compute_G_tensor(F_deviatoric);
 
-        // Free energy
-        auto const U = AffineMicrosphere::volumetric_free_energy_dJ(J, G_eff);
-
         // Compute the macrostress and macromoduli for tube contraint
-        Matrix3 const macro_kirchhoff_c = -G_eff * N * U * k;
+        Matrix3 const macro_kirchhoff_c = -G_eff * N * effective_tube_geometry * k;
 
-        Matrix6 const macro_moduli_c = G_eff * N * U * (K + G);
+        Matrix6 const macro_moduli_c = G_eff * N * effective_tube_geometry * (K + G);
 
         // Superimposed stress response from tube and chain contributions
         Matrix3 const macro_kirchhoff = macro_kirchhoff_f + macro_kirchhoff_c;
