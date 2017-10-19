@@ -61,11 +61,9 @@ void NonAffineMicrosphere::update_internal_variables(double const time_step_size
         Matrix6 const H = compute_H_tensor(F_unimodular);
 
         // Compute the microstress and micro moduli
-        auto const micro_kirchhoff_f = G_eff * (3.0 * N - std::pow(nonaffine_stretch, 2))
-                                       / ((N - std::pow(nonaffine_stretch, 2)) * nonaffine_stretch);
+        auto const micro_kirchhoff_f = G_eff * pade_first(nonaffine_stretch, N) * nonaffine_stretch;
 
-        auto const micro_moduli_f = G_eff * (std::pow(nonaffine_stretch, 4) + 3.0 * std::pow(N, 2))
-                                    / std::pow(N - std::pow(nonaffine_stretch, 2), 2);
+        auto const micro_moduli_f = G_eff * pade_second(nonaffine_stretch, N);
 
         // Compute the macrostress and macromoduli for chain force
         Matrix3 const macro_kirchhoff_f = micro_kirchhoff_f * std::pow(nonaffine_stretch, 1.0 - p)
@@ -148,13 +146,15 @@ Matrix3 NonAffineMicrosphere::compute_k_tensor(Matrix3 const& F_unimodular) cons
 {
     auto const q = non_affine_tube_parameter;
 
-    return unit_sphere.integrate(Matrix3::Zero().eval(), [&](auto const& xyz, auto const& l) -> Matrix3 {
+    // clang-format off
+    return q * unit_sphere.integrate(Matrix3::Zero().eval(), [&](auto const& xyz, auto const& l) -> Matrix3 {
         auto const & [ r, r_o_r ] = xyz;
 
         Vector3 const n = deformed_normal(F_unimodular, r);
 
         return std::pow(compute_area_stretch(n), q - 2.0) * outer_product(n, n);
     });
+    // clang-format on
 }
 
 Matrix6 NonAffineMicrosphere::compute_K_tensor(Matrix3 const& F_unimodular) const
