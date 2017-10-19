@@ -23,7 +23,7 @@ FiniteJ2Plasticity::FiniteJ2Plasticity(InternalVariables& variables, Json::Value
     variables.add(InternalVariables::Matrix::TruesdellModuli,
                   consistent_tangent(1.0, Matrix3::Zero(), Matrix3::Zero(), C_e));
 
-    std::cout << "Constructed finite strain J2 plasticity model\n";
+    // std::cout << "Constructed finite strain J2 plasticity model\n";
 }
 
 FiniteJ2Plasticity::~FiniteJ2Plasticity() = default;
@@ -68,24 +68,24 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
         auto& von_mises = von_mises_list[l];
         auto& log_strain_e = log_strain_e_list[l];
 
-        std::cout << "log strain elastic\n" << log_strain_e << std::endl;
+        // std::cout << "log strain elastic\n" << log_strain_e << std::endl;
 
         // Elastic trial deformation gradient
         Matrix3 const B_e = (2.0 * log_strain_e).exp();
 
-        std::cout << "B elastic\n" << B_e << std::endl;
+        // std::cout << "B elastic\n" << B_e << std::endl;
 
-        std::cout << "Finc\n" << F_inc << std::endl;
+        // std::cout << "Finc\n" << F_inc << std::endl;
 
         // Elastic trial left Cauchy-Green deformation tensor
         Matrix3 const B_e_trial = F_inc * B_e * F_inc.transpose();
 
-        std::cout << "B elastic trial\n" << B_e_trial << std::endl;
+        // std::cout << "B elastic trial\n" << B_e_trial << std::endl;
 
         // Trial Logarithmic elastic strain
         log_strain_e = 0.5 * B_e_trial.log();
 
-        std::cout << "log strain elastic\n" << log_strain_e << std::endl;
+        // std::cout << "log strain elastic\n" << log_strain_e << std::endl;
 
         // Elastic stress predictor
         cauchy_stress = compute_cauchy_stress(log_strain_e) / J;
@@ -93,20 +93,20 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
         // Trial von Mises stress
         von_mises = von_mises_stress(cauchy_stress);
 
-        std::cout << "von Mises " << von_mises << std::endl;
+        // std::cout << "von Mises " << von_mises << std::endl;
 
         // Compute the initial estimate of the yield function for the material
         // and decide if the stress return needs to be computed
         if (auto const f = evaluate_yield_function(von_mises, accumulated_plastic_strain); f <= 0.0)
         {
-            std::cout << "f = " << f << std::endl;
+            // std::cout << "f = " << f << std::endl;
             C_list[l] = consistent_tangent(J, log_strain_e, cauchy_stress, C_e);
             continue;
         }
 
         auto const von_mises_trial = von_mises;
 
-        std::cout << "\nQUADRATURE POINT PLASTIC\n";
+        // std::cout << "\nQUADRATURE POINT PLASTIC\n";
 
         // Compute the normal direction to the yield surface which remains
         // constant throughout the radial return method
@@ -118,9 +118,9 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
         // Plastic strain update
         // F_p = (plastic_increment * std::sqrt(3.0 / 2.0) * normal);
 
-        std::cout << ">>>Elastic strain before dec\n" << log_strain_e << std::endl;
+        // std::cout << ">>>Elastic strain before dec\n" << log_strain_e << std::endl;
         log_strain_e -= plastic_increment * std::sqrt(3.0 / 2.0) * normal;
-        std::cout << ">>>Elastic strain after dec\n" << log_strain_e << std::endl;
+        // std::cout << ">>>Elastic strain after dec\n" << log_strain_e << std::endl;
 
         cauchy_stress -= 2.0 * shear_modulus * plastic_increment * std::sqrt(3.0 / 2.0) * normal / J;
 
