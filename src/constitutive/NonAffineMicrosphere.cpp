@@ -30,10 +30,7 @@ void NonAffineMicrosphere::update_internal_variables(double const time_step_size
     using ranges::view::transform;
     using ranges::view::zip;
 
-    // TODO Change these back once OpenMP allows structured bindings
-
-    // Get references into the hash table
-    auto& F_list = variables(InternalVariables::Tensor::DeformationGradient);
+    auto const& deformation_gradients = variables(InternalVariables::Tensor::DeformationGradient);
     auto& cauchy_stress_list = variables(InternalVariables::Tensor::Cauchy);
 
     auto const& detF_list = variables(InternalVariables::Scalar::DetF);
@@ -45,14 +42,15 @@ void NonAffineMicrosphere::update_internal_variables(double const time_step_size
     auto const K_eff = material.bulk_modulus();
     auto const G_eff = material.shear_modulus();
     auto const N = material.segments_per_chain();
-
     auto const p = non_affine_stretch_parameter;
 
+    auto const number_of_internal_variables = deformation_gradients.size();
+
 #pragma omp parallel for
-    for (auto l = 0; l < F_list.size(); ++l)
+    for (auto l = 0; l < number_of_internal_variables; ++l)
     {
-        auto const& F = F_list[l];    // Deformation gradient
-        auto const& J = detF_list[l]; // Determinant of the deformation gradient
+        auto const& F = deformation_gradients[l]; // Deformation gradient
+        auto const& J = detF_list[l];             // Determinant of the deformation gradient
 
         Matrix3 const F_unimodular = unimodular(F);
 
@@ -87,7 +85,6 @@ void NonAffineMicrosphere::update_internal_variables(double const time_step_size
 
         // Compute the macrostress and macromoduli for tube contraint
         Matrix3 const macro_kirchhoff_c = -G_eff * N * effective_tube_geometry * k;
-
         Matrix6 const macro_moduli_c = G_eff * N * effective_tube_geometry * (K + G);
 
         // Superimposed stress response from tube and chain contributions

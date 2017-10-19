@@ -110,22 +110,20 @@ protected:
     }
 
 protected:
-    double non_affine_stretch_parameter{1.0}; //!< Three-dimensional locking characteristics
-    double non_affine_tube_parameter{1.0};    //!< Shape of constraint stress
-    double effective_tube_geometry{1.0};      //!< Additional constraint stiffness
+    double non_affine_stretch_parameter{1.0}; //!< Three-dimensional locking characteristics (p)
+    double effective_tube_geometry{1.0};      //!< Additional constraint stiffness (U)
+    double non_affine_tube_parameter{1.0};    //!< Shape of constraint stress (q)
 };
 
 inline Matrix6 NonAffineMicrosphere::compute_o_dot_product(Vector3 const& n) const
 {
-    Matrix6 ret_val;
     // clang-format off
-    ret_val << 2.0 * n(0) * n(0),               0.0,               0.0,                               0.0,                       n(0) * n(2), n(0) * n(1),       //
-                             0.0, 2.0 * n(1) * n(1),               0.0,                       n(1) * n(2),                               0.0, n(0) * n(1),       //
-                             0.0,               0.0, 2.0 * n(2) * n(2),                       n(1) * n(2),                       n(0) * n(2), 0.0,               //
-                             0.0,       n(1) * n(2),       n(1) * n(2), 0.5 * (n(1) * n(1) + n(2) * n(2)),                 0.5 * n(0) * n(1), 0.5 * n(0) * n(2), //
-                     n(0) * n(2),               0.0,       n(0) * n(2),                 0.5 * n(0) * n(1), 0.5 * (n(0) * n(0) + n(2) * n(2)), 0.5 * n(2) * n(1), //
-                     n(0) * n(1),       n(0) * n(1),               0.0,                 0.5 * n(0) * n(2),                 0.5 * n(2) * n(1), 0.5 * (n(0) * n(0) + n(1) * n(1));
+    return (Matrix6() << 2.0 * n(0) * n(0),               0.0,               0.0,                               0.0,                       n(0) * n(2), n(0) * n(1),       //
+                                       0.0, 2.0 * n(1) * n(1),               0.0,                       n(1) * n(2),                               0.0, n(0) * n(1),       //
+                                       0.0,               0.0, 2.0 * n(2) * n(2),                       n(1) * n(2),                       n(0) * n(2), 0.0,               //
+                                       0.0,       n(1) * n(2),       n(1) * n(2), 0.5 * (n(1) * n(1) + n(2) * n(2)),                 0.5 * n(0) * n(1), 0.5 * n(0) * n(2), //
+                               n(0) * n(2),               0.0,       n(0) * n(2),                 0.5 * n(0) * n(1), 0.5 * (n(0) * n(0) + n(2) * n(2)), 0.5 * n(2) * n(1), //
+                               n(0) * n(1),       n(0) * n(1),               0.0,                 0.5 * n(0) * n(2),                 0.5 * n(2) * n(1), 0.5 * (n(0) * n(0) + n(1) * n(1))).finished();
     // clang-format on
-    return ret_val;
 }
 }
