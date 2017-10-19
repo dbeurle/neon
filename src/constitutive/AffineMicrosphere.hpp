@@ -165,7 +165,7 @@ inline double AffineMicrosphere::pade_first(double const micro_stretch, double c
 
 inline double AffineMicrosphere::pade_second(double const micro_stretch, double const N) const
 {
-    return (std::pow(micro_stretch, 4) + 3 * std::pow(N, 2))
+    return (std::pow(micro_stretch, 4) + 3.0 * std::pow(N, 2))
            / std::pow(N - std::pow(micro_stretch, 2), 2);
 }
 
