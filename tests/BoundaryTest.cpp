@@ -292,7 +292,8 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
     REQUIRE(submeshes.at(1).nodes_per_element() == 4);
 
     Json::Value boundary;
-    REQUIRE(reader.parse("{\"Time\":[0.0, 1.0], \"Values\":{\"x\":[0.0, 1.0e-3]}}", boundary));
+    REQUIRE(reader.parse(
+        "{\"Time\":[0.0, 1.0], \"Type\" : \"Traction\", \"Values\":{\"y\":[0.0, 1.0e-3]}}", boundary));
 
     // Insert this information into the nonfollower load boundary class
     // using the simulation data for the cube

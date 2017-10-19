@@ -63,14 +63,12 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
     Json::Value const& boundary,
     std::unordered_map<std::string, int> const& dof_table)
 {
-    auto const& type = boundary["Type"].asString();
-
     for (auto & [ is_dof_active, var ] : nonfollower_load)
     {
         is_dof_active = false;
     }
 
-    if (type == "Traction")
+    if (auto const& type = boundary["Type"].asString(); type == "Traction")
     {
         for (auto const& name : boundary["Values"].getMemberNames())
         {
@@ -143,6 +141,11 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
                                              3);
             }
         }
+    }
+    else
+    {
+        throw std::runtime_error("Need to specify a boundary type \"Traction\", \"Pressure\" or "
+                                 "\"BodyForce\"");
     }
 }
 }

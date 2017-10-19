@@ -46,6 +46,10 @@ public:
  * NonFollowerLoadBoundary contains the boundary conditions which contribute to
  * the external force vector.  This can include tractions, pressures, nodal
  * forces and volume forces computed in the initial configuration
+ *
+ * \sa Traction
+ * \sa Pressure
+ * \sa BodyForce
  */
 class NonFollowerLoadBoundary
 {
