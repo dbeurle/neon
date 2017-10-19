@@ -21,6 +21,8 @@ class MicromechanicalElastomer : public LinearElastic
 public:
     MicromechanicalElastomer(Json::Value const& material_data);
 
+    auto const segments_per_chain() const { return N; }
+
     int const groups() const { return number_of_groups; }
 
     /**
@@ -47,6 +49,8 @@ protected:
     void compute_chains_and_segments(Json::Value const& segments_data);
 
 protected:
+    double N{25.0};
+
     double p_scission = 0.0; //!< Probability that a segment is scissioned
 
     int number_of_groups = 1;

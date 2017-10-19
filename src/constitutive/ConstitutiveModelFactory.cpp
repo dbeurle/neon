@@ -4,6 +4,8 @@
 #include "J2Plasticity.hpp"
 
 #include "AffineMicrosphere.hpp"
+#include "NonAffineMicrosphere.hpp"
+
 #include "FiniteJ2Plasticity.hpp"
 #include "NeoHooke.hpp"
 
@@ -32,6 +34,10 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& va
     else if (model_name == "AffineMicrosphere")
     {
         return std::make_unique<AffineMicrosphere>(variables, material_data);
+    }
+    else if (model_name == "NonAffineMicrosphere")
+    {
+        return std::make_unique<NonAffineMicrosphere>(variables, material_data);
     }
     else if (model_name == "J2")
     {

@@ -140,13 +140,21 @@ TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
 
         affine->update_internal_variables(1.0);
 
+        for (auto const& C : material_tangents)
+        {
+            REQUIRE(C.norm() != Approx(0.0));
+        }
+
         // Ensure symmetry is correct
         for (auto const& C : material_tangents)
         {
             REQUIRE((C - C.transpose()).norm() == Approx(0.0));
         }
 
-        for (auto& cauchy : cauchy_list) REQUIRE(cauchy.norm() == Approx(0.0));
+        for (auto& cauchy : cauchy_list)
+        {
+            REQUIRE(cauchy.norm() == Approx(0.0));
+        }
     }
     SECTION("Affine model under uniaxial load")
     {
@@ -165,7 +173,109 @@ TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
             REQUIRE((C - C.transpose()).norm() == Approx(0.0));
         }
 
-        for (auto& cauchy : cauchy_list) REQUIRE(cauchy.norm() != Approx(0.0));
+        for (auto const& C : material_tangents)
+        {
+            REQUIRE(C.norm() != Approx(0.0));
+        }
+
+        for (auto& cauchy : cauchy_list)
+        {
+            REQUIRE(cauchy.norm() != Approx(0.0));
+        }
+    }
+}
+TEST_CASE("NonAffine microsphere model", "[NonAffineMicrosphere]")
+{
+    InternalVariables variables(internal_variable_size);
+
+    // Add the required variables for an updated Lagrangian formulation
+    variables.add(InternalVariables::Tensor::DeformationGradient, InternalVariables::Tensor::Cauchy);
+
+    variables.add(InternalVariables::Scalar::DetF);
+
+    // Create a json reader object from a string
+    std::string input_data = "{\"Name\" : \"rubber\", "
+                             "\"ElasticModulus\" : 10.0e6, "
+                             "\"PoissonsRatio\" : 0.45, "
+                             "\"NonAffineStretchParameter\":1.0, "
+                             "\"Segments\" : { "
+                             "\"Groups\" : 5, "
+                             "\"Average\" : 50, "
+                             "\"StandardDeviation\" : 10, "
+                             "\"ScissionLikelihood\" : 0.0001}}";
+
+    std::string simulation_input = "{\"ConstitutiveModel\" : \"NonAffineMicrosphere\"}";
+
+    Json::Value material_data, simulation_data;
+    Json::Reader reader;
+
+    REQUIRE(reader.parse(input_data.c_str(), material_data));
+    REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
+
+    auto affine = make_constitutive_model(variables, material_data, simulation_data);
+
+    REQUIRE(affine->is_finite_deformation());
+    REQUIRE(affine->intrinsic_material().name() == "rubber");
+
+    // Get the tensor variables
+    auto[F_list, cauchy_list] = variables(InternalVariables::Tensor::DeformationGradient,
+                                          InternalVariables::Tensor::Cauchy);
+
+    auto& J_list = variables(InternalVariables::Scalar::DetF);
+
+    for (auto& J : J_list) J = 1.0;
+
+    auto& material_tangents = variables(InternalVariables::Matrix::TruesdellModuli);
+
+    SECTION("NonAffine model under no load")
+    {
+        // Fill with identity matrix
+        for (auto& F : F_list) F = Matrix3::Identity();
+
+        affine->update_internal_variables(1.0);
+
+        for (auto const& C : material_tangents)
+        {
+            REQUIRE(C.norm() != Approx(0.0));
+        }
+
+        // Ensure symmetry is correct
+        for (auto const& C : material_tangents)
+        {
+            REQUIRE((C - C.transpose()).norm() == Approx(0.0));
+        }
+
+        for (auto& cauchy : cauchy_list)
+        {
+            REQUIRE(cauchy.norm() == Approx(0.0));
+        }
+    }
+    SECTION("NonAffine model under uniaxial load")
+    {
+        for (auto& F : F_list)
+        {
+            F(0, 0) = 1.1;
+            F(1, 1) = 1.0 / std::sqrt(1.1);
+            F(2, 2) = 1.0 / std::sqrt(1.1);
+        }
+
+        affine->update_internal_variables(1.0);
+
+        // Ensure symmetry is correct
+        for (auto const& C : material_tangents)
+        {
+            REQUIRE((C - C.transpose()).norm() == Approx(0.0));
+        }
+
+        for (auto const& C : material_tangents)
+        {
+            REQUIRE(C.norm() != Approx(0.0));
+        }
+
+        for (auto& cauchy : cauchy_list)
+        {
+            REQUIRE(cauchy.norm() != Approx(0.0));
+        }
     }
 }
 TEST_CASE("J2 plasticity model", "[J2Plasticity]")

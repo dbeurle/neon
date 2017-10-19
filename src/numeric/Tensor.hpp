@@ -5,6 +5,10 @@
 
 namespace neon
 {
+/**
+ * Performs the tensor dot product on two second order tensors in three dimensions.
+ *
+ */
 inline double double_dot(Matrix3 const& a, Matrix3 const& b)
 {
     return (a.array() * b.array()).sum();
@@ -15,6 +19,15 @@ inline Matrix3 volumetric(Matrix3 const& a) { return Matrix3::Identity() * a.tra
 
 /** @return the deviatoric part of the tensor */
 inline Matrix3 deviatoric(Matrix3 const& a) { return a - volumetric(a); }
+
+/**
+ * Evaluates the expression
+ * \f{align*}{
+   \bar{F} &= \det(F)^{-1/3} F
+   \f}
+ * @return The unimodular decomposition of a second order tensor
+ */
+inline Matrix3 unimodular(Matrix3 const& a) { return std::pow(a.determinant(), -1.0 / 3.0) * a; }
 
 /** Compute the von Mises stress based on the full stress tensor */
 inline double von_mises_stress(Matrix3 const& a)
@@ -87,15 +100,15 @@ namespace voigt
  * Compute the outer product in Voigt notation according to
  * \f$ \mathbb{\mathbf{1} \otimes \mathbf{1}} = \delta_{ij} \delta_{kl} \f$
  */
-inline CMatrix I_outer_I()
+inline Matrix6 I_outer_I()
 {
     // clang-format off
-    return (CMatrix(6, 6) << 1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
-                             1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
-                             1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
-                             0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                             0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                             0.0, 0.0, 0.0, 0.0, 0.0, 0.0).finished();
+    return (Matrix6() << 1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
+                         1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
+                         1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
+                         0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                         0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                         0.0, 0.0, 0.0, 0.0, 0.0, 0.0).finished();
     // clang-format on
 }
 
@@ -113,8 +126,14 @@ namespace kinematic
  */
 inline Vector6 to(Matrix3 const& a)
 {
-    return (Vector6(6) << a(0, 0), a(1, 1), a(2, 2), 2.0 * a(1, 2), 2.0 * a(0, 2), 2.0 * a(0, 1))
-        .finished();
+    // clang-format off
+    return (Vector6() << a(0, 0),
+                         a(1, 1),
+                         a(2, 2),
+                         2.0 * a(1, 2),
+                         2.0 * a(0, 2),
+                         2.0 * a(0, 1)).finished();
+    // clang-format on
 }
 
 /**
@@ -128,9 +147,9 @@ inline Vector6 to(Matrix3 const& a)
 inline Matrix3 from(Vector6 const& a)
 {
     // clang-format off
-    return (Matrix3(3, 3) <<     a(0), a(5)/2.0, a(4)/2.0,
-                             a(5)/2.0,     a(1),     a(3),
-                             a(4)/2.0, a(3)/2.0,     a(2)).finished();
+    return (Matrix3() <<     a(0), a(5)/2.0, a(4)/2.0,
+                         a(5)/2.0,     a(1),     a(3),
+                         a(4)/2.0, a(3)/2.0,     a(2)).finished();
     // clang-format on
 }
 
@@ -139,15 +158,15 @@ inline Matrix3 from(Vector6 const& a)
  * \f$ \mathbb{P} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) -
  * \frac{1}{3}\delta_{ij} \delta_{kl} \f$
  */
-inline CMatrix deviatoric()
+inline Matrix6 deviatoric()
 {
     // clang-format off
-    return (CMatrix(6, 6) << 2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,
-                            -1.0 / 3.0,  2.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,
-                            -1.0 / 3.0, -1.0 / 3.0,  2.0 / 3.0, 0.0, 0.0, 0.0,
-                                   0.0,        0.0,        0.0, 0.5, 0.0, 0.0,
-                                   0.0,        0.0,        0.0, 0.0, 0.5, 0.0,
-                                   0.0,        0.0,        0.0, 0.0, 0.0, 0.5).finished();
+    return (Matrix6() << 2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,
+                        -1.0 / 3.0,  2.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,
+                        -1.0 / 3.0, -1.0 / 3.0,  2.0 / 3.0, 0.0, 0.0, 0.0,
+                               0.0,        0.0,        0.0, 0.5, 0.0, 0.0,
+                               0.0,        0.0,        0.0, 0.0, 0.5, 0.0,
+                               0.0,        0.0,        0.0, 0.0, 0.0, 0.5).finished();
     // clang-format on
 }
 
@@ -155,15 +174,15 @@ inline CMatrix deviatoric()
  * Compute the fourth order symmetric identity tensor in Voigt notation according to
  * \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
  */
-inline CMatrix fourth_order_identity()
+inline Matrix6 fourth_order_identity()
 {
     // clang-format off
-    return (CMatrix(6, 6) << 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                             0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
-                             0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
-                             0.0, 0.0, 0.0, 0.5, 0.0, 0.0,
-                             0.0, 0.0, 0.0, 0.0, 0.5, 0.0,
-                             0.0, 0.0, 0.0, 0.0, 0.0, 0.5).finished();
+    return (Matrix6() << 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                         0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+                         0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+                         0.0, 0.0, 0.0, 0.5, 0.0, 0.0,
+                         0.0, 0.0, 0.0, 0.0, 0.5, 0.0,
+                         0.0, 0.0, 0.0, 0.0, 0.0, 0.5).finished();
     // clang-format on
 }
 
@@ -171,15 +190,15 @@ inline CMatrix fourth_order_identity()
  * Compute the fourth order symmetric identity tensor in Voigt notation according to
  * \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
  */
-inline CMatrix identity()
+inline Matrix6 identity()
 {
     // clang-format off
-    return (CMatrix(6, 6) << 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                             0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
-                             0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
-                             0.0, 0.0, 0.0, 0.5, 0.0, 0.0,
-                             0.0, 0.0, 0.0, 0.0, 0.5, 0.0,
-                             0.0, 0.0, 0.0, 0.0, 0.0, 0.5).finished();
+    return (Matrix6() << 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                         0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+                         0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+                         0.0, 0.0, 0.0, 0.5, 0.0, 0.0,
+                         0.0, 0.0, 0.0, 0.0, 0.5, 0.0,
+                         0.0, 0.0, 0.0, 0.0, 0.0, 0.5).finished();
     // clang-format on
 }
 }
@@ -197,7 +216,7 @@ namespace kinetic
  */
 inline Vector6 to(Matrix3 const& a)
 {
-    return (Vector6(6) << a(0, 0), a(1, 1), a(2, 2), a(1, 2), a(0, 2), a(0, 1)).finished();
+    return (Vector6() << a(0, 0), a(1, 1), a(2, 2), a(1, 2), a(0, 2), a(0, 1)).finished();
 }
 
 /**
@@ -211,9 +230,9 @@ inline Vector6 to(Matrix3 const& a)
 inline Matrix3 from(Vector6 const& a)
 {
     // clang-format off
-    return (Matrix3(3, 3) << a(0), a(5), a(4),
-                             a(5), a(1), a(3),
-                             a(4), a(3), a(2)).finished();
+    return (Matrix3() << a(0), a(5), a(4),
+                         a(5), a(1), a(3),
+                         a(4), a(3), a(2)).finished();
     // clang-format on
 }
 
@@ -222,15 +241,15 @@ inline Matrix3 from(Vector6 const& a)
  * \f$ \mathbb{P} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) -
  * \frac{1}{3}\delta_{ij} \delta_{kl} \f$
  */
-inline CMatrix deviatoric()
+inline Matrix6 deviatoric()
 {
     // clang-format off
-    return (CMatrix(6, 6) << 2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,
-                            -1.0 / 3.0,  2.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,
-                            -1.0 / 3.0, -1.0 / 3.0,  2.0 / 3.0, 0.0, 0.0, 0.0,
-                                   0.0,        0.0,        0.0, 1.0, 0.0, 0.0,
-                                   0.0,        0.0,        0.0, 0.0, 1.0, 0.0,
-                                   0.0,        0.0,        0.0, 0.0, 0.0, 1.0).finished();
+    return (Matrix6() << 2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,
+                        -1.0 / 3.0,  2.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,
+                        -1.0 / 3.0, -1.0 / 3.0,  2.0 / 3.0, 0.0, 0.0, 0.0,
+                               0.0,        0.0,        0.0, 1.0, 0.0, 0.0,
+                               0.0,        0.0,        0.0, 0.0, 1.0, 0.0,
+                               0.0,        0.0,        0.0, 0.0, 0.0, 1.0).finished();
     // clang-format on
 }
 
@@ -238,45 +257,26 @@ inline CMatrix deviatoric()
  * Compute the fourth order symmetric identity tensor in Voigt notation according to
  * \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
  */
-inline CMatrix fourth_order_identity()
-{
-    // clang-format off
-    return (CMatrix(6, 6) << 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                             0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
-                             0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
-                             0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
-                             0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
-                             0.0, 0.0, 0.0, 0.0, 0.0, 1.0).finished();
-    // clang-format on
-}
-
-/**
- * Compute the fourth order symmetric identity tensor in Voigt notation according to
- * \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
- */
-inline CMatrix identity()
-{
-    // clang-format off
-    return (CMatrix(6, 6) << 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                             0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
-                             0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
-                             0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
-                             0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
-                             0.0, 0.0, 0.0, 0.0, 0.0, 1.0).finished();
-    // clang-format on
-}
+inline Matrix6 fourth_order_identity() { return Matrix6::Identity(); }
 }
 }
 /*! @} End of Doxygen Groups */
 
-inline CMatrix outer_product(Matrix3 const& a, Matrix3 const& b)
+inline Matrix3 outer_product(Vector3 const& a, Vector3 const& b) { return a * b.transpose(); }
+
+inline Matrix6 outer_product(Matrix3 const& a, Matrix3 const& b)
 {
     return voigt::kinetic::to(a) * voigt::kinetic::to(b).transpose();
 }
 
-inline CMatrix outer_product(Matrix3 const& h) { return outer_product(h, h); }
+inline Matrix6 outer_product(Vector3 const& a, Vector3 const& b, Vector3 const& c, Vector3 const& d)
+{
+    return outer_product(outer_product(a, b), outer_product(c, d));
+}
 
-inline CMatrix mandel_notation(CMatrix A)
+inline Matrix6 outer_product(Matrix3 const& h) { return outer_product(h, h); }
+
+inline Matrix6 mandel_notation(Matrix6 A)
 {
     A.block<3, 3>(0, 3) *= std::sqrt(2);
     A.block<3, 3>(3, 0) *= std::sqrt(2);

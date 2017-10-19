@@ -7,7 +7,10 @@ namespace neon
 {
 /**
  * NonAffineMicrosphere model computes the Kirchhoff stress and the material
- * tangent for the non-affine microsphere model by Miehe 2004.
+ * tangent for the non-affine microsphere model by Miehe 2004.  This model includes
+ * the interaction of the polymer chain with the neighbouring (forest) chains
+ * through the inclusion of the tube model.  This is effectively an extension
+ * of the AffineMicrosphere constitutive model.
  */
 class NonAffineMicrosphere : public AffineMicrosphere
 {
@@ -95,6 +98,16 @@ protected:
      * \sa compute_G_tensor
      */
     Matrix6 compute_o_dot_product(Vector3 const& n) const;
+
+    Vector3 deformed_normal(Matrix3 const& F_unimodular, Vector3 const& surface_vector) const
+    {
+        return F_unimodular.inverse().transpose() * surface_vector;
+    }
+
+    auto compute_area_stretch(Vector3 const& deformed_normal) const
+    {
+        return deformed_normal.norm();
+    }
 
 protected:
     double non_affine_stretch_parameter{1.0}; //!< Three-dimensional locking characteristics
