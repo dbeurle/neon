@@ -11,12 +11,22 @@
 
 namespace neon
 {
+/**
+ * AffineMicrosphere is responsible for computing the Cauchy stress and the
+ * material tangent in implicit methods.  The affine microsphere model is used
+ * to model elastomer materials using micromechanical motivations and
+ * homogenises the force from a single chain over a unit sphere.
+ *
+ * This constitutive model requires the use of a quadrature scheme for the unit
+ * sphere and this internal variable update can be computationally expensive and
+ * is therefore multithreaded.
+ */
 class AffineMicrosphere : public Hyperelastic
 {
 public:
     /**
      * @param variables Reference to internal state variable store
-     * @param data Json object with material data
+     * @param material_data Json object with input file material data
      */
     explicit AffineMicrosphere(InternalVariables& variables, Json::Value const& material_data);
 
@@ -63,52 +73,77 @@ protected:
     double pade_second(double const micro_stretch, double const N) const;
 
     /**
-     * Compute the deviatoric projection of the stress tensor according to
+     * Compute the Kirchhoff stress using the deviatoric projection of the
+     * macro stress tensor according to
      * \f{align*}{
        \boldsymbol{\tau} &= p \boldsymbol{g}^{-1} + \mathbb{P} : \bar{\boldsymbol{\tau}} \f}
      * @param pressure Hydrostatic pressure
-     * @param stress_dev Stress tensor from unit sphere homogenisation
+     * @param macro_stress Stress tensor from unit sphere homogenisation
      */
-    Matrix3 deviatoric_projection(double const pressure, Matrix3 const& stress_dev) const;
+    Matrix3 compute_kirchhoff_stress(double const pressure, Matrix3 const& macro_stress) const;
 
     /**
+     * Compute the material tangent including the sdeviatoric projection defined as
      *\f{align*}{
-        \boldsymbol{C} &= \mathbb{P} : \left[\bar{\mathbb{C}} +
-     \frac{2}{3}(\boldsymbol{\tau} : \boldsymbol{g}) \mathbb{I} - \frac{2}{3}
+        \boldsymbol{C} &= (\kappa + p) \mathbf{g}^{-1} \otimes \mathbf{g}^{-1} - 2p\mathbb{I} +
+     \mathbb{P} : \left[\bar{\mathbb{C}} + \frac{2}{3}(\boldsymbol{\tau} : \boldsymbol{g})
+     \mathbb{I} - \frac{2}{3}
      (\bar{\boldsymbol{\tau}} \otimes \boldsymbol{g}^{-1} + \boldsymbol{g}^{-1} \otimes
      \bar{\boldsymbol{\tau}}) \right] : \mathbb{P} \f}
+     * @param J Determinant of deformation gradient
+     * @param K Shear modulus
+     * @param macro_C Macromoduli from unit sphere
+     * @param macro_stress Macrostress from unit sphere
      */
-    CMatrix deviatoric_projection(CMatrix const& C_dev, Matrix3 const& stress_dev) const;
+    Matrix6 compute_material_tangent(double const J,
+                                     double const K,
+                                     Matrix6 const& macro_C,
+                                     Matrix3 const& macro_stress) const;
 
     /**
-     * Compute the Kirchhoff stress using the unit sphere homogenisation
-     * technique for a given F and N
-     * @param unimodular_F Unimodular decomposition of the deformation gradient
+     * Compute the macro stress using the unit sphere homogenisation
+     * technique for a given F and N and perform the deviatoric projection
+     * @param F_unimodular Unimodular decomposition of the deformation gradient
      * @param N number of segments per chain
      * @return Kirchhoff stress tensor
      */
-    Matrix3 compute_kirchhoff_stress(Matrix3 const& unimodular_F, double const N) const;
+    Matrix3 compute_macro_stress(Matrix3 const& F_unimodular, double const N) const;
 
     /**
      * Compute the material tangent matrix using the unit sphere homogenisation
      * technique for a given F and N
-     * @param unimodular_F Unimodular decomposition of the deformation gradient
+     * @param F_unimodular Unimodular decomposition of the deformation gradient
      * @param N number of segments per chain
-     * @return Kirchhoff stress tensor
+     * @return Macromoduli from unit sphere homogenisation
      */
-    CMatrix compute_material_matrix(Matrix3 const& unimodular_F, double const N) const;
+    Matrix6 compute_macro_moduli(Matrix3 const& F_unimodular, double const N) const;
+
+    /**
+     * Compute the deformed tangent using the unimodular deformation gradient
+     * and the vector associated with the quadrature point on the unit sphere
+     */
+    Vector3 deformed_tangent(Matrix3 const& F_unimodular, Vector3 const& surface_vector) const
+    {
+        return F_unimodular * surface_vector;
+    }
+
+    /** Compute the microstretch, which is the norm of the deformed tangent vector */
+    auto compute_microstretch(Vector3 const& deformed_tangent) const
+    {
+        return deformed_tangent.norm();
+    }
 
     template <typename MatrixTp, typename Functor>
     MatrixTp weighting(std::vector<double> const& G, MatrixTp accumulator, Functor f) const;
 
 protected:
-    MicromechanicalElastomer material;
+    MicromechanicalElastomer material; //!< Material with micromechanical parameters
 
-    UnitSphereQuadrature unit_sphere;
+    UnitSphereQuadrature unit_sphere; //!< Unit sphere quadrature rule
 
-    CMatrix const IoI = voigt::I_outer_I();                      //! Outer product
-    CMatrix const I = voigt::kinematic::fourth_order_identity(); //! Fourth order identity
-    CMatrix const P = voigt::kinetic::deviatoric();              //! Deviatoric fourth order tensor
+    Matrix6 const IoI = voigt::I_outer_I();                      //!< Outer product
+    Matrix6 const I = voigt::kinematic::fourth_order_identity(); //!< Fourth order identity
+    Matrix6 const P = voigt::kinetic::deviatoric();              //!< Deviatoric fourth order tensor
 };
 
 inline double AffineMicrosphere::volumetric_free_energy_dJ(double const J,
