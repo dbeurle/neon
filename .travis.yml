@@ -6,10 +6,10 @@ before_install:
   - cp travisci_rsa ~/.ssh/id_rsa
 script:
 - sudo apt-get install --yes doxygen graphviz
-- ls && pwd
-- mkdir -p dbeurle/neon/build/docs/html
-- git clone -b gh-pages git@github.com:dbeurle/neon.git --single-branch dbeurle/neon/build/docs/html
-- ls && pwd
-- cd dbeurle/neon/build/docs/html
-- ls && pwd
+- mkdir -p docs/html
+- git clone -b gh-pages git@github.com:dbeurle/neon.git --single-branch docs/html
+- cd docs/html
+- git rm -rf && cd ..
 - doxygen
+- cd html && git add . && git commit -m "Automated documentation build"
+- git push origin gh-pages
