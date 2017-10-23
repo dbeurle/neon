@@ -3,7 +3,6 @@
 
 #include "Exceptions.hpp"
 #include "NodalCoordinates.hpp"
-#include "NodeOrderingAdapter.hpp"
 
 #include <json/json.h>
 #include <range/v3/action.hpp>

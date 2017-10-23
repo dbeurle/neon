@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include "constitutive/ConstitutiveModel.hpp"
 #include "mesh/ElementTopology.hpp"
 #include "mesh/NodeOrderingAdapter.hpp"
 #include "numeric/DenseTypes.hpp"

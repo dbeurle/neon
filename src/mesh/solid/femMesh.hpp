@@ -1,16 +1,10 @@
 
 #pragma once
 
-#include "numeric/DenseTypes.hpp"
-
 #include "mesh/MaterialCoordinates.hpp"
 #include "mesh/common/Dirichlet.hpp"
 #include "mesh/solid/Submesh.hpp"
 #include "mesh/solid/boundary/NonFollowerLoad.hpp"
-
-#include <json/forwards.h>
-#include <map>
-#include <variant>
 
 namespace neon
 {

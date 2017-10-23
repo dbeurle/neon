@@ -4,7 +4,6 @@
 #include "mesh/NodalCoordinates.hpp"
 #include "mesh/SubMesh.hpp"
 
-#include <json/forwards.h>
 #include <map>
 
 namespace neon

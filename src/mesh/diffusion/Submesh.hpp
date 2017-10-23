@@ -3,10 +3,10 @@
 
 #include "mesh/SubMesh.hpp"
 
+#include "constitutive/ConstitutiveModel.hpp"
 #include "constitutive/InternalVariables.hpp"
 #include "interpolations/ShapeFunction.hpp"
 
-#include <json/forwards.h>
 #include <memory>
 
 namespace neon

@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include <json/forwards.h>
-
 #include "numeric/DenseTypes.hpp"
+
+#include <json/forwards.h>
 
 namespace neon
 {

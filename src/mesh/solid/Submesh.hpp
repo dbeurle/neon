@@ -7,14 +7,12 @@
 #include "constitutive/InternalVariables.hpp"
 #include "interpolations/ShapeFunction.hpp"
 
-#include <json/forwards.h>
 #include <memory>
 #include <unordered_map>
 
 namespace neon
 {
 // Forward declarations
-class ConstitutiveModel;
 class MaterialCoordinates;
 
 namespace solid
