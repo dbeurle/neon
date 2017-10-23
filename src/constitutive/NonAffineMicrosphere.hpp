@@ -17,7 +17,7 @@ class NonAffineMicrosphere : public AffineMicrosphere
 public:
     /**
      * @param variables Reference to internal state variable store
-     * @param data Json object with material data
+     * @param material_data Json object with material data
      */
     explicit NonAffineMicrosphere(InternalVariables& variables, Json::Value const& material_data);
 

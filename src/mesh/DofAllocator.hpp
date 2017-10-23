@@ -3,6 +3,8 @@
 
 #include "numeric/DenseTypes.hpp"
 
+#include <string>
+
 namespace neon
 {
 namespace solid

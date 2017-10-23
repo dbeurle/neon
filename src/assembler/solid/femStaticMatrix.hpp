@@ -7,8 +7,6 @@
 
 #include "io/FileIO.hpp"
 
-#include <json/forwards.h>
-
 namespace neon
 {
 class LinearSolver;

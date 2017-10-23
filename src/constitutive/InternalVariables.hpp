@@ -79,16 +79,14 @@ public:
     void add(Scalar name);
 
     /**
-     * @param size Size of internal buffer
      * @param name Name of variables
      * @param rowcol Number of rows (or columns) in the square matrix
      */
     void add(Matrix name, int rowcol);
 
     /**
-     * @param size Size of internal buffer
-     * @param name Name of variables
-     * @param init Initial matrix
+     * @param name Name of the matrix
+     * @param init Initial matrix size
      */
     void add(Matrix name, neon::Matrix init);
 

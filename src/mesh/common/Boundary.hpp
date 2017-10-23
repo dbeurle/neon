@@ -1,13 +1,12 @@
 
 #pragma once
 
+#include "numeric/DenseTypes.hpp"
+
 #include <array>
 #include <utility>
-#include <vector>
 
 #include <json/forwards.h>
-
-#include "numeric/DenseTypes.hpp"
 
 namespace neon
 {

@@ -14,7 +14,7 @@ class NeoHooke : public Hyperelastic
 public:
     /**
      * @param variables Reference to internal state variable store
-     * @param data Json object with material data
+     * @param material_data Json object with material data
      */
     explicit NeoHooke(InternalVariables& variables, Json::Value const& material_data);
 
