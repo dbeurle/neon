@@ -5,7 +5,6 @@
 
 #include "mesh/DofAllocator.hpp"
 #include "mesh/MaterialCoordinates.hpp"
-#include "numeric/DenseTypes.hpp"
 
 #include <memory>
 

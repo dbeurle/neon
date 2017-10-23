@@ -11,8 +11,6 @@
 
 namespace neon
 {
-// Forward declarations
-class ConstitutiveModel;
 class MaterialCoordinates;
 
 namespace diffusion

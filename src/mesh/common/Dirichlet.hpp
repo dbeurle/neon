@@ -2,7 +2,6 @@
 #pragma once
 
 #include "mesh/common/Boundary.hpp"
-#include "numeric/DenseTypes.hpp"
 
 namespace neon
 {

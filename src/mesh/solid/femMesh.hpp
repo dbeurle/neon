@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include "mesh/MaterialCoordinates.hpp"
 #include "mesh/common/Dirichlet.hpp"
 #include "mesh/solid/Submesh.hpp"
 #include "mesh/solid/boundary/NonFollowerLoad.hpp"
