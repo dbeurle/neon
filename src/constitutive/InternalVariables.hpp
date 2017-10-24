@@ -1,12 +1,11 @@
 
 #pragma once
 
-#include <functional>
-#include <unordered_map>
-#include <vector>
-
 #include "numeric/DenseTypes.hpp"
 #include "numeric/Tensor.hpp"
+
+#include <functional>
+#include <unordered_map>
 
 namespace neon
 {
@@ -22,9 +21,9 @@ public:
     using Scalars = std::vector<double>;
     using Vectors = std::vector<std::vector<double>>;
     using Tensors = std::vector<Matrix3>;
-    using Matrices = std::vector<CMatrix>;
+    using Matrices = std::vector<Matrix6>;
 
-    enum class Matrix { TruesdellModuli };
+    enum class Matrix { TangentOperator };
 
     enum class Tensor {
         /* Tensors for solid mechanics applications */

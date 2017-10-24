@@ -13,7 +13,7 @@ NeoHooke::NeoHooke(InternalVariables& variables, Json::Value const& material_dat
 {
     // The Neo-Hookean model requires the deformation gradient and the Cauchy
     // stress, which are both allocated by default in the mesh object
-    variables.add(InternalVariables::Matrix::TruesdellModuli, 6);
+    variables.add(InternalVariables::Matrix::TangentOperator, 6);
 }
 
 void NeoHooke::update_internal_variables(double const time_step_size)
@@ -24,7 +24,7 @@ void NeoHooke::update_internal_variables(double const time_step_size)
     auto[F_list, cauchy_stress] = variables(InternalVariables::Tensor::DeformationGradient,
                                             InternalVariables::Tensor::Cauchy);
 
-    auto& D_list = variables(InternalVariables::Matrix::TruesdellModuli);
+    auto& D_list = variables(InternalVariables::Matrix::TangentOperator);
     auto const& detF_list = variables(InternalVariables::Scalar::DetF);
 
     auto const I = Matrix3::Identity();

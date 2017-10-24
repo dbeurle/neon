@@ -20,7 +20,7 @@ J2Plasticity::J2Plasticity(InternalVariables& variables, Json::Value const& mate
                   InternalVariables::Scalar::EffectivePlasticStrain);
 
     // Add material tangent with the linear elasticity moduli
-    variables.add(InternalVariables::Matrix::TruesdellModuli, elastic_moduli());
+    variables.add(InternalVariables::Matrix::TangentOperator, elastic_moduli());
 }
 
 J2Plasticity::~J2Plasticity() = default;
@@ -43,7 +43,7 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
          von_mises_list] = variables(InternalVariables::Scalar::EffectivePlasticStrain,
                                      InternalVariables::Scalar::VonMisesStress);
 
-    auto& C_list = variables(InternalVariables::Matrix::TruesdellModuli);
+    auto& C_list = variables(InternalVariables::Matrix::TangentOperator);
 
     // Compute the linear strain gradient from the displacement gradient
     strain_list = variables(InternalVariables::Tensor::DisplacementGradient)

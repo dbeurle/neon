@@ -20,7 +20,7 @@ FiniteJ2Plasticity::FiniteJ2Plasticity(InternalVariables& variables, Json::Value
     variables.add(InternalVariables::Tensor::HenckyStrainElastic);
 
     // Add material tangent with the linear elasticity moduli
-    variables.add(InternalVariables::Matrix::TruesdellModuli,
+    variables.add(InternalVariables::Matrix::TangentOperator,
                   consistent_tangent(1.0, Matrix3::Zero(), Matrix3::Zero(), C_e));
 
     // std::cout << "Constructed finite strain J2 plasticity model\n";
@@ -50,7 +50,7 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
          von_mises_list] = variables(InternalVariables::Scalar::EffectivePlasticStrain,
                                      InternalVariables::Scalar::VonMisesStress);
 
-    auto& C_list = variables(InternalVariables::Matrix::TruesdellModuli);
+    auto& C_list = variables(InternalVariables::Matrix::TangentOperator);
 
     auto const F_inc_list = view::zip(F_list, F_old_list) | view::transform([](auto const& tpl) {
                                 auto const & [ F, F_old ] = tpl;

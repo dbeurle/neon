@@ -16,7 +16,7 @@ namespace neon
 AffineMicrosphere::AffineMicrosphere(InternalVariables& variables, Json::Value const& material_data)
     : Hyperelastic(variables), material(material_data)
 {
-    variables.add(InternalVariables::Matrix::TruesdellModuli, 6);
+    variables.add(InternalVariables::Matrix::TangentOperator, 6);
 
     // Deviatoric stress
     variables.add(InternalVariables::Tensor::Kirchhoff);
@@ -42,7 +42,7 @@ void AffineMicrosphere::update_internal_variables(double const time_step_size)
     using ranges::view::transform;
     using ranges::view::zip;
 
-    auto& D_list = variables(InternalVariables::Matrix::TruesdellModuli);
+    auto& D_list = variables(InternalVariables::Matrix::TangentOperator);
 
     auto const& deformation_gradients = variables(InternalVariables::Tensor::DeformationGradient);
     auto& cauchy_stresses = variables(InternalVariables::Tensor::Cauchy);

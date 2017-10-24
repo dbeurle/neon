@@ -107,7 +107,7 @@ Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int const element
 {
     auto const local_dofs = nodes_per_element() * dofs_per_node();
 
-    auto const& D_Vec = variables(InternalVariables::Matrix::TruesdellModuli);
+    auto const& D_Vec = variables(InternalVariables::Matrix::TangentOperator);
 
     Matrix kmat = Matrix::Zero(local_dofs, local_dofs);
 

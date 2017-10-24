@@ -36,7 +36,7 @@ void NonAffineMicrosphere::update_internal_variables(double const time_step_size
     auto const& detF_list = variables(InternalVariables::Scalar::DetF);
 
     // Compute tangent moduli
-    auto& D_list = variables(InternalVariables::Matrix::TruesdellModuli);
+    auto& D_list = variables(InternalVariables::Matrix::TangentOperator);
 
     // Material properties
     auto const K_eff = material.bulk_modulus();
