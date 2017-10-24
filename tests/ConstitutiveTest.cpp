@@ -72,7 +72,7 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
     SECTION("Check of continuum tangent")
     {
         // Get the matrix variable
-        auto& material_tangents = variables(InternalVariables::Matrix::TruesdellModuli);
+        auto& material_tangents = variables(InternalVariables::Matrix::TangentOperator);
 
         for (auto const& C : material_tangents)
         {
@@ -131,7 +131,7 @@ TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
 
     for (auto& J : J_list) J = 1.0;
 
-    auto& material_tangents = variables(InternalVariables::Matrix::TruesdellModuli);
+    auto& material_tangents = variables(InternalVariables::Matrix::TangentOperator);
 
     SECTION("Affine model under no load")
     {
@@ -225,7 +225,7 @@ TEST_CASE("NonAffine microsphere model", "[NonAffineMicrosphere]")
 
     for (auto& J : J_list) J = 1.0;
 
-    auto& material_tangents = variables(InternalVariables::Matrix::TruesdellModuli);
+    auto& material_tangents = variables(InternalVariables::Matrix::TangentOperator);
 
     SECTION("NonAffine model under no load")
     {
@@ -308,7 +308,7 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
 
     auto& J_list = variables(InternalVariables::Scalar::DetF);
 
-    auto& material_tangents = variables(InternalVariables::Matrix::TruesdellModuli);
+    auto& material_tangents = variables(InternalVariables::Matrix::TangentOperator);
 
     for (auto& H : H_list) H = Matrix3::Zero();
     for (auto& J : J_list) J = 1.0;
@@ -322,7 +322,7 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
         REQUIRE(variables.has(InternalVariables::Scalar::EffectivePlasticStrain));
         REQUIRE(variables.has(InternalVariables::Tensor::LinearisedStrain));
         REQUIRE(variables.has(InternalVariables::Tensor::LinearisedPlasticStrain));
-        REQUIRE(variables.has(InternalVariables::Matrix::TruesdellModuli));
+        REQUIRE(variables.has(InternalVariables::Matrix::TangentOperator));
     }
     SECTION("No load")
     {
@@ -432,7 +432,7 @@ TEST_CASE("Finite J2 plasticity model", "[FiniteJ2Plasticity]")
 
     auto& J_list = variables(InternalVariables::Scalar::DetF);
 
-    auto& material_tangents = variables(InternalVariables::Matrix::TruesdellModuli);
+    auto& material_tangents = variables(InternalVariables::Matrix::TangentOperator);
 
     for (auto& F : F_list) F = Matrix3::Identity();
     for (auto& J : J_list) J = 1.0;
@@ -447,7 +447,7 @@ TEST_CASE("Finite J2 plasticity model", "[FiniteJ2Plasticity]")
         REQUIRE(variables.has(InternalVariables::Scalar::VonMisesStress));
         REQUIRE(variables.has(InternalVariables::Scalar::EffectivePlasticStrain));
         REQUIRE(variables.has(InternalVariables::Tensor::HenckyStrainElastic));
-        REQUIRE(variables.has(InternalVariables::Matrix::TruesdellModuli));
+        REQUIRE(variables.has(InternalVariables::Matrix::TangentOperator));
     }
     SECTION("Initial material tangent symmetry")
     {
