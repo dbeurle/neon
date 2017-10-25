@@ -3,7 +3,7 @@
 
 #include "InternalVariables.hpp"
 
-namespace neon
+namespace neon::diffusion
 {
 IsotropicDiffusion::IsotropicDiffusion(InternalVariables& variables, Json::Value const& material_data)
     : ConstitutiveModel(variables), material(material_data)

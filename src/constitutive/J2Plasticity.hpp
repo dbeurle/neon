@@ -7,7 +7,7 @@
 
 #include "material/IsotropicElasticPlastic.hpp"
 
-namespace neon
+namespace neon::solid
 {
 class IsotropicLinearElasticity : public ConstitutiveModel
 {

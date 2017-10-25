@@ -4,6 +4,7 @@
 namespace neon
 {
 class InternalVariables;
+
 class Material;
 
 /**
@@ -12,6 +13,7 @@ class Material;
  * variables routine and update a constitutive model for use in the global
  * assembly routine
  */
+template <int D>
 class ConstitutiveModel
 {
 public:
@@ -35,4 +37,13 @@ public:
 protected:
     InternalVariables& variables;
 };
+
+namespace solid
+{
+using ConstitutiveModel = neon::ConstitutiveModel<3>;
+}
+namespace diffusion
+{
+using ConstitutiveModel = neon::ConstitutiveModel<3>;
+}
 }

@@ -39,6 +39,10 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& va
     {
         return std::make_unique<NonAffineMicrosphere>(variables, material_data);
     }
+    else if (model_name == "IsotropicLinearElasticity")
+    {
+        return std::make_unique<IsotropicLinearElasticity>(variables, material_data);
+    }
     else if (model_name == "J2")
     {
         return std::make_unique<J2Plasticity>(variables, material_data);

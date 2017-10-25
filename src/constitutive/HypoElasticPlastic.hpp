@@ -3,7 +3,7 @@
 
 #include "ConstitutiveModel.hpp"
 
-namespace neon
+namespace neon::solid
 {
 /**
  * HypoElasticPlastic is a base class for all hypoelastic-plastic material

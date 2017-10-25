@@ -5,7 +5,7 @@
 
 #include "material/LinearDiffusion.hpp"
 
-namespace neon
+namespace neon::diffusion
 {
 /**
  * IsotropicDiffusion computes the isotropic constitutive matrix for linear

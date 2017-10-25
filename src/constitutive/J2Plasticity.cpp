@@ -8,7 +8,7 @@
 #include <json/value.h>
 #include <range/v3/view.hpp>
 
-namespace neon
+namespace neon::solid
 {
 IsotropicLinearElasticity::IsotropicLinearElasticity(InternalVariables& variables,
                                                      Json::Value const& material_data)
@@ -19,7 +19,7 @@ IsotropicLinearElasticity::IsotropicLinearElasticity(InternalVariables& variable
 
     variables.add(InternalVariables::Scalar::VonMisesStress);
 
-    // Add material tangent with the linear elasticity moduli
+    // Add material tangent with the linear elasticity spatial moduli
     variables.add(InternalVariables::Matrix::TangentOperator, elastic_moduli());
 }
 
@@ -85,34 +85,32 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
     auto const shear_modulus = material.shear_modulus();
 
     // Extract the internal variables
-    auto[strain_p_list,
-         strain_list,
-         cauchy_stress_list] = variables(InternalVariables::Tensor::LinearisedPlasticStrain,
-                                         InternalVariables::Tensor::LinearisedStrain,
-                                         InternalVariables::Tensor::Cauchy);
+    auto[plastic_strains, strains, cauchy_stresses] = variables(InternalVariables::Tensor::LinearisedPlasticStrain,
+                                                                InternalVariables::Tensor::LinearisedStrain,
+                                                                InternalVariables::Tensor::Cauchy);
 
     // Retrieve the accumulated internal variables
-    auto[accumulated_plastic_strain_list,
-         von_mises_list] = variables(InternalVariables::Scalar::EffectivePlasticStrain,
-                                     InternalVariables::Scalar::VonMisesStress);
+    auto[accumulated_plastic_strains,
+         von_mises_stresses] = variables(InternalVariables::Scalar::EffectivePlasticStrain,
+                                         InternalVariables::Scalar::VonMisesStress);
 
     auto& C_list = variables(InternalVariables::Matrix::TangentOperator);
 
     // Compute the linear strain gradient from the displacement gradient
-    strain_list = variables(InternalVariables::Tensor::DisplacementGradient)
-                  | view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
+    strains = variables(InternalVariables::Tensor::DisplacementGradient)
+              | view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
     // Perform the update algorithm for each quadrature point
-    for (auto l = 0; l < strain_list.size(); l++)
+    for (auto l = 0; l < strains.size(); l++)
     {
-        auto const& strain = strain_list[l];
-        auto& strain_p = strain_p_list[l];
-        auto& cauchy_stress = cauchy_stress_list[l];
-        auto& accumulated_plastic_strain = accumulated_plastic_strain_list[l];
-        auto& von_mises = von_mises_list[l];
+        auto const& strain = strains[l];
+        auto& plastic_strain = plastic_strains[l];
+        auto& cauchy_stress = cauchy_stresses[l];
+        auto& accumulated_plastic_strain = accumulated_plastic_strains[l];
+        auto& von_mises = von_mises_stresses[l];
 
         // Elastic stress predictor
-        cauchy_stress = compute_cauchy_stress(strain - strain_p);
+        cauchy_stress = compute_cauchy_stress(strain - plastic_strain);
 
         // Trial von Mises stress
         von_mises = von_mises_stress(cauchy_stress);
@@ -133,7 +131,7 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
 
         auto const plastic_increment = perform_radial_return(von_mises, accumulated_plastic_strain);
 
-        strain_p += plastic_increment * std::sqrt(3.0 / 2.0) * normal;
+        plastic_strain += plastic_increment * std::sqrt(3.0 / 2.0) * normal;
 
         cauchy_stress -= 2.0 * shear_modulus * plastic_increment * std::sqrt(3.0 / 2.0) * normal;
 

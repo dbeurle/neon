@@ -7,7 +7,7 @@
 
 #include <json/forwards.h>
 
-namespace neon
+namespace neon::solid
 {
 class NeoHooke : public Hyperelastic
 {
