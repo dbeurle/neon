@@ -10,17 +10,70 @@
 
 namespace neon
 {
-J2Plasticity::J2Plasticity(InternalVariables& variables, Json::Value const& material_data)
-    : HypoElasticPlastic(variables), material(material_data)
+IsotropicLinearElasticity::IsotropicLinearElasticity(InternalVariables& variables,
+                                                     Json::Value const& material_data)
+    : ConstitutiveModel(variables), material(material_data)
 {
     variables.add(InternalVariables::Tensor::LinearisedStrain,
                   InternalVariables::Tensor::LinearisedPlasticStrain);
 
-    variables.add(InternalVariables::Scalar::VonMisesStress,
-                  InternalVariables::Scalar::EffectivePlasticStrain);
+    variables.add(InternalVariables::Scalar::VonMisesStress);
 
     // Add material tangent with the linear elasticity moduli
     variables.add(InternalVariables::Matrix::TangentOperator, elastic_moduli());
+}
+
+IsotropicLinearElasticity::~IsotropicLinearElasticity() = default;
+
+void IsotropicLinearElasticity::update_internal_variables(double const time_step_size)
+{
+    using namespace ranges;
+
+    // Extract the internal variables
+    auto[elastic_strains, cauchy_stresses] = variables(InternalVariables::Tensor::LinearisedStrain,
+                                                       InternalVariables::Tensor::Cauchy);
+    auto& von_mises_stresses = variables(InternalVariables::Scalar::VonMisesStress);
+
+    // Compute the linear strain gradient from the displacement gradient
+    elastic_strains = variables(InternalVariables::Tensor::DisplacementGradient)
+                      | view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
+
+    // Compute Cauchy stress from the linear elastic strains
+    cauchy_stresses = elastic_strains | view::transform([this](auto const& elastic_strain) {
+                          return compute_cauchy_stress(elastic_strain);
+                      });
+
+    // Compute the von Mises equivalent stress
+    von_mises_stresses = cauchy_stresses | view::transform([this](auto const& cauchy_stress) {
+                             return von_mises_stress(cauchy_stress);
+                         });
+}
+
+Matrix6 IsotropicLinearElasticity::elastic_moduli() const
+{
+    auto const[lambda, shear_modulus] = material.Lame_parameters();
+
+    // clang-format off
+    return (Matrix6() << lambda + 2.0 * shear_modulus, lambda, lambda, 0.0, 0.0, 0.0,
+                         lambda, lambda + 2.0 * shear_modulus, lambda, 0.0, 0.0, 0.0,
+                         lambda, lambda, lambda + 2.0 * shear_modulus, 0.0, 0.0, 0.0,
+                         0.0, 0.0, 0.0, shear_modulus, 0.0, 0.0,
+                         0.0, 0.0, 0.0, 0.0, shear_modulus, 0.0,
+                         0.0, 0.0, 0.0, 0.0, 0.0, shear_modulus).finished();
+    // clang-format on
+}
+
+Matrix3 IsotropicLinearElasticity::compute_cauchy_stress(Matrix3 const& elastic_strain) const
+{
+    auto const G = material.shear_modulus();
+    auto const lambda_e = material.lambda();
+    return lambda_e * elastic_strain.trace() * Matrix3::Identity() + 2.0 * G * elastic_strain;
+}
+
+J2Plasticity::J2Plasticity(InternalVariables& variables, Json::Value const& material_data)
+    : IsotropicLinearElasticity(variables, material_data), material(material_data)
+{
+    variables.add(InternalVariables::Scalar::EffectivePlasticStrain);
 }
 
 J2Plasticity::~J2Plasticity() = default;
@@ -95,21 +148,7 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
     }
 }
 
-CMatrix J2Plasticity::elastic_moduli() const
-{
-    auto const[lambda, shear_modulus] = material.Lame_parameters();
-
-    // clang-format off
-    return (CMatrix(6, 6) << lambda + 2.0 * shear_modulus, lambda, lambda, 0.0, 0.0, 0.0,
-                             lambda, lambda + 2.0 * shear_modulus, lambda, 0.0, 0.0, 0.0,
-                             lambda, lambda, lambda + 2.0 * shear_modulus, 0.0, 0.0, 0.0,
-                             0.0, 0.0, 0.0, shear_modulus, 0.0, 0.0,
-                             0.0, 0.0, 0.0, 0.0, shear_modulus, 0.0,
-                             0.0, 0.0, 0.0, 0.0, 0.0, shear_modulus).finished();
-    // clang-format on
-}
-
-CMatrix J2Plasticity::algorithmic_tangent(double const plastic_increment,
+Matrix6 J2Plasticity::algorithmic_tangent(double const plastic_increment,
                                           double const accumulated_plastic_strain,
                                           double const von_mises,
                                           Matrix3 const& n) const
@@ -165,12 +204,5 @@ double J2Plasticity::evaluate_yield_function(double const von_mises,
 
     return (von_mises - 3.0 * shear_modulus * plastic_increment)
            - material.yield_stress(accumulated_plastic_strain + plastic_increment);
-}
-
-Matrix3 J2Plasticity::compute_cauchy_stress(Matrix3 const& elastic_strain) const
-{
-    auto const G = material.shear_modulus();
-    auto const lambda_e = material.lambda();
-    return lambda_e * elastic_strain.trace() * Matrix3::Identity() + 2.0 * G * elastic_strain;
 }
 }

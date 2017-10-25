@@ -9,12 +9,13 @@
 
 namespace neon
 {
-class J2Plasticity : public HypoElasticPlastic
+class IsotropicLinearElasticity : public ConstitutiveModel
 {
 public:
-    J2Plasticity(InternalVariables& variables, Json::Value const& material_data);
+    explicit IsotropicLinearElasticity(InternalVariables& variables,
+                                       Json::Value const& material_data);
 
-    ~J2Plasticity();
+    virtual ~IsotropicLinearElasticity();
 
     void update_internal_variables(double const time_step_size) override;
 
@@ -25,11 +26,34 @@ public:
 protected:
     Matrix3 compute_cauchy_stress(Matrix3 const& elastic_strain) const;
 
-    CMatrix elastic_moduli() const;
+    Matrix6 elastic_moduli() const;
 
-    CMatrix deviatoric_projection() const;
+    Matrix6 const C_e = elastic_moduli();
 
-    CMatrix algorithmic_tangent(double const plastic_increment,
+private:
+    LinearElastic material;
+};
+
+/**
+ * J2Plasticity is responsible for computing the small strain
+ */
+class J2Plasticity : public IsotropicLinearElasticity
+{
+public:
+    explicit J2Plasticity(InternalVariables& variables, Json::Value const& material_data);
+
+    virtual ~J2Plasticity();
+
+    void update_internal_variables(double const time_step_size) override;
+
+    Material const& intrinsic_material() const override { return material; }
+
+    virtual bool is_finite_deformation() const override { return false; }
+
+protected:
+    Matrix6 deviatoric_projection() const;
+
+    Matrix6 algorithmic_tangent(double const plastic_increment,
                                 double const accumulated_plastic_strain,
                                 double const von_mises,
                                 Matrix3 const& n) const;
@@ -53,7 +77,6 @@ protected:
 protected:
     IsotropicElasticPlastic material;
 
-    CMatrix const C_e = elastic_moduli();
-    CMatrix const I_dev = voigt::kinematic::deviatoric();
+    Matrix6 const I_dev = voigt::kinematic::deviatoric();
 };
 }
