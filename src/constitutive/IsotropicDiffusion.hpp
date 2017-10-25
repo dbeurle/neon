@@ -7,11 +7,13 @@
 
 namespace neon::diffusion
 {
+using InternalVariables = neon::InternalVariables<3>;
+
 /**
  * IsotropicDiffusion computes the isotropic constitutive matrix for linear
  * and isotropic diffusion problems.
  */
-class IsotropicDiffusion : public ConstitutiveModel
+class IsotropicDiffusion : public diffusion::ConstitutiveModel
 {
 public:
     IsotropicDiffusion(InternalVariables& variables, Json::Value const& material_data);

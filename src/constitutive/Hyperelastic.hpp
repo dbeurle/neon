@@ -5,6 +5,8 @@
 
 namespace neon::solid
 {
+using InternalVariables = neon::InternalVariables<3>;
+
 class Hyperelastic : public ConstitutiveModel
 {
 public:

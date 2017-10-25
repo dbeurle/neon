@@ -15,7 +15,7 @@ LinearDiffusion::LinearDiffusion(Json::Value const& material_data) : Material(ma
     }
     if (material_data.isMember("SpecificHeat"))
     {
-        Cp = material_data["SpecificHeat"].asDouble();
+        specific_heat = material_data["SpecificHeat"].asDouble();
     }
     else
     {

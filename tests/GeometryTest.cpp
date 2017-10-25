@@ -159,6 +159,8 @@ TEST_CASE("Basic mesh test")
 }
 TEST_CASE("Solid submesh test")
 {
+    using namespace solid;
+
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh
     Json::Value mesh_data, material_data, simulation_data;
@@ -203,10 +205,10 @@ TEST_CASE("Solid submesh test")
     SECTION("Default internal variables test")
     {
         // Check the standard ones are used
-        REQUIRE(internal_vars.has(InternalVariables::Tensor::DisplacementGradient));
-        REQUIRE(internal_vars.has(InternalVariables::Tensor::DeformationGradient));
-        REQUIRE(internal_vars.has(InternalVariables::Tensor::Cauchy));
-        REQUIRE(internal_vars.has(InternalVariables::Scalar::DetF));
+        REQUIRE(internal_vars.has(solid::InternalVariables::Tensor::DisplacementGradient));
+        REQUIRE(internal_vars.has(solid::InternalVariables::Tensor::DeformationGradient));
+        REQUIRE(internal_vars.has(solid::InternalVariables::Tensor::Cauchy));
+        REQUIRE(internal_vars.has(solid::InternalVariables::Scalar::DetF));
     }
     SECTION("Tangent stiffness")
     {

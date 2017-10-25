@@ -3,22 +3,23 @@
 
 namespace neon
 {
+template <int spatial_dimension>
 class InternalVariables;
 
 class Material;
 
 /**
- * ConstitutiveModel is the base class for all constitutive models.  The derived
- * classes define their own internal variables, implement an update internal
- * variables routine and update a constitutive model for use in the global
+ * ConstitutiveModel is the templated base class for all constitutive models.
+ * The derived classes define their own internal variables, implement an update
+ * internal variables routine and update a constitutive model for use in the global
  * assembly routine
  */
-template <int D>
+template <int spatial_dimension>
 class ConstitutiveModel
 {
 public:
     /** Provide an internal variable class to be populated by the constitutive model */
-    ConstitutiveModel(InternalVariables& variables) : variables(variables) {}
+    ConstitutiveModel(InternalVariables<spatial_dimension>& variables) : variables(variables) {}
 
     /**
      * Update the required internal variables and tangent matrix at quadrature
@@ -35,7 +36,7 @@ public:
     virtual bool is_symmetric() const { return true; };
 
 protected:
-    InternalVariables& variables;
+    InternalVariables<spatial_dimension>& variables;
 };
 
 namespace solid

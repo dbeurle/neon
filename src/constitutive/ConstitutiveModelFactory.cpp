@@ -3,10 +3,11 @@
 
 #include "J2Plasticity.hpp"
 
+#include "FiniteJ2Plasticity.hpp"
+
 #include "AffineMicrosphere.hpp"
 #include "NonAffineMicrosphere.hpp"
 
-#include "FiniteJ2Plasticity.hpp"
 #include "NeoHooke.hpp"
 
 #include "IsotropicDiffusion.hpp"

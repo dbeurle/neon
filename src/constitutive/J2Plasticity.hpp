@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "HypoElasticPlastic.hpp"
+#include "constitutive/ConstitutiveModel.hpp"
 
 #include "numeric/Tensor.hpp"
 
@@ -9,6 +9,8 @@
 
 namespace neon::solid
 {
+using InternalVariables = neon::InternalVariables<3>;
+
 class IsotropicLinearElasticity : public ConstitutiveModel
 {
 public:

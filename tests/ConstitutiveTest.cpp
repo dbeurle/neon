@@ -14,9 +14,6 @@
 
 #include "constitutive/ConstitutiveModelFactory.hpp"
 
-using namespace neon;
-using namespace neon::solid;
-
 std::string json_input_file()
 {
     return "{\"Name\": \"rubber\", \"ElasticModulus\": 1.0, \"PoissonsRatio\": 2.0}";
@@ -26,6 +23,7 @@ constexpr auto internal_variable_size = 2;
 
 TEST_CASE("Neo-Hookean model", "[NeoHooke]")
 {
+    using namespace neon::solid;
     InternalVariables variables(internal_variable_size);
 
     // Add the required variables for an updated Lagrangian formulation
@@ -60,7 +58,7 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
     REQUIRE(J_list.size() == internal_variable_size);
 
     // Fill with identity matrix
-    for (auto& F : F_list) F = Matrix3::Identity();
+    for (auto& F : F_list) F = neon::Matrix3::Identity();
     for (auto& J : J_list) J = 1.0;
 
     neo_hooke->update_internal_variables(1.0);
@@ -93,6 +91,8 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
 }
 TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
 {
+    using namespace neon::solid;
+
     InternalVariables variables(internal_variable_size);
 
     // Add the required variables for an updated Lagrangian formulation
@@ -136,7 +136,7 @@ TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
     SECTION("Affine model under no load")
     {
         // Fill with identity matrix
-        for (auto& F : F_list) F = Matrix3::Identity();
+        for (auto& F : F_list) F = neon::Matrix3::Identity();
 
         affine->update_internal_variables(1.0);
 
@@ -186,6 +186,8 @@ TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
 }
 TEST_CASE("NonAffine microsphere model", "[NonAffineMicrosphere]")
 {
+    using namespace neon::solid;
+
     InternalVariables variables(internal_variable_size);
 
     // Add the required variables for an updated Lagrangian formulation
@@ -230,7 +232,7 @@ TEST_CASE("NonAffine microsphere model", "[NonAffineMicrosphere]")
     SECTION("NonAffine model under no load")
     {
         // Fill with identity matrix
-        for (auto& F : F_list) F = Matrix3::Identity();
+        for (auto& F : F_list) F = neon::Matrix3::Identity();
 
         affine->update_internal_variables(1.0);
 
@@ -280,6 +282,8 @@ TEST_CASE("NonAffine microsphere model", "[NonAffineMicrosphere]")
 }
 TEST_CASE("J2 plasticity model", "[J2Plasticity]")
 {
+    using namespace neon::solid;
+
     // Create a json reader object from a string
     std::string
         input_data = "{\"Name\": \"steel\", \"ElasticModulus\": 200.0e9, \"PoissonsRatio\": 0.3, "
@@ -310,7 +314,7 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
 
     auto& material_tangents = variables(InternalVariables::Matrix::TangentOperator);
 
-    for (auto& H : H_list) H = Matrix3::Zero();
+    for (auto& H : H_list) H = neon::Matrix3::Zero();
     for (auto& J : J_list) J = 1.0;
 
     SECTION("Sanity checks")
@@ -404,6 +408,8 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
 }
 TEST_CASE("Finite J2 plasticity model", "[FiniteJ2Plasticity]")
 {
+    using namespace neon::solid;
+
     // Create a json reader object from a string
     std::string
         input_data = "{\"Name\": \"steel\", \"ElasticModulus\": 200.0e9, \"PoissonsRatio\": 0.3, "
@@ -434,7 +440,7 @@ TEST_CASE("Finite J2 plasticity model", "[FiniteJ2Plasticity]")
 
     auto& material_tangents = variables(InternalVariables::Matrix::TangentOperator);
 
-    for (auto& F : F_list) F = Matrix3::Identity();
+    for (auto& F : F_list) F = neon::Matrix3::Identity();
     for (auto& J : J_list) J = 1.0;
 
     variables.commit();

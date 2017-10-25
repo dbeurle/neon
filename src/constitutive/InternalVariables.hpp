@@ -15,6 +15,7 @@ namespace neon
  * when the data is converged to avoid polluting the variable history in the
  * Newton-Raphson method.
  */
+template <int spatial_dimension>
 class InternalVariables
 {
 public:
@@ -204,68 +205,90 @@ protected:
 
 // Allocation methods
 
+template <int spatial_dimension>
 template <typename... Variables>
-inline void InternalVariables::add(InternalVariables::Tensor name, Variables... names)
+inline void InternalVariables<spatial_dimension>::add(Tensor name, Variables... names)
 {
     tensors[name].resize(size, Matrix3::Zero());
     tensors_old[name].resize(size, Matrix3::Zero());
     add(names...);
 }
 
-inline void InternalVariables::add(InternalVariables::Tensor name)
+template <int spatial_dimension>
+inline void InternalVariables<spatial_dimension>::add(Tensor name)
 {
     tensors[name].resize(size, Matrix3::Zero());
     tensors_old[name].resize(size, Matrix3::Zero());
 }
 
+template <int spatial_dimension>
 template <typename... Variables>
-inline void InternalVariables::add(InternalVariables::Scalar name, Variables... names)
+inline void InternalVariables<spatial_dimension>::add(Scalar name, Variables... names)
 {
     scalars[name].resize(size, 0.0);
     scalars_old[name].resize(size, 0.0);
     add(names...);
 }
 
-inline void InternalVariables::add(InternalVariables::Scalar name)
+template <int spatial_dimension>
+inline void InternalVariables<spatial_dimension>::add(Scalar name)
 {
     scalars[name].resize(size, 0.0);
     scalars_old[name].resize(size, 0.0);
 }
 
-inline void InternalVariables::add(InternalVariables::Matrix name, int rowcol)
+template <int spatial_dimension>
+inline void InternalVariables<spatial_dimension>::add(InternalVariables::Matrix name, int rowcol)
 {
     matrices[name].resize(size, neon::Matrix::Zero(rowcol, rowcol));
 }
 
-inline void InternalVariables::add(InternalVariables::Matrix name, neon::Matrix init)
+template <int spatial_dimension>
+inline void InternalVariables<spatial_dimension>::add(InternalVariables::Matrix name,
+                                                      neon::Matrix init)
 {
     matrices[name].resize(size, init);
 }
 
 // Converged results
 
-inline InternalVariables::Tensors const& InternalVariables::operator[](
-    InternalVariables::Tensor tensorType) const
+template <int spatial_dimension>
+inline typename InternalVariables<spatial_dimension>::Tensors const& InternalVariables<
+    spatial_dimension>::operator[](Tensor tensorType) const
 {
     return tensors_old.find(tensorType)->second;
 }
 
-inline InternalVariables::Scalars const& InternalVariables::operator[](Scalar scalarType) const
+template <int spatial_dimension>
+inline typename InternalVariables<spatial_dimension>::Scalars const& InternalVariables<
+    spatial_dimension>::operator[](Scalar scalarType) const
 {
     return scalars_old.find(scalarType)->second;
 }
 
 // Version control of internal state variables
 
-inline void InternalVariables::commit()
+template <int spatial_dimension>
+inline void InternalVariables<spatial_dimension>::commit()
 {
     tensors_old = tensors;
     scalars_old = scalars;
 }
 
-inline void InternalVariables::revert()
+template <int spatial_dimension>
+inline void InternalVariables<spatial_dimension>::revert()
 {
     tensors = tensors_old;
     scalars = scalars_old;
+}
+
+namespace solid
+{
+using InternalVariables = neon::InternalVariables<3>;
+}
+
+namespace diffusion
+{
+using InternalVariables = neon::InternalVariables<3>;
 }
 }
