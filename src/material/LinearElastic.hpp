@@ -10,7 +10,7 @@ namespace neon
 class LinearElastic : public Material
 {
 public:
-    LinearElastic(Json::Value const& material_data);
+    explicit LinearElastic(Json::Value const& material_data);
 
     /** @return Elastic modulus */
     auto elastic_modulus() const { return 9.0 * K * G / (3.0 * K + G); }
