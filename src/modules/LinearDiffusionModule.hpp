@@ -9,6 +9,13 @@
 
 namespace neon
 {
+//! This namespace groups together all of the classes and functions associated
+//! with three-dimensional diffusion type finite elements.  These include
+//! constitutive models, matrix systems, meshes, element stiffness matrices etc.
+namespace diffusion
+{
+}
+
 /**
  * LinearDiffusionModule is responsible for the construction and solution method
  * of a linear diffusion problem

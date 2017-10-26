@@ -8,6 +8,13 @@
 
 namespace neon
 {
+//! This namespace groups together all of the classes and functions associated
+//! with three-dimensional solid mechanics finite elements.  These include
+//! constitutive models, matrix systems, meshes, element stiffness matrices etc.
+namespace solid
+{
+}
+
 /**
  * SolidMechanicsModule is responsible for handling the setup and simulation of the class
  * of three dimensional solid mechanics problems.
