@@ -30,7 +30,10 @@
         },
 		"Mesh" : [{
             "Name" : "plate",
-            "ConstitutiveModel" : "J2",
+            "ConstitutiveModel" : {
+                "Name" : "J2Plasticity",
+                "FiniteStrain" : false
+            },
             "ElementOptions" : {
                 "Quadrature" : "Full"
             },

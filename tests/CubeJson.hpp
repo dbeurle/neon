@@ -128,7 +128,7 @@ inline std::string simulation_data_json()
            "\"Time\" : [0.0, 1.0],"
            "\"Values\" : {\"z\" : [0.0, 1.0e-3]}}],"
            //
-           "\"ConstitutiveModel\" : \"NeoHooke\", "
+           "\"ConstitutiveModel\" : {\"Name\":\"NeoHooke\"}, "
            "\"ElementOptions\" : {\"Quadrature\" : \"Reduced\"}, "
            "\"Name\" : \"cube\", "
            //
@@ -161,7 +161,7 @@ inline std::string simulation_data_traction_json()
            "\"Time\" : [0.0, 1.0],"
            "\"Values\" : {\"y\" : [0.0, 1.0e-3]}} ], "
            //
-           "\"ConstitutiveModel\" : \"NeoHooke\", "
+           "\"ConstitutiveModel\" : {\"Name\":\"NeoHooke\"}, "
            "\"ElementOptions\" : {\"Quadrature\" : \"Reduced\"}, "
            "\"Name\" : \"cube\"}";
 }

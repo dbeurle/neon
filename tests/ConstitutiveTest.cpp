@@ -33,7 +33,7 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
     // Create a json reader object from a string
     auto input_data = json_input_file();
 
-    std::string simulation_input = "{\"ConstitutiveModel\" : \"NeoHooke\"}";
+    std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\": \"NeoHooke\"} }";
 
     Json::Value material_data, simulation_data;
     Json::Reader reader;
@@ -110,7 +110,8 @@ TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
                              "\"StandardDeviation\" : 10, "
                              "\"ScissionLikelihood\" : 0.0001}}";
 
-    std::string simulation_input = "{\"ConstitutiveModel\" : \"AffineMicrosphere\"}";
+    std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\": \"Microsphere\", \"Type\" "
+                                   ": \"Affine\"}}";
 
     Json::Value material_data, simulation_data;
     Json::Reader reader;
@@ -206,7 +207,8 @@ TEST_CASE("NonAffine microsphere model", "[NonAffineMicrosphere]")
                              "\"StandardDeviation\" : 10, "
                              "\"ScissionLikelihood\" : 0.0001}}";
 
-    std::string simulation_input = "{\"ConstitutiveModel\" : \"NonAffineMicrosphere\"}";
+    std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\": \"Microsphere\", \"Type\" "
+                                   ": \"NonAffine\"}}";
 
     Json::Value material_data, simulation_data;
     Json::Reader reader;
@@ -289,7 +291,8 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
         input_data = "{\"Name\": \"steel\", \"ElasticModulus\": 200.0e9, \"PoissonsRatio\": 0.3, "
                      "\"YieldStress\": 200.0e6, \"IsotropicHardeningModulus\": 400.0e6}";
 
-    std::string simulation_input = "{\"ConstitutiveModel\" : \"J2\"}";
+    std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\" : \"J2Plasticity\", "
+                                   "\"FiniteStrain\" : false}}";
 
     Json::Value material_data, simulation_data;
 
@@ -415,7 +418,8 @@ TEST_CASE("Finite J2 plasticity model", "[FiniteJ2Plasticity]")
         input_data = "{\"Name\": \"steel\", \"ElasticModulus\": 200.0e9, \"PoissonsRatio\": 0.3, "
                      "\"YieldStress\": 200.0e6, \"IsotropicHardeningModulus\": 400.0e6}";
 
-    std::string simulation_input = "{\"ConstitutiveModel\" : \"FiniteJ2\"}";
+    std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\" : \"J2Plasticity\", "
+                                   "\"FiniteStrain\":true}}";
 
     Json::Value material_data, simulation_data;
 
