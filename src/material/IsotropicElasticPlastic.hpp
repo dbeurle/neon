@@ -13,11 +13,11 @@ public:
 
     ~IsotropicElasticPlastic() = default;
 
-    double yield_stress(double effective_strain) const;
+    double yield_stress(double const effective_strain) const;
 
-    double hardening_modulus(double effective_strain) const;
+    double hardening_modulus(double const effective_strain) const;
 
-    double kinematic_modulus(double effective_strain) const;
+    double kinematic_modulus(double const effective_strain) const;
 
 protected:
     double stress_y = 0.0;

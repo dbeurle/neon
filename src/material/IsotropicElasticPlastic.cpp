@@ -25,12 +25,12 @@ IsotropicElasticPlastic::IsotropicElasticPlastic(Json::Value const& material_dat
     }
 }
 
-double IsotropicElasticPlastic::yield_stress(double effective_strain) const
+double IsotropicElasticPlastic::yield_stress(double const effective_strain) const
 {
     return stress_y + effective_strain * H;
 }
 
-double IsotropicElasticPlastic::hardening_modulus(double effective_strain) const { return H; }
+double IsotropicElasticPlastic::hardening_modulus(double const effective_strain) const { return H; }
 
-double IsotropicElasticPlastic::kinematic_modulus(double effective_strain) const { return K; }
+double IsotropicElasticPlastic::kinematic_modulus(double const effective_strain) const { return K; }
 }
