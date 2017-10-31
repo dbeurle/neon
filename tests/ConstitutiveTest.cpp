@@ -21,6 +21,63 @@ std::string json_input_file()
 
 constexpr auto internal_variable_size = 2;
 
+TEST_CASE("No constitutive model error test")
+{
+    using namespace neon::solid;
+
+    InternalVariables variables(internal_variable_size);
+
+    // Create a json reader object from a string
+    std::string input_data = "{}";
+    std::string simulation_input = "{}";
+
+    Json::Value material_data, simulation_data;
+    Json::Reader reader;
+
+    REQUIRE(reader.parse(input_data.c_str(), material_data));
+    REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
+
+    REQUIRE_THROWS_AS(make_constitutive_model(variables, material_data, simulation_data),
+                      std::runtime_error);
+}
+TEST_CASE("Constitutive model no name error test")
+{
+    using namespace neon::solid;
+
+    InternalVariables variables(internal_variable_size);
+
+    // Create a json reader object from a string
+    std::string input_data = "{}";
+    std::string simulation_input = "{\"ConstitutiveModel\" : {}}";
+
+    Json::Value material_data, simulation_data;
+    Json::Reader reader;
+
+    REQUIRE(reader.parse(input_data.c_str(), material_data));
+    REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
+
+    REQUIRE_THROWS_AS(make_constitutive_model(variables, material_data, simulation_data),
+                      std::runtime_error);
+}
+TEST_CASE("Constitutive model invalid name error test")
+{
+    using namespace neon::solid;
+
+    InternalVariables variables(internal_variable_size);
+
+    // Create a json reader object from a string
+    std::string input_data = "{}";
+    std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\":\"PurpleMonkey\"}}";
+
+    Json::Value material_data, simulation_data;
+    Json::Reader reader;
+
+    REQUIRE(reader.parse(input_data.c_str(), material_data));
+    REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
+
+    REQUIRE_THROWS_AS(make_constitutive_model(variables, material_data, simulation_data),
+                      std::runtime_error);
+}
 TEST_CASE("Neo-Hookean model", "[NeoHooke]")
 {
     using namespace neon::solid;
@@ -88,6 +145,27 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
             REQUIRE((C - C.transpose()).norm() == Approx(0.0));
         }
     }
+}
+TEST_CASE("Microsphere model error test")
+{
+    using namespace neon::solid;
+
+    InternalVariables variables(internal_variable_size);
+
+    // Create a json reader object from a string
+    std::string input_data = "{}";
+
+    std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\": \"Microsphere\", \"Type\" "
+                                   ": \"Afwsfine\"}}";
+
+    Json::Value material_data, simulation_data;
+    Json::Reader reader;
+
+    REQUIRE(reader.parse(input_data.c_str(), material_data));
+    REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
+
+    REQUIRE_THROWS_AS(make_constitutive_model(variables, material_data, simulation_data),
+                      std::runtime_error);
 }
 TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
 {
@@ -281,6 +359,26 @@ TEST_CASE("NonAffine microsphere model", "[NonAffineMicrosphere]")
             REQUIRE(cauchy.norm() != Approx(0.0));
         }
     }
+}
+TEST_CASE("J2 plasticity model factory errors")
+{
+    using namespace neon::solid;
+
+    // Create a json reader object from a string
+    std::string input_data = "{}";
+    std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\" : \"J2Plasticity\"}}";
+
+    Json::Value material_data, simulation_data;
+
+    Json::Reader reader;
+
+    REQUIRE(reader.parse(input_data.c_str(), material_data));
+    REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
+
+    InternalVariables variables(internal_variable_size);
+
+    REQUIRE_THROWS_AS(make_constitutive_model(variables, material_data, simulation_data),
+                      std::runtime_error);
 }
 TEST_CASE("J2 plasticity model", "[J2Plasticity]")
 {
