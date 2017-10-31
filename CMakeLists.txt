@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(neonfe C CXX)
+project(neonfe CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 add_definitions("-Wall -Wno-sign-compare -Wno-unused-variable -Wno-uninitialized -Wno-inconsistent-missing-override -Wno-unknown-pragmas")
