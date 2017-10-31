@@ -74,8 +74,8 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& va
         return std::make_unique<J2Plasticity>(variables, material_data);
     }
     throw std::runtime_error("The model name " + model_name + " is not recognised\n"
-                             + "Supported models are \"NeoHooke\", \"AffineMicrosphere\" "
-                               "and \"J2\"\n");
+                             + "Supported models are \"NeoHooke\", \"Microsphere\" "
+                               "and \"J2Plasticity\"\n");
     return nullptr;
 }
 }
