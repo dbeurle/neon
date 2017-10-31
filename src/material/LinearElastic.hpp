@@ -12,7 +12,7 @@ class LinearElastic : public Material
 public:
     explicit LinearElastic(Json::Value const& material_data);
 
-    /** @return Elastic modulus */
+    /** @return Elastic modulus or Young's modulus */
     auto elastic_modulus() const { return 9.0 * K * G / (3.0 * K + G); }
 
     /** @return The Poisson's ratio */
