@@ -109,7 +109,9 @@ protected:
         return deformed_normal.norm();
     }
 
-protected:
+private:
+    MicromechanicalElastomer material; //!< Material with micromechanical parameters
+
     double non_affine_stretch_parameter{1.0}; //!< Three-dimensional locking characteristics (p)
     double effective_tube_geometry{1.0};      //!< Additional constraint stiffness (U)
     double non_affine_tube_parameter{1.0};    //!< Shape of constraint stress (q)

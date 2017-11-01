@@ -133,17 +133,14 @@ protected:
         return deformed_tangent.norm();
     }
 
-    template <typename MatrixTp, typename Functor>
-    MatrixTp weighting(std::vector<double> const& G, MatrixTp accumulator, Functor f) const;
-
 protected:
-    MicromechanicalElastomer material; //!< Material with micromechanical parameters
-
     UnitSphereQuadrature unit_sphere; //!< Unit sphere quadrature rule
 
     Matrix6 const IoI = voigt::I_outer_I();                      //!< Outer product
     Matrix6 const I = voigt::kinematic::fourth_order_identity(); //!< Fourth order identity
     Matrix6 const P = voigt::kinetic::deviatoric();              //!< Deviatoric fourth order tensor
+private:
+    MicromechanicalElastomer material; //!< Material with micromechanical parameters
 };
 
 inline double AffineMicrosphere::volumetric_free_energy_dJ(double const J,
@@ -169,10 +166,37 @@ inline double AffineMicrosphere::pade_second(double const micro_stretch, double 
            / std::pow(N - std::pow(micro_stretch, 2), 2);
 }
 
+/**
+ * AffineMicrosphereWithDegradation is responsible for computing the Cauchy
+ * stress and the material tangent in implicit methods when ageing is present.
+ * The affine microsphere model is used to model elastomer materials using
+ * micromechanical motivations and homogenises the force from a single chain
+ * over a unit sphere.
+ */
+class AffineMicrosphereWithDegradation : public AffineMicrosphere
+{
+public:
+    /**
+     * @param variables Reference to internal state variable store
+     * @param material_data Json object with input file material data
+     */
+    explicit AffineMicrosphereWithDegradation(InternalVariables& variables,
+                                              Json::Value const& material_data);
+
+    virtual void update_internal_variables(double const time_step_size) override;
+
+protected:
+    template <typename MatrixTp, typename Functor>
+    MatrixTp weighting(std::vector<double> const& G, MatrixTp accumulator, Functor&& f) const;
+
+private:
+    MicromechanicalElastomer material; //!< Material with micromechanical parameters
+};
+
 template <typename MatrixTp, typename Functor>
-inline MatrixTp AffineMicrosphere::weighting(std::vector<double> const& G,
-                                             MatrixTp accumulator,
-                                             Functor f) const
+inline MatrixTp AffineMicrosphereWithDegradation::weighting(std::vector<double> const& G,
+                                                            MatrixTp accumulator,
+                                                            Functor&& f) const
 {
     for (int i = 0; i < material.segment_groups().size(); i++)
     {

@@ -16,7 +16,7 @@ namespace neon::solid
 {
 NonAffineMicrosphere::NonAffineMicrosphere(InternalVariables& variables,
                                            Json::Value const& material_data)
-    : AffineMicrosphere(variables, material_data)
+    : AffineMicrosphere(variables, material_data), material(material_data)
 {
     if (!material_data.isMember("NonAffineStretchParameter"))
     {

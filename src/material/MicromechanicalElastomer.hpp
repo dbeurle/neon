@@ -13,7 +13,7 @@ namespace neon
  * physical constants which make up the shear modulus for an entropy elastic
  * model.
  *
- * These additional parameters are to do with the evolution of the segments per
+ * These additional parameters are associated with the evolution of the segments per
  * chain in the network.
  */
 class MicromechanicalElastomer : public LinearElastic
@@ -21,7 +21,11 @@ class MicromechanicalElastomer : public LinearElastic
 public:
     MicromechanicalElastomer(Json::Value const& material_data);
 
+    /** @return The number of segments per polymer chain */
     auto const segments_per_chain() const { return N; }
+
+    /** Updates the temperature for the material property */
+    void update_temperature(double const T_new) { temperature = T_new; }
 
     int const groups() const { return number_of_groups; }
 
@@ -49,7 +53,7 @@ protected:
     void compute_chains_and_segments(Json::Value const& segments_data);
 
 protected:
-    double N{25.0};
+    double N{25.0}; //!< Number of segment per chain
 
     double p_scission = 0.0; //!< Probability that a segment is scissioned
 
@@ -57,7 +61,11 @@ protected:
 
     std::vector<double> segments, chains, shear_moduli;
 
-    double const boltzmann_constant = 1.38064852e-23;
-    double const temperature = 298.0;
+    double const boltzmann_constant{1.38064852e-23};
+    double temperature{298.0}; //!< Temperature of elastomer
+
+    double non_affine_stretch_parameter{1.0}; //!< Three-dimensional locking characteristics (p)
+    double effective_tube_geometry{1.0};      //!< Additional constraint stiffness (U)
+    double non_affine_tube_parameter{1.0};    //!< Shape of constraint stress (q)
 };
 }
