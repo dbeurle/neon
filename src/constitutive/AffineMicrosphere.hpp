@@ -104,19 +104,25 @@ protected:
      * Compute the macro stress using the unit sphere homogenisation
      * technique for a given F and N and perform the deviatoric projection
      * @param F_unimodular Unimodular decomposition of the deformation gradient
+     * @param bulk_modulus The material bulk modulus
      * @param N number of segments per chain
      * @return Kirchhoff stress tensor
      */
-    Matrix3 compute_macro_stress(Matrix3 const& F_unimodular, double const N) const;
+    Matrix3 compute_macro_stress(Matrix3 const& F_unimodular,
+                                 double const bulk_modulus,
+                                 double const N) const;
 
     /**
      * Compute the material tangent matrix using the unit sphere homogenisation
      * technique for a given F and N
      * @param F_unimodular Unimodular decomposition of the deformation gradient
+     * @param bulk_modulus The material bulk modulus
      * @param N number of segments per chain
      * @return Macromoduli from unit sphere homogenisation
      */
-    Matrix6 compute_macro_moduli(Matrix3 const& F_unimodular, double const N) const;
+    Matrix6 compute_macro_moduli(Matrix3 const& F_unimodular,
+                                 double const bulk_modulus,
+                                 double const N) const;
 
     /**
      * Compute the deformed tangent using the unimodular deformation gradient

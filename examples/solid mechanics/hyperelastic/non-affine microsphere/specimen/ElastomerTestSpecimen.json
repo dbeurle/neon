@@ -1,5 +1,5 @@
 {
-    "Name" : "SpecimenAgeing",
+    "Name" : "NonaffineSpecimen",
     "Cores" : 2,
     "Part": [{
         "Name" : "ElastomerTestSpecimen",
@@ -9,23 +9,19 @@
         "Name" : "rubber",
         "ElasticModulus" : 10.0e6,
         "PoissonsRatio" : 0.4,
-        "Segments" : {
-            "Groups" : 5,
-            "Average" : 50,
-            "StandardDeviation" : 5,
-            "ScissionLikelihood" : 1e-8
-        }
+        "NonAffineStretchParameter" : 1.0,
+        "SegmentsPerChain" : 50
     }],
     "SimulationCases" : [{
         "Name" : "Load",
 		"Module" : "SolidMechanics",
         "Solution" : "Equilibrium",
         "NonlinearOptions" : {
-            "DisplacementTolerance" : 1.0e-5,
-            "ResidualTolerance" : 1.0e-4
+            "DisplacementTolerance" : 1.0e-3,
+            "ResidualTolerance" : 1.0e-3
         },
         "Time" : {
-            "Period" : 5184002.0,
+            "Period" : 1.0,
             "Increments" : {
                 "Initial" : 1.0,
                 "Minimum" : 0.1,
@@ -34,14 +30,17 @@
         },
 		"Mesh" : [{
             "Name" : "ElastomerTestSpecimen",
-            "ConstitutiveModel" : "AffineMicrosphere",
+            "ConstitutiveModel" : {
+                "Name" : "Microsphere",
+                "Type" : "NonAffine"
+            },
             "ElementOptions" : {
                 "Quadrature" : "Full"
             },
             "BoundaryConditions" : [{
                 "Name" : "x-sym",
                 "Type" : "Displacement",
-                "Time" : [0.0, 5184002.0],
+                "Time" : [0.0, 1.0],
                 "Values" : {
                     "x" : [0.0, 0.0]
                 }
@@ -49,7 +48,7 @@
             {
                 "Name" : "z-sym",
                 "Type" : "Displacement",
-                "Time" : [0.0, 5184002.0],
+                "Time" : [0.0, 1.0],
                 "Values" : {
                     "z" : [0.0, 0.0]
                 }
@@ -57,7 +56,7 @@
             {
                 "Name" : "base",
                 "Type" : "Displacement",
-                "Time" : [0.0, 5184002.0],
+                "Time" : [0.0, 1.0],
                 "Values" : {
                     "y" : [0.0, 0.0]
                 }
@@ -65,9 +64,9 @@
             {
                 "Name" : "load",
 				"Type" : "Displacement",
-                "Time" : [0.0, 1.0, 5184001.0, 5184002.0],
+                "Time" : [0.0, 1.0],
                 "Values" : {
-                    "y" : [0.0, 1.0e-1, 1.0e-1, 0.0]
+                    "y" : [0.0, 0.01]
                 }
             }]
         }],
@@ -78,7 +77,7 @@
         },
         "Visualisation" : {
             "Fields" : ["Displacement", "DeformationGradient", "CauchyStress"],
-            "WriteEvery": 5
+            "WriteEvery": 1
         }
     }]
 }

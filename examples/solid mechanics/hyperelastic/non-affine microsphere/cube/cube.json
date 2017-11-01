@@ -1,5 +1,5 @@
 {
-    "Name" : "Toy cube model",
+    "Name" : "NonaffineCube",
     "Cores" : 2,
     "Part": [{
         "Name" : "cube",
@@ -11,12 +11,7 @@
         "ElasticModulus" : 10.0e6,
         "PoissonsRatio" : 0.46,
         "NonAffineStretchParameter" : 1.0,
-        "Segments" : {
-            "Groups" : 5,
-            "Average" : 50,
-            "StandardDeviation" : 10,
-            "ScissionLikelihood" : 1e-10
-        }
+        "SegmentsPerChain" : 50
     }],
     "SimulationCases" : [{
         "Name" : "Load",
@@ -36,7 +31,10 @@
         },
 		"Mesh" : [{
             "Name" : "cube",
-            "ConstitutiveModel" : "NonAffineMicrosphere",
+            "ConstitutiveModel" : {
+                "Name" : "Microsphere",
+                "Type" : "NonAffine"
+            },
             "ElementOptions" : {
                 "Quadrature" : "Full"
             },
