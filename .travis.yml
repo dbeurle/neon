@@ -12,6 +12,8 @@ before_install:
 script:
     - docker run -e TRAVIS=$TRAVIS -e TRAVIS_JOB_ID=$TRAVIS_JOB_ID --name neon-docker -d -t neon /bin/bash
     - docker exec neon-docker /bin/bash -c "cd neon && mkdir build && cd build && cmake -DENABLE_COVERAGE=TRUE .. && make all -j4 && ctest"
+    - docker exec neon-docker /bin/bash -c "cd neon/build && echo "PATH=$PATH:$pwd" >> ~/.bashrc && source ~/.bashrc"
+    - docker exec neon-docker /bin/bash -c "cd neon/build && ctest"
 after_success:
     # Coverage
     - docker exec neon-docker /bin/bash -c "pip install cpp-coveralls"
