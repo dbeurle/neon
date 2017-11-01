@@ -11,8 +11,8 @@ before_install:
     - cp travisci_rsa ~/.ssh/id_rsa
 script:
     - docker run -e TRAVIS=$TRAVIS -e TRAVIS_JOB_ID=$TRAVIS_JOB_ID --name neon-docker -d -t neon /bin/bash
-    - docker exec neon-docker /bin/bash -c "mkdir -p neon/build && cd neon/build && cmake -DENABLE_COVERAGE=TRUE .. && make all -j4"
-    - docker exec neon-docker /bin/bash -c "cd neon/build && echo "export PATH=\$PATH:$(printf "%q\n" "$(pwd)")" >> ~/.bashrc && source ~/.bashrc"
+    - docker exec neon-docker /bin/bash -c "mkdir -p neon/build && cd neon/build && cmake -DENABLE_COVERAGE=TRUE .."
+    - docker exec neon-docker /bin/bash -c "cd neon/build && echo "export PATH=\$PATH:$(printf "%q\n" "$(pwd)")" >> ~/.bashrc && less ~/.bashrc && source ~/.bashrc"
     - docker exec neon-docker /bin/bash -c "cd neon/build && ctest"
 after_success:
     # Coverage
