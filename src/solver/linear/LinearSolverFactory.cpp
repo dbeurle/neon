@@ -16,23 +16,24 @@
 
 namespace neon
 {
-std::unique_ptr<LinearSolver> make_linear_solver(Json::Value const& solver_data, bool const is_spd)
+std::unique_ptr<LinearSolver> make_linear_solver(Json::Value const& solver_data,
+                                                 bool const is_symmetric)
 {
     std::string const& solver_name = solver_data["Solver"].asString();
 
     if (solver_name == "PaStiX")
     {
-        if (is_spd) return std::make_unique<PaStiXLDLT>();
+        if (is_symmetric) return std::make_unique<PaStiXLDLT>();
         return std::make_unique<PaStiXLU>();
     }
     else if (solver_name == "MUMPS")
     {
-        if (is_spd) return std::make_unique<MUMPSLLT>();
+        if (is_symmetric) return std::make_unique<MUMPSLLT>();
         return std::make_unique<MUMPSLU>();
     }
     else if (solver_name == "Direct")
     {
-        if (is_spd) return std::make_unique<SparseLLT>();
+        if (is_symmetric) return std::make_unique<SparseLLT>();
 
         return std::make_unique<SparseLU>();
     }
@@ -40,7 +41,7 @@ std::unique_ptr<LinearSolver> make_linear_solver(Json::Value const& solver_data,
     {
         if (solver_data.isMember("Tolerance") && solver_data.isMember("MaxIterations"))
         {
-            if (is_spd)
+            if (is_symmetric)
             {
                 return std::make_unique<ConjugateGradient>(solver_data["Tolerance"].asDouble(),
                                                            solver_data["MaxIterations"].asInt());
@@ -50,7 +51,7 @@ std::unique_ptr<LinearSolver> make_linear_solver(Json::Value const& solver_data,
         }
         else if (solver_data.isMember("Tolerance"))
         {
-            if (is_spd)
+            if (is_symmetric)
             {
                 return std::make_unique<ConjugateGradient>(solver_data["Tolerance"].asDouble());
             }
@@ -58,7 +59,7 @@ std::unique_ptr<LinearSolver> make_linear_solver(Json::Value const& solver_data,
         }
         else if (solver_data.isMember("MaxIterations"))
         {
-            if (is_spd)
+            if (is_symmetric)
             {
                 return std::make_unique<ConjugateGradient>(solver_data["MaxIterations"].asInt());
             }
@@ -66,7 +67,7 @@ std::unique_ptr<LinearSolver> make_linear_solver(Json::Value const& solver_data,
         }
         else
         {
-            if (is_spd) return std::make_unique<ConjugateGradient>();
+            if (is_symmetric) return std::make_unique<ConjugateGradient>();
             return std::make_unique<BiCGStab>();
         }
     }
@@ -75,7 +76,7 @@ std::unique_ptr<LinearSolver> make_linear_solver(Json::Value const& solver_data,
     {
 #ifdef ENABLE_CUDA
 
-        if (!is_spd)
+        if (!is_symmetric)
         {
             throw std::runtime_error("A non-symmetric iterative solver for GPU has not yet been "
                                      "implemented\n");

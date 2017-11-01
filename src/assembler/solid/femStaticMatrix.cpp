@@ -19,7 +19,7 @@ femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& simulatio
       fint(Vector::Zero(fem_mesh.active_dofs())),
       fext(Vector::Zero(fem_mesh.active_dofs())),
       d(Vector::Zero(fem_mesh.active_dofs())),
-      linear_solver(make_linear_solver(simulation["LinearSolver"]))
+      linear_solver(make_linear_solver(simulation["LinearSolver"], fem_mesh.is_symmetric()))
 {
     if (!simulation["NonlinearOptions"].isMember("DisplacementTolerance"))
     {
