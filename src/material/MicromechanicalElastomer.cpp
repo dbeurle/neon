@@ -31,6 +31,15 @@ double binomial_pmf(int const n, int const k, double const p = 0.5)
 MicromechanicalElastomer::MicromechanicalElastomer(Json::Value const& material_data)
     : LinearElastic(material_data)
 {
+    if (!material_data.isMember("SegmentsPerChain"))
+    {
+        throw std::runtime_error("SegmentsPerChain not specified in material data\n");
+    }
+}
+
+StochasticMicromechanicalElastomer::StochasticMicromechanicalElastomer(Json::Value const& material_data)
+    : LinearElastic(material_data)
+{
     if (!material_data.isMember("Segments"))
     {
         throw std::runtime_error("Segments not specified in material data\n");
@@ -38,7 +47,7 @@ MicromechanicalElastomer::MicromechanicalElastomer(Json::Value const& material_d
     compute_chains_and_segments(material_data["Segments"]);
 }
 
-void MicromechanicalElastomer::compute_chains_and_segments(Json::Value const& segments_data)
+void StochasticMicromechanicalElastomer::compute_chains_and_segments(Json::Value const& segments_data)
 {
     // Basic error checking
     if (!segments_data.isMember("Groups"))
@@ -84,8 +93,7 @@ void MicromechanicalElastomer::compute_chains_and_segments(Json::Value const& se
 
     if (!is_approx(n0, ranges::accumulate(chains, 0.0)))
     {
-        std::cout << "My method failed\n";
-        std::abort();
+        throw std::runtime_error("Material property error in StochasticMicromechanicalElastomer");
     }
 
     // Partition the range based on the average segments in order
@@ -93,8 +101,8 @@ void MicromechanicalElastomer::compute_chains_and_segments(Json::Value const& se
                              [&](auto const N) { return N <= N_avg; });
 }
 
-std::vector<double> MicromechanicalElastomer::update_chains(std::vector<double> const& chains_old,
-                                                            double const time_step_size)
+std::vector<double> StochasticMicromechanicalElastomer::update_chains(
+    std::vector<double> const& chains_old, double const time_step_size)
 {
     using namespace ranges;
 
@@ -104,7 +112,8 @@ std::vector<double> MicromechanicalElastomer::update_chains(std::vector<double> 
            });
 }
 
-std::vector<double> MicromechanicalElastomer::compute_shear_moduli(std::vector<double> const& chains_new)
+std::vector<double> StochasticMicromechanicalElastomer::compute_shear_moduli(
+    std::vector<double> const& chains_new)
 {
     return chains_new | ranges::view::transform([&](auto const& n) {
                return n * boltzmann_constant * temperature;

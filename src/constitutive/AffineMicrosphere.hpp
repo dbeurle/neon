@@ -190,7 +190,7 @@ protected:
     MatrixTp weighting(std::vector<double> const& G, MatrixTp accumulator, Functor&& f) const;
 
 private:
-    MicromechanicalElastomer material; //!< Material with micromechanical parameters
+    StochasticMicromechanicalElastomer material; //!< Material with micromechanical parameters
 };
 
 template <typename MatrixTp, typename Functor>

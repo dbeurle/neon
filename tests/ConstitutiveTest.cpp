@@ -182,11 +182,7 @@ TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
     std::string input_data = "{\"Name\" : \"rubber\", "
                              "\"ElasticModulus\" : 10.0e6, "
                              "\"PoissonsRatio\" : 0.45, "
-                             "\"Segments\" : { "
-                             "\"Groups\" : 5, "
-                             "\"Average\" : 50, "
-                             "\"StandardDeviation\" : 10, "
-                             "\"ScissionLikelihood\" : 0.0001}}";
+                             "\"SegmentsPerChain\" : 50}";
 
     std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\": \"Microsphere\", \"Type\" "
                                    ": \"Affine\"}}";
@@ -279,11 +275,7 @@ TEST_CASE("NonAffine microsphere model", "[NonAffineMicrosphere]")
                              "\"ElasticModulus\" : 10.0e6, "
                              "\"PoissonsRatio\" : 0.45, "
                              "\"NonAffineStretchParameter\":1.0, "
-                             "\"Segments\" : { "
-                             "\"Groups\" : 5, "
-                             "\"Average\" : 50, "
-                             "\"StandardDeviation\" : 10, "
-                             "\"ScissionLikelihood\" : 0.0001}}";
+                             "\"SegmentsPerChain\" : 50}";
 
     std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\": \"Microsphere\", \"Type\" "
                                    ": \"NonAffine\"}}";

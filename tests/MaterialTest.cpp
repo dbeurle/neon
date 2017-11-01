@@ -159,13 +159,13 @@ TEST_CASE("Missing yield stress", "[IsotropicPlasticElastic]")
 
     REQUIRE_THROWS_AS(IsotropicElasticPlastic(material_data), MaterialPropertyException);
 }
-TEST_CASE("Micromechanical elastomer", "[MicromechanicalElastomer]")
+TEST_CASE("Micromechanical elastomer", "[StochasticMicromechanicalElastomer]")
 {
     Json::Value material_data;
     Json::Reader reader;
 
     REQUIRE(reader.parse(micromechanical_input().c_str(), material_data));
-    MicromechanicalElastomer elastomer(material_data);
+    StochasticMicromechanicalElastomer elastomer(material_data);
 
     // Initial chains and segment groups
     auto const chain_group_initial = elastomer.chain_groups();

@@ -24,6 +24,19 @@ public:
     /** @return The number of segments per polymer chain */
     auto const segments_per_chain() const { return N; }
 
+protected:
+    double N{25.0}; //!< Number of segment per chain
+};
+
+/**
+ * StochasticMicromechanicalElastomer is responsible for handling a distribution
+ * for the material properties of an elastomer
+ */
+class StochasticMicromechanicalElastomer : public LinearElastic
+{
+public:
+    StochasticMicromechanicalElastomer(Json::Value const& material_data);
+
     /** Updates the temperature for the material property */
     void update_temperature(double const T_new) { temperature = T_new; }
 
@@ -53,8 +66,6 @@ protected:
     void compute_chains_and_segments(Json::Value const& segments_data);
 
 protected:
-    double N{25.0}; //!< Number of segment per chain
-
     double p_scission = 0.0; //!< Probability that a segment is scissioned
 
     int number_of_groups = 1;
