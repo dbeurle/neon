@@ -9,7 +9,7 @@
     "Material" : [{
         "Name" : "rubber",
         "ElasticModulus" : 10.0e6,
-        "PoissonsRatio" : 0.46,
+        "PoissonsRatio" : 0.45,
         "NonAffineStretchParameter" : 1.0,
         "SegmentsPerChain" : 50
     }],
