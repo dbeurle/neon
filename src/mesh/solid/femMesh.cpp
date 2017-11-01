@@ -31,6 +31,15 @@ femMesh::femMesh(BasicMesh const& basic_mesh,
     allocate_boundary_conditions(simulation_data, basic_mesh);
 }
 
+bool femMesh::is_symmetric() const
+{
+    for (auto const& submesh : submeshes)
+    {
+        if (!submesh.constitutive().is_symmetric()) return false;
+    }
+    return true;
+}
+
 void femMesh::update_internal_variables(Vector const& u, double const time_step_size)
 {
     auto start = std::chrono::high_resolution_clock::now();

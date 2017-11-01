@@ -26,10 +26,9 @@ public:
 
     /**
      * Checks the boundary conditions and constitutive model to ensure
-     * resulting matrix from this mesh is symmetric.  TODO implement this
-     * once there is an unsymmetric operation.  \sa LinearSolver
+     * resulting matrix from this mesh is symmetric.  \sa LinearSolver
      */
-    bool is_symmetric() const { return true; }
+    bool is_symmetric() const;
 
     /**
      * Deform the body by updating the displacement x = X + u
