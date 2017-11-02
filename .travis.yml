@@ -12,7 +12,7 @@ before_install:
 script:
     - docker run -e TRAVIS=$TRAVIS -e TRAVIS_JOB_ID=$TRAVIS_JOB_ID --name neon-docker -d -t neon /bin/bash
     - docker exec neon-docker /bin/bash -c "mkdir -p neon/build && cd neon/build && cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_COVERAGE=TRUE .. && make all -j2"
-    - docker exec neon-docker /bin/bash -c "cd neon/build && echo "export PATH=\$PATH:$(printf "%q\n" "$(pwd)")" >> ~/.bashrc && source ~/.bashrc"
+    - docker exec neon-docker /bin/bash -c "cd neon/build && echo \"export PATH=\$PATH:/app/neon/build\" >> ~/.bashrc && source ~/.bashrc"
     - docker exec neon-docker /bin/bash -c "cd neon/build && ctest"
 after_success:
     # Coverage
