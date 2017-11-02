@@ -12,12 +12,11 @@ before_install:
 script:
     - docker run -e TRAVIS=$TRAVIS -e TRAVIS_JOB_ID=$TRAVIS_JOB_ID --name neon-docker -d -t neon /bin/bash
     - docker exec neon-docker /bin/bash -c "mkdir -p neon/build && cd neon/build && cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_COVERAGE=TRUE .. && make all -j2"
-    - docker exec neon-docker /bin/bash -c "cd neon/build && echo \"export PATH=\$PATH:/app/neon/build\" >> ~/.bashrc"
-    - docker exec neon-docker /bin/bash -c "source ~/.bashrc && cd neon/build && ctest"
+    - docker exec neon-docker /bin/bash -c "cd neon/build && make install && ctest"
 after_success:
     # Coverage
     - docker exec neon-docker /bin/bash -c "pip install cpp-coveralls"
-    - docker exec neon-docker /bin/bash -c "cd neon/build && make coverage"
+    - docker exec neon-docker /bin/bash -c "cd neon/build && make coverage && make install"
     - docker exec neon-docker /bin/bash -c "cd neon/build && cpp-coveralls --lcov-file=coverage.info --no-gcov"
     # Automated code documentation
     - sudo apt-get install --yes doxygen graphviz fonts-mathjax texlive
