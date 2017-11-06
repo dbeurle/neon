@@ -19,9 +19,9 @@ public:
 
     virtual ~IsotropicLinearElasticity();
 
-    void update_internal_variables(double const time_step_size) override;
+    virtual void update_internal_variables(double const time_step_size) override;
 
-    Material const& intrinsic_material() const override { return material; }
+    virtual Material const& intrinsic_material() const override { return material; }
 
     virtual bool is_finite_deformation() const override { return false; }
 
@@ -30,14 +30,17 @@ protected:
 
     Matrix6 elastic_moduli() const;
 
-    Matrix6 const C_e = elastic_moduli();
-
 private:
     LinearElastic material;
+
+protected:
+    Matrix6 const C_e = elastic_moduli();
 };
 
 /**
- * J2Plasticity is responsible for computing the small strain
+ * J2Plasticity is responsible for computing the small strain J2 plasticity
+ * stress and tangent operator matrix for each internal variable at the quadrature
+ * points.
  */
 class J2Plasticity : public IsotropicLinearElasticity
 {
@@ -46,9 +49,9 @@ public:
 
     virtual ~J2Plasticity();
 
-    void update_internal_variables(double const time_step_size) override;
+    virtual void update_internal_variables(double const time_step_size) override;
 
-    Material const& intrinsic_material() const override { return material; }
+    virtual Material const& intrinsic_material() const override { return material; }
 
     virtual bool is_finite_deformation() const override { return false; }
 

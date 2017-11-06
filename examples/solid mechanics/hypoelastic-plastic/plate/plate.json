@@ -1,6 +1,6 @@
 {
     "Name" : "Plate",
-    "Cores" : 2,
+    "Cores" : 4,
     "Part": [{
         "Name" : "plate",
         "Material" : "steel"
@@ -10,7 +10,7 @@
         "ElasticModulus" : 200.0e3,
         "IsotropicHardeningModulus" : 200.0,
         "YieldStress" : 200.0,
-        "PoissonsRatio" : 0.30
+        "PoissonsRatio" : 0.3
     }],
     "SimulationCases" : [{
         "Name" : "Uniaxial",
@@ -65,7 +65,7 @@
                 "Name" : "load",
                 "Type" : "Pressure",
                 "Time" : [0.0, 1.0],
-		"Values" : [0.0, -1.5e2]
+		        "Values" : [0.0, -1.5e2]
                 //"Values" : {
                 //    "x" : [0.0, -1.5e2]
                 //}
@@ -73,8 +73,8 @@
         }],
 		"LinearSolver" :  {
 		    "Solver" : "PaStiX",
-	            "MaxIterations" : 3000,
-        	    "Tolerance"  : 1.0e-8
+            "MaxIterations" : 3000,
+    	    "Tolerance"  : 1.0e-8
         },
         "Visualisation" : {
             "Fields" : ["Displacement", "LinearisedStrain", "LinearisedPlasticStrain",

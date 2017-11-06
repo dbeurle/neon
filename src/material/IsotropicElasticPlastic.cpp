@@ -10,16 +10,19 @@ namespace neon
 IsotropicElasticPlastic::IsotropicElasticPlastic(Json::Value const& material_data)
     : LinearElastic(material_data)
 {
-    if (material_data["YieldStress"].empty()) throw MaterialPropertyException("YieldStress");
+    if (!material_data.isMember("YieldStress"))
+    {
+        throw MaterialPropertyException("YieldStress");
+    }
 
     stress_y = material_data["YieldStress"].asDouble();
 
-    if (!material_data["IsotropicHardeningModulus"].empty())
+    if (material_data.isMember("IsotropicHardeningModulus"))
     {
         H = material_data["IsotropicHardeningModulus"].asDouble();
     }
 
-    if (!material_data["IsotropicKinematicModulus"].empty())
+    if (material_data.isMember("IsotropicKinematicModulus"))
     {
         K = material_data["IsotropicKinematicModulus"].asDouble();
     }

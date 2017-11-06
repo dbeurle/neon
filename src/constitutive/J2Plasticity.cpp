@@ -14,9 +14,7 @@ IsotropicLinearElasticity::IsotropicLinearElasticity(InternalVariables& variable
                                                      Json::Value const& material_data)
     : ConstitutiveModel(variables), material(material_data)
 {
-    variables.add(InternalVariables::Tensor::LinearisedStrain,
-                  InternalVariables::Tensor::LinearisedPlasticStrain);
-
+    variables.add(InternalVariables::Tensor::LinearisedStrain);
     variables.add(InternalVariables::Scalar::VonMisesStress);
 
     // Add material tangent with the linear elasticity spatial moduli
@@ -44,7 +42,7 @@ void IsotropicLinearElasticity::update_internal_variables(double const time_step
                       });
 
     // Compute the von Mises equivalent stress
-    von_mises_stresses = cauchy_stresses | view::transform([this](auto const& cauchy_stress) {
+    von_mises_stresses = cauchy_stresses | view::transform([](auto const& cauchy_stress) {
                              return von_mises_stress(cauchy_stress);
                          });
 }
@@ -73,6 +71,7 @@ Matrix3 IsotropicLinearElasticity::compute_cauchy_stress(Matrix3 const& elastic_
 J2Plasticity::J2Plasticity(InternalVariables& variables, Json::Value const& material_data)
     : IsotropicLinearElasticity(variables, material_data), material(material_data)
 {
+    variables.add(InternalVariables::Tensor::LinearisedPlasticStrain);
     variables.add(InternalVariables::Scalar::EffectivePlasticStrain);
 }
 
@@ -94,7 +93,7 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
          von_mises_stresses] = variables(InternalVariables::Scalar::EffectivePlasticStrain,
                                          InternalVariables::Scalar::VonMisesStress);
 
-    auto& C_list = variables(InternalVariables::Matrix::TangentOperator);
+    auto& tangent_operators = variables(InternalVariables::Matrix::TangentOperator);
 
     // Compute the linear strain gradient from the displacement gradient
     strains = variables(InternalVariables::Tensor::DisplacementGradient)
@@ -119,7 +118,8 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
         // elastic modulus and continue to the next quadrature point
         if (evaluate_yield_function(von_mises, accumulated_plastic_strain) <= 0.0)
         {
-            C_list[l] = C_e;
+            tangent_operators[l] = C_e;
+
             continue;
         }
 
@@ -139,10 +139,10 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
 
         accumulated_plastic_strain += plastic_increment;
 
-        C_list[l] = algorithmic_tangent(plastic_increment,
-                                        accumulated_plastic_strain,
-                                        von_mises_trial,
-                                        normal);
+        tangent_operators[l] = algorithmic_tangent(plastic_increment,
+                                                   accumulated_plastic_strain,
+                                                   von_mises_trial,
+                                                   normal);
     }
 }
 
