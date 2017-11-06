@@ -6,11 +6,10 @@ find_package(Git REQUIRED)
 ExternalProject_Add(
     catch
     PREFIX ${CMAKE_BINARY_DIR}/catch
-    GIT_REPOSITORY https://github.com/philsquared/Catch.git
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
     GIT_SHALLOW 1
     GIT_PROGRESS 1
     TIMEOUT 10
-    # UPDATE_COMMAND ${GIT_EXECUTABLE} pull
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
@@ -20,4 +19,4 @@ ExternalProject_Add(
 
 # Expose required variable (CATCH_INCLUDE_DIR) to parent scope
 ExternalProject_Get_Property(catch source_dir)
-set(CATCH_INCLUDE_DIR ${source_dir}/include CACHE INTERNAL "Path to include folder for Catch")
+set(CATCH_INCLUDE_DIR ${source_dir}/single_include CACHE INTERNAL "Path to include folder for Catch")
