@@ -23,6 +23,8 @@
 using namespace neon;
 using namespace ranges;
 
+constexpr auto ZERO_MARGIN = 1.0e-5;
+
 TEST_CASE("Dof List Allocation", "[DofAllocator]")
 {
     SECTION("One element")
@@ -85,7 +87,7 @@ TEST_CASE("Boundary unit test", "[Boundary]")
 
         auto const time_history = boundary.time_history();
 
-        REQUIRE(time_history[0] == Approx(0.0));
+        REQUIRE(time_history[0] == Approx(0.0).margin(ZERO_MARGIN));
         REQUIRE(time_history[1] == Approx(1.0));
         REQUIRE(time_history[2] == Approx(2.0));
         REQUIRE(time_history[3] == Approx(3.0));
@@ -113,11 +115,11 @@ TEST_CASE("Boundary unit test", "[Boundary]")
 
         Boundary boundary(times, loads);
 
-        REQUIRE(boundary.interpolate_prescribed_load(0.0) == Approx(0.0));
+        REQUIRE(boundary.interpolate_prescribed_load(0.0) == Approx(0.0).margin(ZERO_MARGIN));
         REQUIRE(boundary.interpolate_prescribed_load(0.5) == Approx(0.5));
         REQUIRE(boundary.interpolate_prescribed_load(1.0) == Approx(1.0));
         REQUIRE(boundary.interpolate_prescribed_load(1.5) == Approx(0.5));
-        REQUIRE(boundary.interpolate_prescribed_load(2.0) == Approx(0.0));
+        REQUIRE(boundary.interpolate_prescribed_load(2.0) == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Non-matching length error test")
     {
@@ -167,7 +169,7 @@ TEST_CASE("Traction test for triangle", "[Traction]")
 
         auto const & [ dofs, t ] = traction.external_force(0, 1.0);
 
-        REQUIRE((t - 1.0 / 6.0 * Vector3::Ones()).norm() == Approx(0.0));
+        REQUIRE((t - 1.0 / 6.0 * Vector3::Ones()).norm() == Approx(0.0).margin(ZERO_MARGIN));
         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
     }
     SECTION("Twice unit load")
@@ -187,7 +189,7 @@ TEST_CASE("Traction test for triangle", "[Traction]")
 
         auto const & [ dofs, t ] = traction.external_force(0, 1.0);
 
-        REQUIRE((t - 2.0 / 6.0 * Vector3::Ones()).norm() == Approx(0.0));
+        REQUIRE((t - 2.0 / 6.0 * Vector3::Ones()).norm() == Approx(0.0).margin(ZERO_MARGIN));
         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
     }
 }
@@ -227,7 +229,7 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
 
         // Compare the z-component to the analytical solution
         REQUIRE((Vector3(f_ext(2), f_ext(5), f_ext(8)) - 1.0 / 6.0 * Vector3::Ones()).norm()
-                == Approx(0.0));
+                == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Twice unit load")
     {
@@ -246,7 +248,7 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
         auto const & [ dofs, f_ext ] = pressure.external_force(0, 1.0);
 
         REQUIRE((Vector3(f_ext(2), f_ext(5), f_ext(8)) - 2.0 / 6.0 * Vector3::Ones()).norm()
-                == Approx(0.0));
+                == Approx(0.0).margin(ZERO_MARGIN));
         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
     }
 }

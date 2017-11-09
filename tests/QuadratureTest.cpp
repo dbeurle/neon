@@ -1,6 +1,5 @@
 
-#define CATCH_CONFIG_MAIN // This tells Catch to provide a main() - only do this in one
-                          // cpp file
+#define CATCH_CONFIG_MAIN
 #include <catch.hpp>
 
 #include "quadrature/HexahedronQuadrature.hpp"
@@ -21,6 +20,8 @@
 #include <range/v3/numeric.hpp>
 
 using namespace neon;
+
+constexpr auto ZERO_MARGIN = 1.0e-5;
 
 TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
 {
@@ -54,8 +55,8 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
 
             REQUIRE(N.sum() == Approx(1.0));
 
-            REQUIRE(rhea.col(0).sum() == Approx(0.0));
-            REQUIRE(rhea.col(1).sum() == Approx(0.0));
+            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
         });
     }
     SECTION("Quadrilateral4 surface area - one point")
@@ -84,8 +85,8 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
 
             REQUIRE(N.sum() == Approx(1.0));
 
-            REQUIRE(rhea.col(0).sum() == Approx(0.0));
-            REQUIRE(rhea.col(1).sum() == Approx(0.0));
+            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
         });
     }
     SECTION("Quadrilateral4 surface area - four point")
@@ -114,8 +115,8 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
 
             REQUIRE(N.sum() == Approx(1.0));
 
-            REQUIRE(rhea.col(0).sum() == Approx(0.0));
-            REQUIRE(rhea.col(1).sum() == Approx(0.0));
+            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
         });
     }
     SECTION("Quadrilateral8 surface area - four point")
@@ -144,8 +145,8 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
 
             REQUIRE(N.sum() == Approx(1.0));
 
-            REQUIRE(rhea.col(0).sum() == Approx(0.0));
-            REQUIRE(rhea.col(1).sum() == Approx(0.0));
+            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
         });
     }
     SECTION("Quadrilateral8 interpolation function - nine point")
@@ -192,8 +193,8 @@ TEST_CASE("Triangle quadrature scheme test", "[TriangleQuadrature]")
 
             REQUIRE(N.sum() == Approx(1.0));
 
-            REQUIRE(rhea.col(0).sum() == Approx(0.0));
-            REQUIRE(rhea.col(1).sum() == Approx(0.0));
+            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
         });
     }
     SECTION("Triangle6 interpolation function - three point")
@@ -209,8 +210,8 @@ TEST_CASE("Triangle quadrature scheme test", "[TriangleQuadrature]")
 
             REQUIRE(N.sum() == Approx(1.0));
 
-            REQUIRE(rhea.col(0).sum() == Approx(0.0));
-            REQUIRE(rhea.col(1).sum() == Approx(0.0));
+            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
         });
     }
     SECTION("Triangle6 interpolation function - four point")
@@ -226,8 +227,8 @@ TEST_CASE("Triangle quadrature scheme test", "[TriangleQuadrature]")
 
             REQUIRE(N.sum() == Approx(1.0));
 
-            REQUIRE(rhea.col(0).sum() == Approx(0.0));
-            REQUIRE(rhea.col(1).sum() == Approx(0.0));
+            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
         });
     }
     SECTION("Triangle3 surface area")
@@ -275,9 +276,9 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
 
             REQUIRE(N.sum() == Approx(1.0));
 
-            REQUIRE(rhea.col(0).sum() == Approx(0.0));
-            REQUIRE(rhea.col(1).sum() == Approx(0.0));
-            REQUIRE(rhea.col(2).sum() == Approx(0.0));
+            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
 
         });
 
@@ -300,9 +301,9 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
 
             REQUIRE(N.sum() == Approx(1.0));
 
-            REQUIRE(rhea.col(0).sum() == Approx(0.0));
-            REQUIRE(rhea.col(1).sum() == Approx(0.0));
-            REQUIRE(rhea.col(2).sum() == Approx(0.0));
+            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
 
         });
 
@@ -341,9 +342,9 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
 
             REQUIRE(N.sum() == Approx(1.0));
 
-            REQUIRE(rhea.col(0).sum() == Approx(0.0));
-            REQUIRE(rhea.col(1).sum() == Approx(0.0));
-            REQUIRE(rhea.col(2).sum() == Approx(0.0));
+            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
         });
 
         REQUIRE(tet4.local_quadrature_extrapolation().rows() == 4);
@@ -363,9 +364,9 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
 
             REQUIRE(N.sum() == Approx(1.0));
 
-            REQUIRE(rhea.col(0).sum() == Approx(0.0));
-            REQUIRE(rhea.col(1).sum() == Approx(0.0));
-            REQUIRE(rhea.col(2).sum() == Approx(0.0));
+            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
         });
 
         REQUIRE(tet10.local_quadrature_extrapolation().rows() == 10);
@@ -385,9 +386,9 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
 
             REQUIRE(N.sum() == Approx(1.0));
 
-            REQUIRE(rhea.col(0).sum() == Approx(0.0));
-            REQUIRE(rhea.col(1).sum() == Approx(0.0));
-            REQUIRE(rhea.col(2).sum() == Approx(0.0));
+            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
         });
 
         REQUIRE(tet10.local_quadrature_extrapolation().rows() == 10);
@@ -407,9 +408,9 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
 
             REQUIRE(N.sum() == Approx(1.0));
 
-            REQUIRE(rhea.col(0).sum() == Approx(0.0));
-            REQUIRE(rhea.col(1).sum() == Approx(0.0));
-            REQUIRE(rhea.col(2).sum() == Approx(0.0));
+            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
         });
 
         REQUIRE(tet10.local_quadrature_extrapolation().rows() == 10);

@@ -11,6 +11,8 @@
 
 using namespace neon;
 
+constexpr auto ZERO_MARGIN = 1.0e-5;
+
 /** Create a SPD matrix for solver testing */
 SparseMatrix create_sparse_matrix()
 {
@@ -66,8 +68,8 @@ TEST_CASE("Linear solver test suite")
 
         linear_solver->solve(A, x, b);
 
-        REQUIRE((x - solution()).norm() == Approx(0.0));
-        REQUIRE((A * x - b).norm() == Approx(0.0));
+        REQUIRE((x - solution()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((A * x - b).norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Preconditioned Conjugate Gradient Tolerance")
     {
@@ -81,8 +83,8 @@ TEST_CASE("Linear solver test suite")
 
         linear_solver->solve(A, x, b);
 
-        REQUIRE((x - solution()).norm() == Approx(0.0));
-        REQUIRE((A * x - b).norm() == Approx(0.0));
+        REQUIRE((x - solution()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((A * x - b).norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Preconditioned Conjugate Gradient Iterations")
     {
@@ -96,8 +98,8 @@ TEST_CASE("Linear solver test suite")
 
         linear_solver->solve(A, x, b);
 
-        REQUIRE((x - solution()).norm() == Approx(0.0));
-        REQUIRE((A * x - b).norm() == Approx(0.0));
+        REQUIRE((x - solution()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((A * x - b).norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Preconditioned Conjugate Gradient Iterations and Tolerance")
     {
@@ -112,8 +114,8 @@ TEST_CASE("Linear solver test suite")
 
         linear_solver->solve(A, x, b);
 
-        REQUIRE((x - solution()).norm() == Approx(0.0));
-        REQUIRE((A * x - b).norm() == Approx(0.0));
+        REQUIRE((x - solution()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((A * x - b).norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Preconditioned Bi-conjugate Gradient Stab Default")
     {
@@ -127,8 +129,8 @@ TEST_CASE("Linear solver test suite")
 
         linear_solver->solve(A, x, b);
 
-        REQUIRE((x - solution()).norm() == Approx(0.0));
-        REQUIRE((A * x - b).norm() == Approx(0.0));
+        REQUIRE((x - solution()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((A * x - b).norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Preconditioned Bi-conjugate Gradient Stab Tolerance")
     {
@@ -142,8 +144,8 @@ TEST_CASE("Linear solver test suite")
 
         linear_solver->solve(A, x, b);
 
-        REQUIRE((x - solution()).norm() == Approx(0.0));
-        REQUIRE((A * x - b).norm() == Approx(0.0));
+        REQUIRE((x - solution()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((A * x - b).norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Preconditioned Bi-conjugate Gradient Stab Iterations")
     {
@@ -157,8 +159,8 @@ TEST_CASE("Linear solver test suite")
 
         linear_solver->solve(A, x, b);
 
-        REQUIRE((x - solution()).norm() == Approx(0.0));
-        REQUIRE((A * x - b).norm() == Approx(0.0));
+        REQUIRE((x - solution()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((A * x - b).norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Preconditioned Bi-conjugate Gradient Stab Iterations and Tolerance")
     {
@@ -173,8 +175,8 @@ TEST_CASE("Linear solver test suite")
 
         linear_solver->solve(A, x, b);
 
-        REQUIRE((x - solution()).norm() == Approx(0.0));
-        REQUIRE((A * x - b).norm() == Approx(0.0));
+        REQUIRE((x - solution()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((A * x - b).norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("PaStiX SPD")
     {
@@ -188,8 +190,8 @@ TEST_CASE("Linear solver test suite")
 
         linear_solver->solve(A, x, b);
 
-        REQUIRE((x - solution()).norm() == Approx(0.0));
-        REQUIRE((A * x - b).norm() == Approx(0.0));
+        REQUIRE((x - solution()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((A * x - b).norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("PaStiX LU")
     {
@@ -203,8 +205,8 @@ TEST_CASE("Linear solver test suite")
 
         linear_solver->solve(A, x, b);
 
-        REQUIRE((x - solution()).norm() == Approx(0.0));
-        REQUIRE((A * x - b).norm() == Approx(0.0));
+        REQUIRE((x - solution()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((A * x - b).norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("MUMPS SPD")
     {
@@ -218,8 +220,8 @@ TEST_CASE("Linear solver test suite")
 
         linear_solver->solve(A, x, b);
 
-        REQUIRE((x - solution()).norm() == Approx(0.0));
-        REQUIRE((A * x - b).norm() == Approx(0.0));
+        REQUIRE((x - solution()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((A * x - b).norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("MUMPS LU")
     {
@@ -233,8 +235,8 @@ TEST_CASE("Linear solver test suite")
 
         linear_solver->solve(A, x, b);
 
-        REQUIRE((x - solution()).norm() == Approx(0.0));
-        REQUIRE((A * x - b).norm() == Approx(0.0));
+        REQUIRE((x - solution()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((A * x - b).norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("SparseLU")
     {
@@ -248,8 +250,8 @@ TEST_CASE("Linear solver test suite")
 
         linear_solver->solve(A, x, b);
 
-        REQUIRE((x - solution()).norm() == Approx(0.0));
-        REQUIRE((A * x - b).norm() == Approx(0.0));
+        REQUIRE((x - solution()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((A * x - b).norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("SparseLDLT")
     {
@@ -263,8 +265,8 @@ TEST_CASE("Linear solver test suite")
 
         linear_solver->solve(A, x, b);
 
-        REQUIRE((x - solution()).norm() == Approx(0.0));
-        REQUIRE((A * x - b).norm() == Approx(0.0));
+        REQUIRE((x - solution()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((A * x - b).norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
 #ifdef ENABLE_CUDA
     SECTION("GPU Preconditioned Conjugate Gradient Default")
@@ -279,8 +281,8 @@ TEST_CASE("Linear solver test suite")
 
         linear_solver->solve(A, x, b);
 
-        REQUIRE((x - solution()).norm() == Approx(0.0));
-        REQUIRE((A * x - b).norm() == Approx(0.0));
+        REQUIRE((x - solution()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((A * x - b).norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("GPU Preconditioned Conjugate Gradient Tolerance")
     {
@@ -294,8 +296,8 @@ TEST_CASE("Linear solver test suite")
 
         linear_solver->solve(A, x, b);
 
-        REQUIRE((x - solution()).norm() == Approx(0.0));
-        REQUIRE((A * x - b).norm() == Approx(0.0));
+        REQUIRE((x - solution()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((A * x - b).norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("GPU Preconditioned Conjugate Gradient Iterations")
     {
@@ -309,8 +311,8 @@ TEST_CASE("Linear solver test suite")
 
         linear_solver->solve(A, x, b);
 
-        REQUIRE((x - solution()).norm() == Approx(0.0));
-        REQUIRE((A * x - b).norm() == Approx(0.0));
+        REQUIRE((x - solution()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((A * x - b).norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("GPU Preconditioned Conjugate Gradient Iterations and Tolerance")
     {
@@ -325,8 +327,8 @@ TEST_CASE("Linear solver test suite")
 
         linear_solver->solve(A, x, b);
 
-        REQUIRE((x - solution()).norm() == Approx(0.0));
-        REQUIRE((A * x - b).norm() == Approx(0.0));
+        REQUIRE((x - solution()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((A * x - b).norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
 #endif
     SECTION("Error")

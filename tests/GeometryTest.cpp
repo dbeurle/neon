@@ -19,6 +19,8 @@
 using namespace neon;
 using namespace ranges;
 
+constexpr auto ZERO_MARGIN = 1.0e-5;
+
 TEST_CASE("Testing material coordinates", "[MaterialCoordinates]")
 {
     // Build a right angled triangle
@@ -45,28 +47,29 @@ TEST_CASE("Testing material coordinates", "[MaterialCoordinates]")
     {
         Vector triangle = Vector::Zero(9);
         triangle << 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0;
-        REQUIRE((nodes.coordinates() - triangle).norm() == Approx(0.0));
+        REQUIRE((nodes.coordinates() - triangle).norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Check initial displacements are zero")
     {
-        REQUIRE(material_coordinates.displacement().norm() == Approx(0.0));
+        REQUIRE(material_coordinates.displacement().norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Test update of coordinates")
     {
         material_coordinates.update_current_configuration(local_displacements);
-        REQUIRE((material_coordinates.displacement() - local_displacements).norm() == Approx(0.0));
+        REQUIRE((material_coordinates.displacement() - local_displacements).norm()
+                == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Test local displacement via lookup")
     {
         material_coordinates.update_current_configuration(local_displacements);
         REQUIRE((material_coordinates.displacement(local_dof_list) - local_displacements).norm()
-                == Approx(0.0));
+                == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Test element view configuration")
     {
         REQUIRE(
             (material_coordinates.initial_configuration(local_node_list) - local_initial_config).norm()
-            == Approx(0.0));
+            == Approx(0.0).margin(ZERO_MARGIN));
     }
 }
 TEST_CASE("Basic mesh test")
@@ -88,10 +91,14 @@ TEST_CASE("Basic mesh test")
 
     SECTION("Test corner vertices")
     {
-        REQUIRE((nodal_coordinates.coordinates({0}) - Vector3(0.0, 0.0, 0.0)).norm() == Approx(0.0));
-        REQUIRE((nodal_coordinates.coordinates({1}) - Vector3(1.0, 0.0, 0.0)).norm() == Approx(0.0));
-        REQUIRE((nodal_coordinates.coordinates({2}) - Vector3(0.0, 1.0, 0.0)).norm() == Approx(0.0));
-        REQUIRE((nodal_coordinates.coordinates({3}) - Vector3(1.0, 1.0, 0.0)).norm() == Approx(0.0));
+        REQUIRE((nodal_coordinates.coordinates({0}) - Vector3(0.0, 0.0, 0.0)).norm()
+                == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((nodal_coordinates.coordinates({1}) - Vector3(1.0, 0.0, 0.0)).norm()
+                == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((nodal_coordinates.coordinates({2}) - Vector3(0.0, 1.0, 0.0)).norm()
+                == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((nodal_coordinates.coordinates({3}) - Vector3(1.0, 1.0, 0.0)).norm()
+                == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Test mesh data for boundary and volume elements")
     {
@@ -216,10 +223,10 @@ TEST_CASE("Solid submesh test")
         REQUIRE(local_dofs.size() == number_of_local_dofs);
         REQUIRE(stiffness.rows() == number_of_local_dofs);
         REQUIRE(stiffness.cols() == number_of_local_dofs);
-        REQUIRE(stiffness.norm() != Approx(0.0));
+        REQUIRE(stiffness.norm() != Approx(0.0).margin(ZERO_MARGIN));
 
         // Check symmetry for NeoHooke material model
-        REQUIRE((stiffness - stiffness.transpose()).norm() == Approx(0.0));
+        REQUIRE((stiffness - stiffness.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Internal force")
     {
@@ -301,7 +308,7 @@ TEST_CASE("Solid mesh test")
         // Check the correct values in the boundary conditions
         for (auto const& fixed_bottom : map.find("bottom")->second)
         {
-            REQUIRE(fixed_bottom.value_view(1.0) == Approx(0.0));
+            REQUIRE(fixed_bottom.value_view(1.0) == Approx(0.0).margin(ZERO_MARGIN));
             REQUIRE(fixed_bottom.dof_view().size() == 16);
         }
 

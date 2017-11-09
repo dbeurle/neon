@@ -1,5 +1,6 @@
-#define CATCH_CONFIG_MAIN // This tells Catch to provide a main() - only do this in one
-                          // cpp file
+
+#define CATCH_CONFIG_MAIN
+
 #include "catch.hpp"
 
 #include <iostream>
@@ -20,6 +21,7 @@ std::string json_input_file()
 }
 
 constexpr auto internal_variable_size = 2;
+constexpr auto ZERO_MARGIN = 1.0e-5;
 
 TEST_CASE("No constitutive model error test")
 {
@@ -78,7 +80,7 @@ TEST_CASE("Constitutive model invalid name error test")
     REQUIRE_THROWS_AS(make_constitutive_model(variables, material_data, simulation_data),
                       std::runtime_error);
 }
-TEST_CASE("Neo-Hookean model", "[NeoHooke]")
+TEST_CASE("Neo-Hookean model")
 {
     using namespace neon::solid;
     InternalVariables variables(internal_variable_size);
@@ -122,7 +124,7 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
 
     SECTION("Update of internal variables")
     {
-        for (auto& cauchy : cauchy_list) REQUIRE(cauchy.norm() == Approx(0.0));
+        for (auto& cauchy : cauchy_list) REQUIRE(cauchy.norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Check of continuum tangent")
     {
@@ -142,7 +144,7 @@ TEST_CASE("Neo-Hookean model", "[NeoHooke]")
             REQUIRE(C(5, 5) == Approx(0.1666666667));
 
             // Ensure symmetry is correct
-            REQUIRE((C - C.transpose()).norm() == Approx(0.0));
+            REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
         }
     }
 }
@@ -167,7 +169,7 @@ TEST_CASE("Microsphere model error test")
     REQUIRE_THROWS_AS(make_constitutive_model(variables, material_data, simulation_data),
                       std::runtime_error);
 }
-TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
+TEST_CASE("Affine microsphere model", )
 {
     using namespace neon::solid;
 
@@ -217,18 +219,18 @@ TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
 
         for (auto const& C : material_tangents)
         {
-            REQUIRE(C.norm() != Approx(0.0));
+            REQUIRE(C.norm() != Approx(0.0).margin(ZERO_MARGIN));
         }
 
         // Ensure symmetry is correct
         for (auto const& C : material_tangents)
         {
-            REQUIRE((C - C.transpose()).norm() == Approx(0.0));
+            REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
         }
 
         for (auto& cauchy : cauchy_list)
         {
-            REQUIRE(cauchy.norm() == Approx(0.0));
+            REQUIRE(cauchy.norm() == Approx(0.0).margin(ZERO_MARGIN));
         }
     }
     SECTION("Affine model under uniaxial load")
@@ -245,21 +247,21 @@ TEST_CASE("Affine microsphere model", "[AffineMicrosphere]")
         // Ensure symmetry is correct
         for (auto const& C : material_tangents)
         {
-            REQUIRE((C - C.transpose()).norm() == Approx(0.0));
+            REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
         }
 
         for (auto const& C : material_tangents)
         {
-            REQUIRE(C.norm() != Approx(0.0));
+            REQUIRE(C.norm() != Approx(0.0).margin(ZERO_MARGIN));
         }
 
         for (auto& cauchy : cauchy_list)
         {
-            REQUIRE(cauchy.norm() != Approx(0.0));
+            REQUIRE(cauchy.norm() != Approx(0.0).margin(ZERO_MARGIN));
         }
     }
 }
-TEST_CASE("NonAffine microsphere model", "[NonAffineMicrosphere]")
+TEST_CASE("NonAffine microsphere model")
 {
     using namespace neon::solid;
 
@@ -310,18 +312,18 @@ TEST_CASE("NonAffine microsphere model", "[NonAffineMicrosphere]")
 
         for (auto const& C : material_tangents)
         {
-            REQUIRE(C.norm() != Approx(0.0));
+            REQUIRE(C.norm() != Approx(0.0).margin(ZERO_MARGIN));
         }
 
         // Ensure symmetry is correct
         for (auto const& C : material_tangents)
         {
-            REQUIRE((C - C.transpose()).norm() == Approx(0.0));
+            REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
         }
 
         for (auto& cauchy : cauchy_list)
         {
-            REQUIRE(cauchy.norm() == Approx(0.0));
+            REQUIRE(cauchy.norm() == Approx(0.0).margin(ZERO_MARGIN));
         }
     }
     SECTION("NonAffine model under uniaxial load")
@@ -338,17 +340,17 @@ TEST_CASE("NonAffine microsphere model", "[NonAffineMicrosphere]")
         // Ensure symmetry is correct
         for (auto const& C : material_tangents)
         {
-            REQUIRE((C - C.transpose()).norm() == Approx(0.0));
+            REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
         }
 
         for (auto const& C : material_tangents)
         {
-            REQUIRE(C.norm() != Approx(0.0));
+            REQUIRE(C.norm() != Approx(0.0).margin(ZERO_MARGIN));
         }
 
         for (auto& cauchy : cauchy_list)
         {
-            REQUIRE(cauchy.norm() != Approx(0.0));
+            REQUIRE(cauchy.norm() != Approx(0.0).margin(ZERO_MARGIN));
         }
     }
 }
@@ -372,7 +374,7 @@ TEST_CASE("J2 plasticity model factory errors")
     REQUIRE_THROWS_AS(make_constitutive_model(variables, material_data, simulation_data),
                       std::runtime_error);
 }
-TEST_CASE("J2 plasticity model", "[J2Plasticity]")
+TEST_CASE("J2 plasticity model")
 {
     using namespace neon::solid;
 
@@ -428,9 +430,9 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
         // Ensure symmetry is correct
         for (auto const& C : material_tangents)
         {
-            REQUIRE((C - C.transpose()).norm() == Approx(0.0));
+            REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
         }
-        for (auto& cauchy : cauchy_list) REQUIRE(cauchy.norm() == Approx(0.0));
+        for (auto& cauchy : cauchy_list) REQUIRE(cauchy.norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Uniaxial elastic load")
     {
@@ -444,21 +446,22 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
         // Ensure symmetry is correct
         for (auto const& C : material_tangents)
         {
-            REQUIRE((C - C.transpose()).norm() == Approx(0.0));
+            REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
         }
         for (auto& cauchy : cauchy_list)
         {
-            REQUIRE(cauchy.norm() != Approx(0.0));
+            REQUIRE(cauchy.norm() != Approx(0.0).margin(ZERO_MARGIN));
 
             // Shear components should be close to zero
-            REQUIRE(cauchy(0, 1) == Approx(0.0));
-            REQUIRE(cauchy(0, 2) == Approx(0.0));
-            REQUIRE(cauchy(1, 2) == Approx(0.0));
+            REQUIRE(cauchy(0, 1) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy(0, 2) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy(1, 2) == Approx(0.0).margin(ZERO_MARGIN));
             REQUIRE(cauchy(0, 0) > 0.0);
             REQUIRE(cauchy(1, 1) > 0.0);
             REQUIRE(cauchy(2, 2) > 0.0);
         }
-        for (auto& strain_p_eff : eff_plastic_list) REQUIRE(strain_p_eff == Approx(0.0));
+        for (auto& strain_p_eff : eff_plastic_list)
+            REQUIRE(strain_p_eff == Approx(0.0).margin(ZERO_MARGIN));
         for (auto& vm : vm_list) REQUIRE(vm < 200.0e6);
     }
     SECTION("Plastic uniaxial elastic load")
@@ -473,16 +476,16 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
         // Ensure symmetry is correct
         for (auto const& C : material_tangents)
         {
-            REQUIRE((C - C.transpose()).norm() == Approx(0.0));
+            REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
         }
         for (auto& cauchy : cauchy_list)
         {
-            REQUIRE(cauchy.norm() != Approx(0.0));
+            REQUIRE(cauchy.norm() != Approx(0.0).margin(ZERO_MARGIN));
 
             // Shear components should be close to zero
-            REQUIRE(cauchy(0, 1) == Approx(0.0));
-            REQUIRE(cauchy(0, 2) == Approx(0.0));
-            REQUIRE(cauchy(1, 2) == Approx(0.0));
+            REQUIRE(cauchy(0, 1) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy(0, 2) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy(1, 2) == Approx(0.0).margin(ZERO_MARGIN));
             REQUIRE(cauchy(0, 0) > 0.0);
             REQUIRE(cauchy(1, 1) > 0.0);
             REQUIRE(cauchy(2, 2) > 0.0);
@@ -499,7 +502,7 @@ TEST_CASE("J2 plasticity model", "[J2Plasticity]")
         }
     }
 }
-TEST_CASE("Finite J2 plasticity model", "[FiniteJ2Plasticity]")
+TEST_CASE("Finite J2 plasticity model")
 {
     using namespace neon::solid;
 
@@ -553,7 +556,7 @@ TEST_CASE("Finite J2 plasticity model", "[FiniteJ2Plasticity]")
     {
         for (auto const& C : material_tangents)
         {
-            REQUIRE((C - C.transpose()).norm() == Approx(0.0));
+            REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
         }
     }
     SECTION("No load")
@@ -562,11 +565,11 @@ TEST_CASE("Finite J2 plasticity model", "[FiniteJ2Plasticity]")
 
         for (auto const& C : material_tangents)
         {
-            REQUIRE((C - C.transpose()).norm() == Approx(0.0));
+            REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
         }
         for (auto& cauchy : cauchy_list)
         {
-            REQUIRE(cauchy.norm() == Approx(0.0));
+            REQUIRE(cauchy.norm() == Approx(0.0).margin(ZERO_MARGIN));
         }
     }
     // SECTION("Uniaxial elastic load")
@@ -577,16 +580,16 @@ TEST_CASE("Finite J2 plasticity model", "[FiniteJ2Plasticity]")
     //
     //     for (auto const& C : material_tangents)
     //     {
-    //         REQUIRE((C - C.transpose()).norm() == Approx(0.0));
+    //         REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
     //     }
     //     for (auto& cauchy : cauchy_list)
     //     {
-    //         REQUIRE((cauchy - cauchy.transpose()).norm() == Approx(0.0));
+    //         REQUIRE((cauchy - cauchy.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
     //
     //         // Shear components should be close to zero
-    //         REQUIRE(cauchy(0, 1) == Approx(0.0));
-    //         REQUIRE(cauchy(0, 2) == Approx(0.0));
-    //         REQUIRE(cauchy(1, 2) == Approx(0.0));
+    //         REQUIRE(cauchy(0, 1) == Approx(0.0).margin(ZERO_MARGIN));
+    //         REQUIRE(cauchy(0, 2) == Approx(0.0).margin(ZERO_MARGIN));
+    //         REQUIRE(cauchy(1, 2) == Approx(0.0).margin(ZERO_MARGIN));
     //         REQUIRE(cauchy(0, 0) > 0.0);
     //         REQUIRE(cauchy(1, 1) > 0.0);
     //         REQUIRE(cauchy(2, 2) > 0.0);
@@ -608,16 +611,16 @@ TEST_CASE("Finite J2 plasticity model", "[FiniteJ2Plasticity]")
     //     // Ensure symmetry is correct
     //     for (auto const& C : material_tangents)
     //     {
-    //         REQUIRE((C - C.transpose()).norm() == Approx(0.0));
+    //         REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
     //     }
     //     for (auto& cauchy : cauchy_list)
     //     {
-    //         REQUIRE(cauchy.norm() != Approx(0.0));
+    //         REQUIRE(cauchy.norm() != Approx(0.0).margin(ZERO_MARGIN));
     //
     //         // Shear components should be close to zero
-    //         REQUIRE(cauchy(0, 1) == Approx(0.0));
-    //         REQUIRE(cauchy(0, 2) == Approx(0.0));
-    //         REQUIRE(cauchy(1, 2) == Approx(0.0));
+    //         REQUIRE(cauchy(0, 1) == Approx(0.0).margin(ZERO_MARGIN));
+    //         REQUIRE(cauchy(0, 2) == Approx(0.0).margin(ZERO_MARGIN));
+    //         REQUIRE(cauchy(1, 2) == Approx(0.0).margin(ZERO_MARGIN));
     //         REQUIRE(cauchy(0, 0) > 0.0);
     //         REQUIRE(cauchy(1, 1) > 0.0);
     //         REQUIRE(cauchy(2, 2) > 0.0);
