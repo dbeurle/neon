@@ -10,8 +10,8 @@
 #include "quadrature/UnitSphereQuadrature.hpp"
 
 #include "interpolations/Hexahedron.hpp"
-#include "interpolations/Quadrilateral4.hpp"
-#include "interpolations/Quadrilateral8.hpp"
+#include "interpolations/Quadrilateral.hpp"
+
 #include "interpolations/Tetrahedron10.hpp"
 #include "interpolations/Tetrahedron4.hpp"
 #include "interpolations/Triangle3.hpp"
@@ -159,6 +159,66 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
             0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
 
         REQUIRE(quad8.compute_measure(x) == Approx(1.0));
+    }
+    SECTION("Quadrilateral9 interpolation function - four point")
+    {
+        Quadrilateral9 quad9(QuadrilateralQuadrature::Rule::FourPoint);
+
+        REQUIRE(quad9.nodes() == 9);
+        REQUIRE(quad9.quadrature().points() == 4);
+        REQUIRE(quad9.local_quadrature_extrapolation().rows() == 9);
+        REQUIRE(quad9.local_quadrature_extrapolation().cols() == 4);
+
+        quad9.quadrature().for_each([&](auto const& femval, auto const& l) {
+
+            auto const & [ N, rhea ] = femval;
+
+            REQUIRE(N.sum() == Approx(1.0));
+
+            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
+        });
+    }
+    SECTION("Quadrilateral9 surface area - four point")
+    {
+        Quadrilateral9 quad9(QuadrilateralQuadrature::Rule::FourPoint);
+
+        Matrix x(3, 9);
+        x << 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5, 0.0, 0.5, //
+            0.0, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5, 0.5,  //
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
+
+        REQUIRE(quad9.compute_measure(x) == Approx(1.0));
+    }
+    SECTION("Quadrilateral9 interpolation function - nine point")
+    {
+        Quadrilateral9 quad9(QuadrilateralQuadrature::Rule::NinePoint);
+
+        REQUIRE(quad9.nodes() == 9);
+        REQUIRE(quad9.quadrature().points() == 9);
+        REQUIRE(quad9.local_quadrature_extrapolation().rows() == 9);
+        REQUIRE(quad9.local_quadrature_extrapolation().cols() == 9);
+
+        quad9.quadrature().for_each([&](auto const& femval, auto const& l) {
+
+            auto const & [ N, rhea ] = femval;
+
+            REQUIRE(N.sum() == Approx(1.0));
+
+            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
+        });
+    }
+    SECTION("Quadrilateral9 interpolation function - nine point")
+    {
+        Quadrilateral9 quad9(QuadrilateralQuadrature::Rule::NinePoint);
+
+        Matrix x(3, 9);
+        x << 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5, 0.0, 0.5, //
+            0.0, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5, 0.5,  //
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
+
+        REQUIRE(quad9.compute_measure(x) == Approx(1.0));
     }
 }
 TEST_CASE("Triangle quadrature scheme test", "[TriangleQuadrature]")

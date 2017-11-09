@@ -30,4 +30,32 @@ protected:
      */
     void precompute_shape_functions();
 };
+
+/** A finite element with 8 nodal points and an isoparametric formulation */
+class Quadrilateral8 : public SurfaceInterpolation
+{
+public:
+    Quadrilateral8(QuadrilateralQuadrature::Rule rule);
+
+    int nodes() const override final { return 8; }
+
+    double compute_measure(Matrix const& nodal_coordinates);
+
+protected:
+    void precompute_shape_functions();
+};
+
+/** A finite element with 8 nodal points and an isoparametric formulation */
+class Quadrilateral9 : public SurfaceInterpolation
+{
+public:
+    Quadrilateral9(QuadrilateralQuadrature::Rule rule);
+
+    int nodes() const override final { return 9; }
+
+    double compute_measure(Matrix const& nodal_coordinates);
+
+protected:
+    void precompute_shape_functions();
+};
 }
