@@ -119,7 +119,6 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
         if (evaluate_yield_function(von_mises, accumulated_plastic_strain) <= 0.0)
         {
             tangent_operators[l] = C_e;
-
             continue;
         }
 
