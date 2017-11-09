@@ -1,7 +1,8 @@
 
 #include "InterpolationFactory.hpp"
 
-#include "interpolations/Hexahedron8.hpp"
+#include "interpolations/Hexahedron.hpp"
+
 #include "interpolations/Quadrilateral4.hpp"
 #include "interpolations/Quadrilateral8.hpp"
 #include "interpolations/Tetrahedron10.hpp"
@@ -40,6 +41,12 @@ std::unique_ptr<VolumeInterpolation> make_volume_interpolation(ElementTopology c
             return std::make_unique<Hexahedron8>(is_reduced ? HexahedronQuadrature::Rule::OnePoint
                                                             : HexahedronQuadrature::Rule::EightPoint);
         }
+        case ElementTopology::Hexahedron27:
+        {
+            return std::make_unique<Hexahedron27>(is_reduced
+                                                      ? HexahedronQuadrature::Rule::SixPoint
+                                                      : HexahedronQuadrature::Rule::EightPoint);
+        }
         case ElementTopology::Tetrahedron4:
         {
             return std::make_unique<Tetrahedron4>(TetrahedronQuadrature::Rule::OnePoint);
@@ -57,10 +64,10 @@ std::unique_ptr<VolumeInterpolation> make_volume_interpolation(ElementTopology c
         case ElementTopology::Tetrahedron56:
         case ElementTopology::Hexahedron64:
         case ElementTopology::Hexahedron125:
-        case ElementTopology::Hexahedron27:
+        case ElementTopology::Hexahedron20:
         case ElementTopology::Prism18:
         case ElementTopology::Pyramid14:
-        case ElementTopology::Hexahedron20:
+
         case ElementTopology::Prism15:
         case ElementTopology::Pyramid13:
         default:

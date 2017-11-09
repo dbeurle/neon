@@ -12,7 +12,7 @@ class Quadrilateral8 : public SurfaceInterpolation
 public:
     Quadrilateral8(QuadrilateralQuadrature::Rule rule);
 
-    virtual int nodes() const override final { return 8; }
+    int nodes() const override final { return 8; }
 
     double compute_measure(Matrix const& nodal_coordinates);
 

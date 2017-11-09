@@ -11,6 +11,6 @@ public:
     /** Available quadrature rules for this element type */
     enum class Rule { OnePoint, FourPoint, FivePoint };
 
-    TetrahedronQuadrature(Rule rule, int interpolationOrder = 1);
+    explicit TetrahedronQuadrature(Rule rule);
 };
 }

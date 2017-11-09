@@ -2,7 +2,6 @@
 #pragma once
 
 #include <tuple>
-#include <vector>
 
 #include "numeric/DenseTypes.hpp"
 
@@ -19,6 +18,7 @@ class NumericalQuadrature
 {
 public:
     using Coordinate = std::tuple<int, Xi, Eta...>;
+    using femValue = std::tuple<Vector, Matrix>;
 
 public:
     /**

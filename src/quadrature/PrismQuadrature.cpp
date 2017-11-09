@@ -3,7 +3,7 @@
 
 namespace neon
 {
-PrismQuadrature::PrismQuadrature(Rule rule, int interpolation_order)
+PrismQuadrature::PrismQuadrature(Rule rule)
 {
     switch (rule)
     {

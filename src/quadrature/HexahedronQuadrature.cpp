@@ -3,7 +3,7 @@
 
 namespace neon
 {
-HexahedronQuadrature::HexahedronQuadrature(Rule rule, int interpolationOrder)
+HexahedronQuadrature::HexahedronQuadrature(Rule rule)
 {
     switch (rule)
     {
@@ -11,6 +11,17 @@ HexahedronQuadrature::HexahedronQuadrature(Rule rule, int interpolationOrder)
         {
             w = {8.0};
             clist = {{0, 0.0, 0.0, 0.0}};
+            break;
+        }
+        case Rule::SixPoint:
+        {
+            w.resize(6, 4.0 / 3.0);
+            clist = {{0, 1.0, 0.0, 0.0},
+                     {1, -1.0, 0.0, 0.0},
+                     {2, 0.0, 1.0, 0.0},
+                     {3, 0.0, -1.0, 0.0},
+                     {4, 0.0, 0.0, 1.0},
+                     {5, 0.0, 0.0, -1.0}};
             break;
         }
         case Rule::EightPoint:

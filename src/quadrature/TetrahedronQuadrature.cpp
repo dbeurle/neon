@@ -5,7 +5,7 @@
 
 namespace neon
 {
-TetrahedronQuadrature::TetrahedronQuadrature(Rule rule, int interpolation_order)
+TetrahedronQuadrature::TetrahedronQuadrature(Rule rule)
 {
     switch (rule)
     {

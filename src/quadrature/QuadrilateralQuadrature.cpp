@@ -3,7 +3,7 @@
 
 namespace neon
 {
-QuadrilateralQuadrature::QuadrilateralQuadrature(Rule rule, int interpolation_order)
+QuadrilateralQuadrature::QuadrilateralQuadrature(Rule rule)
 {
     switch (rule)
     {

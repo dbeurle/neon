@@ -5,7 +5,7 @@
 
 namespace neon
 {
-TriangleQuadrature::TriangleQuadrature(Rule rule, int interpolation_order)
+TriangleQuadrature::TriangleQuadrature(Rule rule)
 {
     switch (rule)
     {

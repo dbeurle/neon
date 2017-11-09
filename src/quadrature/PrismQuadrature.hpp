@@ -12,6 +12,6 @@ public:
     enum class Rule { OnePoint, SixPoint };
 
 public:
-    PrismQuadrature(Rule rule, int interpolation_order = 1);
+    explicit PrismQuadrature(Rule rule);
 };
 }
