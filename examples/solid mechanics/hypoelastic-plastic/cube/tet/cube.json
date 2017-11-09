@@ -9,7 +9,7 @@
         "Name" : "steel",
         "ElasticModulus" : 210.0e9,
         "IsotropicHardeningModulus" : 400.0e6,
-        "YieldStress" : 300.0e6,
+        "YieldStress" : 200.0e6,
         "PoissonsRatio" : 0.3
     }],
     "SimulationCases" : [{
@@ -23,9 +23,9 @@
         "Time" : {
             "Period" : 1.0,
             "Increments" : {
-                "Initial" : 0.1,
+                "Initial" : 1.0,
                 "Minimum" : 0.00001,
-                "Maximum" : 0.1
+                "Maximum" : 1.0
             }
         },
 		"Mesh" : [{
@@ -41,33 +41,33 @@
             [{
                 "Name" : "Xsym",
                 "Type" : "Displacement",
-                "Time" : [0.0, 0.5, 1.0],
+                "Time" : [0.0, 1.0],
                 "Values" : {
-                    "x" : [0.0, 0.0, 0.0]
+                    "x" : [0.0, 0.0]
                 }
             },
             {
                 "Name" : "Ysym",
                 "Type" : "Displacement",
-                "Time" : [0.0, 0.5, 1.0],
+                "Time" : [0.0, 1.0],
                 "Values" : {
-                    "y" : [0.0, 0.0, 0.0]
+                    "y" : [0.0, 0.0]
                 }
             },
             {
                 "Name" : "Zsym",
                 "Type" : "Displacement",
-                "Time" : [0.0, 0.5, 1.0],
+                "Time" : [0.0, 1.0],
                 "Values" : {
-                    "z" : [0.0, 0.0, 0.0]
+                    "z" : [0.0, 0.0]
                 }
             },
             {
                 "Name" : "ZLoad",
 				"Type" : "Displacement",
-                "Time" : [0.0, 0.5, 1.0],
+                "Time" : [0.0, 1.0],
                 "Values" : {
-                    "z" : [0.0, 1.0e-6, 2.0e-6]
+                    "z" : [0.0, 1.0e-3]
                 }
             }]
         }],

@@ -143,9 +143,25 @@ void femStaticMatrix::solve()
 
         compute_external_force(adaptive_load.step_time());
 
-        fem_mesh.update_internal_variables(d, adaptive_load.increment());
+        try
+        {
+            fem_mesh.update_internal_variables(d, adaptive_load.increment());
 
-        perform_equilibrium_iterations();
+            perform_equilibrium_iterations();
+        }
+        catch (computational_error& comp_error)
+        {
+            std::cout << std::endl
+                      << std::string(6, ' ') << termcolor::bold << termcolor::yellow
+                      << comp_error.what() << termcolor::reset << std::endl;
+
+            adaptive_load.update_convergence_state(false);
+            fem_mesh.save_internal_variables(false);
+        }
+        catch (...)
+        {
+            throw;
+        }
     }
 }
 
@@ -245,65 +261,49 @@ void femStaticMatrix::perform_equilibrium_iterations()
     auto constexpr max_iterations{10};
     auto current_iteration{0};
 
-    try
+    while (current_iteration < max_iterations)
     {
-        while (current_iteration < max_iterations)
-        {
-            auto const start = std::chrono::high_resolution_clock::now();
+        auto const start = std::chrono::high_resolution_clock::now();
 
-            std::cout << std::string(4, ' ') << termcolor::blue << termcolor::bold
-                      << "Newton-Raphson iteration " << current_iteration << termcolor::reset
-                      << std::endl;
+        std::cout << std::string(4, ' ') << termcolor::blue << termcolor::bold
+                  << "Newton-Raphson iteration " << current_iteration << termcolor::reset
+                  << std::endl;
 
-            compute_internal_force();
+        compute_internal_force();
 
-            Vector residual = fint - fext;
+        Vector residual = fint - fext;
 
-            assemble_stiffness();
+        assemble_stiffness();
 
-            enforce_dirichlet_conditions(Kt, delta_d, residual);
+        enforce_dirichlet_conditions(Kt, delta_d, residual);
 
-            linear_solver->solve(Kt, delta_d, -residual);
+        linear_solver->solve(Kt, delta_d, -residual);
 
-            d_new += delta_d;
+        d_new += delta_d;
 
-            fem_mesh.update_internal_variables(d_new);
+        fem_mesh.update_internal_variables(d_new);
 
-            update_relative_norms(current_iteration, delta_d.norm(), residual.norm());
+        update_relative_norms(current_iteration, delta_d.norm(), residual.norm());
 
-            print_convergence_progress();
+        print_convergence_progress();
 
-            auto const end = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double> const elapsed_seconds = end - start;
-            std::cout << std::string(6, ' ') << "Equilibrium iteration required "
-                      << elapsed_seconds.count() << "s\n";
+        auto const end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> const elapsed_seconds = end - start;
+        std::cout << std::string(6, ' ') << "Equilibrium iteration required "
+                  << elapsed_seconds.count() << "s\n";
 
-            if (is_iteration_converged()) break;
+        if (is_iteration_converged()) break;
 
-            current_iteration++;
-        }
-
-        adaptive_load.update_convergence_state(current_iteration != max_iterations);
-        fem_mesh.save_internal_variables(current_iteration != max_iterations);
-
-        if (current_iteration != max_iterations)
-        {
-            d = d_new;
-            file_io.write(adaptive_load.step(), adaptive_load.time());
-        }
+        current_iteration++;
     }
-    catch (computational_error& comp_error)
-    {
-        std::cout << std::endl
-                  << std::string(6, ' ') << termcolor::bold << termcolor::yellow
-                  << comp_error.what() << termcolor::reset << std::endl;
 
-        adaptive_load.update_convergence_state(false);
-        fem_mesh.save_internal_variables(false);
-    }
-    catch (...)
+    adaptive_load.update_convergence_state(current_iteration != max_iterations);
+    fem_mesh.save_internal_variables(current_iteration != max_iterations);
+
+    if (current_iteration != max_iterations)
     {
-        throw;
+        d = d_new;
+        file_io.write(adaptive_load.step(), adaptive_load.time());
     }
 }
 

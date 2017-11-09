@@ -9,7 +9,7 @@
         "Name" : "steel",
         "ElasticModulus" : 210.0e9,
         "IsotropicHardeningModulus" : 400.0e6,
-        "YieldStress" : 300.0e6,
+        "YieldStress" : 200.0e6,
         "PoissonsRatio" : 0.3
     }],
     "SimulationCases" : [{
@@ -31,7 +31,7 @@
 		"Mesh" : [{
             "Name" : "cube",
             "ConstitutiveModel" : {
-                "Name" :  "J2Plasticity",
+                "Name" : "J2Plasticity",
                 "FiniteStrain" : false
             },
             "ElementOptions" : {
@@ -67,7 +67,7 @@
 				"Type" : "Displacement",
                 "Time" : [0.0, 1.0],
                 "Values" : {
-                    "z" : [0.0, 2.0e-2]
+                    "z" : [0.0, 1.0e-3]
                 }
             }]
         }],
