@@ -2,9 +2,8 @@
 #include "InterpolationFactory.hpp"
 
 #include "interpolations/Hexahedron.hpp"
+#include "interpolations/Quadrilateral.hpp"
 
-#include "interpolations/Quadrilateral4.hpp"
-#include "interpolations/Quadrilateral8.hpp"
 #include "interpolations/Tetrahedron10.hpp"
 #include "interpolations/Tetrahedron4.hpp"
 #include "interpolations/Triangle3.hpp"
