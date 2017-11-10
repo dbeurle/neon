@@ -2,11 +2,11 @@
 #include "MicromechanicalElastomer.hpp"
 
 #include "numeric/DenseTypes.hpp"
+#include "numeric/FloatingPointCompare.hpp"
 
 #include <json/value.h>
 
 #include <cmath>
-#include <iostream>
 #include <random>
 
 #include <range/v3/action.hpp>

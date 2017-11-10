@@ -3,6 +3,8 @@
 
 #include "mesh/common/Boundary.hpp"
 
+#include "numeric/IndexTypes.hpp"
+
 namespace neon
 {
 class Dirichlet : public Boundary

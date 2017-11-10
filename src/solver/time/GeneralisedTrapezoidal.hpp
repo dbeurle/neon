@@ -3,9 +3,6 @@
 
 #include <json/forwards.h>
 
-#include "numeric/DenseTypes.hpp"
-#include "numeric/SparseTypes.hpp"
-
 namespace neon
 {
 class GeneralisedTrapezoidal

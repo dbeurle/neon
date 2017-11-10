@@ -74,19 +74,19 @@ public:
     AdaptiveLoadStep(Json::Value const& increment_data, std::vector<double> mandatory_time_history);
 
     /** Check if the load increment is finalised */
-    bool is_fully_applied() const { return is_applied; }
+    [[nodiscard]] bool is_fully_applied() const { return is_applied; }
 
     /** Get the global time (including past load cases) */
-    double time() const { return total_time + last_converged_time; }
+    [[nodiscard]] double time() const { return total_time + last_converged_time; }
 
     /** Get the time only for the current load case */
-    double step_time() const { return current_time; }
+    [[nodiscard]] double step_time() const { return current_time; }
 
     /** Get the pseudo time step size */
-    double increment() const { return current_time - last_converged_time; }
+    [[nodiscard]] double increment() const { return current_time - last_converged_time; }
 
     /** The number of steps taken for all time */
-    auto step() const { return successful_increments; }
+    [[nodiscard]] auto step() const { return successful_increments; }
 
     /** Update the convergence state to determine the next increment */
     void update_convergence_state(bool const is_converged);
@@ -98,7 +98,7 @@ protected:
 
     void check_increment_data(Json::Value const& increment_data);
 
-    bool is_highly_nonlinear() const
+    [[nodiscard]] bool is_highly_nonlinear() const
     {
         return consecutive_unconverged > 0 || consecutive_converged < 4;
     }

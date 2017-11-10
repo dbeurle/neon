@@ -15,6 +15,7 @@
 #include <omp.h>
 
 #include <json/json.h>
+#include <range/v3/algorithm.hpp>
 #include <range/v3/view.hpp>
 #include <termcolor/termcolor.hpp>
 

@@ -1,9 +1,7 @@
 
 #include "Boundary.hpp"
 
-#include "numeric/DenseTypes.hpp"
-
-#include <functional>
+#include "numeric/FloatingPointCompare.hpp"
 
 #include <range/v3/algorithm.hpp>
 #include <range/v3/view.hpp>

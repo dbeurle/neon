@@ -5,6 +5,8 @@
 #include "mesh/solid/Submesh.hpp"
 #include "mesh/solid/boundary/NonFollowerLoad.hpp"
 
+#include <map>
+
 namespace neon
 {
 class BasicMesh;
@@ -22,13 +24,13 @@ public:
             Json::Value const& simulation_data);
 
     /** The number of active degrees of freedom in this mesh */
-    auto active_dofs() const { return 3 * material_coordinates->size(); }
+    [[nodiscard]] auto active_dofs() const { return 3 * material_coordinates->size(); }
 
     /**
      * Checks the boundary conditions and constitutive model to ensure
      * resulting matrix from this mesh is symmetric.  \sa LinearSolver
      */
-    bool is_symmetric() const;
+    [[nodiscard]] bool is_symmetric() const;
 
     /**
      * Deform the body by updating the displacement x = X + u
@@ -44,14 +46,14 @@ public:
     void save_internal_variables(bool const have_converged);
 
     /** Constant access to the sub-meshes */
-    std::vector<femSubmesh> const& meshes() const { return submeshes; }
+    [[nodiscard]] std::vector<femSubmesh> const& meshes() const { return submeshes; }
 
     /** Mutable access to the sub-meshes */
-    std::vector<femSubmesh>& meshes() { return submeshes; }
+    [[nodiscard]] std::vector<femSubmesh>& meshes() { return submeshes; }
 
-    auto const& displacement_boundaries() const { return displacement_bcs; }
+    [[nodiscard]] auto const& displacement_boundaries() const { return displacement_bcs; }
 
-    auto const& nonfollower_load_boundaries() const { return nonfollower_loads; }
+    [[nodiscard]] auto const& nonfollower_load_boundaries() const { return nonfollower_loads; }
 
     /**
      * Gathers the time history for each boundary condition and
@@ -59,9 +61,9 @@ public:
      *
      * \sa AdaptiveLoadStep
      */
-    std::vector<double> time_history() const;
+    [[nodiscard]] std::vector<double> time_history() const;
 
-    auto const& coordinates() const { return *(material_coordinates.get()); }
+    [[nodiscard]] auto const& coordinates() const { return *(material_coordinates.get()); }
 
 protected:
     void check_boundary_conditions(Json::Value const& boundary_data) const;
@@ -70,10 +72,10 @@ protected:
 
     void allocate_displacement_boundary(Json::Value const& boundary, BasicMesh const& basic_mesh);
 
-    bool is_nonfollower_load(std::string const& boundary_type) const;
+    [[nodiscard]] bool is_nonfollower_load(std::string const& boundary_type) const;
 
     /** Collapse the nodal connectivity arrays from the submesh for a node list */
-    List filter_dof_list(std::vector<SubMesh> const& boundary_mesh) const;
+    [[nodiscard]] List filter_dof_list(std::vector<SubMesh> const& boundary_mesh) const;
 
 protected:
     std::shared_ptr<MaterialCoordinates> material_coordinates;

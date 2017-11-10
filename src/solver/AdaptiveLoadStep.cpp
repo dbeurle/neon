@@ -1,7 +1,7 @@
 
 #include "AdaptiveLoadStep.hpp"
 
-#include "numeric/DenseTypes.hpp"
+#include "numeric/FloatingPointCompare.hpp"
 
 #include <exception>
 #include <range/v3/algorithm.hpp>

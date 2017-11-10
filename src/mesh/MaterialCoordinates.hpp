@@ -3,9 +3,6 @@
 
 #include "mesh/NodalCoordinates.hpp"
 
-#include <range/v3/algorithm.hpp>
-#include <range/v3/view.hpp>
-
 #include "vtkSmartPointer.h"
 class vtkPoints;
 class vtkDoubleArray;

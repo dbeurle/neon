@@ -1,6 +1,9 @@
 
 #include "MaterialCoordinates.hpp"
 
+#include <range/v3/algorithm.hpp>
+#include <range/v3/view.hpp>
+
 #include "vtkDoubleArray.h"
 #include "vtkPoints.h"
 

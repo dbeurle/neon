@@ -19,6 +19,8 @@
 #include <json/reader.h>
 #include <termcolor/termcolor.hpp>
 
+#include <range/v3/algorithm.hpp>
+
 namespace neon
 {
 int SimulationControl::threads = std::thread::hardware_concurrency();

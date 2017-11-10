@@ -3,6 +3,7 @@
 
 #include "Exceptions.hpp"
 #include "InternalVariables.hpp"
+#include "numeric/FloatingPointCompare.hpp"
 
 #include <iostream>
 #include <json/value.h>

@@ -4,7 +4,6 @@
 #include <json/forwards.h>
 
 #include "numeric/DenseTypes.hpp"
-#include "numeric/SparseTypes.hpp"
 #include "solver/TimeControl.hpp"
 
 namespace neon
@@ -14,23 +13,25 @@ class NewmarkBeta
 public:
     NewmarkBeta(Json::Value const& time_solver_data);
 
-    double mass_scaling_factor() const;
+    [[nodiscard]] double mass_scaling_factor() const;
 
-    Vector approximate_displacements(Vector const& a, Vector const& v, Vector const& d) const;
+    [[nodiscard]] Vector approximate_displacements(Vector const& a,
+                                                   Vector const& v,
+                                                   Vector const& d) const;
 
-    Vector approximate_velocities(Vector const& a, Vector const& v) const;
+    [[nodiscard]] Vector approximate_velocities(Vector const& a, Vector const& v) const;
 
-    Vector accelerations(Vector const& a, Vector const& v, Vector const& d);
+    [[nodiscard]] Vector accelerations(Vector const& a, Vector const& v, Vector const& d);
 
-    Vector velocities(Vector const& a, Vector const& v) const;
+    [[nodiscard]] Vector velocities(Vector const& a, Vector const& v) const;
 
     /** Perform the time integration until returns false */
-    bool time_loop();
+    [[nodiscard]] bool time_loop();
 
-    double time_step_size() const { return time_control.current_time_step_size(); }
+    [[nodiscard]] double time_step_size() const { return time_control.current_time_step_size(); }
 
 protected:
-    bool are_parameters_unstable() const;
+    [[nodiscard]] bool are_parameters_unstable() const;
 
 protected:
     TimeControl time_control;

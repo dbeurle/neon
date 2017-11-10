@@ -2,7 +2,7 @@
 #pragma once
 
 #include "mesh/ElementTopology.hpp"
-#include "numeric/DenseTypes.hpp"
+#include "numeric/IndexTypes.hpp"
 
 #include <unordered_map>
 

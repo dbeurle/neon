@@ -3,7 +3,7 @@
 
 #include "mesh/ElementTopology.hpp"
 #include "mesh/NodeOrderingAdapter.hpp"
-#include "numeric/DenseTypes.hpp"
+#include "numeric/IndexTypes.hpp"
 
 #include <json/forwards.h>
 

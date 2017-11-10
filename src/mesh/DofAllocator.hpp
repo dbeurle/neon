@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "numeric/DenseTypes.hpp"
+#include "numeric/IndexTypes.hpp"
 
 #include <string>
 
