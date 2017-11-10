@@ -16,7 +16,7 @@ namespace neon::solid
 AffineMicrosphere::AffineMicrosphere(InternalVariables& variables, Json::Value const& material_data)
     : Hyperelastic(variables), material(material_data)
 {
-    variables.add(InternalVariables::Matrix::TangentOperator, 6);
+    variables.add(InternalVariables::Matrix::TangentOperator);
 
     // Deviatoric stress
     variables.add(InternalVariables::Tensor::Kirchhoff);

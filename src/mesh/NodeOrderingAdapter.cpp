@@ -25,34 +25,33 @@ void NodeOrderingAdapter::convert_from_gmsh(std::vector<List>& nodal_connectivit
         case ElementTopology::Hexahedron20:
         {
             /*
-              Gmsh ordering (1 based indexing) taken from gmsh.info
-               4----14----3
+              Gmsh ordering (0 based indexing) taken from gmsh.info
+               3----13----2
                |\         |\
-               | 16       | 15
-              10  \       12 \
-               |   8----20+---7
+               | 15       | 14
+               9  \       11 \
+               |   7----19+---6
                |   |      |   |
-               1---+-9----2   |
-                \  18      \  19
-                11 |        13|
+               0---+-8----1   |
+                \  17      \  18
+                10 |        12|
                   \|         \|
-                   5----17----6
+                   4----16----5
 
-              Hughes ordering (1 based indexing)
+              Hughes ordering (0 based indexing)
 
-               4----11----3
+               3----10----2
                |\         |\
-               | 20       | 19
-              12  \       10 \
-               |   8----15+---7
+               | 19       | 18
+              11  \       9  \
+               |   7----14+---6
                |   |      |   |
-               1---+-9----2   |
-                \  16      \  14
-                17 |        18|
+               0---+-8----1   |
+                \  15      \  13
+                16 |        17|
                   \|         \|
-                   5----13----6
+                   4----12----5
             */
-
             for (auto& nodal_list : nodal_connectivity)
             {
                 std::swap(nodal_list.at(11), nodal_list.at(9));
@@ -89,6 +88,42 @@ std::vector<List> NodeOrderingAdapter::convert_to_vtk(std::vector<List> nodal_co
             }
             break;
         }
+        case ElementTopology::Hexahedron20:
+        {
+            // The ordering of the twenty points defining the cell is point ids (0-7,8-19) where
+            // point ids 0-7 are the eight corner vertices of the cube; followed by twelve midedge
+            // nodes (8-19). Note that these midedge nodes correspond lie on the edges defined by
+            // 8 > (0,1), 9 > (1,2), 10 > (2,3), 11 > (3,0),
+            // 12 > (4,5), 13 > (5,6), 14 > (6,7), 15 > (7,4),
+            // 16 > (0,4), 17 > (1,5), 18 > (2,6), 19 > (3,7).
+
+            // NOTE This corresponds nicely to the Hughes ordering
+            break;
+        }
+        case ElementTopology::Hexahedron27:
+        {
+            /* top
+             *  7--14--6
+             *  |      |
+             * 15  25  13
+             *  |      |
+             *  4--12--5
+             *
+             *  middle
+             * 19--23--18
+             *  |      |
+             * 20  26  21
+             *  |      |
+             * 16--22--17
+             *
+             * bottom
+             *  3--10--2
+             *  |      |
+             * 11  24  9
+             *  |      |
+             *  0-- 8--1
+             */
+        }
         default:
             break;
     }
@@ -100,7 +135,8 @@ ElementTopology NodeOrderingAdapter::gmsh_type_to_enum(int element_code) const
     auto const found = gmsh_converter.find(element_code);
     if (found == gmsh_converter.end())
     {
-        throw KeyNotFoundInMap<int>(element_code);
+        throw std::runtime_error("Element code " + std::to_string(element_code)
+                                 + " not implemented for gmsh element type");
     }
     return found->second;
 }
@@ -110,7 +146,8 @@ int NodeOrderingAdapter::to_vtk(ElementTopology element_topology) const
     auto const found = vtk_converter.find(element_topology);
     if (found == vtk_converter.end())
     {
-        throw KeyNotFoundInMap<int>(static_cast<int>(element_topology));
+        throw std::runtime_error("Element code " + std::to_string(static_cast<int>(element_topology))
+                                 + " not implemented for vtk element type");
     }
     return found->second;
 }

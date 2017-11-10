@@ -35,15 +35,19 @@ protected:
                                                             {5, ElementTopology::Hexahedron8},
                                                             {6, ElementTopology::Prism6},
                                                             {9, ElementTopology::Triangle6},
-                                                            {11, ElementTopology::Tetrahedron10}};
+                                                            {11, ElementTopology::Tetrahedron10},
+                                                            {16, ElementTopology::Quadrilateral8},
+                                                            {17, ElementTopology::Hexahedron20}};
 
     std::unordered_map<ElementTopology, int>
         vtk_converter{{ElementTopology::Triangle3, VTK_TRIANGLE},
                       {ElementTopology::Quadrilateral4, VTK_QUAD},
+                      {ElementTopology::Quadrilateral8, VTK_QUADRATIC_QUAD},
                       {ElementTopology::Tetrahedron4, VTK_TETRA},
                       {ElementTopology::Hexahedron8, VTK_HEXAHEDRON},
                       {ElementTopology::Prism6, VTK_WEDGE},
                       {ElementTopology::Triangle6, VTK_QUADRATIC_TRIANGLE},
-                      {ElementTopology::Tetrahedron10, VTK_QUADRATIC_TETRA}};
+                      {ElementTopology::Tetrahedron10, VTK_QUADRATIC_TETRA},
+                      {ElementTopology::Hexahedron20, VTK_QUADRATIC_HEXAHEDRON}};
 };
 }

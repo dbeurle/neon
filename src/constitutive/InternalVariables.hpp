@@ -3,6 +3,7 @@
 
 #include "numeric/DenseTypes.hpp"
 #include "numeric/Tensor.hpp"
+#include "numeric/VoigtDimension.hpp"
 
 #include <functional>
 #include <unordered_map>
@@ -19,13 +20,22 @@ template <int spatial_dimension>
 class InternalVariables
 {
 public:
+    static auto constexpr voigt_dimension = spatial_to_voigt(
+        std::integral_constant<int, spatial_dimension>{});
+
+public:
+    using tensor = Eigen::Matrix<double, spatial_dimension, spatial_dimension>;
+    using matrix = Eigen::Matrix<double, voigt_dimension, voigt_dimension>;
+
     using Scalars = std::vector<double>;
     using Vectors = std::vector<std::vector<double>>;
-    using Tensors = std::vector<Matrix3>;
-    using Matrices = std::vector<Matrix6>;
+    using Tensors = std::vector<tensor>;
+    using Matrices = std::vector<matrix>;
 
+public:
     enum class Matrix { TangentOperator };
 
+    /** Enumerations for internal variables that are tensor types */
     enum class Tensor {
         /* Tensors for solid mechanics applications */
         // Stress measures
@@ -35,7 +45,7 @@ public:
         PiolaKirchhoff2,
         // Deformation measures
         LinearisedStrain,
-        LinearisedPlasticStrain, // Small strain
+        LinearisedPlasticStrain,
         HenckyStrainElastic,
         DeformationGradient,
         DeformationGradientPlastic,
@@ -53,8 +63,8 @@ public:
         ShearModuli, // Shear moduli
         VonMisesStress,
         EffectivePlasticStrain,
-        DetF0, // Reference Jacobian determinant
-        DetF   // Updated Jacobian determinant
+        DetF0, //! Reference Jacobian determinant
+        DetF   //! Updated Jacobian determinant
     };
 
 public:
@@ -68,40 +78,58 @@ public:
 
     /** Add a number of tensor type variables to the object store */
     template <typename... Variables>
-    void add(Tensor name, Variables... names);
+    void add(Tensor const name, Variables... names)
+    {
+        tensors[name].resize(size, tensor::Zero());
+        tensors_old[name].resize(size, tensor::Zero());
+        add(names...);
+    }
 
-    void add(Tensor name);
+    void add(Tensor const name)
+    {
+        tensors[name].resize(size, tensor::Zero());
+        tensors_old[name].resize(size, tensor::Zero());
+    }
 
     /** Add a number of scalar type variables to the object store */
     template <typename... Variables>
-    void add(Scalar name, Variables... names);
+    void add(Scalar const name, Variables... names)
+    {
+        scalars[name].resize(size, 0.0);
+        scalars_old[name].resize(size, 0.0);
+        add(names...);
+    }
 
-    void add(Scalar name);
+    void add(Scalar const name)
+    {
+        scalars[name].resize(size, 0.0);
+        scalars_old[name].resize(size, 0.0);
+    }
 
-    /**
-     * @param name Name of variables
-     * @param rowcol Number of rows (or columns) in the square matrix
-     */
-    void add(Matrix name, int rowcol);
+    /** Allocate matrix internal variable with zeros */
+    void add(InternalVariables::Matrix const name) { matrices[name].resize(size, matrix::Zero()); }
 
-    /**
-     * @param name Name of the matrix
-     * @param init Initial matrix size
-     */
-    void add(Matrix name, neon::Matrix init);
+    /** Allocate matrix internal variables with provided matrix */
+    void add(InternalVariables::Matrix const name, neon::Matrix const initial_matrix)
+    {
+        matrices[name].resize(size, initial_matrix);
+    }
 
     bool has(Scalar name) const { return scalars.find(name) != scalars.end(); }
     bool has(Tensor name) const { return tensors.find(name) != tensors.end(); }
     bool has(Matrix name) const { return matrices.find(name) != matrices.end(); }
 
     /** Const access to the converged tensor variables */
-    Tensors const& operator[](Tensor tensorType) const;
+    Tensors const& operator[](Tensor const tensorType) const
+    {
+        return tensors_old.find(tensorType)->second;
+    }
 
     /** Const access to the converged scalar variables */
-    Scalars const& operator[](Scalar scalarType) const;
-
-    /** Const access to the converged matrix variables */
-    Matrices const& operator[](Matrix matrixType) const;
+    Scalars const& operator[](Scalar const scalarType) const
+    {
+        return scalars_old.find(scalarType)->second;
+    }
 
     /*-------------------------------------------------------------*
      *  Mutable access methods for unconverged internal variables  *
@@ -185,10 +213,18 @@ public:
     }
 
     /** Commit to history when iteration converges */
-    void commit();
+    void commit()
+    {
+        tensors_old = tensors;
+        scalars_old = scalars;
+    }
 
     /** Revert to the old state when iteration doesn't converge */
-    void revert();
+    void revert()
+    {
+        tensors = tensors_old;
+        scalars = scalars_old;
+    }
 
 protected:
     // These state variables are committed and reverted depending on the outer
@@ -202,85 +238,6 @@ protected:
 
     std::size_t size;
 };
-
-// Allocation methods
-
-template <int spatial_dimension>
-template <typename... Variables>
-inline void InternalVariables<spatial_dimension>::add(Tensor name, Variables... names)
-{
-    tensors[name].resize(size, Matrix3::Zero());
-    tensors_old[name].resize(size, Matrix3::Zero());
-    add(names...);
-}
-
-template <int spatial_dimension>
-inline void InternalVariables<spatial_dimension>::add(Tensor name)
-{
-    tensors[name].resize(size, Matrix3::Zero());
-    tensors_old[name].resize(size, Matrix3::Zero());
-}
-
-template <int spatial_dimension>
-template <typename... Variables>
-inline void InternalVariables<spatial_dimension>::add(Scalar name, Variables... names)
-{
-    scalars[name].resize(size, 0.0);
-    scalars_old[name].resize(size, 0.0);
-    add(names...);
-}
-
-template <int spatial_dimension>
-inline void InternalVariables<spatial_dimension>::add(Scalar name)
-{
-    scalars[name].resize(size, 0.0);
-    scalars_old[name].resize(size, 0.0);
-}
-
-template <int spatial_dimension>
-inline void InternalVariables<spatial_dimension>::add(InternalVariables::Matrix name, int rowcol)
-{
-    matrices[name].resize(size, neon::Matrix::Zero(rowcol, rowcol));
-}
-
-template <int spatial_dimension>
-inline void InternalVariables<spatial_dimension>::add(InternalVariables::Matrix name,
-                                                      neon::Matrix init)
-{
-    matrices[name].resize(size, init);
-}
-
-// Converged results
-
-template <int spatial_dimension>
-inline typename InternalVariables<spatial_dimension>::Tensors const& InternalVariables<
-    spatial_dimension>::operator[](Tensor tensorType) const
-{
-    return tensors_old.find(tensorType)->second;
-}
-
-template <int spatial_dimension>
-inline typename InternalVariables<spatial_dimension>::Scalars const& InternalVariables<
-    spatial_dimension>::operator[](Scalar scalarType) const
-{
-    return scalars_old.find(scalarType)->second;
-}
-
-// Version control of internal state variables
-
-template <int spatial_dimension>
-inline void InternalVariables<spatial_dimension>::commit()
-{
-    tensors_old = tensors;
-    scalars_old = scalars;
-}
-
-template <int spatial_dimension>
-inline void InternalVariables<spatial_dimension>::revert()
-{
-    tensors = tensors_old;
-    scalars = scalars_old;
-}
 
 namespace solid
 {

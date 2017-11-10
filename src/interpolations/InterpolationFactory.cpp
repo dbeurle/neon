@@ -40,6 +40,12 @@ std::unique_ptr<VolumeInterpolation> make_volume_interpolation(ElementTopology c
             return std::make_unique<Hexahedron8>(is_reduced ? HexahedronQuadrature::Rule::OnePoint
                                                             : HexahedronQuadrature::Rule::EightPoint);
         }
+        case ElementTopology::Hexahedron20:
+        {
+            return std::make_unique<Hexahedron20>(is_reduced
+                                                      ? HexahedronQuadrature::Rule::SixPoint
+                                                      : HexahedronQuadrature::Rule::EightPoint);
+        }
         case ElementTopology::Hexahedron27:
         {
             return std::make_unique<Hexahedron27>(is_reduced
@@ -63,15 +69,13 @@ std::unique_ptr<VolumeInterpolation> make_volume_interpolation(ElementTopology c
         case ElementTopology::Tetrahedron56:
         case ElementTopology::Hexahedron64:
         case ElementTopology::Hexahedron125:
-        case ElementTopology::Hexahedron20:
         case ElementTopology::Prism18:
         case ElementTopology::Pyramid14:
-
         case ElementTopology::Prism15:
         case ElementTopology::Pyramid13:
         default:
-            throw std::runtime_error("Element shape not implemented for continuum "
-                                     "simulations\n");
+            throw std::runtime_error("Element shape " + std::to_string(static_cast<int>(topology))
+                                     + " not implemented for continuum simulations\n");
             break;
     }
     return nullptr;
@@ -107,6 +111,12 @@ std::unique_ptr<SurfaceInterpolation> make_surface_interpolation(ElementTopology
         case ElementTopology::Quadrilateral8:
         {
             return std::make_unique<Quadrilateral8>(is_reduced
+                                                        ? QuadrilateralQuadrature::Rule::FourPoint
+                                                        : QuadrilateralQuadrature::Rule::NinePoint);
+        }
+        case ElementTopology::Quadrilateral9:
+        {
+            return std::make_unique<Quadrilateral9>(is_reduced
                                                         ? QuadrilateralQuadrature::Rule::FourPoint
                                                         : QuadrilateralQuadrature::Rule::NinePoint);
         }
