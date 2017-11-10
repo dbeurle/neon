@@ -25,11 +25,11 @@ public:
                      Json::Value const& times,
                      Json::Value const& loads);
 
-    auto elements() const { return nodal_connectivity.size(); }
+    [[nodiscard]] auto elements() const { return nodal_connectivity.size(); }
 
     /** @return an element external force vector for a given element */
-    virtual std::tuple<List const&, Vector> external_force(int const element,
-                                                           double const load_factor) const = 0;
+    [[nodiscard]] virtual std::tuple<List const&, Vector> external_force(
+        int const element, double const load_factor) const = 0;
 
 protected:
     std::vector<List> nodal_connectivity;
@@ -61,7 +61,6 @@ public:
     /**
      * Compute the external force due to a Neumann type boundary condition.
      * This computes the following integral on a boundary element
-
      */
     virtual std::tuple<List const&, Vector> external_force(int const element,
                                                            double const load_factor) const override

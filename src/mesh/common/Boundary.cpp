@@ -36,7 +36,7 @@ Boundary::Boundary(Json::Value const& times, Json::Value const& loads)
                               })
         != times.end())
     {
-        throw std::runtime_error("Load time must be monotonically increasing.");
+        throw std::runtime_error("Load times must be monotonically increasing.");
     }
 
     time_load = view::zip(times, loads) | view::transform([](auto const& time_load) {

@@ -20,13 +20,13 @@ public:
     /** Mutate the nodalConnectivity */
     void convert_from_gmsh(std::vector<List>& nodal_connectivity, ElementTopology topology);
 
-    std::vector<List> convert_to_vtk(std::vector<List> nodal_connectivity,
-                                     ElementTopology element_topology) const;
+    [[nodiscard]] std::vector<List> convert_to_vtk(std::vector<List> nodal_connectivity,
+                                                   ElementTopology element_topology) const;
 
     /** Add strong types to gmsh integer element codes */
-    ElementTopology gmsh_type_to_enum(int const element_code) const;
+    [[nodiscard]] ElementTopology gmsh_type_to_enum(int const element_code) const;
 
-    int to_vtk(ElementTopology element_topology) const;
+    [[nodiscard]] int to_vtk(ElementTopology element_topology) const;
 
 protected:
     std::unordered_map<int, ElementTopology> gmsh_converter{{2, ElementTopology::Triangle3},

@@ -197,6 +197,8 @@ double J2Plasticity::perform_radial_return(double const von_mises,
                   << material.hardening_modulus(accumulated_plastic_strain + plastic_increment)
                   << "\n";
 
+        std::cout << std::string(8, ' ') << "Shear modulus : " << shear_modulus << "\n";
+
         std::cout << std::string(8, ' ') << "Yield function after mapping : " << f << "\n";
 
         std::cout << std::string(8, ' ')

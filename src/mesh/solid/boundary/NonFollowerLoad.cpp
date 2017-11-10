@@ -1,7 +1,6 @@
 
 #include "NonFollowerLoad.hpp"
 
-#include <iostream>
 #include <utility>
 
 #include <json/value.h>

@@ -20,7 +20,7 @@ public:
     BasicMesh(Json::Value const& mesh_file);
 
     /** @return mesh matching a specific name */
-    std::vector<SubMesh> const& meshes(std::string const& name) const;
+    [[nodiscard]] std::vector<SubMesh> const& meshes(std::string const& name) const;
 
 protected:
     std::map<std::string, std::vector<SubMesh>> meshes_map;

@@ -25,7 +25,7 @@ public:
 
     ~Boundary() = default;
 
-    std::vector<double> time_history() const;
+    [[nodiscard]] std::vector<double> time_history() const;
 
     /**
      * Interpolates linearly between the old prescribed boundary value and
@@ -33,9 +33,9 @@ public:
      * load is ramped or propogated from the previous load/time step
      * @return an interpolated value
      */
-    double interpolate_prescribed_load(double const step_time) const;
+    [[nodiscard]] double interpolate_prescribed_load(double const step_time) const;
 
-    Vector3 interpolate_prescribed_loads(double const step_time) const;
+    [[nodiscard]] Vector3 interpolate_prescribed_loads(double const step_time) const;
 
 private:
     std::vector<std::pair<double, double>> time_load;

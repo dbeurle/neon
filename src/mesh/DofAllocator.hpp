@@ -15,7 +15,7 @@ namespace solid
  * then an exception is thrown.  These functions are only usable for each
  * module
  */
-int encode_dof(std::string const& name);
+[[nodiscard]] int encode_dof(std::string const& name);
 }
 
 /**
@@ -24,8 +24,8 @@ int encode_dof(std::string const& name);
  * @param nodal_connectivity Vector of nodal coordinates
  * @return The global degrees of freedom
  */
-std::vector<List> allocate_dof_list(int const nodal_dofs,
-                                    std::vector<List> const& nodal_connectivity);
+[[nodiscard]] std::vector<List> allocate_dof_list(int const nodal_dofs,
+                                                  std::vector<List> const& nodal_connectivity);
 
 /**
  * This function accepts the nodal connectivity of the mesh, multiplies each
@@ -33,7 +33,7 @@ std::vector<List> allocate_dof_list(int const nodal_dofs,
  * use with the boundary classes, where each boundary class holds a dof_list
  * with the dofs associated only with the particular dof.
  */
-std::vector<List> filter_dof_list(int const nodal_dofs,
-                                  int const dof_offset,
-                                  std::vector<List> const& nodal_connectivity);
+[[nodiscard]] std::vector<List> filter_dof_list(int const nodal_dofs,
+                                                int const dof_offset,
+                                                std::vector<List> const& nodal_connectivity);
 }

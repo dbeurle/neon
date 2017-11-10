@@ -19,12 +19,12 @@ public:
     /** Construct with a list of coordinates in json format */
     explicit NodalCoordinates(Json::Value const& mesh_file);
 
-    auto size() const { return X.rows() / 3; }
+    [[nodiscard]] auto size() const { return X.rows() / 3; }
 
-    Vector const& coordinates() const { return X; }
+    [[nodiscard]] Vector const& coordinates() const { return X; }
 
     /** @return the coordinates using fancy indexing */
-    Vector coordinates(List const& local_node_list) const;
+    [[nodiscard]] Vector coordinates(List const& local_node_list) const;
 
 protected:
     Vector X; //!< Reference configuration encoded as (x1, y1, z1, x2, y2, z2)

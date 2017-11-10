@@ -19,26 +19,26 @@ public:
     MaterialCoordinates(Vector const& initial_coordinates);
 
     /** @return element reference configuration based on the local node numbers*/
-    Matrix initial_configuration(List const& local_nodes) const;
+    [[nodiscard]] Matrix initial_configuration(List const& local_nodes) const;
 
     /** @return element current configuration based on the local node numbers*/
-    Matrix current_configuration(List const& local_nodes) const;
+    [[nodiscard]] Matrix current_configuration(List const& local_nodes) const;
 
     /** @param u - displacement vector from initial configuration (x,y,z...) */
     void update_current_configuration(Vector const& u) { x = X + u; };
 
-    Vector displacement() const { return x - X; }
+    [[nodiscard]] Vector displacement() const { return x - X; }
 
-    Vector displacement(List const& local_dofs) const;
+    [[nodiscard]] Vector displacement(List const& local_dofs) const;
 
     /** @return a vtk object of the initial coordinates */
-    vtkSmartPointer<vtkPoints> vtk_coordinates() const;
+    [[nodiscard]] vtkSmartPointer<vtkPoints> vtk_coordinates() const;
 
     /** @return a vtk array of nodal displacements */
-    vtkSmartPointer<vtkDoubleArray> vtk_displacement() const;
+    [[nodiscard]] vtkSmartPointer<vtkDoubleArray> vtk_displacement() const;
 
 protected:
-    Matrix get_configuration(List const& local_nodes, Vector const& configuration) const;
+    [[nodiscard]] Matrix get_configuration(List const& local_nodes, Vector const& configuration) const;
 
 protected:
     Vector x; //!< Current configuration

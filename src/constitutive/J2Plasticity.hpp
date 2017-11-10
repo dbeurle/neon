@@ -21,14 +21,14 @@ public:
 
     virtual void update_internal_variables(double const time_step_size) override;
 
-    virtual Material const& intrinsic_material() const override { return material; }
+    [[nodiscard]] virtual Material const& intrinsic_material() const override { return material; }
 
-    virtual bool is_finite_deformation() const override { return false; }
+    [[nodiscard]] virtual bool is_finite_deformation() const override { return false; }
 
 protected:
-    Matrix3 compute_cauchy_stress(Matrix3 const& elastic_strain) const;
+    [[nodiscard]] Matrix3 compute_cauchy_stress(Matrix3 const& elastic_strain) const;
 
-    Matrix6 elastic_moduli() const;
+    [[nodiscard]] Matrix6 elastic_moduli() const;
 
 private:
     LinearElastic material;
@@ -56,28 +56,28 @@ public:
     virtual bool is_finite_deformation() const override { return false; }
 
 protected:
-    Matrix6 deviatoric_projection() const;
+    [[nodiscard]] Matrix6 deviatoric_projection() const;
 
-    Matrix6 algorithmic_tangent(double const plastic_increment,
-                                double const accumulated_plastic_strain,
-                                double const von_mises,
-                                Matrix3 const& normal) const;
+    [[nodiscard]] Matrix6 algorithmic_tangent(double const plastic_increment,
+                                              double const accumulated_plastic_strain,
+                                              double const von_mises,
+                                              Matrix3 const& normal) const;
 
     /**
      * Performs the radial return algorithm with nonlinear hardening for
      * projecting the stress onto the yield surface.  This provides the plastic
      * increment required for updating the internal variables
      */
-    double perform_radial_return(double const von_mises,
-                                 double const accumulated_plastic_strain) const;
+    [[nodiscard]] double perform_radial_return(double const von_mises,
+                                               double const accumulated_plastic_strain) const;
 
     /**
      * Evaluates the yield function and returns greater than zero if
      * the yield function has been violated
      */
-    double evaluate_yield_function(double const von_mises,
-                                   double const accumulated_plastic_strain,
-                                   double const plastic_increment = 0.0) const;
+    [[nodiscard]] double evaluate_yield_function(double const von_mises,
+                                                 double const accumulated_plastic_strain,
+                                                 double const plastic_increment = 0.0) const;
 
 protected:
     IsotropicElasticPlastic material;
