@@ -1,7 +1,7 @@
 // Code from http://matveichev.blogspot.de/2013/12/building-hexagonal-meshes-with-gmsh.html
 // x, y, z, hs
 
-elements = 1;
+elements = 5;
 
 x = 1.0;
 y = 1.0;
@@ -55,3 +55,4 @@ Physical Surface("Xsym") = {22};
 Physical Surface("Ysym") = {18};
 Physical Surface("Zsym") = {16};
 Physical Surface("ZLoad") = {20};
+
