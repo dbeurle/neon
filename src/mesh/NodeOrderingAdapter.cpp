@@ -24,6 +24,35 @@ void NodeOrderingAdapter::convert_from_gmsh(std::vector<List>& nodal_connectivit
         }
         case ElementTopology::Hexahedron20:
         {
+            /*
+              Gmsh ordering (1 based indexing)
+               4----14----3
+               |\         |\
+               | 16       | 15
+              10  \       12 \
+               |   8----20+---7
+               |   |      |   |
+               1---+-9----2   |
+                \  18      \  19
+                11 |        13|
+                  \|         \|
+                   5----17----6
+
+              Hughes ordering (1 based indexing)
+
+               4----11----3
+               |\         |\
+               | 20       | 19
+              12  \       10 \
+               |   8----15+---7
+               |   |      |   |
+               1---+-9----2   |
+                \  16      \  14
+                17 |        18|
+                  \|         \|
+                   5----13----6
+            */
+
             for (auto& nodal_list : nodal_connectivity)
             {
                 std::swap(nodal_list.at(11), nodal_list.at(9));
