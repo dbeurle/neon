@@ -30,6 +30,7 @@ void IsotropicLinearElasticity::update_internal_variables(double const time_step
     // Extract the internal variables
     auto[elastic_strains, cauchy_stresses] = variables(InternalVariables::Tensor::LinearisedStrain,
                                                        InternalVariables::Tensor::Cauchy);
+
     auto& von_mises_stresses = variables(InternalVariables::Scalar::VonMisesStress);
 
     // Compute the linear strain gradient from the displacement gradient
@@ -148,14 +149,14 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
 Matrix6 J2Plasticity::algorithmic_tangent(double const plastic_increment,
                                           double const accumulated_plastic_strain,
                                           double const von_mises,
-                                          Matrix3 const& n) const
+                                          Matrix3 const& normal) const
 {
     auto const G = material.shear_modulus();
     auto const H = material.hardening_modulus(accumulated_plastic_strain);
 
     return C_e - plastic_increment * 6.0 * std::pow(G, 2) / von_mises * I_dev
            + 6.0 * std::pow(G, 2) * (plastic_increment / von_mises - 1.0 / (3.0 * G + H))
-                 * outer_product(n, n);
+                 * outer_product(normal, normal);
 }
 
 double J2Plasticity::perform_radial_return(double const von_mises,
@@ -165,11 +166,11 @@ double J2Plasticity::perform_radial_return(double const von_mises,
 
     auto plastic_increment = 0.0;
 
-    double f = evaluate_yield_function(von_mises, accumulated_plastic_strain, plastic_increment);
+    auto f = evaluate_yield_function(von_mises, accumulated_plastic_strain, plastic_increment);
 
     // Perform the non-linear hardening solve
     int iterations = 0, max_iterations = 25;
-    while (f > 1.0e-10 && iterations < max_iterations)
+    while (f > 1.0e-8 && iterations < max_iterations)
     {
         auto const H = material.hardening_modulus(accumulated_plastic_strain + plastic_increment);
 
@@ -183,12 +184,17 @@ double J2Plasticity::perform_radial_return(double const von_mises,
     }
     if (iterations == max_iterations)
     {
-        std::cout << "MAXIMUM NUMBER OF ITERATIONS IN RADIAL RETURN REACHED\n";
-        std::cout << "Accumulated plastic strain " << accumulated_plastic_strain << "\n";
-        std::cout << "Yield function after mapping " << f << "\n";
-        std::cout << "Current yield stress " << material.yield_stress(accumulated_plastic_strain)
+        std::cout << "\n";
+        std::cout << std::string(8, ' ')
+                  << "Accumulated plastic strain : " << accumulated_plastic_strain << "\n";
+
+        std::cout << std::string(8, ' ') << "Yield function after mapping : " << f << "\n";
+
+        std::cout << std::string(8, ' ')
+                  << "Current yield stress : " << material.yield_stress(accumulated_plastic_strain)
                   << "\n";
-        throw computational_error("Radial return failure\n");
+
+        throw computational_error("Non-convergence in radial return method.");
     }
     return plastic_increment;
 }

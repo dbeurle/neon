@@ -61,7 +61,7 @@ protected:
     Matrix6 algorithmic_tangent(double const plastic_increment,
                                 double const accumulated_plastic_strain,
                                 double const von_mises,
-                                Matrix3 const& n) const;
+                                Matrix3 const& normal) const;
 
     /**
      * Performs the radial return algorithm with nonlinear hardening for
