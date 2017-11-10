@@ -60,8 +60,8 @@ void AdaptiveLoadStep::update_convergence_state(bool const is_converged)
     }
     else
     {
-        double const dt = std::max(minimum_increment,
-                                   (current_time - last_converged_time) * cutback_factor);
+        auto const dt = std::max(minimum_increment,
+                                 (current_time - last_converged_time) * cutback_factor);
 
         current_time = last_converged_time + dt;
 
@@ -78,7 +78,7 @@ void AdaptiveLoadStep::update_convergence_state(bool const is_converged)
 
         std::cout << "\n"
                   << std::string(terminal_indent, ' ') << termcolor::yellow << termcolor::bold
-                  << "Non-convergence detected.  Performing increment reduction.\n"
+                  << "Non-convergence detected - performing increment reduction.\n"
                   << termcolor::reset << std::flush;
 
         consecutive_unconverged++;
