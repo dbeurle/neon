@@ -74,6 +74,8 @@ J2Plasticity::J2Plasticity(InternalVariables& variables, Json::Value const& mate
 {
     variables.add(InternalVariables::Tensor::LinearisedPlasticStrain);
     variables.add(InternalVariables::Scalar::EffectivePlasticStrain);
+
+    variables.commit();
 }
 
 J2Plasticity::~J2Plasticity() = default;
@@ -164,13 +166,14 @@ double J2Plasticity::perform_radial_return(double const von_mises,
 {
     auto const shear_modulus = material.shear_modulus();
 
-    auto plastic_increment = 0.0;
+    auto plastic_increment{0.0};
 
-    auto f = evaluate_yield_function(von_mises, accumulated_plastic_strain, plastic_increment);
+    auto f = evaluate_yield_function(von_mises, accumulated_plastic_strain);
 
     // Perform the non-linear hardening solve
-    int iterations = 0, max_iterations = 25;
-    while (f > 1.0e-8 && iterations < max_iterations)
+    int iterations{0};
+    auto constexpr max_iterations{50};
+    while (f > 1.0e-6 && iterations < max_iterations)
     {
         auto const H = material.hardening_modulus(accumulated_plastic_strain + plastic_increment);
 
