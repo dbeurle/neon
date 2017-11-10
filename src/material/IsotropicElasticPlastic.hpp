@@ -22,7 +22,7 @@ public:
 protected:
     double stress_y = 0.0;
 
-    double H = 0.0; //!< Isotropic hardening modulus
-    double K = 0.0; //!< Kinematic hardening modulus
+    double H_iso = 0.0; //!< Isotropic hardening modulus
+    double K_iso = 0.0; //!< Kinematic hardening modulus
 };
 }

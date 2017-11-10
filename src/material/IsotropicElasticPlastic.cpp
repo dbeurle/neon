@@ -19,21 +19,27 @@ IsotropicElasticPlastic::IsotropicElasticPlastic(Json::Value const& material_dat
 
     if (material_data.isMember("IsotropicHardeningModulus"))
     {
-        H = material_data["IsotropicHardeningModulus"].asDouble();
+        H_iso = material_data["IsotropicHardeningModulus"].asDouble();
     }
 
     if (material_data.isMember("IsotropicKinematicModulus"))
     {
-        K = material_data["IsotropicKinematicModulus"].asDouble();
+        K_iso = material_data["IsotropicKinematicModulus"].asDouble();
     }
 }
 
 double IsotropicElasticPlastic::yield_stress(double const effective_strain) const
 {
-    return stress_y + effective_strain * H;
+    return stress_y + effective_strain * H_iso;
 }
 
-double IsotropicElasticPlastic::hardening_modulus(double const effective_strain) const { return H; }
+double IsotropicElasticPlastic::hardening_modulus(double const effective_strain) const
+{
+    return H_iso;
+}
 
-double IsotropicElasticPlastic::kinematic_modulus(double const effective_strain) const { return K; }
+double IsotropicElasticPlastic::kinematic_modulus(double const effective_strain) const
+{
+    return K_iso;
+}
 }
