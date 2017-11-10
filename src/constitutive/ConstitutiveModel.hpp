@@ -29,11 +29,11 @@ public:
     virtual void update_internal_variables(double const time_step_size) = 0;
 
     /** @return A base class reference to the common material properties */
-    virtual Material const& intrinsic_material() const = 0;
+    [[nodiscard]] virtual Material const& intrinsic_material() const = 0;
 
-    virtual bool is_finite_deformation() const = 0;
+    [[nodiscard]] virtual bool is_finite_deformation() const = 0;
 
-    virtual bool is_symmetric() const { return true; };
+    [[nodiscard]] virtual bool is_symmetric() const { return true; };
 
 protected:
     InternalVariables<spatial_dimension>& variables;
