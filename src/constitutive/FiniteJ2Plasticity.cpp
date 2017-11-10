@@ -35,37 +35,39 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
     auto const shear_modulus = material.shear_modulus();
 
     // Extract the internal variables
-    auto[F_list,
+    auto[deformation_gradients,
          log_strain_e_list,
-         cauchy_stress_list] = variables(InternalVariables::Tensor::DeformationGradient,
-                                         InternalVariables::Tensor::HenckyStrainElastic,
-                                         InternalVariables::Tensor::Cauchy);
+         cauchy_stresses] = variables(InternalVariables::Tensor::DeformationGradient,
+                                      InternalVariables::Tensor::HenckyStrainElastic,
+                                      InternalVariables::Tensor::Cauchy);
 
-    auto const F_old_list = variables[InternalVariables::Tensor::DeformationGradient];
+    auto const old_deformation_gradients = variables[InternalVariables::Tensor::DeformationGradient];
 
     auto const J_list = variables(InternalVariables::Scalar::DetF);
 
     // Retrieve the accumulated internal variables
-    auto[accumulated_plastic_strain_list,
-         von_mises_list] = variables(InternalVariables::Scalar::EffectivePlasticStrain,
-                                     InternalVariables::Scalar::VonMisesStress);
+    auto[accumulated_plastic_strains,
+         von_mises_stresses] = variables(InternalVariables::Scalar::EffectivePlasticStrain,
+                                         InternalVariables::Scalar::VonMisesStress);
 
-    auto& C_list = variables(InternalVariables::Matrix::TangentOperator);
+    auto& tangent_operators = variables(InternalVariables::Matrix::TangentOperator);
 
-    auto const F_inc_list = view::zip(F_list, F_old_list) | view::transform([](auto const& tpl) {
-                                auto const & [ F, F_old ] = tpl;
-                                return F * F_old.inverse();
-                            });
+    auto const incremental_deformation_gradients = view::zip(deformation_gradients,
+                                                             old_deformation_gradients)
+                                                   | view::transform([](auto const& tpl) {
+                                                         auto const & [ F, F_old ] = tpl;
+                                                         return F * F_old.inverse();
+                                                     });
 
     // Perform the update algorithm for each quadrature point
-    for (auto l = 0; l < F_list.size(); l++)
+    for (auto l = 0; l < deformation_gradients.size(); l++)
     {
-        auto const& F_inc = F_inc_list[l];
+        auto const& F_inc = incremental_deformation_gradients[l];
         auto const J = J_list[l];
 
-        auto& cauchy_stress = cauchy_stress_list[l];
-        auto& accumulated_plastic_strain = accumulated_plastic_strain_list[l];
-        auto& von_mises = von_mises_list[l];
+        auto& cauchy_stress = cauchy_stresses[l];
+        auto& accumulated_plastic_strain = accumulated_plastic_strains[l];
+        auto& von_mises = von_mises_stresses[l];
         auto& log_strain_e = log_strain_e_list[l];
 
         // std::cout << "log strain elastic\n" << log_strain_e << std::endl;
@@ -99,8 +101,7 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
         // and decide if the stress return needs to be computed
         if (auto const f = evaluate_yield_function(von_mises, accumulated_plastic_strain); f <= 0.0)
         {
-            // std::cout << "f = " << f << std::endl;
-            C_list[l] = consistent_tangent(J, log_strain_e, cauchy_stress, C_e);
+            tangent_operators[l] = consistent_tangent(J, log_strain_e, cauchy_stress, C_e);
             continue;
         }
 
@@ -135,21 +136,21 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
                                               normal);
 
         // Compute the elastic-plastic tangent modulus for large strain
-        C_list[l] = consistent_tangent(J, log_strain_e, cauchy_stress, D_ep);
+        tangent_operators[l] = consistent_tangent(J, log_strain_e, cauchy_stress, D_ep);
     }
 }
 
-CMatrix FiniteJ2Plasticity::consistent_tangent(double const J,
+Matrix6 FiniteJ2Plasticity::consistent_tangent(double const J,
                                                Matrix3 const& Be_trial,
                                                Matrix3 const& cauchy_stress,
-                                               CMatrix const& C)
+                                               Matrix6 const& C)
 {
     // Convert to Mandel notation so matrix multiplication == double dot operation
-    CMatrix const D = voigt_to_mandel(C);
-    CMatrix const L = voigt_to_mandel(compute_L(Be_trial));
-    CMatrix const B = voigt_to_mandel(compute_B(Be_trial));
+    Matrix6 const D = voigt_to_mandel(C);
+    Matrix6 const L = voigt_to_mandel(compute_L(Be_trial));
+    Matrix6 const B = voigt_to_mandel(compute_B(Be_trial));
 
-    CMatrix const H = compute_H(cauchy_stress);
+    Matrix6 const H = compute_H(cauchy_stress);
 
     return 1.0 / (2.0 * J) * D * L * B - H;
 }
@@ -205,7 +206,7 @@ std::tuple<Vector3, std::array<Matrix3, 3>, bool, std::array<int, 3>> FiniteJ2Pl
     return {x, E, is_repeated, abc_ordering};
 }
 
-CMatrix FiniteJ2Plasticity::derivative_tensor_log_unique(Matrix3 const& Be_trial,
+Matrix6 FiniteJ2Plasticity::derivative_tensor_log_unique(Matrix3 const& Be_trial,
                                                          Vector3 const& x,
                                                          std::array<Matrix3, 3> const& E,
                                                          std::array<int, 3> const& abc_ordering) const
@@ -218,7 +219,7 @@ CMatrix FiniteJ2Plasticity::derivative_tensor_log_unique(Matrix3 const& Be_trial
            + 1.0 / x(a) * outer_product(E[a]);
 }
 
-CMatrix FiniteJ2Plasticity::compute_L(Matrix3 const& Be_trial) const
+Matrix6 FiniteJ2Plasticity::compute_L(Matrix3 const& Be_trial) const
 {
     auto const[x, E, is_repeated, abc_ordering] = compute_eigenvalues_eigenprojections(Be_trial);
 
@@ -258,9 +259,9 @@ CMatrix FiniteJ2Plasticity::compute_L(Matrix3 const& Be_trial) const
     return x.norm() < 1.0e-5 ? Isym : Isym / x(0);
 }
 
-CMatrix FiniteJ2Plasticity::compute_B(Matrix3 const& Be_trial) const
+Matrix6 FiniteJ2Plasticity::compute_B(Matrix3 const& Be_trial) const
 {
-    CMatrix B(6, 6);
+    Matrix6 B(6, 6);
     // clang-format off
     B << 2 * Be_trial(0, 0),                  0,                  0,                  0, 2 * Be_trial(0, 2), 2 * Be_trial(0, 1),
                           0, 2 * Be_trial(1, 1),                  0, 2 * Be_trial(1, 2),                  0,                  0,
@@ -272,9 +273,9 @@ CMatrix FiniteJ2Plasticity::compute_B(Matrix3 const& Be_trial) const
     return B;
 }
 
-CMatrix FiniteJ2Plasticity::compute_H(Matrix3 const& s) const
+Matrix6 FiniteJ2Plasticity::compute_H(Matrix3 const& s) const
 {
-    CMatrix H(6, 6);
+    Matrix6 H(6, 6);
     // clang-format off
     H << 2 * s(0, 0),           0,           0,           0, 2 * s(0, 2), 2 * s(0, 1),
                    0, 2 * s(1, 1),           0, 2 * s(1, 2),           0,           0,
@@ -286,9 +287,9 @@ CMatrix FiniteJ2Plasticity::compute_H(Matrix3 const& s) const
     return H;
 }
 
-CMatrix FiniteJ2Plasticity::dX2_dX(Matrix3 const& X) const
+Matrix6 FiniteJ2Plasticity::dX2_dX(Matrix3 const& X) const
 {
-    CMatrix dx2_dx(6, 6);
+    Matrix6 dx2_dx(6, 6);
     // clang-format off
     dx2_dx << 2 * X(0, 0),         0.0,         0.0,               0.0,           X(2, 0),          X(1, 0),
                       0.0, 2 * X(1, 1),         0.0,           X(2, 1),               0.0,          X(1, 0),
@@ -300,9 +301,9 @@ CMatrix FiniteJ2Plasticity::dX2_dX(Matrix3 const& X) const
     return dx2_dx;
 }
 
-CMatrix FiniteJ2Plasticity::mandel_transformation() const
+Matrix6 FiniteJ2Plasticity::mandel_transformation() const
 {
-    CMatrix M = CMatrix::Ones(6, 6);
+    Matrix6 M = Matrix6::Ones();
 
     M.block<3, 3>(0, 3) *= std::sqrt(2);
     M.block<3, 3>(3, 0) *= std::sqrt(2);
