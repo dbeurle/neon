@@ -18,8 +18,7 @@ using RowMatrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::R
 using Matrix2 = Eigen::Matrix<double, 2, 2>;
 using Matrix3 = Eigen::Matrix<double, 3, 3>;
 using Matrix6 = Eigen::Matrix<double, 6, 6>;
-
-using CMatrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor, 6, 6>;
+using Matrix9 = Eigen::Matrix<double, 9, 9>;
 
 using Vector = Eigen::Matrix<double, Eigen::Dynamic, 1>;
 using Vector2 = Eigen::Vector2d;
@@ -28,8 +27,6 @@ using Vector6 = Eigen::Matrix<double, 6, 1, Eigen::ColMajor, 6, 1>;
 
 using Array = Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic>;
 using List = std::vector<int>;
-
-using femValue = std::tuple<Vector, Matrix>;
 
 template <class T>
 typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type is_approx(T const x,
