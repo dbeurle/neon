@@ -188,8 +188,14 @@ double J2Plasticity::perform_radial_return(double const von_mises,
     if (iterations == max_iterations)
     {
         std::cout << "\n";
+        std::cout << std::string(8, ' ') << "Plastic increment : " << plastic_increment << "\n";
+
         std::cout << std::string(8, ' ')
                   << "Accumulated plastic strain : " << accumulated_plastic_strain << "\n";
+
+        std::cout << std::string(8, ' ') << "Hardening modulus : "
+                  << material.hardening_modulus(accumulated_plastic_strain + plastic_increment)
+                  << "\n";
 
         std::cout << std::string(8, ' ') << "Yield function after mapping : " << f << "\n";
 
