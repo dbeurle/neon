@@ -269,13 +269,35 @@ inline Matrix6 outer_product(Matrix3 const& a, Matrix3 const& b)
     return voigt::kinetic::to(a) * voigt::kinetic::to(b).transpose();
 }
 
+/**
+ * Computes the outer product of four first order tensors in three dimensions
+    \f{align*}{
+        & \mathbf{a} \otimes \mathbf{b} \otimes \mathbf{c} \otimes \mathbf{d}
+    \f}
+*/
 inline Matrix6 outer_product(Vector3 const& a, Vector3 const& b, Vector3 const& c, Vector3 const& d)
 {
     return outer_product(outer_product(a, b), outer_product(c, d));
 }
 
+/**
+ * Computes the outer product of two second order tensors in three dimensions
+    \f{align*}{
+        & \mathbf{a} \otimes \mathbf{b}
+    \f}
+*/
 inline Matrix6 outer_product(Matrix3 const& h) { return outer_product(h, h); }
 
+/**
+ * Convert a fourth order tensor in Voigt notation to Mandel notation.  This
+ * is useful in computing the double dot product (contraction) between two
+ * fourth order tensors using matrix-matrix multiplication.
+     \f{align*}{
+     \mathbf{c} &= \mathbf{a} : \mathbf{b} \\
+      c_{ijkl} &= a_{ijmn} b_{mnkl} \\
+      [\mathbf{c}] &= [\mathbf{a}] [\mathbf{b}]
+     \f}
+ */
 inline Matrix6 mandel_notation(Matrix6 A)
 {
     A.block<3, 3>(0, 3) *= std::sqrt(2);
