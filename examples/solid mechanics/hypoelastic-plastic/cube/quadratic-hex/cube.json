@@ -63,15 +63,13 @@
             },
             {
                 "Name" : "ZLoad",
-				"Type" : "Displacement",
-                "Time" : [0.0, 1.0],
-                "Values" : {
-                    "z" : [0.0, 1.0e-3]
-                }
+				"Type" : "Pressure",
+                "Time" : [0.0, 0.1, 1.0],
+                "Values" : [0.0, -1.5e-8, -3.0e8]
             }]
         }],
 		"LinearSolver" : {
-		    "Solver" : "Iterative"
+		    "Solver" : "Direct"
         },
         "Visualisation" : {
             "Fields" : ["Displacement", "LinearisedStrain", "LinearisedPlasticStrain",
