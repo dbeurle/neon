@@ -33,6 +33,11 @@ femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& simulatio
     }
     residual_tolerance = simulation["NonlinearOptions"]["ResidualTolerance"].asDouble();
     displacement_tolerance = simulation["NonlinearOptions"]["DisplacementTolerance"].asDouble();
+
+    // Perform Newton-Raphson iterations
+    std::cout << "\n"
+              << std::string(4, ' ') << "Non-linear equation system has " << fem_mesh.active_dofs()
+              << " degrees of freedom\n";
 }
 
 femStaticMatrix::~femStaticMatrix() = default;
@@ -128,40 +133,38 @@ void femStaticMatrix::compute_external_force(double const step_time)
 
 void femStaticMatrix::solve()
 {
-    // Perform Newton-Raphson iterations
-    std::cout << std::string(4, ' ') << "Non-linear equation system has " << fem_mesh.active_dofs()
-              << " degrees of freedom\n";
-
-    while (!adaptive_load.is_fully_applied())
+    try
     {
-        std::cout << "\n"
-                  << std::string(4, ' ') << termcolor::magenta << termcolor::bold
-                  << "Performing equilibrium iterations for time " << adaptive_load.step_time()
-                  << termcolor::reset << std::endl;
-
-        apply_displacement_boundaries();
-
-        compute_external_force(adaptive_load.step_time());
-
-        try
+        while (!adaptive_load.is_fully_applied())
         {
+            std::cout << "\n"
+                      << std::string(4, ' ') << termcolor::magenta << termcolor::bold
+                      << "Performing equilibrium iterations for time " << adaptive_load.step_time()
+                      << termcolor::reset << std::endl;
+
+            apply_displacement_boundaries();
+
+            compute_external_force(adaptive_load.step_time());
+
             fem_mesh.update_internal_variables(d, adaptive_load.increment());
 
             perform_equilibrium_iterations();
         }
-        catch (computational_error& comp_error)
-        {
-            std::cout << std::endl
-                      << std::string(6, ' ') << termcolor::bold << termcolor::yellow
-                      << comp_error.what() << termcolor::reset << std::endl;
+    }
+    catch (computational_error& comp_error)
+    {
+        std::cout << std::endl
+                  << std::string(6, ' ') << termcolor::bold << termcolor::yellow
+                  << comp_error.what() << termcolor::reset << std::endl;
 
-            adaptive_load.update_convergence_state(false);
-            fem_mesh.save_internal_variables(false);
-        }
-        catch (...)
-        {
-            throw;
-        }
+        adaptive_load.update_convergence_state(false);
+        fem_mesh.save_internal_variables(false);
+
+        this->solve();
+    }
+    catch (...)
+    {
+        throw;
     }
 }
 
