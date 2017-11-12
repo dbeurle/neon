@@ -6,28 +6,33 @@
 #include <chrono>
 #include <termcolor/termcolor.hpp>
 
-#include <Eigen/PaStiXSupport>
-
 namespace neon
 {
+PaStiXLDLT::PaStiXLDLT()
+{
+    // Verbosity
+    ldlt.iparm(3) = 0;
+
+    // Number of threads
+    ldlt.iparm(34) = SimulationControl::threads;
+
+    // Number of Cuda devices
+    // ldlt.iparm(64) = 1;
+}
+
 void PaStiXLDLT::solve(SparseMatrix const& A, Vector& x, Vector const& b)
 {
     auto start = std::chrono::high_resolution_clock::now();
 
-    Eigen::PastixLDLT<Eigen::SparseMatrix<double>, Eigen::Upper> pastix;
+    if (sparsity_pattern_changed)
+    {
+        ldlt.analyzePattern(A);
+        sparsity_pattern_changed = false;
+    }
 
-    // Verbosity
-    pastix.iparm(3) = 0;
+    ldlt.factorize(A);
 
-    // Number of threads
-    pastix.iparm(34) = SimulationControl::threads;
-
-    // Number of Cuda devices
-    // pastix.iparm(64) = 1;
-
-    pastix.compute(A);
-
-    x = pastix.solve(b);
+    x = ldlt.solve(b);
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;

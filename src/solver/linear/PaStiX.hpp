@@ -3,6 +3,10 @@
 
 #include "LinearSolver.hpp"
 
+#include <Eigen/Sparse>
+
+#include <Eigen/PaStiXSupport>
+
 namespace neon
 {
 /**
@@ -12,7 +16,14 @@ namespace neon
 class PaStiXLDLT : public DirectLinearSolver
 {
 public:
+    PaStiXLDLT();
+
     void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
+
+private:
+    Eigen::PastixLDLT<Eigen::SparseMatrix<double>, Eigen::Upper> ldlt;
+
+    bool sparsity_pattern_changed = true;
 };
 
 /**
