@@ -63,9 +63,7 @@ protected:
     /** Pretty printer for the convergence of the Newton-Raphson solver */
     void print_convergence_progress() const;
 
-    void update_relative_norms(int const current_iteration,
-                               double const delta_d_norm,
-                               double const residual_norm);
+    void update_relative_norms(double const delta_d_norm, double const residual_norm);
 
 private:
     void perform_equilibrium_iterations();
@@ -82,8 +80,8 @@ protected:
     double residual_tolerance = 1.0e-5;
     double displacement_tolerance = 1.0e-5;
 
-    double first_displacement_norm = 1.0;
-    double first_residual_norm = 1.0;
+    double displacement_norm_old = 1.0;
+    double residual_norm_old = 1.0;
     double relative_displacement_norm;
     double relative_force_norm;
 
