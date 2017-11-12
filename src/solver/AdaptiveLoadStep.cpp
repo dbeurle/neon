@@ -14,12 +14,13 @@ namespace neon
 AdaptiveLoadStep::AdaptiveLoadStep(Json::Value const& increment_data,
                                    std::vector<double> mandatory_time_history)
 {
-    // Set the time history to the
+    // Set the time history to the input data
     for (auto const& t : mandatory_time_history) time_queue.push(t);
 
+    // Remove the first entry if it's zero
     if (is_approx(time_queue.top(), 0.0)) time_queue.pop();
 
-    this->parse_input(increment_data);
+    parse_input(increment_data);
 }
 
 void AdaptiveLoadStep::update_convergence_state(bool const is_converged)
@@ -97,7 +98,7 @@ void AdaptiveLoadStep::reset(Json::Value const& new_increment_data)
     // Update the history counters
     total_time += current_time;
 
-    this->parse_input(new_increment_data);
+    parse_input(new_increment_data);
 
     is_applied = false;
 
@@ -107,7 +108,7 @@ void AdaptiveLoadStep::reset(Json::Value const& new_increment_data)
 
 void AdaptiveLoadStep::parse_input(Json::Value const& increment_data)
 {
-    this->check_increment_data(increment_data);
+    check_increment_data(increment_data);
 
     // Initial factor determined by input
     initial_time = increment_data["Increments"]["Initial"].asDouble();
