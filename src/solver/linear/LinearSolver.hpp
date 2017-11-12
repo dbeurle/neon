@@ -15,6 +15,9 @@ class LinearSolver
 public:
     virtual void solve(SparseMatrix const& A, Vector& x, Vector const& b) = 0;
 
+    /** Notifies the linear solvers to of a change in sparsity structure of A */
+    void update_sparsity_pattern() { build_sparsity_pattern = true; }
+
 protected:
     bool build_sparsity_pattern = true;
 };

@@ -24,10 +24,10 @@ void PaStiXLDLT::solve(SparseMatrix const& A, Vector& x, Vector const& b)
 {
     auto start = std::chrono::high_resolution_clock::now();
 
-    if (sparsity_pattern_changed)
+    if (build_sparsity_pattern)
     {
         ldlt.analyzePattern(A);
-        sparsity_pattern_changed = false;
+        build_sparsity_pattern = false;
     }
 
     ldlt.factorize(A);

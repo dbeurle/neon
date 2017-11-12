@@ -22,8 +22,6 @@ public:
 
 private:
     Eigen::PastixLDLT<Eigen::SparseMatrix<double>, Eigen::Upper> ldlt;
-
-    bool sparsity_pattern_changed = true;
 };
 
 /**

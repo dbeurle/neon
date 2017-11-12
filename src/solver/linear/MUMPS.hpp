@@ -3,8 +3,29 @@
 
 #include "LinearSolver.hpp"
 
+// Mumps includes
+#include <MUMPS/dmumps_c.h>
+#include <MUMPS/smumps_c.h>
+
 namespace neon
 {
+template <typename T>
+struct MUMPSWrapper;
+
+template <>
+struct MUMPSWrapper<float>
+{
+    using MUMPS_STRUC_C = SMUMPS_STRUC_C;
+    static void mumps_c(MUMPS_STRUC_C& info) { smumps_c(&info); }
+};
+
+template <>
+struct MUMPSWrapper<double>
+{
+    using MUMPS_STRUC_C = DMUMPS_STRUC_C;
+    static void mumps_c(MUMPS_STRUC_C& info) { dmumps_c(&info); }
+};
+
 /**
  * MUMPS is a base class for the multifrontal direct solver.  This solver
  * is widely used in the parallel solution of linear systems.
@@ -32,6 +53,13 @@ public:
 
     enum MatrixProperty { Unsymmetric, SPD, GeneralSymmetric };
 
+    using MUMPSAdapter = MUMPSWrapper<SparseMatrix::Scalar>;
+
+public:
+    explicit MUMPS(MatrixProperty const symmetric_flag);
+
+    ~MUMPS();
+
 protected:
     /**
      * Expand the sparse matrix into coordinate format only using the upper
@@ -40,9 +68,11 @@ protected:
      */
     virtual void allocate_coordinate_format_storage(SparseMatrix const& A) = 0;
 
-    void internal_solve(SparseMatrix const& A, Vector& x, Vector const& b, int const symmetric_flag);
+    void internal_solve(SparseMatrix const& A, Vector& x, Vector const& b);
 
 protected:
+    MUMPSAdapter::MUMPS_STRUC_C info;
+
     std::vector<int> rows, cols;      //!< Row and column index storage (uncompressed)
     std::vector<double> coefficients; //!< Sparse matrix coefficients
 };
@@ -55,6 +85,8 @@ protected:
 class MUMPSLLT : public MUMPS
 {
 public:
+    MUMPSLLT() : MUMPS(MUMPS::MatrixProperty::SPD) {}
+
     void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
 
 protected:
@@ -69,6 +101,8 @@ protected:
 class MUMPSLU : public MUMPS
 {
 public:
+    MUMPSLU() : MUMPS(MUMPS::MatrixProperty::Unsymmetric) {}
+
     void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
 
 protected:
