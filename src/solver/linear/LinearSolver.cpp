@@ -7,14 +7,9 @@
 #include "Exceptions.hpp"
 #include "SimulationControl.hpp"
 
-#ifdef ENABLE_OPENMP
 #include <omp.h>
-#endif
-
-#include <Eigen/Sparse>
 
 #include <chrono>
-#include <iostream>
 #include <thread>
 
 namespace neon

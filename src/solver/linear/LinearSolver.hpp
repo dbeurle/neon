@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "numeric/DenseTypes.hpp"
 #include "numeric/SparseTypes.hpp"
 
 namespace neon
@@ -65,7 +66,7 @@ public:
     void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
 };
 
-struct DirectLinearSolver : public LinearSolver
+class DirectLinearSolver : public LinearSolver
 {
 };
 

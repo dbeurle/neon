@@ -1,5 +1,5 @@
 
-#include "LinearSolver.hpp"
+#include "LinearSolverFactory.hpp"
 
 #ifdef ENABLE_CUDA
 #include "ConjugateGradientGPU.hpp"
@@ -9,10 +9,8 @@
 #include "PaStiX.hpp"
 
 #include <exception>
-#include <memory>
-#include <string>
 
-#include <json/json.h>
+#include <json/value.h>
 
 namespace neon
 {
@@ -101,7 +99,7 @@ std::unique_ptr<LinearSolver> make_linear_solver(Json::Value const& solver_data,
         }
 #else
         throw std::runtime_error("ConjugateGradientGPU is only available when neon is "
-                                 "compiled with -DENABLE_CUDA=ON\n");
+                                 "configured with -DENABLE_CUDA=ON\n");
 #endif
     }
     else

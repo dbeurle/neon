@@ -1,7 +1,7 @@
 
 #pragma once
 
-// Do not parallelise the GEMM routines
+// Do not parallelise the GEMM routines as this is called by mulitple threads
 #ifndef NEON_PARALLEL_EIGEN_SOLVERS
 #define EIGEN_DONT_PARALLELIZE
 #endif

@@ -1,22 +1,16 @@
 
 #pragma once
 
-#include "numeric/DenseTypes.hpp"
-
-#include <array>
 #include <utility>
+#include <vector>
 
 #include <json/forwards.h>
 
 namespace neon
 {
 /**
- * Boundary is a base class for boundary conditions which performs the
- * interpolation logic.  This class offers restart functionality when performing
- * multiple time steps or load steps in a non-linear simulation.
-
- * \sa Dirichlet
- * \sa NonFollowerLoad
+ * Boundary is a base class for boundary conditions which performs the load
+ * interpolation logic.
  */
 class Boundary
 {
@@ -35,7 +29,9 @@ public:
      */
     [[nodiscard]] double interpolate_prescribed_load(double const step_time) const;
 
-    [[nodiscard]] Vector3 interpolate_prescribed_loads(double const step_time) const;
+protected:
+    [[nodiscard]] double interpolate_prescribed_load(
+        std::vector<std::pair<double, double>> const& time_value, double const step_time) const;
 
 private:
     std::vector<std::pair<double, double>> time_load;

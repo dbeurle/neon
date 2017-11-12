@@ -10,5 +10,5 @@
 namespace neon
 {
 std::unique_ptr<LinearSolver> make_linear_solver(Json::Value const& solver_data,
-                                                 bool const is_spd = true);
+                                                 bool const is_symmetric = true);
 }

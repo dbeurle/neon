@@ -1,8 +1,7 @@
 
 #pragma once
 
-#include "DenseTypes.hpp"
-#include <Eigen/SparseCore>
+#include <Eigen/Sparse>
 
 namespace neon
 {
