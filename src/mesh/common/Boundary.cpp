@@ -46,20 +46,26 @@ std::vector<double> Boundary::time_history() const { return time_load | ranges::
 
 double Boundary::interpolate_prescribed_load(double const step_time) const
 {
+    return interpolate_prescribed_load(time_load, step_time);
+}
+
+double Boundary::interpolate_prescribed_load(std::vector<std::pair<double, double>> const& time_value,
+                                             double const step_time) const
+{
     using ranges::adjacent_find;
     using ranges::find_if;
     using ranges::next;
 
     // Find if we have a time that matches exactly to a load
-    if (auto match = find_if(time_load,
+    if (auto match = find_if(time_value,
                              [&](auto const& value) { return is_approx(value.first, step_time); });
-        match != time_load.end())
+        match != time_value.end())
     {
         return (*match).second;
     }
 
     // Otherwise we need to interpolate between the values
-    auto const lower_position = adjacent_find(time_load, [&](auto const& left, auto const& right) {
+    auto const lower_position = adjacent_find(time_value, [&](auto const& left, auto const& right) {
         return left.first < step_time && step_time < right.first;
     });
 
