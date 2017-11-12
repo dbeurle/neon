@@ -160,8 +160,6 @@ void femStaticMatrix::solve()
         adaptive_load.update_convergence_state(false);
         fem_mesh.save_internal_variables(false);
 
-        displacement_norm_old = residual_norm_old = 1.0;
-
         this->solve();
     }
     catch (...)
@@ -262,8 +260,6 @@ void femStaticMatrix::perform_equilibrium_iterations()
     Vector delta_d = Vector::Zero(fem_mesh.active_dofs());
     Vector d_new = d;
 
-    displacement_norm_old = residual_norm_old = 1.0;
-
     // Full Newton-Raphson iteration to solve nonlinear equations
     auto constexpr max_iterations{10};
     auto current_iteration{0};
@@ -290,7 +286,7 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
         fem_mesh.update_internal_variables(d_new);
 
-        update_relative_norms(delta_d.norm(), residual.norm());
+        update_relative_norms(d_new, delta_d, residual);
 
         print_convergence_progress();
 
@@ -314,13 +310,12 @@ void femStaticMatrix::perform_equilibrium_iterations()
     }
 }
 
-void femStaticMatrix::update_relative_norms(double const delta_d_norm, double const residual_norm)
+void femStaticMatrix::update_relative_norms(Vector const& d_new,
+                                            Vector const& delta_d,
+                                            Vector const& residual)
 {
-    relative_displacement_norm = delta_d_norm / displacement_norm_old;
-    relative_force_norm = residual_norm / residual_norm_old;
-
-    displacement_norm_old = delta_d_norm;
-    residual_norm_old = residual_norm;
+    relative_displacement_norm = delta_d.norm() / d_new.norm();
+    relative_force_norm = residual.norm() / std::max(fext.norm(), fint.norm());
 }
 
 void femStaticMatrix::print_convergence_progress() const
