@@ -166,7 +166,7 @@ TEST_CASE("Basic mesh test")
 }
 TEST_CASE("Solid submesh test")
 {
-    using namespace solid;
+    using namespace mech::solid;
 
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh
@@ -189,7 +189,7 @@ TEST_CASE("Solid submesh test")
 
     auto material_coordinates = std::make_shared<MaterialCoordinates>(nodal_coordinates.coordinates());
 
-    solid::femSubmesh fem_submesh(material_data, simulation_data, material_coordinates, submesh);
+    mech::solid::femSubmesh fem_submesh(material_data, simulation_data, material_coordinates, submesh);
 
     int constexpr number_of_nodes = 64;
     int constexpr number_of_dofs = number_of_nodes * 3;
@@ -212,10 +212,10 @@ TEST_CASE("Solid submesh test")
     SECTION("Default internal variables test")
     {
         // Check the standard ones are used
-        REQUIRE(internal_vars.has(solid::InternalVariables::Tensor::DisplacementGradient));
-        REQUIRE(internal_vars.has(solid::InternalVariables::Tensor::DeformationGradient));
-        REQUIRE(internal_vars.has(solid::InternalVariables::Tensor::Cauchy));
-        REQUIRE(internal_vars.has(solid::InternalVariables::Scalar::DetF));
+        REQUIRE(internal_vars.has(mech::solid::InternalVariables::Tensor::DisplacementGradient));
+        REQUIRE(internal_vars.has(mech::solid::InternalVariables::Tensor::DeformationGradient));
+        REQUIRE(internal_vars.has(mech::solid::InternalVariables::Tensor::Cauchy));
+        REQUIRE(internal_vars.has(mech::solid::InternalVariables::Scalar::DetF));
     }
     SECTION("Tangent stiffness")
     {
@@ -257,7 +257,7 @@ TEST_CASE("Solid submesh test")
 }
 TEST_CASE("Solid mesh test")
 {
-    using solid::femMesh;
+    using mech::solid::femMesh;
 
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh

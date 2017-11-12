@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "numeric/DenseTypes.hpp"
+#include "InternalVariablesForwards.hpp"
+
 #include "numeric/Tensor.hpp"
-#include "numeric/VoigtDimension.hpp"
 
 #include <functional>
 #include <unordered_map>
@@ -16,13 +16,9 @@ namespace neon
  * when the data is converged to avoid polluting the variable history in the
  * Newton-Raphson method.
  */
-template <int spatial_dimension>
+template <int spatial_dimension, int voigt_dimension>
 class InternalVariables
 {
-public:
-    static auto constexpr voigt_dimension = spatial_to_voigt(
-        std::integral_constant<int, spatial_dimension>{});
-
 public:
     using tensor = Eigen::Matrix<double, spatial_dimension, spatial_dimension>;
     using matrix = Eigen::Matrix<double, voigt_dimension, voigt_dimension>;
@@ -239,7 +235,7 @@ protected:
     std::size_t size;
 };
 
-namespace solid
+namespace mech::solid
 {
 using InternalVariables = neon::InternalVariables<3>;
 }

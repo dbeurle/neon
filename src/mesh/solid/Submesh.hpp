@@ -12,10 +12,9 @@
 
 namespace neon
 {
-// Forward declarations
 class MaterialCoordinates;
 
-namespace solid
+namespace mech::solid
 {
 /**
  * femSubmesh provides the element local routines for computing the system
@@ -34,33 +33,35 @@ public:
                         SubMesh const& submesh);
 
     /** @return list of global degrees of freedom for an element */
-    List const& local_dof_list(int const element) const { return dof_list.at(element); }
+    [[nodiscard]] List const& local_dof_list(int const element) const
+    {
+        return dof_list.at(element);
+    }
 
     /** @return The internal variable store */
-    InternalVariables const& internal_variables() const { return variables; }
+    [[nodiscard]] InternalVariables const& internal_variables() const { return variables; }
 
     void save_internal_variables(bool const have_converged);
 
-    auto dofs_per_node() const { return 3; }
+    [[nodiscard]] auto dofs_per_node() const { return 3; }
 
-    auto const& shape_function() const { return *sf.get(); }
+    [[nodiscard]] auto const& shape_function() const { return *sf.get(); }
 
-    auto const& constitutive() const { return *cm.get(); }
+    [[nodiscard]] auto const& constitutive() const { return *cm.get(); }
 
     /** @return the tangent consistent stiffness matrix */
-    std::tuple<List const&, Matrix> tangent_stiffness(int const element) const;
+    [[nodiscard]] std::tuple<List const&, Matrix> tangent_stiffness(int const element) const;
 
     /** @return the internal element force */
-    std::tuple<List const&, Vector> internal_force(int const element) const;
+    [[nodiscard]] std::tuple<List const&, Vector> internal_force(int const element) const;
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    std::tuple<List const&, Matrix> consistent_mass(int const element) const;
+    [[nodiscard]] std::tuple<List const&, Matrix> consistent_mass(int const element) const;
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    std::tuple<List const&, Vector> diagonal_mass(int const element) const;
+    [[nodiscard]] std::tuple<List const&, Vector> diagonal_mass(int const element) const;
 
     /** Update the internal variables for the mesh group
-     *  Calls:
      *  \sa update_deformation_measures()
      *  \sa update_Jacobian_determinants()
      *  \sa check_element_distortion()
@@ -73,7 +74,8 @@ public:
      * @param rhea Shape function gradients at quadrature point
      * @param configuration Configuration of the element (coordinates)
      */
-    static Matrix3 local_deformation_gradient(Matrix const& rhea, Matrix const& configuration)
+    [[nodiscard]] static Matrix3 local_deformation_gradient(Matrix const& rhea,
+                                                            Matrix const& configuration)
     {
         return configuration * rhea;
     }
@@ -87,15 +89,15 @@ public:
      * @param X Reference configuration (spatial coordinates, local nodes)
      * @param x Current configuration (spatial coordinates, local nodes)
      */
-    Matrix3 deformation_gradient(Matrix const& rhea, Matrix const& X, Matrix const& x)
+    [[nodiscard]] Matrix3 deformation_gradient(Matrix const& rhea, Matrix const& X, Matrix const& x)
     {
         // Deformation gradient in the reference and current configuration
         return local_deformation_gradient(rhea, x) * local_deformation_gradient(rhea, X).inverse();
     }
 
-    ValueCount nodal_averaged_variable(InternalVariables::Tensor const tensor_name) const;
+    [[nodiscard]] ValueCount nodal_averaged_variable(InternalVariables::Tensor const tensor_name) const;
 
-    ValueCount nodal_averaged_variable(InternalVariables::Scalar const scalar_name) const;
+    [[nodiscard]] ValueCount nodal_averaged_variable(InternalVariables::Scalar const scalar_name) const;
 
 protected:
     /** Update the strain measures defined by the constitutive model */
@@ -119,7 +121,7 @@ protected:
        \f}
      * Where B is the gradient operator in the finite element discretization
      */
-    Matrix geometric_tangent_stiffness(Matrix const& configuration, int element) const;
+    [[nodiscard]] Matrix geometric_tangent_stiffness(Matrix const& configuration, int element) const;
 
     /**
      * Compute the material tangent stiffness using the formula
@@ -127,7 +129,7 @@ protected:
      * k_{mat} &= I_{2x2} \int_{V} B_I^{T} \sigma B_{J} dV
      * \f}
      */
-    Matrix material_tangent_stiffness(Matrix const& configuration, int element) const;
+    [[nodiscard]] Matrix material_tangent_stiffness(Matrix const& configuration, int element) const;
 
     /**
      * Compute the internal force vector using the formula
@@ -136,10 +138,10 @@ protected:
      * \f}
      * @return the internal nodal force vector
      */
-    Vector internal_nodal_force(Matrix const& configuration, int element) const;
+    [[nodiscard]] Vector internal_nodal_force(Matrix const& configuration, int element) const;
 
     /** @return the index into the internal variable store */
-    int offset(int const element, int const quadraturePoint) const;
+    [[nodiscard]] int offset(int const element, int const quadraturePoint) const;
 
 private:
     std::shared_ptr<MaterialCoordinates> material_coordinates;

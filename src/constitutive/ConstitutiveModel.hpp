@@ -1,11 +1,10 @@
 
 #pragma once
 
+#include "InternalVariablesForwards.hpp"
+
 namespace neon
 {
-template <int spatial_dimension>
-class InternalVariables;
-
 class Material;
 
 /**
@@ -14,7 +13,8 @@ class Material;
  * internal variables routine and update a constitutive model for use in the global
  * assembly routine
  */
-template <int spatial_dimension>
+template <int spatial_dimension,
+          int voigt_dimension = spatial_to_voigt(std::integral_constant<int, spatial_dimension>{})>
 class ConstitutiveModel
 {
 public:
@@ -39,12 +39,16 @@ protected:
     InternalVariables<spatial_dimension>& variables;
 };
 
-namespace solid
+namespace mech::solid
 {
-using ConstitutiveModel = neon::ConstitutiveModel<3>;
+using ConstitutiveModel = neon::ConstitutiveModel<3, 6>;
+}
+namespace mech::plane
+{
+using ConstitutiveModel = neon::ConstitutiveModel<2, 3>;
 }
 namespace diffusion
 {
-using ConstitutiveModel = neon::ConstitutiveModel<3>;
+using ConstitutiveModel = neon::ConstitutiveModel<3, 3>;
 }
 }

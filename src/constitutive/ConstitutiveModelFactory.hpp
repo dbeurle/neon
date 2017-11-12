@@ -5,18 +5,16 @@
 
 #include <json/forwards.h>
 
+#include "InternalVariablesForwards.hpp"
+
 namespace neon
 {
-template <int D>
-class InternalVariables;
-
-template <int D>
+template <int spatial_dimension, int voigt_dimension>
 class ConstitutiveModel;
 
-namespace solid
+namespace mech::solid
 {
-using ConstitutiveModel = neon::ConstitutiveModel<3>;
-using InternalVariables = neon::InternalVariables<3>;
+using ConstitutiveModel = neon::ConstitutiveModel<3, 6>;
 
 std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& variables,
                                                            Json::Value const& material_data,
@@ -24,8 +22,7 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& va
 }
 namespace diffusion
 {
-using ConstitutiveModel = neon::ConstitutiveModel<3>;
-using InternalVariables = neon::InternalVariables<3>;
+using ConstitutiveModel = neon::ConstitutiveModel<3, 3>;
 
 std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& variables,
                                                            Json::Value const& material_data,

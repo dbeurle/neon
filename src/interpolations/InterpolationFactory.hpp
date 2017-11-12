@@ -11,7 +11,7 @@
 
 namespace neon
 {
-namespace solid
+namespace mech::solid
 {
 /** Factory method for the three dimensional shape functions */
 std::unique_ptr<VolumeInterpolation> make_volume_interpolation(ElementTopology const topology,
@@ -23,7 +23,7 @@ std::unique_ptr<SurfaceInterpolation> make_surface_interpolation(ElementTopology
 }
 namespace diffusion
 {
-using solid::make_surface_interpolation;
-using solid::make_volume_interpolation;
+using mech::solid::make_surface_interpolation;
+using mech::solid::make_volume_interpolation;
 }
 }

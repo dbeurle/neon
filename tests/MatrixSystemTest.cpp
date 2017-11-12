@@ -23,8 +23,8 @@ using namespace neon;
 
 TEST_CASE("Nonlinear system equilibrium solver test")
 {
-    using solid::femMesh;
-    using solid::femStaticMatrix;
+    using mech::solid::femMesh;
+    using mech::solid::femStaticMatrix;
 
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh

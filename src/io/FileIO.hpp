@@ -50,7 +50,7 @@ protected:
     bool use_binary_format = false;
 };
 
-namespace solid
+namespace mech::solid
 {
 class FileIO : public neon::FileIO
 {

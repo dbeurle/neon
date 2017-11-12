@@ -11,7 +11,7 @@ namespace neon
 {
 class BasicMesh;
 
-namespace solid
+namespace mech::solid
 {
 class femMesh
 {
