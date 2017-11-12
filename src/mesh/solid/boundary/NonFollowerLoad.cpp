@@ -5,7 +5,7 @@
 
 #include <json/value.h>
 
-namespace neon::solid
+namespace neon::mech::solid
 {
 Pressure::Pressure(std::unique_ptr<SurfaceInterpolation>&& sf,
                    std::vector<List> const& nodal_connectivity,

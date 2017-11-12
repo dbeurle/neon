@@ -25,7 +25,7 @@ constexpr auto ZERO_MARGIN = 1.0e-5;
 
 TEST_CASE("No constitutive model error test")
 {
-    using namespace neon::solid;
+    using namespace neon::mech::solid;
 
     InternalVariables variables(internal_variable_size);
 
@@ -44,7 +44,7 @@ TEST_CASE("No constitutive model error test")
 }
 TEST_CASE("Constitutive model no name error test")
 {
-    using namespace neon::solid;
+    using namespace neon::mech::solid;
 
     InternalVariables variables(internal_variable_size);
 
@@ -63,7 +63,7 @@ TEST_CASE("Constitutive model no name error test")
 }
 TEST_CASE("Constitutive model invalid name error test")
 {
-    using namespace neon::solid;
+    using namespace neon::mech::solid;
 
     InternalVariables variables(internal_variable_size);
 
@@ -82,7 +82,7 @@ TEST_CASE("Constitutive model invalid name error test")
 }
 TEST_CASE("Neo-Hookean model")
 {
-    using namespace neon::solid;
+    using namespace neon::mech::solid;
     InternalVariables variables(internal_variable_size);
 
     // Add the required variables for an updated Lagrangian formulation
@@ -150,7 +150,7 @@ TEST_CASE("Neo-Hookean model")
 }
 TEST_CASE("Microsphere model error test")
 {
-    using namespace neon::solid;
+    using namespace neon::mech::solid;
 
     InternalVariables variables(internal_variable_size);
 
@@ -171,7 +171,7 @@ TEST_CASE("Microsphere model error test")
 }
 TEST_CASE("Affine microsphere model", )
 {
-    using namespace neon::solid;
+    using namespace neon::mech::solid;
 
     InternalVariables variables(internal_variable_size);
 
@@ -263,7 +263,7 @@ TEST_CASE("Affine microsphere model", )
 }
 TEST_CASE("NonAffine microsphere model")
 {
-    using namespace neon::solid;
+    using namespace neon::mech::solid;
 
     InternalVariables variables(internal_variable_size);
 
@@ -356,7 +356,7 @@ TEST_CASE("NonAffine microsphere model")
 }
 TEST_CASE("J2 plasticity model factory errors")
 {
-    using namespace neon::solid;
+    using namespace neon::mech::solid;
 
     // Create a json reader object from a string
     std::string input_data = "{}";
@@ -376,7 +376,7 @@ TEST_CASE("J2 plasticity model factory errors")
 }
 TEST_CASE("J2 plasticity model")
 {
-    using namespace neon::solid;
+    using namespace neon::mech::solid;
 
     // Create a json reader object from a string
     std::string
@@ -504,7 +504,7 @@ TEST_CASE("J2 plasticity model")
 }
 TEST_CASE("Finite J2 plasticity model")
 {
-    using namespace neon::solid;
+    using namespace neon::mech::solid;
 
     // Create a json reader object from a string
     std::string

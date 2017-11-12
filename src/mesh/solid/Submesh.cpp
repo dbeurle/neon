@@ -19,7 +19,7 @@
 #include <range/v3/view.hpp>
 #include <termcolor/termcolor.hpp>
 
-namespace neon::solid
+namespace neon::mech::solid
 {
 femSubmesh::femSubmesh(Json::Value const& material_data,
                        Json::Value const& simulation_data,

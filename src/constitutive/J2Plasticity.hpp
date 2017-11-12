@@ -7,7 +7,7 @@
 
 #include "material/IsotropicElasticPlastic.hpp"
 
-namespace neon::solid
+namespace neon::mech::solid
 {
 using InternalVariables = neon::InternalVariables<3>;
 

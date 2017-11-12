@@ -138,7 +138,7 @@ TEST_CASE("Boundary unit test", "[Boundary]")
 }
 TEST_CASE("Traction test for triangle", "[Traction]")
 {
-    using namespace neon::solid;
+    using namespace neon::mech::solid;
 
     Json::Reader reader;
     Json::Value times, loads;
@@ -195,7 +195,7 @@ TEST_CASE("Traction test for triangle", "[Traction]")
 }
 TEST_CASE("Pressure test for triangle", "[Pressure]")
 {
-    using namespace neon::solid;
+    using namespace neon::mech::solid;
 
     Json::Reader reader;
     Json::Value times, loads;
@@ -256,7 +256,7 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
 {
     // Test the construction and population of a mixed quadrilateral and
     // triangle mesh
-    using namespace neon::solid;
+    using namespace neon::mech::solid;
 
     Vector coordinates(3 * 5);
     coordinates << 0.0, 0.0, 0.0, //

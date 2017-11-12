@@ -15,7 +15,7 @@
 #include <json/value.h>
 #include <stdexcept>
 
-namespace neon::solid
+namespace neon::mech::solid
 {
 std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& variables,
                                                            Json::Value const& material_data,

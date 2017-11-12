@@ -13,7 +13,7 @@
 #include <range/v3/action.hpp>
 #include <range/v3/view.hpp>
 
-namespace neon::solid
+namespace neon::mech::solid
 {
 femMesh::femMesh(BasicMesh const& basic_mesh,
                  Json::Value const& material_data,

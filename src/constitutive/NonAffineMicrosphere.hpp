@@ -3,7 +3,7 @@
 
 #include "AffineMicrosphere.hpp"
 
-namespace neon::solid
+namespace neon::mech::solid
 {
 /**
  * NonAffineMicrosphere model computes the Kirchhoff stress and the material

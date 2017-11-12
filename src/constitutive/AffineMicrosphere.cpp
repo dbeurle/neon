@@ -11,7 +11,7 @@
 #include <exception>
 #include <omp.h>
 
-namespace neon::solid
+namespace neon::mech::solid
 {
 AffineMicrosphere::AffineMicrosphere(InternalVariables& variables, Json::Value const& material_data)
     : Hyperelastic(variables), material(material_data)

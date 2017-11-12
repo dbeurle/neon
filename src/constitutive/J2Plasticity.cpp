@@ -8,7 +8,7 @@
 #include <json/value.h>
 #include <range/v3/view.hpp>
 
-namespace neon::solid
+namespace neon::mech::solid
 {
 IsotropicLinearElasticity::IsotropicLinearElasticity(InternalVariables& variables,
                                                      Json::Value const& material_data)

@@ -10,7 +10,7 @@
 #include <range/v3/view.hpp>
 #include <unsupported/Eigen/MatrixFunctions>
 
-namespace neon::solid
+namespace neon::mech::solid
 {
 FiniteJ2Plasticity::FiniteJ2Plasticity(InternalVariables& variables, Json::Value const& material_data)
     : J2Plasticity(variables, material_data)

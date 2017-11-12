@@ -3,7 +3,7 @@
 
 #include "ConstitutiveModel.hpp"
 
-namespace neon::solid
+namespace neon::mech::solid
 {
 using InternalVariables = neon::InternalVariables<3>;
 

@@ -9,7 +9,7 @@
 
 #include <array>
 
-namespace neon::solid
+namespace neon::mech::solid
 {
 /**
  * FiniteJ2Plasticity is a material model for the large strain deformation

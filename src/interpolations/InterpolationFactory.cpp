@@ -13,7 +13,7 @@
 
 #include <json/value.h>
 
-namespace neon::solid
+namespace neon::mech::solid
 {
 bool is_reduced_integration(Json::Value const& simulation_data)
 {

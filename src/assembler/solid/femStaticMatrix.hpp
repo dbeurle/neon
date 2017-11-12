@@ -12,7 +12,7 @@ namespace neon
 class LinearSolver;
 }
 
-namespace neon::solid
+namespace neon::mech::solid
 {
 class femStaticMatrix
 {

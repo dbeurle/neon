@@ -6,7 +6,7 @@
 #include <range/v3/algorithm.hpp>
 #include <range/v3/view.hpp>
 
-namespace neon::solid
+namespace neon::mech::solid
 {
 NeoHooke::NeoHooke(InternalVariables& variables, Json::Value const& material_data)
     : Hyperelastic(variables), material(material_data)
