@@ -22,10 +22,52 @@ void NodeOrderingAdapter::convert_from_gmsh(std::vector<List>& nodal_connectivit
             }
             break;
         }
+        case ElementTopology::Hexahedron27:
+        {
+            /*
+            Gmsh ordering (0 based indexing) taken from gmsh.info
+
+                3----13----2
+                |\         |\
+                |15    24  | 14
+                9  \ 20    11 \
+                |   7----19+---6
+                |22 |  26  | 23|
+                0---+-8----1   |
+                 \ 17    25 \  18
+                 10 |  21    12|
+                   \|         \|
+                    4----16----5
+
+            Hughes ordering (0 based indexing)
+
+                3----10----2
+                |\         |\
+                | 19   23  | 18
+               11  \ 20    9  \
+                |   7----14+---6
+                |24 |  26  | 25|
+                0---+-8----1   |
+                 \  15   21 \  13
+                 16 |  22    17|
+                   \|         \|
+                    4----12----5
+
+            */
+            for (auto& nodal_list : nodal_connectivity)
+            {
+                std::swap(nodal_list.at(21), nodal_list.at(25));
+                std::swap(nodal_list.at(25), nodal_list.at(22));
+                std::swap(nodal_list.at(24), nodal_list.at(25));
+                std::swap(nodal_list.at(23), nodal_list.at(25));
+            }
+            [[fallthrough]];
+        }
         case ElementTopology::Hexahedron20:
         {
             /*
               Gmsh ordering (0 based indexing) taken from gmsh.info
+
                3----13----2
                |\         |\
                | 15       | 14
@@ -123,6 +165,12 @@ std::vector<List> NodeOrderingAdapter::convert_to_vtk(std::vector<List> nodal_co
              *  |      |
              *  0-- 8--1
              */
+            for (auto& nodal_list : nodal_connectivity)
+            {
+                std::swap(nodal_list.at(21), nodal_list.at(25));
+                std::swap(nodal_list.at(20), nodal_list.at(24));
+            }
+            break;
         }
         default:
             break;
@@ -141,7 +189,7 @@ ElementTopology NodeOrderingAdapter::gmsh_type_to_enum(int element_code) const
     return found->second;
 }
 
-int NodeOrderingAdapter::to_vtk(ElementTopology element_topology) const
+VTKCellType NodeOrderingAdapter::to_vtk(ElementTopology element_topology) const
 {
     auto const found = vtk_converter.find(element_topology);
     if (found == vtk_converter.end())
