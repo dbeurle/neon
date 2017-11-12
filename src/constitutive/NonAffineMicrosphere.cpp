@@ -5,11 +5,8 @@
 #include "numeric/DenseTypes.hpp"
 
 #include <json/json.h>
-#include <range/v3/algorithm.hpp>
-#include <range/v3/view.hpp>
 
 #include <exception>
-#include <iostream>
 #include <omp.h>
 
 namespace neon::mech::solid
@@ -27,9 +24,6 @@ NonAffineMicrosphere::NonAffineMicrosphere(InternalVariables& variables,
 
 void NonAffineMicrosphere::update_internal_variables(double const time_step_size)
 {
-    using ranges::view::transform;
-    using ranges::view::zip;
-
     auto const& deformation_gradients = variables(InternalVariables::Tensor::DeformationGradient);
     auto& cauchy_stress_list = variables(InternalVariables::Tensor::Cauchy);
 

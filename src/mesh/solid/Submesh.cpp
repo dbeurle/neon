@@ -15,8 +15,10 @@
 #include <omp.h>
 
 #include <json/json.h>
-#include <range/v3/algorithm.hpp>
-#include <range/v3/view.hpp>
+
+#include <range/v3/algorithm/find_if.hpp>
+#include <range/v3/view/transform.hpp>
+
 #include <termcolor/termcolor.hpp>
 
 namespace neon::mech::solid

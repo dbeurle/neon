@@ -19,7 +19,8 @@
 #include <json/reader.h>
 #include <termcolor/termcolor.hpp>
 
-#include <range/v3/algorithm.hpp>
+#include <range/v3/algorithm/find.hpp>
+#include <range/v3/algorithm/find_if.hpp>
 
 namespace neon
 {

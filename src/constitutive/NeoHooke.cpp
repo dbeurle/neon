@@ -3,8 +3,9 @@
 
 #include "InternalVariables.hpp"
 
-#include <range/v3/algorithm.hpp>
-#include <range/v3/view.hpp>
+#include <range/v3/algorithm/for_each.hpp>
+#include <range/v3/view/transform.hpp>
+#include <range/v3/view/zip.hpp>
 
 namespace neon::mech::solid
 {

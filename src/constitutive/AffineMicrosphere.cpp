@@ -5,8 +5,9 @@
 #include "numeric/DenseTypes.hpp"
 
 #include <json/json.h>
-#include <range/v3/algorithm.hpp>
-#include <range/v3/view.hpp>
+
+#include <range/v3/view/transform.hpp>
+#include <range/v3/view/zip.hpp>
 
 #include <exception>
 #include <omp.h>

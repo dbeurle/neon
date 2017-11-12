@@ -7,7 +7,10 @@
 
 #include <iostream>
 #include <json/value.h>
-#include <range/v3/view.hpp>
+
+#include <range/v3/view/transform.hpp>
+#include <range/v3/view/zip.hpp>
+
 #include <unsupported/Eigen/MatrixFunctions>
 
 namespace neon::mech::solid

@@ -1,8 +1,10 @@
 
 #include "MaterialCoordinates.hpp"
 
-#include <range/v3/algorithm.hpp>
-#include <range/v3/view.hpp>
+#include <range/v3/algorithm/for_each.hpp>
+
+#include <range/v3/view/iota.hpp>
+#include <range/v3/view/zip.hpp>
 
 #include "vtkDoubleArray.h"
 #include "vtkPoints.h"

@@ -9,9 +9,11 @@
 #include <cmath>
 #include <random>
 
-#include <range/v3/action.hpp>
-#include <range/v3/algorithm.hpp>
-#include <range/v3/view.hpp>
+#include <range/v3/action/sort.hpp>
+#include <range/v3/algorithm/stable_partition.hpp>
+#include <range/v3/numeric/accumulate.hpp>
+#include <range/v3/view/transform.hpp>
+#include <range/v3/view/zip.hpp>
 
 namespace neon
 {

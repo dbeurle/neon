@@ -3,6 +3,7 @@
 
 #include "mesh/BasicMesh.hpp"
 
+#include <chrono>
 #include <exception>
 #include <memory>
 #include <numeric>
@@ -10,8 +11,11 @@
 #include <json/value.h>
 #include <termcolor/termcolor.hpp>
 
-#include <range/v3/action.hpp>
-#include <range/v3/view.hpp>
+#include <range/v3/action/join.hpp>
+#include <range/v3/action/sort.hpp>
+#include <range/v3/action/transform.hpp>
+#include <range/v3/action/unique.hpp>
+#include <range/v3/view/transform.hpp>
 
 namespace neon::mech::solid
 {

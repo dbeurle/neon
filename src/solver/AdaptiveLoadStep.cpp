@@ -4,7 +4,6 @@
 #include "numeric/FloatingPointCompare.hpp"
 
 #include <exception>
-#include <range/v3/algorithm.hpp>
 #include <termcolor/termcolor.hpp>
 
 #include <json/value.h>

@@ -5,7 +5,10 @@
 #include "NodalCoordinates.hpp"
 
 #include <json/json.h>
-#include <range/v3/action.hpp>
+
+#include <range/v3/action/join.hpp>
+#include <range/v3/action/sort.hpp>
+#include <range/v3/action/unique.hpp>
 
 namespace neon
 {

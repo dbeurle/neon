@@ -3,6 +3,7 @@
 
 #include "mesh/BasicMesh.hpp"
 
+#include <chrono>
 #include <exception>
 #include <memory>
 #include <numeric>
@@ -10,8 +11,10 @@
 #include <json/json.h>
 #include <termcolor/termcolor.hpp>
 
-#include <range/v3/action.hpp>
-#include <range/v3/view.hpp>
+#include <range/v3/action/join.hpp>
+#include <range/v3/action/sort.hpp>
+#include <range/v3/action/unique.hpp>
+#include <range/v3/view/transform.hpp>
 
 namespace neon::diffusion
 {
@@ -52,8 +55,6 @@ void femMesh::save_internal_variables(bool const have_converged)
 void femMesh::allocate_boundary_conditions(Json::Value const& simulation_data,
                                            BasicMesh const& basic_mesh)
 {
-    using namespace ranges;
-
     auto const& boundary_data = simulation_data["BoundaryConditions"];
 
     // Populate the boundary meshes

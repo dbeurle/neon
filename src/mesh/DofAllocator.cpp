@@ -1,7 +1,9 @@
 
 #include "DofAllocator.hpp"
 
-#include <range/v3/view.hpp>
+#include <range/v3/view/for_each.hpp>
+#include <range/v3/view/iota.hpp>
+#include <range/v3/view/transform.hpp>
 
 namespace neon
 {
