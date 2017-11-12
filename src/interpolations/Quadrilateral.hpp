@@ -14,7 +14,7 @@ public:
 
     virtual int nodes() const override final { return 4; }
 
-    double compute_measure(Matrix const& nodal_coordinates);
+    [[nodiscard]] double compute_measure(Matrix const& nodal_coordinates) const;
 
 protected:
     /**
@@ -39,7 +39,7 @@ public:
 
     int nodes() const override final { return 8; }
 
-    double compute_measure(Matrix const& nodal_coordinates);
+    [[nodiscard]] double compute_measure(Matrix const& nodal_coordinates) const;
 
 protected:
     void precompute_shape_functions();
@@ -53,7 +53,7 @@ public:
 
     int nodes() const override final { return 9; }
 
-    double compute_measure(Matrix const& nodal_coordinates);
+    [[nodiscard]] double compute_measure(Matrix const& nodal_coordinates) const;
 
 protected:
     void precompute_shape_functions();

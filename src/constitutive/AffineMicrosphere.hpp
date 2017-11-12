@@ -32,9 +32,9 @@ public:
 
     virtual void update_internal_variables(double const time_step_size) override;
 
-    Material const& intrinsic_material() const override final { return material; };
+    [[nodiscard]] Material const& intrinsic_material() const override final { return material; };
 
-    virtual bool is_finite_deformation() const override final { return true; };
+    [[nodiscard]] virtual bool is_finite_deformation() const override final { return true; };
 
 protected:
     /**

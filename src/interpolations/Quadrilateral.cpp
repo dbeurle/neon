@@ -55,7 +55,7 @@ void Quadrilateral4::precompute_shape_functions()
     compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
 }
 
-double Quadrilateral4::compute_measure(Matrix const& nodal_coordinates)
+double Quadrilateral4::compute_measure(Matrix const& nodal_coordinates) const
 {
     return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
         auto const & [ N, dN ] = femval;
@@ -141,7 +141,7 @@ void Quadrilateral8::precompute_shape_functions()
     compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
 }
 
-double Quadrilateral8::compute_measure(Matrix const& nodal_coordinates)
+double Quadrilateral8::compute_measure(Matrix const& nodal_coordinates) const
 {
     return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
         auto const & [ N, dN ] = femval;
@@ -231,7 +231,7 @@ void Quadrilateral9::precompute_shape_functions()
     compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
 }
 
-double Quadrilateral9::compute_measure(Matrix const& nodal_coordinates)
+double Quadrilateral9::compute_measure(Matrix const& nodal_coordinates) const
 {
     return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
         auto const & [ N, dN ] = femval;

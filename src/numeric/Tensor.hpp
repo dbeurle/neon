@@ -9,16 +9,19 @@ namespace neon
  * Performs the tensor dot product on two second order tensors in three dimensions.
  *
  */
-inline double double_dot(Matrix3 const& a, Matrix3 const& b)
+[[nodiscard]] inline double double_dot(Matrix3 const& a, Matrix3 const& b)
 {
     return (a.array() * b.array()).sum();
 }
 
 /** @return the volumetric part of the tensor */
-inline Matrix3 volumetric(Matrix3 const& a) { return Matrix3::Identity() * a.trace() / 3.0; }
+[[nodiscard]] inline Matrix3 volumetric(Matrix3 const& a)
+{
+    return Matrix3::Identity() * a.trace() / 3.0;
+}
 
 /** @return the deviatoric part of the tensor */
-inline Matrix3 deviatoric(Matrix3 const& a) { return a - volumetric(a); }
+[[nodiscard]] inline Matrix3 deviatoric(Matrix3 const& a) { return a - volumetric(a); }
 
 /**
  * Evaluates the expression
@@ -27,30 +30,33 @@ inline Matrix3 deviatoric(Matrix3 const& a) { return a - volumetric(a); }
    \f}
  * @return The unimodular decomposition of a second order tensor
  */
-inline Matrix3 unimodular(Matrix3 const& a) { return std::pow(a.determinant(), -1.0 / 3.0) * a; }
+[[nodiscard]] inline Matrix3 unimodular(Matrix3 const& a)
+{
+    return std::pow(a.determinant(), -1.0 / 3.0) * a;
+}
 
 /** Compute the von Mises stress based on the full stress tensor */
-inline double von_mises_stress(Matrix3 const& a)
+[[nodiscard]] inline double von_mises_stress(Matrix3 const& a)
 {
     return std::sqrt(3.0 / 2.0) * deviatoric(a).norm();
 }
 
-inline Matrix3 symmetric(Matrix3 const& a) { return 0.5 * (a.transpose() + a); }
+[[nodiscard]] inline Matrix3 symmetric(Matrix3 const& a) { return 0.5 * (a.transpose() + a); }
 
 /**
  * Compute the velocity gradient given the time derivative of the deformation
  * gradient and the deformation gradient
  */
-inline Matrix3 velocity_gradient(Matrix3 const& Fdot, Matrix const& F)
+[[nodiscard]] inline Matrix3 velocity_gradient(Matrix3 const& Fdot, Matrix const& F)
 {
     return Fdot * F.inverse();
 }
 
 /** Compute the rate of deformation given the velocity gradient */
-inline Matrix3 rate_of_deformation(Matrix3 const& L) { return symmetric(L); }
+[[nodiscard]] inline Matrix3 rate_of_deformation(Matrix3 const& L) { return symmetric(L); }
 
 /** Compute the rate of deformation given the velocity gradient */
-inline Matrix3 rate_of_deformation(Matrix3 const& F_dot, Matrix3 const& F)
+[[nodiscard]] inline Matrix3 rate_of_deformation(Matrix3 const& F_dot, Matrix3 const& F)
 {
     return symmetric(velocity_gradient(F_dot, F));
 }
@@ -60,7 +66,7 @@ inline Matrix3 rate_of_deformation(Matrix3 const& F_dot, Matrix3 const& F)
  * which is equal to the trace
  * @return First invariant
  */
-inline double I1(Matrix3 const& a) { return a.trace(); }
+[[nodiscard]] inline double I1(Matrix3 const& a) { return a.trace(); }
 
 /**
  * I2 returns the coefficient I2, the second stress invariant,
@@ -70,12 +76,15 @@ inline double I1(Matrix3 const& a) { return a.trace(); }
  * \f}
  * @return Second invariant
  */
-inline double I2(Matrix3 const& a) { return 0.5 * (std::pow(a.trace(), 2) - (a * a).trace()); }
+[[nodiscard]] inline double I2(Matrix3 const& a)
+{
+    return 0.5 * (std::pow(a.trace(), 2) - (a * a).trace());
+}
 
 /** @return Third invariant, which is the determinant of the tensor */
-inline double I3(Matrix3 const& a) { return a.determinant(); }
+[[nodiscard]] inline double I3(Matrix3 const& a) { return a.determinant(); }
 
-inline Matrix identity_expansion(Matrix const& H, int const nodal_dofs)
+[[nodiscard]] inline Matrix identity_expansion(Matrix const& H, int const nodal_dofs)
 {
     assert(H.rows() == H.cols());
     // Create the geometric part of the tangent stiffness matrix
@@ -100,7 +109,7 @@ namespace voigt
  * Compute the outer product in Voigt notation according to
  * \f$ \mathbb{\mathbf{1} \otimes \mathbf{1}} = \delta_{ij} \delta_{kl} \f$
  */
-inline Matrix6 I_outer_I()
+[[nodiscard]] inline Matrix6 I_outer_I()
 {
     // clang-format off
     return (Matrix6() << 1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
@@ -124,7 +133,7 @@ namespace kinematic
  * \varepsilon_{13} \\ \varepsilon_{21} & \varepsilon_{22} & \varepsilon_{23} \\ \varepsilon_{31} &
  * \varepsilon_{32} & \varepsilon_{33} \end{bmatrix} \f$
  */
-inline Vector6 to(Matrix3 const& a)
+[[nodiscard]] inline Vector6 to(Matrix3 const& a)
 {
     // clang-format off
     return (Vector6() << a(0, 0),
@@ -144,7 +153,7 @@ inline Vector6 to(Matrix3 const& a)
  * \varepsilon_{22} \\ \varepsilon_{33} \\ 2\varepsilon_{23}
  * \\ 2\varepsilon_{13} \\ 2\varepsilon_{12} \end{bmatrix} \f$
  */
-inline Matrix3 from(Vector6 const& a)
+[[nodiscard]] inline Matrix3 from(Vector6 const& a)
 {
     // clang-format off
     return (Matrix3() <<     a(0), a(5)/2.0, a(4)/2.0,
@@ -158,7 +167,7 @@ inline Matrix3 from(Vector6 const& a)
  * \f$ \mathbb{P} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) -
  * \frac{1}{3}\delta_{ij} \delta_{kl} \f$
  */
-inline Matrix6 deviatoric()
+[[nodiscard]] inline Matrix6 deviatoric()
 {
     // clang-format off
     return (Matrix6() << 2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,
@@ -174,7 +183,7 @@ inline Matrix6 deviatoric()
  * Compute the fourth order symmetric identity tensor in Voigt notation according to
  * \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
  */
-inline Matrix6 fourth_order_identity()
+[[nodiscard]] inline Matrix6 fourth_order_identity()
 {
     // clang-format off
     return (Matrix6() << 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -190,7 +199,7 @@ inline Matrix6 fourth_order_identity()
  * Compute the fourth order symmetric identity tensor in Voigt notation according to
  * \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
  */
-inline Matrix6 identity()
+[[nodiscard]] inline Matrix6 identity()
 {
     // clang-format off
     return (Matrix6() << 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -214,7 +223,7 @@ namespace kinetic
  * \sigma_{21} & \sigma_{22} & \sigma_{23} \\ \sigma_{31} & \sigma_{32} & \sigma_{33} \end{bmatrix}
  * \f$
  */
-inline Vector6 to(Matrix3 const& a)
+[[nodiscard]] inline Vector6 to(Matrix3 const& a)
 {
     return (Vector6() << a(0, 0), a(1, 1), a(2, 2), a(1, 2), a(0, 2), a(0, 1)).finished();
 }
@@ -227,7 +236,7 @@ inline Vector6 to(Matrix3 const& a)
  * \sigma_{12} \end{bmatrix}
  * \f$
  */
-inline Matrix3 from(Vector6 const& a)
+[[nodiscard]] inline Matrix3 from(Vector6 const& a)
 {
     // clang-format off
     return (Matrix3() << a(0), a(5), a(4),
@@ -241,7 +250,7 @@ inline Matrix3 from(Vector6 const& a)
  * \f$ \mathbb{P} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) -
  * \frac{1}{3}\delta_{ij} \delta_{kl} \f$
  */
-inline Matrix6 deviatoric()
+[[nodiscard]] inline Matrix6 deviatoric()
 {
     // clang-format off
     return (Matrix6() << 2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,
@@ -257,14 +266,17 @@ inline Matrix6 deviatoric()
  * Compute the fourth order symmetric identity tensor in Voigt notation according to
  * \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
  */
-inline Matrix6 fourth_order_identity() { return Matrix6::Identity(); }
+[[nodiscard]] inline Matrix6 fourth_order_identity() { return Matrix6::Identity(); }
 }
 }
 /*! @} End of Doxygen Groups */
 
-inline Matrix3 outer_product(Vector3 const& a, Vector3 const& b) { return a * b.transpose(); }
+[[nodiscard]] inline Matrix3 outer_product(Vector3 const& a, Vector3 const& b)
+{
+    return a * b.transpose();
+}
 
-inline Matrix6 outer_product(Matrix3 const& a, Matrix3 const& b)
+[[nodiscard]] inline Matrix6 outer_product(Matrix3 const& a, Matrix3 const& b)
 {
     return voigt::kinetic::to(a) * voigt::kinetic::to(b).transpose();
 }
@@ -275,7 +287,10 @@ inline Matrix6 outer_product(Matrix3 const& a, Matrix3 const& b)
         & \mathbf{a} \otimes \mathbf{b} \otimes \mathbf{c} \otimes \mathbf{d}
     \f}
 */
-inline Matrix6 outer_product(Vector3 const& a, Vector3 const& b, Vector3 const& c, Vector3 const& d)
+[[nodiscard]] inline Matrix6 outer_product(Vector3 const& a,
+                                           Vector3 const& b,
+                                           Vector3 const& c,
+                                           Vector3 const& d)
 {
     return outer_product(outer_product(a, b), outer_product(c, d));
 }
@@ -286,7 +301,7 @@ inline Matrix6 outer_product(Vector3 const& a, Vector3 const& b, Vector3 const& 
         & \mathbf{a} \otimes \mathbf{b}
     \f}
 */
-inline Matrix6 outer_product(Matrix3 const& h) { return outer_product(h, h); }
+[[nodiscard]] inline Matrix6 outer_product(Matrix3 const& h) { return outer_product(h, h); }
 
 /**
  * Convert a fourth order tensor in Voigt notation to Mandel notation.  This
@@ -298,7 +313,7 @@ inline Matrix6 outer_product(Matrix3 const& h) { return outer_product(h, h); }
       [\mathbf{c}] &= [\mathbf{a}] [\mathbf{b}]
      \f}
  */
-inline Matrix6 mandel_notation(Matrix6 A)
+[[nodiscard]] inline Matrix6 mandel_notation(Matrix6 A)
 {
     A.block<3, 3>(0, 3) *= std::sqrt(2);
     A.block<3, 3>(3, 0) *= std::sqrt(2);

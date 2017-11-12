@@ -14,13 +14,13 @@ namespace neon
 class SurfaceInterpolation : public ShapeFunction<SurfaceQuadrature>
 {
 public:
-    SurfaceInterpolation(std::unique_ptr<SurfaceQuadrature>&& quadratureImpl)
+    explicit SurfaceInterpolation(std::unique_ptr<SurfaceQuadrature>&& quadratureImpl)
         : ShapeFunction<SurfaceQuadrature>(std::move(quadratureImpl))
     {
     }
 
     Vector3 unit_outward_normal(Matrix const& nodal_coordinates) const;
 
-    Matrix project_to_plane(Matrix const& nodal_coordinates) const;
+    [[nodiscard]] Matrix project_to_plane(Matrix const& nodal_coordinates) const;
 };
 }

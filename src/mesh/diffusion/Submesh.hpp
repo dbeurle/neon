@@ -27,18 +27,21 @@ public:
                         SubMesh const& submesh);
 
     /** @return list of global degrees of freedom for an element */
-    List const& local_dof_list(int const element) const { return local_node_list(element); }
+    [[nodiscard]] List const& local_dof_list(int const element) const
+    {
+        return local_node_list(element);
+    }
 
     /** @return The internal variable store */
-    InternalVariables const& internal_variables() const { return variables; }
+    [[nodiscard]] InternalVariables const& internal_variables() const { return variables; }
 
     void save_internal_variables(bool const have_converged);
 
-    auto dofs_per_node() const { return 1; }
+    [[nodiscard]] auto dofs_per_node() const { return 1; }
 
-    auto const& shape_function() const { return *sf.get(); }
+    [[nodiscard]] auto const& shape_function() const { return *sf.get(); }
 
-    auto const& constitutive() const { return *cm.get(); }
+    [[nodiscard]] auto const& constitutive() const { return *cm.get(); }
 
     /**
      * Compute the stiffness (conductivity) matrix according to
@@ -48,7 +51,7 @@ public:
      * where \f$ \kappa \f$ is the conductivity
      * @return DoFs and stiffness matrix
      */
-    std::tuple<List const&, Matrix> tangent_stiffness(int const element) const;
+    [[nodiscard]] std::tuple<List const&, Matrix> tangent_stiffness(int const element) const;
 
     /**
      * Compute the consistent (full) mass matrix according to
@@ -58,10 +61,10 @@ public:
      * where \f$ \rho \f$ is the density and \f$ c_p \f$ is the specific heat
      * @return DoFs and consistent mass matrix \sa diagonal_mass
      */
-    std::tuple<List const&, Matrix> consistent_mass(int const element) const;
+    [[nodiscard]] std::tuple<List const&, Matrix> consistent_mass(int const element) const;
 
     /** @return Diagonal mass matrix using row sum technique \sa consistent_mass */
-    std::tuple<List const&, Vector> diagonal_mass(int const element) const;
+    [[nodiscard]] std::tuple<List const&, Vector> diagonal_mass(int const element) const;
 
     /** Update the internal variables for the mesh group */
     void update_internal_variables(double const time_step_size);
@@ -71,18 +74,18 @@ public:
      * @param rhea Shape function gradients at quadrature point
      * @param configuration Configuration of the element (coordinates)
      */
-    Matrix3 local_jacobian(Matrix const& rhea, Matrix const& configuration) const
+    [[nodiscard]] Matrix3 local_jacobian(Matrix const& rhea, Matrix const& configuration) const
     {
         return configuration * rhea;
     }
 
-    ValueCount nodal_averaged_variable(InternalVariables::Tensor const tensor_name) const;
+    [[nodiscard]] ValueCount nodal_averaged_variable(InternalVariables::Tensor const tensor_name) const;
 
-    ValueCount nodal_averaged_variable(InternalVariables::Scalar const scalar_name) const;
+    [[nodiscard]] ValueCount nodal_averaged_variable(InternalVariables::Scalar const scalar_name) const;
 
 protected:
     /** @return the index into the internal variable store */
-    int offset(int const element, int const quadraturePoint) const;
+    [[nodiscard]] int offset(int const element, int const quadraturePoint) const;
 
 private:
     std::shared_ptr<MaterialCoordinates> material_coordinates;
