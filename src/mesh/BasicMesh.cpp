@@ -3,7 +3,7 @@
 
 #include "Exceptions.hpp"
 
-#include <json/json.h>
+#include <json/value.h>
 
 namespace neon
 {

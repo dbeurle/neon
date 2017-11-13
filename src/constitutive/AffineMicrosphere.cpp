@@ -4,7 +4,7 @@
 #include "InternalVariables.hpp"
 #include "numeric/DenseTypes.hpp"
 
-#include <json/json.h>
+#include <json/value.h>
 
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/zip.hpp>
