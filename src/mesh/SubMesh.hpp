@@ -9,8 +9,6 @@
 
 namespace neon
 {
-class NodalCoordinates;
-
 /** SubMesh stores connectivities for one particular element group */
 class SubMesh
 {
