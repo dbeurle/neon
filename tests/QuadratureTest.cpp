@@ -312,14 +312,17 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
         HexahedronQuadrature One(HexahedronQuadrature::Rule::OnePoint);
         HexahedronQuadrature Six(HexahedronQuadrature::Rule::SixPoint);
         HexahedronQuadrature Eight(HexahedronQuadrature::Rule::EightPoint);
+        HexahedronQuadrature TwentySeven(HexahedronQuadrature::Rule::TwentySevenPoint);
 
         REQUIRE(One.points() == 1);
         REQUIRE(Six.points() == 6);
         REQUIRE(Eight.points() == 8);
+        REQUIRE(TwentySeven.points() == 27);
 
         REQUIRE(ranges::accumulate(One.weights(), 0.0) == Approx(8.0));
         REQUIRE(ranges::accumulate(Six.weights(), 0.0) == Approx(8.0));
         REQUIRE(ranges::accumulate(Eight.weights(), 0.0) == Approx(8.0));
+        REQUIRE(ranges::accumulate(TwentySeven.weights(), 0.0) == Approx(8.0));
     }
     SECTION("Hexahedron8 OnePoint Evaluation")
     {
@@ -474,6 +477,31 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
         REQUIRE(hex20.local_quadrature_extrapolation().rows() == 20);
         REQUIRE(hex20.local_quadrature_extrapolation().cols() == 8);
     }
+    SECTION("Hexahedron20 TwentySevenPoint Evaluation")
+    {
+        Hexahedron20 hex20(HexahedronQuadrature::Rule::TwentySevenPoint);
+
+        // Check the nodes are correct
+        REQUIRE(hex20.nodes() == 20);
+
+        // Check the quaduratre is assigned correctly
+        REQUIRE(hex20.quadrature().points() == 27);
+
+        hex20.quadrature().for_each([&](auto const& femval, auto const& l) {
+
+            auto const & [ N, rhea ] = femval;
+
+            REQUIRE(N.sum() == Approx(1.0));
+
+            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
+
+        });
+
+        REQUIRE(hex20.local_quadrature_extrapolation().rows() == 20);
+        REQUIRE(hex20.local_quadrature_extrapolation().cols() == 27);
+    }
     SECTION("Hexahedron27 OnePoint Evaluation")
     {
         Hexahedron27 hex27(HexahedronQuadrature::Rule::OnePoint);
@@ -548,6 +576,31 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
 
         REQUIRE(hex27.local_quadrature_extrapolation().rows() == 27);
         REQUIRE(hex27.local_quadrature_extrapolation().cols() == 8);
+    }
+    SECTION("Hexahedron27 TwentySevenPoint Evaluation")
+    {
+        Hexahedron27 hex27(HexahedronQuadrature::Rule::TwentySevenPoint);
+
+        // Check the nodes are correct
+        REQUIRE(hex27.nodes() == 27);
+
+        // Check the quaduratre is assigned correctly
+        REQUIRE(hex27.quadrature().points() == 27);
+
+        hex27.quadrature().for_each([&](auto const& femval, auto const& l) {
+
+            auto const & [ N, rhea ] = femval;
+
+            REQUIRE(N.sum() == Approx(1.0));
+
+            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
+
+        });
+
+        REQUIRE(hex27.local_quadrature_extrapolation().rows() == 27);
+        REQUIRE(hex27.local_quadrature_extrapolation().cols() == 27);
     }
     SECTION("Hexahedron27 volume evaluation")
     {

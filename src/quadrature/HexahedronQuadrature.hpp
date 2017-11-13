@@ -11,11 +11,12 @@ public:
     /** Available quadrature rules for this element type */
     enum class Rule {
         OnePoint,
-        SixPoint, // Fourth order accuracy
-        EightPoint
+        SixPoint,        // Fourth order accuracy
+        EightPoint,      // Fourth order accuracy
+        TwentySevenPoint // Six order accuracy
     };
 
 public:
-    HexahedronQuadrature(Rule rule);
+    HexahedronQuadrature(Rule const rule);
 };
 }

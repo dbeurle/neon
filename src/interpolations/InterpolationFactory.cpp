@@ -44,13 +44,13 @@ std::unique_ptr<VolumeInterpolation> make_volume_interpolation(ElementTopology c
         {
             return std::make_unique<Hexahedron20>(is_reduced
                                                       ? HexahedronQuadrature::Rule::SixPoint
-                                                      : HexahedronQuadrature::Rule::EightPoint);
+                                                      : HexahedronQuadrature::Rule::TwentySevenPoint);
         }
         case ElementTopology::Hexahedron27:
         {
             return std::make_unique<Hexahedron27>(is_reduced
                                                       ? HexahedronQuadrature::Rule::SixPoint
-                                                      : HexahedronQuadrature::Rule::EightPoint);
+                                                      : HexahedronQuadrature::Rule::TwentySevenPoint);
         }
         case ElementTopology::Tetrahedron4:
         {
