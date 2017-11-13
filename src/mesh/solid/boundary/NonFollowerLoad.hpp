@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/common/Neumann.hpp"
+#include "mesh/generic/Neumann.hpp"
 
 #include "interpolations/InterpolationFactory.hpp"
 #include "mesh/SubMesh.hpp"

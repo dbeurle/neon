@@ -3,7 +3,7 @@
 
 #include "mesh/diffusion/Submesh.hpp"
 
-#include "mesh/common/Dirichlet.hpp"
+#include "mesh/generic/Dirichlet.hpp"
 #include "mesh/diffusion/boundary/SurfaceFlux.hpp"
 
 #include <map>
