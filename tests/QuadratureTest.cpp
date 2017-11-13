@@ -17,7 +17,7 @@
 #include "interpolations/Triangle3.hpp"
 #include "interpolations/Triangle6.hpp"
 
-#include <range/v3/numeric.hpp>
+#include <range/v3/numeric/accumulate.hpp>
 
 using namespace neon;
 
@@ -373,6 +373,17 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
         REQUIRE(hex8.local_quadrature_extrapolation().rows() == 8);
         REQUIRE(hex8.local_quadrature_extrapolation().cols() == 8);
     }
+    SECTION("Hexahedron8 volume evaluation")
+    {
+        Hexahedron8 hex8(HexahedronQuadrature::Rule::EightPoint);
+
+        Matrix x(3, 8);
+        x << 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, //
+            0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0,  //
+            0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0;
+
+        REQUIRE(hex8.compute_measure(x) == Approx(1.0));
+    }
     SECTION("Hexahedron20 OnePoint Evaluation")
     {
         Hexahedron20 hex20(HexahedronQuadrature::Rule::OnePoint);
@@ -422,6 +433,21 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
 
         REQUIRE(hex20.local_quadrature_extrapolation().rows() == 20);
         REQUIRE(hex20.local_quadrature_extrapolation().cols() == 6);
+    }
+    SECTION("Hexahedron20 volume evaluation")
+    {
+        Hexahedron20 hex20(HexahedronQuadrature::Rule::EightPoint);
+
+        // xyz coordinates of the unit cube
+        Matrix x(3, 20);
+        x << 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5, 0.0, 0.5, 1.0, 0.5, 0.0, 0.0,
+            1.0, 1.0, 0.0, //
+            0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, /**/ 0.0, 0.5, 1.0, 0.5, 0.0, 0.5, 1.0, 0.5,
+            0.0, 0.0, 1.0, 1.0, //
+            0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.5,
+            0.5, 0.5, 0.5;
+
+        REQUIRE(hex20.compute_measure(x) == Approx(1.0));
     }
     SECTION("Hexahedron20 EightPoint Evaluation")
     {
@@ -522,6 +548,47 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
 
         REQUIRE(hex27.local_quadrature_extrapolation().rows() == 27);
         REQUIRE(hex27.local_quadrature_extrapolation().cols() == 8);
+    }
+    SECTION("Hexahedron27 volume evaluation")
+    {
+        SECTION("Six point rule")
+        {
+            Hexahedron27 hex27(HexahedronQuadrature::Rule::SixPoint);
+
+            // xyz coordinates of the unit cube
+            Matrix x(3, 27);
+            x << 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, /**/ 0.5, 1.0, 0.5, 0.0, 0.5, 1.0, 0.5,
+                0.0, 0.0, 1.0, 1.0, 0.0, /**/ 0.5, 0.5, 0.5, 0.5, 0.0, 1.0, 0.5, //
+                0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, /**/ 0.0, 0.5, 1.0, 0.5, 0.0, 0.5, 1.0, 0.5,
+                0.0, 0.0, 1.0, 1.0, /**/ 0.5, 0.5, 0.0, 1.0, 0.5, 0.5, 0.5, //
+                0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, /**/ 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0,
+                0.5, 0.5, 0.5, 0.5, /**/ 0.0, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5;
+
+            REQUIRE(hex27.compute_measure(x) == Approx(1.0));
+
+            x *= 2.0;
+
+            REQUIRE(hex27.compute_measure(x) == Approx(8.0));
+        }
+        SECTION("Eight point rule")
+        {
+            Hexahedron27 hex27(HexahedronQuadrature::Rule::EightPoint);
+
+            // xyz coordinates of the unit cube
+            Matrix x(3, 27);
+            x << 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, /**/ 0.5, 1.0, 0.5, 0.0, 0.5, 1.0, 0.5,
+                0.0, 0.0, 1.0, 1.0, 0.0, /**/ 0.5, 0.5, 0.5, 0.5, 0.0, 1.0, 0.5, //
+                0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, /**/ 0.0, 0.5, 1.0, 0.5, 0.0, 0.5, 1.0, 0.5,
+                0.0, 0.0, 1.0, 1.0, /**/ 0.5, 0.5, 0.0, 1.0, 0.5, 0.5, 0.5, //
+                0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, /**/ 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0,
+                0.5, 0.5, 0.5, 0.5, /**/ 0.0, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5;
+
+            REQUIRE(hex27.compute_measure(x) == Approx(1.0));
+
+            x *= 2.0;
+
+            REQUIRE(hex27.compute_measure(x) == Approx(8.0));
+        }
     }
 }
 TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")

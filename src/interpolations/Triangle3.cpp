@@ -61,7 +61,7 @@ void Triangle3::precompute_shape_functions()
     compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
 }
 
-double Triangle3::compute_measure(Matrix const& nodal_coordinates)
+double Triangle3::compute_measure(Matrix const& nodal_coordinates) const
 {
     // Use the cross product identity 2A = | a x b | to compute face area
     Vector3 const direction0 = nodal_coordinates.col(0) - nodal_coordinates.col(2);

@@ -66,6 +66,17 @@ void Hexahedron8::precompute_shape_functions()
     compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
 }
 
+double Hexahedron8::compute_measure(Matrix const& nodal_coordinates) const
+{
+    return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
+        auto const & [ N, dN ] = femval;
+
+        Matrix3 const Jacobian = nodal_coordinates * dN;
+
+        return Jacobian.determinant();
+    });
+}
+
 Hexahedron20::Hexahedron20(HexahedronQuadrature::Rule rule)
     : VolumeInterpolation(std::make_unique<HexahedronQuadrature>(rule))
 {
@@ -196,6 +207,17 @@ void Hexahedron20::precompute_shape_functions()
         local_nodal_coordinates(a, 2) = zeta_a;
     }
     compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
+}
+
+double Hexahedron20::compute_measure(Matrix const& nodal_coordinates) const
+{
+    return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
+        auto const & [ N, dN ] = femval;
+
+        Matrix3 const Jacobian = nodal_coordinates * dN;
+
+        return Jacobian.determinant();
+    });
 }
 
 Hexahedron27::Hexahedron27(HexahedronQuadrature::Rule rule)
@@ -360,5 +382,16 @@ void Hexahedron27::precompute_shape_functions()
         local_nodal_coordinates(a, 2) = zeta_a;
     }
     compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
+}
+
+double Hexahedron27::compute_measure(Matrix const& nodal_coordinates) const
+{
+    return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
+        auto const & [ N, dN ] = femval;
+
+        Matrix3 const Jacobian = nodal_coordinates * dN;
+
+        return Jacobian.determinant();
+    });
 }
 }

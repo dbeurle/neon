@@ -19,6 +19,8 @@ public:
 
     int nodes() const override final { return 8; }
 
+    double compute_measure(Matrix const& nodal_coordinates) const;
+
 protected:
     /**
      * Initialize the shape functions to the following polynomials
@@ -48,6 +50,8 @@ public:
 
     int nodes() const override final { return 20; }
 
+    double compute_measure(Matrix const& nodal_coordinates) const;
+
 protected:
     void precompute_shape_functions();
 };
@@ -63,6 +67,8 @@ public:
     explicit Hexahedron27(HexahedronQuadrature::Rule rule);
 
     int nodes() const override final { return 27; }
+
+    double compute_measure(Matrix const& nodal_coordinates) const;
 
 protected:
     void precompute_shape_functions();

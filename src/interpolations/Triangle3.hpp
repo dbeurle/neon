@@ -14,7 +14,7 @@ public:
 
     virtual int nodes() const override final { return 3; }
 
-    double compute_measure(Matrix const& nodal_coordinates);
+    double compute_measure(Matrix const& nodal_coordinates) const;
 
 protected:
     /**
