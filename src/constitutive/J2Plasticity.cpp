@@ -23,8 +23,6 @@ J2Plasticity::~J2Plasticity() = default;
 
 void J2Plasticity::update_internal_variables(double const time_step_size)
 {
-    using namespace ranges;
-
     auto const shear_modulus = material.shear_modulus();
 
     // Extract the internal variables
@@ -41,7 +39,7 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
 
     // Compute the linear strain gradient from the displacement gradient
     strains = variables(InternalVariables::Tensor::DisplacementGradient)
-              | view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
+              | ranges::view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
     // Perform the update algorithm for each quadrature point
     for (auto l = 0; l < strains.size(); l++)
