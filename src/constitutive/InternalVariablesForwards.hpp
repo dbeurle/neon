@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "numeric/VoigtDimension.hpp"
+#include "constitutive/VoigtDimension.hpp"
 
 namespace neon
 {
