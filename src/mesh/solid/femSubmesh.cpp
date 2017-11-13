@@ -1,5 +1,5 @@
 
-#include "Submesh.hpp"
+#include "femSubmesh.hpp"
 
 #include "Exceptions.hpp"
 
@@ -14,7 +14,7 @@
 #include <chrono>
 #include <omp.h>
 
-#include <json/json.h>
+#include <json/value.h>
 
 #include <range/v3/algorithm/find_if.hpp>
 #include <range/v3/view/transform.hpp>

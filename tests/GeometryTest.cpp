@@ -8,7 +8,7 @@
 #include "mesh/NodeOrderingAdapter.hpp"
 
 #include "mesh/MaterialCoordinates.hpp"
-#include "mesh/solid/Submesh.hpp"
+#include "mesh/solid/femSubmesh.hpp"
 #include "mesh/solid/femMesh.hpp"
 
 #include <json/json.h>

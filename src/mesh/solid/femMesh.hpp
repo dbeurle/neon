@@ -2,7 +2,7 @@
 #pragma once
 
 #include "mesh/common/Dirichlet.hpp"
-#include "mesh/solid/Submesh.hpp"
+#include "mesh/solid/femSubmesh.hpp"
 #include "mesh/solid/boundary/NonFollowerLoad.hpp"
 
 #include <map>
