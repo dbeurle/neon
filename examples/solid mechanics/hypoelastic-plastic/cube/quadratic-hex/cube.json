@@ -17,14 +17,14 @@
 		"Module" : "SolidMechanics",
         "Solution" : "Equilibrium",
         "NonlinearOptions" : {
-            "DisplacementTolerance" : 1.0e-4,
-            "ResidualTolerance" : 1.0e-4
+            "DisplacementTolerance" : 1.0e-3,
+            "ResidualTolerance" : 1.0e-3
         },
         "Time" : {
             "Period" : 1.0,
             "Increments" : {
                 "Initial" : 1.0,
-                "Minimum" : 0.00001,
+                "Minimum" : 1e-5,
                 "Maximum" : 1.0
             }
         },
@@ -63,9 +63,11 @@
             },
             {
                 "Name" : "ZLoad",
-				"Type" : "Pressure",
-                "Time" : [0.0, 0.1, 1.0],
-                "Values" : [0.0, -1.5e-8, -3.0e8]
+				"Type" : "Displacement",
+                "Time" : [0.0, 1.0],
+                "Values" : {
+                    "z" : [0.0, 1.0e-3]
+                }
             }]
         }],
 		"LinearSolver" : {

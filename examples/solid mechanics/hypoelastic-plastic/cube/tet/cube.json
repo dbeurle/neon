@@ -1,5 +1,5 @@
 {
-    "Name" : "CubeExample",
+    "Name" : "J2PlasticityTetrahedral",
     "Cores" : 1,
     "Part": [{
         "Name" : "cube",
@@ -17,14 +17,14 @@
 		"Module" : "SolidMechanics",
         "Solution" : "Equilibrium",
         "NonlinearOptions" : {
-            "DisplacementTolerance" : 1.0e-5,
-            "ResidualTolerance" : 1.0e-5
+            "DisplacementTolerance" : 1.0e-3,
+            "ResidualTolerance" : 1.0e-3
         },
         "Time" : {
             "Period" : 1.0,
             "Increments" : {
                 "Initial" : 1.0,
-                "Minimum" : 0.00001,
+                "Minimum" : 1e-5,
                 "Maximum" : 1.0
             }
         },
@@ -37,8 +37,7 @@
             "ElementOptions" : {
                 "Quadrature" : "Full"
             },
-            "BoundaryConditions" :
-            [{
+            "BoundaryConditions" : [{
                 "Name" : "Xsym",
                 "Type" : "Displacement",
                 "Time" : [0.0, 1.0],

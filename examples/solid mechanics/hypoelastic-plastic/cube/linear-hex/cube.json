@@ -71,7 +71,7 @@
             }]
         }],
 		"LinearSolver" : {
-		    "Solver" : "Iterative"
+		    "Solver" : "Direct"
         },
         "Visualisation" : {
             "Fields" : ["Displacement", "LinearisedStrain", "LinearisedPlasticStrain",

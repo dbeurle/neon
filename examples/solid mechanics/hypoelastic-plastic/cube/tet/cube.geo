@@ -7,14 +7,16 @@ x = 1.0;
 y = 1.0;
 z = 1.0;
 
-Point(1) = {0, 0, 0, 1.0};
-Point(2) = {x, 0, 0, 1.0};
-Point(3) = {0, y, 0, 1.0};
-Point(4) = {x, y, 0, 1.0};
-Point(5) = {x, y, z, 1.0};
-Point(6) = {x, 0, z, 1.0};
-Point(7) = {0, y, z, 1.0};
-Point(8) = {0, 0, z, 1.0};
+mesh_density = 0.5;
+
+Point(1) = {0, 0, 0, mesh_density};
+Point(2) = {x, 0, 0, mesh_density};
+Point(3) = {0, y, 0, mesh_density};
+Point(4) = {x, y, 0, mesh_density};
+Point(5) = {x, y, z, mesh_density};
+Point(6) = {x, 0, z, mesh_density};
+Point(7) = {0, y, z, mesh_density};
+Point(8) = {0, 0, z, mesh_density};
 
 Line(1) = {3, 7};
 Line(2) = {7, 5};
@@ -55,3 +57,4 @@ Physical Surface("Xsym") = {22};
 Physical Surface("Ysym") = {18};
 Physical Surface("Zsym") = {16};
 Physical Surface("ZLoad") = {20};
+
