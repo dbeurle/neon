@@ -4,8 +4,6 @@
 #include "Exceptions.hpp"
 #include "InternalVariables.hpp"
 
-#include <json/value.h>
-
 #include <range/v3/view/transform.hpp>
 
 namespace neon::mech::solid

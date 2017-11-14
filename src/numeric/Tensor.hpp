@@ -15,10 +15,19 @@ namespace neon
 }
 
 /** @return the volumetric part of the tensor */
+[[nodiscard]] inline Matrix2 volumetric(Matrix2 const& a)
+{
+    return Matrix2::Identity() * a.trace() / 3.0;
+}
+
+/** @return the volumetric part of the tensor */
 [[nodiscard]] inline Matrix3 volumetric(Matrix3 const& a)
 {
     return Matrix3::Identity() * a.trace() / 3.0;
 }
+
+/** @return the deviatoric part of the tensor */
+[[nodiscard]] inline Matrix2 deviatoric(Matrix2 const& a) { return a - volumetric(a); }
 
 /** @return the deviatoric part of the tensor */
 [[nodiscard]] inline Matrix3 deviatoric(Matrix3 const& a) { return a - volumetric(a); }
@@ -35,31 +44,23 @@ namespace neon
     return std::pow(a.determinant(), -1.0 / 3.0) * a;
 }
 
+/** Compute the von Mises stress based on the reduced stress tensor */
+[[nodiscard]] inline double von_mises_stress(Matrix2 const& a)
+{
+    return std::sqrt(3.0 / 2.0) * deviatoric(a).norm();
+}
+
 /** Compute the von Mises stress based on the full stress tensor */
 [[nodiscard]] inline double von_mises_stress(Matrix3 const& a)
 {
     return std::sqrt(3.0 / 2.0) * deviatoric(a).norm();
 }
 
+/** @return The symmetric part of the tensor */
+[[nodiscard]] inline Matrix2 symmetric(Matrix2 const& a) { return 0.5 * (a.transpose() + a); }
+
+/** @return The symmetric part of the tensor */
 [[nodiscard]] inline Matrix3 symmetric(Matrix3 const& a) { return 0.5 * (a.transpose() + a); }
-
-/**
- * Compute the velocity gradient given the time derivative of the deformation
- * gradient and the deformation gradient
- */
-[[nodiscard]] inline Matrix3 velocity_gradient(Matrix3 const& Fdot, Matrix const& F)
-{
-    return Fdot * F.inverse();
-}
-
-/** Compute the rate of deformation given the velocity gradient */
-[[nodiscard]] inline Matrix3 rate_of_deformation(Matrix3 const& L) { return symmetric(L); }
-
-/** Compute the rate of deformation given the velocity gradient */
-[[nodiscard]] inline Matrix3 rate_of_deformation(Matrix3 const& F_dot, Matrix3 const& F)
-{
-    return symmetric(velocity_gradient(F_dot, F));
-}
 
 /**
  * I1 returns the coefficient I1, the first stress invariant,
@@ -315,8 +316,8 @@ namespace kinetic
  */
 [[nodiscard]] inline Matrix6 mandel_notation(Matrix6 A)
 {
-    A.block<3, 3>(0, 3) *= std::sqrt(2);
-    A.block<3, 3>(3, 0) *= std::sqrt(2);
+    A.block<3, 3>(0, 3) *= std::sqrt(2.0);
+    A.block<3, 3>(3, 0) *= std::sqrt(2.0);
     A.block<3, 3>(3, 3) *= 2.0;
     return A;
 }

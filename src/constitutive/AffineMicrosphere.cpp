@@ -4,12 +4,9 @@
 #include "InternalVariables.hpp"
 #include "numeric/DenseTypes.hpp"
 
-#include <json/value.h>
-
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/zip.hpp>
 
-#include <exception>
 #include <omp.h>
 
 namespace neon::mech::solid
@@ -28,9 +25,6 @@ AffineMicrosphere::AffineMicrosphere(InternalVariables& variables, Json::Value c
 
 void AffineMicrosphere::update_internal_variables(double const time_step_size)
 {
-    using ranges::view::transform;
-    using ranges::view::zip;
-
     auto& tangent_operators = variables(InternalVariables::Matrix::TangentOperator);
 
     auto const& deformation_gradients = variables(InternalVariables::Tensor::DeformationGradient);
@@ -52,8 +46,8 @@ void AffineMicrosphere::update_internal_variables(double const time_step_size)
     }
 
     // Project the stresses to obtain the Cauchy stress
-    cauchy_stresses = zip(macro_stresses, det_deformation_gradients)
-                      | transform([&](auto const& tpl) -> Matrix3 {
+    cauchy_stresses = ranges::view::zip(macro_stresses, det_deformation_gradients)
+                      | ranges::view::transform([&](auto const& tpl) -> Matrix3 {
                             auto const & [ macro_stress, J ] = tpl;
 
                             auto const pressure = J * volumetric_free_energy_dJ(J, K);

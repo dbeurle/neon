@@ -5,17 +5,19 @@
 
 namespace neon
 {
-template <int spatial_dimension,
-          int voigt_dimension = spatial_to_voigt(std::integral_constant<int, spatial_dimension>{})>
+template <int spatial_dimension, int voigt_dimension = spatial_to_voigt(spatial_dimension)>
 class InternalVariables;
 
-namespace mech::solid
+namespace mech
+{
+namespace solid
 {
 using InternalVariables = neon::InternalVariables<3>;
 }
-namespace mech::beam
+namespace plane
 {
-using InternalVariables = neon::InternalVariables<1>;
+using InternalVariables = neon::InternalVariables<2>;
+}
 }
 
 namespace diffusion
