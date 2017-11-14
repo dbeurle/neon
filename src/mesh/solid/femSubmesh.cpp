@@ -14,8 +14,6 @@
 #include <chrono>
 #include <omp.h>
 
-#include <json/value.h>
-
 #include <range/v3/algorithm/find_if.hpp>
 #include <range/v3/view/transform.hpp>
 
@@ -260,8 +258,7 @@ void femSubmesh::check_element_distortion() const
     {
         auto const i = std::distance(detF_list.begin(), found);
 
-        auto const element = std::floor(static_cast<double>(i) / sf->quadrature().points());
-        auto const quadrature_point = i % sf->quadrature().points();
+        auto const[element, quadrature_point] = std::div(i, sf->quadrature().points());
 
         throw computational_error("Global mapping assumption violated at element "
                                   + std::to_string(element) + " and local quadrature point "
