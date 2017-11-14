@@ -5,12 +5,14 @@
 
 #include "numeric/DenseTypes.hpp"
 
-#include "material/IsotropicElasticPlastic.hpp"
+#include "material/LinearElastic.hpp"
 
-namespace neon
+namespace neon::mech::solid
 {
-namespace mech::solid
-{
+/**
+ * IsotropicLinearElasticity is responsible for compute the moduli and the
+ * stress for the three-dimensional theory.
+ */
 class IsotropicLinearElasticity : public ConstitutiveModel
 {
 public:
@@ -36,7 +38,6 @@ private:
 protected:
     Matrix6 const C_e = elastic_moduli();
 };
-}
 
 // namespace mech::plane
 // {

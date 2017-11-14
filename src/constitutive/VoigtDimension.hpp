@@ -1,12 +1,11 @@
 
 #pragma once
 
-#include <type_traits>
-
 namespace neon
 {
 /** Convert a spatial dimension to the size of the symmetric Voigt notation */
-constexpr auto spatial_to_voigt(typename std::integral_constant<int, 1>) { return 1; }
-constexpr auto spatial_to_voigt(typename std::integral_constant<int, 2>) { return 3; }
-constexpr auto spatial_to_voigt(typename std::integral_constant<int, 3>) { return 6; }
+constexpr auto spatial_to_voigt(int const spatial_dimension)
+{
+    return spatial_dimension == 1 ? 1 : spatial_dimension == 2 ? 3 : 6;
+}
 }

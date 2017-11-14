@@ -5,9 +5,6 @@
 #include "InternalVariables.hpp"
 #include "numeric/FloatingPointCompare.hpp"
 
-#include <iostream>
-#include <json/value.h>
-
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/zip.hpp>
 

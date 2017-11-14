@@ -13,8 +13,7 @@ class Material;
  * internal variables routine and update a constitutive model for use in the global
  * assembly routine
  */
-template <int spatial_dimension,
-          int voigt_dimension = spatial_to_voigt(std::integral_constant<int, spatial_dimension>{})>
+template <int spatial_dimension, int voigt_dimension = spatial_to_voigt(spatial_dimension)>
 class ConstitutiveModel
 {
 public:
@@ -41,11 +40,11 @@ protected:
 
 namespace mech::solid
 {
-using ConstitutiveModel = neon::ConstitutiveModel<3, 6>;
+using ConstitutiveModel = neon::ConstitutiveModel<3>;
 }
 namespace mech::plane
 {
-using ConstitutiveModel = neon::ConstitutiveModel<2, 3>;
+using ConstitutiveModel = neon::ConstitutiveModel<2>;
 }
 namespace diffusion
 {

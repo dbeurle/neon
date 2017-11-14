@@ -234,14 +234,4 @@ protected:
 
     std::size_t size;
 };
-
-namespace mech::solid
-{
-using InternalVariables = neon::InternalVariables<3>;
-}
-
-namespace diffusion
-{
-using InternalVariables = neon::InternalVariables<3>;
-}
 }

@@ -121,7 +121,7 @@ Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int const element
         Matrix3 const Jacobian = local_deformation_gradient(rhea, x);
 
         // Compute the symmetric gradient operator
-        Matrix const B = fem::SymGradient<3>((rhea * Jacobian.inverse()).transpose());
+        Matrix const B = fem::sym_gradient<3>((rhea * Jacobian.inverse()).transpose());
 
         return B.transpose() * D * B * Jacobian.determinant();
     });

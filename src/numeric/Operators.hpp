@@ -1,18 +1,18 @@
 
 #pragma once
 
-#include "DenseTypes.hpp"
+#include "numeric/DenseTypes.hpp"
 
-namespace neon
-{
-namespace fem
+#include "constitutive/VoigtDimension.hpp"
+
+namespace neon::fem
 {
 /**
- * GalerkinSymGradient signals the use of
+ * sym_gradient signals the use of
  * \f{align*}{
  * a(w,u) &= (\nabla_S N_a^T) \hspace{0.1cm} (\nabla_S N_a)
  * \f}
- * Where in a vector case the symmetric gradient operator
+ * where in a vector case the symmetric gradient operator
  * takes on a form depending on the number of dimensions.
  *
  * For two dimensions:
@@ -35,19 +35,20 @@ namespace fem
  * Where \f$ N_{a,i} \f$ represents the partial derivative with respect
  * to the \f$ i \f$th dimension of the shape function in the parent domain
  */
-template <int Dimension>
-inline Matrix SymGradient(Matrix const& L)
+template <int spatial_dimension>
+inline Matrix sym_gradient(Matrix const& L)
 {
-    auto nodesPerElement = L.cols();
+    auto const nodes_per_element = L.cols();
 
-    Matrix B = Matrix::Zero(Dimension == 3 ? 6 : 3, Dimension * nodesPerElement);
+    auto constexpr voigt_dimension = spatial_to_voigt(spatial_dimension);
 
-    // These if statements should be optimized away
-    if (Dimension == 3)
+    Matrix B = Matrix::Zero(voigt_dimension, spatial_dimension * nodes_per_element);
+
+    if (spatial_dimension == 3)
     {
-        for (auto a = 0; a < nodesPerElement; ++a)
+        for (auto a = 0; a < nodes_per_element; ++a)
         {
-            auto const b = a * Dimension;
+            auto const b = a * spatial_dimension;
 
             B(0, b) = L(0, a);
             B(4, b) = L(2, a);
@@ -60,11 +61,12 @@ inline Matrix SymGradient(Matrix const& L)
             B(4, b + 2) = L(0, a);
         }
     }
-    else if (Dimension == 2)
+    else if (spatial_dimension == 2)
     {
-        for (int a = 0; a < nodesPerElement; ++a)
+        for (auto a = 0; a < nodes_per_element; ++a)
         {
-            const int b = a * Dimension;
+            auto const b = a * spatial_dimension;
+
             B(0, b) = L(0, a);
             B(2, b) = L(1, a);
             B(1, b + 1) = L(1, a);
@@ -72,6 +74,5 @@ inline Matrix SymGradient(Matrix const& L)
         }
     }
     return B;
-}
 }
 }
