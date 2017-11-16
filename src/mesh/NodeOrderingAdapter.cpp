@@ -17,8 +17,20 @@ void NodeOrderingAdapter::convert_from_gmsh(std::vector<List>& nodal_connectivit
         {
             for (auto& nodal_list : nodal_connectivity)
             {
+                std::swap(nodal_list.at(4), nodal_list.at(7));
+                std::swap(nodal_list.at(4), nodal_list.at(5));
+                std::swap(nodal_list.at(5), nodal_list.at(8));
+                std::swap(nodal_list.at(8), nodal_list.at(9));
+                std::swap(nodal_list.at(6), nodal_list.at(9));
+            }
+        }
+        case ElementTopology::Tetrahedron4:
+        {
+            for (auto& nodal_list : nodal_connectivity)
+            {
                 std::swap(nodal_list.at(0), nodal_list.at(3));
-                std::swap(nodal_list.at(4), nodal_list.at(9));
+                std::swap(nodal_list.at(0), nodal_list.at(2));
+                std::swap(nodal_list.at(0), nodal_list.at(1));
             }
             break;
         }
