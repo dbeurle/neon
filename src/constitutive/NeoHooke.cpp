@@ -22,30 +22,30 @@ void NeoHooke::update_internal_variables(double const time_step_size)
     using namespace ranges;
 
     // Get references into the hash table
-    auto[F_list, cauchy_stress] = variables(InternalVariables::Tensor::DeformationGradient,
-                                            InternalVariables::Tensor::Cauchy);
+    auto[F_list, cauchy_stresses] = variables(InternalVariables::Tensor::DeformationGradient,
+                                              InternalVariables::Tensor::Cauchy);
 
-    auto& D_list = variables(InternalVariables::Matrix::TangentOperator);
+    auto& tangent_operators = variables(InternalVariables::Matrix::TangentOperator);
     auto const& detF_list = variables(InternalVariables::Scalar::DetF);
 
     auto const I = Matrix3::Identity();
 
     // Compute stresses
-    cauchy_stress = view::zip(F_list, detF_list)
-                    | view::transform([this, &I](auto const& tpl) -> Matrix3 {
-                          auto const[lambda, shear_modulus] = material.Lame_parameters();
+    cauchy_stresses = view::zip(F_list, detF_list)
+                      | view::transform([this, &I](auto const& tpl) -> Matrix3 {
+                            auto const[lambda, shear_modulus] = material.Lame_parameters();
 
-                          auto const & [ F, J ] = tpl;
+                            auto const & [ F, J ] = tpl;
 
-                          // Left Cauchy Green deformation tensor
-                          auto const B = F * F.transpose();
+                            // Left Cauchy Green deformation tensor
+                            auto const B = F * F.transpose();
 
-                          // Compute Kirchhoff stress and transform to Cauchy
-                          return (lambda * std::log(J) * I + shear_modulus * (B - I)) / J;
-                      });
+                            // Compute Kirchhoff stress and transform to Cauchy
+                            return (lambda * std::log(J) * I + shear_modulus * (B - I)) / J;
+                        });
 
     // Compute tangent moduli
-    for_each(view::zip(F_list, D_list, detF_list), [&](auto const& tpl) {
+    for_each(view::zip(F_list, tangent_operators, detF_list), [&](auto const& tpl) {
 
         auto & [ F, D, J ] = tpl;
 
