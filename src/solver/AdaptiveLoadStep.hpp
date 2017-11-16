@@ -94,7 +94,7 @@ public:
     void reset(Json::Value const& new_increment_data);
 
 protected:
-    void parse_input(Json::Value const& increment_data);
+    void parse_input(Json::Value const& increment_data, double const maximum_mandatory_time);
 
     void check_increment_data(Json::Value const& increment_data);
 
