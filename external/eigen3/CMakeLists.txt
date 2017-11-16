@@ -12,7 +12,6 @@ ExternalProject_Add(
     UPDATE_COMMAND ""
     HG_TAG 3.3
     CONFIGURE_COMMAND ""
-    PATCH_COMMAND patch -p1 -i ${CMAKE_SOURCE_DIR}/external/eigen3/inline_functions.patch
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
     LOG_DOWNLOAD ON
