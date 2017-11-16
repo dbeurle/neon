@@ -5,6 +5,8 @@
 
 #include <json/value.h>
 
+#include <Eigen/Geometry>
+
 namespace neon::mech::solid
 {
 Pressure::Pressure(std::unique_ptr<SurfaceInterpolation>&& sf,

@@ -6,7 +6,8 @@
 #define EIGEN_DONT_PARALLELIZE
 #endif
 
-#include <Eigen/Dense>
+#include <Eigen/Core>
+#include <Eigen/LU>
 
 namespace neon
 {
