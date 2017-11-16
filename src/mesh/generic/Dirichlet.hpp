@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/common/Boundary.hpp"
+#include "mesh/generic/Boundary.hpp"
 
 #include "numeric/IndexTypes.hpp"
 

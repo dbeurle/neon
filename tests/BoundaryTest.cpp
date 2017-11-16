@@ -10,7 +10,7 @@
 
 #include "mesh/SubMesh.hpp"
 
-#include "mesh/common/Boundary.hpp"
+#include "mesh/generic/Boundary.hpp"
 #include "mesh/solid/boundary/NonFollowerLoad.hpp"
 
 #include <json/json.h>
