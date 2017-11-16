@@ -11,8 +11,10 @@
 
 namespace neon::mech::solid
 {
-AffineMicrosphere::AffineMicrosphere(InternalVariables& variables, Json::Value const& material_data)
-    : Hyperelastic(variables), material(material_data)
+AffineMicrosphere::AffineMicrosphere(InternalVariables& variables,
+                                     Json::Value const& material_data,
+                                     UnitSphereQuadrature::Rule const rule)
+    : Hyperelastic(variables), unit_sphere(rule), material(material_data)
 {
     variables.add(InternalVariables::Matrix::TangentOperator);
 
@@ -132,8 +134,9 @@ Matrix6 AffineMicrosphere::compute_macro_moduli(Matrix3 const& F_unimodular,
 }
 
 AffineMicrosphereWithDegradation::AffineMicrosphereWithDegradation(InternalVariables& variables,
-                                                                   Json::Value const& material_data)
-    : AffineMicrosphere(variables, material_data), material(material_data)
+                                                                   Json::Value const& material_data,
+                                                                   UnitSphereQuadrature::Rule const rule)
+    : AffineMicrosphere(variables, material_data, rule), material(material_data)
 {
     variables.add(InternalVariables::Scalar::Chains, InternalVariables::Scalar::ShearModuli);
 

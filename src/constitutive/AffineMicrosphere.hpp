@@ -28,7 +28,9 @@ public:
      * @param variables Reference to internal state variable store
      * @param material_data Json object with input file material data
      */
-    explicit AffineMicrosphere(InternalVariables& variables, Json::Value const& material_data);
+    explicit AffineMicrosphere(InternalVariables& variables,
+                               Json::Value const& material_data,
+                               UnitSphereQuadrature::Rule const rule);
 
     virtual void update_internal_variables(double const time_step_size) override;
 
@@ -46,7 +48,7 @@ protected:
          U &= \frac{K}{4}(J^2 - 1) - \frac{K}{2}\ln{J}
        \f}
      */
-    double volumetric_free_energy_dJ(double const J, double const bulk_modulus) const;
+    [[nodiscard]] double volumetric_free_energy_dJ(double const J, double const bulk_modulus) const;
 
     /**
      * \f{align*}{
@@ -54,7 +56,8 @@ protected:
      \frac{1}{J^2}\right) \f}
      * \sa volumetric_free_energy_dJ
      */
-    double volumetric_free_energy_second_d2J(double const J, double const bulk_modulus) const;
+    [[nodiscard]] double volumetric_free_energy_second_d2J(double const J,
+                                                           double const bulk_modulus) const;
 
     /**
      * Compute the Padé approximation of the inverse Langevin stretch model
@@ -62,7 +65,7 @@ protected:
          n \psi_f^{'}(\lambda) &= \frac{3N - \lambda^2}{N - \lambda^2}
        \f}
      */
-    double pade_first(double const micro_stretch, double const N) const;
+    [[nodiscard]] double pade_first(double const micro_stretch, double const N) const;
 
     /**
      * Compute the Padé approximation of the inverse Langevin stretch model
@@ -70,7 +73,7 @@ protected:
          n \psi_f^{''}(\lambda) &= \frac{\lambda^4 + 3N^2}{(N - \lambda^2)^2}
        \f}
      */
-    double pade_second(double const micro_stretch, double const N) const;
+    [[nodiscard]] double pade_second(double const micro_stretch, double const N) const;
 
     /**
      * Compute the Kirchhoff stress using the deviatoric projection of the
@@ -80,7 +83,8 @@ protected:
      * @param pressure Hydrostatic pressure
      * @param macro_stress Stress tensor from unit sphere homogenisation
      */
-    Matrix3 compute_kirchhoff_stress(double const pressure, Matrix3 const& macro_stress) const;
+    [[nodiscard]] Matrix3 compute_kirchhoff_stress(double const pressure,
+                                                   Matrix3 const& macro_stress) const;
 
     /**
      * Compute the material tangent including the sdeviatoric projection defined as
@@ -95,10 +99,10 @@ protected:
      * @param macro_C Macromoduli from unit sphere
      * @param macro_stress Macrostress from unit sphere
      */
-    Matrix6 compute_material_tangent(double const J,
-                                     double const K,
-                                     Matrix6 const& macro_C,
-                                     Matrix3 const& macro_stress) const;
+    [[nodiscard]] Matrix6 compute_material_tangent(double const J,
+                                                   double const K,
+                                                   Matrix6 const& macro_C,
+                                                   Matrix3 const& macro_stress) const;
 
     /**
      * Compute the macro stress using the unit sphere homogenisation
@@ -108,9 +112,9 @@ protected:
      * @param N number of segments per chain
      * @return Kirchhoff stress tensor
      */
-    Matrix3 compute_macro_stress(Matrix3 const& F_unimodular,
-                                 double const bulk_modulus,
-                                 double const N) const;
+    [[nodiscard]] Matrix3 compute_macro_stress(Matrix3 const& F_unimodular,
+                                               double const bulk_modulus,
+                                               double const N) const;
 
     /**
      * Compute the material tangent matrix using the unit sphere homogenisation
@@ -120,21 +124,22 @@ protected:
      * @param N number of segments per chain
      * @return Macromoduli from unit sphere homogenisation
      */
-    Matrix6 compute_macro_moduli(Matrix3 const& F_unimodular,
-                                 double const bulk_modulus,
-                                 double const N) const;
+    [[nodiscard]] Matrix6 compute_macro_moduli(Matrix3 const& F_unimodular,
+                                               double const bulk_modulus,
+                                               double const N) const;
 
     /**
      * Compute the deformed tangent using the unimodular deformation gradient
      * and the vector associated with the quadrature point on the unit sphere
      */
-    Vector3 deformed_tangent(Matrix3 const& F_unimodular, Vector3 const& surface_vector) const
+    [[nodiscard]] Vector3 deformed_tangent(Matrix3 const& F_unimodular,
+                                           Vector3 const& surface_vector) const
     {
         return F_unimodular * surface_vector;
     }
 
     /** Compute the microstretch, which is the norm of the deformed tangent vector */
-    auto compute_microstretch(Vector3 const& deformed_tangent) const
+    [[nodiscard]] auto compute_microstretch(Vector3 const& deformed_tangent) const
     {
         return deformed_tangent.norm();
     }
@@ -187,7 +192,8 @@ public:
      * @param material_data Json object with input file material data
      */
     explicit AffineMicrosphereWithDegradation(InternalVariables& variables,
-                                              Json::Value const& material_data);
+                                              Json::Value const& material_data,
+                                              UnitSphereQuadrature::Rule const rule);
 
     virtual void update_internal_variables(double const time_step_size) override;
 

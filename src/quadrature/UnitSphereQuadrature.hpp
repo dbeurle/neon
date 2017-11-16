@@ -19,7 +19,7 @@ public:
 
 public:
     /** Fill the quadrature coordinates and weightings */
-    UnitSphereQuadrature(Rule const rule = Rule::BO21);
+    UnitSphereQuadrature(Rule const rule);
 
 protected:
     void precompute_coordinates();
