@@ -1,7 +1,8 @@
 
 #include "SimulationControl.hpp"
 
-#include <iostream>
+#include <stdexcept>
+#include <termcolor/termcolor.hpp>
 
 int main(int argc, char* argv[])
 {
@@ -13,9 +14,18 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    SimulationControl simulation(argv[1]);
+    try
+    {
+        SimulationControl simulation(argv[1]);
 
-    simulation.start();
-
+        simulation.start();
+    }
+    catch (std::runtime_error& error)
+    {
+        std::cout << std::endl
+                  << std::string(2, ' ') << termcolor::red << termcolor::bold << error.what()
+                  << termcolor::reset << std::flush << std::endl;
+        return 1;
+    }
     return 0;
 }
