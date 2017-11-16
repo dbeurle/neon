@@ -250,7 +250,8 @@ void femSubmesh::update_Jacobian_determinants()
 
         throw computational_error("Positive Jacobian assumption violated at element "
                                   + std::to_string(element) + " and local quadrature point "
-                                  + std::to_string(quadrature_point));
+                                  + std::to_string(quadrature_point) + " (" + std::to_string(*found)
+                                  + ")");
     }
 }
 
