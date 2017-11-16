@@ -33,7 +33,8 @@
             "Name" : "cube",
             "ConstitutiveModel" : {
                 "Name" : "Microsphere",
-                "Type" : "NonAffine"
+                "Type" : "NonAffine",
+                "Quadrature" : "BO21"
             },
             "ElementOptions" : {
                 "Quadrature" : "Full"
