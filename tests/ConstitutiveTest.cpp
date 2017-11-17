@@ -187,7 +187,7 @@ TEST_CASE("Affine microsphere model", )
                              "\"SegmentsPerChain\" : 50}";
 
     std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\": \"Microsphere\", \"Type\" "
-                                   ": \"Affine\"}}";
+                                   ": \"Affine\", \"Quadrature\" : \"BO21\"}}";
 
     Json::Value material_data, simulation_data;
     Json::Reader reader;
@@ -280,7 +280,7 @@ TEST_CASE("NonAffine microsphere model")
                              "\"SegmentsPerChain\" : 50}";
 
     std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\": \"Microsphere\", \"Type\" "
-                                   ": \"NonAffine\"}}";
+                                   ": \"NonAffine\", \"Quadrature\" : \"BO21\"}}";
 
     Json::Value material_data, simulation_data;
     Json::Reader reader;
