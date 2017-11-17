@@ -17,7 +17,7 @@ namespace neon::diffusion
 using SurfaceFlux = SurfaceLoad<SurfaceInterpolation>;
 
 /**
- * NeumannDirichlet is responsible for computing the additional term to the
+ * NewtonConvection is responsible for computing the additional term to the
  * stiffness matrix and right hand side for modelling physics such as the Newton's
  * law of cooling given by
  *
@@ -29,29 +29,16 @@ using SurfaceFlux = SurfaceLoad<SurfaceInterpolation>;
  * leaving the surface.  The surrounding temperature \f$T_\infty\f$ is computed by
  * \f$ T_\infty = h / \lambda \f$
  */
-class NeumannDirichlet : public SurfaceFlux
+class NewtonConvection : public SurfaceFlux
 {
 public:
-    explicit NeumannDirichlet(std::unique_ptr<SurfaceInterpolation>&& sf,
+    explicit NewtonConvection(std::unique_ptr<SurfaceInterpolation>&& sf,
                               std::vector<List> const& nodal_connectivity,
+                              std::vector<List> const& dof_list,
                               std::shared_ptr<MaterialCoordinates>& material_coordinates,
                               Json::Value const& time_history,
                               Json::Value const& heat_transfer_coefficients,
-                              Json::Value const& prescribed_heat_fluxes,
-                              int const dof_offset,
-                              int const nodal_dofs);
-
-    /**
-     * Compute the element load vector contributing to the mixed boundary condition
-       \f{align*}{
-         f_{a} &= \int_{\Gamma} N_a h d\Gamma
-       \f}
-     */
-    std::tuple<List const&, Vector> external_force(int const element,
-                                                   double const load_factor) const override
-    {
-        return neumann.external_force(element, load_factor);
-    }
+                              Json::Value const& prescribed_heat_fluxes);
 
     /**
      * Compute the element stiffness matrix contributing to the mixed boundary condition
@@ -65,7 +52,7 @@ public:
         // clang-format off
         auto const X = sf->project_to_plane(material_coordinates->initial_configuration(nodal_connectivity[element]));
 
-        auto const heat_transfer_coefficient = interpolate_prescribed_load(load_factor);
+        auto const coefficient = interpolate_prescribed_load(coefficient_time_data, load_factor);
 
         // Perform the computation of the external element stiffness matrix
         auto const k_ext = sf->quadrature().integrate(Matrix::Zero(X.cols(), X.cols()).eval(),
@@ -74,14 +61,14 @@ public:
 
                                                           auto const j = (X * dN).determinant();
 
-                                                          return heat_transfer_coefficient * N * N.transpose() * j;
+                                                          return coefficient * N * N.transpose() * j;
                                                       });
         return {dof_list[element], k_ext};
         // clang-format on
     }
 
 protected:
-    SurfaceFlux neumann;
+    std::vector<std::pair<double, double>> coefficient_time_data;
 };
 
 /* SurfaceFluxBoundary contains the boundary conditions which contribute to
@@ -101,11 +88,10 @@ public:
         {
             surface_loads.emplace_back(make_surface_interpolation(mesh.topology(), simulation_data),
                                        mesh.connectivities(),
+                                       mesh.connectivities(),
                                        material_coordinates,
                                        times,
-                                       loads,
-                                       0,
-                                       1);
+                                       loads);
         }
     }
 

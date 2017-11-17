@@ -7,24 +7,6 @@
 
 namespace neon::mech::solid
 {
-Pressure::Pressure(std::unique_ptr<SurfaceInterpolation>&& sf,
-                   std::vector<List> const& nodal_connectivity,
-                   std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                   Json::Value const& time_history,
-                   Json::Value const& load_history,
-                   int const nodal_dofs)
-    : Traction(std::move(sf),
-               nodal_connectivity,
-               material_coordinates,
-               time_history,
-               load_history,
-               0,
-               nodal_dofs)
-{
-    // The inclusion of pressure results in at most three tractions
-    dof_list = allocate_dof_list(3, nodal_connectivity);
-}
-
 std::tuple<List const&, Vector> Pressure::external_force(int const element,
                                                          double const load_factor) const
 {
@@ -88,11 +70,10 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
                                              make_surface_interpolation(mesh.topology(),
                                                                         simulation_data),
                                              mesh.connectivities(),
+                                             filter_dof_list(3, dof_offset, mesh.connectivities()),
                                              material_coordinates,
                                              boundary["Time"],
-                                             boundary["Values"][name],
-                                             dof_offset,
-                                             3);
+                                             boundary["Values"][name]);
             }
         }
     }
@@ -107,10 +88,10 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
             boundary_meshes.emplace_back(std::in_place_type_t<Pressure>{},
                                          make_surface_interpolation(mesh.topology(), simulation_data),
                                          mesh.connectivities(),
+                                         allocate_dof_list(3, mesh.connectivities()),
                                          material_coordinates,
                                          boundary["Time"],
-                                         boundary["Values"],
-                                         3);
+                                         boundary["Values"]);
         }
     }
     else if (type == "BodyForce")
@@ -133,11 +114,10 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
                                              make_volume_interpolation(mesh.topology(),
                                                                        simulation_data),
                                              mesh.connectivities(),
+                                             filter_dof_list(3, dof_offset, mesh.connectivities()),
                                              material_coordinates,
                                              boundary["Time"],
-                                             boundary["Values"][name],
-                                             dof_offset,
-                                             3);
+                                             boundary["Values"][name]);
             }
         }
     }
