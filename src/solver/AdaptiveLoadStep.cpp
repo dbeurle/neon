@@ -6,6 +6,8 @@
 #include <exception>
 #include <termcolor/termcolor.hpp>
 
+#include <range/v3/algorithm/max_element.hpp>
+
 #include <json/value.h>
 
 namespace neon
@@ -19,7 +21,7 @@ AdaptiveLoadStep::AdaptiveLoadStep(Json::Value const& increment_data,
     // Remove the first entry if it's zero
     if (is_approx(time_queue.top(), 0.0)) time_queue.pop();
 
-    parse_input(increment_data);
+    parse_input(increment_data, *ranges::max_element(mandatory_time_history));
 }
 
 void AdaptiveLoadStep::update_convergence_state(bool const is_converged)
@@ -97,7 +99,7 @@ void AdaptiveLoadStep::reset(Json::Value const& new_increment_data)
     // Update the history counters
     total_time += current_time;
 
-    parse_input(new_increment_data);
+    parse_input(new_increment_data, -1.0);
 
     is_applied = false;
 
@@ -105,7 +107,8 @@ void AdaptiveLoadStep::reset(Json::Value const& new_increment_data)
     consecutive_unconverged = consecutive_converged = 0;
 }
 
-void AdaptiveLoadStep::parse_input(Json::Value const& increment_data)
+void AdaptiveLoadStep::parse_input(Json::Value const& increment_data,
+                                   double const maximum_mandatory_time)
 {
     check_increment_data(increment_data);
 
@@ -116,6 +119,14 @@ void AdaptiveLoadStep::parse_input(Json::Value const& increment_data)
     maximum_increment = increment_data["Increments"]["Maximum"].asDouble();
 
     final_time = increment_data["Period"].asDouble();
+
+    if (maximum_mandatory_time > final_time)
+    {
+        std::cout << std::string(2, ' ') << termcolor::yellow << termcolor::bold
+                  << "A boundary time is greater than the specified time period.  Please ensure "
+                     "this is intended behaviour.\n"
+                  << termcolor::reset << std::flush;
+    }
 
     current_time = std::min(time_queue.top(), initial_time);
 }

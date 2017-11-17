@@ -9,8 +9,10 @@ namespace neon
 {
 BasicMesh::BasicMesh(Json::Value const& mesh_file) : NodalCoordinates(mesh_file)
 {
-    if (mesh_file["Elements"].empty())
+    if (!mesh_file.isMember("Elements"))
+    {
         throw std::runtime_error("The mesh file is missing the \"Elements\" field");
+    }
 
     for (auto const& mesh : mesh_file["Elements"])
     {

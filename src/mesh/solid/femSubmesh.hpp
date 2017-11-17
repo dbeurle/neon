@@ -103,13 +103,9 @@ protected:
     /** Update the strain measures defined by the constitutive model */
     void update_deformation_measures();
 
-    /** Computes the Jacobian determinants.  Called by \sa update_deformation_measures()
+    /** Computes the Jacobian determinants and check if negative
      */
     void update_Jacobian_determinants();
-
-    /** Check element Jacobians are acceptable.  Called by \sa
-     * update_deformation_measures() */
-    void check_element_distortion() const;
 
     /**
      * Compute the geometric stiffness matrix for in the computation solid

@@ -1,6 +1,8 @@
 
 #include "Triangle3.hpp"
 
+#include <Eigen/Geometry>
+
 namespace neon
 {
 Triangle3::Triangle3(TriangleQuadrature::Rule rule)

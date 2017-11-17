@@ -19,7 +19,9 @@ public:
      * @param variables Reference to internal state variable store
      * @param material_data Json object with material data
      */
-    explicit NonAffineMicrosphere(InternalVariables& variables, Json::Value const& material_data);
+    explicit NonAffineMicrosphere(InternalVariables& variables,
+                                  Json::Value const& material_data,
+                                  UnitSphereQuadrature::Rule const rule);
 
     virtual void update_internal_variables(double const time_step_size) override;
 
@@ -112,8 +114,8 @@ protected:
 private:
     MicromechanicalElastomer material; //!< Material with micromechanical parameters
 
-    double non_affine_stretch_parameter{1.0}; //!< Three-dimensional locking characteristics (p)
-    double effective_tube_geometry{1.0};      //!< Additional constraint stiffness (U)
+    double non_affine_stretch_parameter{9.0}; //!< Three-dimensional locking characteristics (p)
+    double effective_tube_geometry{9.0};      //!< Additional constraint stiffness (U)
     double non_affine_tube_parameter{1.0};    //!< Shape of constraint stress (q)
 };
 

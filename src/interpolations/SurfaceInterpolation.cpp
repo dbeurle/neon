@@ -1,6 +1,8 @@
 
 #include "SurfaceInterpolation.hpp"
 
+#include <Eigen/Geometry>
+
 namespace neon
 {
 Matrix SurfaceInterpolation::project_to_plane(Matrix const& nodal_coordinates) const

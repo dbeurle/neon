@@ -5,6 +5,8 @@
 
 #include <json/value.h>
 
+#include <Eigen/Geometry>
+
 namespace neon::mech::solid
 {
 std::tuple<List const&, Vector> Pressure::external_force(int const element,

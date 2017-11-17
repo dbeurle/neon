@@ -108,7 +108,7 @@ Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int const element
 {
     auto const local_dofs = nodes_per_element() * dofs_per_node();
 
-    auto const& D_Vec = variables(InternalVariables::Matrix::TangentOperator);
+    auto const& tangent_operators = variables(InternalVariables::Matrix::TangentOperator);
 
     Matrix kmat = Matrix::Zero(local_dofs, local_dofs);
 
@@ -116,9 +116,9 @@ Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int const element
 
         auto const & [ N, rhea ] = femval;
 
-        auto const& D = D_Vec[offset(element, l)];
+        auto const& D = tangent_operators[offset(element, l)];
 
-        Matrix3 const Jacobian = local_deformation_gradient(rhea, x);
+        auto const Jacobian = local_deformation_gradient(rhea, x);
 
         // Compute the symmetric gradient operator
         Matrix const B = fem::sym_gradient<3>((rhea * Jacobian.inverse()).transpose());
@@ -129,26 +129,27 @@ Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int const element
 
 Vector femSubmesh::internal_nodal_force(Matrix const& x, int const element) const
 {
-    auto const& cauchy_list = variables(InternalVariables::Tensor::Cauchy);
+    auto const& cauchy_stresses = variables(InternalVariables::Tensor::Cauchy);
 
     auto const[m, n] = std::make_tuple(nodes_per_element(), dofs_per_node());
 
-    RowMatrix fint = sf->quadrature()
-                         .integrate(RowMatrix::Zero(m, n).eval(),
-                                    [&](auto const& femval, auto const& l) -> RowMatrix {
-                                        auto const & [ N, dN ] = femval;
+    Vector fint = Vector::Zero(m * n);
 
-                                        auto const Jacobian = local_deformation_gradient(dN, x);
+    sf->quadrature().integrate(Eigen::Map<RowMatrix>(fint.data(), m, n),
+                               [&](auto const& femval, auto const& l) -> RowMatrix {
 
-                                        auto const cauchy = cauchy_list[offset(element, l)];
+                                   auto const & [ N, dN ] = femval;
 
-                                        // Compute the symmetric gradient operator
-                                        auto const Bt = dN * Jacobian.inverse();
+                                   auto const Jacobian = local_deformation_gradient(dN, x);
 
-                                        return Bt * cauchy * Jacobian.determinant();
-                                    });
-    // Convert into a vector for the vector assembly operation
-    return Eigen::Map<RowMatrix>(fint.data(), m * n, 1);
+                                   auto const& cauchy_stress = cauchy_stresses[offset(element, l)];
+
+                                   // Compute the symmetric gradient operator
+                                   auto const Bt = dN * Jacobian.inverse();
+
+                                   return Bt * cauchy_stress * Jacobian.determinant();
+                               });
+    return fint;
 }
 
 std::tuple<List const&, Matrix> femSubmesh::consistent_mass(int const element) const
@@ -189,8 +190,6 @@ void femSubmesh::update_internal_variables(double const time_step_size)
 
     update_Jacobian_determinants();
 
-    check_element_distortion();
-
     cm->update_internal_variables(time_step_size);
 
     if (std::fetestexcept(FE_INVALID))
@@ -219,12 +218,6 @@ void femSubmesh::update_deformation_measures()
             Matrix3 const F_0 = local_deformation_gradient(rhea, X);
             Matrix3 const F = local_deformation_gradient(rhea, x);
 
-            if (auto const j = F.determinant(); j < 0.0)
-            {
-                throw computational_error("Distorted element (" + std::to_string(element) + ", "
-                                          + std::to_string(l) + ") with j = " + std::to_string(j));
-            }
-
             // Gradient operator in index notation
             auto const& B_0t = rhea * F_0.inverse();
 
@@ -239,30 +232,26 @@ void femSubmesh::update_deformation_measures()
 
 void femSubmesh::update_Jacobian_determinants()
 {
-    using ranges::view::transform;
+    auto const& deformation_gradients = variables(InternalVariables::Tensor::DeformationGradient);
+    auto& deformation_gradient_determinants = variables(InternalVariables::Scalar::DetF);
 
-    auto const& F_list = variables(InternalVariables::Tensor::DeformationGradient);
+    deformation_gradient_determinants = deformation_gradients
+                                        | ranges::view::transform(
+                                              [](auto const& F) { return F.determinant(); });
 
-    auto& detF_list = variables(InternalVariables::Scalar::DetF);
+    auto const found = ranges::find_if(deformation_gradient_determinants,
+                                       [](auto const& detF) { return detF <= 0.0; });
 
-    detF_list = F_list | transform([](auto const& F) { return F.determinant(); });
-}
-
-void femSubmesh::check_element_distortion() const
-{
-    auto const& detF_list = variables(InternalVariables::Scalar::DetF);
-
-    auto found = ranges::find_if(detF_list, [](auto const& detF) { return detF < 0.0; });
-
-    if (found != detF_list.end())
+    if (found != deformation_gradient_determinants.end())
     {
-        auto const i = std::distance(detF_list.begin(), found);
+        auto const i = std::distance(deformation_gradient_determinants.begin(), found);
 
         auto const[element, quadrature_point] = std::div(i, sf->quadrature().points());
 
-        throw computational_error("Global mapping assumption violated at element "
+        throw computational_error("Positive Jacobian assumption violated at element "
                                   + std::to_string(element) + " and local quadrature point "
-                                  + std::to_string(quadrature_point));
+                                  + std::to_string(quadrature_point) + " (" + std::to_string(*found)
+                                  + ")");
     }
 }
 

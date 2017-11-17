@@ -8,8 +8,8 @@
 #include "mesh/NodeOrderingAdapter.hpp"
 
 #include "mesh/MaterialCoordinates.hpp"
-#include "mesh/solid/femSubmesh.hpp"
 #include "mesh/solid/femMesh.hpp"
+#include "mesh/solid/femSubmesh.hpp"
 
 #include <json/json.h>
 #include <range/v3/view.hpp>
@@ -319,20 +319,20 @@ TEST_CASE("Solid mesh test")
         }
     }
 }
-TEST_CASE("Nodal ordering Adapater")
-{
-    NodeOrderingAdapter node_adapter;
-
-    SECTION("Tetrahedron10 ordering")
-    {
-        // Create a dummy connectivity set
-        std::vector<List> nodal_connectivity = {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}};
-
-        node_adapter.convert_from_gmsh(nodal_connectivity, ElementTopology::Tetrahedron10);
-
-        REQUIRE(nodal_connectivity[0][4] == 9);
-        REQUIRE(nodal_connectivity[0][9] == 4);
-        REQUIRE(nodal_connectivity[0][3] == 0);
-        REQUIRE(nodal_connectivity[0][0] == 3);
-    }
-}
+// TEST_CASE("Nodal ordering Adapater")
+// {
+//     NodeOrderingAdapter node_adapter;
+//
+//     SECTION("Tetrahedron10 ordering")
+//     {
+//         // Create a dummy connectivity set
+//         std::vector<List> nodal_connectivity = {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}};
+//
+//         node_adapter.convert_from_gmsh(nodal_connectivity, ElementTopology::Tetrahedron10);
+//
+//         REQUIRE(nodal_connectivity[0][4] == 9);
+//         REQUIRE(nodal_connectivity[0][9] == 4);
+//         REQUIRE(nodal_connectivity[0][3] == 0);
+//         REQUIRE(nodal_connectivity[0][0] == 3);
+//     }
+// }

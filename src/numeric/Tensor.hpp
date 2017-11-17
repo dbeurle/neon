@@ -122,7 +122,7 @@ namespace voigt
     // clang-format on
 }
 
-//! Kinetic description of tensor to voigt notation where off diagonal components
+//! Kinematic description of tensor to voigt notation where off diagonal components
 //! are multiplied by a factor of two
 namespace kinematic
 {
