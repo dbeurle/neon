@@ -3,6 +3,8 @@
 
 #include "catch.hpp"
 
+#include <Eigen/Dense>
+#include <Eigen/Eigenvalues>
 #include <iostream>
 #include <json/json.h>
 
@@ -106,8 +108,8 @@ TEST_CASE("Neo-Hookean model")
     REQUIRE(neo_hooke->intrinsic_material().name() == "rubber");
 
     // Get the tensor variables
-    auto[F_list, cauchy_list] = variables(InternalVariables::Tensor::DeformationGradient,
-                                          InternalVariables::Tensor::Cauchy);
+    auto [F_list, cauchy_list] = variables(InternalVariables::Tensor::DeformationGradient,
+                                           InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables(InternalVariables::Scalar::DetF);
 
@@ -201,8 +203,8 @@ TEST_CASE("Affine microsphere model", )
     REQUIRE(affine->intrinsic_material().name() == "rubber");
 
     // Get the tensor variables
-    auto[F_list, cauchy_list] = variables(InternalVariables::Tensor::DeformationGradient,
-                                          InternalVariables::Tensor::Cauchy);
+    auto [F_list, cauchy_list] = variables(InternalVariables::Tensor::DeformationGradient,
+                                           InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables(InternalVariables::Scalar::DetF);
 
@@ -294,8 +296,8 @@ TEST_CASE("NonAffine microsphere model")
     REQUIRE(affine->intrinsic_material().name() == "rubber");
 
     // Get the tensor variables
-    auto[F_list, cauchy_list] = variables(InternalVariables::Tensor::DeformationGradient,
-                                          InternalVariables::Tensor::Cauchy);
+    auto [F_list, cauchy_list] = variables(InternalVariables::Tensor::DeformationGradient,
+                                           InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables(InternalVariables::Scalar::DetF);
 
@@ -402,8 +404,8 @@ TEST_CASE("J2 plasticity model")
     auto j2plasticity = make_constitutive_model(variables, material_data, simulation_data);
 
     // Get the tensor variables
-    auto[H_list, cauchy_list] = variables(InternalVariables::Tensor::DisplacementGradient,
-                                          InternalVariables::Tensor::Cauchy);
+    auto [H_list, cauchy_list] = variables(InternalVariables::Tensor::DisplacementGradient,
+                                           InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables(InternalVariables::Scalar::DetF);
 
@@ -440,8 +442,9 @@ TEST_CASE("J2 plasticity model")
 
         j2plasticity->update_internal_variables(1.0);
 
-        auto[vm_list, eff_plastic_list] = variables(InternalVariables::Scalar::VonMisesStress,
-                                                    InternalVariables::Scalar::EffectivePlasticStrain);
+        auto [vm_list,
+              eff_plastic_list] = variables(InternalVariables::Scalar::VonMisesStress,
+                                            InternalVariables::Scalar::EffectivePlasticStrain);
 
         // Ensure symmetry is correct
         for (auto const& C : material_tangents)
@@ -470,8 +473,9 @@ TEST_CASE("J2 plasticity model")
 
         j2plasticity->update_internal_variables(1.0);
 
-        auto[vm_list, eff_plastic_list] = variables(InternalVariables::Scalar::VonMisesStress,
-                                                    InternalVariables::Scalar::EffectivePlasticStrain);
+        auto [vm_list,
+              eff_plastic_list] = variables(InternalVariables::Scalar::VonMisesStress,
+                                            InternalVariables::Scalar::EffectivePlasticStrain);
 
         // Ensure symmetry is correct
         for (auto const& C : material_tangents)
@@ -502,7 +506,155 @@ TEST_CASE("J2 plasticity model")
         }
     }
 }
-TEST_CASE("Finite J2 plasticity model")
+TEST_CASE("J2 plasticity damage model", "[J2PlasticityDamage]")
+{
+    using namespace neon::mech::solid;
+
+    // Create a json reader object from a string
+    std::string
+        input_data = "{\"Name\": \"steel\", \"ElasticModulus\": 134.0e3, \"PoissonsRatio\": 0.3, "
+                     "\"YieldStress\": 85, \"HardeningModulus\": "
+                     "5500,\"SofteningMultiplier\" : 250,\"PlasticityViscousExponent\" : "
+                     "2.5,\"PlasticityViscousMultiplier\" : "
+                     "1.923536463026969e-08,\"DamageViscousExponent\" : "
+                     "2,\"DamageViscousMultiplier\" : 2.777777777777778}";
+
+    std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\" : \"ChabocheDamage\", "
+                                   "\"FiniteStrain\" : false}}";
+
+    Json::Value material_data, simulation_data;
+
+    Json::Reader reader;
+
+    REQUIRE(reader.parse(input_data.c_str(), material_data));
+    REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
+
+    InternalVariables variables(internal_variable_size);
+
+    variables.add(InternalVariables::Tensor::DisplacementGradient, InternalVariables::Tensor::Cauchy);
+    variables.add(InternalVariables::Scalar::DetF);
+
+    auto J2PlasticityDamage = make_constitutive_model(variables, material_data, simulation_data);
+
+    // Get the tensor variables
+    auto [H_list, cauchy_list] = variables(InternalVariables::Tensor::DisplacementGradient,
+                                           InternalVariables::Tensor::Cauchy);
+
+    auto [J_list, damage_list] = variables(InternalVariables::Scalar::DetF,
+                                           InternalVariables::Scalar::Damage);
+
+    auto& material_tangents = variables(InternalVariables::Matrix::TangentOperator);
+
+    for (auto& H : H_list) H = neon::Matrix3::Zero();
+    for (auto& J : J_list) J = 1.0;
+
+    SECTION("Sanity checks")
+    {
+        REQUIRE(J2PlasticityDamage->is_finite_deformation() == false);
+        REQUIRE(J2PlasticityDamage->intrinsic_material().name() == "steel");
+
+        REQUIRE(variables.has(InternalVariables::Scalar::VonMisesStress));
+        REQUIRE(variables.has(InternalVariables::Scalar::EffectivePlasticStrain));
+        REQUIRE(variables.has(InternalVariables::Tensor::LinearisedStrain));
+        REQUIRE(variables.has(InternalVariables::Tensor::LinearisedPlasticStrain));
+        REQUIRE(variables.has(InternalVariables::Matrix::TangentOperator));
+        REQUIRE(variables.has(InternalVariables::Scalar::Damage));
+        REQUIRE(variables.has(InternalVariables::Scalar::EnergyReleaseRate));
+        REQUIRE(variables.has(InternalVariables::Tensor::KinematicHardening));
+        REQUIRE(variables.has(InternalVariables::Tensor::BackStress));
+    }
+    SECTION("Uniaxial elastic load")
+    {
+        for (auto& H : H_list) H(2, 2) = 0.0008;
+
+        J2PlasticityDamage->update_internal_variables(1.0);
+
+        auto [vm_list,
+              eff_plastic_list] = variables(InternalVariables::Scalar::VonMisesStress,
+                                            InternalVariables::Scalar::EffectivePlasticStrain);
+
+        // Ensure symmetry is correct when the loading is elastic
+        for (auto const& C : material_tangents)
+        {
+            // std::cout << C << "\n";
+            REQUIRE((C - C.transpose()).norm() == Approx(0.0));
+        }
+
+        for (auto& cauchy : cauchy_list)
+        {
+            // std::cout << cauchy << std::endl;
+            REQUIRE(cauchy.norm() != Approx(0.0));
+
+            // Shear components should be close to zero
+            REQUIRE(cauchy(0, 1) == Approx(0.0));
+            REQUIRE(cauchy(0, 2) == Approx(0.0));
+            REQUIRE(cauchy(1, 2) == Approx(0.0));
+            REQUIRE(cauchy(0, 0) == Approx(cauchy(1, 1)));
+            REQUIRE(cauchy(1, 1) > 0.0);
+            REQUIRE(cauchy(2, 2) > 0.0);
+        }
+        for (auto& strain_p_eff : eff_plastic_list) REQUIRE(strain_p_eff == Approx(0.0));
+        for (auto& vm : vm_list)
+        {
+            REQUIRE(vm > 80);
+            REQUIRE(vm < 85);
+        }
+    }
+    SECTION("Plastic uniaxial load")
+    {
+        for (auto& H : H_list) H(2, 2) = 0.0009; // 0.000825 for comparison with 1D
+
+        J2PlasticityDamage->update_internal_variables(0.01); // time here is real (not pseudo time)
+
+        auto [vm_list,
+              eff_plastic_list] = variables(InternalVariables::Scalar::VonMisesStress,
+                                            InternalVariables::Scalar::EffectivePlasticStrain);
+
+        for (auto const& cauchy : cauchy_list)
+        {
+            REQUIRE(cauchy.norm() != Approx(0.0));
+            // std::cout << cauchy << std::endl;
+            // Shear components should be close to zero
+            REQUIRE(cauchy(0, 1) == Approx(0.0));
+            REQUIRE(cauchy(0, 2) == Approx(0.0));
+            REQUIRE(cauchy(1, 2) == Approx(0.0));
+            REQUIRE(cauchy(0, 0) > 0.0);
+            REQUIRE(cauchy(1, 1) > 0.0);
+            REQUIRE(cauchy(2, 2) > 0.0);
+        }
+        for (auto& strain_p_eff : eff_plastic_list)
+        {
+            REQUIRE(strain_p_eff > 0.0);
+        }
+        for (auto& damage_var : damage_list)
+        {
+            REQUIRE(damage_var > 0.0);
+        }
+        for (auto& vm : vm_list)
+        {
+            // Should experience hardening
+            REQUIRE(vm <= 100);
+            REQUIRE(vm > 85);
+        }
+        // check the eig val of the tangent_operator
+        for (auto const& C : material_tangents)
+        {
+            // std::cout << C << "\n";
+            // Compute the condition number of C
+            // Eigen::JacobiSVD<Eigen::MatrixXd> svd(C);
+            // double cond = svd.singularValues()(0)
+            //               / svd.singularValues()(svd.singularValues().size() - 1);
+            // std::cout << cond << "\n\n";
+
+            Eigen::EigenSolver<Eigen::MatrixXd> eigen_solver;
+            eigen_solver.compute(C);
+            // Eigen::VectorXd eig_val = eigen_solver.eigenvalues();
+            // std::cout << eig_val << "\n";
+            // REQUIRE(eig_val(0) >= 0.0); // TODO: uncomment this linear and add the other elements
+        }
+    }
+}
+TEST_CASE("Finite J2 plasticity model", "[FiniteJ2Plasticity]")
 {
     using namespace neon::mech::solid;
 
@@ -530,8 +682,8 @@ TEST_CASE("Finite J2 plasticity model")
     auto j2plasticity = make_constitutive_model(variables, material_data, simulation_data);
 
     // Get the tensor variables
-    auto[F_list, cauchy_list] = variables(InternalVariables::Tensor::DeformationGradient,
-                                          InternalVariables::Tensor::Cauchy);
+    auto [F_list, cauchy_list] = variables(InternalVariables::Tensor::DeformationGradient,
+                                           InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables(InternalVariables::Scalar::DetF);
 

@@ -77,16 +77,20 @@ private:
 
     // clang-format off
     ScalarMap const scalar_map{{"AccumulatedPlasticStrain", InternalVariables::Scalar::EffectivePlasticStrain},
-                               {"VonMisesStress", InternalVariables::Scalar::VonMisesStress}};
+                               {"VonMisesStress", InternalVariables::Scalar::VonMisesStress},
+                               {"Damage", InternalVariables::Scalar::Damage},
+                               {"EnergyReleaseRate", InternalVariables::Scalar::EnergyReleaseRate}};
 
     TensorMap const tensor_map{{"CauchyStress", InternalVariables::Tensor::Cauchy},
                                {"LinearisedStrain", InternalVariables::Tensor::LinearisedStrain},
                                {"LinearisedPlasticStrain", InternalVariables::Tensor::LinearisedPlasticStrain},
                                {"DeformationGradient", InternalVariables::Tensor::DeformationGradient},
-                               {"DisplacementGradient", InternalVariables::Tensor::DisplacementGradient}};
+                               {"DisplacementGradient", InternalVariables::Tensor::DisplacementGradient},
+                               {"KinematicHardening", InternalVariables::Tensor::KinematicHardening},
+                               {"BackStress", InternalVariables::Tensor::BackStress}};
     // clang-format on
 };
-}
+} // namespace mech::solid
 
 namespace diffusion
 {
@@ -114,5 +118,5 @@ private:
 
     VectorMap const vector_map{{"HeatFlux", InternalVariables::Vector::HeatFlux}};
 };
-}
-}
+} // namespace diffusion
+} // namespace neon

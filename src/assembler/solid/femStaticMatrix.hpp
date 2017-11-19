@@ -54,6 +54,8 @@ protected:
      */
     void enforce_dirichlet_conditions(SparseMatrix& A, Vector& x, Vector& b);
 
+    void convert_dirichlet_to_external_force(SparseMatrix& A, Vector& x, Vector& b);
+
     /** Move the nodes on the mesh for the Dirichlet boundary */
     void apply_displacement_boundaries();
 
@@ -96,4 +98,4 @@ inline bool femStaticMatrix::is_iteration_converged() const
     return relative_displacement_norm <= displacement_tolerance
            && relative_force_norm <= residual_tolerance;
 }
-}
+} // namespace neon::mech::solid

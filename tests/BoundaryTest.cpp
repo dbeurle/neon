@@ -166,7 +166,7 @@ TEST_CASE("Traction test for triangle", "[Traction]")
 
         REQUIRE(traction.elements() == 1);
 
-        auto const & [ dofs, t ] = traction.external_force(0, 1.0);
+        auto const& [dofs, t] = traction.external_force(0, 1.0);
 
         REQUIRE((t - 1.0 / 6.0 * Vector3::Ones()).norm() == Approx(0.0).margin(ZERO_MARGIN));
         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
@@ -185,7 +185,7 @@ TEST_CASE("Traction test for triangle", "[Traction]")
 
         REQUIRE(traction.elements() == 1);
 
-        auto const & [ dofs, t ] = traction.external_force(0, 1.0);
+        auto const& [dofs, t] = traction.external_force(0, 1.0);
 
         REQUIRE((t - 2.0 / 6.0 * Vector3::Ones()).norm() == Approx(0.0).margin(ZERO_MARGIN));
         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
@@ -221,7 +221,7 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
 
         REQUIRE(pressure.elements() == 1);
 
-        auto const & [ dofs, f_ext ] = pressure.external_force(0, 1.0);
+        auto const& [dofs, f_ext] = pressure.external_force(0, 1.0);
 
         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
 
@@ -243,7 +243,7 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
 
         REQUIRE(pressure.elements() == 1);
 
-        auto const & [ dofs, f_ext ] = pressure.external_force(0, 1.0);
+        auto const& [dofs, f_ext] = pressure.external_force(0, 1.0);
 
         REQUIRE((Vector3(f_ext(2), f_ext(5), f_ext(8)) - 2.0 / 6.0 * Vector3::Ones()).norm()
                 == Approx(0.0).margin(ZERO_MARGIN));
@@ -303,14 +303,14 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
                                   boundary,
                                   {{"x", 0}, {"y", 1}, {"z", 2}});
 
-    for (auto const & [ is_dof_active, meshes ] : loads.interface())
+    for (auto const& [is_dof_active, meshes] : loads.interface())
     {
         if (is_dof_active)
         {
             std::visit(
                 [&](auto const& mesh) {
 
-                    auto const & [ dofs_tri, f_tri ] = mesh.external_force(0, 1.0);
+                    auto const& [dofs_tri, f_tri] = mesh.external_force(0, 1.0);
 
                     REQUIRE(dofs_tri.size() == 3);
                     REQUIRE(f_tri.rows() == 3);
@@ -323,7 +323,7 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
             std::visit(
                 [&](auto const& mesh) {
 
-                    auto const & [ dofs_quad, f_quad ] = mesh.external_force(0, 1.0);
+                    auto const& [dofs_quad, f_quad] = mesh.external_force(0, 1.0);
 
                     REQUIRE(dofs_quad.size() == 4);
                     REQUIRE(f_quad.rows() == 4);

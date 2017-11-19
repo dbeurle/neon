@@ -2,6 +2,7 @@
 #include "ConstitutiveModelFactory.hpp"
 
 #include "J2Plasticity.hpp"
+#include "J2PlasticityDamage.hpp"
 
 #include "FiniteJ2Plasticity.hpp"
 
@@ -101,12 +102,21 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& va
         }
         return std::make_unique<J2Plasticity>(variables, material_data);
     }
+    else if (model_name == "ChabocheDamage")
+    {
+        if (simulation_data["ConstitutiveModel"]["FiniteStrain"].asBool())
+        {
+            throw std::runtime_error("\"ChabocheDamage\" is not implemented for "
+                                     "\"FiniteStrain\"");
+        }
+        return std::make_unique<J2PlasticityDamage>(variables, material_data);
+    }
     throw std::runtime_error("The model name " + model_name + " is not recognised\n"
                              + "Supported models are \"NeoHooke\", \"Microsphere\" "
                                "and \"J2Plasticity\"\n");
     return nullptr;
 }
-}
+} // namespace neon::solid
 
 namespace neon::diffusion
 {
@@ -131,4 +141,4 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& va
 
     return nullptr;
 }
-}
+} // namespace neon::diffusion
