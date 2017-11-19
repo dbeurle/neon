@@ -82,6 +82,9 @@ class SparseLU : public DirectLinearSolver
 {
 public:
     void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
+
+private:
+    Eigen::SparseLU<SparseMatrix, Eigen::AMDOrdering<int>> lu;
 };
 
 /**
@@ -93,5 +96,8 @@ class SparseLLT : public DirectLinearSolver
 {
 public:
     void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
+
+private:
+    Eigen::SimplicialLLT<Eigen::SparseMatrix<SparseMatrix::Scalar>> llt;
 };
 }
