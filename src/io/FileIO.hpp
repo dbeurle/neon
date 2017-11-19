@@ -35,10 +35,10 @@ protected:
     void add_field(std::string const& name, Vector const& data, int const components);
 
 protected:
+    std::string const directory_name = "visualisation";
     std::string file_name;
 
     vtkSmartPointer<vtkUnstructuredGrid> unstructured_mesh;
-    // vtkSmartPointer<vtkXMLUnstructuredGridWriter> unstructured_mesh_writer;
 
     std::ofstream pvd_file; //!< Stream for writing time history
 
