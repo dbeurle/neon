@@ -1,0 +1,75 @@
+{
+    "Name" : "J2PlasticityDamage",
+    "Cores" : 1,
+    "Part": [{
+        "Name" : "beam",
+        "Material" : "steel",
+        "MeshFormat" : "gmsh"
+    }],
+    "Material" : [{
+        "Name" : "steel",
+        "ElasticModulus": 134.0e3,
+        "YieldStress": 85,
+        "PoissonsRatio": 0.3,
+        "KinematicHardeningModulus": 5500,
+        "SofteningMultiplier" : 250,
+        "PlasticityViscousExponent" : 2.5,
+        "PlasticityViscousMultiplier" : 1.923536463026969e-08,
+        "DamageViscousExponent" : 2,
+        "DamageViscousMultiplier" : 2.777777777777778
+    }],
+    "SimulationCases" : [{
+        "Name" : "Uniaxial",
+		    "Module" : "SolidMechanics",
+        "Solution" : "Equilibrium",
+        "NonlinearOptions" : {
+          "ResidualTolerance" : 1e-3,
+          "DisplacementTolerance" : 1e-3
+        },
+        "Time" : {
+            "Period" : 0.01,
+            "Increments" : {
+                "Initial" : 0.01,
+                "Minimum" : 0.01,
+                "Maximum" : 0.01
+            }
+    },
+    "Mesh" : [{
+            "Name" : "beam",
+            "ConstitutiveModel" : {
+                "Name" : "ChabocheDamage", //"ChabocheDamage", J2Plasticity
+
+                "FiniteStrain" : false
+            },
+            "ElementOptions" : {
+                "Quadrature" : "Full"
+            },
+            "BoundaryConditions" : [{
+                "Name" : "Clamped",
+                "Type" : "Displacement",
+                "Time" : [0.0, 0.01],
+                "Values" : {
+                    "x" : [0.0, 0.0],
+                    "y" : [0.0, 0.0],
+                    "z" : [0.0, 0.0]
+                }
+            },
+            {
+                "Name" : "Zsym",
+				"Type" : "Traction",
+                "Time" : [0.0, 0.01],
+                "Values" : {
+                    "x" : [0.0, 2.2] //0.01 //force 1.5 -> 85MPa 1.65
+                }
+            }]
+        }],
+		"LinearSolver" : {
+		    "Solver" : "PaStiX"
+        },
+        "Visualisation" : {
+            "Fields" : ["Displacement", "LinearisedStrain", "LinearisedPlasticStrain",
+                        "CauchyStress", "VonMisesStress", "AccumulatedPlasticStrain","DisplacementGradient",
+                        "Damage","EnergyReleaseRate","BackStress","KinematicHardening","DisplacementGradient"]
+        }
+    }]
+}
