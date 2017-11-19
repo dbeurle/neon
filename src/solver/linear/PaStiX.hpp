@@ -31,6 +31,14 @@ private:
 class PaStiXLU : public DirectLinearSolver
 {
 public:
+    PaStiXLU();
+
     void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
+
+private:
+    // BUG Likely not going to work with unsymmetric matrix because of row and
+    // column ordering change.  Should give the transpose of the matrix but
+    // unsure why Eigen can't handle this
+    Eigen::PastixLU<Eigen::SparseMatrix<double>> lu;
 };
 }
