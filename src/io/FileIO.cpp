@@ -149,7 +149,7 @@ void FileIO::write(int const time_step, double const total_time)
                 {
                     throw std::runtime_error("Internal variable " + name + " does not exist in mesh");
                 }
-                auto const[value, count] = submesh.nodal_averaged_variable(found->second);
+                auto const [value, count] = submesh.nodal_averaged_variable(found->second);
                 nodal_averaged_value += value;
                 running_count += count;
             }
@@ -167,7 +167,7 @@ void FileIO::write(int const time_step, double const total_time)
 
             for (auto const& submesh : fem_mesh.meshes())
             {
-                auto const[value, count] = submesh.nodal_averaged_variable(found->second);
+                auto const [value, count] = submesh.nodal_averaged_variable(found->second);
                 nodal_averaged_value += value;
                 running_count += count;
             }

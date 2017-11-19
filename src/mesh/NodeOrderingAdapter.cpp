@@ -133,6 +133,14 @@ std::vector<List> NodeOrderingAdapter::convert_to_vtk(std::vector<List> nodal_co
 {
     switch (element_topology)
     {
+        case ElementTopology::Tetrahedron4:
+        {
+            for (auto& nodal_list : nodal_connectivity)
+            {
+                std::swap(nodal_list.at(0), nodal_list.at(1));
+            }
+            break;
+        }
         case ElementTopology::Tetrahedron10:
         {
             for (auto& nodal_list : nodal_connectivity)
@@ -211,4 +219,4 @@ VTKCellType NodeOrderingAdapter::to_vtk(ElementTopology element_topology) const
     }
     return found->second;
 }
-}
+} // namespace neon

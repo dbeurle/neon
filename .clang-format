@@ -78,3 +78,4 @@ SpacesInSquareBrackets: false
 Standard:        Cpp11
 TabWidth:        4
 UseTab:          Never
+FixNamespaceComments: false
