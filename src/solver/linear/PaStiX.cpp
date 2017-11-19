@@ -43,10 +43,10 @@ void PaStiXLDLT::solve(SparseMatrix const& A, Vector& x, Vector const& b)
 PaStiXLU::PaStiXLU()
 {
     // Verbosity
-    ldlt.iparm(3) = 0;
+    lu.iparm(3) = 0;
 
     // Number of threads
-    ldlt.iparm(34) = SimulationControl::threads;
+    lu.iparm(34) = SimulationControl::threads;
 
     // Number of Cuda devices
     // ldlt.iparm(64) = 1;
