@@ -211,7 +211,7 @@ namespace kinematic
                          0.0, 0.0, 0.0, 0.0, 0.0, 0.5).finished();
     // clang-format on
 }
-} // namespace kinematic
+}
 
 //! Kinetic description of tensor to voigt notation where off diagonal components
 //! are not multiplied by a factor of two
@@ -265,11 +265,11 @@ namespace kinetic
 
 /**
  * Compute the fourth order symmetric identity tensor in Voigt notation according to
- * \f$ \mathbb{I} = \delta_{ij} \f$
+ * \f$ \mathbb{I} = \delta_{ijkl} \f$
  */
 [[nodiscard]] inline Matrix6 fourth_order_identity() { return Matrix6::Identity(); }
-} // namespace kinetic
-} // namespace voigt
+}
+}
 /*! @} End of Doxygen Groups */
 
 [[nodiscard]] inline Matrix3 outer_product(Vector3 const& a, Vector3 const& b)
@@ -321,4 +321,4 @@ namespace kinetic
     A.block<3, 3>(3, 3) *= 2.0;
     return A;
 }
-} // namespace neon
+}

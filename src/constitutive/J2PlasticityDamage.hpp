@@ -81,4 +81,4 @@ protected:
 protected:
     IsotropicElasticPlasticDamage material;
 };
-} // namespace neon::mech::solid
+}

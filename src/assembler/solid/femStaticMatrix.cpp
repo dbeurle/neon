@@ -149,7 +149,6 @@ void femStaticMatrix::solve()
             compute_external_force(adaptive_load.step_time());
 
             perform_equilibrium_iterations();
-            return;
         }
     }
     catch (computational_error& comp_error)
@@ -255,50 +254,9 @@ void femStaticMatrix::apply_displacement_boundaries()
         }
     }
 }
-void femStaticMatrix::convert_dirichlet_to_external_force(SparseMatrix& A, Vector& x, Vector& b)
-{
-    for (auto const& [name, dirichlet_boundaries] : fem_mesh.displacement_boundaries())
-    {
-        for (auto const& dirichlet_boundary : dirichlet_boundaries)
-        {
-            for (auto const& fixed_dof : dirichlet_boundary.dof_view())
-            {
-                auto const diagonal_entry = A.coeffRef(fixed_dof, fixed_dof);
 
-                x(fixed_dof) = dirichlet_boundary.value_view(adaptive_load.step_time());
-
-                std::vector<int> non_zero_visitor;
-
-                for (SparseMatrix::InnerIterator it(A, fixed_dof); it; ++it)
-                {
-                    if (!A.IsRowMajor) b(it.row()) -= it.valueRef() * x(fixed_dof);
-
-                    it.valueRef() = 0.0;
-
-                    non_zero_visitor.push_back(A.IsRowMajor ? it.col() : it.row());
-                }
-
-                for (auto const& non_zero : non_zero_visitor)
-                {
-                    auto const row = A.IsRowMajor ? non_zero : fixed_dof;
-                    auto const col = A.IsRowMajor ? fixed_dof : non_zero;
-
-                    if (A.IsRowMajor) b(row) -= A.coeffRef(row, col) * x(fixed_dof);
-
-                    A.coeffRef(row, col) = 0.0;
-                }
-
-                // Reset the diagonal to the same value to preserve condition number
-                A.coeffRef(fixed_dof, fixed_dof) = diagonal_entry;
-                b(fixed_dof) = diagonal_entry * x(fixed_dof);
-            }
-        }
-    }
-}
 void femStaticMatrix::perform_equilibrium_iterations()
 {
-    auto fext0 = fext;
-    auto d0 = d;
     Vector delta_d = Vector::Zero(fem_mesh.active_dofs());
     Vector d_new = d;
 
@@ -308,8 +266,6 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
     while (current_iteration < max_iterations)
     {
-        // fext = fext0;
-        // d = d0;
         auto const start = std::chrono::high_resolution_clock::now();
 
         std::cout << std::string(4, ' ') << termcolor::blue << termcolor::bold
@@ -319,7 +275,7 @@ void femStaticMatrix::perform_equilibrium_iterations()
         compute_internal_force();
 
         assemble_stiffness();
-        // if (current_iteration == 0) convert_dirichlet_to_external_force(Kt, d, fext);
+
         Vector residual = fint - fext;
 
         enforce_dirichlet_conditions(Kt, delta_d, residual);
@@ -388,4 +344,4 @@ void femStaticMatrix::print_convergence_progress() const
     std::cout << termcolor::bold << "Residual force norm " << relative_force_norm
               << termcolor::reset << "\n";
 }
-} // namespace neon::mech::solid
+}

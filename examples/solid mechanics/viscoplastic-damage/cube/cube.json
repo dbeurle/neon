@@ -11,7 +11,7 @@
         "ElasticModulus": 134.0e3,
         "YieldStress": 85,
         "PoissonsRatio": 0.3,
-        "HardeningModulus": 5500,
+        "KinematicHardeningModulus": 5500,
         "SofteningMultiplier" : 250,
         "PlasticityViscousExponent" : 2.5,
         "PlasticityViscousMultiplier" : 1.923536463026969e-08,

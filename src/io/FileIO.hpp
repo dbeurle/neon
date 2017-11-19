@@ -90,7 +90,7 @@ private:
                                {"BackStress", InternalVariables::Tensor::BackStress}};
     // clang-format on
 };
-} // namespace mech::solid
+}
 
 namespace diffusion
 {
@@ -118,5 +118,5 @@ private:
 
     VectorMap const vector_map{{"HeatFlux", InternalVariables::Vector::HeatFlux}};
 };
-} // namespace diffusion
-} // namespace neon
+}
+}

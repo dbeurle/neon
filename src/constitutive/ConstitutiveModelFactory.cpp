@@ -116,7 +116,7 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& va
                                "and \"J2Plasticity\"\n");
     return nullptr;
 }
-} // namespace neon::solid
+}
 
 namespace neon::diffusion
 {
@@ -141,4 +141,4 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& va
 
     return nullptr;
 }
-} // namespace neon::diffusion
+}

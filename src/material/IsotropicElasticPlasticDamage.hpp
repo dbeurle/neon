@@ -14,7 +14,7 @@ public:
     ~IsotropicElasticPlasticDamage() = default;
 
     double softening_multiplier() const { return gamma; }
-    double hardening_modulus() const { return C; }
+    double kinematic_hardening_modulus() const { return C; }
     double plasticity_viscous_exponent() const { return np; }
     double plasticity_viscous_multiplier() const { return kp; }
     double damage_viscous_exponent() const { return nd; }
@@ -28,4 +28,4 @@ protected:
     double kd = 1.0;    //!< damage viscous multiplier
     double nd = 1.0;    //!< damage viscous exponent
 };
-} // namespace neon
+}

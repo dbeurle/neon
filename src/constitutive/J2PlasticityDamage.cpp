@@ -129,7 +129,7 @@ double J2PlasticityDamage::perform_radial_return(Matrix3& cauchy_stress,
     auto const np = material.plasticity_viscous_exponent();
     auto const kd = material.damage_viscous_multiplier();
     auto const nd = material.damage_viscous_exponent();
-    auto const C = material.hardening_modulus();
+    auto const C = material.kinematic_hardening_modulus();
     auto const gamma = material.softening_multiplier();
 
     // TODO: use relative error instead of absolute one (for f and delta_y)
@@ -221,7 +221,7 @@ double J2PlasticityDamage::evaluate_yield_function(double const von_mises,
                                                    Matrix3 const& back_stress) const
 {
     return von_mises
-           + 0.5 * material.softening_multiplier() / material.hardening_modulus()
+           + 0.5 * material.softening_multiplier() / material.kinematic_hardening_modulus()
                  * double_dot(back_stress, back_stress)
            - material.yield_stress(0.0);
 }
@@ -248,4 +248,4 @@ Vector6 J2PlasticityDamage::compute_stress_like_vector(Matrix6 const& tangent_op
     // could get the tangent_operator directly without passing it to this function
     return tangent_operator * voigt::kinematic::to(strain_like);
 }
-} // namespace neon::mech::solid
+}

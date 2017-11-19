@@ -513,7 +513,7 @@ TEST_CASE("J2 plasticity damage model", "[J2PlasticityDamage]")
     // Create a json reader object from a string
     std::string
         input_data = "{\"Name\": \"steel\", \"ElasticModulus\": 134.0e3, \"PoissonsRatio\": 0.3, "
-                     "\"YieldStress\": 85, \"HardeningModulus\": "
+                     "\"YieldStress\": 85, \"KinematicHardeningModulus\": "
                      "5500,\"SofteningMultiplier\" : 250,\"PlasticityViscousExponent\" : "
                      "2.5,\"PlasticityViscousMultiplier\" : "
                      "1.923536463026969e-08,\"DamageViscousExponent\" : "
@@ -639,18 +639,11 @@ TEST_CASE("J2 plasticity damage model", "[J2PlasticityDamage]")
         // check the eig val of the tangent_operator
         for (auto const& C : material_tangents)
         {
-            // std::cout << C << "\n";
-            // Compute the condition number of C
-            // Eigen::JacobiSVD<Eigen::MatrixXd> svd(C);
-            // double cond = svd.singularValues()(0)
-            //               / svd.singularValues()(svd.singularValues().size() - 1);
-            // std::cout << cond << "\n\n";
-
             Eigen::EigenSolver<Eigen::MatrixXd> eigen_solver;
             eigen_solver.compute(C);
-            // Eigen::VectorXd eig_val = eigen_solver.eigenvalues();
-            // std::cout << eig_val << "\n";
-            // REQUIRE(eig_val(0) >= 0.0); // TODO: uncomment this linear and add the other elements
+            Eigen::VectorXcd eig_val = eigen_solver.eigenvalues();
+
+            // REQUIRE(!(eig_val.real() < 0.0).any()); TODO
         }
     }
 }

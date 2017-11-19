@@ -11,16 +11,12 @@
         "ElasticModulus": 134.0e3,
         "YieldStress": 85,
         "PoissonsRatio": 0.3,
-        "HardeningModulus": 5500, //KinematicHardeningModulus
+        "KinematicHardeningModulus": 5500,
         "SofteningMultiplier" : 250,
         "PlasticityViscousExponent" : 2.5,
         "PlasticityViscousMultiplier" : 1.923536463026969e-08,
         "DamageViscousExponent" : 2,
         "DamageViscousMultiplier" : 2.777777777777778
-        //"ElasticModulus" : 134.0e3,
-        //"IsotropicHardeningModulus" : 5500,
-        //"YieldStress" : 85,
-        //"PoissonsRatio" : 0.3
     }],
     "SimulationCases" : [{
         "Name" : "Uniaxial",

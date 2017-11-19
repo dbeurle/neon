@@ -56,4 +56,4 @@ protected:
 
     Matrix6 const I_dev = voigt::kinematic::deviatoric();
 };
-} // namespace neon::mech::solid
+}
