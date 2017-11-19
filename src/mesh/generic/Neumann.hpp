@@ -44,16 +44,11 @@ class SurfaceLoad : public Neumann
 public:
     explicit SurfaceLoad(std::unique_ptr<SurfaceInterpolation_Tp>&& sf,
                          std::vector<List> const& nodal_connectivity,
+                         std::vector<List> const& dof_list,
                          std::shared_ptr<MaterialCoordinates>& material_coordinates,
                          Json::Value const& time_history,
-                         Json::Value const& load_history,
-                         int const dof_offset,
-                         int const nodal_dofs)
-        : Neumann(nodal_connectivity,
-                  filter_dof_list(nodal_dofs, dof_offset, nodal_connectivity),
-                  material_coordinates,
-                  time_history,
-                  load_history),
+                         Json::Value const& load_history)
+        : Neumann(nodal_connectivity, dof_list, material_coordinates, time_history, load_history),
           sf(std::move(sf))
     {
     }
@@ -92,21 +87,17 @@ class VolumeLoad : public Neumann
 public:
     explicit VolumeLoad(std::unique_ptr<VolumeInterpolation_Tp>&& sf,
                         std::vector<List> const& nodal_connectivity,
+                        std::vector<List> const& dof_list,
                         std::shared_ptr<MaterialCoordinates>& material_coordinates,
                         Json::Value const& time_history,
-                        Json::Value const& load_history,
-                        int const dof_offset,
-                        int const nodal_dofs)
-        : Neumann(nodal_connectivity,
-                  filter_dof_list(nodal_dofs, dof_offset, nodal_connectivity),
-                  material_coordinates,
-                  time_history,
-                  load_history),
+                        Json::Value const& load_history)
+        : Neumann(nodal_connectivity, dof_list, material_coordinates, time_history, load_history),
           sf(std::move(sf))
     {
     }
 
-    std::tuple<List const&, Vector> external_force(int const element, double const load_factor) const
+    std::tuple<List const&, Vector> external_force(int const element,
+                                                   double const load_factor) const override
     {
         auto const X = material_coordinates->initial_configuration(nodal_connectivity[element]);
 
@@ -114,7 +105,7 @@ public:
 
         // Perform the computation of the external load vector
         auto const f_ext = sf->quadrature().integrate(Vector::Zero(X.cols()).eval(),
-                                                      [&](auto const& femval, auto const& l) {
+                                                      [&](auto const& femval, auto const& l) -> Vector {
                                                           auto const & [ N, dN ] = femval;
 
                                                           auto const j = (X * dN).determinant();

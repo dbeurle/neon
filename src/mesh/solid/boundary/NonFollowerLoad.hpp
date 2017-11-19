@@ -26,15 +26,20 @@ using Traction = SurfaceLoad<SurfaceInterpolation>;
  */
 using BodyForce = VolumeLoad<VolumeInterpolation>;
 
+/**
+ * Pressure computes the pressure load acting normal the quadrature point
+ * on the surface of an element in the initial configuration.  This computes
+ * the cross product of the shape functions that describe the surface element.
+ * In the most general case, a pressure will contribute to three DoFs but
+ * could also recover tractions if the surface is aligned with an axis.
+ *
+ * The convention used here is that a positive value represents compression
+ * on the surface.
+ */
 class Pressure : public Traction
 {
 public:
-    explicit Pressure(std::unique_ptr<SurfaceInterpolation>&& sf,
-                      std::vector<List> const& nodal_connectivity,
-                      std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                      Json::Value const& time_history,
-                      Json::Value const& load_history,
-                      int const nodal_dofs);
+    using Traction::Traction;
 
     std::tuple<List const&, Vector> external_force(int const element,
                                                    double const load_factor) const override;

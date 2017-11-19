@@ -159,11 +159,10 @@ TEST_CASE("Traction test for triangle", "[Traction]")
 
         Traction traction(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
                           nodal_connectivity,
+                          dof_list,
                           material_coordinates,
                           times,
-                          loads,
-                          0,
-                          3);
+                          loads);
 
         REQUIRE(traction.elements() == 1);
 
@@ -179,11 +178,10 @@ TEST_CASE("Traction test for triangle", "[Traction]")
 
         Traction traction(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
                           nodal_connectivity,
+                          dof_list,
                           material_coordinates,
                           times,
-                          loads,
-                          0,
-                          3);
+                          loads);
 
         REQUIRE(traction.elements() == 1);
 
@@ -216,10 +214,10 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
 
         Pressure pressure(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
                           nodal_connectivity,
+                          dof_list,
                           material_coordinates,
                           times,
-                          loads,
-                          3);
+                          loads);
 
         REQUIRE(pressure.elements() == 1);
 
@@ -238,10 +236,10 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
 
         Pressure pressure(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
                           nodal_connectivity,
+                          dof_list,
                           material_coordinates,
                           times,
-                          loads,
-                          3);
+                          loads);
 
         REQUIRE(pressure.elements() == 1);
 
