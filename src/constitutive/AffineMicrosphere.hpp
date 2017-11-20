@@ -210,7 +210,7 @@ inline MatrixTp AffineMicrosphereWithDegradation::weighting(std::vector<double> 
                                                             MatrixTp accumulator,
                                                             Functor&& f) const
 {
-    for (int i = 0; i < material.segment_groups().size(); i++)
+    for (auto i = 0; i < material.segment_groups().size(); i++)
     {
         accumulator.noalias() += f(material.segment_groups()[i]) * G[i];
     }
