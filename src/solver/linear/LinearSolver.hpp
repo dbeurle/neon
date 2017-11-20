@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include "numeric/DenseTypes.hpp"
-#include "numeric/SparseTypes.hpp"
+#include "numeric/DenseMatrix.hpp"
+#include "numeric/SparseMatrix.hpp"
 
 namespace neon
 {

@@ -4,7 +4,7 @@
 #include "J2Plasticity.hpp"
 
 #include "material/IsotropicElasticPlastic.hpp"
-#include "numeric/DenseTypes.hpp"
+#include "numeric/DenseMatrix.hpp"
 #include "numeric/Tensor.hpp"
 
 #include <array>

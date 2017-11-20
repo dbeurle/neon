@@ -3,7 +3,7 @@
 
 #include <json/forwards.h>
 
-#include "numeric/DenseTypes.hpp"
+#include "numeric/DenseMatrix.hpp"
 #include "solver/TimeControl.hpp"
 
 namespace neon

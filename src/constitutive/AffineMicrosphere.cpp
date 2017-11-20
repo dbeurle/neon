@@ -2,7 +2,7 @@
 #include "AffineMicrosphere.hpp"
 
 #include "InternalVariables.hpp"
-#include "numeric/DenseTypes.hpp"
+#include "numeric/DenseMatrix.hpp"
 
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/zip.hpp>

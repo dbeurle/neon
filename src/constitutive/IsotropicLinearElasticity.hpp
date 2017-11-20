@@ -3,7 +3,7 @@
 
 #include "constitutive/ConstitutiveModel.hpp"
 
-#include "numeric/DenseTypes.hpp"
+#include "numeric/DenseMatrix.hpp"
 
 #include "material/LinearElastic.hpp"
 

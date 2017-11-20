@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "DenseTypes.hpp"
+#include "DenseMatrix.hpp"
 
 namespace neon
 {

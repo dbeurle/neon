@@ -2,7 +2,7 @@
 #pragma once
 
 #include "mesh/solid/femMesh.hpp"
-#include "numeric/SparseTypes.hpp"
+#include "numeric/SparseMatrix.hpp"
 #include "solver/AdaptiveLoadStep.hpp"
 
 #include "io/FileIO.hpp"

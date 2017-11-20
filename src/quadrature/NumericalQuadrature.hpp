@@ -3,7 +3,7 @@
 
 #include <tuple>
 
-#include "numeric/DenseTypes.hpp"
+#include "numeric/DenseMatrix.hpp"
 
 namespace neon
 {
