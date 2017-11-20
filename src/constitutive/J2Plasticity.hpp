@@ -28,8 +28,6 @@ public:
     virtual bool is_finite_deformation() const override { return false; }
 
 protected:
-    [[nodiscard]] Matrix6 deviatoric_projection() const;
-
     [[nodiscard]] Matrix6 algorithmic_tangent(double const plastic_increment,
                                               double const accumulated_plastic_strain,
                                               double const von_mises,
