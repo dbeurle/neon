@@ -37,7 +37,7 @@ public:
     virtual bool is_symmetric() const { return false; };
 
 protected:
-    Matrix3 compute_cauchy_stress(Matrix3 const& elastic_strain) const;
+    [[nodiscard]] Matrix3 compute_cauchy_stress(Matrix3 const& elastic_strain) const;
 
     /**
      * Performs the radial return algorithm with nonlinear kinematic hardening.
@@ -57,26 +57,28 @@ protected:
      {\lambda}_{vp} \ \mathbb{\tilde{N}} \ \frac{1}{1-D} \right ) = 0 \f]
       * Note that all the n+1 indices are ommited for the sake of simplicity
       */
-    double perform_radial_return(Matrix3& cauchy_stress,
-                                 Matrix3& back_stress,
-                                 double& damage_var,
-                                 Matrix3& kin_hard,
-                                 double& energy_var,
-                                 Matrix6& C_list,
-                                 double const& delta_t,
-                                 Matrix3 const& eps_e_t);
+    [[nodiscard]] double perform_radial_return(Matrix3& cauchy_stress,
+                                               Matrix3& back_stress,
+                                               double& damage_var,
+                                               Matrix3& kin_hard,
+                                               double& energy_var,
+                                               Matrix6& C_list,
+                                               double const& delta_t,
+                                               Matrix3 const& eps_e_t);
     /**
      * Evaluates the yield function and returns greater than zero if
      * the yield function has been violated
      */
-    double evaluate_yield_function(double const von_mises, Matrix3 const& back_stress) const;
+    [[nodiscard]] double evaluate_yield_function(double const von_mises,
+                                                 Matrix3 const& back_stress) const;
 
-    double evaluate_damage_yield_function(double const energy_var) const;
+    [[nodiscard]] double evaluate_damage_yield_function(double const energy_var) const;
 
-    Matrix3 compute_stress_like_matrix(Matrix6 const& tangent_operator,
-                                       Matrix3 const& strain_like) const;
-    Vector6 compute_stress_like_vector(Matrix6 const& tangent_operator,
-                                       Matrix3 const& strain_like) const;
+    [[nodiscard]] Matrix3 compute_stress_like_matrix(Matrix6 const& tangent_operator,
+                                                     Matrix3 const& strain_like) const;
+
+    [[nodiscard]] Vector6 compute_stress_like_vector(Matrix6 const& tangent_operator,
+                                                     Matrix3 const& strain_like) const;
 
 protected:
     IsotropicElasticPlasticDamage material;
