@@ -6,7 +6,7 @@
 namespace neon
 {
 void NodeOrderingAdapter::convert_from_gmsh(std::vector<List>& nodal_connectivity,
-                                            ElementTopology element_topology)
+                                            ElementTopology const element_topology) const
 {
     // Reorder based on the differences between the local node numbering
     // provided from Section 9.3 Node ordering

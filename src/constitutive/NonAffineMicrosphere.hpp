@@ -7,7 +7,7 @@ namespace neon::mech::solid
 {
 /**
  * NonAffineMicrosphere model computes the Kirchhoff stress and the material
- * tangent for the non-affine microsphere model by Miehe 2004.  This model includes
+ * tangent for the non-affine microsphere model \cite Miehe2004.  This model includes
  * the interaction of the polymer chain with the neighbouring (forest) chains
  * through the inclusion of the tube model.  This is effectively an extension
  * of the AffineMicrosphere constitutive model.

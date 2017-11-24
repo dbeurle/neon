@@ -34,10 +34,8 @@ protected:
     /**
      * Compute the extrapolation matrix to allow for quadrature valued variables
      * to be averaged to the nodal points without ill-effects when using a
-     * least squares (for example with quadratric tetrahedron elements).
-     *
-     * Algorithm is taken from 'A local extrapolation method for finite elements'
-     * by R. Durand and M.M. Farias, from Advances in Engineering Software, 2014
+     * least squares (for example with quadratric tetrahedron elements)
+     * developed in \cite Durand2014
      */
     void compute_extrapolation_matrix(Matrix const N,
                                       Matrix const local_nodal_coordinates,
