@@ -26,11 +26,21 @@ namespace neon
     return Matrix3::Identity() * a.trace() / 3.0;
 }
 
+namespace detail
+{
 /** @return the deviatoric part of the tensor */
 [[nodiscard]] inline Matrix2 deviatoric(Matrix2 const& a) { return a - volumetric(a); }
 
 /** @return the deviatoric part of the tensor */
 [[nodiscard]] inline Matrix3 deviatoric(Matrix3 const& a) { return a - volumetric(a); }
+}
+
+/** @return the deviatoric part of the tensor */
+template <typename MatrixExpression>
+[[nodiscard]] inline auto deviatoric(MatrixExpression const& a)
+{
+    return detail::deviatoric(a.eval());
+}
 
 /**
  * Evaluates the expression
