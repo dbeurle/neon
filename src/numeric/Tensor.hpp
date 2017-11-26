@@ -44,6 +44,8 @@ namespace neon
     return std::pow(a.determinant(), -1.0 / 3.0) * a;
 }
 
+namespace detail
+{
 /** Compute the von Mises stress based on the reduced stress tensor */
 [[nodiscard]] inline double von_mises_stress(Matrix2 const& a)
 {
@@ -54,6 +56,13 @@ namespace neon
 [[nodiscard]] inline double von_mises_stress(Matrix3 const& a)
 {
     return std::sqrt(3.0 / 2.0) * deviatoric(a).norm();
+}
+}
+
+template <typename MatrixExpression>
+[[nodiscard]] inline double von_mises_stress(MatrixExpression const& a)
+{
+    return detail::von_mises_stress(a.eval());
 }
 
 /** @return The symmetric part of the tensor */
