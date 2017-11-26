@@ -3,7 +3,7 @@
 
 #include "io/FileIO.hpp"
 #include "mesh/diffusion/femMesh.hpp"
-#include "numeric/SparseTypes.hpp"
+#include "numeric/SparseMatrix.hpp"
 
 #include <json/forwards.h>
 

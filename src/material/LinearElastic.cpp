@@ -25,6 +25,11 @@ LinearElastic::LinearElastic(Json::Value const& material_data) : Material(materi
         auto const E = material_data["ElasticModulus"].asDouble();
         auto const nu = material_data["PoissonsRatio"].asDouble();
 
+        if (nu > 0.5)
+        {
+            throw MaterialPropertyException("\"PoissonsRatio\" must be less than or equal to 0.5");
+        }
+
         K = E / (3.0 * (1.0 - 2.0 * nu));
         G = E / (2.0 * (1.0 + nu));
     }

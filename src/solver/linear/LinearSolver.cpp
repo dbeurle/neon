@@ -73,15 +73,23 @@ void BiCGStab::solve(SparseMatrix const& A, Vector& x, Vector const& b)
 
 void SparseLU::solve(SparseMatrix const& A, Vector& x, Vector const& b)
 {
-    Eigen::SparseLU<SparseMatrix, Eigen::AMDOrdering<int>> lu;
-    lu.compute(A);
+    if (build_sparsity_pattern)
+    {
+        lu.analyzePattern(A);
+        build_sparsity_pattern = false;
+    }
+    lu.factorize(A);
     x = lu.solve(b);
 }
 
 void SparseLLT::solve(SparseMatrix const& A, Vector& x, Vector const& b)
 {
-    Eigen::SimplicialLLT<Eigen::SparseMatrix<SparseMatrix::Scalar>> llt;
-    llt.compute(A);
+    if (build_sparsity_pattern)
+    {
+        llt.analyzePattern(A);
+        build_sparsity_pattern = false;
+    }
+    llt.factorize(A);
     x = llt.solve(b);
 }
 }

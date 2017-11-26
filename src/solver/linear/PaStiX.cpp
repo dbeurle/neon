@@ -40,27 +40,31 @@ void PaStiXLDLT::solve(SparseMatrix const& A, Vector& x, Vector const& b)
               << "s\n";
 }
 
+PaStiXLU::PaStiXLU()
+{
+    // Verbosity
+    lu.iparm(3) = 0;
+
+    // Number of threads
+    lu.iparm(34) = SimulationControl::threads;
+
+    // Number of Cuda devices
+    // ldlt.iparm(64) = 1;
+}
+
 void PaStiXLU::solve(SparseMatrix const& A, Vector& x, Vector const& b)
 {
     auto start = std::chrono::high_resolution_clock::now();
 
-    // BUG Likely not going to work with unsymmetric matrix because of row and
-    // column ordering change.  Should give the transpose of the matrix but
-    // unsure why Eigen can't handle this
-    Eigen::PastixLU<Eigen::SparseMatrix<double>> pastix;
+    if (build_sparsity_pattern)
+    {
+        lu.analyzePattern(A);
+        build_sparsity_pattern = false;
+    }
 
-    // Verbosity
-    pastix.iparm(3) = 0;
+    lu.factorize(A);
 
-    // Number of threads
-    pastix.iparm(34) = SimulationControl::threads;
-
-    // Number of Cuda devices
-    // pastix.iparm(64) = 1;
-
-    pastix.compute(A);
-
-    x = pastix.solve(b);
+    x = lu.solve(b);
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;

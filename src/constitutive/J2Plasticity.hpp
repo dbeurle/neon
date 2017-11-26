@@ -12,7 +12,8 @@ namespace neon::mech::solid
 /**
  * J2Plasticity is responsible for computing the small strain J2 plasticity
  * stress and tangent operator matrix for each internal variable at the quadrature
- * points.
+ * points.  The method can be found for small strain plasticity using a combination
+ * of \cite Neto2011 and \cite Belytschko2013nonlinear
  */
 class J2Plasticity : public IsotropicLinearElasticity
 {
@@ -28,8 +29,6 @@ public:
     virtual bool is_finite_deformation() const override { return false; }
 
 protected:
-    [[nodiscard]] Matrix6 deviatoric_projection() const;
-
     [[nodiscard]] Matrix6 algorithmic_tangent(double const plastic_increment,
                                               double const accumulated_plastic_strain,
                                               double const von_mises,

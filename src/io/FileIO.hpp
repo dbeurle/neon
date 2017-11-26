@@ -35,10 +35,10 @@ protected:
     void add_field(std::string const& name, Vector const& data, int const components);
 
 protected:
+    std::string const directory_name = "visualisation";
     std::string file_name;
 
     vtkSmartPointer<vtkUnstructuredGrid> unstructured_mesh;
-    // vtkSmartPointer<vtkXMLUnstructuredGridWriter> unstructured_mesh_writer;
 
     std::ofstream pvd_file; //!< Stream for writing time history
 
@@ -77,13 +77,17 @@ private:
 
     // clang-format off
     ScalarMap const scalar_map{{"AccumulatedPlasticStrain", InternalVariables::Scalar::EffectivePlasticStrain},
-                               {"VonMisesStress", InternalVariables::Scalar::VonMisesStress}};
+                               {"VonMisesStress", InternalVariables::Scalar::VonMisesStress},
+                               {"Damage", InternalVariables::Scalar::Damage},
+                               {"EnergyReleaseRate", InternalVariables::Scalar::EnergyReleaseRate}};
 
     TensorMap const tensor_map{{"CauchyStress", InternalVariables::Tensor::Cauchy},
                                {"LinearisedStrain", InternalVariables::Tensor::LinearisedStrain},
                                {"LinearisedPlasticStrain", InternalVariables::Tensor::LinearisedPlasticStrain},
                                {"DeformationGradient", InternalVariables::Tensor::DeformationGradient},
-                               {"DisplacementGradient", InternalVariables::Tensor::DisplacementGradient}};
+                               {"DisplacementGradient", InternalVariables::Tensor::DisplacementGradient},
+                               {"KinematicHardening", InternalVariables::Tensor::KinematicHardening},
+                               {"BackStress", InternalVariables::Tensor::BackStress}};
     // clang-format on
 };
 }

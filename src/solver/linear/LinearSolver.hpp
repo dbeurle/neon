@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include "numeric/DenseTypes.hpp"
-#include "numeric/SparseTypes.hpp"
+#include "numeric/DenseMatrix.hpp"
+#include "numeric/SparseMatrix.hpp"
 
 namespace neon
 {
@@ -82,6 +82,9 @@ class SparseLU : public DirectLinearSolver
 {
 public:
     void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
+
+private:
+    Eigen::SparseLU<SparseMatrix, Eigen::AMDOrdering<int>> lu;
 };
 
 /**
@@ -93,5 +96,8 @@ class SparseLLT : public DirectLinearSolver
 {
 public:
     void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
+
+private:
+    Eigen::SimplicialLLT<Eigen::SparseMatrix<SparseMatrix::Scalar>> llt;
 };
 }

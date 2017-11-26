@@ -23,6 +23,8 @@
 #include "vtkXMLUnstructuredGridReader.h"
 #include "vtkXMLUnstructuredGridWriter.h"
 
+#include <boost/filesystem.hpp>
+
 namespace neon
 {
 FileIO::FileIO(std::string file_name, Json::Value const& visualisation_data)
@@ -32,6 +34,9 @@ FileIO::FileIO(std::string file_name, Json::Value const& visualisation_data)
     {
         write_every = visualisation_data["WriteEvery"].asInt();
     }
+
+    boost::filesystem::path directory_path(directory_name);
+    boost::filesystem::create_directory(directory_path);
 
     pvd_file.open(file_name + ".pvd");
 
@@ -65,12 +70,13 @@ FileIO::~FileIO()
 
 void FileIO::write_to_file(int const time_step, double const total_time)
 {
-    auto const vtk_filename = file_name + "_" + std::to_string(time_step) + ".vtu";
+    auto unstructured_mesh_writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
+
+    auto const vtk_filename = directory_name + "/" + file_name + "_" + std::to_string(time_step)
+                              + "." + unstructured_mesh_writer->GetDefaultFileExtension();
 
     std::cout << "\n"
               << std::string(4, ' ') << "Writing solution to file for step " << time_step << "\n";
-
-    auto unstructured_mesh_writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
 
     unstructured_mesh_writer->SetFileName(vtk_filename.c_str());
     unstructured_mesh_writer->SetInputData(unstructured_mesh);
@@ -81,7 +87,9 @@ void FileIO::write_to_file(int const time_step, double const total_time)
 
     // Update the pvd file for timestep mapping
     pvd_file << std::string(4, ' ') << "<DataSet timestep = \"" << std::to_string(total_time)
-             << "\" file = \"" << file_name << "_" << std::to_string(time_step) << ".vtu\" />\n";
+             << "\" file = \"" << directory_name << "/" << file_name << "_"
+             << std::to_string(time_step) << "."
+             << unstructured_mesh_writer->GetDefaultFileExtension() << "\" />\n";
 }
 
 void FileIO::add_field(std::string const& name, Vector const& field, int const components)
@@ -141,7 +149,7 @@ void FileIO::write(int const time_step, double const total_time)
                 {
                     throw std::runtime_error("Internal variable " + name + " does not exist in mesh");
                 }
-                auto const[value, count] = submesh.nodal_averaged_variable(found->second);
+                auto const [value, count] = submesh.nodal_averaged_variable(found->second);
                 nodal_averaged_value += value;
                 running_count += count;
             }
@@ -159,7 +167,7 @@ void FileIO::write(int const time_step, double const total_time)
 
             for (auto const& submesh : fem_mesh.meshes())
             {
-                auto const[value, count] = submesh.nodal_averaged_variable(found->second);
+                auto const [value, count] = submesh.nodal_averaged_variable(found->second);
                 nodal_averaged_value += value;
                 running_count += count;
             }

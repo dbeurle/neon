@@ -13,8 +13,8 @@ namespace neon::mech::solid
 {
 /**
  * AffineMicrosphere is responsible for computing the Cauchy stress and the
- * material tangent in implicit methods.  The affine microsphere model is used
- * to model elastomer materials using micromechanical motivations and
+ * material tangent in implicit methods.  The affine microsphere model \cite Miehe2004
+ * is used to model elastomer materials using micromechanical motivations and
  * homogenises the force from a single chain over a unit sphere.
  *
  * This constitutive model requires the use of a quadrature scheme for the unit
@@ -210,7 +210,7 @@ inline MatrixTp AffineMicrosphereWithDegradation::weighting(std::vector<double> 
                                                             MatrixTp accumulator,
                                                             Functor&& f) const
 {
-    for (int i = 0; i < material.segment_groups().size(); i++)
+    for (auto i = 0; i < material.segment_groups().size(); i++)
     {
         accumulator.noalias() += f(material.segment_groups()[i]) * G[i];
     }

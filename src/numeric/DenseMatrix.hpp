@@ -22,7 +22,5 @@ using Matrix9 = Eigen::Matrix<double, 9, 9>;
 using Vector = Eigen::Matrix<double, Eigen::Dynamic, 1>;
 using Vector2 = Eigen::Vector2d;
 using Vector3 = Eigen::Vector3d;
-using Vector6 = Eigen::Matrix<double, 6, 1, Eigen::ColMajor, 6, 1>;
-
-using Array = Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic>;
+using Vector6 = Eigen::Matrix<double, 6, 1>;
 }

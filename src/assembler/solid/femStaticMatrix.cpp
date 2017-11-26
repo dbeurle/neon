@@ -84,7 +84,7 @@ void femStaticMatrix::compute_internal_force()
     {
         for (auto element = 0; element < submesh.elements(); ++element)
         {
-            auto const & [ dofs, fe_int ] = submesh.internal_force(element);
+            auto const& [dofs, fe_int] = submesh.internal_force(element);
 
             for (auto a = 0; a < fe_int.size(); ++a)
             {
@@ -100,9 +100,9 @@ void femStaticMatrix::compute_external_force(double const step_time)
 
     fext.setZero();
 
-    for (auto const & [ name, nf_loads ] : fem_mesh.nonfollower_load_boundaries())
+    for (auto const& [name, nf_loads] : fem_mesh.nonfollower_load_boundaries())
     {
-        for (auto const & [ is_dof_active, boundary_conditions ] : nf_loads.interface())
+        for (auto const& [is_dof_active, boundary_conditions] : nf_loads.interface())
         {
             if (!is_dof_active) continue;
 
@@ -133,6 +133,8 @@ void femStaticMatrix::compute_external_force(double const step_time)
 
 void femStaticMatrix::solve()
 {
+    fem_mesh.update_internal_variables(d);
+
     try
     {
         while (!adaptive_load.is_fully_applied())
@@ -145,8 +147,6 @@ void femStaticMatrix::solve()
             apply_displacement_boundaries();
 
             compute_external_force(adaptive_load.step_time());
-
-            fem_mesh.update_internal_variables(d, adaptive_load.increment());
 
             perform_equilibrium_iterations();
         }
@@ -206,7 +206,7 @@ void femStaticMatrix::assemble_stiffness()
 
 void femStaticMatrix::enforce_dirichlet_conditions(SparseMatrix& A, Vector& x, Vector& b)
 {
-    for (auto const & [ name, dirichlet_boundaries ] : fem_mesh.displacement_boundaries())
+    for (auto const& [name, dirichlet_boundaries] : fem_mesh.displacement_boundaries())
     {
         for (auto const& dirichlet_boundary : dirichlet_boundaries)
         {
@@ -243,7 +243,7 @@ void femStaticMatrix::enforce_dirichlet_conditions(SparseMatrix& A, Vector& x, V
 
 void femStaticMatrix::apply_displacement_boundaries()
 {
-    for (auto const & [ name, dirichlet_boundaries ] : fem_mesh.displacement_boundaries())
+    for (auto const& [name, dirichlet_boundaries] : fem_mesh.displacement_boundaries())
     {
         for (auto const& dirichlet_boundary : dirichlet_boundaries)
         {
@@ -274,9 +274,9 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
         compute_internal_force();
 
-        Vector residual = fint - fext;
-
         assemble_stiffness();
+
+        Vector residual = fint - fext;
 
         enforce_dirichlet_conditions(Kt, delta_d, residual);
 
@@ -284,7 +284,8 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
         d_new += delta_d;
 
-        fem_mesh.update_internal_variables(d_new);
+        fem_mesh.update_internal_variables(d_new,
+                                           current_iteration == 0 ? adaptive_load.increment() : 0.0);
 
         update_relative_norms(d_new, delta_d, residual);
 

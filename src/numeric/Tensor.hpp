@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "DenseTypes.hpp"
+#include "DenseMatrix.hpp"
 
 namespace neon
 {
@@ -274,7 +274,7 @@ namespace kinetic
 
 /**
  * Compute the fourth order symmetric identity tensor in Voigt notation according to
- * \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
+ * \f$ \mathbb{I} = \delta_{ijkl} \f$
  */
 [[nodiscard]] inline Matrix6 fourth_order_identity() { return Matrix6::Identity(); }
 }

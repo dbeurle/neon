@@ -17,11 +17,15 @@ namespace neon
 class NodeOrderingAdapter
 {
 public:
-    /** Mutate the nodalConnectivity */
-    void convert_from_gmsh(std::vector<List>& nodal_connectivity, ElementTopology topology);
+    /**
+     * Convert the nodal connectivities from the gmsh node ordering to the
+     * reference ordering in \cite Hughes2012
+     */
+    void convert_from_gmsh(std::vector<List>& nodal_connectivity,
+                           ElementTopology const topology) const;
 
     [[nodiscard]] std::vector<List> convert_to_vtk(std::vector<List> nodal_connectivity,
-                                                   ElementTopology element_topology) const;
+                                                   ElementTopology const element_topology) const;
 
     /** Add strong types to gmsh integer element codes */
     [[nodiscard]] ElementTopology gmsh_type_to_enum(int const element_code) const;

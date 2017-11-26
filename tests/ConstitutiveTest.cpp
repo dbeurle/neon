@@ -3,6 +3,8 @@
 
 #include "catch.hpp"
 
+#include <Eigen/Dense>
+#include <Eigen/Eigenvalues>
 #include <iostream>
 #include <json/json.h>
 
@@ -17,7 +19,7 @@
 
 std::string json_input_file()
 {
-    return "{\"Name\": \"rubber\", \"ElasticModulus\": 1.0, \"PoissonsRatio\": 2.0}";
+    return "{\"Name\": \"rubber\", \"ElasticModulus\": 2.0, \"PoissonsRatio\": 0.45}";
 }
 
 constexpr auto internal_variable_size = 2;
@@ -102,19 +104,11 @@ TEST_CASE("Neo-Hookean model")
 
     auto neo_hooke = make_constitutive_model(variables, material_data, simulation_data);
 
-    REQUIRE(neo_hooke->is_finite_deformation());
-    REQUIRE(neo_hooke->intrinsic_material().name() == "rubber");
-
     // Get the tensor variables
-    auto[F_list, cauchy_list] = variables(InternalVariables::Tensor::DeformationGradient,
-                                          InternalVariables::Tensor::Cauchy);
+    auto[F_list, cauchy_stresses] = variables(InternalVariables::Tensor::DeformationGradient,
+                                              InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables(InternalVariables::Scalar::DetF);
-
-    // Ensure the internal variables are allocated correctly
-    REQUIRE(F_list.size() == internal_variable_size);
-    REQUIRE(cauchy_list.size() == internal_variable_size);
-    REQUIRE(J_list.size() == internal_variable_size);
 
     // Fill with identity matrix
     for (auto& F : F_list) F = neon::Matrix3::Identity();
@@ -122,29 +116,46 @@ TEST_CASE("Neo-Hookean model")
 
     neo_hooke->update_internal_variables(1.0);
 
+    Eigen::EigenSolver<Eigen::MatrixXd> eigen_solver;
+
+    SECTION("Sanity check")
+    {
+        // Ensure the internal variables are allocated correctly
+        REQUIRE(F_list.size() == internal_variable_size);
+        REQUIRE(cauchy_stresses.size() == internal_variable_size);
+        REQUIRE(J_list.size() == internal_variable_size);
+
+        REQUIRE(neo_hooke->is_finite_deformation());
+        REQUIRE(neo_hooke->intrinsic_material().name() == "rubber");
+    }
     SECTION("Update of internal variables")
     {
-        for (auto& cauchy : cauchy_list) REQUIRE(cauchy.norm() == Approx(0.0).margin(ZERO_MARGIN));
+        for (auto& cauchy_stress : cauchy_stresses)
+        {
+            REQUIRE(cauchy_stress.norm() == Approx(0.0).margin(ZERO_MARGIN));
+        }
     }
-    SECTION("Check of continuum tangent")
+    SECTION("Check of material tangent")
     {
         // Get the matrix variable
         auto& material_tangents = variables(InternalVariables::Matrix::TangentOperator);
 
-        for (auto const& C : material_tangents)
+        for (auto const& material_tangent : material_tangents)
         {
             // Check a few of the numerical values
-            REQUIRE(C(0, 0) == Approx(0.111111));
-            REQUIRE(C(0, 1) == Approx(-0.222222));
-            REQUIRE(C(0, 2) == Approx(-0.222222));
-            REQUIRE(C(1, 1) == Approx(0.111111));
-            REQUIRE(C(2, 2) == Approx(0.111111));
-            REQUIRE(C(3, 3) == Approx(0.1666666667));
-            REQUIRE(C(4, 4) == Approx(0.1666666667));
-            REQUIRE(C(5, 5) == Approx(0.1666666667));
+            REQUIRE(material_tangent(0, 0) == Approx(material_tangent(1, 1)));
+            REQUIRE(material_tangent(0, 1) == Approx(material_tangent(0, 2)));
+            REQUIRE(material_tangent(1, 1) == Approx(material_tangent(2, 2)));
+            REQUIRE(material_tangent(3, 3) == Approx(material_tangent(4, 4)));
+            REQUIRE(material_tangent(5, 5) == Approx(material_tangent(4, 4)));
 
             // Ensure symmetry is correct
-            REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE((material_tangent - material_tangent.transpose()).norm()
+                    == Approx(0.0).margin(ZERO_MARGIN));
+
+            eigen_solver.compute(material_tangent);
+
+            REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
         }
     }
 }
@@ -197,12 +208,8 @@ TEST_CASE("Affine microsphere model", )
 
     auto affine = make_constitutive_model(variables, material_data, simulation_data);
 
-    REQUIRE(affine->is_finite_deformation());
-    REQUIRE(affine->intrinsic_material().name() == "rubber");
-
-    // Get the tensor variables
-    auto[F_list, cauchy_list] = variables(InternalVariables::Tensor::DeformationGradient,
-                                          InternalVariables::Tensor::Cauchy);
+    auto[F_list, cauchy_stresses] = variables(InternalVariables::Tensor::DeformationGradient,
+                                              InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables(InternalVariables::Scalar::DetF);
 
@@ -210,6 +217,14 @@ TEST_CASE("Affine microsphere model", )
 
     auto& material_tangents = variables(InternalVariables::Matrix::TangentOperator);
 
+    Eigen::EigenSolver<Eigen::MatrixXd> eigen_solver;
+
+    SECTION("Sanity checks")
+    {
+        REQUIRE(affine->is_symmetric());
+        REQUIRE(affine->is_finite_deformation());
+        REQUIRE(affine->intrinsic_material().name() == "rubber");
+    }
     SECTION("Affine model under no load")
     {
         // Fill with identity matrix
@@ -217,20 +232,18 @@ TEST_CASE("Affine microsphere model", )
 
         affine->update_internal_variables(1.0);
 
-        for (auto const& C : material_tangents)
+        for (auto const& material_tangent : material_tangents)
         {
-            REQUIRE(C.norm() != Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE((material_tangent - material_tangent.transpose()).norm()
+                    == Approx(0.0).margin(ZERO_MARGIN));
+
+            eigen_solver.compute(material_tangent);
+            REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
         }
 
-        // Ensure symmetry is correct
-        for (auto const& C : material_tangents)
+        for (auto& cauchy_stress : cauchy_stresses)
         {
-            REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
-        }
-
-        for (auto& cauchy : cauchy_list)
-        {
-            REQUIRE(cauchy.norm() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy_stress.norm() == Approx(0.0).margin(ZERO_MARGIN));
         }
     }
     SECTION("Affine model under uniaxial load")
@@ -244,20 +257,18 @@ TEST_CASE("Affine microsphere model", )
 
         affine->update_internal_variables(1.0);
 
-        // Ensure symmetry is correct
-        for (auto const& C : material_tangents)
+        for (auto const& material_tangent : material_tangents)
         {
-            REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE((material_tangent - material_tangent.transpose()).norm()
+                    == Approx(0.0).margin(ZERO_MARGIN));
+
+            eigen_solver.compute(material_tangent);
+            REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
         }
 
-        for (auto const& C : material_tangents)
+        for (auto& cauchy_stress : cauchy_stresses)
         {
-            REQUIRE(C.norm() != Approx(0.0).margin(ZERO_MARGIN));
-        }
-
-        for (auto& cauchy : cauchy_list)
-        {
-            REQUIRE(cauchy.norm() != Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy_stress.norm() > 0.0);
         }
     }
 }
@@ -290,12 +301,9 @@ TEST_CASE("NonAffine microsphere model")
 
     auto affine = make_constitutive_model(variables, material_data, simulation_data);
 
-    REQUIRE(affine->is_finite_deformation());
-    REQUIRE(affine->intrinsic_material().name() == "rubber");
-
     // Get the tensor variables
-    auto[F_list, cauchy_list] = variables(InternalVariables::Tensor::DeformationGradient,
-                                          InternalVariables::Tensor::Cauchy);
+    auto[F_list, cauchy_stresses] = variables(InternalVariables::Tensor::DeformationGradient,
+                                              InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables(InternalVariables::Scalar::DetF);
 
@@ -303,6 +311,14 @@ TEST_CASE("NonAffine microsphere model")
 
     auto& material_tangents = variables(InternalVariables::Matrix::TangentOperator);
 
+    Eigen::EigenSolver<Eigen::MatrixXd> eigen_solver;
+
+    SECTION("Sanity test")
+    {
+        REQUIRE(affine->is_symmetric());
+        REQUIRE(affine->is_finite_deformation());
+        REQUIRE(affine->intrinsic_material().name() == "rubber");
+    }
     SECTION("NonAffine model under no load")
     {
         // Fill with identity matrix
@@ -310,20 +326,19 @@ TEST_CASE("NonAffine microsphere model")
 
         affine->update_internal_variables(1.0);
 
-        for (auto const& C : material_tangents)
+        for (auto const& material_tangent : material_tangents)
         {
-            REQUIRE(C.norm() != Approx(0.0).margin(ZERO_MARGIN));
+            // Ensure symmetry is correct
+            REQUIRE((material_tangent - material_tangent.transpose()).norm()
+                    == Approx(0.0).margin(ZERO_MARGIN));
+
+            eigen_solver.compute(material_tangent);
+            REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
         }
 
-        // Ensure symmetry is correct
-        for (auto const& C : material_tangents)
+        for (auto& cauchy_stress : cauchy_stresses)
         {
-            REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
-        }
-
-        for (auto& cauchy : cauchy_list)
-        {
-            REQUIRE(cauchy.norm() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy_stress.norm() == Approx(0.0).margin(ZERO_MARGIN));
         }
     }
     SECTION("NonAffine model under uniaxial load")
@@ -337,20 +352,19 @@ TEST_CASE("NonAffine microsphere model")
 
         affine->update_internal_variables(1.0);
 
-        // Ensure symmetry is correct
-        for (auto const& C : material_tangents)
+        for (auto const& material_tangent : material_tangents)
         {
-            REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+            // Ensure symmetry is correct
+            REQUIRE((material_tangent - material_tangent.transpose()).norm()
+                    == Approx(0.0).margin(ZERO_MARGIN));
+
+            eigen_solver.compute(material_tangent);
+            REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
         }
 
-        for (auto const& C : material_tangents)
+        for (auto& cauchy_stress : cauchy_stresses)
         {
-            REQUIRE(C.norm() != Approx(0.0).margin(ZERO_MARGIN));
-        }
-
-        for (auto& cauchy : cauchy_list)
-        {
-            REQUIRE(cauchy.norm() != Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy_stress.norm() > 0.0);
         }
     }
 }
@@ -402,18 +416,21 @@ TEST_CASE("J2 plasticity model")
     auto j2plasticity = make_constitutive_model(variables, material_data, simulation_data);
 
     // Get the tensor variables
-    auto[H_list, cauchy_list] = variables(InternalVariables::Tensor::DisplacementGradient,
-                                          InternalVariables::Tensor::Cauchy);
+    auto[displacement_gradients, cauchy_stresses] = variables(InternalVariables::Tensor::DisplacementGradient,
+                                                              InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables(InternalVariables::Scalar::DetF);
 
     auto& material_tangents = variables(InternalVariables::Matrix::TangentOperator);
 
-    for (auto& H : H_list) H = neon::Matrix3::Zero();
+    for (auto& H : displacement_gradients) H = neon::Matrix3::Zero();
     for (auto& J : J_list) J = 1.0;
+
+    Eigen::EigenSolver<Eigen::MatrixXd> eigen_solver;
 
     SECTION("Sanity checks")
     {
+        REQUIRE(j2plasticity->is_symmetric());
         REQUIRE(j2plasticity->is_finite_deformation() == false);
         REQUIRE(j2plasticity->intrinsic_material().name() == "steel");
 
@@ -428,91 +445,124 @@ TEST_CASE("J2 plasticity model")
         j2plasticity->update_internal_variables(1.0);
 
         // Ensure symmetry is correct
-        for (auto const& C : material_tangents)
+        for (auto const& material_tangent : material_tangents)
         {
-            REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE((material_tangent - material_tangent.transpose()).norm()
+                    == Approx(0.0).margin(ZERO_MARGIN));
+
+            eigen_solver.compute(material_tangent);
+            REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
         }
-        for (auto& cauchy : cauchy_list) REQUIRE(cauchy.norm() == Approx(0.0).margin(ZERO_MARGIN));
+
+        for (auto& cauchy_stress : cauchy_stresses)
+        {
+            REQUIRE(cauchy_stress.norm() == Approx(0.0).margin(ZERO_MARGIN));
+        }
     }
     SECTION("Uniaxial elastic load")
     {
-        for (auto& H : H_list) H(2, 2) = 0.001;
+        for (auto& H : displacement_gradients) H(2, 2) = 0.001;
 
         j2plasticity->update_internal_variables(1.0);
 
-        auto[vm_list, eff_plastic_list] = variables(InternalVariables::Scalar::VonMisesStress,
-                                                    InternalVariables::Scalar::EffectivePlasticStrain);
+        auto[von_mises_stresses,
+             accumulated_plastic_strains] = variables(InternalVariables::Scalar::VonMisesStress,
+                                                      InternalVariables::Scalar::EffectivePlasticStrain);
 
-        // Ensure symmetry is correct
-        for (auto const& C : material_tangents)
+        for (auto const& material_tangent : material_tangents)
         {
-            REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+            // Ensure symmetry is correct
+            REQUIRE((material_tangent - material_tangent.transpose()).norm()
+                    == Approx(0.0).margin(ZERO_MARGIN));
+
+            eigen_solver.compute(material_tangent);
+            REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
         }
-        for (auto& cauchy : cauchy_list)
+
+        for (auto const& cauchy_stress : cauchy_stresses)
         {
-            REQUIRE(cauchy.norm() != Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy_stress.norm() != Approx(0.0).margin(ZERO_MARGIN));
 
             // Shear components should be close to zero
-            REQUIRE(cauchy(0, 1) == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(cauchy(0, 2) == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(cauchy(1, 2) == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(cauchy(0, 0) > 0.0);
-            REQUIRE(cauchy(1, 1) > 0.0);
-            REQUIRE(cauchy(2, 2) > 0.0);
+            REQUIRE(cauchy_stress(0, 1) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy_stress(0, 2) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy_stress(1, 2) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy_stress(0, 0) > 0.0);
+            REQUIRE(cauchy_stress(1, 1) > 0.0);
+            REQUIRE(cauchy_stress(2, 2) > 0.0);
         }
-        for (auto& strain_p_eff : eff_plastic_list)
-            REQUIRE(strain_p_eff == Approx(0.0).margin(ZERO_MARGIN));
-        for (auto& vm : vm_list) REQUIRE(vm < 200.0e6);
+
+        for (auto& accumulated_plastic_strain : accumulated_plastic_strains)
+        {
+            REQUIRE(accumulated_plastic_strain == Approx(0.0).margin(ZERO_MARGIN));
+        }
+
+        for (auto& von_mises_stress : von_mises_stresses)
+        {
+            REQUIRE(von_mises_stress < 200.0e6);
+        }
     }
     SECTION("Plastic uniaxial elastic load")
     {
-        for (auto& H : H_list) H(2, 2) = 0.003;
+        for (auto& H : displacement_gradients) H(2, 2) = 0.003;
 
         j2plasticity->update_internal_variables(1.0);
 
-        auto[vm_list, eff_plastic_list] = variables(InternalVariables::Scalar::VonMisesStress,
-                                                    InternalVariables::Scalar::EffectivePlasticStrain);
+        auto[von_mises_stresses,
+             accumulated_plastic_strains] = variables(InternalVariables::Scalar::VonMisesStress,
+                                                      InternalVariables::Scalar::EffectivePlasticStrain);
 
-        // Ensure symmetry is correct
-        for (auto const& C : material_tangents)
+        for (auto const& material_tangent : material_tangents)
         {
-            REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+            // Ensure symmetry is correct
+            REQUIRE((material_tangent - material_tangent.transpose()).norm()
+                    == Approx(0.0).margin(ZERO_MARGIN));
+
+            eigen_solver.compute(material_tangent);
+            REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
         }
-        for (auto& cauchy : cauchy_list)
+
+        for (auto& cauchy_stress : cauchy_stresses)
         {
-            REQUIRE(cauchy.norm() != Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy_stress.norm() != Approx(0.0).margin(ZERO_MARGIN));
 
             // Shear components should be close to zero
-            REQUIRE(cauchy(0, 1) == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(cauchy(0, 2) == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(cauchy(1, 2) == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(cauchy(0, 0) > 0.0);
-            REQUIRE(cauchy(1, 1) > 0.0);
-            REQUIRE(cauchy(2, 2) > 0.0);
+            REQUIRE(cauchy_stress(0, 1) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy_stress(0, 2) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy_stress(1, 2) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy_stress(0, 0) > 0.0);
+            REQUIRE(cauchy_stress(1, 1) > 0.0);
+            REQUIRE(cauchy_stress(2, 2) > 0.0);
         }
-        for (auto& strain_p_eff : eff_plastic_list)
+
+        for (auto& accumulated_plastic_strain : accumulated_plastic_strains)
         {
-            REQUIRE(strain_p_eff > 0.0);
+            REQUIRE(accumulated_plastic_strain > 0.0);
         }
-        for (auto& vm : vm_list)
+
+        for (auto& von_mises_stress : von_mises_stresses)
         {
             // Should experience hardening
-            REQUIRE(vm <= 201.0e6);
-            REQUIRE(vm > 200.0e6);
+            REQUIRE(von_mises_stress <= 201.0e6);
+            REQUIRE(von_mises_stress > 200.0e6);
         }
     }
 }
-TEST_CASE("Finite J2 plasticity model")
+TEST_CASE("J2 plasticity damage model", "[J2PlasticityDamage]")
 {
     using namespace neon::mech::solid;
 
     // Create a json reader object from a string
     std::string
-        input_data = "{\"Name\": \"steel\", \"ElasticModulus\": 200.0e9, \"PoissonsRatio\": 0.3, "
-                     "\"YieldStress\": 200.0e6, \"IsotropicHardeningModulus\": 400.0e6}";
+        input_data = "{\"Name\": \"steel\", \"ElasticModulus\": 134.0e3, \"PoissonsRatio\": 0.3, "
+                     "\"YieldStress\": 85, \"KinematicHardeningModulus\": "
+                     "5500,\"SofteningMultiplier\" : 250,\"PlasticityViscousExponent\" : "
+                     "2.5,\"PlasticityViscousMultiplier\" : "
+                     "1.923536463026969e-08,\"DamageViscousExponent\" : "
+                     "2,\"DamageViscousMultiplier\" : 2.777777777777778}";
 
-    std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\" : \"J2Plasticity\", "
-                                   "\"FiniteStrain\":true}}";
+    std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\" : \"ChabocheDamage\", "
+                                   "\"FiniteStrain\" : false}}";
 
     Json::Value material_data, simulation_data;
 
@@ -521,119 +571,273 @@ TEST_CASE("Finite J2 plasticity model")
     REQUIRE(reader.parse(input_data.c_str(), material_data));
     REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
 
-    InternalVariables variables(1);
+    InternalVariables variables(internal_variable_size);
 
-    // Add the required variables for an updated Lagrangian formulation
-    variables.add(InternalVariables::Tensor::DeformationGradient, InternalVariables::Tensor::Cauchy);
+    variables.add(InternalVariables::Tensor::DisplacementGradient, InternalVariables::Tensor::Cauchy);
     variables.add(InternalVariables::Scalar::DetF);
 
-    auto j2plasticity = make_constitutive_model(variables, material_data, simulation_data);
+    auto J2PlasticityDamage = make_constitutive_model(variables, material_data, simulation_data);
 
     // Get the tensor variables
-    auto[F_list, cauchy_list] = variables(InternalVariables::Tensor::DeformationGradient,
-                                          InternalVariables::Tensor::Cauchy);
+    auto[displacement_gradients, cauchy_stresses] = variables(InternalVariables::Tensor::DisplacementGradient,
+                                                              InternalVariables::Tensor::Cauchy);
 
-    auto& J_list = variables(InternalVariables::Scalar::DetF);
+    auto[J_list, damage_list] = variables(InternalVariables::Scalar::DetF,
+                                          InternalVariables::Scalar::Damage);
 
     auto& material_tangents = variables(InternalVariables::Matrix::TangentOperator);
 
-    for (auto& F : F_list) F = neon::Matrix3::Identity();
+    for (auto& H : displacement_gradients) H = neon::Matrix3::Zero();
     for (auto& J : J_list) J = 1.0;
 
-    variables.commit();
+    Eigen::EigenSolver<Eigen::MatrixXd> eigen_solver;
 
     SECTION("Sanity checks")
     {
-        REQUIRE(j2plasticity->is_finite_deformation() == true);
-        REQUIRE(j2plasticity->intrinsic_material().name() == "steel");
+        REQUIRE(J2PlasticityDamage->is_finite_deformation() == false);
+        REQUIRE(J2PlasticityDamage->is_symmetric() == false);
+
+        REQUIRE(J2PlasticityDamage->intrinsic_material().name() == "steel");
 
         REQUIRE(variables.has(InternalVariables::Scalar::VonMisesStress));
         REQUIRE(variables.has(InternalVariables::Scalar::EffectivePlasticStrain));
-        REQUIRE(variables.has(InternalVariables::Tensor::HenckyStrainElastic));
+        REQUIRE(variables.has(InternalVariables::Tensor::LinearisedStrain));
+        REQUIRE(variables.has(InternalVariables::Tensor::LinearisedPlasticStrain));
         REQUIRE(variables.has(InternalVariables::Matrix::TangentOperator));
+        REQUIRE(variables.has(InternalVariables::Scalar::Damage));
+        REQUIRE(variables.has(InternalVariables::Scalar::EnergyReleaseRate));
+        REQUIRE(variables.has(InternalVariables::Tensor::KinematicHardening));
+        REQUIRE(variables.has(InternalVariables::Tensor::BackStress));
     }
-    SECTION("Initial material tangent symmetry")
+    SECTION("Uniaxial elastic load")
     {
-        for (auto const& C : material_tangents)
-        {
-            REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
-        }
-    }
-    SECTION("No load")
-    {
-        j2plasticity->update_internal_variables(1.0);
+        for (auto& H : displacement_gradients) H(2, 2) = 0.0008;
 
-        for (auto const& C : material_tangents)
+        J2PlasticityDamage->update_internal_variables(1.0);
+
+        auto[von_mises_stresses,
+             accumulated_plastic_strains] = variables(InternalVariables::Scalar::VonMisesStress,
+                                                      InternalVariables::Scalar::EffectivePlasticStrain);
+
+        for (auto const& material_tangent : material_tangents)
         {
-            REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+            // std::cout << C << "\n";
+
+            // Ensure symmetry is correct when the loading is elastic
+            REQUIRE((material_tangent - material_tangent.transpose()).norm()
+                    == Approx(0.0).margin(ZERO_MARGIN));
+
+            eigen_solver.compute(material_tangent);
+            REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
         }
-        for (auto& cauchy : cauchy_list)
+
+        for (auto& cauchy_stress : cauchy_stresses)
         {
-            REQUIRE(cauchy.norm() == Approx(0.0).margin(ZERO_MARGIN));
+            // std::cout << cauchy_stress << std::endl;
+            REQUIRE(cauchy_stress.norm() != Approx(0.0).margin(ZERO_MARGIN));
+
+            // Shear components should be close to zero
+            REQUIRE(cauchy_stress(0, 1) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy_stress(0, 2) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy_stress(1, 2) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy_stress(0, 0) == Approx(cauchy_stress(1, 1)));
+            REQUIRE(cauchy_stress(1, 1) > 0.0);
+            REQUIRE(cauchy_stress(2, 2) > 0.0);
+        }
+        for (auto& accumulated_plastic_strain : accumulated_plastic_strains)
+        {
+            REQUIRE(accumulated_plastic_strain == Approx(0.0).margin(ZERO_MARGIN));
+        }
+        for (auto& von_mises_stress : von_mises_stresses)
+        {
+            REQUIRE(von_mises_stress > 80);
+            REQUIRE(von_mises_stress < 85);
         }
     }
-    // SECTION("Uniaxial elastic load")
-    // {
-    //     for (auto& F : F_list) F(2, 2) = 1.001;
-    //
-    //     j2plasticity->update_internal_variables(1.0);
-    //
-    //     for (auto const& C : material_tangents)
-    //     {
-    //         REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
-    //     }
-    //     for (auto& cauchy : cauchy_list)
-    //     {
-    //         REQUIRE((cauchy - cauchy.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
-    //
-    //         // Shear components should be close to zero
-    //         REQUIRE(cauchy(0, 1) == Approx(0.0).margin(ZERO_MARGIN));
-    //         REQUIRE(cauchy(0, 2) == Approx(0.0).margin(ZERO_MARGIN));
-    //         REQUIRE(cauchy(1, 2) == Approx(0.0).margin(ZERO_MARGIN));
-    //         REQUIRE(cauchy(0, 0) > 0.0);
-    //         REQUIRE(cauchy(1, 1) > 0.0);
-    //         REQUIRE(cauchy(2, 2) > 0.0);
-    //     }
-    //     for (auto& vm : variables(InternalVariables::Scalar::VonMisesStress))
-    //     {
-    //         REQUIRE(vm < 200.0e6);
-    //     }
-    // }
-    // SECTION("Plastic uniaxial elastic load")
-    // {
-    //     for (auto& F : F_list) F(2, 2) = 0.003;
-    //
-    //     j2plasticity->update_internal_variables(1.0);
-    //
-    //     auto[vm_list, eff_plastic_list] = variables(InternalVariables::Scalar::VonMisesStress,
-    //                                                 InternalVariables::Scalar::EffectivePlasticStrain);
-    //
-    //     // Ensure symmetry is correct
-    //     for (auto const& C : material_tangents)
-    //     {
-    //         REQUIRE((C - C.transpose()).norm() == Approx(0.0).margin(ZERO_MARGIN));
-    //     }
-    //     for (auto& cauchy : cauchy_list)
-    //     {
-    //         REQUIRE(cauchy.norm() != Approx(0.0).margin(ZERO_MARGIN));
-    //
-    //         // Shear components should be close to zero
-    //         REQUIRE(cauchy(0, 1) == Approx(0.0).margin(ZERO_MARGIN));
-    //         REQUIRE(cauchy(0, 2) == Approx(0.0).margin(ZERO_MARGIN));
-    //         REQUIRE(cauchy(1, 2) == Approx(0.0).margin(ZERO_MARGIN));
-    //         REQUIRE(cauchy(0, 0) > 0.0);
-    //         REQUIRE(cauchy(1, 1) > 0.0);
-    //         REQUIRE(cauchy(2, 2) > 0.0);
-    //     }
-    //     for (auto& strain_p_eff : eff_plastic_list)
-    //     {
-    //         REQUIRE(strain_p_eff > 0.0);
-    //     }
-    //     for (auto& vm : vm_list)
-    //     {
-    //         // Should experience hardening
-    //         REQUIRE(vm <= 201.0e6);
-    //         REQUIRE(vm > 200.0e6);
-    //     }
-    // }
+    SECTION("Plastic uniaxial load")
+    {
+        for (auto& H : displacement_gradients) H(2, 2) = 0.0009; // 0.000825 for comparison with 1D
+
+        J2PlasticityDamage->update_internal_variables(0.01); // time here is real (not pseudo time)
+
+        auto[von_mises_stresses,
+             accumulated_plastic_strains] = variables(InternalVariables::Scalar::VonMisesStress,
+                                                      InternalVariables::Scalar::EffectivePlasticStrain);
+
+        for (auto const& cauchy_stress : cauchy_stresses)
+        {
+            REQUIRE(cauchy_stress.norm() != Approx(0.0).margin(ZERO_MARGIN));
+
+            // Shear components should be close to zero
+            REQUIRE(cauchy_stress(0, 1) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy_stress(0, 2) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy_stress(1, 2) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy_stress(0, 0) > 0.0);
+            REQUIRE(cauchy_stress(1, 1) > 0.0);
+            REQUIRE(cauchy_stress(2, 2) > 0.0);
+        }
+        for (auto& accumulated_plastic_strain : accumulated_plastic_strains)
+        {
+            REQUIRE(accumulated_plastic_strain > 0.0);
+        }
+        for (auto& damage_var : damage_list)
+        {
+            REQUIRE(damage_var > 0.0);
+        }
+        for (auto& von_mises_stress : von_mises_stresses)
+        {
+            // Should experience hardening
+            REQUIRE(von_mises_stress <= 100);
+            REQUIRE(von_mises_stress > 85);
+        }
+
+        for (auto const& material_tangent : material_tangents)
+        {
+            eigen_solver.compute(material_tangent);
+            REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
+        }
+    }
 }
+
+// TEST_CASE("Finite J2 plasticity model", "[FiniteJ2Plasticity]")
+// {
+//     using namespace neon::mech::solid;
+//
+//     // Create a json reader object from a string
+//     std::string
+//         input_data = "{\"Name\": \"steel\", \"ElasticModulus\": 200.0e9, \"PoissonsRatio\": 0.3,
+//         "
+//                      "\"YieldStress\": 200.0e6, \"IsotropicHardeningModulus\": 400.0e6}";
+//
+//     std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\" : \"J2Plasticity\", "
+//                                    "\"FiniteStrain\":true}}";
+//
+//     Json::Value material_data, simulation_data;
+//
+//     Json::Reader reader;
+//
+//     REQUIRE(reader.parse(input_data.c_str(), material_data));
+//     REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
+//
+//     InternalVariables variables(1);
+//
+//     // Add the required variables for an updated Lagrangian formulation
+//     variables.add(InternalVariables::Tensor::DeformationGradient,
+//     InternalVariables::Tensor::Cauchy); variables.add(InternalVariables::Scalar::DetF);
+//
+//     auto j2plasticity = make_constitutive_model(variables, material_data, simulation_data);
+//
+//     // Get the tensor variables
+//     auto[F_list, cauchy_stresses] = variables(InternalVariables::Tensor::DeformationGradient,
+//                                               InternalVariables::Tensor::Cauchy);
+//
+//     auto& J_list = variables(InternalVariables::Scalar::DetF);
+//
+//     auto& material_tangents = variables(InternalVariables::Matrix::TangentOperator);
+//
+//     for (auto& F : F_list) F = neon::Matrix3::Identity();
+//     for (auto& J : J_list) J = 1.0;
+//
+//     variables.commit();
+//
+//     SECTION("Sanity checks")
+//     {
+//         REQUIRE(j2plasticity->is_finite_deformation() == true);
+//         REQUIRE(j2plasticity->intrinsic_material().name() == "steel");
+//
+//         REQUIRE(variables.has(InternalVariables::Scalar::VonMisesStress));
+//         REQUIRE(variables.has(InternalVariables::Scalar::EffectivePlasticStrain));
+//         REQUIRE(variables.has(InternalVariables::Tensor::HenckyStrainElastic));
+//         REQUIRE(variables.has(InternalVariables::Matrix::TangentOperator));
+//     }
+//     SECTION("Initial material tangent symmetry")
+//     {
+//         for (auto const& material_tangent : material_tangents)
+//         {
+//             REQUIRE((material_tangent - material_tangent.transpose()).norm()
+//                     == Approx(0.0).margin(ZERO_MARGIN));
+//         }
+//     }
+//     SECTION("No load")
+//     {
+//         j2plasticity->update_internal_variables(1.0);
+//
+//         for (auto const& material_tangent : material_tangents)
+//         {
+//             REQUIRE((material_tangent - material_tangent.transpose()).norm()
+//                     == Approx(0.0).margin(ZERO_MARGIN));
+//         }
+//         for (auto& cauchy_stress : cauchy_stresses)
+//         {
+//             REQUIRE(cauchy_stress.norm() == Approx(0.0).margin(ZERO_MARGIN));
+//         }
+//     }
+//     // SECTION("Uniaxial elastic load")
+//     // {
+//     //     for (auto& F : F_list) F(2, 2) = 1.001;
+//     //
+//     //     j2plasticity->update_internal_variables(1.0);
+//     //
+//     //     for (auto const& material_tangent : material_tangents)
+//     //     {
+//     //         REQUIRE((material_tangent - material_tangent.transpose()).norm() ==
+//     //         Approx(0.0).margin(ZERO_MARGIN));
+//     //     }
+//     //     for (auto& cauchy_stress : cauchy_stresses)
+//     //     {
+//     //         REQUIRE((cauchy_stress - cauchy_stress.transpose()).norm() ==
+//     Approx(0.0).margin(ZERO_MARGIN));
+//     //
+//     //         // Shear components should be close to zero
+//     //         REQUIRE(cauchy_stress(0, 1) == Approx(0.0).margin(ZERO_MARGIN));
+//     //         REQUIRE(cauchy_stress(0, 2) == Approx(0.0).margin(ZERO_MARGIN));
+//     //         REQUIRE(cauchy_stress(1, 2) == Approx(0.0).margin(ZERO_MARGIN));
+//     //         REQUIRE(cauchy_stress(0, 0) > 0.0);
+//     //         REQUIRE(cauchy_stress(1, 1) > 0.0);
+//     //         REQUIRE(cauchy_stress(2, 2) > 0.0);
+//     //     }
+//     //     for (auto& von_mises_stress : variables(InternalVariables::Scalar::VonMisesStress))
+//     //     {
+//     //         REQUIRE(von_mises_stress < 200.0e6);
+//     //     }
+//     // }
+//     // SECTION("Plastic uniaxial elastic load")
+//     // {
+//     //     for (auto& F : F_list) F(2, 2) = 0.003;
+//     //
+//     //     j2plasticity->update_internal_variables(1.0);
+//     //
+//     //     auto[von_mises_stresses, accumulated_plastic_strains] =
+//     //     variables(InternalVariables::Scalar::VonMisesStress,
+//     // InternalVariables::Scalar::EffectivePlasticStrain);
+//     //
+//     //     // Ensure symmetry is correct
+//     //     for (auto const& material_tangent : material_tangents)
+//     //     {
+//     //         REQUIRE((material_tangent - material_tangent.transpose()).norm() ==
+//     //         Approx(0.0).margin(ZERO_MARGIN));
+//     //     }
+//     //     for (auto& cauchy_stress : cauchy_stresses)
+//     //     {
+//     //         REQUIRE(cauchy_stress.norm() != Approx(0.0).margin(ZERO_MARGIN));
+//     //
+//     //         // Shear components should be close to zero
+//     //         REQUIRE(cauchy_stress(0, 1) == Approx(0.0).margin(ZERO_MARGIN));
+//     //         REQUIRE(cauchy_stress(0, 2) == Approx(0.0).margin(ZERO_MARGIN));
+//     //         REQUIRE(cauchy_stress(1, 2) == Approx(0.0).margin(ZERO_MARGIN));
+//     //         REQUIRE(cauchy_stress(0, 0) > 0.0);
+//     //         REQUIRE(cauchy_stress(1, 1) > 0.0);
+//     //         REQUIRE(cauchy_stress(2, 2) > 0.0);
+//     //     }
+//     //     for (auto& accumulated_plastic_strain : accumulated_plastic_strains)
+//     //     {
+//     //         REQUIRE(accumulated_plastic_strain > 0.0);
+//     //     }
+//     //     for (auto& von_mises_stress : von_mises_stresses)
+//     //     {
+//     //         // Should experience hardening
+//     //         REQUIRE(von_mises_stress <= 201.0e6);
+//     //         REQUIRE(von_mises_stress > 200.0e6);
+//     //     }
+//     // }
+// }

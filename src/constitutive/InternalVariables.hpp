@@ -47,6 +47,9 @@ public:
         DeformationGradientPlastic,
         DisplacementGradient,
         GreenLagrange,
+        //  J2Plasticity internal variables
+        BackStress,
+        KinematicHardening,
         /* Tensors for diffusion applications */
         Conductivity
     };
@@ -59,8 +62,10 @@ public:
         ShearModuli, // Shear moduli
         VonMisesStress,
         EffectivePlasticStrain,
-        DetF0, //! Reference Jacobian determinant
-        DetF   //! Updated Jacobian determinant
+        DetF0, // Reference Jacobian determinant
+        DetF,   // Updated Jacobian determinant
+        Damage,
+        EnergyReleaseRate
     };
 
 public:
