@@ -34,7 +34,7 @@ public:
 
     virtual bool is_finite_deformation() const override { return false; }
 
-    virtual bool is_symmetric() const { return false; };
+    virtual bool is_symmetric() const override { return false; };
 
 protected:
     Matrix3 compute_cauchy_stress(Matrix3 const& elastic_strain) const;
@@ -65,6 +65,7 @@ protected:
                                  Matrix6& C_list,
                                  double const& delta_t,
                                  Matrix3 const& eps_e_t);
+
     /**
      * Evaluates the yield function and returns greater than zero if
      * the yield function has been violated
@@ -75,6 +76,7 @@ protected:
 
     Matrix3 compute_stress_like_matrix(Matrix6 const& tangent_operator,
                                        Matrix3 const& strain_like) const;
+
     Vector6 compute_stress_like_vector(Matrix6 const& tangent_operator,
                                        Matrix3 const& strain_like) const;
 
