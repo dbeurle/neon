@@ -225,6 +225,7 @@ double J2PlasticityDamage::evaluate_yield_function(double const von_mises,
                  * double_dot(back_stress, back_stress)
            - material.yield_stress(0.0);
 }
+
 double J2PlasticityDamage::evaluate_damage_yield_function(double const energy_var) const
 {
     return energy_var - std::pow(material.yield_stress(0.0), 2) / (2 * material.elastic_modulus());
@@ -236,12 +237,14 @@ Matrix3 J2PlasticityDamage::compute_cauchy_stress(Matrix3 const& elastic_strain)
     auto const lambda_e = material.lambda();
     return lambda_e * elastic_strain.trace() * Matrix3::Identity() + 2.0 * G * elastic_strain;
 }
+
 Matrix3 J2PlasticityDamage::compute_stress_like_matrix(Matrix6 const& tangent_operator,
                                                        Matrix3 const& strain_like) const
 {
     // could get the tangent_operator directly without passing it to this function
     return voigt::kinetic::from(tangent_operator * voigt::kinematic::to(strain_like));
 }
+
 Vector6 J2PlasticityDamage::compute_stress_like_vector(Matrix6 const& tangent_operator,
                                                        Matrix3 const& strain_like) const
 {
