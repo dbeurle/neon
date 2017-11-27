@@ -9,6 +9,7 @@
 
 #include <omp.h>
 
+#include <cfenv>
 #include <chrono>
 #include <thread>
 
@@ -35,6 +36,8 @@ void ConjugateGradient::solve(SparseMatrix const& A, Vector& x, Vector const& b)
     omp_set_num_threads(SimulationControl::threads);
 #endif
 
+    std::feclearexcept(FE_ALL_EXCEPT);
+
     Eigen::ConjugateGradient<SparseMatrix, Eigen::Lower | Eigen::Upper> pcg;
 
     pcg.setTolerance(residual_tolerance);
@@ -44,19 +47,26 @@ void ConjugateGradient::solve(SparseMatrix const& A, Vector& x, Vector const& b)
 
     x = pcg.solveWithGuess(b, x);
 
-    std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << pcg.iterations()
-              << " (max. " << max_iterations << "), estimated error: " << pcg.error() << " (min. "
-              << residual_tolerance << ")\n";
+    if (std::fetestexcept(FE_INVALID))
+    {
+        throw computational_error("Floating point error reported\n");
+    }
 
     if (pcg.iterations() >= max_iterations)
     {
         throw computational_error("Conjugate gradient solver maximum iterations "
                                   "reached\n");
     }
+
+    std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << pcg.iterations()
+              << " (max. " << max_iterations << "), estimated error: " << pcg.error() << " (min. "
+              << residual_tolerance << ")\n";
 }
 
 void BiCGStab::solve(SparseMatrix const& A, Vector& x, Vector const& b)
 {
+    std::feclearexcept(FE_ALL_EXCEPT);
+
     Eigen::BiCGSTAB<SparseMatrix> bicgstab; //, Eigen::IncompleteLUT<double>
 
     bicgstab.setTolerance(residual_tolerance);
@@ -65,6 +75,17 @@ void BiCGStab::solve(SparseMatrix const& A, Vector& x, Vector const& b)
     bicgstab.compute(A);
 
     x = bicgstab.solve(b);
+
+    if (std::fetestexcept(FE_INVALID))
+    {
+        throw computational_error("Floating point error reported\n");
+    }
+
+    if (bicgstab.iterations() >= max_iterations)
+    {
+        throw computational_error("Conjugate gradient solver maximum iterations "
+                                  "reached\n");
+    }
 
     std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << bicgstab.iterations()
               << " (max. " << max_iterations << "), estimated error: " << bicgstab.error()
