@@ -277,8 +277,6 @@ void femStaticMatrix::perform_equilibrium_iterations()
                   << "Newton-Raphson iteration " << current_iteration << termcolor::reset
                   << std::endl;
 
-        compute_internal_force();
-
         assemble_stiffness();
 
         minus_residual = fext - fint;
@@ -293,6 +291,8 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
         fem_mesh.update_internal_variables(displacement,
                                            current_iteration == 0 ? adaptive_load.increment() : 0.0);
+
+        compute_internal_force();
 
         update_relative_norms(displacement, delta_d, minus_residual);
 
