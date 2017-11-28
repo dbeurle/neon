@@ -132,7 +132,7 @@ double J2PlasticityDamage::perform_radial_return(Matrix3& cauchy_stress,
         scalar_damage, energy_var;
 
     // The residual
-    Vector16 f = Vector::Identity(16, 1);
+    Vector16 f = Vector16::Ones();
 
     int iterations = 0, max_iterations = 25;
 
@@ -193,8 +193,7 @@ double J2PlasticityDamage::perform_radial_return(Matrix3& cauchy_stress,
         M.block<6, 1>(2, 0) = delta_t * compute_stress_like_vector(C_e, normal_tild);
         M.block<6, 1>(2, 14) = compute_stress_like_vector(C_e, eps_e_t);
         M.block<6, 1>(8, 0) = voigt::kinetic::to(-delta_t * C * (normal_tild - gamma / C * beta));
-        M.block<6, 6>(8, 8) = voigt::kinetic::fourth_order_identity()
-                              * (1.0 + delta_t * d_lam_plastic * gamma);
+        M.block<6, 6>(8, 8) = voigt::kinetic::fourth_order_identity() * (1.0 + delta_t * d_lam_plastic * gamma);
 
         M(14, 1) = -delta_t;
 
@@ -253,13 +252,6 @@ double J2PlasticityDamage::evaluate_yield_function(double const von_mises,
 double J2PlasticityDamage::evaluate_damage_yield_function(double const energy_var) const
 {
     return energy_var - std::pow(material.yield_stress(0.0), 2) / (2 * material.elastic_modulus());
-}
-
-Matrix3 J2PlasticityDamage::compute_cauchy_stress(Matrix3 const& elastic_strain) const
-{
-    auto const G = material.shear_modulus();
-    auto const lambda_e = material.lambda();
-    return lambda_e * elastic_strain.trace() * Matrix3::Identity() + 2.0 * G * elastic_strain;
 }
 
 Matrix3 J2PlasticityDamage::compute_stress_like_matrix(Matrix6 const& tangent_operator,
