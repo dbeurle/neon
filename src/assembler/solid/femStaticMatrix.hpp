@@ -35,11 +35,8 @@ protected:
 
     void compute_internal_force();
 
-    /**
-     * Computes the external force contributions to the system of equations.
-     * \sa NonFollowerLoadBoundary
-     */
-    void compute_external_force(double const time_step);
+    /** Gathers the external force contributions to the system of equations */
+    void compute_external_force();
 
     /**
      * Assembles the material and geometric matrices, checking for allocation
@@ -63,7 +60,7 @@ protected:
     /** Pretty printer for the convergence of the Newton-Raphson solver */
     void print_convergence_progress() const;
 
-    void update_relative_norms(Vector const& d_new, Vector const& delta_d, Vector const& residual);
+    void update_relative_norms();
 
 private:
     void perform_equilibrium_iterations();
@@ -77,8 +74,8 @@ protected:
 
     bool is_sparsity_computed = false;
 
-    double residual_tolerance = 1.0e-5;
-    double displacement_tolerance = 1.0e-5;
+    double residual_tolerance = 1.0e-3;
+    double displacement_tolerance = 1.0e-3;
 
     double relative_displacement_norm;
     double relative_force_norm;
@@ -92,8 +89,6 @@ protected:
     Vector delta_d;          //!< Incremental displacement vector
 
     Vector minus_residual; //!< Minus residual vector
-
-    Eigen::SparseVector<double> prescribed_displacement;
 
     std::unique_ptr<LinearSolver> linear_solver;
 };
