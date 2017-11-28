@@ -47,7 +47,7 @@ protected:
     std::unordered_set<std::string> output_set;
 
     int write_every = 1; //!< Time steps to write out (e.g. two is every second time step)
-    bool use_binary_format = false;
+    bool use_binary_format = true;
 };
 
 namespace mech::solid
