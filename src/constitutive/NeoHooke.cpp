@@ -35,7 +35,7 @@ void NeoHooke::update_internal_variables(double const time_step_size)
                       | view::transform([this, &I](auto const& tpl) -> Matrix3 {
                             auto const[lambda, shear_modulus] = material.Lame_parameters();
 
-                            auto const & [ F, J ] = tpl;
+                            auto const & [F, J] = tpl;
 
                             // Left Cauchy Green deformation tensor
                             auto const B = F * F.transpose();
@@ -45,9 +45,9 @@ void NeoHooke::update_internal_variables(double const time_step_size)
                         });
 
     // Compute tangent moduli
-    for_each(view::zip(F_list, tangent_operators, detF_list), [&](auto const& tpl) {
+    for_each(view::zip(tangent_operators, detF_list), [&](auto const& tpl) {
 
-        auto & [ F, D, J ] = tpl;
+        auto & [D, J] = tpl;
 
         auto const[lambda, shear_modulus_0] = material.Lame_parameters();
 
