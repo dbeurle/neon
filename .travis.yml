@@ -6,9 +6,11 @@ before_install:
     # Build docker image
     - docker build -t neon .
     # Encrypted key setup
-    - openssl aes-256-cbc -K $encrypted_3bf24bb6ee14_key -iv $encrypted_3bf24bb6ee14_iv -in travisci_rsa.enc -out travisci_rsa -d
-    - chmod 0600 travisci_rsa
-    - cp travisci_rsa ~/.ssh/id_rsa
+    - 'if [ "$TRAVIS_PULL_REQUEST" = "false"]; then
+            openssl aes-256-cbc -K $encrypted_3bf24bb6ee14_key -iv $encrypted_3bf24bb6ee14_iv -in travisci_rsa.enc -out travisci_rsa -d;
+            chmod 0600 travisci_rsa;
+            cp travisci_rsa ~/.ssh/id_rsa
+       fi'
 script:
     - docker run -e TRAVIS=$TRAVIS -e TRAVIS_JOB_ID=$TRAVIS_JOB_ID --name neon-docker -d -t neon /bin/bash
     - docker exec neon-docker /bin/bash -c "mkdir -p neon/build && cd neon/build && cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_COVERAGE=TRUE .. && make all -j2"
@@ -19,13 +21,15 @@ after_success:
     - docker exec neon-docker /bin/bash -c "cd neon/build && make coverage && make install"
     - docker exec neon-docker /bin/bash -c "cd neon/build && cpp-coveralls --lcov-file=coverage.info --no-gcov"
     # Automated code documentation
-    - sudo apt-get install --yes doxygen graphviz fonts-mathjax texlive
-    - mkdir -p docs/html
-    - git clone -b gh-pages git@github.com:dbeurle/neon.git --single-branch docs/html
-    - cd docs/html
-    - git rm -rf . && cd ..
-    - doxygen
-    - cd html
-    - git add .
-    - git commit -m "Automated documentation build"
-    - git push origin gh-pages
+    - 'if [ "$TRAVIS_PULL_REQUEST" = "false"]; then
+           sudo apt-get install --yes doxygen graphviz fonts-mathjax texlive;
+           mkdir -p docs/html;
+           git clone -b gh-pages git@github.com:dbeurle/neon.git --single-branch docs/html;
+           cd docs/html;
+           git rm -rf . && cd ..;
+           doxygen;
+           cd html;
+           git add .;
+           git commit -m "Automated documentation build";
+           git push origin gh-pages;
+       fi'
