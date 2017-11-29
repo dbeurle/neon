@@ -61,8 +61,9 @@ find_package(HwLoc REQUIRED)
 
 include_directories("${CMAKE_SOURCE_DIR}/src")
 
-include(CTest)
 add_subdirectory(src)
+
+include(CTest)
 add_subdirectory(tests)
 add_subdirectory(examples)
 
