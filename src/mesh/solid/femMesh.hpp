@@ -2,8 +2,8 @@
 #pragma once
 
 #include "mesh/generic/Dirichlet.hpp"
-#include "mesh/solid/femSubmesh.hpp"
 #include "mesh/solid/boundary/NonFollowerLoad.hpp"
+#include "mesh/solid/femSubmesh.hpp"
 
 #include <map>
 

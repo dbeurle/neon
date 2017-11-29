@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "Boundary.hpp"
+#include "VectorContribution.hpp"
 
 #include "mesh/DofAllocator.hpp"
 #include "mesh/MaterialCoordinates.hpp"
@@ -16,7 +16,7 @@ namespace neon
  * implement shape functions and the appropriate finite element approximation
  * for the given problem
  */
-class Neumann : public Boundary
+class Neumann : public VectorContribution
 {
 public:
     explicit Neumann(std::vector<List> const& nodal_connectivity,
@@ -26,10 +26,6 @@ public:
                      Json::Value const& loads);
 
     [[nodiscard]] auto elements() const { return nodal_connectivity.size(); }
-
-    /** @return an element external force vector for a given element */
-    [[nodiscard]] virtual std::tuple<List const&, Vector> external_force(
-        int const element, double const load_factor) const = 0;
 
 protected:
     std::vector<List> nodal_connectivity;
