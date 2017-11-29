@@ -56,6 +56,8 @@ void ShapeFunction<Quadrature>::compute_extrapolation_matrix(Matrix const N,
     auto const n = local_nodal_coordinates.rows();
     auto const m = numerical_quadrature->points();
 
+    assert(m != local_quadrature_coordinates.rows());
+
     auto const& xi = local_nodal_coordinates;
     auto const& xi_hat = local_quadrature_coordinates;
 
@@ -65,20 +67,18 @@ void ShapeFunction<Quadrature>::compute_extrapolation_matrix(Matrix const N,
         return;
     }
 
-    Matrix const N_plus = (N.transpose() * N).inverse() * N.transpose();
-
     if (m > n)
     {
-        extrapolation = N_plus;
+        extrapolation = (N.transpose() * N).inverse() * N.transpose();
         return;
     }
 
+    Matrix const N_plus = N.transpose() * (N * N.transpose()).inverse();
+
     // Number of quadrature points are less than the number of nodes
-    auto const xi_hat_plus = (xi_hat.transpose() * xi_hat).inverse() * xi_hat.transpose();
+    auto const xi_hat_plus = xi_hat.transpose() * (xi_hat * xi_hat.transpose()).inverse();
 
-    Matrix const I = Matrix::Identity(m, m);
-
-    extrapolation = N_plus * (I - xi_hat * xi_hat_plus) + xi * xi_hat_plus;
+    extrapolation = N_plus * (Matrix::Identity(m, m) - xi_hat * xi_hat_plus) + xi * xi_hat_plus;
 }
 
 using VolumeInterpolation = ShapeFunction<VolumeQuadrature>;
