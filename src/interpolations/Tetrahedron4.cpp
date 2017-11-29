@@ -14,12 +14,8 @@ void Tetrahedron4::precompute_shape_functions()
     using NodalCoordinate = std::tuple<int, double, double, double>;
 
     // Initialize nodal coordinates array as Xi, Eta, Zeta
-    constexpr std::array<NodalCoordinate, 4> local_coordinates = {{
-        {0, 0.0, 0.0, 0.0},
-        {1, 1.0, 0.0, 0.0},
-        {2, 0.0, 1.0, 0.0},
-        {3, 0.0, 0.0, 1.0},
-    }};
+    std::array<NodalCoordinate, 4> constexpr local_coordinates{
+        {{0, 1.0, 0.0, 0.0}, {1, 0.0, 1.0, 0.0}, {2, 0.0, 0.0, 1.0}, {3, 0.0, 0.0, 0.0}}};
 
     Matrix N_matrix(numerical_quadrature->points(), nodes());
     Matrix local_quadrature_coordinates = Matrix::Ones(numerical_quadrature->points(), 4);
