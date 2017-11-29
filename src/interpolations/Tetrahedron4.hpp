@@ -7,8 +7,7 @@
 namespace neon
 {
 /**
- * Tetrahedron4 is an isoparametric tetrahedral 4 node element with analytical
- * integration.
+ * Tetrahedron4 is an isoparametric simplex 4 node element numerical integration.
  */
 class Tetrahedron4 : public VolumeInterpolation
 {

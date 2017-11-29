@@ -82,7 +82,11 @@ public:
     /** Get the time only for the current load case */
     [[nodiscard]] double step_time() const { return current_time; }
 
+<<<<<<< HEAD
     /** Get the time only for the last load case */
+=======
+    /** Get the time only for the last converged load case */
+>>>>>>> c3c2c4cc8b3464fa4cc1021cc7b5ee0efea9eff6
     [[nodiscard]] double last_step_time() const { return last_converged_time; }
 
     /** Get the pseudo time step size */

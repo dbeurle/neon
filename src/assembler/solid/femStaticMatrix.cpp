@@ -2,6 +2,7 @@
 #include "femStaticMatrix.hpp"
 
 #include "Exceptions.hpp"
+#include "numeric/FloatingPointCompare.hpp"
 #include "solver/linear/LinearSolverFactory.hpp"
 
 #include <chrono>
@@ -18,7 +19,9 @@ femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& simulatio
       adaptive_load(simulation["Time"], fem_mesh.time_history()),
       fint(Vector::Zero(fem_mesh.active_dofs())),
       fext(Vector::Zero(fem_mesh.active_dofs())),
-      d(Vector::Zero(fem_mesh.active_dofs())),
+      displacement(Vector::Zero(fem_mesh.active_dofs())),
+      displacement_old(Vector::Zero(fem_mesh.active_dofs())),
+      delta_d(Vector::Zero(fem_mesh.active_dofs())),
       linear_solver(make_linear_solver(simulation["LinearSolver"], fem_mesh.is_symmetric()))
 {
     if (!simulation["NonlinearOptions"].isMember("DisplacementTolerance"))
@@ -84,7 +87,7 @@ void femStaticMatrix::compute_internal_force()
     {
         for (auto element = 0; element < submesh.elements(); ++element)
         {
-            auto const& [dofs, fe_int] = submesh.internal_force(element);
+            auto const & [ dofs, fe_int ] = submesh.internal_force(element);
 
             for (auto a = 0; a < fe_int.size(); ++a)
             {
@@ -94,15 +97,17 @@ void femStaticMatrix::compute_internal_force()
     }
 }
 
-void femStaticMatrix::compute_external_force(double const step_time)
+void femStaticMatrix::compute_external_force()
 {
     auto const start = std::chrono::high_resolution_clock::now();
 
+    auto const step_time = adaptive_load.step_time();
+
     fext.setZero();
 
-    for (auto const& [name, nf_loads] : fem_mesh.nonfollower_load_boundaries())
+    for (auto const & [ name, nf_loads ] : fem_mesh.nonfollower_load_boundaries())
     {
-        for (auto const& [is_dof_active, boundary_conditions] : nf_loads.interface())
+        for (auto const & [ is_dof_active, boundary_conditions ] : nf_loads.interface())
         {
             if (!is_dof_active) continue;
 
@@ -133,10 +138,11 @@ void femStaticMatrix::compute_external_force(double const step_time)
 
 void femStaticMatrix::solve()
 {
-    fem_mesh.update_internal_variables(d);
-
     try
     {
+        // Initialise the mesh with zero displacements
+        fem_mesh.update_internal_variables(displacement);
+
         while (!adaptive_load.is_fully_applied())
         {
             std::cout << "\n"
@@ -144,21 +150,23 @@ void femStaticMatrix::solve()
                       << "Performing equilibrium iterations for time " << adaptive_load.step_time()
                       << termcolor::reset << std::endl;
 
-            apply_displacement_boundaries();
-
-            compute_external_force(adaptive_load.step_time());
+            compute_external_force();
 
             perform_equilibrium_iterations();
         }
     }
     catch (computational_error& comp_error)
     {
+        // A numerical error has been reported that is able to be recovered
+        // by resetting the state
         std::cout << std::endl
                   << std::string(6, ' ') << termcolor::bold << termcolor::yellow
                   << comp_error.what() << termcolor::reset << std::endl;
 
         adaptive_load.update_convergence_state(false);
         fem_mesh.save_internal_variables(false);
+
+        displacement = displacement_old;
 
         this->solve();
     }
@@ -204,17 +212,17 @@ void femStaticMatrix::assemble_stiffness()
               << elapsed_seconds.count() << "s\n";
 }
 
-void femStaticMatrix::enforce_dirichlet_conditions(SparseMatrix& A, Vector& x, Vector& b)
+void femStaticMatrix::enforce_dirichlet_conditions(SparseMatrix& A, Vector& b) const
 {
-    for (auto const& [name, dirichlet_boundaries] : fem_mesh.displacement_boundaries())
+    for (auto const & [ name, boundaries ] : fem_mesh.displacement_boundaries())
     {
-        for (auto const& dirichlet_boundary : dirichlet_boundaries)
+        for (auto const& dirichlet_boundary : boundaries)
         {
             for (auto const& fixed_dof : dirichlet_boundary.dof_view())
             {
-                auto const diagonal_entry = A.coeffRef(fixed_dof, fixed_dof);
+                auto const diagonal_entry = A.coeff(fixed_dof, fixed_dof);
 
-                x(fixed_dof) = b(fixed_dof) = 0.0;
+                b(fixed_dof) = 0.0;
 
                 std::vector<int> non_zero_visitor;
 
@@ -243,22 +251,34 @@ void femStaticMatrix::enforce_dirichlet_conditions(SparseMatrix& A, Vector& x, V
 
 void femStaticMatrix::apply_displacement_boundaries()
 {
-    for (auto const& [name, dirichlet_boundaries] : fem_mesh.displacement_boundaries())
+    Eigen::SparseVector<double> prescribed_increment(displacement.size());
+
+    for (auto const & [ name, boundaries ] : fem_mesh.displacement_boundaries())
     {
-        for (auto const& dirichlet_boundary : dirichlet_boundaries)
+        for (auto const& boundary : boundaries)
         {
-            for (auto const& dof : dirichlet_boundary.dof_view())
+            auto const delta_u = boundary.value_view(adaptive_load.step_time())
+                                 - boundary.value_view(adaptive_load.last_step_time());
+
+            for (auto const& dof : boundary.dof_view())
             {
-                d(dof) = dirichlet_boundary.value_view(adaptive_load.step_time());
+                prescribed_increment.coeffRef(dof) = delta_u;
             }
         }
     }
+
+    // std::cout << prescribed_increment << std::endl;
+
+    // A sparse matrix - sparse vector multiplication is more efficient for a
+    // relatively small vector size with the exception of allocation
+    minus_residual -= Kt * prescribed_increment;
+
+    displacement += prescribed_increment;
 }
 
 void femStaticMatrix::perform_equilibrium_iterations()
 {
-    Vector delta_d = Vector::Zero(fem_mesh.active_dofs());
-    Vector d_new = d;
+    displacement = displacement_old;
 
     // Full Newton-Raphson iteration to solve nonlinear equations
     auto constexpr max_iterations{10};
@@ -272,22 +292,24 @@ void femStaticMatrix::perform_equilibrium_iterations()
                   << "Newton-Raphson iteration " << current_iteration << termcolor::reset
                   << std::endl;
 
-        compute_internal_force();
-
         assemble_stiffness();
 
-        Vector residual = fint - fext;
+        compute_internal_force();
 
-        enforce_dirichlet_conditions(Kt, delta_d, residual);
+        minus_residual = fext - fint;
 
-        linear_solver->solve(Kt, delta_d, -residual);
+        if (current_iteration == 0) apply_displacement_boundaries();
 
-        d_new += delta_d;
+        enforce_dirichlet_conditions(Kt, minus_residual);
 
-        fem_mesh.update_internal_variables(d_new,
+        linear_solver->solve(Kt, delta_d, minus_residual);
+
+        displacement += delta_d;
+
+        fem_mesh.update_internal_variables(displacement,
                                            current_iteration == 0 ? adaptive_load.increment() : 0.0);
 
-        update_relative_norms(d_new, delta_d, residual);
+        update_relative_norms();
 
         print_convergence_progress();
 
@@ -300,23 +322,28 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
         current_iteration++;
     }
-
-    adaptive_load.update_convergence_state(current_iteration != max_iterations);
-    fem_mesh.save_internal_variables(current_iteration != max_iterations);
+    if (current_iteration == max_iterations)
+    {
+        throw computational_error("Reached Newton-Raphson iteration limit");
+    }
 
     if (current_iteration != max_iterations)
     {
-        d = d_new;
+        adaptive_load.update_convergence_state(current_iteration != max_iterations);
+        fem_mesh.save_internal_variables(current_iteration != max_iterations);
+
+        displacement_old = displacement;
         file_io.write(adaptive_load.step(), adaptive_load.time());
     }
 }
 
-void femStaticMatrix::update_relative_norms(Vector const& d_new,
-                                            Vector const& delta_d,
-                                            Vector const& residual)
+void femStaticMatrix::update_relative_norms()
 {
-    relative_displacement_norm = delta_d.norm() / d_new.norm();
-    relative_force_norm = residual.norm() / std::max(fext.norm(), fint.norm());
+    relative_displacement_norm = delta_d.norm() / displacement.norm();
+
+    relative_force_norm = is_approx(std::max(fext.norm(), fint.norm()), 0.0)
+                              ? 1.0
+                              : minus_residual.norm() / std::max(fext.norm(), fint.norm());
 }
 
 void femStaticMatrix::print_convergence_progress() const
