@@ -62,8 +62,7 @@ void femMesh::allocate_boundary_conditions(Json::Value const& simulation_data,
     {
         auto const& boundary_name = boundary["Name"].asString();
 
-        if (auto const& boundary_type = boundary["Type"].asString();
-            boundary_type == "Concentration" || boundary_type == "Temperature")
+        if (auto const& boundary_type = boundary["Type"].asString(); boundary_type == "Temperature")
         {
             dirichlet_bcs[boundary_name].emplace_back(filter_dof_list(
                                                           basic_mesh.meshes(boundary_name)),
@@ -89,13 +88,13 @@ void femMesh::check_boundary_conditions(Json::Value const& boundary_data) const
 {
     for (auto const& boundary : boundary_data)
     {
-        if (!boundary.isMember("Name"))
+        for (auto const& required_field : {"Name", "Type"})
         {
-            throw std::runtime_error("Missing \"Name\" in BoundaryConditions\n");
-        }
-        if (!boundary.isMember("Type"))
-        {
-            throw std::runtime_error("Missing \"Type\" in BoundaryConditions\n");
+            if (!boundary.isMember(required_field))
+            {
+                throw std::runtime_error("Missing " + std::string(required_field)
+                                         + " in BoundaryConditions\n");
+            }
         }
     }
 }
