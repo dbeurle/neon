@@ -21,13 +21,13 @@ after_success:
     - docker exec neon-docker /bin/bash -c "cd neon/build && make coverage && make install"
     - docker exec neon-docker /bin/bash -c "cd neon/build && cpp-coveralls --lcov-file=coverage.info --no-gcov"
     # Automated code documentation
+    - sudo apt-get install --yes doxygen graphviz fonts-mathjax texlive
+    - mkdir -p docs/html
+    - git clone -b gh-pages git@github.com:dbeurle/neon.git --single-branch docs/html
+    - cd docs/html
+    - git rm -rf . && cd ..
+    - doxygen
     - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
-           sudo apt-get install --yes doxygen graphviz fonts-mathjax texlive;
-           mkdir -p docs/html;
-           git clone -b gh-pages git@github.com:dbeurle/neon.git --single-branch docs/html;
-           cd docs/html;
-           git rm -rf . && cd ..;
-           doxygen;
            cd html;
            git add .;
            git commit -m "Automated documentation build";
