@@ -3,14 +3,14 @@ sudo: required
 services:
     - docker
 before_install:
-    # Build docker image
-    - docker build -t neon .
     # Encrypted key setup
     - 'if [ "$TRAVIS_PULL_REQUEST" = "false"]; then
-            openssl aes-256-cbc -K $encrypted_3bf24bb6ee14_key -iv $encrypted_3bf24bb6ee14_iv -in travisci_rsa.enc -out travisci_rsa -d;
-            chmod 0600 travisci_rsa;
-            cp travisci_rsa ~/.ssh/id_rsa
-       fi'
+    openssl aes-256-cbc -K $encrypted_3bf24bb6ee14_key -iv $encrypted_3bf24bb6ee14_iv -in travisci_rsa.enc -out travisci_rsa -d;
+    chmod 0600 travisci_rsa;
+    cp travisci_rsa ~/.ssh/id_rsa;
+    fi'
+    # Build docker image
+    - docker build -t neon .
 script:
     - docker run -e TRAVIS=$TRAVIS -e TRAVIS_JOB_ID=$TRAVIS_JOB_ID --name neon-docker -d -t neon /bin/bash
     - docker exec neon-docker /bin/bash -c "mkdir -p neon/build && cd neon/build && cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_COVERAGE=TRUE .. && make all -j2"
