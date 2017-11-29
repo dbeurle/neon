@@ -267,8 +267,6 @@ void femStaticMatrix::apply_displacement_boundaries()
         }
     }
 
-    // std::cout << prescribed_increment << std::endl;
-
     // A sparse matrix - sparse vector multiplication is more efficient for a
     // relatively small vector size with the exception of allocation
     minus_residual -= Kt * prescribed_increment;
