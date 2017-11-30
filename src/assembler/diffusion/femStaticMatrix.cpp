@@ -48,7 +48,7 @@ void femStaticMatrix::compute_sparsity_pattern()
 
 void femStaticMatrix::compute_external_force(double const load_factor)
 {
-    auto start = std::chrono::high_resolution_clock::now();
+    auto const start = std::chrono::high_resolution_clock::now();
 
     f.setZero();
 
