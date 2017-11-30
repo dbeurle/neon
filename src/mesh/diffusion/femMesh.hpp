@@ -62,7 +62,7 @@ protected:
 
     std::vector<femSubmesh> submeshes;
 
-    std::map<std::string, std::vector<NonHomogeneousDirichlet>> dirichlet_bcs;
+    std::map<std::string, std::vector<Dirichlet>> dirichlet_bcs;
     std::map<std::string, std::vector<SurfaceBoundary>> surface_bcs;
 
     std::unordered_map<std::string, int> const dof_table = {{"x", 0}, {"y", 1}, {"z", 2}};
