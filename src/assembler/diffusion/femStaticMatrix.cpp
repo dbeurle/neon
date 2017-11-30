@@ -56,7 +56,7 @@ void femStaticMatrix::compute_external_force(double const load_factor)
     {
         for (auto const& surface : surfaces)
         {
-            for (auto const& mesh : surface.boundaries())
+            for (auto const& mesh : surface.load_interface())
             {
                 for (auto element = 0; element < mesh.elements(); ++element)
                 {
