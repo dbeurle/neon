@@ -70,7 +70,7 @@ void femStaticMatrix::compute_external_force(double const load_factor)
             }
         }
     }
-    auto end = std::chrono::high_resolution_clock::now();
+    auto const end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
     std::cout << std::string(6, ' ') << "External forces assembly took " << elapsed_seconds.count()
               << "s\n";
@@ -96,7 +96,7 @@ void femStaticMatrix::assemble_stiffness()
 {
     if (!is_sparsity_computed) compute_sparsity_pattern();
 
-    auto start = std::chrono::high_resolution_clock::now();
+    auto const start = std::chrono::high_resolution_clock::now();
 
     K.coeffs() = 0.0;
 
@@ -121,7 +121,7 @@ void femStaticMatrix::assemble_stiffness()
         }
     }
 
-    auto end = std::chrono::high_resolution_clock::now();
+    auto const end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
 
     std::cout << std::string(6, ' ') << "Stiffness assembly took " << elapsed_seconds.count()
