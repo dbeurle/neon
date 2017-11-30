@@ -24,8 +24,6 @@ void J2PlasticityDamage::update_internal_variables(double const time_step_size)
 {
     using namespace ranges;
 
-    auto const shear_modulus = material.shear_modulus();
-
     // Extract the internal variables
     auto[plastic_strains,
          strains,
