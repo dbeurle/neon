@@ -158,7 +158,7 @@ void MUMPSLU::allocate_coordinate_format_storage(SparseMatrix const& A)
     cols.reserve(A.nonZeros());
     coefficients.reserve(A.nonZeros());
 
-    for (auto k = 0, nonzeros = 0; k < A.outerSize(); ++k)
+    for (auto k = 0; k < A.outerSize(); ++k)
     {
         for (SparseMatrix::InnerIterator it(A, k); it; ++it)
         {
