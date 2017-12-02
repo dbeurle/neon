@@ -27,8 +27,8 @@ void IsotropicLinearElasticity::update_internal_variables(double const time_step
     using namespace ranges;
 
     // Extract the internal variables
-    auto[elastic_strains, cauchy_stresses] = variables(InternalVariables::Tensor::LinearisedStrain,
-                                                       InternalVariables::Tensor::Cauchy);
+    auto [elastic_strains, cauchy_stresses] = variables(InternalVariables::Tensor::LinearisedStrain,
+                                                        InternalVariables::Tensor::Cauchy);
 
     auto& von_mises_stresses = variables(InternalVariables::Scalar::VonMisesStress);
 
@@ -49,7 +49,7 @@ void IsotropicLinearElasticity::update_internal_variables(double const time_step
 
 Matrix3 IsotropicLinearElasticity::elastic_moduli() const
 {
-    auto[lambda, shear_modulus] = material.Lame_parameters();
+    auto [lambda, shear_modulus] = material.Lame_parameters();
 
     if (theory == Plane::Stress)
     {

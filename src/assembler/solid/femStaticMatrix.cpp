@@ -87,7 +87,7 @@ void femStaticMatrix::compute_internal_force()
     {
         for (auto element = 0; element < submesh.elements(); ++element)
         {
-            auto const & [ dofs, fe_int ] = submesh.internal_force(element);
+            auto const& [dofs, fe_int] = submesh.internal_force(element);
 
             for (auto a = 0; a < fe_int.size(); ++a)
             {
@@ -105,9 +105,9 @@ void femStaticMatrix::compute_external_force()
 
     fext.setZero();
 
-    for (auto const & [ name, nf_loads ] : fem_mesh.nonfollower_load_boundaries())
+    for (auto const& [name, nf_loads] : fem_mesh.nonfollower_load_boundaries())
     {
-        for (auto const & [ is_dof_active, boundary_conditions ] : nf_loads.interface())
+        for (auto const& [is_dof_active, boundary_conditions] : nf_loads.interface())
         {
             if (!is_dof_active) continue;
 
@@ -214,7 +214,7 @@ void femStaticMatrix::assemble_stiffness()
 
 void femStaticMatrix::enforce_dirichlet_conditions(SparseMatrix& A, Vector& b) const
 {
-    for (auto const & [ name, boundaries ] : fem_mesh.displacement_boundaries())
+    for (auto const& [name, boundaries] : fem_mesh.displacement_boundaries())
     {
         for (auto const& dirichlet_boundary : boundaries)
         {
@@ -253,7 +253,7 @@ void femStaticMatrix::apply_displacement_boundaries()
 {
     Eigen::SparseVector<double> prescribed_increment(displacement.size());
 
-    for (auto const & [ name, boundaries ] : fem_mesh.displacement_boundaries())
+    for (auto const& [name, boundaries] : fem_mesh.displacement_boundaries())
     {
         for (auto const& boundary : boundaries)
         {

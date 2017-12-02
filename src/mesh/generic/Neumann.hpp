@@ -64,7 +64,7 @@ public:
         // Perform the computation of the external load vector
         auto const f_ext = sf->quadrature().integrate(Vector::Zero(X.cols()).eval(),
                                                       [&](auto const& femval, auto const& l) -> Vector {
-                                                          auto const & [ N, dN ] = femval;
+                                                          auto const& [N, dN] = femval;
 
                                                           auto const j = (X * dN).determinant();
 
@@ -102,7 +102,7 @@ public:
         // Perform the computation of the external load vector
         auto const f_ext = sf->quadrature().integrate(Vector::Zero(X.cols()).eval(),
                                                       [&](auto const& femval, auto const& l) -> Vector {
-                                                          auto const & [ N, dN ] = femval;
+                                                          auto const& [N, dN] = femval;
 
                                                           auto const j = (X * dN).determinant();
 

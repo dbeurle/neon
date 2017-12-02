@@ -12,8 +12,7 @@ Triangle6::Triangle6(TriangleQuadrature::Rule rule)
 void Triangle6::precompute_shape_functions()
 {
     numerical_quadrature->evaluate([&](auto const& coordinate) {
-
-        auto const & [ l, r, s ] = coordinate;
+        auto const& [l, r, s] = coordinate;
 
         auto const t = 1.0 - r - s;
 

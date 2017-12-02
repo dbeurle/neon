@@ -36,27 +36,27 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
     auto const shear_modulus = material.shear_modulus();
 
     // Extract the internal variables
-    auto[deformation_gradients,
-         log_strain_e_list,
-         cauchy_stresses] = variables(InternalVariables::Tensor::DeformationGradient,
-                                      InternalVariables::Tensor::HenckyStrainElastic,
-                                      InternalVariables::Tensor::Cauchy);
+    auto [deformation_gradients,
+          log_strain_e_list,
+          cauchy_stresses] = variables(InternalVariables::Tensor::DeformationGradient,
+                                       InternalVariables::Tensor::HenckyStrainElastic,
+                                       InternalVariables::Tensor::Cauchy);
 
     auto const old_deformation_gradients = variables[InternalVariables::Tensor::DeformationGradient];
 
     auto const J_list = variables(InternalVariables::Scalar::DetF);
 
     // Retrieve the accumulated internal variables
-    auto[accumulated_plastic_strains,
-         von_mises_stresses] = variables(InternalVariables::Scalar::EffectivePlasticStrain,
-                                         InternalVariables::Scalar::VonMisesStress);
+    auto [accumulated_plastic_strains,
+          von_mises_stresses] = variables(InternalVariables::Scalar::EffectivePlasticStrain,
+                                          InternalVariables::Scalar::VonMisesStress);
 
     auto& tangent_operators = variables(InternalVariables::Matrix::TangentOperator);
 
     auto const incremental_deformation_gradients = view::zip(deformation_gradients,
                                                              old_deformation_gradients)
                                                    | view::transform([](auto const& tpl) {
-                                                         auto const & [ F, F_old ] = tpl;
+                                                         auto const& [F, F_old] = tpl;
                                                          return F * F_old.inverse();
                                                      });
 
@@ -212,7 +212,7 @@ Matrix6 FiniteJ2Plasticity::derivative_tensor_log_unique(Matrix3 const& Be_trial
                                                          std::array<Matrix3, 3> const& E,
                                                          std::array<int, 3> const& abc_ordering) const
 {
-    auto const[a, b, c] = abc_ordering;
+    auto const [a, b, c] = abc_ordering;
     return std::log(x(a)) / ((x(a) - x(b)) * (x(a) - x(c)))
                * (dX2_dX(Be_trial) - (x(b) - x(c)) * Isym
                   - (2.0 * x(a) - x(b) - x(c)) * outer_product(E[a])
@@ -222,7 +222,7 @@ Matrix6 FiniteJ2Plasticity::derivative_tensor_log_unique(Matrix3 const& Be_trial
 
 Matrix6 FiniteJ2Plasticity::compute_L(Matrix3 const& Be_trial) const
 {
-    auto const[x, E, is_repeated, abc_ordering] = compute_eigenvalues_eigenprojections(Be_trial);
+    auto const [x, E, is_repeated, abc_ordering] = compute_eigenvalues_eigenprojections(Be_trial);
 
     if (!is_repeated)
     {
@@ -233,7 +233,7 @@ Matrix6 FiniteJ2Plasticity::compute_L(Matrix3 const& Be_trial) const
     else if (is_repeated && abc_ordering[0] >= 0)
     {
         // Derivative when there is one repeated eigenvalue
-        auto const & [ a, b, c ] = abc_ordering;
+        auto const& [a, b, c] = abc_ordering;
 
         std::cout << "Eigenvalues\n" << x << std::endl;
 

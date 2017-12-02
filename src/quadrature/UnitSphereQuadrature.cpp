@@ -1313,8 +1313,7 @@ UnitSphereQuadrature::UnitSphereQuadrature(Rule const rule)
 void UnitSphereQuadrature::precompute_coordinates()
 {
     this->evaluate([](auto const& coordinate) {
-
-        auto const & [ l, r1, r2, r3 ] = coordinate;
+        auto const& [l, r1, r2, r3] = coordinate;
 
         Vector3 t(r1, r2, r3);
 

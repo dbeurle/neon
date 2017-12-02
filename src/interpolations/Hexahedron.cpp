@@ -31,12 +31,12 @@ void Hexahedron8::precompute_shape_functions()
     Matrix local_quadrature_coordinates = Matrix::Ones(numerical_quadrature->points(), 4);
 
     numerical_quadrature->evaluate([&](auto const& coordinate) {
-        auto const & [ l, xi, eta, zeta ] = coordinate;
+        auto const& [l, xi, eta, zeta] = coordinate;
 
         Vector N(8);
         Matrix rhea(8, 3);
 
-        for (auto const & [ a, xi_a, eta_a, zeta_a ] : local_coordinates)
+        for (auto const& [a, xi_a, eta_a, zeta_a] : local_coordinates)
         {
             N(a) = 1.0 / 8.0 * (1.0 + xi_a * xi) * (1.0 + eta_a * eta) * (1.0 + zeta_a * zeta);
 
@@ -57,7 +57,7 @@ void Hexahedron8::precompute_shape_functions()
     // Compute extrapolation algorithm matrices
     Matrix local_nodal_coordinates = Matrix::Ones(nodes(), 4);
 
-    for (auto const & [ a, xi_a, eta_a, zeta_a ] : local_coordinates)
+    for (auto const& [a, xi_a, eta_a, zeta_a] : local_coordinates)
     {
         local_nodal_coordinates(a, 0) = xi_a;
         local_nodal_coordinates(a, 1) = eta_a;
@@ -69,7 +69,7 @@ void Hexahedron8::precompute_shape_functions()
 double Hexahedron8::compute_measure(Matrix const& nodal_coordinates) const
 {
     return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
-        auto const & [ N, dN ] = femval;
+        auto const& [N, dN] = femval;
 
         Matrix3 const Jacobian = nodal_coordinates * dN;
 
@@ -99,7 +99,7 @@ void Hexahedron20::precompute_shape_functions()
     Matrix local_quadrature_coordinates = Matrix::Ones(numerical_quadrature->points(), 4);
 
     numerical_quadrature->evaluate([&](auto const& coordinate) {
-        auto const & [ l, xi, eta, zeta ] = coordinate;
+        auto const& [l, xi, eta, zeta] = coordinate;
 
         Vector N(20);
         Matrix rhea(20, 3);
@@ -200,7 +200,7 @@ void Hexahedron20::precompute_shape_functions()
     // Compute extrapolation algorithm matrices
     Matrix local_nodal_coordinates = Matrix::Ones(nodes(), 4);
 
-    for (auto const & [ a, xi_a, eta_a, zeta_a ] : local_coordinates)
+    for (auto const& [a, xi_a, eta_a, zeta_a] : local_coordinates)
     {
         local_nodal_coordinates(a, 0) = xi_a;
         local_nodal_coordinates(a, 1) = eta_a;
@@ -212,7 +212,7 @@ void Hexahedron20::precompute_shape_functions()
 double Hexahedron20::compute_measure(Matrix const& nodal_coordinates) const
 {
     return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
-        auto const & [ N, dN ] = femval;
+        auto const& [N, dN] = femval;
 
         Matrix3 const Jacobian = nodal_coordinates * dN;
 
@@ -244,7 +244,7 @@ void Hexahedron27::precompute_shape_functions()
     Matrix local_quadrature_coordinates = Matrix::Ones(numerical_quadrature->points(), 4);
 
     numerical_quadrature->evaluate([&](auto const& coordinate) {
-        auto const & [ l, xi, eta, zeta ] = coordinate;
+        auto const& [l, xi, eta, zeta] = coordinate;
 
         Vector N(27);
         Matrix rhea(27, 3);
@@ -375,7 +375,7 @@ void Hexahedron27::precompute_shape_functions()
     // Compute extrapolation algorithm matrices
     Matrix local_nodal_coordinates = Matrix::Ones(nodes(), 4);
 
-    for (auto const & [ a, xi_a, eta_a, zeta_a ] : local_coordinates)
+    for (auto const& [a, xi_a, eta_a, zeta_a] : local_coordinates)
     {
         local_nodal_coordinates(a, 0) = xi_a;
         local_nodal_coordinates(a, 1) = eta_a;
@@ -387,7 +387,7 @@ void Hexahedron27::precompute_shape_functions()
 double Hexahedron27::compute_measure(Matrix const& nodal_coordinates) const
 {
     return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
-        auto const & [ N, dN ] = femval;
+        auto const& [N, dN] = femval;
 
         Matrix3 const Jacobian = nodal_coordinates * dN;
 

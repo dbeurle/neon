@@ -63,7 +63,7 @@ public:
         VonMisesStress,
         EffectivePlasticStrain,
         DetF0, // Reference Jacobian determinant
-        DetF,   // Updated Jacobian determinant
+        DetF,  // Updated Jacobian determinant
         Damage,
         EnergyReleaseRate
     };

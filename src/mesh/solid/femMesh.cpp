@@ -133,16 +133,16 @@ std::vector<double> femMesh::time_history() const
     std::vector<double> history;
 
     // Append time history from each boundary condition
-    for (auto const & [ key, boundaries ] : displacement_bcs)
+    for (auto const& [key, boundaries] : displacement_bcs)
     {
         for (auto const& boundary : boundaries)
         {
             history |= ranges::action::push_back(boundary.time_history());
         }
     }
-    for (auto const & [ key, nonfollower_load ] : nonfollower_loads)
+    for (auto const& [key, nonfollower_load] : nonfollower_loads)
     {
-        for (auto const & [ is_dof_active, boundaries ] : nonfollower_load.interface())
+        for (auto const& [is_dof_active, boundaries] : nonfollower_load.interface())
         {
             if (!is_dof_active) continue;
 

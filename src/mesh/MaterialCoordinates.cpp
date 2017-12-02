@@ -23,7 +23,7 @@ Vector MaterialCoordinates::displacement(List const& local_dofs) const
     Vector localdisp(local_dofs.size());
 
     for_each(view::zip(view::ints(0), local_dofs), [&](auto const& zip_pair) {
-        auto const & [ i, local_dof ] = zip_pair;
+        auto const& [i, local_dof] = zip_pair;
         localdisp(i) = x(local_dof) - X(local_dof);
     });
     return localdisp;

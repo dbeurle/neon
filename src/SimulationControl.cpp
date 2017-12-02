@@ -136,7 +136,7 @@ void SimulationControl::start()
 {
     // Allocate the modules storage, which automatically checks for correct input
     // and throws the appropriate exception when an error is detected
-    for (auto const & [ name, simulations ] : multistep_simulations)
+    for (auto const& [name, simulations] : multistep_simulations)
     {
         for (auto const& simulation : simulations)
         {
@@ -160,7 +160,7 @@ void SimulationControl::build_simulation_tree()
         }
     }
 
-    for (auto const & [ name, queue ] : multistep_simulations)
+    for (auto const& [name, queue] : multistep_simulations)
     {
         std::cout << std::string(4, ' ') << "Simulation \"" << name << "\" is continued by:\n";
         for (auto const& item : queue)
@@ -215,7 +215,7 @@ std::unordered_set<std::string> SimulationControl::parse_material_names(Json::Va
     {
         if (material["Name"].empty()) throw std::runtime_error("Material: Name");
 
-        auto const[it, inserted] = material_names.emplace(material["Name"].asString());
+        auto const [it, inserted] = material_names.emplace(material["Name"].asString());
 
         if (!inserted) throw DuplicateNameException("Material");
     }
@@ -238,7 +238,7 @@ std::unordered_set<std::string> SimulationControl::parse_part_names(
                                      "materials\n");
         }
 
-        auto const[it, inserted] = part_names.emplace(part["Name"].asString());
+        auto const [it, inserted] = part_names.emplace(part["Name"].asString());
 
         if (!inserted) throw DuplicateNameException("Part");
     }

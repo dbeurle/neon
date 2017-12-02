@@ -109,7 +109,7 @@ std::vector<double> StochasticMicromechanicalElastomer::update_chains(
     using namespace ranges;
 
     return view::zip(segments, chains_old) | view::transform([&](auto const tpl) {
-               auto const & [ N, n ] = tpl;
+               auto const& [N, n] = tpl;
                return n / (1.0 + time_step_size * (1.0 - std::pow(1.0 - p_scission, N)));
            });
 }

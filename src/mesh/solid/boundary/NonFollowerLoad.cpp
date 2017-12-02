@@ -23,7 +23,7 @@ std::tuple<List const&, Vector> Pressure::external_force(int const element,
                       * sf->quadrature()
                             .integrate(RowMatrix::Zero(X.cols(), 3).eval(),
                                        [&](auto const& femval, auto const& l) -> RowMatrix {
-                                           auto const & [ N, dN ] = femval;
+                                           auto const& [N, dN] = femval;
 
                                            auto const j = (X_surface * dN).determinant();
 
@@ -46,7 +46,7 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
     Json::Value const& boundary,
     std::unordered_map<std::string, int> const& dof_table)
 {
-    for (auto & [ is_dof_active, var ] : nonfollower_load)
+    for (auto& [is_dof_active, var] : nonfollower_load)
     {
         is_dof_active = false;
     }
@@ -62,7 +62,7 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
 
             auto const dof_offset = dof_table.find(name)->second;
 
-            auto & [ is_dof_active, boundary_meshes ] = nonfollower_load[dof_offset];
+            auto& [is_dof_active, boundary_meshes] = nonfollower_load[dof_offset];
 
             is_dof_active = true;
 
@@ -81,7 +81,7 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
     }
     else if (type == "Pressure")
     {
-        auto & [ is_dof_active, boundary_meshes ] = nonfollower_load[0];
+        auto& [is_dof_active, boundary_meshes] = nonfollower_load[0];
 
         is_dof_active = true;
 
@@ -106,7 +106,7 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
             }
             auto const dof_offset = dof_table.find(name)->second;
 
-            auto & [ is_dof_active, boundary_meshes ] = nonfollower_load[dof_offset];
+            auto& [is_dof_active, boundary_meshes] = nonfollower_load[dof_offset];
 
             is_dof_active = true;
 
