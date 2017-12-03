@@ -8,10 +8,6 @@
 
 #include "modules/AbstractModule.hpp"
 
-#include "assembler/solid/femStaticMatrix.hpp"
-
-#include "assembler/solid/femDynamicMatrix.hpp"
-
 #include <iomanip>
 #include <thread>
 
