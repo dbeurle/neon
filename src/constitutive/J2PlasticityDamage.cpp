@@ -3,6 +3,8 @@
 #include "Exceptions.hpp"
 #include "InternalVariables.hpp"
 
+#include "numeric/mechanics"
+
 #include <iostream>
 #include <json/value.h>
 #include <range/v3/view.hpp>

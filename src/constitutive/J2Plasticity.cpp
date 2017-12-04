@@ -4,6 +4,8 @@
 #include "Exceptions.hpp"
 #include "InternalVariables.hpp"
 
+#include "numeric/mechanics"
+
 #include <range/v3/view/transform.hpp>
 
 namespace neon::mech::solid

@@ -4,6 +4,8 @@
 #include "Exceptions.hpp"
 #include "InternalVariables.hpp"
 
+#include "numeric/mechanics"
+
 #include <range/v3/view/transform.hpp>
 
 namespace neon::mech::solid
@@ -37,7 +39,9 @@ void IsotropicLinearElasticity::update_internal_variables(double const time_step
 
     // Compute Cauchy stress from the linear elastic strains
     cauchy_stresses = elastic_strains | view::transform([this](auto const& elastic_strain) {
-                          return compute_cauchy_stress(elastic_strain);
+                          return compute_cauchy_stress(material.shear_modulus(),
+                                                       material.lambda(),
+                                                       elastic_strain);
                       });
 
     // Compute the von Mises equivalent stress

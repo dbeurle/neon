@@ -4,6 +4,7 @@
 #include "Exceptions.hpp"
 #include "InternalVariables.hpp"
 #include "numeric/FloatingPointCompare.hpp"
+#include "numeric/mechanics"
 
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/zip.hpp>

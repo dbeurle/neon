@@ -7,13 +7,15 @@ namespace neon
 {
 /**
  * Performs the tensor dot product on two second order tensors in three dimensions.
- *
  */
-[[nodiscard]] inline double double_dot(Matrix3 const& a, Matrix3 const& b)
+template <typename MatrixExpression>
+[[nodiscard]] inline double double_dot(MatrixExpression const& a, MatrixExpression const& b)
 {
     return (a.array() * b.array()).sum();
 }
 
+namespace detail
+{
 /** @return the volumetric part of the tensor */
 [[nodiscard]] inline Matrix2 volumetric(Matrix2 const& a)
 {
@@ -26,13 +28,18 @@ namespace neon
     return Matrix3::Identity() * a.trace() / 3.0;
 }
 
-namespace detail
-{
 /** @return the deviatoric part of the tensor */
 [[nodiscard]] inline Matrix2 deviatoric(Matrix2 const& a) { return a - volumetric(a); }
 
 /** @return the deviatoric part of the tensor */
 [[nodiscard]] inline Matrix3 deviatoric(Matrix3 const& a) { return a - volumetric(a); }
+}
+
+/** @return the volumetric part of the tensor */
+template <typename MatrixExpression>
+[[nodiscard]] inline auto volumetric(MatrixExpression const& a)
+{
+    return detail::deviatoric(a.eval());
 }
 
 /** @return the deviatoric part of the tensor */
@@ -52,27 +59,6 @@ template <typename MatrixExpression>
 [[nodiscard]] inline Matrix3 unimodular(Matrix3 const& a)
 {
     return std::pow(a.determinant(), -1.0 / 3.0) * a;
-}
-
-namespace detail
-{
-/** Compute the von Mises stress based on the reduced stress tensor */
-[[nodiscard]] inline double von_mises_stress(Matrix2 const& a)
-{
-    return std::sqrt(3.0 / 2.0) * deviatoric(a).norm();
-}
-
-/** Compute the von Mises stress based on the full stress tensor */
-[[nodiscard]] inline double von_mises_stress(Matrix3 const& a)
-{
-    return std::sqrt(3.0 / 2.0) * deviatoric(a).norm();
-}
-}
-
-template <typename MatrixExpression>
-[[nodiscard]] inline double von_mises_stress(MatrixExpression const& a)
-{
-    return detail::von_mises_stress(a.eval());
 }
 
 /** @return The symmetric part of the tensor */

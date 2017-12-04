@@ -29,7 +29,7 @@ public:
     [[nodiscard]] virtual bool is_finite_deformation() const override { return false; }
 
 protected:
-    [[nodiscard]] Matrix3 compute_cauchy_stress(Matrix3 const& elastic_strain) const;
+    [[deprecated]][[nodiscard]] Matrix3 compute_cauchy_stress(Matrix3 const& elastic_strain) const;
 
     [[nodiscard]] Matrix6 elastic_moduli() const;
 
