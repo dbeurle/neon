@@ -19,6 +19,11 @@ using Matrix3 = Eigen::Matrix<double, 3, 3>;
 using Matrix6 = Eigen::Matrix<double, 6, 6>;
 using Matrix9 = Eigen::Matrix<double, 9, 9>;
 
+/** Compile time fixed rows for nodal coordinates in two dimensions */
+using Matrix2x = Eigen::Matrix<double, 2, Eigen::Dynamic>;
+/** Compile time fixed rows for nodal coordinates in three dimensions */
+using Matrix3x = Eigen::Matrix<double, 3, Eigen::Dynamic>;
+
 using Vector = Eigen::Matrix<double, Eigen::Dynamic, 1>;
 using Vector2 = Eigen::Vector2d;
 using Vector3 = Eigen::Vector3d;
