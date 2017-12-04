@@ -2,7 +2,7 @@
 #pragma once
 
 #include "ShapeFunction.hpp"
-#include "SurfaceInterpolation.hpp"
+#include "ShapeFunction.hpp"
 
 #include "mesh/ElementTopology.hpp"
 

@@ -1,6 +1,8 @@
 
 #include "Quadrilateral.hpp"
 
+#include "geometry/Projection.hpp"
+
 #include <array>
 #include <tuple>
 
@@ -60,7 +62,7 @@ double Quadrilateral4::compute_measure(Matrix const& nodal_coordinates) const
     return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
         auto const & [ N, dN ] = femval;
 
-        Matrix2 const Jacobian = project_to_plane(nodal_coordinates) * dN;
+        Matrix2 const Jacobian = geometry::project_to_plane(nodal_coordinates) * dN;
 
         return Jacobian.determinant();
     });
@@ -146,7 +148,7 @@ double Quadrilateral8::compute_measure(Matrix const& nodal_coordinates) const
     return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
         auto const & [ N, dN ] = femval;
 
-        Matrix2 const Jacobian = project_to_plane(nodal_coordinates) * dN;
+        Matrix2 const Jacobian = geometry::project_to_plane(nodal_coordinates) * dN;
 
         return Jacobian.determinant();
     });
@@ -236,7 +238,7 @@ double Quadrilateral9::compute_measure(Matrix const& nodal_coordinates) const
     return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
         auto const & [ N, dN ] = femval;
 
-        Matrix2 const Jacobian = project_to_plane(nodal_coordinates) * dN;
+        Matrix2 const Jacobian = geometry::project_to_plane(nodal_coordinates) * dN;
 
         return Jacobian.determinant();
     });

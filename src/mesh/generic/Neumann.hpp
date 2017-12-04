@@ -3,6 +3,7 @@
 
 #include "VectorContribution.hpp"
 
+#include "geometry/Projection.hpp"
 #include "mesh/DofAllocator.hpp"
 #include "mesh/MaterialCoordinates.hpp"
 
@@ -56,7 +57,7 @@ public:
     virtual std::tuple<List const&, Vector> external_force(int const element,
                                                            double const load_factor) const override
     {
-        auto const X = sf->project_to_plane(
+        auto const X = geometry::project_to_plane(
             material_coordinates->initial_configuration(nodal_connectivity[element]));
 
         auto const h = interpolate_prescribed_load(load_factor);

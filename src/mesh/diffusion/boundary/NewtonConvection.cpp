@@ -34,7 +34,7 @@ std::tuple<List const&, Matrix> NewtonConvection::external_stiffness(int const e
                                                                      double const load_factor) const
 {
     // clang-format off
-    auto const X = sf->project_to_plane(material_coordinates->initial_configuration(nodal_connectivity[element]));
+    auto const X = geometry::project_to_plane(material_coordinates->initial_configuration(nodal_connectivity[element]));
 
     auto const coefficient = interpolate_prescribed_load(coefficient_time_data, load_factor);
 

@@ -3,7 +3,7 @@
 
 #include "mesh/generic/Neumann.hpp"
 
-#include "interpolations/SurfaceInterpolation.hpp"
+#include "interpolations/ShapeFunction.hpp"
 
 namespace neon::diffusion
 {

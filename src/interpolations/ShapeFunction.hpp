@@ -81,5 +81,6 @@ void ShapeFunction<Quadrature>::compute_extrapolation_matrix(Matrix const N,
     extrapolation = N_plus * (Matrix::Identity(m, m) - xi_hat * xi_hat_plus) + xi * xi_hat_plus;
 }
 
+using SurfaceInterpolation = ShapeFunction<SurfaceQuadrature>;
 using VolumeInterpolation = ShapeFunction<VolumeQuadrature>;
 }

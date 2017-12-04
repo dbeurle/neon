@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "SurfaceInterpolation.hpp"
+#include "ShapeFunction.hpp"
 #include "quadrature/QuadrilateralQuadrature.hpp"
 
 namespace neon
