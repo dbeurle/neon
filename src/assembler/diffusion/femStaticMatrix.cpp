@@ -52,7 +52,7 @@ void femStaticMatrix::compute_external_force(double const load_factor)
 
     f.setZero();
 
-    for (auto const & [ name, surfaces ] : fem_mesh.surface_boundaries())
+    for (auto const& [name, surfaces] : fem_mesh.surface_boundaries())
     {
         for (auto const& surface : surfaces)
         {
@@ -60,7 +60,7 @@ void femStaticMatrix::compute_external_force(double const load_factor)
             {
                 for (auto element = 0; element < mesh.elements(); ++element)
                 {
-                    auto const & [ dofs, fe ] = mesh.external_force(element, load_factor);
+                    auto const& [dofs, fe] = mesh.external_force(element, load_factor);
 
                     for (auto a = 0; a < fe.size(); ++a)
                     {
@@ -130,7 +130,7 @@ void femStaticMatrix::assemble_stiffness()
 
 void femStaticMatrix::apply_dirichlet_conditions(SparseMatrix& A, Vector& x, Vector& b)
 {
-    for (auto const & [ name, dirichlet_boundaries ] : fem_mesh.dirichlet_boundaries())
+    for (auto const& [name, dirichlet_boundaries] : fem_mesh.dirichlet_boundaries())
     {
         for (auto const& dirichlet_boundary : dirichlet_boundaries)
         {

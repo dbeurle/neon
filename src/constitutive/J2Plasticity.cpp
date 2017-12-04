@@ -26,14 +26,16 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
     auto const shear_modulus = material.shear_modulus();
 
     // Extract the internal variables
-    auto[plastic_strains, strains, cauchy_stresses] = variables(InternalVariables::Tensor::LinearisedPlasticStrain,
-                                                                InternalVariables::Tensor::LinearisedStrain,
-                                                                InternalVariables::Tensor::Cauchy);
+    auto [plastic_strains,
+          strains,
+          cauchy_stresses] = variables(InternalVariables::Tensor::LinearisedPlasticStrain,
+                                       InternalVariables::Tensor::LinearisedStrain,
+                                       InternalVariables::Tensor::Cauchy);
 
     // Retrieve the accumulated internal variables
-    auto[accumulated_plastic_strains,
-         von_mises_stresses] = variables(InternalVariables::Scalar::EffectivePlasticStrain,
-                                         InternalVariables::Scalar::VonMisesStress);
+    auto [accumulated_plastic_strains,
+          von_mises_stresses] = variables(InternalVariables::Scalar::EffectivePlasticStrain,
+                                          InternalVariables::Scalar::VonMisesStress);
 
     auto& tangent_operators = variables(InternalVariables::Matrix::TangentOperator);
 

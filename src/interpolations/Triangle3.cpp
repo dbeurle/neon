@@ -26,8 +26,7 @@ void Triangle3::precompute_shape_functions()
     Matrix local_quadrature_coordinates = Matrix::Ones(numerical_quadrature->points(), 3);
 
     numerical_quadrature->evaluate([&](auto const& coordinates) {
-
-        auto const & [ l, r, s ] = coordinates;
+        auto const& [l, r, s] = coordinates;
 
         Vector N(3);
         Matrix rhea(3, 2);
@@ -55,7 +54,7 @@ void Triangle3::precompute_shape_functions()
     // Compute extrapolation algorithm matrices
     Matrix local_nodal_coordinates = Matrix::Ones(nodes(), 3);
 
-    for (auto const & [ a, r, s ] : local_coordinates)
+    for (auto const& [a, r, s] : local_coordinates)
     {
         local_nodal_coordinates(a, 0) = r;
         local_nodal_coordinates(a, 1) = s;

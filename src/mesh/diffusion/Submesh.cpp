@@ -54,8 +54,7 @@ std::tuple<List const&, Matrix> femSubmesh::tangent_stiffness(int const element)
     Matrix const kmat = sf->quadrature()
                             .integrate(Matrix::Zero(n, n).eval(),
                                        [&](auto const& femval, auto const& l) -> Matrix {
-
-                                           auto const & [ N, rhea ] = femval;
+                                           auto const& [N, rhea] = femval;
 
                                            auto const& D = D_Vec[offset(element, l)];
 
@@ -79,7 +78,7 @@ std::tuple<List const&, Matrix> femSubmesh::consistent_mass(int const element) c
 
     auto m = sf->quadrature().integrate(Matrix::Zero(nodes_per_element(), nodes_per_element()).eval(),
                                         [&](auto const& femval, auto const& l) -> Matrix {
-                                            auto const & [ N, dN ] = femval;
+                                            auto const& [N, dN] = femval;
 
                                             auto const Jacobian = local_jacobian(dN, X);
 
@@ -91,7 +90,7 @@ std::tuple<List const&, Matrix> femSubmesh::consistent_mass(int const element) c
 
 std::tuple<List const&, Vector> femSubmesh::diagonal_mass(int const element) const
 {
-    auto const & [ dofs, consistent_m ] = this->consistent_mass(element);
+    auto const& [dofs, consistent_m] = this->consistent_mass(element);
 
     Vector diagonal_m(consistent_m.rows());
     for (auto i = 0; i < consistent_m.rows(); ++i)

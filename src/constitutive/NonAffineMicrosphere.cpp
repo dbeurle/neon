@@ -99,7 +99,7 @@ double NonAffineMicrosphere::compute_nonaffine_stretch(Matrix3 const& F_unimodul
 
     return std::pow(unit_sphere.integrate(0.0,
                                           [&](auto const& coordinates, auto const& l) {
-                                              auto const & [ r, r_outer_r ] = coordinates;
+                                              auto const& [r, r_outer_r] = coordinates;
 
                                               Vector3 const t = deformed_tangent(F_unimodular, r);
 
@@ -113,7 +113,7 @@ Matrix3 NonAffineMicrosphere::compute_h_tensor(Matrix3 const& F_unimodular) cons
     auto const p = non_affine_stretch_parameter;
 
     return unit_sphere.integrate(Matrix3::Zero().eval(), [&](auto const& xyz, auto const& l) -> Matrix3 {
-        auto const & [ r, r_o_r ] = xyz;
+        auto const& [r, r_o_r] = xyz;
 
         Vector3 const t = deformed_tangent(F_unimodular, r);
 

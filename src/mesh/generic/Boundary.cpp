@@ -76,8 +76,8 @@ double Boundary::interpolate_prescribed_load(std::vector<std::pair<double, doubl
     auto const lower_pair = *lower_position;
     auto const upper_pair = *(ranges::next(lower_position));
 
-    auto const[time_0, load_0] = lower_pair;
-    auto const[time_1, load_1] = upper_pair;
+    auto const [time_0, load_0] = lower_pair;
+    auto const [time_1, load_1] = upper_pair;
 
     auto const interpolation_factor = (step_time - time_0) / (time_1 - time_0);
 

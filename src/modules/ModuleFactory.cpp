@@ -24,7 +24,7 @@ std::unique_ptr<AbstractModule> make_module(
     std::cout << std::string(4, ' ') << "Module \"" << module_type << "\"\n";
     std::cout << std::string(4, ' ') << "Solution \"" << solution_type << "\"\n";
 
-    auto const & [ mesh, material ] = simulation_mesh->second;
+    auto const& [mesh, material] = simulation_mesh->second;
 
     if (module_type == "SolidMechanics")
     {

@@ -9,10 +9,12 @@
 
 namespace neon::mech::solid
 {
-  /**
-   * J2PlasticityDamage is responsible for computing the constitutive model of a standard ductile Chaboche damage model without microdefects closure effects.
-   * Theoritical details can be found in \cite Neto2011 (Lemaitre’s elastoplastic damage theory), \cite Ladeveze1999 (chapter 2) and \cite Lemaitre2005 (Isotropic Damage without Microdefects Closure).
-   */
+/**
+ * J2PlasticityDamage is responsible for computing the constitutive model of a standard ductile
+ * Chaboche damage model without microdefects closure effects. Theoritical details can be found in
+ * \cite Neto2011 (Lemaitre’s elastoplastic damage theory), \cite Ladeveze1999 (chapter 2) and \cite
+ * Lemaitre2005 (Isotropic Damage without Microdefects Closure).
+ */
 class J2PlasticityDamage : public J2Plasticity
 {
 public:

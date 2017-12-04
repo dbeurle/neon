@@ -50,7 +50,7 @@ void AffineMicrosphere::update_internal_variables(double const time_step_size)
     // Project the stresses to obtain the Cauchy stress
     cauchy_stresses = ranges::view::zip(macro_stresses, det_deformation_gradients)
                       | ranges::view::transform([&](auto const& tpl) -> Matrix3 {
-                            auto const & [ macro_stress, J ] = tpl;
+                            auto const& [macro_stress, J] = tpl;
 
                             auto const pressure = J * volumetric_free_energy_dJ(J, K);
 
@@ -104,7 +104,7 @@ Matrix3 AffineMicrosphere::compute_macro_stress(Matrix3 const& F_unimodular,
     return bulk_modulus
            * unit_sphere.integrate(Matrix3::Zero().eval(),
                                    [&](auto const& coordinates, auto const& l) -> Matrix3 {
-                                       auto const & [ r, r_outer_r ] = coordinates;
+                                       auto const& [r, r_outer_r] = coordinates;
 
                                        Vector3 const t = deformed_tangent(F_unimodular, r);
 

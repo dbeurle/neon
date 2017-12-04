@@ -113,7 +113,6 @@ Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int const element
     Matrix kmat = Matrix::Zero(local_dofs, local_dofs);
 
     return sf->quadrature().integrate(kmat, [&](auto const& femval, auto const& l) -> Matrix {
-
         auto const & [N, rhea] = femval;
 
         auto const& D = tangent_operators[offset(element, l)];
@@ -137,7 +136,6 @@ Vector femSubmesh::internal_nodal_force(Matrix const& x, int const element) cons
 
     sf->quadrature().integrate(Eigen::Map<RowMatrix>(fint.data(), m, n),
                                [&](auto const& femval, auto const& l) -> RowMatrix {
-
                                    auto const & [N, dN] = femval;
 
                                    auto const Jacobian = local_deformation_gradient(dN, x);
@@ -211,7 +209,6 @@ void femSubmesh::update_deformation_measures()
         auto const x = material_coordinates->current_configuration(local_node_list(element));
 
         sf->quadrature().for_each([&](auto const& femval, const auto& l) {
-
             auto const & [N, rhea] = femval;
 
             // Local deformation gradient for the initial configuration

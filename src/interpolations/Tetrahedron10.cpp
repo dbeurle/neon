@@ -30,7 +30,7 @@ void Tetrahedron10::precompute_shape_functions()
     Matrix local_quadrature_coordinates = Matrix::Ones(numerical_quadrature->points(), 4);
 
     numerical_quadrature->evaluate([&](auto const& coordinate) {
-        auto const & [ l, r, s, t ] = coordinate;
+        auto const& [l, r, s, t] = coordinate;
 
         auto const u = 1.0 - r - s - t;
 
@@ -93,7 +93,7 @@ void Tetrahedron10::precompute_shape_functions()
     // Compute extrapolation algorithm matrices
     Matrix local_nodal_coordinates = Matrix::Ones(nodes(), 4);
 
-    for (auto const & [ a, r, s, t ] : local_coordinates)
+    for (auto const& [a, r, s, t] : local_coordinates)
     {
         local_nodal_coordinates(a, 0) = r;
         local_nodal_coordinates(a, 1) = s;

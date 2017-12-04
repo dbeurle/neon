@@ -27,24 +27,24 @@ void J2PlasticityDamage::update_internal_variables(double const time_step_size)
     using namespace ranges;
 
     // Extract the internal variables
-    auto[plastic_strains,
-         strains,
-         cauchy_stresses,
-         back_stresses,
-         accumulated_kinematic_stresses] = variables(InternalVariables::Tensor::LinearisedPlasticStrain,
-                                                     InternalVariables::Tensor::LinearisedStrain,
-                                                     InternalVariables::Tensor::Cauchy,
-                                                     InternalVariables::Tensor::BackStress,
-                                                     InternalVariables::Tensor::KinematicHardening);
+    auto [plastic_strains,
+          strains,
+          cauchy_stresses,
+          back_stresses,
+          accumulated_kinematic_stresses] = variables(InternalVariables::Tensor::LinearisedPlasticStrain,
+                                                      InternalVariables::Tensor::LinearisedStrain,
+                                                      InternalVariables::Tensor::Cauchy,
+                                                      InternalVariables::Tensor::BackStress,
+                                                      InternalVariables::Tensor::KinematicHardening);
 
     // Retrieve the accumulated internal variables
-    auto[accumulated_plastic_strains,
-         von_mises_stresses,
-         scalar_damages,
-         energy_release_rates] = variables(InternalVariables::Scalar::EffectivePlasticStrain,
-                                           InternalVariables::Scalar::VonMisesStress,
-                                           InternalVariables::Scalar::Damage,
-                                           InternalVariables::Scalar::EnergyReleaseRate);
+    auto [accumulated_plastic_strains,
+          von_mises_stresses,
+          scalar_damages,
+          energy_release_rates] = variables(InternalVariables::Scalar::EffectivePlasticStrain,
+                                            InternalVariables::Scalar::VonMisesStress,
+                                            InternalVariables::Scalar::Damage,
+                                            InternalVariables::Scalar::EnergyReleaseRate);
 
     auto& tangent_operators = variables(InternalVariables::Matrix::TangentOperator);
 
