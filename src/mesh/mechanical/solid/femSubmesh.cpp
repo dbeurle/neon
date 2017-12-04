@@ -83,7 +83,7 @@ std::tuple<List const&, Vector> femSubmesh::internal_force(int const element) co
 
 Matrix femSubmesh::geometric_tangent_stiffness(Matrix const& x, int const element) const
 {
-    auto const& cauchy_list = variables(InternalVariables::Tensor::Cauchy);
+    auto const& cauchy_stresses = variables(InternalVariables::Tensor::Cauchy);
 
     auto n = nodes_per_element();
 
@@ -94,12 +94,12 @@ Matrix femSubmesh::geometric_tangent_stiffness(Matrix const& x, int const elemen
 
                                                         auto const Jacobian = local_deformation_gradient(rhea, x);
 
-                                                        Matrix3 const cauchy = cauchy_list[offset(element, l)];
+                                                        auto const cauchy_stress = cauchy_stresses[offset(element, l)];
 
                                                         // Compute the symmetric gradient operator
                                                         auto const L = (rhea * Jacobian.inverse()).transpose();
 
-                                                        return L.transpose() * cauchy * L * Jacobian.determinant();
+                                                        return L.transpose() * cauchy_stress * L * Jacobian.determinant();
                                                     });
     // clang-format on
     return identity_expansion(kgeo, dofs_per_node());
