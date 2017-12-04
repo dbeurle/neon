@@ -8,8 +8,8 @@
 #include "mesh/NodeOrderingAdapter.hpp"
 
 #include "mesh/MaterialCoordinates.hpp"
-#include "mesh/mech/solid/femMesh.hpp"
-#include "mesh/mech/solid/femSubmesh.hpp"
+#include "mesh/mechanical/solid/femMesh.hpp"
+#include "mesh/mechanical/solid/femSubmesh.hpp"
 
 #include <json/json.h>
 #include <range/v3/view.hpp>
@@ -166,7 +166,7 @@ TEST_CASE("Basic mesh test")
 }
 TEST_CASE("Solid submesh test")
 {
-    using namespace mech::solid;
+    using namespace mechanical::solid;
 
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh
@@ -189,7 +189,7 @@ TEST_CASE("Solid submesh test")
 
     auto material_coordinates = std::make_shared<MaterialCoordinates>(nodal_coordinates.coordinates());
 
-    mech::solid::femSubmesh fem_submesh(material_data, simulation_data, material_coordinates, submesh);
+    mechanical::solid::femSubmesh fem_submesh(material_data, simulation_data, material_coordinates, submesh);
 
     int constexpr number_of_nodes = 64;
     int constexpr number_of_dofs = number_of_nodes * 3;
@@ -212,10 +212,10 @@ TEST_CASE("Solid submesh test")
     SECTION("Default internal variables test")
     {
         // Check the standard ones are used
-        REQUIRE(internal_vars.has(mech::solid::InternalVariables::Tensor::DisplacementGradient));
-        REQUIRE(internal_vars.has(mech::solid::InternalVariables::Tensor::DeformationGradient));
-        REQUIRE(internal_vars.has(mech::solid::InternalVariables::Tensor::Cauchy));
-        REQUIRE(internal_vars.has(mech::solid::InternalVariables::Scalar::DetF));
+        REQUIRE(internal_vars.has(mechanical::solid::InternalVariables::Tensor::DisplacementGradient));
+        REQUIRE(internal_vars.has(mechanical::solid::InternalVariables::Tensor::DeformationGradient));
+        REQUIRE(internal_vars.has(mechanical::solid::InternalVariables::Tensor::Cauchy));
+        REQUIRE(internal_vars.has(mechanical::solid::InternalVariables::Scalar::DetF));
     }
     SECTION("Tangent stiffness")
     {
@@ -257,7 +257,7 @@ TEST_CASE("Solid submesh test")
 }
 TEST_CASE("Solid mesh test")
 {
-    using mech::solid::femMesh;
+    using mechanical::solid::femMesh;
 
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh

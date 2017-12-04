@@ -38,11 +38,11 @@ protected:
     InternalVariables<spatial_dimension>& variables;
 };
 
-namespace mech::solid
+namespace mechanical::solid
 {
 using ConstitutiveModel = neon::ConstitutiveModel<3>;
 }
-namespace mech::plane
+namespace mechanical::plane
 {
 using ConstitutiveModel = neon::ConstitutiveModel<2>;
 }

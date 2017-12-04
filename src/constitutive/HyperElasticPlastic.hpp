@@ -3,7 +3,7 @@
 
 #include "ConstitutiveModel.hpp"
 
-namespace neon::mech::solid
+namespace neon::mechanical::solid
 {
 class HyperElasticPlastic : public ConstitutiveModel
 {

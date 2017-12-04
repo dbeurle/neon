@@ -7,7 +7,7 @@
 
 #include "material/LinearElastic.hpp"
 
-namespace neon::mech::solid
+namespace neon::mechanical::solid
 {
 /**
  * IsotropicLinearElasticity is responsible for compute the moduli and the
@@ -29,8 +29,6 @@ public:
     [[nodiscard]] virtual bool is_finite_deformation() const override { return false; }
 
 protected:
-    [[deprecated]][[nodiscard]] Matrix3 compute_cauchy_stress(Matrix3 const& elastic_strain) const;
-
     [[nodiscard]] Matrix6 elastic_moduli() const;
 
 private:

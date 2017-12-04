@@ -7,7 +7,7 @@
 
 namespace neon
 {
-namespace mech::solid
+namespace mechanical::solid
 {
 int encode_dof(std::string const& name) { return 0; }
 }

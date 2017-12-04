@@ -5,7 +5,7 @@
 
 #include "solver/time/NewmarkBeta.hpp"
 
-namespace neon::mech::solid
+namespace neon::mechanical::solid
 {
 class femDynamicMatrix : public femStaticMatrix
 {

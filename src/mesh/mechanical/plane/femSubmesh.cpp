@@ -19,7 +19,7 @@
 
 #include <termcolor/termcolor.hpp>
 
-namespace neon::mech::plane
+namespace neon::mechanical::plane
 {
 femSubmesh::femSubmesh(Json::Value const& material_data,
                        Json::Value const& simulation_data,

@@ -8,8 +8,8 @@ namespace neon
 /**
  * Performs the tensor dot product on two second order tensors in three dimensions.
  */
-template <typename MatrixExpression>
-[[nodiscard]] inline double double_dot(MatrixExpression const& a, MatrixExpression const& b)
+template <class MatrixLeft, class MatrixRight>
+[[nodiscard]] inline double double_dot(MatrixLeft const& a, MatrixRight const& b)
 {
     return (a.array() * b.array()).sum();
 }
@@ -39,7 +39,7 @@ namespace detail
 template <typename MatrixExpression>
 [[nodiscard]] inline auto volumetric(MatrixExpression const& a)
 {
-    return detail::deviatoric(a.eval());
+    return detail::volumetric(a.eval());
 }
 
 /** @return the deviatoric part of the tensor */

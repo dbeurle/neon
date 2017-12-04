@@ -8,7 +8,7 @@
 
 #include <variant>
 
-namespace neon::mech::solid
+namespace neon::mechanical::solid
 {
 /**
  * Traction is a non-follower load that has a surface interpolation and

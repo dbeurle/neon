@@ -4,14 +4,14 @@
 #include "AbstractModule.hpp"
 
 #include "assembler/solid/femStaticMatrix.hpp"
-#include "mesh/mech/solid/femMesh.hpp"
+#include "mesh/mechanical/solid/femMesh.hpp"
 
 namespace neon
 {
 //! This namespace groups together all of the classes and functions associated
 //! with solid mechanics finite elements.  The sub-namespaces implement mechanics
 //! such as solid, plate, beam, axisymmetric etc
-namespace mech
+namespace mechanical
 {
 //! This namespace groups together all of the classes and functions associated
 //! with three-dimensional solid mechanics finite elements.  These include
@@ -41,7 +41,7 @@ public:
     virtual void perform_simulation() override final { fem_matrix.solve(); }
 
 protected:
-    mech::solid::femMesh fem_mesh;           //!< Mesh with the solid routines
-    mech::solid::femStaticMatrix fem_matrix; //!< Nonlinear solver routines
+    mechanical::solid::femMesh fem_mesh;           //!< Mesh with the solid routines
+    mechanical::solid::femStaticMatrix fem_matrix; //!< Nonlinear solver routines
 };
 }

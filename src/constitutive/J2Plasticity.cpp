@@ -8,7 +8,7 @@
 
 #include <range/v3/view/transform.hpp>
 
-namespace neon::mech::solid
+namespace neon::mechanical::solid
 {
 J2Plasticity::J2Plasticity(InternalVariables& variables, Json::Value const& material_data)
     : IsotropicLinearElasticity(variables, material_data), material(material_data)
@@ -26,16 +26,14 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
     auto const shear_modulus = material.shear_modulus();
 
     // Extract the internal variables
-    auto [plastic_strains,
-          strains,
-          cauchy_stresses] = variables(InternalVariables::Tensor::LinearisedPlasticStrain,
-                                       InternalVariables::Tensor::LinearisedStrain,
-                                       InternalVariables::Tensor::Cauchy);
+    auto[plastic_strains, strains, cauchy_stresses] = variables(InternalVariables::Tensor::LinearisedPlasticStrain,
+                                                                InternalVariables::Tensor::LinearisedStrain,
+                                                                InternalVariables::Tensor::Cauchy);
 
     // Retrieve the accumulated internal variables
-    auto [accumulated_plastic_strains,
-          von_mises_stresses] = variables(InternalVariables::Scalar::EffectivePlasticStrain,
-                                          InternalVariables::Scalar::VonMisesStress);
+    auto[accumulated_plastic_strains,
+         von_mises_stresses] = variables(InternalVariables::Scalar::EffectivePlasticStrain,
+                                         InternalVariables::Scalar::VonMisesStress);
 
     auto& tangent_operators = variables(InternalVariables::Matrix::TangentOperator);
 
@@ -53,7 +51,9 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
         auto& von_mises = von_mises_stresses[l];
 
         // Elastic stress predictor
-        cauchy_stress = compute_cauchy_stress(strain - plastic_strain);
+        cauchy_stress = compute_cauchy_stress(material.shear_modulus(),
+                                              material.lambda(),
+                                              strain - plastic_strain);
 
         // Trial von Mises stress
         von_mises = von_mises_stress(cauchy_stress);

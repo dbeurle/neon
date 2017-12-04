@@ -7,7 +7,7 @@
 #include <json/value.h>
 #include <termcolor/termcolor.hpp>
 
-namespace neon::mech::solid
+namespace neon::mechanical::solid
 {
 femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh, Json::Value const& simulation)
     : femStaticMatrix(fem_mesh, simulation),

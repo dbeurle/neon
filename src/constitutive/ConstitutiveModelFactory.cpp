@@ -13,12 +13,12 @@
 
 #include "IsotropicDiffusion.hpp"
 
-#include "mech/plane/IsotropicLinearElasticity.hpp"
+#include "mechanical/plane/IsotropicLinearElasticity.hpp"
 
 #include <json/value.h>
 #include <stdexcept>
 
-namespace neon::mech::solid
+namespace neon::mechanical::solid
 {
 std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& variables,
                                                            Json::Value const& material_data,
@@ -120,7 +120,7 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& va
 }
 }
 
-namespace neon::mech::plane
+namespace neon::mechanical::plane
 {
 std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& variables,
                                                            Json::Value const& material_data,

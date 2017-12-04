@@ -4,7 +4,7 @@
 #include "constitutive/InternalVariables.hpp"
 #include "mesh/NodeOrderingAdapter.hpp"
 #include "mesh/diffusion/femMesh.hpp"
-#include "mesh/mech/solid/femMesh.hpp"
+#include "mesh/mechanical/solid/femMesh.hpp"
 
 #include <map>
 #include <string>
@@ -50,7 +50,7 @@ protected:
     bool use_binary_format = true;
 };
 
-namespace mech::solid
+namespace mechanical::solid
 {
 class FileIO : public neon::FileIO
 {

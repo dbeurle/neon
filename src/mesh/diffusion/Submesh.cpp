@@ -25,7 +25,7 @@ femSubmesh::femSubmesh(Json::Value const& material_data,
                        Submesh const& submesh)
     : neon::Submesh(submesh),
       material_coordinates(material_coordinates),
-      sf(mech::solid::make_volume_interpolation(topology(), simulation_data)),
+      sf(mechanical::solid::make_volume_interpolation(topology(), simulation_data)),
       variables(elements() * sf->quadrature().points()),
       cm(make_constitutive_model(variables, material_data, simulation_data))
 {

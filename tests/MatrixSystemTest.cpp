@@ -6,8 +6,8 @@
 #include "mesh/BasicMesh.hpp"
 
 #include "mesh/MaterialCoordinates.hpp"
-#include "mesh/mech/solid/femMesh.hpp"
-#include "mesh/mech/solid/femSubmesh.hpp"
+#include "mesh/mechanical/solid/femMesh.hpp"
+#include "mesh/mechanical/solid/femSubmesh.hpp"
 
 #include "assembler/solid/femStaticMatrix.hpp"
 
@@ -23,8 +23,8 @@ using namespace neon;
 
 TEST_CASE("Nonlinear system equilibrium solver test")
 {
-    using mech::solid::femMesh;
-    using mech::solid::femStaticMatrix;
+    using mechanical::solid::femMesh;
+    using mechanical::solid::femStaticMatrix;
 
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh

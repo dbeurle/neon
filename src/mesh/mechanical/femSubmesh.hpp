@@ -8,7 +8,7 @@
 
 #include <tuple>
 
-namespace neon::mech::detail
+namespace neon::mechanical::detail
 {
 /**
  * femSubmesh is a Curiously Recurring Template Pattern class for enforcing

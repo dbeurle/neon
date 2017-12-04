@@ -9,7 +9,7 @@
 #include <exception>
 #include <omp.h>
 
-namespace neon::mech::solid
+namespace neon::mechanical::solid
 {
 NonAffineMicrosphere::NonAffineMicrosphere(InternalVariables& variables,
                                            Json::Value const& material_data,

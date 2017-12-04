@@ -1,7 +1,7 @@
 
 #include "FileIO.hpp"
 
-#include "mesh/mech/solid/femMesh.hpp"
+#include "mesh/mechanical/solid/femMesh.hpp"
 
 #include <json/value.h>
 
@@ -109,7 +109,7 @@ void FileIO::add_field(std::string const& name, Vector const& field, int const c
     unstructured_mesh->GetPointData()->AddArray(scalar_value);
 }
 
-namespace mech::solid
+namespace mechanical::solid
 {
 FileIO::FileIO(std::string file_name, Json::Value const& visualisation_data, femMesh const& fem_mesh)
     : neon::FileIO(file_name, visualisation_data), fem_mesh(fem_mesh)

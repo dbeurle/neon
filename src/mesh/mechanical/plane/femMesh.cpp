@@ -1,5 +1,5 @@
 //
-// #include "mesh/mech/solid/femMesh.hpp"
+// #include "mesh/mechanical/solid/femMesh.hpp"
 //
 // #include "mesh/BasicMesh.hpp"
 //
@@ -17,7 +17,7 @@
 // #include <range/v3/action/unique.hpp>
 // #include <range/v3/view/transform.hpp>
 //
-// namespace neon::mech::solid
+// namespace neon::mechanical::solid
 // {
 // femMesh::femMesh(BasicMesh const& basic_mesh,
 //                  Json::Value const& material_data,

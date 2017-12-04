@@ -9,7 +9,7 @@
 #include <json/value.h>
 #include <range/v3/view.hpp>
 
-namespace neon::mech::solid
+namespace neon::mechanical::solid
 {
 J2PlasticityDamage::J2PlasticityDamage(InternalVariables& variables, Json::Value const& material_data)
     : J2Plasticity(variables, material_data), material(material_data)
@@ -27,24 +27,24 @@ void J2PlasticityDamage::update_internal_variables(double const time_step_size)
     using namespace ranges;
 
     // Extract the internal variables
-    auto [plastic_strains,
-          strains,
-          cauchy_stresses,
-          back_stresses,
-          accumulated_kinematic_stresses] = variables(InternalVariables::Tensor::LinearisedPlasticStrain,
-                                                      InternalVariables::Tensor::LinearisedStrain,
-                                                      InternalVariables::Tensor::Cauchy,
-                                                      InternalVariables::Tensor::BackStress,
-                                                      InternalVariables::Tensor::KinematicHardening);
+    auto[plastic_strains,
+         strains,
+         cauchy_stresses,
+         back_stresses,
+         accumulated_kinematic_stresses] = variables(InternalVariables::Tensor::LinearisedPlasticStrain,
+                                                     InternalVariables::Tensor::LinearisedStrain,
+                                                     InternalVariables::Tensor::Cauchy,
+                                                     InternalVariables::Tensor::BackStress,
+                                                     InternalVariables::Tensor::KinematicHardening);
 
     // Retrieve the accumulated internal variables
-    auto [accumulated_plastic_strains,
-          von_mises_stresses,
-          scalar_damages,
-          energy_release_rates] = variables(InternalVariables::Scalar::EffectivePlasticStrain,
-                                            InternalVariables::Scalar::VonMisesStress,
-                                            InternalVariables::Scalar::Damage,
-                                            InternalVariables::Scalar::EnergyReleaseRate);
+    auto[accumulated_plastic_strains,
+         von_mises_stresses,
+         scalar_damages,
+         energy_release_rates] = variables(InternalVariables::Scalar::EffectivePlasticStrain,
+                                           InternalVariables::Scalar::VonMisesStress,
+                                           InternalVariables::Scalar::Damage,
+                                           InternalVariables::Scalar::EnergyReleaseRate);
 
     auto& tangent_operators = variables(InternalVariables::Matrix::TangentOperator);
 
@@ -67,7 +67,9 @@ void J2PlasticityDamage::update_internal_variables(double const time_step_size)
         auto& C_algorithmic = tangent_operators[l];
 
         // Elastic stress predictor
-        cauchy_stress = compute_cauchy_stress(strain - plastic_strain);
+        cauchy_stress = compute_cauchy_stress(material.shear_modulus(),
+                                              material.lambda(),
+                                              strain - plastic_strain);
 
         Matrix3 tau = deviatoric(cauchy_stress) / (1.0 - scalar_damage) - deviatoric(back_stress);
 

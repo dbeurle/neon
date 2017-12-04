@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/mech/solid/femMesh.hpp"
+#include "mesh/mechanical/solid/femMesh.hpp"
 #include "numeric/SparseMatrix.hpp"
 #include "solver/AdaptiveLoadStep.hpp"
 
@@ -12,7 +12,7 @@ namespace neon
 class LinearSolver;
 }
 
-namespace neon::mech::solid
+namespace neon::mechanical::solid
 {
 class femStaticMatrix
 {

@@ -9,7 +9,7 @@
 
 #include <Eigen/Geometry>
 
-namespace neon::mech::solid
+namespace neon::mechanical::solid
 {
 std::tuple<List const&, Vector> Pressure::external_force(int const element,
                                                          double const load_factor) const

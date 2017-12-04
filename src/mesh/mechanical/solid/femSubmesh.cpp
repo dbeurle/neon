@@ -9,6 +9,7 @@
 #include "mesh/DofAllocator.hpp"
 #include "mesh/MaterialCoordinates.hpp"
 #include "numeric/Operators.hpp"
+#include "numeric/mechanics"
 
 #include <cfenv>
 #include <chrono>
@@ -19,7 +20,7 @@
 
 #include <termcolor/termcolor.hpp>
 
-namespace neon::mech::solid
+namespace neon::mechanical::solid
 {
 femSubmesh::femSubmesh(Json::Value const& material_data,
                        Json::Value const& simulation_data,

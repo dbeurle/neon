@@ -8,7 +8,7 @@
 
 #include <range/v3/view/transform.hpp>
 
-namespace neon::mech::solid
+namespace neon::mechanical::solid
 {
 IsotropicLinearElasticity::IsotropicLinearElasticity(InternalVariables& variables,
                                                      Json::Value const& material_data)
@@ -28,8 +28,8 @@ void IsotropicLinearElasticity::update_internal_variables(double const time_step
     using namespace ranges;
 
     // Extract the internal variables
-    auto [elastic_strains, cauchy_stresses] = variables(InternalVariables::Tensor::LinearisedStrain,
-                                                        InternalVariables::Tensor::Cauchy);
+    auto[elastic_strains, cauchy_stresses] = variables(InternalVariables::Tensor::LinearisedStrain,
+                                                       InternalVariables::Tensor::Cauchy);
 
     auto& von_mises_stresses = variables(InternalVariables::Scalar::VonMisesStress);
 
@@ -52,7 +52,7 @@ void IsotropicLinearElasticity::update_internal_variables(double const time_step
 
 Matrix6 IsotropicLinearElasticity::elastic_moduli() const
 {
-    auto const [lambda, shear_modulus] = material.Lame_parameters();
+    auto const[lambda, shear_modulus] = material.Lame_parameters();
 
     // clang-format off
     return (Matrix6() << lambda + 2.0 * shear_modulus, lambda, lambda, 0.0, 0.0, 0.0,
@@ -62,12 +62,5 @@ Matrix6 IsotropicLinearElasticity::elastic_moduli() const
                          0.0, 0.0, 0.0, 0.0, shear_modulus, 0.0,
                          0.0, 0.0, 0.0, 0.0, 0.0, shear_modulus).finished();
     // clang-format on
-}
-
-Matrix3 IsotropicLinearElasticity::compute_cauchy_stress(Matrix3 const& elastic_strain) const
-{
-    auto const G = material.shear_modulus();
-    auto const lambda_e = material.lambda();
-    return lambda_e * elastic_strain.trace() * Matrix3::Identity() + 2.0 * G * elastic_strain;
 }
 }

@@ -7,7 +7,7 @@
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/zip.hpp>
 
-namespace neon::mech::solid
+namespace neon::mechanical::solid
 {
 NeoHooke::NeoHooke(InternalVariables& variables, Json::Value const& material_data)
     : Hyperelastic(variables), material(material_data)

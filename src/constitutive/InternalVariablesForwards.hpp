@@ -8,7 +8,7 @@ namespace neon
 template <int spatial_dimension, int voigt_dimension = spatial_to_voigt(spatial_dimension)>
 class InternalVariables;
 
-namespace mech
+namespace mechanical
 {
 namespace solid
 {

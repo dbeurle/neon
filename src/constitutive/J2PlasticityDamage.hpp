@@ -7,7 +7,7 @@
 
 #include "material/IsotropicElasticPlasticDamage.hpp"
 
-namespace neon::mech::solid
+namespace neon::mechanical::solid
 {
 /**
  * J2PlasticityDamage is responsible for computing the constitutive model of a standard ductile

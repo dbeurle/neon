@@ -11,7 +11,7 @@
 // {
 // class BasicMesh;
 //
-// namespace mech::solid
+// namespace mechanical::solid
 // {
 // class femMesh
 // {

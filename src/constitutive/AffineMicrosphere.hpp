@@ -9,7 +9,7 @@
 
 #include <json/forwards.h>
 
-namespace neon::mech::solid
+namespace neon::mechanical::solid
 {
 /**
  * AffineMicrosphere is responsible for computing the Cauchy stress and the

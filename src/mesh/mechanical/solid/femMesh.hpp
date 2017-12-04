@@ -2,8 +2,8 @@
 #pragma once
 
 #include "mesh/generic/Dirichlet.hpp"
-#include "mesh/mech/solid/boundary/NonFollowerLoad.hpp"
-#include "mesh/mech/solid/femSubmesh.hpp"
+#include "mesh/mechanical/solid/boundary/NonFollowerLoad.hpp"
+#include "mesh/mechanical/solid/femSubmesh.hpp"
 
 #include <map>
 
@@ -11,7 +11,7 @@ namespace neon
 {
 class BasicMesh;
 
-namespace mech::solid
+namespace mechanical::solid
 {
 class femMesh
 {

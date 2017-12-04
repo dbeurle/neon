@@ -3,7 +3,7 @@
 
 #include "numeric/DenseMatrix.hpp"
 
-namespace neon
+namespace neon::mechanical
 {
 /**
  * Compute the local deformation gradient

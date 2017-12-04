@@ -11,7 +11,7 @@
 #include <omp.h>
 #include <termcolor/termcolor.hpp>
 
-namespace neon::mech::solid
+namespace neon::mechanical::solid
 {
 femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& simulation)
     : fem_mesh(fem_mesh),

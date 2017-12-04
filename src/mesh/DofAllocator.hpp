@@ -7,7 +7,7 @@
 
 namespace neon
 {
-namespace mech::solid
+namespace mechanical::solid
 {
 /**
  * encode_dof takes a string valued representation of the DoF and returns the

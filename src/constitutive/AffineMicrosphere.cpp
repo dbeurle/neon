@@ -9,7 +9,7 @@
 
 #include <omp.h>
 
-namespace neon::mech::solid
+namespace neon::mechanical::solid
 {
 AffineMicrosphere::AffineMicrosphere(InternalVariables& variables,
                                      Json::Value const& material_data,

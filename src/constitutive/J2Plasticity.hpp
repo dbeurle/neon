@@ -7,7 +7,7 @@
 
 #include "material/IsotropicElasticPlastic.hpp"
 
-namespace neon::mech::solid
+namespace neon::mechanical::solid
 {
 /**
  * J2Plasticity is responsible for computing the small strain J2 plasticity
