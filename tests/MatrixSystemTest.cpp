@@ -6,8 +6,8 @@
 #include "mesh/BasicMesh.hpp"
 
 #include "mesh/MaterialCoordinates.hpp"
-#include "mesh/solid/femSubmesh.hpp"
-#include "mesh/solid/femMesh.hpp"
+#include "mesh/mech/solid/femMesh.hpp"
+#include "mesh/mech/solid/femSubmesh.hpp"
 
 #include "assembler/solid/femStaticMatrix.hpp"
 

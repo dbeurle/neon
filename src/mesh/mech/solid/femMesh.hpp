@@ -2,8 +2,8 @@
 #pragma once
 
 #include "mesh/generic/Dirichlet.hpp"
-#include "mesh/solid/boundary/NonFollowerLoad.hpp"
-#include "mesh/solid/femSubmesh.hpp"
+#include "mesh/mech/solid/boundary/NonFollowerLoad.hpp"
+#include "mesh/mech/solid/femSubmesh.hpp"
 
 #include <map>
 
@@ -75,7 +75,7 @@ protected:
     [[nodiscard]] bool is_nonfollower_load(std::string const& boundary_type) const;
 
     /** Collapse the nodal connectivity arrays from the submesh for a node list */
-    [[nodiscard]] List filter_dof_list(std::vector<SubMesh> const& boundary_mesh) const;
+    [[nodiscard]] List filter_dof_list(std::vector<Submesh> const& boundary_mesh) const;
 
 protected:
     std::shared_ptr<MaterialCoordinates> material_coordinates;

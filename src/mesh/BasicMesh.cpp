@@ -20,7 +20,7 @@ BasicMesh::BasicMesh(Json::Value const& mesh_file) : NodalCoordinates(mesh_file)
     }
 }
 
-std::vector<SubMesh> const& BasicMesh::meshes(std::string const& name) const
+std::vector<Submesh> const& BasicMesh::meshes(std::string const& name) const
 {
     auto const found = meshes_map.find(name);
 

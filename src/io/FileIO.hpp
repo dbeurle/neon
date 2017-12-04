@@ -4,7 +4,7 @@
 #include "constitutive/InternalVariables.hpp"
 #include "mesh/NodeOrderingAdapter.hpp"
 #include "mesh/diffusion/femMesh.hpp"
-#include "mesh/solid/femMesh.hpp"
+#include "mesh/mech/solid/femMesh.hpp"
 
 #include <map>
 #include <string>

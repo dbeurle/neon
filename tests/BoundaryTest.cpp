@@ -8,10 +8,10 @@
 #include "interpolations/Triangle3.hpp"
 #include "quadrature/TriangleQuadrature.hpp"
 
-#include "mesh/SubMesh.hpp"
+#include "mesh/Submesh.hpp"
 
 #include "mesh/generic/Boundary.hpp"
-#include "mesh/solid/boundary/NonFollowerLoad.hpp"
+#include "mesh/mech/solid/boundary/NonFollowerLoad.hpp"
 
 #include <json/json.h>
 #include <range/v3/view.hpp>
@@ -280,7 +280,7 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
     REQUIRE(reader.parse(quadmesh.c_str(), quad_mesh_data));
     REQUIRE(reader.parse(simulation_data_traction_json().c_str(), simulation_data));
 
-    std::vector<SubMesh> submeshes = {tri_mesh_data, quad_mesh_data};
+    std::vector<Submesh> submeshes = {tri_mesh_data, quad_mesh_data};
 
     REQUIRE(submeshes.at(0).elements() == 1);
     REQUIRE(submeshes.at(1).elements() == 1);

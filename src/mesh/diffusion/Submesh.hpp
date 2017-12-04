@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/SubMesh.hpp"
+#include "mesh/Submesh.hpp"
 
 #include "constitutive/ConstitutiveModel.hpp"
 #include "constitutive/InternalVariables.hpp"
@@ -15,7 +15,7 @@ class MaterialCoordinates;
 
 namespace diffusion
 {
-class femSubmesh : public SubMesh
+class femSubmesh : public Submesh
 {
 public:
     using ValueCount = std::tuple<Vector, Vector>;
@@ -24,7 +24,7 @@ public:
     explicit femSubmesh(Json::Value const& material_data,
                         Json::Value const& simulation_data,
                         std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                        SubMesh const& submesh);
+                        Submesh const& submesh);
 
     /** @return list of global degrees of freedom for an element */
     [[nodiscard]] List const& local_dof_list(int const element) const

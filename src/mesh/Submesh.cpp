@@ -1,5 +1,5 @@
 
-#include "SubMesh.hpp"
+#include "Submesh.hpp"
 
 #include "Exceptions.hpp"
 
@@ -11,7 +11,7 @@
 
 namespace neon
 {
-SubMesh::SubMesh(Json::Value const& mesh)
+Submesh::Submesh(Json::Value const& mesh)
 {
     // Error checking for empty fields
     if (!mesh.isMember("Name"))
@@ -47,7 +47,7 @@ SubMesh::SubMesh(Json::Value const& mesh)
     adapter.convert_from_gmsh(nodal_connectivity, element_topology);
 }
 
-List SubMesh::unique_connectivities() const
+List Submesh::unique_connectivities() const
 {
     using namespace ranges;
     return std::ref(nodal_connectivity) | action::join | action::sort | action::unique;

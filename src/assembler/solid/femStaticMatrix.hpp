@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/solid/femMesh.hpp"
+#include "mesh/mech/solid/femMesh.hpp"
 #include "numeric/SparseMatrix.hpp"
 #include "solver/AdaptiveLoadStep.hpp"
 

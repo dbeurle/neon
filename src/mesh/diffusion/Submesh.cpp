@@ -22,8 +22,8 @@ namespace neon::diffusion
 femSubmesh::femSubmesh(Json::Value const& material_data,
                        Json::Value const& simulation_data,
                        std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                       SubMesh const& submesh)
-    : neon::SubMesh(submesh),
+                       Submesh const& submesh)
+    : neon::Submesh(submesh),
       material_coordinates(material_coordinates),
       sf(mech::solid::make_volume_interpolation(topology(), simulation_data)),
       variables(elements() * sf->quadrature().points()),

@@ -1,7 +1,7 @@
 
 #include "FileIO.hpp"
 
-#include "mesh/solid/femMesh.hpp"
+#include "mesh/mech/solid/femMesh.hpp"
 
 #include <json/value.h>
 

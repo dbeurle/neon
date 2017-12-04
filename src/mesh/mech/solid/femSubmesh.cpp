@@ -24,8 +24,8 @@ namespace neon::mech::solid
 femSubmesh::femSubmesh(Json::Value const& material_data,
                        Json::Value const& simulation_data,
                        std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                       SubMesh const& submesh)
-    : neon::SubMesh(submesh),
+                       Submesh const& submesh)
+    : neon::Submesh(submesh),
       material_coordinates(material_coordinates),
       sf(make_volume_interpolation(topology(), simulation_data)),
       variables(elements() * sf->quadrature().points()),
@@ -114,7 +114,7 @@ Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int const element
 
     return sf->quadrature().integrate(kmat, [&](auto const& femval, auto const& l) -> Matrix {
 
-        auto const & [ N, rhea ] = femval;
+        auto const & [N, rhea] = femval;
 
         auto const& D = tangent_operators[offset(element, l)];
 
@@ -138,7 +138,7 @@ Vector femSubmesh::internal_nodal_force(Matrix const& x, int const element) cons
     sf->quadrature().integrate(Eigen::Map<RowMatrix>(fint.data(), m, n),
                                [&](auto const& femval, auto const& l) -> RowMatrix {
 
-                                   auto const & [ N, dN ] = femval;
+                                   auto const & [N, dN] = femval;
 
                                    auto const Jacobian = local_deformation_gradient(dN, x);
 
@@ -160,7 +160,7 @@ std::tuple<List const&, Matrix> femSubmesh::consistent_mass(int const element) c
 
     auto m = sf->quadrature().integrate(Matrix::Zero(nodes_per_element(), nodes_per_element()).eval(),
                                         [&](auto const& femval, auto const& l) -> Matrix {
-                                            auto const & [ N, dN ] = femval;
+                                            auto const & [N, dN] = femval;
 
                                             auto const Jacobian = local_deformation_gradient(dN, X);
 
@@ -172,7 +172,7 @@ std::tuple<List const&, Matrix> femSubmesh::consistent_mass(int const element) c
 
 std::tuple<List const&, Vector> femSubmesh::diagonal_mass(int const element) const
 {
-    auto const & [ dofs, consistent_m ] = this->consistent_mass(element);
+    auto const & [dofs, consistent_m] = this->consistent_mass(element);
 
     Vector diagonal_m(consistent_m.rows());
     for (auto i = 0; i < consistent_m.rows(); ++i)
@@ -212,7 +212,7 @@ void femSubmesh::update_deformation_measures()
 
         sf->quadrature().for_each([&](auto const& femval, const auto& l) {
 
-            auto const & [ N, rhea ] = femval;
+            auto const & [N, rhea] = femval;
 
             // Local deformation gradient for the initial configuration
             Matrix3 const F_0 = local_deformation_gradient(rhea, X);

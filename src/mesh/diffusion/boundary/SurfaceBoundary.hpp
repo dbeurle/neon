@@ -26,7 +26,7 @@ class SurfaceBoundary
 {
 public:
     explicit SurfaceBoundary(std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                             std::vector<SubMesh> const& submeshes,
+                             std::vector<Submesh> const& submeshes,
                              Json::Value const& times,
                              Json::Value const& loads,
                              Json::Value const& simulation_data)

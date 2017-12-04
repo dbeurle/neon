@@ -4,7 +4,7 @@
 #include "AbstractModule.hpp"
 
 #include "assembler/solid/femStaticMatrix.hpp"
-#include "mesh/solid/femMesh.hpp"
+#include "mesh/mech/solid/femMesh.hpp"
 
 namespace neon
 {

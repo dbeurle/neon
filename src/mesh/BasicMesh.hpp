@@ -2,7 +2,7 @@
 #pragma once
 
 #include "mesh/NodalCoordinates.hpp"
-#include "mesh/SubMesh.hpp"
+#include "mesh/Submesh.hpp"
 
 #include <map>
 
@@ -20,9 +20,9 @@ public:
     BasicMesh(Json::Value const& mesh_file);
 
     /** @return mesh matching a specific name */
-    [[nodiscard]] std::vector<SubMesh> const& meshes(std::string const& name) const;
+    [[nodiscard]] std::vector<Submesh> const& meshes(std::string const& name) const;
 
 protected:
-    std::map<std::string, std::vector<SubMesh>> meshes_map;
+    std::map<std::string, std::vector<Submesh>> meshes_map;
 };
 }

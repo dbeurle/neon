@@ -9,12 +9,15 @@
 
 namespace neon
 {
-/** SubMesh stores connectivities for one particular element group */
-class SubMesh
+/** Submesh stores connectivities for one particular element group */
+class Submesh
 {
 public:
     /** Construct using a json object */
-    SubMesh(Json::Value const& mesh);
+    Submesh(Json::Value const& mesh);
+
+    Submesh(Submesh const&) = default;
+    Submesh(Submesh&&) = default;
 
     /** @return the number of elements */
     auto elements() const { return nodal_connectivity.size(); }

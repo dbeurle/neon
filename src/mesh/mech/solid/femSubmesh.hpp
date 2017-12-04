@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/SubMesh.hpp"
+#include "mesh/Submesh.hpp"
 
 #include "constitutive/ConstitutiveModel.hpp"
 #include "constitutive/InternalVariables.hpp"
@@ -20,7 +20,7 @@ namespace mech::solid
  * femSubmesh provides the element local routines for computing the system
  * components for a three-dimensional continuum mechanics discretisation.
  */
-class femSubmesh : public SubMesh
+class femSubmesh : public Submesh
 {
 public:
     using ValueCount = std::tuple<Vector, Vector>;
@@ -30,7 +30,7 @@ public:
     explicit femSubmesh(Json::Value const& material_data,
                         Json::Value const& simulation_data,
                         std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                        SubMesh const& submesh);
+                        Submesh const& submesh);
 
     /** @return list of global degrees of freedom for an element */
     [[nodiscard]] List const& local_dof_list(int const element) const
@@ -67,33 +67,6 @@ public:
      *  \sa check_element_distortion()
      */
     void update_internal_variables(double const time_step_size = 1.0);
-
-    /**
-     * Compute the local deformation gradient
-     * \f{align*}{ F_{\xi} &= \bf{x}_\xi \f}
-     * @param rhea Shape function gradients at quadrature point
-     * @param configuration Configuration of the element (coordinates)
-     */
-    [[nodiscard]] static Matrix3 local_deformation_gradient(Matrix const& rhea,
-                                                            Matrix const& configuration)
-    {
-        return configuration * rhea;
-    }
-
-    /**
-     * Compute the deformation gradient, F, from the global to local mapping
-     * \f{align*}{
-     * F &= F_{\xi} \times (F^0_{\xi})^{-1}
-     * \f}
-     * @param rhea Shape function derivatives at the integration points
-     * @param X Reference configuration (spatial coordinates, local nodes)
-     * @param x Current configuration (spatial coordinates, local nodes)
-     */
-    [[nodiscard]] Matrix3 deformation_gradient(Matrix const& rhea, Matrix const& X, Matrix const& x)
-    {
-        // Deformation gradient in the reference and current configuration
-        return local_deformation_gradient(rhea, x) * local_deformation_gradient(rhea, X).inverse();
-    }
 
     [[nodiscard]] ValueCount nodal_averaged_variable(InternalVariables::Tensor const tensor_name) const;
 

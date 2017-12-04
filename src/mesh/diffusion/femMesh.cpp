@@ -99,7 +99,7 @@ void femMesh::check_boundary_conditions(Json::Value const& boundary_data) const
     }
 }
 
-List femMesh::filter_dof_list(std::vector<SubMesh> const& boundary_mesh) const
+List femMesh::filter_dof_list(std::vector<Submesh> const& boundary_mesh) const
 {
     using namespace ranges;
 

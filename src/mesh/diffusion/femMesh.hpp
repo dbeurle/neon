@@ -55,7 +55,7 @@ protected:
     void allocate_boundary_conditions(Json::Value const& boundary_data, BasicMesh const& basic_mesh);
 
     /** Collapse the nodal connectivity arrays from the submesh for a node list */
-    List filter_dof_list(std::vector<SubMesh> const& boundary_mesh) const;
+    List filter_dof_list(std::vector<Submesh> const& boundary_mesh) const;
 
 protected:
     std::shared_ptr<MaterialCoordinates> material_coordinates;

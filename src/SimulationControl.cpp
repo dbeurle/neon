@@ -2,7 +2,7 @@
 #include "SimulationControl.hpp"
 
 #include "Exceptions.hpp"
-#include "mesh/solid/femMesh.hpp"
+#include "mesh/mech/solid/femMesh.hpp"
 
 #include "modules/ModuleFactory.hpp"
 

@@ -4,7 +4,7 @@
 #include "mesh/generic/Neumann.hpp"
 
 #include "interpolations/InterpolationFactory.hpp"
-#include "mesh/SubMesh.hpp"
+#include "mesh/Submesh.hpp"
 
 #include <variant>
 
@@ -62,7 +62,7 @@ public:
 
 public:
     explicit NonFollowerLoadBoundary(std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                                     std::vector<SubMesh> const& submeshes,
+                                     std::vector<Submesh> const& submeshes,
                                      Json::Value const& simulation_data,
                                      Json::Value const& boundary,
                                      std::unordered_map<std::string, int> const& dof_table);
