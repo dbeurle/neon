@@ -7,6 +7,8 @@
 
 #include <exception>
 
+#pragma clang diagnostic ignored "-Winconsistent-missing-override"
+
 #include "vtkCellData.h"
 #include "vtkCellTypes.h"
 #include "vtkDataObject.h"
