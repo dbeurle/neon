@@ -58,15 +58,15 @@ vtkSmartPointer<vtkDoubleArray> MaterialCoordinates::vtk_displacement() const
     return displacements;
 }
 
-Matrix MaterialCoordinates::get_configuration(List const& local_nodes, Vector const& configuration) const
+Matrix3x MaterialCoordinates::get_configuration(List const& local_nodes,
+                                                Vector const& configuration) const
 {
-    auto const lnodes = local_nodes.size();
-    Matrix localconf(3, lnodes);
+    Matrix3x element_displacement(3, local_nodes.size());
 
-    for (auto lnode = 0; lnode < lnodes; lnode++)
+    for (auto lnode = 0; lnode < local_nodes.size(); lnode++)
     {
-        localconf.col(lnode) = configuration.segment<3>(3 * local_nodes[lnode]);
+        element_displacement.col(lnode) = configuration.segment<3>(3 * local_nodes[lnode]);
     }
-    return localconf;
+    return element_displacement;
 }
 }

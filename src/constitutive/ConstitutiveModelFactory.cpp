@@ -13,6 +13,8 @@
 
 #include "IsotropicDiffusion.hpp"
 
+#include "mech/plane/IsotropicLinearElasticity.hpp"
+
 #include <json/value.h>
 #include <stdexcept>
 
@@ -110,6 +112,45 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& va
                                      "\"FiniteStrain\"");
         }
         return std::make_unique<J2PlasticityDamage>(variables, material_data);
+    }
+    throw std::runtime_error("The model name " + model_name + " is not recognised\n"
+                             + "Supported models are \"NeoHooke\", \"Microsphere\" "
+                               "and \"J2Plasticity\"\n");
+    return nullptr;
+}
+}
+
+namespace neon::mech::plane
+{
+std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& variables,
+                                                           Json::Value const& material_data,
+                                                           Json::Value const& simulation_data)
+{
+    if (!simulation_data.isMember("ConstitutiveModel"))
+    {
+        throw std::runtime_error("Missing \"ConstitutiveModel\" in \"Mesh\"");
+    }
+
+    auto const& constitutive_model = simulation_data["ConstitutiveModel"];
+
+    if (!constitutive_model.isMember("Name"))
+    {
+        throw std::runtime_error("Missing \"Name\" in \"ConstitutiveModel\"");
+    }
+
+    auto const& model_name = constitutive_model["Name"].asString();
+
+    if (model_name == "PlaneStrain")
+    {
+        return std::make_unique<IsotropicLinearElasticity>(variables,
+                                                           material_data,
+                                                           IsotropicLinearElasticity::State::PlaneStrain);
+    }
+    else if (model_name == "PlaneStress")
+    {
+        return std::make_unique<IsotropicLinearElasticity>(variables,
+                                                           material_data,
+                                                           IsotropicLinearElasticity::State::PlaneStress);
     }
     throw std::runtime_error("The model name " + model_name + " is not recognised\n"
                              + "Supported models are \"NeoHooke\", \"Microsphere\" "

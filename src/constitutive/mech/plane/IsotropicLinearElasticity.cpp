@@ -10,8 +10,8 @@ namespace neon::mech::plane
 {
 IsotropicLinearElasticity::IsotropicLinearElasticity(InternalVariables& variables,
                                                      Json::Value const& material_data,
-                                                     Plane const theory)
-    : ConstitutiveModel(variables), material(material_data), theory(theory)
+                                                     State const state)
+    : ConstitutiveModel(variables), material(material_data), state(state)
 {
     variables.add(InternalVariables::Tensor::LinearisedStrain);
     variables.add(InternalVariables::Scalar::VonMisesStress);
@@ -51,7 +51,7 @@ Matrix3 IsotropicLinearElasticity::elastic_moduli() const
 {
     auto[lambda, shear_modulus] = material.Lame_parameters();
 
-    if (theory == Plane::Stress)
+    if (state == State::PlaneStress)
     {
         lambda = 2.0 * lambda * shear_modulus / (lambda + 2.0 * shear_modulus);
     }

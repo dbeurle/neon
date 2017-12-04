@@ -16,10 +16,10 @@ public:
     MaterialCoordinates(Vector const& initial_coordinates);
 
     /** @return element reference configuration based on the local node numbers*/
-    [[nodiscard]] Matrix initial_configuration(List const& local_nodes) const;
+    [[nodiscard]] Matrix3x initial_configuration(List const& local_nodes) const;
 
     /** @return element current configuration based on the local node numbers*/
-    [[nodiscard]] Matrix current_configuration(List const& local_nodes) const;
+    [[nodiscard]] Matrix3x current_configuration(List const& local_nodes) const;
 
     /** @param u - displacement vector from initial configuration (x,y,z...) */
     void update_current_configuration(Vector const& u) { x = X + u; };
@@ -35,18 +35,19 @@ public:
     [[nodiscard]] vtkSmartPointer<vtkDoubleArray> vtk_displacement() const;
 
 protected:
-    [[nodiscard]] Matrix get_configuration(List const& local_nodes, Vector const& configuration) const;
+    [[nodiscard]] Matrix3x get_configuration(List const& local_nodes,
+                                             Vector const& configuration) const;
 
 protected:
     Vector x; //!< Current configuration
 };
 
-inline Matrix MaterialCoordinates::initial_configuration(List const& local_node_list) const
+inline Matrix3x MaterialCoordinates::initial_configuration(List const& local_node_list) const
 {
     return this->get_configuration(local_node_list, X);
 }
 
-inline Matrix MaterialCoordinates::current_configuration(List const& local_node_list) const
+inline Matrix3x MaterialCoordinates::current_configuration(List const& local_node_list) const
 {
     return this->get_configuration(local_node_list, x);
 }
