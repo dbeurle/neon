@@ -56,7 +56,7 @@ void ShapeFunction<Quadrature>::compute_extrapolation_matrix(Matrix const N,
     auto const n = local_nodal_coordinates.rows();
     auto const m = numerical_quadrature->points();
 
-    assert(m != local_quadrature_coordinates.rows());
+    assert(m == local_quadrature_coordinates.rows());
 
     auto const& xi = local_nodal_coordinates;
     auto const& xi_hat = local_quadrature_coordinates;
