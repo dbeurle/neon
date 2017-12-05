@@ -52,7 +52,6 @@ void SimulationControl::parse()
 
     std::ifstream file(input_file_name);
 
-    // Json::Reader reader;
     Json::CharReaderBuilder reader;
 
     if (JSONCPP_STRING input_errors; !Json::parseFromStream(reader, file, &root, &input_errors))
