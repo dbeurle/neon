@@ -19,6 +19,9 @@
 
 #include "CubeJson.hpp"
 
+Json::CharReaderBuilder reader;
+JSONCPP_STRING input_errors;
+
 using namespace neon;
 
 TEST_CASE("Nonlinear system equilibrium solver test")
@@ -29,11 +32,14 @@ TEST_CASE("Nonlinear system equilibrium solver test")
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh
     Json::Value mesh_data, material_data, simulation_data;
-    Json::Reader reader;
 
-    REQUIRE(reader.parse(cube_mesh_json().c_str(), mesh_data));
-    REQUIRE(reader.parse(material_data_json().c_str(), material_data));
-    REQUIRE(reader.parse(simulation_data_json().c_str(), simulation_data));
+    std::istringstream cube_mesh_stream(cube_mesh_json());
+    std::istringstream material_data_stream(material_data_json());
+    std::istringstream simulation_data_stream(simulation_data_json());
+
+    REQUIRE(Json::parseFromStream(reader, cube_mesh_stream, &mesh_data, &input_errors));
+    REQUIRE(Json::parseFromStream(reader, material_data_stream, &material_data, &input_errors));
+    REQUIRE(Json::parseFromStream(reader, simulation_data_stream, &simulation_data, &input_errors));
 
     // Create the test objects
     BasicMesh basic_mesh(mesh_data);

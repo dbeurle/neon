@@ -20,6 +20,9 @@
 
 #include "CubeJson.hpp"
 
+Json::CharReaderBuilder reader;
+JSONCPP_STRING input_errors;
+
 using namespace neon;
 using namespace ranges;
 
@@ -75,13 +78,14 @@ TEST_CASE("Dof List Filter", "[DofAllocator]")
 }
 TEST_CASE("Boundary unit test", "[Boundary]")
 {
-    Json::Reader reader;
-    Json::Value times, loads;
-
     SECTION("Check time data saved correctly")
     {
-        REQUIRE(reader.parse("[0.0, 1.0, 2.0, 3.0]", times));
-        REQUIRE(reader.parse("[0.0, 0.5, 1.0, 1.5]", loads));
+        Json::Value times, loads;
+
+        std::istringstream times_stream("[0.0, 1.0, 2.0, 3.0]");
+        std::istringstream loads_stream("[0.0, 1.0, 2.0, 3.0]");
+        REQUIRE(Json::parseFromStream(reader, times_stream, &times, &input_errors));
+        REQUIRE(Json::parseFromStream(reader, loads_stream, &loads, &input_errors));
 
         Boundary boundary(times, loads);
 
@@ -94,8 +98,12 @@ TEST_CASE("Boundary unit test", "[Boundary]")
     }
     SECTION("Monotonic loading interpolation test")
     {
-        REQUIRE(reader.parse("[0.0, 1.0, 2.0, 3.0]", times));
-        REQUIRE(reader.parse("[0.0, 0.5, 1.0, 1.5]", loads));
+        Json::Value times, loads;
+
+        std::istringstream times_stream("[0.0, 1.0, 2.0, 3.0]");
+        std::istringstream loads_stream("[0.0, 0.5, 1.0, 1.5]");
+        REQUIRE(Json::parseFromStream(reader, times_stream, &times, &input_errors));
+        REQUIRE(Json::parseFromStream(reader, loads_stream, &loads, &input_errors));
 
         Boundary boundary(times, loads);
 
@@ -110,8 +118,12 @@ TEST_CASE("Boundary unit test", "[Boundary]")
     }
     SECTION("Unload interpolation test")
     {
-        REQUIRE(reader.parse("[0.0, 1.0, 2.0]", times));
-        REQUIRE(reader.parse("[0.0, 1.0, 0.0]", loads));
+        Json::Value times, loads;
+
+        std::istringstream times_stream("[0.0, 1.0, 2.0, 3.0]");
+        std::istringstream loads_stream("[0.0, 1.0, 0.0, 3.0]");
+        REQUIRE(Json::parseFromStream(reader, times_stream, &times, &input_errors));
+        REQUIRE(Json::parseFromStream(reader, loads_stream, &loads, &input_errors));
 
         Boundary boundary(times, loads);
 
@@ -123,24 +135,17 @@ TEST_CASE("Boundary unit test", "[Boundary]")
     }
     SECTION("Non-matching length error test")
     {
-        REQUIRE(reader.parse("[0.0, 1.0, 3.0]", times));
-        REQUIRE(reader.parse("[0.0, 0.5, 1.0, 1.5]", loads));
-
-        REQUIRE_THROWS_AS(Boundary(times, loads), std::runtime_error);
+        REQUIRE_THROWS_AS(Boundary("[0.0, 1.0, 3.0]", "[0.0, 0.5, 1.0, 1.5]"), std::runtime_error);
     }
     SECTION("Unordered time error test")
     {
-        REQUIRE(reader.parse("[0.0, 10.0, 3.0]", times));
-        REQUIRE(reader.parse("[0.0, 0.5, 1.0]", loads));
-
-        REQUIRE_THROWS_AS(Boundary(times, loads), std::runtime_error);
+        REQUIRE_THROWS_AS(Boundary("[0.0, 10.0, 3.0]", "[0.0, 0.5, 1.0]"), std::runtime_error);
     }
 }
 TEST_CASE("Traction test for triangle", "[Traction]")
 {
     using namespace neon::mechanical::solid;
 
-    Json::Reader reader;
     Json::Value times, loads;
 
     // Build a right angled triangle
@@ -154,8 +159,11 @@ TEST_CASE("Traction test for triangle", "[Traction]")
 
     SECTION("Unit load")
     {
-        REQUIRE(reader.parse("[0.0, 1.0]", times));
-        REQUIRE(reader.parse("[0.0, 1.0]", loads));
+        std::istringstream times_stream("[0.0, 1.0]");
+        std::istringstream loads_stream("[0.0, 1.0]");
+
+        REQUIRE(Json::parseFromStream(reader, times_stream, &times, &input_errors));
+        REQUIRE(Json::parseFromStream(reader, loads_stream, &loads, &input_errors));
 
         Traction traction(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
                           nodal_connectivity,
@@ -173,8 +181,10 @@ TEST_CASE("Traction test for triangle", "[Traction]")
     }
     SECTION("Twice unit load")
     {
-        REQUIRE(reader.parse("[0.0, 1.0]", times));
-        REQUIRE(reader.parse("[0.0, 2.0]", loads));
+        std::istringstream times_stream("[0.0, 1.0]");
+        std::istringstream loads_stream("[0.0, 2.0]");
+        REQUIRE(Json::parseFromStream(reader, times_stream, &times, &input_errors));
+        REQUIRE(Json::parseFromStream(reader, loads_stream, &loads, &input_errors));
 
         Traction traction(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
                           nodal_connectivity,
@@ -195,7 +205,6 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
 {
     using namespace neon::mechanical::solid;
 
-    Json::Reader reader;
     Json::Value times, loads;
 
     // Build a right angled triangle
@@ -209,8 +218,11 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
 
     SECTION("Unit load")
     {
-        REQUIRE(reader.parse("[0.0, 1.0]", times));
-        REQUIRE(reader.parse("[0.0, -1.0]", loads));
+        std::istringstream times_stream("[0.0, 1.0]");
+        std::istringstream loads_stream("[0.0, -1.0]");
+
+        REQUIRE(Json::parseFromStream(reader, times_stream, &times, &input_errors));
+        REQUIRE(Json::parseFromStream(reader, loads_stream, &loads, &input_errors));
 
         Pressure pressure(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
                           nodal_connectivity,
@@ -231,8 +243,11 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
     }
     SECTION("Twice unit load")
     {
-        REQUIRE(reader.parse("[0.0, 1.0]", times));
-        REQUIRE(reader.parse("[0.0, -2.0]", loads));
+        std::istringstream times_stream("[0.0, 1.0]");
+        std::istringstream loads_stream("[0.0, -2.0]");
+
+        REQUIRE(Json::parseFromStream(reader, times_stream, &times, &input_errors));
+        REQUIRE(Json::parseFromStream(reader, loads_stream, &loads, &input_errors));
 
         Pressure pressure(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
                           nodal_connectivity,
@@ -274,11 +289,20 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
     std::array<int, 4> const known_dofs_quad{{1, 4, 7, 10}};
 
     Json::Value tri_mesh_data, quad_mesh_data, simulation_data;
-    Json::Reader reader;
 
-    REQUIRE(reader.parse(trimesh.c_str(), tri_mesh_data));
-    REQUIRE(reader.parse(quadmesh.c_str(), quad_mesh_data));
-    REQUIRE(reader.parse(simulation_data_traction_json().c_str(), simulation_data));
+    Json::Value boundary;
+
+    std::istringstream trimesh_stream(trimesh);
+    std::istringstream quadmesh_stream(quadmesh);
+    std::istringstream simulation_data_stream(simulation_data_traction_json());
+
+    std::istringstream boundary_stream("{\"Time\":[0.0, 1.0], \"Type\" : \"Traction\", "
+                                       "\"Values\":{\"y\":[0.0, 1.0e-3]}}");
+
+    REQUIRE(Json::parseFromStream(reader, trimesh_stream, &tri_mesh_data, &input_errors));
+    REQUIRE(Json::parseFromStream(reader, quadmesh_stream, &quad_mesh_data, &input_errors));
+    REQUIRE(Json::parseFromStream(reader, simulation_data_stream, &simulation_data, &input_errors));
+    REQUIRE(Json::parseFromStream(reader, boundary_stream, &boundary, &input_errors));
 
     std::vector<Submesh> submeshes = {tri_mesh_data, quad_mesh_data};
 
@@ -290,10 +314,6 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
 
     REQUIRE(submeshes.at(0).nodes_per_element() == 3);
     REQUIRE(submeshes.at(1).nodes_per_element() == 4);
-
-    Json::Value boundary;
-    REQUIRE(reader.parse(
-        "{\"Time\":[0.0, 1.0], \"Type\" : \"Traction\", \"Values\":{\"y\":[0.0, 1.0e-3]}}", boundary));
 
     // Insert this information into the nonfollower load boundary class
     // using the simulation data for the cube
@@ -309,7 +329,6 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
         {
             std::visit(
                 [&](auto const& mesh) {
-
                     auto const& [dofs_tri, f_tri] = mesh.external_force(0, 1.0);
 
                     REQUIRE(dofs_tri.size() == 3);
@@ -322,7 +341,6 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
 
             std::visit(
                 [&](auto const& mesh) {
-
                     auto const& [dofs_quad, f_quad] = mesh.external_force(0, 1.0);
 
                     REQUIRE(dofs_quad.size() == 4);

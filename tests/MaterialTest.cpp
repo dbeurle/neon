@@ -100,7 +100,7 @@ TEST_CASE("Linear elastic material", "[LinearElastic]")
         REQUIRE(linear_elastic.lambda() == Approx(E * v / ((1.0 + v) * (1.0 - 2.0 * v))));
         REQUIRE(linear_elastic.mu() == Approx(E / (2.0 * (1.0 + v))));
 
-        auto const[lambda, shear_modulus] = linear_elastic.Lame_parameters();
+        auto const [lambda, shear_modulus] = linear_elastic.Lame_parameters();
 
         REQUIRE(lambda == Approx(linear_elastic.lambda()));
         REQUIRE(shear_modulus == Approx(linear_elastic.mu()));

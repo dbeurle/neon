@@ -9,6 +9,9 @@
 
 #include <json/json.h>
 
+Json::CharReaderBuilder reader;
+JSONCPP_STRING input_errors;
+
 using namespace neon;
 
 std::string json_input_file()
@@ -25,9 +28,10 @@ std::string increment_json()
 TEST_CASE("AdaptiveIncrement")
 {
     Json::Value time_data;
-    Json::Reader time_file;
 
-    REQUIRE(time_file.parse(increment_json().c_str(), time_data));
+    std::istringstream time_data_stream(increment_json());
+
+    REQUIRE(Json::parseFromStream(reader, time_data_stream, &time_data, &input_errors));
 
     AdaptiveLoadStep load(time_data, {0.0, 1.0});
 

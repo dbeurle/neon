@@ -17,6 +17,9 @@
 
 #include "constitutive/ConstitutiveModelFactory.hpp"
 
+Json::CharReaderBuilder reader;
+JSONCPP_STRING input_errors;
+
 std::string json_input_file()
 {
     return "{\"Name\": \"rubber\", \"ElasticModulus\": 2.0, \"PoissonsRatio\": 0.45}";
@@ -36,10 +39,11 @@ TEST_CASE("No constitutive model error test")
     std::string simulation_input = "{}";
 
     Json::Value material_data, simulation_data;
-    Json::Reader reader;
 
-    REQUIRE(reader.parse(input_data.c_str(), material_data));
-    REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
+    std::istringstream input_data_stream(input_data), simulation_input_stream(simulation_input);
+
+    REQUIRE(Json::parseFromStream(reader, input_data_stream, &material_data, &input_errors));
+    REQUIRE(Json::parseFromStream(reader, simulation_input_stream, &simulation_data, &input_errors));
 
     REQUIRE_THROWS_AS(make_constitutive_model(variables, material_data, simulation_data),
                       std::runtime_error);
@@ -55,10 +59,11 @@ TEST_CASE("Constitutive model no name error test")
     std::string simulation_input = "{\"ConstitutiveModel\" : {}}";
 
     Json::Value material_data, simulation_data;
-    Json::Reader reader;
 
-    REQUIRE(reader.parse(input_data.c_str(), material_data));
-    REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
+    std::istringstream input_data_stream(input_data), simulation_input_stream(simulation_input);
+
+    REQUIRE(Json::parseFromStream(reader, input_data_stream, &material_data, &input_errors));
+    REQUIRE(Json::parseFromStream(reader, simulation_input_stream, &simulation_data, &input_errors));
 
     REQUIRE_THROWS_AS(make_constitutive_model(variables, material_data, simulation_data),
                       std::runtime_error);
@@ -74,10 +79,11 @@ TEST_CASE("Constitutive model invalid name error test")
     std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\":\"PurpleMonkey\"}}";
 
     Json::Value material_data, simulation_data;
-    Json::Reader reader;
 
-    REQUIRE(reader.parse(input_data.c_str(), material_data));
-    REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
+    std::istringstream input_data_stream(input_data), simulation_input_stream(simulation_input);
+
+    REQUIRE(Json::parseFromStream(reader, input_data_stream, &material_data, &input_errors));
+    REQUIRE(Json::parseFromStream(reader, simulation_input_stream, &simulation_data, &input_errors));
 
     REQUIRE_THROWS_AS(make_constitutive_model(variables, material_data, simulation_data),
                       std::runtime_error);
@@ -97,16 +103,17 @@ TEST_CASE("Neo-Hookean model")
     std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\": \"NeoHooke\"} }";
 
     Json::Value material_data, simulation_data;
-    Json::Reader reader;
 
-    REQUIRE(reader.parse(input_data.c_str(), material_data));
-    REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
+    std::istringstream input_data_stream(input_data), simulation_input_stream(simulation_input);
+
+    REQUIRE(Json::parseFromStream(reader, input_data_stream, &material_data, &input_errors));
+    REQUIRE(Json::parseFromStream(reader, simulation_input_stream, &simulation_data, &input_errors));
 
     auto neo_hooke = make_constitutive_model(variables, material_data, simulation_data);
 
     // Get the tensor variables
-    auto[F_list, cauchy_stresses] = variables(InternalVariables::Tensor::DeformationGradient,
-                                              InternalVariables::Tensor::Cauchy);
+    auto [F_list, cauchy_stresses] = variables(InternalVariables::Tensor::DeformationGradient,
+                                               InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables(InternalVariables::Scalar::DetF);
 
@@ -172,10 +179,11 @@ TEST_CASE("Microsphere model error test")
                                    ": \"Afwsfine\"}}";
 
     Json::Value material_data, simulation_data;
-    Json::Reader reader;
 
-    REQUIRE(reader.parse(input_data.c_str(), material_data));
-    REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
+    std::istringstream input_data_stream(input_data), simulation_input_stream(simulation_input);
+
+    REQUIRE(Json::parseFromStream(reader, input_data_stream, &material_data, &input_errors));
+    REQUIRE(Json::parseFromStream(reader, simulation_input_stream, &simulation_data, &input_errors));
 
     REQUIRE_THROWS_AS(make_constitutive_model(variables, material_data, simulation_data),
                       std::runtime_error);
@@ -201,15 +209,16 @@ TEST_CASE("Affine microsphere model", )
                                    ": \"Affine\", \"Quadrature\" : \"BO21\"}}";
 
     Json::Value material_data, simulation_data;
-    Json::Reader reader;
 
-    REQUIRE(reader.parse(input_data.c_str(), material_data));
-    REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
+    std::istringstream input_data_stream(input_data), simulation_input_stream(simulation_input);
+
+    REQUIRE(Json::parseFromStream(reader, input_data_stream, &material_data, &input_errors));
+    REQUIRE(Json::parseFromStream(reader, simulation_input_stream, &simulation_data, &input_errors));
 
     auto affine = make_constitutive_model(variables, material_data, simulation_data);
 
-    auto[F_list, cauchy_stresses] = variables(InternalVariables::Tensor::DeformationGradient,
-                                              InternalVariables::Tensor::Cauchy);
+    auto [F_list, cauchy_stresses] = variables(InternalVariables::Tensor::DeformationGradient,
+                                               InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables(InternalVariables::Scalar::DetF);
 
@@ -294,16 +303,17 @@ TEST_CASE("NonAffine microsphere model")
                                    ": \"NonAffine\", \"Quadrature\" : \"BO21\"}}";
 
     Json::Value material_data, simulation_data;
-    Json::Reader reader;
 
-    REQUIRE(reader.parse(input_data.c_str(), material_data));
-    REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
+    std::istringstream input_data_stream(input_data), simulation_input_stream(simulation_input);
+
+    REQUIRE(Json::parseFromStream(reader, input_data_stream, &material_data, &input_errors));
+    REQUIRE(Json::parseFromStream(reader, simulation_input_stream, &simulation_data, &input_errors));
 
     auto affine = make_constitutive_model(variables, material_data, simulation_data);
 
     // Get the tensor variables
-    auto[F_list, cauchy_stresses] = variables(InternalVariables::Tensor::DeformationGradient,
-                                              InternalVariables::Tensor::Cauchy);
+    auto [F_list, cauchy_stresses] = variables(InternalVariables::Tensor::DeformationGradient,
+                                               InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables(InternalVariables::Scalar::DetF);
 
@@ -378,10 +388,10 @@ TEST_CASE("J2 plasticity model factory errors")
 
     Json::Value material_data, simulation_data;
 
-    Json::Reader reader;
+    std::istringstream input_data_stream(input_data), simulation_input_stream(simulation_input);
 
-    REQUIRE(reader.parse(input_data.c_str(), material_data));
-    REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
+    REQUIRE(Json::parseFromStream(reader, input_data_stream, &material_data, &input_errors));
+    REQUIRE(Json::parseFromStream(reader, simulation_input_stream, &simulation_data, &input_errors));
 
     InternalVariables variables(internal_variable_size);
 
@@ -393,19 +403,19 @@ TEST_CASE("J2 plasticity model")
     using namespace neon::mechanical::solid;
 
     // Create a json reader object from a string
-    std::string
-        input_data = "{\"Name\": \"steel\", \"ElasticModulus\": 200.0e9, \"PoissonsRatio\": 0.3, "
-                     "\"YieldStress\": 200.0e6, \"IsotropicHardeningModulus\": 400.0e6}";
+    std::string input_data = "{\"Name\": \"steel\", \"ElasticModulus\": 200.0e9, "
+                             "\"PoissonsRatio\": 0.3, "
+                             "\"YieldStress\": 200.0e6, \"IsotropicHardeningModulus\": 400.0e6}";
 
     std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\" : \"J2Plasticity\", "
                                    "\"FiniteStrain\" : false}}";
 
     Json::Value material_data, simulation_data;
 
-    Json::Reader reader;
+    std::istringstream input_data_stream(input_data), simulation_input_stream(simulation_input);
 
-    REQUIRE(reader.parse(input_data.c_str(), material_data));
-    REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
+    REQUIRE(Json::parseFromStream(reader, input_data_stream, &material_data, &input_errors));
+    REQUIRE(Json::parseFromStream(reader, simulation_input_stream, &simulation_data, &input_errors));
 
     InternalVariables variables(internal_variable_size);
 
@@ -416,8 +426,9 @@ TEST_CASE("J2 plasticity model")
     auto j2plasticity = make_constitutive_model(variables, material_data, simulation_data);
 
     // Get the tensor variables
-    auto[displacement_gradients, cauchy_stresses] = variables(InternalVariables::Tensor::DisplacementGradient,
-                                                              InternalVariables::Tensor::Cauchy);
+    auto [displacement_gradients,
+          cauchy_stresses] = variables(InternalVariables::Tensor::DisplacementGradient,
+                                       InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables(InternalVariables::Scalar::DetF);
 
@@ -465,9 +476,9 @@ TEST_CASE("J2 plasticity model")
 
         j2plasticity->update_internal_variables(1.0);
 
-        auto[von_mises_stresses,
-             accumulated_plastic_strains] = variables(InternalVariables::Scalar::VonMisesStress,
-                                                      InternalVariables::Scalar::EffectivePlasticStrain);
+        auto [von_mises_stresses,
+              accumulated_plastic_strains] = variables(InternalVariables::Scalar::VonMisesStress,
+                                                       InternalVariables::Scalar::EffectivePlasticStrain);
 
         for (auto const& material_tangent : material_tangents)
         {
@@ -508,9 +519,9 @@ TEST_CASE("J2 plasticity model")
 
         j2plasticity->update_internal_variables(1.0);
 
-        auto[von_mises_stresses,
-             accumulated_plastic_strains] = variables(InternalVariables::Scalar::VonMisesStress,
-                                                      InternalVariables::Scalar::EffectivePlasticStrain);
+        auto [von_mises_stresses,
+              accumulated_plastic_strains] = variables(InternalVariables::Scalar::VonMisesStress,
+                                                       InternalVariables::Scalar::EffectivePlasticStrain);
 
         for (auto const& material_tangent : material_tangents)
         {
@@ -553,23 +564,23 @@ TEST_CASE("J2 plasticity damage model", "[J2PlasticityDamage]")
     using namespace neon::mechanical::solid;
 
     // Create a json reader object from a string
-    std::string
-        input_data = "{\"Name\": \"steel\", \"ElasticModulus\": 134.0e3, \"PoissonsRatio\": 0.3, "
-                     "\"YieldStress\": 85, \"KinematicHardeningModulus\": "
-                     "5500,\"SofteningMultiplier\" : 250,\"PlasticityViscousExponent\" : "
-                     "2.5,\"PlasticityViscousMultiplier\" : "
-                     "1.923536463026969e-08,\"DamageViscousExponent\" : "
-                     "2,\"DamageViscousMultiplier\" : 2.777777777777778}";
+    std::string input_data = "{\"Name\": \"steel\", \"ElasticModulus\": 134.0e3, "
+                             "\"PoissonsRatio\": 0.3, "
+                             "\"YieldStress\": 85, \"KinematicHardeningModulus\": "
+                             "5500,\"SofteningMultiplier\" : 250,\"PlasticityViscousExponent\" : "
+                             "2.5,\"PlasticityViscousMultiplier\" : "
+                             "1.923536463026969e-08,\"DamageViscousExponent\" : "
+                             "2,\"DamageViscousMultiplier\" : 2.777777777777778}";
 
     std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\" : \"ChabocheDamage\", "
                                    "\"FiniteStrain\" : false}}";
 
     Json::Value material_data, simulation_data;
 
-    Json::Reader reader;
+    std::istringstream input_data_stream(input_data), simulation_input_stream(simulation_input);
 
-    REQUIRE(reader.parse(input_data.c_str(), material_data));
-    REQUIRE(reader.parse(simulation_input.c_str(), simulation_data));
+    REQUIRE(Json::parseFromStream(reader, input_data_stream, &material_data, &input_errors));
+    REQUIRE(Json::parseFromStream(reader, simulation_input_stream, &simulation_data, &input_errors));
 
     InternalVariables variables(internal_variable_size);
 
@@ -579,11 +590,12 @@ TEST_CASE("J2 plasticity damage model", "[J2PlasticityDamage]")
     auto J2PlasticityDamage = make_constitutive_model(variables, material_data, simulation_data);
 
     // Get the tensor variables
-    auto[displacement_gradients, cauchy_stresses] = variables(InternalVariables::Tensor::DisplacementGradient,
-                                                              InternalVariables::Tensor::Cauchy);
+    auto [displacement_gradients,
+          cauchy_stresses] = variables(InternalVariables::Tensor::DisplacementGradient,
+                                       InternalVariables::Tensor::Cauchy);
 
-    auto[J_list, damage_list] = variables(InternalVariables::Scalar::DetF,
-                                          InternalVariables::Scalar::Damage);
+    auto [J_list, damage_list] = variables(InternalVariables::Scalar::DetF,
+                                           InternalVariables::Scalar::Damage);
 
     auto& material_tangents = variables(InternalVariables::Matrix::TangentOperator);
 
@@ -615,14 +627,12 @@ TEST_CASE("J2 plasticity damage model", "[J2PlasticityDamage]")
 
         J2PlasticityDamage->update_internal_variables(1.0);
 
-        auto[von_mises_stresses,
-             accumulated_plastic_strains] = variables(InternalVariables::Scalar::VonMisesStress,
-                                                      InternalVariables::Scalar::EffectivePlasticStrain);
+        auto [von_mises_stresses,
+              accumulated_plastic_strains] = variables(InternalVariables::Scalar::VonMisesStress,
+                                                       InternalVariables::Scalar::EffectivePlasticStrain);
 
         for (auto const& material_tangent : material_tangents)
         {
-            // std::cout << C << "\n";
-
             // Ensure symmetry is correct when the loading is elastic
             REQUIRE((material_tangent - material_tangent.transpose()).norm()
                     == Approx(0.0).margin(ZERO_MARGIN));
@@ -633,7 +643,6 @@ TEST_CASE("J2 plasticity damage model", "[J2PlasticityDamage]")
 
         for (auto& cauchy_stress : cauchy_stresses)
         {
-            // std::cout << cauchy_stress << std::endl;
             REQUIRE(cauchy_stress.norm() != Approx(0.0).margin(ZERO_MARGIN));
 
             // Shear components should be close to zero
@@ -660,9 +669,9 @@ TEST_CASE("J2 plasticity damage model", "[J2PlasticityDamage]")
 
         J2PlasticityDamage->update_internal_variables(0.01); // time here is real (not pseudo time)
 
-        auto[von_mises_stresses,
-             accumulated_plastic_strains] = variables(InternalVariables::Scalar::VonMisesStress,
-                                                      InternalVariables::Scalar::EffectivePlasticStrain);
+        auto [von_mises_stresses,
+              accumulated_plastic_strains] = variables(InternalVariables::Scalar::VonMisesStress,
+                                                       InternalVariables::Scalar::EffectivePlasticStrain);
 
         for (auto const& cauchy_stress : cauchy_stresses)
         {
