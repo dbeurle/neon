@@ -14,12 +14,17 @@
 #include <json/json.h>
 #include <range/v3/view.hpp>
 
+#include <sstream>
+
 #include "CubeJson.hpp"
 
 using namespace neon;
 using namespace ranges;
 
 constexpr auto ZERO_MARGIN = 1.0e-5;
+
+Json::CharReaderBuilder reader;
+JSONCPP_STRING input_errors;
 
 TEST_CASE("Testing material coordinates", "[MaterialCoordinates]")
 {
@@ -77,9 +82,9 @@ TEST_CASE("Basic mesh test")
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh
     Json::Value mesh_data;
-    Json::Reader mesh_file;
 
-    REQUIRE(mesh_file.parse(cube_mesh_json().c_str(), mesh_data));
+    std::istringstream input_data(cube_mesh_json());
+    REQUIRE(Json::parseFromStream(reader, input_data, &mesh_data, &input_errors));
 
     // Create the test objects
     BasicMesh basic_mesh(mesh_data);
@@ -171,11 +176,14 @@ TEST_CASE("Solid submesh test")
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh
     Json::Value mesh_data, material_data, simulation_data;
-    Json::Reader mesh_file, material_file, simulation_file;
 
-    REQUIRE(mesh_file.parse(cube_mesh_json().c_str(), mesh_data));
-    REQUIRE(material_file.parse(material_data_json().c_str(), material_data));
-    REQUIRE(simulation_file.parse(simulation_data_json().c_str(), simulation_data));
+    std::istringstream cube_mesh_input(cube_mesh_json());
+    std::istringstream material_data_input(material_data_json());
+    std::istringstream simulation_data_input(simulation_data_json());
+
+    REQUIRE(Json::parseFromStream(reader, cube_mesh_input, &mesh_data, &input_errors));
+    REQUIRE(Json::parseFromStream(reader, material_data_input, &material_data, &input_errors));
+    REQUIRE(Json::parseFromStream(reader, simulation_data_input, &simulation_data, &input_errors));
 
     // Create the test objects
     BasicMesh basic_mesh(mesh_data);
@@ -189,7 +197,10 @@ TEST_CASE("Solid submesh test")
 
     auto material_coordinates = std::make_shared<MaterialCoordinates>(nodal_coordinates.coordinates());
 
-    mechanical::solid::femSubmesh fem_submesh(material_data, simulation_data, material_coordinates, submesh);
+    mechanical::solid::femSubmesh fem_submesh(material_data,
+                                              simulation_data,
+                                              material_coordinates,
+                                              submesh);
 
     int constexpr number_of_nodes = 64;
     int constexpr number_of_dofs = number_of_nodes * 3;
@@ -236,8 +247,8 @@ TEST_CASE("Solid submesh test")
     }
     SECTION("Consistent and diagonal mass")
     {
-        auto const & [ local_dofs_0, mass_c ] = fem_submesh.consistent_mass(0);
-        auto const & [ local_dofs_1, mass_d ] = fem_submesh.diagonal_mass(0);
+        auto const & [local_dofs_0, mass_c] = fem_submesh.consistent_mass(0);
+        auto const & [local_dofs_1, mass_d] = fem_submesh.diagonal_mass(0);
 
         REQUIRE(local_dofs_0.size() == number_of_local_dofs);
         REQUIRE(local_dofs_1.size() == number_of_local_dofs);
@@ -262,11 +273,14 @@ TEST_CASE("Solid mesh test")
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh
     Json::Value mesh_data, material_data, simulation_data;
-    Json::Reader mesh_file, material_file, simulation_file;
 
-    REQUIRE(mesh_file.parse(cube_mesh_json().c_str(), mesh_data));
-    REQUIRE(material_file.parse(material_data_json().c_str(), material_data));
-    REQUIRE(simulation_file.parse(simulation_data_json().c_str(), simulation_data));
+    std::istringstream cube_mesh_input(cube_mesh_json());
+    std::istringstream material_data_input(material_data_json());
+    std::istringstream simulation_data_input(simulation_data_json());
+
+    REQUIRE(Json::parseFromStream(reader, cube_mesh_input, &mesh_data, &input_errors));
+    REQUIRE(Json::parseFromStream(reader, material_data_input, &material_data, &input_errors));
+    REQUIRE(Json::parseFromStream(reader, simulation_data_input, &simulation_data, &input_errors));
 
     // Create the test objects
     BasicMesh basic_mesh(mesh_data);

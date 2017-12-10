@@ -13,6 +13,9 @@ using namespace neon;
 
 constexpr auto ZERO_MARGIN = 1.0e-5;
 
+Json::CharReaderBuilder reader;
+JSONCPP_STRING input_errors;
+
 /** Create a SPD matrix for solver testing */
 SparseMatrix create_sparse_matrix()
 {
@@ -61,8 +64,9 @@ TEST_CASE("Linear solver test suite")
         std::string solver_str = "{\"Solver\":\"Iterative\"}";
 
         Json::Value solver_data;
-        Json::Reader solver_file;
-        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        std::istringstream input_data(solver_str);
+        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -76,8 +80,9 @@ TEST_CASE("Linear solver test suite")
         std::string solver_str = "{\"Solver\":\"Iterative\",\"Tolerance\":1e-8}";
 
         Json::Value solver_data;
-        Json::Reader solver_file;
-        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        std::istringstream input_data(solver_str);
+        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -91,8 +96,9 @@ TEST_CASE("Linear solver test suite")
         std::string solver_str = "{\"Solver\":\"Iterative\",\"MaxIterations\":100}";
 
         Json::Value solver_data;
-        Json::Reader solver_file;
-        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        std::istringstream input_data(solver_str);
+        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -107,8 +113,9 @@ TEST_CASE("Linear solver test suite")
                                  "100,\"Tolerance\":1e-8}";
 
         Json::Value solver_data;
-        Json::Reader solver_file;
-        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        std::istringstream input_data(solver_str);
+        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -122,8 +129,9 @@ TEST_CASE("Linear solver test suite")
         std::string solver_str = "{\"Solver\":\"Iterative\"}";
 
         Json::Value solver_data;
-        Json::Reader solver_file;
-        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        std::istringstream input_data(solver_str);
+        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
 
         auto linear_solver = make_linear_solver(solver_data, false);
 
@@ -137,8 +145,9 @@ TEST_CASE("Linear solver test suite")
         std::string solver_str = "{\"Solver\":\"Iterative\",\"Tolerance\":1e-8}";
 
         Json::Value solver_data;
-        Json::Reader solver_file;
-        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        std::istringstream input_data(solver_str);
+        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
 
         auto linear_solver = make_linear_solver(solver_data, false);
 
@@ -152,8 +161,9 @@ TEST_CASE("Linear solver test suite")
         std::string solver_str = "{\"Solver\":\"Iterative\",\"MaxIterations\":100}";
 
         Json::Value solver_data;
-        Json::Reader solver_file;
-        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        std::istringstream input_data(solver_str);
+        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
 
         auto linear_solver = make_linear_solver(solver_data, false);
 
@@ -168,8 +178,9 @@ TEST_CASE("Linear solver test suite")
                                  "\"Tolerance\":1e-8}";
 
         Json::Value solver_data;
-        Json::Reader solver_file;
-        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        std::istringstream input_data(solver_str);
+        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
 
         auto linear_solver = make_linear_solver(solver_data, false);
 
@@ -183,8 +194,9 @@ TEST_CASE("Linear solver test suite")
         std::string solver_str = "{\"Solver\":\"PaStiX\"}";
 
         Json::Value solver_data;
-        Json::Reader solver_file;
-        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        std::istringstream input_data(solver_str);
+        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -198,8 +210,9 @@ TEST_CASE("Linear solver test suite")
         std::string solver_str = "{\"Solver\":\"PaStiX\"}";
 
         Json::Value solver_data;
-        Json::Reader solver_file;
-        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        std::istringstream input_data(solver_str);
+        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
 
         auto linear_solver = make_linear_solver(solver_data, false);
 
@@ -213,8 +226,9 @@ TEST_CASE("Linear solver test suite")
         std::string solver_str = "{\"Solver\":\"MUMPS\"}";
 
         Json::Value solver_data;
-        Json::Reader solver_file;
-        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        std::istringstream input_data(solver_str);
+        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -228,8 +242,9 @@ TEST_CASE("Linear solver test suite")
         std::string solver_str = "{\"Solver\":\"MUMPS\"}";
 
         Json::Value solver_data;
-        Json::Reader solver_file;
-        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        std::istringstream input_data(solver_str);
+        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
 
         auto linear_solver = make_linear_solver(solver_data, false);
 
@@ -243,8 +258,9 @@ TEST_CASE("Linear solver test suite")
         std::string solver_str = "{\"Solver\":\"Direct\"}";
 
         Json::Value solver_data;
-        Json::Reader solver_file;
-        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        std::istringstream input_data(solver_str);
+        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
 
         auto linear_solver = make_linear_solver(solver_data, false);
 
@@ -258,8 +274,9 @@ TEST_CASE("Linear solver test suite")
         std::string solver_str = "{\"Solver\":\"Direct\"}";
 
         Json::Value solver_data;
-        Json::Reader solver_file;
-        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        std::istringstream input_data(solver_str);
+        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -274,8 +291,9 @@ TEST_CASE("Linear solver test suite")
         std::string solver_str = "{\"Solver\":\"IterativeGPU\"}";
 
         Json::Value solver_data;
-        Json::Reader solver_file;
-        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        std::istringstream input_data(solver_str);
+        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -289,8 +307,9 @@ TEST_CASE("Linear solver test suite")
         std::string solver_str = "{\"Solver\":\"IterativeGPU\",\"Tolerance\":1e-8}";
 
         Json::Value solver_data;
-        Json::Reader solver_file;
-        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        std::istringstream input_data(solver_str);
+        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -304,8 +323,9 @@ TEST_CASE("Linear solver test suite")
         std::string solver_str = "{\"Solver\":\"IterativeGPU\",\"MaxIterations\":100}";
 
         Json::Value solver_data;
-        Json::Reader solver_file;
-        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        std::istringstream input_data(solver_str);
+        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -320,8 +340,9 @@ TEST_CASE("Linear solver test suite")
                                  "100,\"Tolerance\":1e-8}";
 
         Json::Value solver_data;
-        Json::Reader solver_file;
-        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        std::istringstream input_data(solver_str);
+        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -336,8 +357,9 @@ TEST_CASE("Linear solver test suite")
         std::string solver_str = "{\"Solver\":\"PurpleMonkey\"}";
 
         Json::Value solver_data;
-        Json::Reader solver_file;
-        REQUIRE(solver_file.parse(solver_str.c_str(), solver_data));
+
+        std::istringstream input_data(solver_str);
+        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
 
         REQUIRE_THROWS_AS(make_linear_solver(solver_data), std::runtime_error);
     }

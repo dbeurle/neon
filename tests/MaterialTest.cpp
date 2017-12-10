@@ -14,6 +14,9 @@
 
 #include "Exceptions.hpp"
 
+Json::CharReaderBuilder reader;
+JSONCPP_STRING input_errors;
+
 using namespace neon;
 
 std::string linear_material_input()
@@ -75,11 +78,13 @@ std::string micromechanical_input()
 TEST_CASE("Linear elastic material", "[LinearElastic]")
 {
     Json::Value material_data;
-    Json::Reader reader;
 
     SECTION("Linear elastic properties")
     {
-        REQUIRE(reader.parse(linear_material_input().c_str(), material_data));
+        // Read in a cube mesh from the json input file and use this to
+        // test the functionality of the basic mesh
+        std::istringstream material_stream(linear_material_input());
+        REQUIRE(Json::parseFromStream(reader, material_stream, &material_data, &input_errors));
 
         LinearElastic linear_elastic(material_data);
 
@@ -102,7 +107,9 @@ TEST_CASE("Linear elastic material", "[LinearElastic]")
     }
     SECTION("Incompressible elastic properties")
     {
-        REQUIRE(reader.parse(linear_material_input_incompressible().c_str(), material_data));
+        std::istringstream material_stream(linear_material_input_incompressible());
+        REQUIRE(Json::parseFromStream(reader, material_stream, &material_data, &input_errors));
+
         LinearElastic linear_elastic(material_data);
 
         REQUIRE(linear_elastic.bulk_modulus() == Approx(200.0e9));
@@ -110,16 +117,18 @@ TEST_CASE("Linear elastic material", "[LinearElastic]")
     }
     SECTION("Incorrect elastic properties")
     {
-        REQUIRE(reader.parse(linear_material_input_incorrect().c_str(), material_data));
+        std::istringstream material_stream(linear_material_input_incorrect());
+        REQUIRE(Json::parseFromStream(reader, material_stream, &material_data, &input_errors));
+
         REQUIRE_THROWS_AS(LinearElastic(material_data), MaterialPropertyException);
     }
 }
 TEST_CASE("Perfect plastic material", "[PerfectPlasticElastic]")
 {
     Json::Value material_data;
-    Json::Reader reader;
 
-    REQUIRE(reader.parse(perfect_plastic_input().c_str(), material_data));
+    std::istringstream material_stream(perfect_plastic_input());
+    REQUIRE(Json::parseFromStream(reader, material_stream, &material_data, &input_errors));
 
     IsotropicElasticPlastic perfect_plastic_elastic(material_data);
 
@@ -134,9 +143,9 @@ TEST_CASE("Perfect plastic material", "[PerfectPlasticElastic]")
 TEST_CASE("Isotropic hardening", "[IsotropicPlasticElastic]")
 {
     Json::Value material_data;
-    Json::Reader reader;
 
-    REQUIRE(reader.parse(isotropic_plastic_input().c_str(), material_data));
+    std::istringstream material_stream(isotropic_plastic_input());
+    REQUIRE(Json::parseFromStream(reader, material_stream, &material_data, &input_errors));
 
     IsotropicElasticPlastic iso_plastic_elastic(material_data);
 
@@ -153,18 +162,19 @@ TEST_CASE("Isotropic hardening", "[IsotropicPlasticElastic]")
 TEST_CASE("Missing yield stress", "[IsotropicPlasticElastic]")
 {
     Json::Value material_data;
-    Json::Reader reader;
 
-    REQUIRE(reader.parse(perfect_plastic_input_incorrect().c_str(), material_data));
+    std::istringstream material_stream(perfect_plastic_input_incorrect());
+    REQUIRE(Json::parseFromStream(reader, material_stream, &material_data, &input_errors));
 
     REQUIRE_THROWS_AS(IsotropicElasticPlastic(material_data), MaterialPropertyException);
 }
 TEST_CASE("Micromechanical elastomer", "[StochasticMicromechanicalElastomer]")
 {
     Json::Value material_data;
-    Json::Reader reader;
 
-    REQUIRE(reader.parse(micromechanical_input().c_str(), material_data));
+    std::istringstream material_stream(micromechanical_input());
+    REQUIRE(Json::parseFromStream(reader, material_stream, &material_data, &input_errors));
+
     StochasticMicromechanicalElastomer elastomer(material_data);
 
     // Initial chains and segment groups
@@ -193,9 +203,9 @@ TEST_CASE("Micromechanical elastomer", "[StochasticMicromechanicalElastomer]")
 TEST_CASE("Diffusion material", "[LinearDiffusion]")
 {
     Json::Value material_data;
-    Json::Reader reader;
 
-    REQUIRE(reader.parse(linear_diffusion_material_input().c_str(), material_data));
+    std::istringstream material_stream(linear_diffusion_material_input());
+    REQUIRE(Json::parseFromStream(reader, material_stream, &material_data, &input_errors));
 
     LinearDiffusion linear_diffusion(material_data);
 
