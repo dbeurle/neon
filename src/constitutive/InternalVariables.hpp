@@ -7,9 +7,27 @@
 
 #include <functional>
 #include <unordered_map>
+#include <vector>
 
 namespace neon
 {
+class variable_view
+{
+public:
+    variable_view() = default;
+
+    variable_view(std::size_t const quadrature_points) : quadrature_points(quadrature_points) {}
+
+    /** @return view index into the vector */
+    std::size_t operator()(std::size_t const element, std::size_t const quadrature_point) const
+    {
+        return quadrature_points * element + quadrature_point;
+    }
+
+private:
+    std::size_t quadrature_points = 0;
+};
+
 /**
  * InternalVariables stores the internal variables associated with the element
  * quadrature points.  These variables are duplicated and commited to memory
