@@ -7,17 +7,6 @@
 
 namespace neon
 {
-namespace mechanical::solid
-{
-/**
- * encode_dof takes a string valued representation of the DoF and returns the
- * encoding as an integer for computational use.  If name is not recognised
- * then an exception is thrown.  These functions are only usable for each
- * module
- */
-[[nodiscard]] int encode_dof(std::string const& name);
-}
-
 /**
  * Allocates the dof lists from the nodal connectivity vector
  * @param nodal_dofs Number of degrees of freedom for each node

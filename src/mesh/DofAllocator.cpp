@@ -7,11 +7,6 @@
 
 namespace neon
 {
-namespace mechanical::solid
-{
-int encode_dof(std::string const& name) { return 0; }
-}
-
 std::vector<List> allocate_dof_list(int const nodal_dofs, std::vector<List> const& nodal_connectivity)
 {
     using namespace ranges;
