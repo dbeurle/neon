@@ -72,7 +72,6 @@ void femDynamicMatrix::assemble_mass()
         }
     }
     M.setFromTriplets(doublets.begin(), doublets.end());
-    M.coeffs() = 0.0;
 
     doublets.clear();
 
