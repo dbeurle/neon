@@ -20,8 +20,8 @@ std::unique_ptr<AbstractModule> make_module(
     auto const& module_type = simulation["Module"].asString();
     auto const& solution_type = simulation["Solution"].asString();
 
-    std::cout << std::string(4, ' ') << "Name \"" << name << "\"\n";
-    std::cout << std::string(4, ' ') << "Module \"" << module_type << "\"\n";
+    std::cout << std::string(4, ' ') << "Name     \"" << name << "\"\n";
+    std::cout << std::string(4, ' ') << "Module   \"" << module_type << "\"\n";
     std::cout << std::string(4, ' ') << "Solution \"" << solution_type << "\"\n";
 
     auto const& [mesh, material] = simulation_mesh->second;
