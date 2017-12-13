@@ -29,8 +29,7 @@ public:
     [[nodiscard]] auto elements() const { return nodal_connectivity.size(); }
 
 protected:
-    std::vector<List> nodal_connectivity;
-    std::vector<List> dof_list;
+    std::vector<List> nodal_connectivity, dof_list;
 
     std::shared_ptr<MaterialCoordinates> material_coordinates;
 };
@@ -60,8 +59,6 @@ public:
         auto const X = geometry::project_to_plane(
             material_coordinates->initial_configuration(nodal_connectivity[element]));
 
-        auto const h = interpolate_prescribed_load(load_factor);
-
         // Perform the computation of the external load vector
         auto const f_ext = sf->quadrature().integrate(Vector::Zero(X.cols()).eval(),
                                                       [&](auto const& femval, auto const& l) -> Vector {
@@ -69,9 +66,9 @@ public:
 
                                                           auto const j = (X * dN).determinant();
 
-                                                          return h * N * j;
+                                                          return N * j;
                                                       });
-        return {dof_list[element], f_ext};
+        return {dof_list[element], interpolate_prescribed_load(load_factor) * f_ext};
     }
 
 protected:
