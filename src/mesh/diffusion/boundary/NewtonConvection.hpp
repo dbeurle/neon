@@ -5,10 +5,10 @@
 
 #include "interpolations/ShapeFunction.hpp"
 
-namespace neon::diffusion
+namespace neon::diffusion::boundary
 {
 /**
- * NewtonConvection is responsible for computing the additional term to the
+ * newton_cooling is responsible for computing the additional term to the
  * stiffness matrix and right hand side for modelling physics such as the Newton's
  * law of cooling given by
  *
@@ -20,16 +20,24 @@ namespace neon::diffusion
  * leaving the surface.  The surrounding temperature \f$T_\infty\f$ is computed by
  * \f$ T_\infty = h / \lambda \f$
  */
-class NewtonConvection : public SurfaceLoad<SurfaceInterpolation>
+class newton_cooling : public SurfaceLoad<SurfaceInterpolation>
 {
 public:
-    explicit NewtonConvection(std::unique_ptr<SurfaceInterpolation>&& sf,
-                              std::vector<List> const& nodal_connectivity,
-                              std::vector<List> const& dof_list,
-                              std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                              Json::Value const& time_history,
-                              Json::Value const& heat_transfer_coefficients,
-                              Json::Value const& prescribed_heat_fluxes);
+    /**
+     * Construct the boundary condition
+     * @param sf A surface interpolation
+     * @param nodal_connectivity
+     * @param times A list of times and values
+     * @param heat_flux A list of heat fluxes
+     * @param external_temperature A list of heat transfer coefficients
+     */
+    explicit newton_cooling(std::unique_ptr<SurfaceInterpolation>&& sf,
+                            std::vector<List> const& nodal_connectivity,
+                            std::vector<List> const& dof_list,
+                            std::shared_ptr<MaterialCoordinates>& material_coordinates,
+                            Json::Value const& times,
+                            Json::Value const& heat_flux,
+                            Json::Value const& heat_transfer_coefficient);
 
     /**
      * Compute the element stiffness matrix contributing to the mixed boundary condition
@@ -41,6 +49,6 @@ public:
                                                                      double const load_factor) const;
 
 protected:
-    std::vector<std::pair<double, double>> coefficient_time_data;
+    std::vector<std::pair<double, double>> stiffness_time_data;
 };
 }

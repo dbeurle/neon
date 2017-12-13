@@ -13,6 +13,8 @@
 #include "mesh/generic/Boundary.hpp"
 #include "mesh/mechanical/solid/boundary/NonFollowerLoad.hpp"
 
+#include "mesh/diffusion/boundary/NewtonConvection.hpp"
+
 #include <json/json.h>
 #include <range/v3/view.hpp>
 
@@ -165,16 +167,16 @@ TEST_CASE("Traction test for triangle", "[Traction]")
         REQUIRE(Json::parseFromStream(reader, times_stream, &times, &input_errors));
         REQUIRE(Json::parseFromStream(reader, loads_stream, &loads, &input_errors));
 
-        Traction traction(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
-                          nodal_connectivity,
-                          dof_list,
-                          material_coordinates,
-                          times,
-                          loads);
+        traction patch(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
+                       nodal_connectivity,
+                       dof_list,
+                       material_coordinates,
+                       times,
+                       loads);
 
-        REQUIRE(traction.elements() == 1);
+        REQUIRE(patch.elements() == 1);
 
-        auto const& [dofs, t] = traction.external_force(0, 1.0);
+        auto const& [dofs, t] = patch.external_force(0, 1.0);
 
         REQUIRE((t - 1.0 / 6.0 * Vector3::Ones()).norm() == Approx(0.0).margin(ZERO_MARGIN));
         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
@@ -186,16 +188,16 @@ TEST_CASE("Traction test for triangle", "[Traction]")
         REQUIRE(Json::parseFromStream(reader, times_stream, &times, &input_errors));
         REQUIRE(Json::parseFromStream(reader, loads_stream, &loads, &input_errors));
 
-        Traction traction(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
-                          nodal_connectivity,
-                          dof_list,
-                          material_coordinates,
-                          times,
-                          loads);
+        traction patch(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
+                       nodal_connectivity,
+                       dof_list,
+                       material_coordinates,
+                       times,
+                       loads);
 
-        REQUIRE(traction.elements() == 1);
+        REQUIRE(patch.elements() == 1);
 
-        auto const& [dofs, t] = traction.external_force(0, 1.0);
+        auto const& [dofs, t] = patch.external_force(0, 1.0);
 
         REQUIRE((t - 2.0 / 6.0 * Vector3::Ones()).norm() == Approx(0.0).margin(ZERO_MARGIN));
         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
@@ -224,16 +226,16 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
         REQUIRE(Json::parseFromStream(reader, times_stream, &times, &input_errors));
         REQUIRE(Json::parseFromStream(reader, loads_stream, &loads, &input_errors));
 
-        Pressure pressure(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
-                          nodal_connectivity,
-                          dof_list,
-                          material_coordinates,
-                          times,
-                          loads);
+        pressure pressure_patch(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
+                                nodal_connectivity,
+                                dof_list,
+                                material_coordinates,
+                                times,
+                                loads);
 
-        REQUIRE(pressure.elements() == 1);
+        REQUIRE(pressure_patch.elements() == 1);
 
-        auto const& [dofs, f_ext] = pressure.external_force(0, 1.0);
+        auto const& [dofs, f_ext] = pressure_patch.external_force(0, 1.0);
 
         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
 
@@ -249,16 +251,16 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
         REQUIRE(Json::parseFromStream(reader, times_stream, &times, &input_errors));
         REQUIRE(Json::parseFromStream(reader, loads_stream, &loads, &input_errors));
 
-        Pressure pressure(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
-                          nodal_connectivity,
-                          dof_list,
-                          material_coordinates,
-                          times,
-                          loads);
+        pressure pressure_patch(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
+                                nodal_connectivity,
+                                dof_list,
+                                material_coordinates,
+                                times,
+                                loads);
 
-        REQUIRE(pressure.elements() == 1);
+        REQUIRE(pressure_patch.elements() == 1);
 
-        auto const& [dofs, f_ext] = pressure.external_force(0, 1.0);
+        auto const& [dofs, f_ext] = pressure_patch.external_force(0, 1.0);
 
         REQUIRE((Vector3(f_ext(2), f_ext(5), f_ext(8)) - 2.0 / 6.0 * Vector3::Ones()).norm()
                 == Approx(0.0).margin(ZERO_MARGIN));
@@ -351,5 +353,50 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
                 },
                 meshes.at(1));
         }
+    }
+}
+TEST_CASE("Newton cooling boundary conditions")
+{
+    using diffusion::boundary::newton_cooling;
+
+    Json::Value times, flux, T_inf;
+
+    // Build a right angled triangle
+    Vector coordinates(9);
+    coordinates << 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0;
+
+    auto material_coordinates = std::make_shared<MaterialCoordinates>(coordinates);
+
+    std::vector<List> const nodal_connectivity = {{0, 1, 2}};
+    std::vector<List> const dof_list = {{0, 3, 6}};
+
+    SECTION("Unit load")
+    {
+        std::istringstream times_stream("[0.0, 1.0]"), h_stream("[0.0, 1.0]"),
+            T_inf_stream("[300.0, 300.0]");
+
+        REQUIRE(Json::parseFromStream(reader, times_stream, &times, &input_errors));
+        REQUIRE(Json::parseFromStream(reader, h_stream, &flux, &input_errors));
+        REQUIRE(Json::parseFromStream(reader, T_inf_stream, &T_inf, &input_errors));
+
+        newton_cooling patch(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
+                             nodal_connectivity,
+                             dof_list,
+                             material_coordinates,
+                             times,
+                             flux,
+                             T_inf);
+
+        REQUIRE(patch.elements() == 1);
+
+        auto const& [dofs_0, t] = patch.external_force(0, 1.0);
+        auto const& [dofs_1, k] = patch.external_stiffness(0, 1.0);
+
+        REQUIRE((t - 1.0 / 6.0 * Vector3::Ones()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+
+        REQUIRE(k.norm() > 0.0);
+
+        REQUIRE(view::set_difference(dof_list.at(0), dofs_0).empty());
+        REQUIRE(view::set_difference(dof_list.at(0), dofs_1).empty());
     }
 }

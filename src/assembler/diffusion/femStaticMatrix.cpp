@@ -68,6 +68,24 @@ void femStaticMatrix::compute_external_force(double const load_factor)
                     }
                 }
             }
+            for (auto const& mesh : surface.stiffness_load_interface())
+            {
+                for (auto element = 0; element < mesh.elements(); ++element)
+                {
+                    auto const& [dofs, fe] = mesh.external_force(element, load_factor);
+                    auto const& [_, ke] = mesh.external_stiffness(element, load_factor);
+
+                    for (auto a = 0; a < fe.size(); ++a)
+                    {
+                        f(dofs[a]) += fe(a);
+
+                        for (auto b = 0; b < fe.size(); ++b)
+                        {
+                            K.coeffRef(dofs[a], dofs[b]) += ke(a, b);
+                        }
+                    }
+                }
+            }
         }
     }
     auto const end = std::chrono::high_resolution_clock::now();
