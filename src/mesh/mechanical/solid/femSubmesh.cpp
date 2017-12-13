@@ -15,9 +15,9 @@
 #include <chrono>
 #include <omp.h>
 
-#include <range/v3/algorithm/find_if.hpp>
 #include <range/v3/algorithm/count_if.hpp>
 #include <range/v3/algorithm/fill.hpp>
+#include <range/v3/algorithm/find_if.hpp>
 #include <range/v3/view/transform.hpp>
 
 #include <termcolor/termcolor.hpp>
@@ -33,7 +33,7 @@ femSubmesh::femSubmesh(Json::Value const& material_data,
       sf(make_volume_interpolation(topology(), mesh_data)),
       variables(elements() * sf->quadrature().points()),
       view(sf->quadrature().points()),
-      cm(make_constitutive_model(variables, material_data, mesh_data)),
+      cm(make_constitutive_model(variables, material_data, mesh_data))
 {
     // Allocate storage for the displacement gradient
     variables.add(InternalVariables::Tensor::DisplacementGradient,
@@ -238,21 +238,22 @@ void femSubmesh::update_Jacobian_determinants()
                                         | ranges::view::transform(
                                               [](auto const& F) { return F.determinant(); });
 
-    auto const count = ranges::count_if(deformation_gradient_determinants,
-                                        [](auto detF) { return detF <= 0.0; });
+    auto const found = ranges::find_if(deformation_gradient_determinants,
+                                       [](auto detF) { return detF <= 0.0; });
 
-    if (count > 0)
+    if (found != std::end(deformation_gradient_determinants))
     {
-        auto const i = std::distance(deformation_gradient_determinants.begin(),
-                                     ranges::find_if(deformation_gradient_determinants,
-                                                     [](auto detF) { return detF <= 0.0; }));
+        auto const count = ranges::count_if(deformation_gradient_determinants,
+                                            [](auto detF) { return detF <= 0.0; });
+
+        auto const i = std::distance(deformation_gradient_determinants.begin(), found);
 
         auto const [element, quadrature_point] = std::div(i, sf->quadrature().points());
 
         throw computational_error("Positive Jacobian assumption violated at element "
                                   + std::to_string(element) + " and local quadrature point "
                                   + std::to_string(quadrature_point) + " (" + std::to_string(*found)
-                                  + "), another " + std::to_string(count - 1) " violations found");
+                                  + "), another " + std::to_string(count - 1) + " violations found");
     }
 }
 
