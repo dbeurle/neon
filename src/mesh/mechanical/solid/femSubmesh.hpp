@@ -110,8 +110,6 @@ protected:
      */
     [[nodiscard]] Vector internal_nodal_force(Matrix const& configuration, int element) const;
 
-    /** @return the index into the internal variable store */
-    [[nodiscard]] int offset(int const element, int const quadraturePoint) const;
 
 private:
     std::shared_ptr<MaterialCoordinates> material_coordinates;
