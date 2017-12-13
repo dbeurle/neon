@@ -3,7 +3,6 @@
 
 #include "numeric/IndexTypes.hpp"
 
-#include <string>
 
 namespace neon
 {
