@@ -14,6 +14,7 @@ option(ENABLE_COVERAGE "Set compiler flag for coverage analysis" OFF)
 if (ENABLE_CUDA)
     find_package(CUDA REQUIRED)
     add_definitions(-DENABLE_CUDA)
+    include_directories(${CUDA_INCLUDE_DIRS})
 endif()
 
 if (ENABLE_NATIVE)
