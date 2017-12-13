@@ -1,5 +1,5 @@
 
-#include "Submesh.hpp"
+#include "femSubmesh.hpp"
 
 #include "Exceptions.hpp"
 
@@ -13,21 +13,19 @@
 #include <cfenv>
 #include <omp.h>
 
-#include <json/json.h>
-
 #include <termcolor/termcolor.hpp>
 
 namespace neon::diffusion
 {
 femSubmesh::femSubmesh(Json::Value const& material_data,
-                       Json::Value const& simulation_data,
+                       Json::Value const& mesh_data,
                        std::shared_ptr<MaterialCoordinates>& material_coordinates,
                        Submesh const& submesh)
-    : neon::Submesh(submesh),
+    : Submesh(submesh),
       material_coordinates(material_coordinates),
-      sf(mechanical::solid::make_volume_interpolation(topology(), simulation_data)),
+      sf(mechanical::solid::make_volume_interpolation(topology(), mesh_data)),
       variables(elements() * sf->quadrature().points()),
-      cm(make_constitutive_model(variables, material_data, simulation_data))
+      cm(make_constitutive_model(variables, material_data, mesh_data))
 {
 }
 

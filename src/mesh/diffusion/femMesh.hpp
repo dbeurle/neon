@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/diffusion/Submesh.hpp"
+#include "mesh/diffusion/femSubmesh.hpp"
 
 #include "mesh/diffusion/boundary/SurfaceBoundary.hpp"
 #include "mesh/generic/Dirichlet.hpp"
@@ -20,7 +20,7 @@ class femMesh
 public:
     femMesh(BasicMesh const& basic_mesh,
             Json::Value const& material_data,
-            Json::Value const& simulation_data);
+            Json::Value const& mesh_data);
 
     auto active_dofs() const { return material_coordinates->size(); }
 
@@ -45,7 +45,7 @@ public:
 
     auto const& dirichlet_boundaries() const { return dirichlet_bcs; }
 
-    auto const& surface_boundaries() const { return surface_bcs; }
+    auto const& surface_boundaries() const { return boundary_meshes; }
 
     auto const& coordinates() const { return *(material_coordinates.get()); }
 
@@ -63,7 +63,7 @@ protected:
     std::vector<femSubmesh> submeshes;
 
     std::map<std::string, std::vector<Dirichlet>> dirichlet_bcs;
-    std::map<std::string, std::vector<SurfaceBoundary>> surface_bcs;
+    std::map<std::string, std::vector<boundary_mesh>> boundary_meshes;
 
     std::unordered_map<std::string, int> const dof_table = {{"x", 0}, {"y", 1}, {"z", 2}};
 };

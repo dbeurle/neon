@@ -15,6 +15,10 @@ class MaterialCoordinates;
 
 namespace diffusion
 {
+/**
+ * femSubmesh provides the element local routines for computing the system
+ * components for a three-dimensional heat equation discretisation.
+ */
 class femSubmesh : public Submesh
 {
 public:
@@ -22,18 +26,20 @@ public:
 
 public:
     explicit femSubmesh(Json::Value const& material_data,
-                        Json::Value const& simulation_data,
+                        Json::Value const& mesh_data,
                         std::shared_ptr<MaterialCoordinates>& material_coordinates,
                         Submesh const& submesh);
 
     /** @return list of global degrees of freedom for an element */
-    [[nodiscard]] List const& local_dof_list(int const element) const
-    {
+    [[nodiscard]] List const& local_dof_list(int const element) const {
         return local_node_list(element);
     }
 
-    /** @return The internal variable store */
-    [[nodiscard]] InternalVariables const& internal_variables() const { return variables; }
+        /** @return The internal variable store */
+        [[nodiscard]] InternalVariables const& internal_variables() const
+    {
+        return variables;
+    }
 
     void save_internal_variables(bool const have_converged);
 
@@ -74,12 +80,12 @@ public:
      * @param rhea Shape function gradients at quadrature point
      * @param configuration Configuration of the element (coordinates)
      */
-    [[nodiscard]] Matrix3 local_jacobian(Matrix const& rhea, Matrix const& configuration) const
-    {
+    [[nodiscard]] Matrix3 local_jacobian(Matrix const& rhea, Matrix const& configuration) const {
         return configuration * rhea;
     }
 
-    [[nodiscard]] ValueCount nodal_averaged_variable(InternalVariables::Tensor const tensor_name) const;
+        [[nodiscard]] ValueCount
+        nodal_averaged_variable(InternalVariables::Tensor const tensor_name) const;
 
     [[nodiscard]] ValueCount nodal_averaged_variable(InternalVariables::Scalar const scalar_name) const;
 

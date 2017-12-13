@@ -20,27 +20,27 @@ namespace neon::diffusion
 {
 femMesh::femMesh(BasicMesh const& basic_mesh,
                  Json::Value const& material_data,
-                 Json::Value const& simulation_data)
+                 Json::Value const& mesh_data)
     : material_coordinates(std::make_shared<MaterialCoordinates>(basic_mesh.coordinates()))
 {
-    check_boundary_conditions(simulation_data["BoundaryConditions"]);
+    check_boundary_conditions(mesh_data["BoundaryConditions"]);
 
-    auto const& simulation_name = simulation_data["Name"].asString();
+    auto const& simulation_name = mesh_data["Name"].asString();
 
     for (auto const& submesh : basic_mesh.meshes(simulation_name))
     {
-        submeshes.emplace_back(material_data, simulation_data, material_coordinates, submesh);
+        submeshes.emplace_back(material_data, mesh_data, material_coordinates, submesh);
     }
-    allocate_boundary_conditions(simulation_data, basic_mesh);
+    allocate_boundary_conditions(mesh_data, basic_mesh);
 }
 
 void femMesh::update_internal_variables(Vector const& u, double const time_step_size)
 {
-    auto start = std::chrono::high_resolution_clock::now();
+    auto const start = std::chrono::high_resolution_clock::now();
 
     for (auto& submesh : submeshes) submesh.update_internal_variables(time_step_size);
 
-    auto end = std::chrono::high_resolution_clock::now();
+    auto const end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
 
     std::cout << std::string(6, ' ') << "Internal variable update took " << elapsed_seconds.count()
@@ -52,34 +52,60 @@ void femMesh::save_internal_variables(bool const have_converged)
     for (auto& submesh : submeshes) submesh.save_internal_variables(have_converged);
 }
 
-void femMesh::allocate_boundary_conditions(Json::Value const& simulation_data,
-                                           BasicMesh const& basic_mesh)
+void femMesh::allocate_boundary_conditions(Json::Value const& mesh_data, BasicMesh const& basic_mesh)
 {
-    auto const& boundary_data = simulation_data["BoundaryConditions"];
+    auto const& boundary_data = mesh_data["BoundaryConditions"];
 
     // Populate the boundary meshes
     for (auto const& boundary : boundary_data)
     {
         auto const& boundary_name = boundary["Name"].asString();
 
+        if (!boundary.isMember("Time"))
+        {
+            throw std::runtime_error("BoundaryCondition requires a \"Time\" field.");
+        }
+
         if (auto const& boundary_type = boundary["Type"].asString(); boundary_type == "Temperature")
         {
+            if (!boundary.isMember("Value"))
+            {
+                throw std::runtime_error("BoundaryCondition \"" + boundary_type
+                                         + "\" requires a \"Value\" field.");
+            }
+
             dirichlet_bcs[boundary_name].emplace_back(filter_dof_list(
                                                           basic_mesh.meshes(boundary_name)),
                                                       boundary["Time"],
                                                       boundary["Value"]);
         }
-        else if (boundary_type == "HeatFlux")
+        else if (boundary_type == "HeatFlux" || boundary_type == "NewtonCooling")
         {
-            surface_bcs[boundary_name].emplace_back(material_coordinates,
-                                                    basic_mesh.meshes(boundary_name),
-                                                    boundary["Time"],
-                                                    boundary["Value"],
-                                                    simulation_data);
+            if (boundary_type == "HeatFlux" && !boundary.isMember("Value"))
+            {
+                throw std::runtime_error("BoundaryCondition \"" + boundary_type
+                                         + "\" requires a \"Value\" field.");
+            }
+            else if (boundary_type == "NewtonCooling"
+                     && (!boundary.isMember("HeatTransferCoefficient")
+                         || !boundary.isMember("AmbientTemperature")))
+            {
+                throw std::runtime_error("BoundaryCondition \"" + boundary_type
+                                         + "\" requires a \"HeatTransferCoefficient\" and "
+                                           "\"AmbientTemperature\" "
+                                           "field.");
+            }
+            boundary_meshes[boundary_name].emplace_back(material_coordinates,
+                                                        basic_mesh.meshes(boundary_name),
+                                                        boundary,
+                                                        mesh_data);
         }
         else
         {
-            throw std::runtime_error("BoundaryCondition \"" + boundary_type + "\" is not recognised");
+            throw std::runtime_error("BoundaryCondition \"" + boundary_type
+                                     + "\" is not recognised.  For thermal simulations "
+                                       "\"Temperature\", \"HeatFlux\" "
+                                       "and \"NewtonCooling\" are valid.");
         }
     }
 }
