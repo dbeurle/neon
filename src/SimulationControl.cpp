@@ -73,6 +73,8 @@ void SimulationControl::parse()
             return material["Name"].asString() == part["Material"].asString();
         });
 
+        auto const read_start = std::chrono::high_resolution_clock::now();
+
         std::ifstream mesh_input_stream(part["Name"].asString() + ".mesh");
 
         Json::Value mesh_file;
@@ -83,10 +85,20 @@ void SimulationControl::parse()
             throw std::runtime_error(mesh_errors);
         }
 
+        auto const read_end = std::chrono::high_resolution_clock::now();
+
+        std::cout << std::string(4, ' ') << "Parsed " << part["Name"].asString()
+                  << " mesh from file in "
+                  << std::chrono::duration<double>(read_end - read_start).count() << "s\n";
+
         mesh_store.try_emplace(part["Name"].asString(), mesh_file, material);
 
-        std::cout << std::string(4, ' ') << "Inserted " << part["Name"].asString()
-                  << " into the mesh store\n";
+        std::cout << std::string(4, ' ') << "Allocated internal storage for "
+                  << part["Name"].asString() << " in "
+                  << std::chrono::duration<double>(std::chrono::high_resolution_clock::now()
+                                                   - read_end)
+                         .count()
+                  << "s\n";
     }
 
     std::vector<std::string> const required_fields{"Name",
