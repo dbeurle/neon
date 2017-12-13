@@ -12,13 +12,22 @@ namespace neon::diffusion
 femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh, Json::Value const& simulation_data)
     : femStaticMatrix(fem_mesh, simulation_data), time_solver(simulation_data["Time"])
 {
-    d = 250.0 * Vector::Ones(fem_mesh.active_dofs());
+    if (simulation_data.isMember("InitialConditions")
+        && simulation_data["InitialConditions"].isMember("Uniform"))
+    {
+        d = simulation_data["InitialConditions"]["Uniform"].asDouble()
+            * Vector::Ones(fem_mesh.active_dofs());
+    }
 }
 
 void femDynamicMatrix::solve()
 {
     // Perform time dependent solution
-    std::cout << "Solving " << fem_mesh.active_dofs() << " degrees of freedom\n";
+    file_io.write(0, 0.0, d);
+
+    std::cout << "\n"
+              << std::string(4, ' ') << "Solving " << fem_mesh.active_dofs()
+              << " degrees of freedom\n\n";
 
     assemble_mass();
 
