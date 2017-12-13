@@ -22,14 +22,14 @@ namespace neon::mechanical::solid
 {
 std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& variables,
                                                            Json::Value const& material_data,
-                                                           Json::Value const& simulation_data)
+                                                           Json::Value const& mesh_data)
 {
-    if (!simulation_data.isMember("ConstitutiveModel"))
+    if (!mesh_data.isMember("ConstitutiveModel"))
     {
         throw std::runtime_error("Missing \"ConstitutiveModel\" in \"Mesh\"");
     }
 
-    auto const& constitutive_model = simulation_data["ConstitutiveModel"];
+    auto const& constitutive_model = mesh_data["ConstitutiveModel"];
 
     if (!constitutive_model.isMember("Name"))
     {
@@ -98,7 +98,7 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& va
                                      "\"FiniteStrain\"");
         }
 
-        if (simulation_data["ConstitutiveModel"]["FiniteStrain"].asBool())
+        if (mesh_data["ConstitutiveModel"]["FiniteStrain"].asBool())
         {
             return std::make_unique<FiniteJ2Plasticity>(variables, material_data);
         }
@@ -106,7 +106,7 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& va
     }
     else if (model_name == "ChabocheDamage")
     {
-        if (simulation_data["ConstitutiveModel"]["FiniteStrain"].asBool())
+        if (mesh_data["ConstitutiveModel"]["FiniteStrain"].asBool())
         {
             throw std::runtime_error("\"ChabocheDamage\" is not implemented for "
                                      "\"FiniteStrain\"");
@@ -124,14 +124,14 @@ namespace neon::mechanical::plane
 {
 std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& variables,
                                                            Json::Value const& material_data,
-                                                           Json::Value const& simulation_data)
+                                                           Json::Value const& mesh_data)
 {
-    if (!simulation_data.isMember("ConstitutiveModel"))
+    if (!mesh_data.isMember("ConstitutiveModel"))
     {
         throw std::runtime_error("Missing \"ConstitutiveModel\" in \"Mesh\"");
     }
 
-    auto const& constitutive_model = simulation_data["ConstitutiveModel"];
+    auto const& constitutive_model = mesh_data["ConstitutiveModel"];
 
     if (!constitutive_model.isMember("Name"))
     {
@@ -159,25 +159,33 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& va
 }
 }
 
+#include <iostream>
+
 namespace neon::diffusion
 {
 std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& variables,
                                                            Json::Value const& material_data,
-                                                           Json::Value const& simulation_data)
+                                                           Json::Value const& mesh_data)
 {
-    if (!simulation_data.isMember("ConstitutiveModel"))
+    if (!mesh_data.isMember("ConstitutiveModel"))
     {
-        throw std::runtime_error("Missing \"ConstitutiveModel\" in \"Mesh\"");
+        throw std::runtime_error("A \"ConstitutiveModel\" was not specified in \"Mesh\"");
     }
 
-    auto const& model_name = simulation_data["ConstitutiveModel"]["Name"].asString();
+    auto const& constitutive_model = mesh_data["ConstitutiveModel"];
 
-    if (model_name == "IsotropicDiffusion")
+    if (!constitutive_model.isMember("Name"))
+    {
+        throw std::runtime_error("\"ConstitutiveModel\" requires a \"Name\" field");
+    }
+
+    if (constitutive_model["Name"].asString() == "IsotropicDiffusion")
     {
         return std::make_unique<IsotropicDiffusion>(variables, material_data);
     }
 
-    throw std::runtime_error("The model name " + model_name + " is not recognised\n"
+    throw std::runtime_error("The model name " + constitutive_model["Name"].asString()
+                             + " is not recognised\n"
                              + "The supported model is \"IsotropicDiffusion\"\n");
 
     return nullptr;
