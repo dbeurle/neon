@@ -15,23 +15,23 @@
 
 namespace neon::mechanical::solid
 {
-bool is_reduced_integration(Json::Value const& simulation_data)
+bool is_reduced_integration(Json::Value const& mesh_data)
 {
-    return simulation_data["ElementOptions"]["Quadrature"].empty()
+    return mesh_data["ElementOptions"]["Quadrature"].empty()
                ? false
-               : simulation_data["ElementOptions"]["Quadrature"].asString() == "Reduced";
+               : mesh_data["ElementOptions"]["Quadrature"].asString() == "Reduced";
 }
 
 /** Factory method for the three dimensional shape functions */
 std::unique_ptr<VolumeInterpolation> make_volume_interpolation(ElementTopology const topology,
-                                                               Json::Value const& simulation_data)
+                                                               Json::Value const& mesh_data)
 {
-    if (!simulation_data.isMember("ElementOptions"))
+    if (!mesh_data.isMember("ElementOptions"))
     {
         throw std::runtime_error("Missing \"Part\": \"ElementOptions\"");
     }
 
-    auto is_reduced = is_reduced_integration(simulation_data);
+    auto const is_reduced = is_reduced_integration(mesh_data);
 
     switch (topology)
     {
@@ -43,13 +43,13 @@ std::unique_ptr<VolumeInterpolation> make_volume_interpolation(ElementTopology c
         case ElementTopology::Hexahedron20:
         {
             return std::make_unique<Hexahedron20>(is_reduced
-                                                      ? HexahedronQuadrature::Rule::SixPoint
+                                                      ? HexahedronQuadrature::Rule::EightPoint
                                                       : HexahedronQuadrature::Rule::TwentySevenPoint);
         }
         case ElementTopology::Hexahedron27:
         {
             return std::make_unique<Hexahedron27>(is_reduced
-                                                      ? HexahedronQuadrature::Rule::SixPoint
+                                                      ? HexahedronQuadrature::Rule::EightPoint
                                                       : HexahedronQuadrature::Rule::TwentySevenPoint);
         }
         case ElementTopology::Tetrahedron4:
@@ -82,14 +82,14 @@ std::unique_ptr<VolumeInterpolation> make_volume_interpolation(ElementTopology c
 }
 
 std::unique_ptr<SurfaceInterpolation> make_surface_interpolation(ElementTopology const topology,
-                                                                 Json::Value const& simulation_data)
+                                                                 Json::Value const& mesh_data)
 {
-    if (!simulation_data.isMember("ElementOptions"))
+    if (!mesh_data.isMember("ElementOptions"))
     {
         throw std::runtime_error("Missing \"Part\": \"ElementOptions\"");
     }
 
-    auto is_reduced = is_reduced_integration(simulation_data);
+    auto is_reduced = is_reduced_integration(mesh_data);
 
     switch (topology)
     {
