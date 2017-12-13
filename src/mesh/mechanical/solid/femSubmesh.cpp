@@ -16,6 +16,8 @@
 #include <omp.h>
 
 #include <range/v3/algorithm/find_if.hpp>
+#include <range/v3/algorithm/count_if.hpp>
+#include <range/v3/algorithm/fill.hpp>
 #include <range/v3/view/transform.hpp>
 
 #include <termcolor/termcolor.hpp>
@@ -30,7 +32,8 @@ femSubmesh::femSubmesh(Json::Value const& material_data,
       material_coordinates(material_coordinates),
       sf(make_volume_interpolation(topology(), mesh_data)),
       variables(elements() * sf->quadrature().points()),
-      cm(make_constitutive_model(variables, material_data, mesh_data))
+      view(sf->quadrature().points()),
+      cm(make_constitutive_model(variables, material_data, mesh_data)),
 {
     // Allocate storage for the displacement gradient
     variables.add(InternalVariables::Tensor::DisplacementGradient,
@@ -40,10 +43,8 @@ femSubmesh::femSubmesh(Json::Value const& material_data,
     variables.add(InternalVariables::Scalar::DetF);
 
     // Get the old data to the undeformed configuration
-    for (auto& F : variables(InternalVariables::Tensor::DeformationGradient))
-    {
-        F = Matrix3::Identity();
-    }
+    ranges::fill(variables(InternalVariables::Tensor::DeformationGradient), Matrix3::Identity());
+
     variables.commit();
 
     dof_list = allocate_dof_list(this->dofs_per_node(), nodal_connectivity);
@@ -94,7 +95,7 @@ Matrix femSubmesh::geometric_tangent_stiffness(Matrix const& x, int const elemen
 
                                                         auto const Jacobian = local_deformation_gradient(rhea, x);
 
-                                                        auto const cauchy_stress = cauchy_stresses[offset(element, l)];
+                                                        auto const cauchy_stress = cauchy_stresses[view(element, l)];
 
                                                         // Compute the symmetric gradient operator
                                                         auto const L = (rhea * Jacobian.inverse()).transpose();
@@ -116,7 +117,7 @@ Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int const element
     return sf->quadrature().integrate(kmat, [&](auto const& femval, auto const& l) -> Matrix {
         auto const& [N, rhea] = femval;
 
-        auto const& D = tangent_operators[offset(element, l)];
+        auto const& D = tangent_operators[view(element, l)];
 
         auto const Jacobian = local_deformation_gradient(rhea, x);
 
@@ -141,7 +142,7 @@ Vector femSubmesh::internal_nodal_force(Matrix const& x, int const element) cons
 
                                    auto const Jacobian = local_deformation_gradient(dN, x);
 
-                                   auto const& cauchy_stress = cauchy_stresses[offset(element, l)];
+                                   auto const& cauchy_stress = cauchy_stresses[view(element, l)];
 
                                    // Compute the symmetric gradient operator
                                    auto const Bt = dN * Jacobian.inverse();
@@ -222,8 +223,8 @@ void femSubmesh::update_deformation_measures()
             // Displacement gradient
             Matrix3 const H = (x - X) * B_0t;
 
-            H_list[offset(element, l)] = H;
-            F_list[offset(element, l)] = F * F_0.inverse();
+            H_list[view(element, l)] = H;
+            F_list[view(element, l)] = F * F_0.inverse();
         });
     }
 }
@@ -237,25 +238,22 @@ void femSubmesh::update_Jacobian_determinants()
                                         | ranges::view::transform(
                                               [](auto const& F) { return F.determinant(); });
 
-    auto const found = ranges::find_if(deformation_gradient_determinants,
-                                       [](auto const& detF) { return detF <= 0.0; });
+    auto const count = ranges::count_if(deformation_gradient_determinants,
+                                        [](auto detF) { return detF <= 0.0; });
 
-    if (found != deformation_gradient_determinants.end())
+    if (count > 0)
     {
-        auto const i = std::distance(deformation_gradient_determinants.begin(), found);
+        auto const i = std::distance(deformation_gradient_determinants.begin(),
+                                     ranges::find_if(deformation_gradient_determinants,
+                                                     [](auto detF) { return detF <= 0.0; }));
 
         auto const [element, quadrature_point] = std::div(i, sf->quadrature().points());
 
         throw computational_error("Positive Jacobian assumption violated at element "
                                   + std::to_string(element) + " and local quadrature point "
                                   + std::to_string(quadrature_point) + " (" + std::to_string(*found)
-                                  + ")");
+                                  + "), another " + std::to_string(count - 1) " violations found");
     }
-}
-
-int femSubmesh::offset(int const element, int const quadrature_point) const
-{
-    return sf->quadrature().points() * element + quadrature_point;
 }
 
 femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(InternalVariables::Tensor const tensor_name) const
@@ -281,7 +279,7 @@ femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(InternalVariables::Te
             {
                 for (auto l = 0; l < sf->quadrature().points(); ++l)
                 {
-                    auto const& tensor = tensor_list[this->offset(e, l)];
+                    auto const& tensor = tensor_list[view(e, l)];
                     component(l) = tensor(ci, cj);
                 }
 
@@ -318,7 +316,7 @@ femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(InternalVariables::Sc
 
         for (auto l = 0; l < sf->quadrature().points(); ++l)
         {
-            component(l) = scalar_list[this->offset(e, l)];
+            component(l) = scalar_list[view(e, l)];
         }
 
         // Local extrapolation to the nodes

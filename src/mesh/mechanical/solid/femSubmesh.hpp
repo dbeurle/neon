@@ -119,6 +119,7 @@ private:
     std::unique_ptr<VolumeInterpolation> sf; //!< Shape function
 
     InternalVariables variables;
+    variable_view view;
 
     std::unique_ptr<ConstitutiveModel> cm; //!< Constitutive model
 

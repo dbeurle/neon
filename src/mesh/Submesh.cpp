@@ -29,6 +29,10 @@ Submesh::Submesh(Json::Value const& mesh)
         throw std::runtime_error("The element group in the mesh file is missing the "
                                  "\"NodalConnectivity\" field");
     }
+    if (mesh["NodalConnectivity"].size() == 0 || mesh["NodalConnectivity"][0].size() == 0)
+    {
+        throw std::runtime_error("The element group in the mesh file is empty");
+    }
 
     element_topology = adapter.gmsh_type_to_enum(mesh["Type"].asInt());
 

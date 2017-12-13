@@ -16,9 +16,6 @@ public:
     /** Construct using a json object */
     Submesh(Json::Value const& mesh);
 
-    Submesh(Submesh const&) = default;
-    Submesh(Submesh&&) = default;
-
     /** @return the number of elements */
     auto elements() const { return nodal_connectivity.size(); }
 
