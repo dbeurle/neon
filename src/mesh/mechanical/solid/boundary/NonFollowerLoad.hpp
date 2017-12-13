@@ -1,9 +1,11 @@
 
 #pragma once
 
-#include "mesh/generic/Neumann.hpp"
+#include "body_force.hpp"
+#include "pressure.hpp"
+#include "traction.hpp"
 
-#include "interpolations/InterpolationFactory.hpp"
+#include "interpolations/ShapeFunction.hpp"
 #include "mesh/Submesh.hpp"
 
 #include <variant>
@@ -11,54 +13,21 @@
 namespace neon::mechanical::solid
 {
 /**
- * Traction is a non-follower load that has a surface interpolation and
- * computes the element external load vector contribution to the system of
- * equations
- * \sa NonFollowerLoad
- */
-using Traction = SurfaceLoad<SurfaceInterpolation>;
-
-/**
- * BodyForce is a non-follower load that has a volume interpolation and
- * computes the element external load vector contribution to the system of
- * equations
- * \sa NonFollowerLoad
- */
-using BodyForce = VolumeLoad<VolumeInterpolation>;
-
-/**
- * Pressure computes the pressure load acting normal the quadrature point
- * on the surface of an element in the initial configuration.  This computes
- * the cross product of the shape functions that describe the surface element.
- * In the most general case, a pressure will contribute to three DoFs but
- * could also recover tractions if the surface is aligned with an axis.
- *
- * The convention used here is that a positive value represents compression
- * on the surface.
- */
-class Pressure : public Traction
-{
-public:
-    using Traction::Traction;
-
-    std::tuple<List const&, Vector> external_force(int const element,
-                                                   double const load_factor) const override;
-};
-
-/**
  * NonFollowerLoadBoundary contains the boundary conditions which contribute to
  * the external force vector.  This can include tractions, pressures, nodal
  * forces and volume forces computed in the initial configuration
  *
- * \sa Traction
- * \sa Pressure
- * \sa BodyForce
+ * \sa traction
+ * \sa pressure
+ * \sa body_force
  */
 class NonFollowerLoadBoundary
 {
 public:
+    using value_types = std::variant<traction, pressure, body_force>;
+
     /** Specifying the allowable nonfollower loads */
-    using BoundaryMeshes = std::vector<std::variant<Traction, Pressure, BodyForce>>;
+    using BoundaryMeshes = std::vector<std::variant<traction, pressure, body_force>>;
 
 public:
     explicit NonFollowerLoadBoundary(std::shared_ptr<MaterialCoordinates>& material_coordinates,

@@ -16,9 +16,6 @@ namespace mechanical::solid
 class femMesh
 {
 public:
-    using BoundaryType = std::variant<Traction, Pressure, BodyForce>;
-
-public:
     femMesh(BasicMesh const& basic_mesh,
             Json::Value const& material_data,
             Json::Value const& simulation_data);
