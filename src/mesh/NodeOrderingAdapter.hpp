@@ -33,19 +33,20 @@ public:
     [[nodiscard]] VTKCellType to_vtk(ElementTopology element_topology) const;
 
 protected:
-    std::unordered_map<int, ElementTopology> gmsh_converter{{2, ElementTopology::Triangle3},
-                                                            {3, ElementTopology::Quadrilateral4},
-                                                            {4, ElementTopology::Tetrahedron4},
-                                                            {5, ElementTopology::Hexahedron8},
-                                                            {6, ElementTopology::Prism6},
-                                                            {9, ElementTopology::Triangle6},
-                                                            {11, ElementTopology::Tetrahedron10},
-                                                            {10, ElementTopology::Quadrilateral9},
-                                                            {12, ElementTopology::Hexahedron27},
-                                                            {16, ElementTopology::Quadrilateral8},
-                                                            {17, ElementTopology::Hexahedron20}};
+    std::unordered_map<int, ElementTopology> const
+        gmsh_converter{{2, ElementTopology::Triangle3},
+                       {3, ElementTopology::Quadrilateral4},
+                       {4, ElementTopology::Tetrahedron4},
+                       {5, ElementTopology::Hexahedron8},
+                       {6, ElementTopology::Prism6},
+                       {9, ElementTopology::Triangle6},
+                       {11, ElementTopology::Tetrahedron10},
+                       {10, ElementTopology::Quadrilateral9},
+                       {12, ElementTopology::Hexahedron27},
+                       {16, ElementTopology::Quadrilateral8},
+                       {17, ElementTopology::Hexahedron20}};
 
-    std::unordered_map<ElementTopology, VTKCellType>
+    std::unordered_map<ElementTopology, VTKCellType> const
         vtk_converter{{ElementTopology::Triangle3, VTK_TRIANGLE},
                       {ElementTopology::Quadrilateral4, VTK_QUAD},
                       {ElementTopology::Quadrilateral8, VTK_QUADRATIC_QUAD},
