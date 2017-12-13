@@ -81,9 +81,9 @@ void femStaticMatrix::solve()
     std::cout << std::string(4, ' ') << "Linear equation system has " << fem_mesh.active_dofs()
               << " degrees of freedom\n";
 
-    compute_external_force();
-
     assemble_stiffness();
+
+    compute_external_force();
 
     apply_dirichlet_conditions(K, d, f);
 
