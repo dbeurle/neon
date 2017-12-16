@@ -31,8 +31,8 @@ std::unordered_map<ElementTopology, VTKCellType> const
                   {ElementTopology::Tetrahedron10, VTK_QUADRATIC_TETRA},
                   {ElementTopology::Hexahedron20, VTK_QUADRATIC_HEXAHEDRON},
                   {ElementTopology::Hexahedron27, VTK_TRIQUADRATIC_HEXAHEDRON}};
-void NodeOrderingAdapter::convert_from_gmsh(std::vector<List>& nodal_connectivity,
-                                            ElementTopology const element_topology) const
+
+void convert_from_gmsh(std::vector<List>& nodal_connectivity, ElementTopology const element_topology)
 {
     // Reorder based on the differences between the local node numbering
     // provided from Section 9.3 Node ordering
@@ -154,8 +154,8 @@ void NodeOrderingAdapter::convert_from_gmsh(std::vector<List>& nodal_connectivit
     }
 }
 
-std::vector<List> NodeOrderingAdapter::convert_to_vtk(std::vector<List> nodal_connectivity,
-                                                      ElementTopology element_topology) const
+std::vector<List> convert_to_vtk(std::vector<List> nodal_connectivity,
+                                 ElementTopology const element_topology)
 {
     switch (element_topology)
     {
@@ -224,7 +224,7 @@ std::vector<List> NodeOrderingAdapter::convert_to_vtk(std::vector<List> nodal_co
     return nodal_connectivity;
 }
 
-ElementTopology NodeOrderingAdapter::gmsh_type_to_enum(int element_code) const
+ElementTopology gmsh_type_to_enum(int const element_code)
 {
     auto const found = gmsh_converter.find(element_code);
     if (found == gmsh_converter.end())
@@ -235,7 +235,7 @@ ElementTopology NodeOrderingAdapter::gmsh_type_to_enum(int element_code) const
     return found->second;
 }
 
-VTKCellType NodeOrderingAdapter::to_vtk(ElementTopology element_topology) const
+VTKCellType to_vtk(ElementTopology const element_topology)
 {
     auto const found = vtk_converter.find(element_topology);
     if (found == vtk_converter.end())
