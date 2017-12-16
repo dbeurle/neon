@@ -8,7 +8,6 @@
 #include "interpolations/ShapeFunction.hpp"
 
 #include <memory>
-#include <unordered_map>
 
 namespace neon
 {
