@@ -9,11 +9,13 @@
 #include "interpolations/Triangle3.hpp"
 #include "interpolations/Triangle6.hpp"
 
+#include "interpolations/Line.hpp"
+
 #include <stdexcept>
 
 #include <json/value.h>
 
-namespace neon::mechanical::solid
+namespace neon
 {
 bool is_reduced_integration(Json::Value const& mesh_data)
 {
@@ -22,14 +24,19 @@ bool is_reduced_integration(Json::Value const& mesh_data)
                : mesh_data["ElementOptions"]["Quadrature"].asString() == "Reduced";
 }
 
-/** Factory method for the three dimensional shape functions */
-std::unique_ptr<VolumeInterpolation> make_volume_interpolation(ElementTopology const topology,
-                                                               Json::Value const& mesh_data)
+void check_element_options(Json::Value const& mesh_data)
 {
     if (!mesh_data.isMember("ElementOptions"))
     {
         throw std::runtime_error("Missing \"Part\": \"ElementOptions\"");
     }
+}
+
+/** Factory method for the three dimensional shape functions */
+std::unique_ptr<VolumeInterpolation> make_volume_interpolation(ElementTopology const topology,
+                                                               Json::Value const& mesh_data)
+{
+    check_element_options(mesh_data);
 
     auto const is_reduced = is_reduced_integration(mesh_data);
 
@@ -74,8 +81,9 @@ std::unique_ptr<VolumeInterpolation> make_volume_interpolation(ElementTopology c
         case ElementTopology::Prism15:
         case ElementTopology::Pyramid13:
         default:
-            throw std::runtime_error("Element shape " + std::to_string(static_cast<int>(topology))
-                                     + " not implemented for continuum simulations\n");
+            throw std::runtime_error("Volume interpolation "
+                                     + std::to_string(static_cast<int>(topology))
+                                     + " not implemented");
             break;
     }
     return nullptr;
@@ -84,10 +92,7 @@ std::unique_ptr<VolumeInterpolation> make_volume_interpolation(ElementTopology c
 std::unique_ptr<SurfaceInterpolation> make_surface_interpolation(ElementTopology const topology,
                                                                  Json::Value const& mesh_data)
 {
-    if (!mesh_data.isMember("ElementOptions"))
-    {
-        throw std::runtime_error("Missing \"Part\": \"ElementOptions\"");
-    }
+    check_element_options(mesh_data);
 
     auto is_reduced = is_reduced_integration(mesh_data);
 
@@ -121,8 +126,34 @@ std::unique_ptr<SurfaceInterpolation> make_surface_interpolation(ElementTopology
                                                         : QuadrilateralQuadrature::Rule::NinePoint);
         }
         default:
-            throw std::runtime_error("Surface element shape not implemented for "
-                                     "continuum simulations\n");
+        {
+            throw std::runtime_error("Surface element shape not implemented");
+            break;
+        }
+    }
+    return nullptr;
+}
+
+std::unique_ptr<LineInterpolation> make_line_interpolation(ElementTopology const topology,
+                                                           Json::Value const& mesh_data)
+{
+    check_element_options(mesh_data);
+
+    auto is_reduced = is_reduced_integration(mesh_data);
+
+    switch (topology)
+    {
+        case ElementTopology::Line2:
+        {
+            return std::make_unique<Line2>(LineQuadrature::Rule::OnePoint);
+        }
+        case ElementTopology::Line3:
+        {
+            return std::make_unique<Line3>(is_reduced ? LineQuadrature::Rule::OnePoint
+                                                      : LineQuadrature::Rule::TwoPoint);
+        }
+        default:
+            throw std::runtime_error("Line element shape not implemented");
             break;
     }
     return nullptr;
