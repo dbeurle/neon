@@ -14,7 +14,7 @@ std::unique_ptr<AbstractModule> make_module(
 {
     auto const& mesh_data = simulation["Mesh"][0];
 
-    auto simulation_mesh = mesh_store.find(mesh_data["Name"].asString());
+    auto const& simulation_mesh = mesh_store.find(mesh_data["Name"].asString());
 
     auto const& name = simulation["Name"].asString();
     auto const& module_type = simulation["Module"].asString();
