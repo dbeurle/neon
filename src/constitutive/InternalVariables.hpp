@@ -38,13 +38,20 @@ template <int spatial_dimension, int voigt_dimension>
 class InternalVariables
 {
 public:
-    using tensor = Eigen::Matrix<double, spatial_dimension, spatial_dimension>;
-    using matrix = Eigen::Matrix<double, voigt_dimension, voigt_dimension>;
+    /** Spatial dimension (three, two or one dimension) */
+    static auto constexpr r_n = spatial_dimension;
 
-    using Scalars = std::vector<double>;
-    using Vectors = std::vector<std::vector<double>>;
-    using Tensors = std::vector<tensor>;
-    using Matrices = std::vector<matrix>;
+    /** Voigt dimension for the tensor conversion */
+    static auto constexpr v_n = voigt_dimension;
+
+    // Type aliases
+    using scalar_type = double;
+
+    /** The tensor type is a small matrix in tensor notation */
+    using tensor_type = Eigen::Matrix<scalar_type, spatial_dimension, spatial_dimension>;
+    using matrix_type = Eigen::Matrix<scalar_type, voigt_dimension, voigt_dimension>;
+
+    static auto constexpr tensor_size = spatial_dimension * spatial_dimension;
 
 public:
     enum class Matrix { TangentOperator };
@@ -99,15 +106,15 @@ public:
     template <typename... Variables>
     void add(Tensor const name, Variables... names)
     {
-        tensors[name].resize(size, tensor::Zero());
-        tensors_old[name].resize(size, tensor::Zero());
+        tensors[name].resize(size, tensor_type::Zero());
+        tensors_old[name].resize(size, tensor_type::Zero());
         add(names...);
     }
 
     void add(Tensor const name)
     {
-        tensors[name].resize(size, tensor::Zero());
-        tensors_old[name].resize(size, tensor::Zero());
+        tensors[name].resize(size, tensor_type::Zero());
+        tensors_old[name].resize(size, tensor_type::Zero());
     }
 
     /** Add a number of scalar type variables to the object store */
@@ -126,7 +133,10 @@ public:
     }
 
     /** Allocate matrix internal variable with zeros */
-    void add(InternalVariables::Matrix const name) { matrices[name].resize(size, matrix::Zero()); }
+    void add(InternalVariables::Matrix const name)
+    {
+        matrices[name].resize(size, matrix_type::Zero());
+    }
 
     /** Allocate matrix internal variables with provided matrix */
     void add(InternalVariables::Matrix const name, neon::Matrix const initial_matrix)
@@ -139,13 +149,13 @@ public:
     bool has(Matrix name) const { return matrices.find(name) != matrices.end(); }
 
     /** Const access to the converged tensor variables */
-    Tensors const& operator[](Tensor const tensorType) const
+    std::vector<tensor_type> const& operator[](Tensor const tensorType) const
     {
         return tensors_old.find(tensorType)->second;
     }
 
     /** Const access to the converged scalar variables */
-    Scalars const& operator[](Scalar const scalarType) const
+    std::vector<scalar_type> const& operator[](Scalar const scalarType) const
     {
         return scalars_old.find(scalarType)->second;
     }
@@ -155,13 +165,22 @@ public:
      *-------------------------------------------------------------*/
 
     /** Mutable access to the non-converged scalar variables */
-    Scalars& operator()(Scalar scalarType) { return scalars.find(scalarType)->second; }
+    std::vector<scalar_type>& operator()(Scalar scalarType)
+    {
+        return scalars.find(scalarType)->second;
+    }
 
     /** Mutable access to the non-converged tensor variables */
-    Tensors& operator()(Tensor tensorType) { return tensors.find(tensorType)->second; }
+    std::vector<tensor_type>& operator()(Tensor tensorType)
+    {
+        return tensors.find(tensorType)->second;
+    }
 
     /** Mutable access to the non-converged matrix variables */
-    Matrices& operator()(Matrix matrixType) { return matrices.find(matrixType)->second; }
+    std::vector<matrix_type>& operator()(Matrix matrixType)
+    {
+        return matrices.find(matrixType)->second;
+    }
 
     /** Mutable access to the non-converged scalar variables */
     template <typename... ScalarTps>
@@ -194,13 +213,19 @@ public:
      *-------------------------------------------------------------*/
 
     /** Constant access to the non-converged scalar variables */
-    Scalars const& operator()(Scalar scalarType) const { return scalars.find(scalarType)->second; }
+    std::vector<scalar_type> const& operator()(Scalar scalarType) const
+    {
+        return scalars.find(scalarType)->second;
+    }
 
     /** Non-mutable access to the non-converged tensor variables */
-    Tensors const& operator()(Tensor tensorType) const { return tensors.find(tensorType)->second; }
+    std::vector<tensor_type> const& operator()(Tensor tensorType) const
+    {
+        return tensors.find(tensorType)->second;
+    }
 
     /** Non-mutable access to the non-converged matrix variables */
-    Matrices const& operator()(Matrix matrixType) const
+    std::vector<matrix_type> const& operator()(Matrix matrixType) const
     {
         return matrices.find(matrixType)->second;
     }
@@ -250,10 +275,10 @@ protected:
     // simulation loop.  If a nonlinear iteration does not converge then revert
     // the state back to the previous state.  The tensors and scalars fields
     // are the 'unstable' variables and the *Old are the stable variants
-    std::unordered_map<Tensor, Tensors> tensors, tensors_old;
-    std::unordered_map<Scalar, Scalars> scalars, scalars_old;
+    std::unordered_map<Tensor, std::vector<tensor_type>> tensors, tensors_old;
+    std::unordered_map<Scalar, std::vector<scalar_type>> scalars, scalars_old;
 
-    std::unordered_map<Matrix, Matrices> matrices;
+    std::unordered_map<Matrix, std::vector<matrix_type>> matrices;
 
     std::size_t size;
 };
