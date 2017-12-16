@@ -2,6 +2,7 @@
 #pragma once
 
 #include <tuple>
+#include <vector>
 
 #include "numeric/DenseMatrix.hpp"
 
@@ -92,7 +93,6 @@ protected:
                                    //!< evaluated at the quadrature points
 };
 
-using LineQuadrature = NumericalQuadrature<double>;
 using SurfaceQuadrature = NumericalQuadrature<double, double>;
 using VolumeQuadrature = NumericalQuadrature<double, double, double>;
 }
