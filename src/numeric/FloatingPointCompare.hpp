@@ -2,6 +2,7 @@
 #pragma once
 
 #include <cmath>
+#include <limits>
 #include <type_traits>
 
 namespace neon
@@ -9,7 +10,7 @@ namespace neon
 template <class T>
 std::enable_if_t<std::is_floating_point<T>::value, bool> is_approx(T const x,
                                                                    T const y,
-                                                                   int const ulp = 2)
+                                                                   int const ulp = 2) noexcept
 {
     // Taken and modified from
     // http://en.cppreference.com/w/cpp/types/numeric_limits/epsilon
