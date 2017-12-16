@@ -66,13 +66,13 @@ std::tuple<List const&, Matrix> femSubmesh::tangent_stiffness(int const element)
 {
     auto const x = material_coordinates->current_configuration(local_node_list(element));
 
-    Matrix const kmat = material_tangent_stiffness(x, element);
+    Matrix ke = material_tangent_stiffness(x, element);
 
-    if (!cm->is_finite_deformation()) return {local_dof_list(element), kmat};
+    if (!cm->is_finite_deformation()) return {local_dof_list(element), ke};
 
-    Matrix const kgeo = geometric_tangent_stiffness(x, element);
+    ke.noalias() += geometric_tangent_stiffness(x, element);
 
-    return {local_dof_list(element), kmat + kgeo};
+    return {local_dof_list(element), ke};
 }
 
 std::tuple<List const&, Vector> femSubmesh::internal_force(int const element) const
