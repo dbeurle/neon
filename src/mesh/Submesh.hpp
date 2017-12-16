@@ -2,7 +2,6 @@
 #pragma once
 
 #include "mesh/ElementTopology.hpp"
-#include "mesh/NodeOrderingAdapter.hpp"
 #include "numeric/IndexTypes.hpp"
 
 #include <json/forwards.h>
@@ -20,7 +19,7 @@ public:
     auto elements() const { return nodal_connectivity.size(); }
 
     /** @return The element topology for this mesh */
-    ElementTopology topology() const { return element_topology; }
+    ElementTopology const& topology() const { return element_topology; }
 
     /** @return a list of the element nodal connectivities */
     List const& local_node_list(int const element) const { return nodal_connectivity[element]; }
@@ -36,7 +35,6 @@ public:
 
 protected:
     ElementTopology element_topology;
-    NodeOrderingAdapter adapter;
     std::vector<List> nodal_connectivity;
 };
 }

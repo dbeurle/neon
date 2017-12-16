@@ -1,6 +1,7 @@
 
 #include "FileIO.hpp"
 
+#include "mesh/NodeOrderingAdapter.hpp"
 #include "mesh/mechanical/solid/femMesh.hpp"
 
 #include <json/value.h>
@@ -197,8 +198,8 @@ void FileIO::add_mesh()
 
     for (auto const& submesh : fem_mesh.meshes())
     {
-        auto const vtk_ordered_connectivity = adapter.convert_to_vtk(submesh.connectivities(),
-                                                                     submesh.topology());
+        auto const vtk_ordered_connectivity = convert_to_vtk(submesh.connectivities(),
+                                                             submesh.topology());
         for (auto const& node_list : vtk_ordered_connectivity)
         {
             auto vtk_node_list = vtkSmartPointer<vtkIdList>::New();
@@ -207,7 +208,7 @@ void FileIO::add_mesh()
             {
                 vtk_node_list->InsertNextId(static_cast<long>(node));
             }
-            unstructured_mesh->InsertNextCell(adapter.to_vtk(submesh.topology()), vtk_node_list);
+            unstructured_mesh->InsertNextCell(to_vtk(submesh.topology()), vtk_node_list);
         }
     }
     unstructured_mesh->GetPointData()->AddArray(fem_mesh.coordinates().vtk_displacement());
@@ -250,8 +251,8 @@ void FileIO::add_mesh()
 
     for (auto const& submesh : fem_mesh.meshes())
     {
-        auto const vtk_ordered_connectivity = adapter.convert_to_vtk(submesh.connectivities(),
-                                                                     submesh.topology());
+        auto const vtk_ordered_connectivity = convert_to_vtk(submesh.connectivities(),
+                                                             submesh.topology());
         for (auto const& node_list : vtk_ordered_connectivity)
         {
             auto vtk_node_list = vtkSmartPointer<vtkIdList>::New();
@@ -260,7 +261,7 @@ void FileIO::add_mesh()
             {
                 vtk_node_list->InsertNextId(static_cast<long>(node));
             }
-            unstructured_mesh->InsertNextCell(adapter.to_vtk(submesh.topology()), vtk_node_list);
+            unstructured_mesh->InsertNextCell(to_vtk(submesh.topology()), vtk_node_list);
         }
     }
 }

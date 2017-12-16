@@ -1,6 +1,8 @@
 
 #include "Submesh.hpp"
 
+#include "mesh/NodeOrderingAdapter.hpp"
+
 #include "Exceptions.hpp"
 
 #include <json/value.h>
@@ -34,7 +36,7 @@ Submesh::Submesh(Json::Value const& mesh)
         throw std::runtime_error("The element group in the mesh file is empty");
     }
 
-    element_topology = adapter.gmsh_type_to_enum(mesh["Type"].asInt());
+    element_topology = gmsh_type_to_enum(mesh["Type"].asInt());
 
     nodal_connectivity.reserve(mesh["NodalConnectivity"].size());
 
@@ -48,7 +50,7 @@ Submesh::Submesh(Json::Value const& mesh)
             nodal_connectivity.back().push_back(node.asInt());
         }
     }
-    adapter.convert_from_gmsh(nodal_connectivity, element_topology);
+    convert_from_gmsh(nodal_connectivity, element_topology);
 }
 
 List Submesh::unique_connectivities() const
