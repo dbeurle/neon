@@ -34,7 +34,7 @@ TEST_CASE("Dof List Allocation", "[DofAllocator]")
 {
     SECTION("One element")
     {
-        std::vector<List> const nodal_connectivity = {{0, 1, 2, 3}};
+        std::vector<List> const nodal_connectivity{{0, 1, 2, 3}};
 
         std::vector<List> const known_dof_list{{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}};
 
