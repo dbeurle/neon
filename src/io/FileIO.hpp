@@ -2,7 +2,6 @@
 #pragma once
 
 #include "constitutive/InternalVariables.hpp"
-#include "mesh/NodeOrderingAdapter.hpp"
 #include "mesh/diffusion/femMesh.hpp"
 #include "mesh/mechanical/solid/femMesh.hpp"
 
@@ -45,8 +44,6 @@ protected:
     vtkSmartPointer<vtkUnstructuredGrid> unstructured_mesh;
 
     std::ofstream pvd_file; //!< Stream for writing time history
-
-    NodeOrderingAdapter adapter; //!< Converting neon to vtk ordering
 
     std::unordered_set<std::string> output_set;
 
