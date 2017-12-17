@@ -6,6 +6,9 @@
 #include "assembler/solid/femStaticMatrix.hpp"
 #include "mesh/mechanical/solid/femMesh.hpp"
 
+#include "assembler/mechanical/plane/femStaticMatrix.hpp"
+#include "mesh/mechanical/plane/femMesh.hpp"
+
 namespace neon
 {
 //! This namespace groups together all of the classes and functions associated
@@ -43,5 +46,25 @@ public:
 protected:
     mechanical::solid::femMesh fem_mesh;           //!< Mesh with the solid routines
     mechanical::solid::femStaticMatrix fem_matrix; //!< Nonlinear solver routines
+};
+
+class PlaneMechanicsModule : public AbstractModule
+{
+public:
+    PlaneMechanicsModule(BasicMesh const& mesh,
+                         Json::Value const& material,
+                         Json::Value const& simulation);
+
+    virtual ~PlaneMechanicsModule() = default;
+
+    PlaneMechanicsModule(PlaneMechanicsModule const&) = delete;
+
+    PlaneMechanicsModule(PlaneMechanicsModule&&) = default;
+
+    virtual void perform_simulation() override final { fem_matrix.solve(); }
+
+protected:
+    mechanical::plane::femMesh fem_mesh;           //!< Mesh with the solid routines
+    mechanical::plane::femStaticMatrix fem_matrix; //!< Nonlinear solver routines
 };
 }

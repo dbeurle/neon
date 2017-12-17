@@ -7,7 +7,8 @@
 
 namespace neon
 {
-std::unordered_map<int, ElementTopology> const gmsh_converter{{2, ElementTopology::Triangle3},
+std::unordered_map<int, ElementTopology> const gmsh_converter{{1, ElementTopology::Line2},
+                                                              {2, ElementTopology::Triangle3},
                                                               {3, ElementTopology::Quadrilateral4},
                                                               {4, ElementTopology::Tetrahedron4},
                                                               {5, ElementTopology::Hexahedron8},

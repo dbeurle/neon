@@ -4,7 +4,6 @@
 #include "mesh/ElementTopology.hpp"
 #include "numeric/IndexTypes.hpp"
 
-
 #include <vtkCellType.h>
 
 namespace neon

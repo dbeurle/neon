@@ -8,7 +8,7 @@
 
 #include <variant>
 
-namespace neon::mechanical::solid
+namespace neon::mechanical::plane
 {
 /**
  * Traction is a non-follower load that has a surface interpolation and
@@ -16,7 +16,7 @@ namespace neon::mechanical::solid
  * equations
  * \sa NonFollowerLoad
  */
-using Traction = SurfaceLoad<SurfaceInterpolation>;
+using Traction = SurfaceLoad<LineInterpolation>;
 
 /**
  * BodyForce is a non-follower load that has a volume interpolation and
@@ -24,26 +24,7 @@ using Traction = SurfaceLoad<SurfaceInterpolation>;
  * equations
  * \sa NonFollowerLoad
  */
-using BodyForce = VolumeLoad<VolumeInterpolation>;
-
-/**
- * Pressure computes the pressure load acting normal the quadrature point
- * on the surface of an element in the initial configuration.  This computes
- * the cross product of the shape functions that describe the surface element.
- * In the most general case, a pressure will contribute to three DoFs but
- * could also recover tractions if the surface is aligned with an axis.
- *
- * The convention used here is that a positive value represents compression
- * on the surface.
- */
-class Pressure : public Traction
-{
-public:
-    using Traction::Traction;
-
-    std::tuple<List const&, Vector> external_force(int const element,
-                                                   double const load_factor) const override;
-};
+using BodyForce = VolumeLoad<SurfaceInterpolation>;
 
 /**
  * NonFollowerLoadBoundary contains the boundary conditions which contribute to
@@ -58,7 +39,7 @@ class NonFollowerLoadBoundary
 {
 public:
     /** Specifying the allowable nonfollower loads */
-    using BoundaryMeshes = std::vector<std::variant<Traction, Pressure, BodyForce>>;
+    using BoundaryMeshes = std::vector<std::variant<Traction, BodyForce>>;
 
 public:
     explicit NonFollowerLoadBoundary(std::shared_ptr<MaterialCoordinates>& material_coordinates,
@@ -92,6 +73,6 @@ public:
     auto const& interface() const { return nonfollower_load; }
 
 protected:
-    std::array<std::pair<bool, BoundaryMeshes>, 3> nonfollower_load;
+    std::array<std::pair<bool, BoundaryMeshes>, 2> nonfollower_load;
 };
 }

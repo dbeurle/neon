@@ -68,7 +68,7 @@ private:
 protected:
     femMesh& fem_mesh;
 
-    FileIO file_io;
+    FileIO<femMesh> io;
 
     AdaptiveLoadStep adaptive_load;
 

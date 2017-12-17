@@ -1,19 +1,112 @@
 
-#include "femStaticMatrix.hpp"
+#pragma once
+
+#include "numeric/SparseMatrix.hpp"
+
+#include "solver/AdaptiveLoadStep.hpp"
 
 #include "Exceptions.hpp"
 #include "numeric/FloatingPointCompare.hpp"
 #include "solver/linear/LinearSolverFactory.hpp"
 
 #include <chrono>
-
 #include <json/value.h>
-#include <omp.h>
 #include <termcolor/termcolor.hpp>
 
-namespace neon::mechanical::solid
+#include <omp.h>
+
+namespace neon::mechanical::detail
 {
-femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& simulation)
+/**
+ * Generic static matrix designed for solid mechanics problems using the
+ * Newton-Raphson method for the solution of nonlinear equations.
+ * This class is responsible for the assembly of the process stiffness matrix,
+ * residual force vector and solution of the incremental displacement.
+ */
+template <class femMeshType>
+class femStaticMatrix
+{
+public:
+    using fem_mesh_type = femMeshType;
+
+public:
+    explicit femStaticMatrix(fem_mesh_type& fem_mesh, Json::Value const& simulation);
+
+    void internal_restart(Json::Value const& solver_data, Json::Value const& new_increment_data);
+
+    void solve();
+
+protected:
+    /**
+     * Compute the sparse pattern of the coefficient matrix but use the doublet
+     * list as a means of forming the sparsity pattern.  This is a memory
+     * intensive operation and should be replaced in the future
+     */
+    void compute_sparsity_pattern();
+
+    /** Gathers the internal force vector using the Cauchy stress */
+    void compute_internal_force();
+
+    /** Gathers the external force contributions to the system of equations */
+    void compute_external_force();
+
+    /**
+     * Assembles the material and geometric matrices, checking for allocation
+     * already performed
+     */
+    void assemble_stiffness();
+
+    /**
+     * Apply dirichlet conditions to the system defined by A, x, and b.
+     * This method sets the incremental displacements to zero for the given
+     * load increment such that incremental displacements are zero
+     */
+    void enforce_dirichlet_conditions(SparseMatrix& A, vector& b) const;
+
+    /** Move the nodes on the mesh for the Dirichlet boundary */
+    void apply_displacement_boundaries();
+
+    /** Equilibrium iteration convergence criteria */
+    bool is_iteration_converged() const;
+
+    /** Pretty printer for the convergence of the Newton-Raphson solver */
+    void print_convergence_progress() const;
+
+    void update_relative_norms();
+
+private:
+    void perform_equilibrium_iterations();
+
+protected:
+    fem_mesh_type& fem_mesh;
+
+    FileIO<fem_mesh_type> io;
+
+    AdaptiveLoadStep adaptive_load;
+
+    bool is_sparsity_computed = false;
+
+    double residual_tolerance = 1.0e-3;
+    double displacement_tolerance = 1.0e-3;
+
+    double relative_displacement_norm;
+    double relative_force_norm;
+
+    SparseMatrix Kt; //!< Tangent matrix stiffness
+    Vector fint;     //!< Internal force vector
+    Vector fext;     //!< External force vector
+
+    Vector displacement;     //!< Displacement vector
+    Vector displacement_old; //!< Last displacement vector
+    Vector delta_d;          //!< Incremental displacement vector
+
+    Vector minus_residual; //!< Minus residual vector
+
+    std::unique_ptr<LinearSolver> linear_solver;
+};
+
+template <class femMeshType>
+femStaticMatrix<femMeshType>::femStaticMatrix(fem_mesh_type& fem_mesh, Json::Value const& simulation)
     : fem_mesh(fem_mesh),
       io(simulation["Name"].asString(), simulation["Visualisation"], fem_mesh),
       adaptive_load(simulation["Time"], fem_mesh.time_history()),
@@ -43,100 +136,16 @@ femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& simulatio
               << " degrees of freedom\n";
 }
 
-femStaticMatrix::~femStaticMatrix() = default;
-
-void femStaticMatrix::internal_restart(Json::Value const& solver_data,
-                                       Json::Value const& new_increment_data)
+template <class femMeshType>
+void femStaticMatrix<femMeshType>::internal_restart(Json::Value const& solver_data,
+                                                    Json::Value const& new_increment_data)
 {
     adaptive_load.reset(new_increment_data);
     linear_solver = make_linear_solver(solver_data);
 }
 
-void femStaticMatrix::compute_sparsity_pattern()
-{
-    std::vector<Doublet<int32>> doublets;
-    doublets.reserve(fem_mesh.active_dofs());
-
-    Kt.resize(fem_mesh.active_dofs(), fem_mesh.active_dofs());
-
-    for (auto const& submesh : fem_mesh.meshes())
-    {
-        // Loop over the elements and add in the non-zero components
-        for (auto element = 0; element < submesh.elements(); element++)
-        {
-            for (auto const& p : submesh.local_dof_list(element))
-            {
-                for (auto const& q : submesh.local_dof_list(element))
-                {
-                    doublets.emplace_back(p, q);
-                }
-            }
-        }
-    }
-    Kt.setFromTriplets(doublets.begin(), doublets.end());
-    Kt.finalize();
-
-    is_sparsity_computed = true;
-}
-
-void femStaticMatrix::compute_internal_force()
-{
-    fint.setZero();
-
-    for (auto const& submesh : fem_mesh.meshes())
-    {
-        for (auto element = 0; element < submesh.elements(); ++element)
-        {
-            auto const& [dofs, fe_int] = submesh.internal_force(element);
-
-            for (auto a = 0; a < fe_int.size(); ++a)
-            {
-                fint(dofs[a]) += fe_int(a);
-            }
-        }
-    }
-}
-
-void femStaticMatrix::compute_external_force()
-{
-    auto const start = std::chrono::high_resolution_clock::now();
-
-    auto const step_time = adaptive_load.step_time();
-
-    fext.setZero();
-
-    for (auto const& [name, nf_loads] : fem_mesh.nonfollower_load_boundaries())
-    {
-        for (auto const& [is_dof_active, boundary_conditions] : nf_loads.interface())
-        {
-            if (!is_dof_active) continue;
-
-            for (auto const& boundary_condition : boundary_conditions)
-            {
-                // clang-format off
-                std::visit([&](auto const& mesh) {
-                    for (auto element = 0; element < mesh.elements(); ++element)
-                    {
-                       auto const & [ dofs, fe_ext ] = mesh.external_force(element, step_time);
-
-                       for (auto a = 0; a < fe_ext.size(); ++a)
-                       {
-                           fext(dofs[a]) += fe_ext(a);
-                       }
-                    }
-                },
-                boundary_condition);
-                // clang-format on
-            }
-        }
-    }
-    auto const end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
-    std::cout << std::string(6, ' ') << "External forces assembly took " << elapsed_seconds.count()
-              << "s\n";
-}
-
-void femStaticMatrix::solve()
+template <class femMeshType>
+void femStaticMatrix<femMeshType>::solve()
 {
     try
     {
@@ -176,7 +185,95 @@ void femStaticMatrix::solve()
     }
 }
 
-void femStaticMatrix::assemble_stiffness()
+template <class femMeshType>
+void femStaticMatrix<femMeshType>::compute_sparsity_pattern()
+{
+    std::vector<Doublet<int32>> doublets;
+    doublets.reserve(fem_mesh.active_dofs());
+
+    Kt.resize(fem_mesh.active_dofs(), fem_mesh.active_dofs());
+
+    for (auto const& submesh : fem_mesh.meshes())
+    {
+        // Loop over the elements and add in the non-zero components
+        for (auto element = 0; element < submesh.elements(); element++)
+        {
+            for (auto const& p : submesh.local_dof_view(element))
+            {
+                for (auto const& q : submesh.local_dof_view(element))
+                {
+                    doublets.emplace_back(p, q);
+                }
+            }
+        }
+    }
+    Kt.setFromTriplets(doublets.begin(), doublets.end());
+    Kt.finalize();
+
+    is_sparsity_computed = true;
+}
+
+template <class femMeshType>
+void femStaticMatrix<femMeshType>::compute_internal_force()
+{
+    fint.setZero();
+
+    for (auto const& submesh : fem_mesh.meshes())
+    {
+        for (auto element = 0; element < submesh.elements(); ++element)
+        {
+            auto const& [dofs, fe_int] = submesh.internal_force(element);
+
+            for (auto a = 0; a < fe_int.size(); ++a)
+            {
+                fint(dofs[a]) += fe_int(a);
+            }
+        }
+    }
+}
+
+template <class femMeshType>
+void femStaticMatrix<femMeshType>::compute_external_force()
+{
+    auto const start = std::chrono::high_resolution_clock::now();
+
+    auto const step_time = adaptive_load.step_time();
+
+    fext.setZero();
+
+    for (auto const& [name, nf_loads] : fem_mesh.nonfollower_load_boundaries())
+    {
+        for (auto const& [is_dof_active, boundary_conditions] : nf_loads.interface())
+        {
+            if (!is_dof_active) continue;
+
+            for (auto const& boundary_condition : boundary_conditions)
+            {
+                // clang-format off
+                std::visit([&](auto const& mesh) {
+                    for (auto element = 0; element < mesh.elements(); ++element)
+                    {
+                       auto const & [ dofs, fe_ext ] = mesh.external_force(element, step_time);
+
+                       for (auto a = 0; a < fe_ext.size(); ++a)
+                       {
+                           fext(dofs[a]) += fe_ext(a);
+                       }
+                    }
+                },
+                boundary_condition);
+                // clang-format on
+            }
+        }
+    }
+    auto const end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::cout << std::string(6, ' ') << "External forces assembly took " << elapsed_seconds.count()
+              << "s\n";
+}
+
+template <class femMeshType>
+void femStaticMatrix<femMeshType>::assemble_stiffness()
 {
     if (!is_sparsity_computed) compute_sparsity_pattern();
 
@@ -212,7 +309,8 @@ void femStaticMatrix::assemble_stiffness()
               << elapsed_seconds.count() << "s\n";
 }
 
-void femStaticMatrix::enforce_dirichlet_conditions(SparseMatrix& A, Vector& b) const
+template <class femMeshType>
+void femStaticMatrix<femMeshType>::enforce_dirichlet_conditions(SparseMatrix& A, Vector& b) const
 {
     for (auto const& [name, boundaries] : fem_mesh.displacement_boundaries())
     {
@@ -249,7 +347,8 @@ void femStaticMatrix::enforce_dirichlet_conditions(SparseMatrix& A, Vector& b) c
     }
 }
 
-void femStaticMatrix::apply_displacement_boundaries()
+template <class femMeshType>
+void femStaticMatrix<femMeshType>::apply_displacement_boundaries()
 {
     Eigen::SparseVector<double> prescribed_increment(displacement.size());
 
@@ -274,7 +373,52 @@ void femStaticMatrix::apply_displacement_boundaries()
     displacement += prescribed_increment;
 }
 
-void femStaticMatrix::perform_equilibrium_iterations()
+template <class femMeshType>
+bool femStaticMatrix<femMeshType>::is_iteration_converged() const
+{
+    return relative_displacement_norm <= displacement_tolerance
+           && relative_force_norm <= residual_tolerance;
+}
+
+template <class femMeshType>
+void femStaticMatrix<femMeshType>::print_convergence_progress() const
+{
+    std::cout << std::string(6, ' ') << termcolor::bold;
+    if (relative_displacement_norm <= displacement_tolerance)
+    {
+        std::cout << termcolor::green;
+    }
+    else
+    {
+        std::cout << termcolor::yellow;
+    }
+    std::cout << "Incremental displacement norm " << relative_displacement_norm << "\n"
+              << termcolor::reset << std::string(6, ' ');
+
+    if (relative_force_norm <= residual_tolerance)
+    {
+        std::cout << termcolor::green;
+    }
+    else
+    {
+        std::cout << termcolor::yellow;
+    }
+    std::cout << termcolor::bold << "Residual force norm " << relative_force_norm
+              << termcolor::reset << "\n";
+}
+
+template <class femMeshType>
+void femStaticMatrix<femMeshType>::update_relative_norms()
+{
+    relative_displacement_norm = delta_d.norm() / displacement.norm();
+
+    relative_force_norm = is_approx(std::max(fext.norm(), fint.norm()), 0.0)
+                              ? 1.0
+                              : minus_residual.norm() / std::max(fext.norm(), fint.norm());
+}
+
+template <class femMeshType>
+void femStaticMatrix<femMeshType>::perform_equilibrium_iterations()
 {
     displacement = displacement_old;
 
@@ -333,40 +477,5 @@ void femStaticMatrix::perform_equilibrium_iterations()
         displacement_old = displacement;
         io.write(adaptive_load.step(), adaptive_load.time());
     }
-}
-
-void femStaticMatrix::update_relative_norms()
-{
-    relative_displacement_norm = delta_d.norm() / displacement.norm();
-
-    relative_force_norm = is_approx(std::max(fext.norm(), fint.norm()), 0.0)
-                              ? 1.0
-                              : minus_residual.norm() / std::max(fext.norm(), fint.norm());
-}
-
-void femStaticMatrix::print_convergence_progress() const
-{
-    std::cout << std::string(6, ' ') << termcolor::bold;
-    if (relative_displacement_norm <= displacement_tolerance)
-    {
-        std::cout << termcolor::green;
-    }
-    else
-    {
-        std::cout << termcolor::yellow;
-    }
-    std::cout << "Incremental displacement norm " << relative_displacement_norm << "\n"
-              << termcolor::reset << std::string(6, ' ');
-
-    if (relative_force_norm <= residual_tolerance)
-    {
-        std::cout << termcolor::green;
-    }
-    else
-    {
-        std::cout << termcolor::yellow;
-    }
-    std::cout << termcolor::bold << "Residual force norm " << relative_force_norm
-              << termcolor::reset << "\n";
 }
 }

@@ -16,6 +16,9 @@ namespace mechanical::solid
 class femMesh
 {
 public:
+    using internal_variable_type = femSubmesh::internal_variable_type;
+
+public:
     femMesh(BasicMesh const& basic_mesh,
             Json::Value const& material_data,
             Json::Value const& simulation_data);

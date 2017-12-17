@@ -22,7 +22,9 @@ namespace mechanical::solid
 class femSubmesh : public Submesh
 {
 public:
-    using ValueCount = std::tuple<Vector, Vector>;
+    using ValueCount = std::tuple<vector, vector>;
+
+    using internal_variable_type = InternalVariables;
 
 public:
     /** Constructor providing the material coordinates reference */
@@ -109,7 +111,6 @@ protected:
      * @return the internal nodal force vector
      */
     [[nodiscard]] Vector internal_nodal_force(Matrix const& configuration, int element) const;
-
 
 private:
     std::shared_ptr<MaterialCoordinates> material_coordinates;

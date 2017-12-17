@@ -3,9 +3,12 @@
 
 #include "mesh/Submesh.hpp"
 
+#include "mesh/MaterialCoordinates.hpp"
+
 #include "numeric/DenseMatrix.hpp"
 #include "numeric/IndexTypes.hpp"
 
+#include <memory>
 #include <tuple>
 
 namespace neon::mechanical::detail
@@ -14,48 +17,51 @@ namespace neon::mechanical::detail
  * femSubmesh is a Curiously Recurring Template Pattern class for enforcing
  * a minumum interface for all solid mechanics meshes at compile time.
  */
-template <typename MeshType>
+template <class MeshType, class InternalVariableType>
 class femSubmesh : public Submesh
 {
 public:
     using mesh_type = MeshType;
+    using internal_variable_type = InternalVariableType;
 
 public:
-    femSubmesh<MeshType>(Submesh const& submesh) : Submesh(submesh) {}
+    femSubmesh(Submesh const& submesh) : Submesh(submesh) {}
 
-    /** @return list of global degrees of freedom for an element */
-    List const& local_dof_list(int64 const element) const
+    /** @return mapping of the element degrees of freedom to the process matrix */
+    local_indices const& local_dof_view(int32 const element) const
     {
-        return static_cast<MeshType*>(this)->local_dof_list(element);
+        return static_cast<mesh_type*>(this)->local_dof_view(element);
     }
 
     /** @return the tangent consistent stiffness matrix */
-    [[nodiscard]] std::tuple<List const&, Matrix> tangent_stiffness(int64 const element) const
-    {
-        return static_cast<MeshType*>(this)->tangent_stiffness(element);
+    [[nodiscard]] std::pair<local_indices const&, matrix> tangent_stiffness(int32 const element) const {
+        return static_cast<mesh_type*>(this)->tangent_stiffness(element);
     }
 
     /** @return the internal element force */
-    [[nodiscard]] std::tuple<List const&, Vector> internal_force(int64 const element) const
+    std::pair<local_indices const&, vector> internal_force(int32 const element) const
     {
-        return static_cast<MeshType*>(this)->internal_force(element);
+        return static_cast<mesh_type*>(this)->internal_force(element);
     }
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    [[nodiscard]] std::tuple<List const&, Matrix> consistent_mass(int64 const element) const
+    std::pair<local_indices const&, matrix> consistent_mass(int32 const element) const
     {
-        return static_cast<MeshType*>(this)->consistent_mass(element);
+        return static_cast<mesh_type*>(this)->consistent_mass(element);
     }
 
-    /** @return the consistent mass matrix \sa diagonal_mass */
-    [[nodiscard]] std::tuple<List const&, Vector> diagonal_mass(int64 const element) const
+    /** @return the diagonal mass matrix as a vector \sa consistent_mass */
+    std::pair<local_indices const&, vector> diagonal_mass(int32 const element) const
     {
-        return static_cast<MeshType*>(this)->diagonal_mass(element);
+        return static_cast<mesh_type*>(this)->diagonal_mass(element);
     }
 
-    [[nodiscard]] int64 dofs_per_node() const
-    {
-        return static_cast<MeshType*>(this)->dofs_per_node();
-    }
+    /** @return the number of degrees of freedom per node */
+    int32 dofs_per_node() const { return static_cast<MeshType*>(this)->dofs_per_node(); }
+
+protected:
+    std::shared_ptr<MaterialCoordinates> material_coordinates;
+
+    std::vector<local_indices> dof_list; //!< Map for the local element to process indices
 };
 }

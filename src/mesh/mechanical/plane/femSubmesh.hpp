@@ -20,7 +20,7 @@ namespace mechanical::plane
  * components for a generalised plane strain/stress mechanics discretisation.
  * This class conforms to the CRTP interface \sa detail::femSubmesh
  */
-class femSubmesh : public detail::femSubmesh<mechanical::plane::femSubmesh>
+class femSubmesh : public detail::femSubmesh<plane::femSubmesh, plane::InternalVariables>
 {
 public:
     /** Constructor providing the material coordinates reference */
@@ -29,14 +29,14 @@ public:
                         std::shared_ptr<MaterialCoordinates>& material_coordinates,
                         Submesh const& submesh);
 
-    /** @return list of global degrees of freedom for an element */
-    [[nodiscard]] List const& local_dof_list(int64 const element) const
-    {
+    [[nodiscard]] local_indices const& local_dof_view(int32 const element) const {
         return dof_list.at(element);
     }
 
-    /** @return The internal variable store */
-    [[nodiscard]] InternalVariables const& internal_variables() const { return variables; }
+        [[nodiscard]] InternalVariables const& internal_variables() const
+    {
+        return variables;
+    }
 
     void save_internal_variables(bool const have_converged);
 
@@ -47,16 +47,16 @@ public:
     [[nodiscard]] auto const& constitutive() const { return *cm.get(); }
 
     /** @return the tangent consistent stiffness matrix */
-    [[nodiscard]] std::tuple<List const&, Matrix> tangent_stiffness(int64 const element) const;
+    [[nodiscard]] std::pair<local_indices const&, matrix> tangent_stiffness(int32 const element) const;
 
     /** @return the internal element force */
-    [[nodiscard]] std::tuple<List const&, Vector> internal_force(int64 const element) const;
+    [[nodiscard]] std::pair<local_indices const&, Vector> internal_force(int32 const element) const;
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    [[nodiscard]] std::tuple<List const&, Matrix> consistent_mass(int64 const element) const;
+    [[nodiscard]] std::pair<local_indices const&, matrix> consistent_mass(int32 const element) const;
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    [[nodiscard]] std::tuple<List const&, Vector> diagonal_mass(int64 const element) const;
+    [[nodiscard]] std::pair<local_indices const&, Vector> diagonal_mass(int32 const element) const;
 
     /** Update the internal variables for the mesh group
      *  \sa update_deformation_measures()
@@ -65,12 +65,17 @@ public:
      */
     void update_internal_variables(double const time_step_size = 1.0);
 
+    [[nodiscard]] std::pair<vector, vector> nodal_averaged_variable(
+        InternalVariables::Tensor const tensor_name) const;
+
+    [[nodiscard]] std::pair<vector, vector> nodal_averaged_variable(
+        InternalVariables::Scalar const scalar_name) const;
+
 protected:
     /** Update the strain measures defined by the constitutive model */
     void update_deformation_measures();
 
-    /** Computes the Jacobian determinants and check if negative
-     */
+    /** Computes the Jacobian determinants and check if negative */
     void update_Jacobian_determinants();
 
     /**
@@ -83,8 +88,8 @@ protected:
        \f}
      * Where B is the gradient operator in the finite element discretization
      */
-    [[nodiscard]] Matrix geometric_tangent_stiffness(Matrix const& configuration,
-                                                     int64 const element) const;
+    [[nodiscard]] matrix geometric_tangent_stiffness(matrix const& configuration,
+                                                     int32 const element) const;
 
     /**
      * Compute the material tangent stiffness using the formula
@@ -92,8 +97,8 @@ protected:
      * k_{mat} &= I_{2x2} \int_{V} B_I^{T} \sigma B_{J} dV
      * \f}
      */
-    [[nodiscard]] Matrix material_tangent_stiffness(Matrix const& configuration,
-                                                    int64 const element) const;
+    [[nodiscard]] matrix material_tangent_stiffness(matrix const& configuration,
+                                                    int32 const element) const;
 
     /**
      * Compute the internal force vector using the formula
@@ -102,21 +107,17 @@ protected:
      * \f}
      * @return the internal nodal force vector
      */
-    [[nodiscard]] Vector internal_nodal_force(Matrix const& configuration, int64 const element) const;
-
-    /** @return the index into the internal variable store */
-    [[nodiscard]] int64 offset(int64 const element, int64 const quadrature_point) const;
+    [[nodiscard]] Vector internal_nodal_force(matrix const& configuration, int32 const element) const;
 
 private:
     std::shared_ptr<MaterialCoordinates> material_coordinates;
 
     std::unique_ptr<SurfaceInterpolation> sf; //!< Shape function
 
+    variable_view view;
     InternalVariables variables;
 
     std::unique_ptr<ConstitutiveModel> cm; //!< Constitutive model
-
-    std::vector<List> dof_list; //!< Map for the local to global dofs
 };
 }
 }
