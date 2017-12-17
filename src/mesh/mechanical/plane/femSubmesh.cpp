@@ -35,18 +35,24 @@ femSubmesh::femSubmesh(Json::Value const& material_data,
       variables(elements() * sf->quadrature().points()),
       cm(make_constitutive_model(variables, material_data, simulation_data))
 {
+    std::cout << "Number of quadrature points: " << sf->quadrature().points() << std::endl;
+    std::cout << "Number of elements: " << elements() << std::endl;
+
     // Allocate storage for the displacement gradient
     variables.add(InternalVariables::Tensor::DisplacementGradient,
                   InternalVariables::Tensor::DeformationGradient,
-                  InternalVariables::Tensor::Cauchy);
+                  InternalVariables::Tensor::Cauchy,
+                  InternalVariables::Scalar::DetF);
 
-    variables.add(InternalVariables::Scalar::DetF);
+    std::cout << "size of internal variable store: "
+              << variables(InternalVariables::Tensor::DeformationGradient).size() << std::endl;
 
     // Get the old data to the undeformed configuration
     for (auto& F : variables(InternalVariables::Tensor::DeformationGradient))
     {
         F = matrix2::Identity();
     }
+
     variables.commit();
 
     dof_list = allocate_dof_list(dofs_per_node(), nodal_connectivity);

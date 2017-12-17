@@ -25,7 +25,7 @@ public:
     using internal_variable_type = InternalVariableType;
 
 public:
-    femSubmesh(Submesh const& submesh) : Submesh(submesh) {}
+    explicit femSubmesh(Submesh const& submesh) : Submesh(submesh) {}
 
     /** @return mapping of the element degrees of freedom to the process matrix */
     local_indices const& local_dof_view(int32 const element) const
@@ -34,7 +34,8 @@ public:
     }
 
     /** @return the tangent consistent stiffness matrix */
-    [[nodiscard]] std::pair<local_indices const&, matrix> tangent_stiffness(int32 const element) const {
+    [[nodiscard]] std::pair<local_indices const&, matrix> tangent_stiffness(int32 const element) const
+    {
         return static_cast<mesh_type*>(this)->tangent_stiffness(element);
     }
 
@@ -60,8 +61,5 @@ public:
     int32 dofs_per_node() const { return static_cast<MeshType*>(this)->dofs_per_node(); }
 
 protected:
-    std::shared_ptr<MaterialCoordinates> material_coordinates;
-
-    std::vector<local_indices> dof_list; //!< Map for the local element to process indices
 };
 }

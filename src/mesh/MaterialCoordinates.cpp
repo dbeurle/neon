@@ -11,6 +11,9 @@
 
 namespace neon
 {
+template <int coordinate, int stride>
+using vector_view = Eigen::Map<vector, coordinate, Eigen::InnerStride<stride>>;
+
 MaterialCoordinates::MaterialCoordinates(Vector const& initial_coordinates)
     : NodalCoordinates(initial_coordinates), x(initial_coordinates)
 {
@@ -23,13 +26,33 @@ Vector MaterialCoordinates::displacement(List const& local_dofs) const
     Vector localdisp(local_dofs.size());
 
     for_each(view::zip(view::ints(0), local_dofs), [&](auto const& zip_pair) {
-        auto const& [i, local_dof] = zip_pair;
+        auto const & [i, local_dof] = zip_pair;
         localdisp(i) = x(local_dof) - X(local_dof);
     });
     return localdisp;
 }
 
-/** @return a vtk object of the initial coordinates */
+void MaterialCoordinates::update_current_xy_configuration(vector const& u)
+{
+    std::cout << "Hallo.....!" << std::endl;
+
+    std::cout << "Size of the vector " << u.size() << std::endl;
+    std::cout << "Number of nodes " << u.size() / 2 << std::endl;
+
+    std::cout << "Coordinates of the vector " << x.size() << std::endl;
+    std::cout << "Number of nodes " << x.size() / 3 << std::endl;
+
+    vector_view<0, 3>(x.data(),
+                      x.size() / 3) = vector_view<0, 3>(X.data(), X.size() / 3)
+                                      + vector_view<0, 2>(const_cast<vector::Scalar*>(u.data()),
+                                                          u.size() / 2);
+
+    vector_view<1, 3>(x.data(),
+                      x.size() / 3) = vector_view<1, 3>(X.data(), X.size() / 3)
+                                      + vector_view<1, 2>(const_cast<vector::Scalar*>(u.data()),
+                                                          u.size() / 2);
+}
+
 vtkSmartPointer<vtkPoints> MaterialCoordinates::vtk_coordinates() const
 {
     auto points = vtkSmartPointer<vtkPoints>::New();
@@ -44,7 +67,6 @@ vtkSmartPointer<vtkPoints> MaterialCoordinates::vtk_coordinates() const
     return points;
 }
 
-/** @return a vtk array of nodal displacements */
 vtkSmartPointer<vtkDoubleArray> MaterialCoordinates::vtk_displacement() const
 {
     auto displacements = vtkSmartPointer<vtkDoubleArray>::New();
@@ -58,10 +80,10 @@ vtkSmartPointer<vtkDoubleArray> MaterialCoordinates::vtk_displacement() const
     return displacements;
 }
 
-Matrix3x MaterialCoordinates::get_configuration(List const& local_nodes,
-                                                Vector const& configuration) const
+matrix3x MaterialCoordinates::get_configuration(local_indices const& local_nodes,
+                                                vector const& configuration) const
 {
-    Matrix3x element_displacement(3, local_nodes.size());
+    matrix3x element_displacement(3, local_nodes.size());
 
     for (auto lnode = 0; lnode < local_nodes.size(); lnode++)
     {

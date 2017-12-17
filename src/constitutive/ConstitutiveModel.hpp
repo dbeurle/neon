@@ -13,12 +13,15 @@ class Material;
  * internal variables routine and update a constitutive model for use in the global
  * assembly routine
  */
-template <int spatial_dimension, int voigt_dimension = spatial_to_voigt(spatial_dimension)>
+template <int rank2_dimension, int rank4_dimension>
 class ConstitutiveModel
 {
 public:
     /** Provide an internal variable class to be populated by the constitutive model */
-    ConstitutiveModel(InternalVariables<spatial_dimension>& variables) : variables(variables) {}
+    ConstitutiveModel(InternalVariables<rank2_dimension, rank4_dimension>& variables)
+        : variables(variables)
+    {
+    }
 
     /**
      * Update the required internal variables and tangent matrix at quadrature
@@ -35,16 +38,16 @@ public:
     [[nodiscard]] virtual bool is_symmetric() const { return true; };
 
 protected:
-    InternalVariables<spatial_dimension>& variables;
+    InternalVariables<rank2_dimension, rank4_dimension>& variables;
 };
 
 namespace mechanical::solid
 {
-using ConstitutiveModel = neon::ConstitutiveModel<3>;
+using ConstitutiveModel = neon::ConstitutiveModel<3, 6>;
 }
 namespace mechanical::plane
 {
-using ConstitutiveModel = neon::ConstitutiveModel<2>;
+using ConstitutiveModel = neon::ConstitutiveModel<2, 3>;
 }
 namespace diffusion
 {

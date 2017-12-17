@@ -13,20 +13,23 @@ class MaterialCoordinates : public NodalCoordinates
 {
 public:
     /** Construct this class using a set of initial coordinates */
-    MaterialCoordinates(Vector const& initial_coordinates);
+    MaterialCoordinates(vector const& initial_coordinates);
 
     /** @return element reference configuration based on the local node numbers*/
-    [[nodiscard]] Matrix3x initial_configuration(List const& local_nodes) const;
+    [[nodiscard]] Matrix3x initial_configuration(local_indices const& local_nodes) const;
 
     /** @return element current configuration based on the local node numbers*/
-    [[nodiscard]] Matrix3x current_configuration(List const& local_nodes) const;
+    [[nodiscard]] Matrix3x current_configuration(local_indices const& local_nodes) const;
 
     /** @param u - displacement vector from initial configuration (x,y,z...) */
-    void update_current_configuration(Vector const& u) { x = X + u; };
+    void update_current_configuration(vector const& u) { x = X + u; };
+
+    /** @param u - displacement vector from initial configuration (x,y...) */
+    void update_current_xy_configuration(vector const& u);
 
     [[nodiscard]] Vector displacement() const { return x - X; }
 
-    [[nodiscard]] Vector displacement(List const& local_dofs) const;
+    [[nodiscard]] Vector displacement(local_indices const& local_dofs) const;
 
     /** @return a vtk object of the initial coordinates */
     [[nodiscard]] vtkSmartPointer<vtkPoints> vtk_coordinates() const;
@@ -35,8 +38,8 @@ public:
     [[nodiscard]] vtkSmartPointer<vtkDoubleArray> vtk_displacement() const;
 
 protected:
-    [[nodiscard]] Matrix3x get_configuration(List const& local_nodes,
-                                             Vector const& configuration) const;
+    [[nodiscard]] Matrix3x get_configuration(local_indices const& local_nodes,
+                                             vector const& configuration) const;
 
 protected:
     Vector x; //!< Current configuration

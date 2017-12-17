@@ -34,24 +34,26 @@ private:
  * when the data is converged to avoid polluting the variable history in the
  * Newton-Raphson method.
  */
-template <int spatial_dimension, int voigt_dimension>
+template <int rank2_dimension, int rank4_dimension>
 class InternalVariables
 {
 public:
     /** Spatial dimension (three, two or one dimension) */
-    static auto constexpr r_n = spatial_dimension;
+    static auto constexpr r_n = rank2_dimension;
 
     /** Voigt dimension for the tensor conversion */
-    static auto constexpr v_n = voigt_dimension;
+    static auto constexpr v_n = rank4_dimension;
 
     // Type aliases
     using scalar_type = double;
 
-    /** The tensor type is a small matrix in tensor notation */
-    using tensor_type = Eigen::Matrix<scalar_type, spatial_dimension, spatial_dimension>;
-    using matrix_type = Eigen::Matrix<scalar_type, voigt_dimension, voigt_dimension>;
+    /** A second order tensor type is a small matrix in tensor notation */
+    using rank2tensor_type = Eigen::Matrix<scalar_type, rank2_dimension, rank2_dimension>;
 
-    static auto constexpr tensor_size = spatial_dimension * spatial_dimension;
+    /** A fourth order tensor type is a fixed size matrix in Voigt notation */
+    using rank4tensor_type = Eigen::Matrix<scalar_type, rank4_dimension, rank4_dimension>;
+
+    static auto constexpr tensor_size = rank2_dimension * rank2_dimension;
 
 public:
     enum class Matrix { TangentOperator };
@@ -99,6 +101,9 @@ public:
     /** Delete copy constructor to prevent references moving */
     InternalVariables(InternalVariables const&) = delete;
 
+    /** Delete assignment constructor to prevent references moving */
+    InternalVariables& operator=(InternalVariables const&) = delete;
+
     /** Implicitly defined move constructor */
     InternalVariables(InternalVariables&&) = default;
 
@@ -106,15 +111,15 @@ public:
     template <typename... Variables>
     void add(Tensor const name, Variables... names)
     {
-        tensors[name].resize(size, tensor_type::Zero());
-        tensors_old[name].resize(size, tensor_type::Zero());
+        rank2tensors[name].resize(size, rank2tensor_type::Zero());
+        rank2tensors_old[name].resize(size, rank2tensor_type::Zero());
         add(names...);
     }
 
     void add(Tensor const name)
     {
-        tensors[name].resize(size, tensor_type::Zero());
-        tensors_old[name].resize(size, tensor_type::Zero());
+        rank2tensors[name].resize(size, rank2tensor_type::Zero());
+        rank2tensors_old[name].resize(size, rank2tensor_type::Zero());
     }
 
     /** Add a number of scalar type variables to the object store */
@@ -132,26 +137,21 @@ public:
         scalars_old[name].resize(size, 0.0);
     }
 
-    /** Allocate matrix internal variable with zeros */
-    void add(InternalVariables::Matrix const name)
-    {
-        matrices[name].resize(size, matrix_type::Zero());
-    }
-
     /** Allocate matrix internal variables with provided matrix */
-    void add(InternalVariables::Matrix const name, neon::Matrix const initial_matrix)
+    void add(InternalVariables::Matrix const name,
+             rank4tensor_type const m = rank4tensor_type::Zero())
     {
-        matrices[name].resize(size, initial_matrix);
+        rank4tensors[name].resize(size, m);
     }
 
-    bool has(Scalar name) const { return scalars.find(name) != scalars.end(); }
-    bool has(Tensor name) const { return tensors.find(name) != tensors.end(); }
-    bool has(Matrix name) const { return matrices.find(name) != matrices.end(); }
+    bool has(Scalar const name) const { return scalars.find(name) != scalars.end(); }
+    bool has(Tensor const name) const { return rank2tensors.find(name) != rank2tensors.end(); }
+    bool has(Matrix const name) const { return rank4tensors.find(name) != rank4tensors.end(); }
 
     /** Const access to the converged tensor variables */
-    std::vector<tensor_type> const& operator[](Tensor const tensorType) const
+    std::vector<rank2tensor_type> const& operator[](Tensor const tensorType) const
     {
-        return tensors_old.find(tensorType)->second;
+        return rank2tensors_old.find(tensorType)->second;
     }
 
     /** Const access to the converged scalar variables */
@@ -171,15 +171,15 @@ public:
     }
 
     /** Mutable access to the non-converged tensor variables */
-    std::vector<tensor_type>& operator()(Tensor tensorType)
+    std::vector<rank2tensor_type>& operator()(Tensor tensorType)
     {
-        return tensors.find(tensorType)->second;
+        return rank2tensors.find(tensorType)->second;
     }
 
     /** Mutable access to the non-converged matrix variables */
-    std::vector<matrix_type>& operator()(Matrix matrixType)
+    std::vector<rank4tensor_type>& operator()(Matrix matrixType)
     {
-        return matrices.find(matrixType)->second;
+        return rank4tensors.find(matrixType)->second;
     }
 
     /** Mutable access to the non-converged scalar variables */
@@ -195,17 +195,17 @@ public:
     template <typename... TensorTps>
     auto operator()(Tensor var0, Tensor var1, TensorTps... vars)
     {
-        return std::make_tuple(std::ref(tensors.find(var0)->second),
-                               std::ref(tensors.find(var1)->second),
-                               std::ref(tensors.find(vars)->second)...);
+        return std::make_tuple(std::ref(rank2tensors.find(var0)->second),
+                               std::ref(rank2tensors.find(var1)->second),
+                               std::ref(rank2tensors.find(vars)->second)...);
     }
 
     template <typename... MatrixTps>
     auto operator()(Matrix var0, Matrix var1, MatrixTps... vars)
     {
-        return std::make_tuple(std::ref(matrices.find(var0)->second),
-                               std::ref(matrices.find(var1)->second),
-                               std::ref(matrices.find(vars)->second)...);
+        return std::make_tuple(std::ref(rank4tensors.find(var0)->second),
+                               std::ref(rank4tensors.find(var1)->second),
+                               std::ref(rank4tensors.find(vars)->second)...);
     }
 
     /*-------------------------------------------------------------*
@@ -219,15 +219,15 @@ public:
     }
 
     /** Non-mutable access to the non-converged tensor variables */
-    std::vector<tensor_type> const& operator()(Tensor tensorType) const
+    std::vector<rank2tensor_type> const& operator()(Tensor tensorType) const
     {
-        return tensors.find(tensorType)->second;
+        return rank2tensors.find(tensorType)->second;
     }
 
     /** Non-mutable access to the non-converged matrix variables */
-    std::vector<matrix_type> const& operator()(Matrix matrixType) const
+    std::vector<rank4tensor_type> const& operator()(Matrix matrixType) const
     {
-        return matrices.find(matrixType)->second;
+        return rank4tensors.find(matrixType)->second;
     }
 
     /** Const access to the non-converged scalar variables */
@@ -243,42 +243,42 @@ public:
     template <typename... TensorTps>
     auto operator()(Tensor var0, Tensor var1, TensorTps... vars) const
     {
-        return std::make_tuple(std::cref(tensors.find(var0)->second),
-                               std::cref(tensors.find(var1)->second),
-                               std::cref(tensors.find(vars)->second)...);
+        return std::make_tuple(std::cref(rank2tensors.find(var0)->second),
+                               std::cref(rank2tensors.find(var1)->second),
+                               std::cref(rank2tensors.find(vars)->second)...);
     }
 
     template <typename... MatrixTps>
     auto operator()(Matrix var0, Matrix var1, MatrixTps... vars) const
     {
-        return std::make_tuple(std::cref(matrices.find(var0)->second),
-                               std::cref(matrices.find(var1)->second),
-                               std::cref(matrices.find(vars)->second)...);
+        return std::make_tuple(std::cref(rank4tensors.find(var0)->second),
+                               std::cref(rank4tensors.find(var1)->second),
+                               std::cref(rank4tensors.find(vars)->second)...);
     }
 
     /** Commit to history when iteration converges */
     void commit()
     {
-        tensors_old = tensors;
+        rank2tensors_old = rank2tensors;
         scalars_old = scalars;
     }
 
     /** Revert to the old state when iteration doesn't converge */
     void revert()
     {
-        tensors = tensors_old;
+        rank2tensors = rank2tensors_old;
         scalars = scalars_old;
     }
 
 protected:
     // These state variables are committed and reverted depending on the outer
     // simulation loop.  If a nonlinear iteration does not converge then revert
-    // the state back to the previous state.  The tensors and scalars fields
+    // the state back to the previous state.  The rank2tensors and scalars fields
     // are the 'unstable' variables and the *Old are the stable variants
-    std::unordered_map<Tensor, std::vector<tensor_type>> tensors, tensors_old;
+    std::unordered_map<Tensor, std::vector<rank2tensor_type>> rank2tensors, rank2tensors_old;
     std::unordered_map<Scalar, std::vector<scalar_type>> scalars, scalars_old;
 
-    std::unordered_map<Matrix, std::vector<matrix_type>> matrices;
+    std::unordered_map<Matrix, std::vector<rank4tensor_type>> rank4tensors;
 
     std::size_t size;
 };

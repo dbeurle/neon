@@ -153,13 +153,10 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& va
                                                            IsotropicLinearElasticity::State::PlaneStress);
     }
     throw std::runtime_error("The model name " + model_name + " is not recognised\n"
-                             + "Supported models are \"NeoHooke\", \"Microsphere\" "
-                               "and \"J2Plasticity\"\n");
+                             + "Supported models are \"PlaneStrain\" and \"PlaneStress\"\n");
     return nullptr;
 }
 }
-
-#include <iostream>
 
 namespace neon::diffusion
 {

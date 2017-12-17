@@ -7,21 +7,9 @@
 
 namespace neon
 {
-std::vector<List> allocate_dof_list(int const nodal_dofs, std::vector<List> const& nodal_connectivity)
-{
-    using namespace ranges;
-    return nodal_connectivity | view::transform([=](auto const& node_list) {
-               return view::for_each(node_list, [=](int const local_node) {
-                   return view::ints(0, nodal_dofs) | view::transform([=](int const nodal_dof) {
-                              return local_node * nodal_dofs + nodal_dof;
-                          });
-               });
-           });
-}
-
-std::vector<List> filter_dof_list(int const nodal_dofs,
-                                  int const dof_offset,
-                                  std::vector<List> const& nodal_connectivity)
+std::vector<local_indices> filter_dof_list(int32 const nodal_dofs,
+                                           int32 const dof_offset,
+                                           std::vector<local_indices> const& nodal_connectivity)
 {
     using namespace ranges;
     return nodal_connectivity | view::transform([=](auto const& node_list) {

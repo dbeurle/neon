@@ -28,30 +28,45 @@ void IsotropicLinearElasticity::update_internal_variables(double const time_step
 {
     using namespace ranges;
 
+    std::cout << "Performing the internal variable updates" << std::endl;
+
     // Extract the internal variables
-    auto [elastic_strains, cauchy_stresses] = variables(InternalVariables::Tensor::LinearisedStrain,
-                                                        InternalVariables::Tensor::Cauchy);
+    auto[elastic_strains, cauchy_stresses] = variables(InternalVariables::Tensor::LinearisedStrain,
+                                                       InternalVariables::Tensor::Cauchy);
+
+    std::cout << "Accessing the von Mises stress" << std::endl;
 
     auto& von_mises_stresses = variables(InternalVariables::Scalar::VonMisesStress);
+
+    std::cout << "Size of displacement gradient: "
+              << variables(InternalVariables::Tensor::DisplacementGradient).size() << std::endl;
+
+    std::cout << "Computing elastic strains" << std::endl;
 
     // Compute the linear strain gradient from the displacement gradient
     elastic_strains = variables(InternalVariables::Tensor::DisplacementGradient)
                       | view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
+
+    std::cout << "Computing Cauchy stress" << std::endl;
 
     // Compute Cauchy stress from the linear elastic strains
     cauchy_stresses = elastic_strains | view::transform([this](auto const& elastic_strain) {
                           return compute_cauchy_stress(elastic_strain);
                       });
 
+    std::cout << "Computing von Mises stress" << std::endl;
+
     // Compute the von Mises equivalent stress
     von_mises_stresses = cauchy_stresses | view::transform([](auto const& cauchy_stress) {
                              return von_mises_stress(cauchy_stress);
                          });
+
+    std::cout << "All done!" << std::endl;
 }
 
 matrix3 IsotropicLinearElasticity::elastic_moduli() const
 {
-    auto [lambda, shear_modulus] = material.Lame_parameters();
+    auto[lambda, shear_modulus] = material.Lame_parameters();
 
     if (state == State::PlaneStress)
     {

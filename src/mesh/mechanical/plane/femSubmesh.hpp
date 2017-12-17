@@ -29,14 +29,12 @@ public:
                         std::shared_ptr<MaterialCoordinates>& material_coordinates,
                         Submesh const& submesh);
 
-    [[nodiscard]] local_indices const& local_dof_view(int32 const element) const {
+    [[nodiscard]] local_indices const& local_dof_view(int32 const element) const
+    {
         return dof_list.at(element);
     }
 
-        [[nodiscard]] InternalVariables const& internal_variables() const
-    {
-        return variables;
-    }
+    [[nodiscard]] InternalVariables const& internal_variables() const { return variables; }
 
     void save_internal_variables(bool const have_converged);
 
@@ -118,6 +116,8 @@ private:
     InternalVariables variables;
 
     std::unique_ptr<ConstitutiveModel> cm; //!< Constitutive model
+
+    std::vector<local_indices> dof_list; //!< Map for the local element to process indices
 };
 }
 }
