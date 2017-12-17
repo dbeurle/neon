@@ -29,8 +29,8 @@ void IsotropicLinearElasticity::update_internal_variables(double const time_step
     using namespace ranges;
 
     // Extract the internal variables
-    auto[elastic_strains, cauchy_stresses] = variables(InternalVariables::Tensor::LinearisedStrain,
-                                                       InternalVariables::Tensor::Cauchy);
+    auto [elastic_strains, cauchy_stresses] = variables(InternalVariables::Tensor::LinearisedStrain,
+                                                        InternalVariables::Tensor::Cauchy);
 
     auto& von_mises_stresses = variables(InternalVariables::Scalar::VonMisesStress);
 
@@ -49,25 +49,25 @@ void IsotropicLinearElasticity::update_internal_variables(double const time_step
                          });
 }
 
-Matrix3 IsotropicLinearElasticity::elastic_moduli() const
+matrix3 IsotropicLinearElasticity::elastic_moduli() const
 {
-    auto[lambda, shear_modulus] = material.Lame_parameters();
+    auto [lambda, shear_modulus] = material.Lame_parameters();
 
     if (state == State::PlaneStress)
     {
         lambda = 2.0 * lambda * shear_modulus / (lambda + 2.0 * shear_modulus);
     }
     // clang-format off
-    return (Matrix3() << lambda + 2.0 * shear_modulus, lambda, 0.0,
+    return (matrix3() << lambda + 2.0 * shear_modulus, lambda, 0.0,
                          lambda, lambda + 2.0 * shear_modulus, 0.0,
                          0.0, 0.0, shear_modulus).finished();
     // clang-format on
 }
 
-Matrix2 IsotropicLinearElasticity::compute_cauchy_stress(Matrix2 const& elastic_strain) const
+matrix2 IsotropicLinearElasticity::compute_cauchy_stress(matrix2 const& elastic_strain) const
 {
     auto const G = material.shear_modulus();
     auto const lambda_e = material.lambda();
-    return lambda_e * elastic_strain.trace() * Matrix2::Identity() + 2.0 * G * elastic_strain;
+    return lambda_e * elastic_strain.trace() * matrix2::Identity() + 2.0 * G * elastic_strain;
 }
 }
