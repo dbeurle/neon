@@ -35,6 +35,15 @@ std::unique_ptr<AbstractModule> make_module(
         }
         return std::make_unique<SolidMechanicsModule>(mesh, material, simulation);
     }
+    else if (module_type == "PlaneMechanics")
+    {
+        if (!simulation.isMember("NonlinearOptions"))
+        {
+            throw std::runtime_error("\"NonlinearOptions\" needs to be present for a "
+                                     "SolidMechanics simulation");
+        }
+        return std::make_unique<PlaneMechanicsModule>(mesh, material, simulation);
+    }
     else if (module_type == "HeatDiffusion")
     {
         if (solution_type == "Equilibrium")
