@@ -17,6 +17,8 @@
 
 #include "constitutive/ConstitutiveModelFactory.hpp"
 
+#include "Exceptions.hpp"
+
 Json::CharReaderBuilder reader;
 JSONCPP_STRING input_errors;
 
@@ -378,7 +380,27 @@ TEST_CASE("NonAffine microsphere model")
         }
     }
 }
-TEST_CASE("J2 plasticity model factory errors")
+TEST_CASE("Plane stress linear elasticity factory error")
+{
+    using namespace neon;
+
+    // Create a json reader object from a string
+    std::string input_data = "{\"Badkey\" : \"donkey\"}";
+    std::string mesh_input = "{\"ConstitutiveModel\" : {\"Name\" : \"PlaneStrain\"}}";
+
+    Json::Value material_data, mesh_data;
+
+    std::istringstream input_data_stream(input_data), mesh_input_stream(mesh_input);
+
+    REQUIRE(Json::parseFromStream(reader, input_data_stream, &material_data, &input_errors));
+    REQUIRE(Json::parseFromStream(reader, mesh_input_stream, &mesh_data, &input_errors));
+
+    mechanical::plane::InternalVariables variables(internal_variable_size);
+
+    REQUIRE_THROWS_AS(mechanical::plane::make_constitutive_model(variables, material_data, mesh_data),
+                      neon::MaterialPropertyException);
+}
+TEST_CASE("Solid mechanics J2 plasticity model factory errors")
 {
     using namespace neon::mechanical::solid;
 
@@ -398,7 +420,7 @@ TEST_CASE("J2 plasticity model factory errors")
     REQUIRE_THROWS_AS(make_constitutive_model(variables, material_data, simulation_data),
                       std::runtime_error);
 }
-TEST_CASE("J2 plasticity model")
+TEST_CASE("Solid mechanics J2 plasticity model")
 {
     using namespace neon::mechanical::solid;
 
@@ -559,7 +581,7 @@ TEST_CASE("J2 plasticity model")
         }
     }
 }
-TEST_CASE("J2 plasticity damage model", "[J2PlasticityDamage]")
+TEST_CASE("Solid mechanics J2 plasticity damage model", "[J2PlasticityDamage]")
 {
     using namespace neon::mechanical::solid;
 

@@ -137,6 +137,7 @@ TEST_CASE("Basic mesh test")
         for (auto const& mesh : basic_mesh.meshes("bottom"))
         {
             auto const unique_node_list = mesh.unique_connectivities();
+
             List const known_unique{0, 1, 2, 3, 14, 15, 16, 17, 18, 19, 26, 27, 36, 37, 38, 39};
 
             REQUIRE(view::set_symmetric_difference(unique_node_list, known_unique).empty());
