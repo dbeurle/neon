@@ -1,6 +1,8 @@
+
 cmake_minimum_required(VERSION 3.0)
-project(blaze_builder CXX)
+
 include(ExternalProject)
+
 find_package(Git REQUIRED)
 
 ExternalProject_Add(
@@ -18,6 +20,6 @@ ExternalProject_Add(
     LOG_DOWNLOAD ON
    )
 
-# Expose required variable (CATCH_INCLUDE_DIR) to parent scope
+# Expose required variable (BLAZE_INCLUDE_DIR) to parent scope
 ExternalProject_Get_Property(blaze source_dir)
-set(BLAZE_INCLUDE_DIR ${source_dir}/blaze CACHE INTERNAL "Path to include folder for Blaze")
+set(BLAZE_INCLUDE_DIR ${source_dir} CACHE INTERNAL "Path to include folder for Blaze")

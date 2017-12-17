@@ -28,11 +28,13 @@ endif()
 set(EXTERNAL_PROJECTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external")
 
 add_subdirectory(${EXTERNAL_PROJECTS_DIR}/catch)
+add_subdirectory(${EXTERNAL_PROJECTS_DIR}/blaze)
 add_subdirectory(${EXTERNAL_PROJECTS_DIR}/eigen3)
 add_subdirectory(${EXTERNAL_PROJECTS_DIR}/range-v3)
 add_subdirectory(${EXTERNAL_PROJECTS_DIR}/termcolor)
 
 include_directories(${CATCH_INCLUDE_DIR}
+                    ${BLAZE_INCLUDE_DIR}
                     ${RV3_INCLUDE_DIR}
                     ${EIGEN_INCLUDE_DIR}
                     ${TERMCOLOR_INCLUDE_DIR}
