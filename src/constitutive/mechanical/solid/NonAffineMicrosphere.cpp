@@ -1,7 +1,7 @@
 
 #include "NonAffineMicrosphere.hpp"
 
-#include "InternalVariables.hpp"
+#include "constitutive/InternalVariables.hpp"
 #include "numeric/DenseMatrix.hpp"
 
 #include <json/value.h>

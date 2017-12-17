@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "ConstitutiveModel.hpp"
+#include "constitutive/ConstitutiveModel.hpp"
 
 #include "material/LinearDiffusion.hpp"
 

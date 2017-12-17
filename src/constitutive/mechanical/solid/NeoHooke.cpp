@@ -1,7 +1,7 @@
 
 #include "NeoHooke.hpp"
 
-#include "InternalVariables.hpp"
+#include "constitutive/InternalVariables.hpp"
 
 #include <range/v3/algorithm/for_each.hpp>
 #include <range/v3/view/transform.hpp>

@@ -1,7 +1,7 @@
 
 #include "AffineMicrosphere.hpp"
 
-#include "InternalVariables.hpp"
+#include "constitutive/InternalVariables.hpp"
 #include "numeric/DenseMatrix.hpp"
 
 #include <range/v3/view/transform.hpp>

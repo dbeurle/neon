@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "constitutive/IsotropicLinearElasticity.hpp"
+#include "IsotropicLinearElasticity.hpp"
 
 #include "numeric/Tensor.hpp"
 

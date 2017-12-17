@@ -1,17 +1,17 @@
 
 #include "ConstitutiveModelFactory.hpp"
 
-#include "J2Plasticity.hpp"
-#include "J2PlasticityDamage.hpp"
+#include "mechanical/solid/J2Plasticity.hpp"
+#include "mechanical/solid/J2PlasticityDamage.hpp"
 
-#include "FiniteJ2Plasticity.hpp"
+#include "mechanical/solid/FiniteJ2Plasticity.hpp"
 
-#include "AffineMicrosphere.hpp"
-#include "NonAffineMicrosphere.hpp"
+#include "mechanical/solid/AffineMicrosphere.hpp"
+#include "mechanical/solid/NonAffineMicrosphere.hpp"
 
-#include "NeoHooke.hpp"
+#include "mechanical/solid/NeoHooke.hpp"
 
-#include "IsotropicDiffusion.hpp"
+#include "thermal/IsotropicDiffusion.hpp"
 
 #include "mechanical/plane/IsotropicLinearElasticity.hpp"
 

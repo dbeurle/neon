@@ -1,7 +1,7 @@
 
 #include "IsotropicDiffusion.hpp"
 
-#include "InternalVariables.hpp"
+#include "constitutive/InternalVariables.hpp"
 
 namespace neon::diffusion
 {
