@@ -3,6 +3,7 @@ foreach(test
              AdaptiveIncrementTest
              BoundaryTest
              ConstitutiveTest
+             DofAllocation
              GeometryTest
              LinearSolverTest
              MaterialTest
