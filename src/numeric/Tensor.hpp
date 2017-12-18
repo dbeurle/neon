@@ -23,16 +23,16 @@ namespace detail
 }
 
 /** @return the volumetric part of the tensor */
-[[nodiscard]] inline Matrix3 volumetric(Matrix3 const& a)
+[[nodiscard]] inline matrix3 volumetric(matrix3 const& a)
 {
-    return Matrix3::Identity() * a.trace() / 3.0;
+    return matrix3::Identity() * a.trace() / 3.0;
 }
 
 /** @return the deviatoric part of the tensor */
 [[nodiscard]] inline Matrix2 deviatoric(Matrix2 const& a) { return a - volumetric(a); }
 
 /** @return the deviatoric part of the tensor */
-[[nodiscard]] inline Matrix3 deviatoric(Matrix3 const& a) { return a - volumetric(a); }
+[[nodiscard]] inline matrix3 deviatoric(matrix3 const& a) { return a - volumetric(a); }
 }
 
 /** @return the volumetric part of the tensor */
@@ -56,7 +56,7 @@ template <typename MatrixExpression>
    \f}
  * @return The unimodular decomposition of a second order tensor
  */
-[[nodiscard]] inline Matrix3 unimodular(Matrix3 const& a)
+[[nodiscard]] inline matrix3 unimodular(matrix3 const& a)
 {
     return std::pow(a.determinant(), -1.0 / 3.0) * a;
 }
@@ -65,14 +65,14 @@ template <typename MatrixExpression>
 [[nodiscard]] inline Matrix2 symmetric(Matrix2 const& a) { return 0.5 * (a.transpose() + a); }
 
 /** @return The symmetric part of the tensor */
-[[nodiscard]] inline Matrix3 symmetric(Matrix3 const& a) { return 0.5 * (a.transpose() + a); }
+[[nodiscard]] inline matrix3 symmetric(matrix3 const& a) { return 0.5 * (a.transpose() + a); }
 
 /**
  * I1 returns the coefficient I1, the first stress invariant,
  * which is equal to the trace
  * @return First invariant
  */
-[[nodiscard]] inline double I1(Matrix3 const& a) { return a.trace(); }
+[[nodiscard]] inline double I1(matrix3 const& a) { return a.trace(); }
 
 /**
  * I2 returns the coefficient I2, the second stress invariant,
@@ -82,13 +82,13 @@ template <typename MatrixExpression>
  * \f}
  * @return Second invariant
  */
-[[nodiscard]] inline double I2(Matrix3 const& a)
+[[nodiscard]] inline double I2(matrix3 const& a)
 {
     return 0.5 * (std::pow(a.trace(), 2) - (a * a).trace());
 }
 
 /** @return Third invariant, which is the determinant of the tensor */
-[[nodiscard]] inline double I3(Matrix3 const& a) { return a.determinant(); }
+[[nodiscard]] inline double I3(matrix3 const& a) { return a.determinant(); }
 
 [[nodiscard]] inline Matrix identity_expansion(Matrix const& H, int const nodal_dofs)
 {
@@ -115,10 +115,10 @@ namespace voigt
  * Compute the outer product in Voigt notation according to
  * \f$ \mathbb{\mathbf{1} \otimes \mathbf{1}} = \delta_{ij} \delta_{kl} \f$
  */
-[[nodiscard]] inline Matrix6 I_outer_I()
+[[nodiscard]] inline matrix6 I_outer_I()
 {
     // clang-format off
-    return (Matrix6() << 1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
+    return (matrix6() << 1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
                          1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
                          1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
                          0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -128,9 +128,26 @@ namespace voigt
 }
 
 //! Kinematic description of tensor to voigt notation where off diagonal components
-//! are multiplied by a factor of two
+//! are multiplied by a factor of two (strain type)
 namespace kinematic
 {
+namespace detail
+{
+/**
+ * Convert second order tensor to Voigt notation according to
+ * \f$ \begin{bmatrix} \varepsilon_{11} \\ \varepsilon_{22} \\ 2\varepsilon_{12} \end{bmatrix} =
+ * \begin{bmatrix} \varepsilon_{11} & \varepsilon_{12} \\ \varepsilon_{21} &
+ * \varepsilon_{22} \end{bmatrix} \f$
+ */
+[[nodiscard]] inline vector3 to(matrix2 const& a)
+{
+    // clang-format off
+            return (vector3() << a(0, 0),
+                                 a(1, 1),
+                                 2.0 * a(0, 1)).finished();
+    // clang-format on
+}
+
 /**
  * Convert second order tensor to Voigt notation according to
  * \f$ \begin{bmatrix} \varepsilon_{11} \\ \varepsilon_{22} \\ \varepsilon_{33} \\ 2\varepsilon_{23}
@@ -139,15 +156,32 @@ namespace kinematic
  * \varepsilon_{13} \\ \varepsilon_{21} & \varepsilon_{22} & \varepsilon_{23} \\ \varepsilon_{31} &
  * \varepsilon_{32} & \varepsilon_{33} \end{bmatrix} \f$
  */
-[[nodiscard]] inline Vector6 to(Matrix3 const& a)
+[[nodiscard]] inline vector6 to(matrix3 const& a)
 {
     // clang-format off
-    return (Vector6() << a(0, 0),
-                         a(1, 1),
-                         a(2, 2),
-                         2.0 * a(1, 2),
-                         2.0 * a(0, 2),
-                         2.0 * a(0, 1)).finished();
+        return (vector6() << a(0, 0),
+                             a(1, 1),
+                             a(2, 2),
+                             2.0 * a(1, 2),
+                             2.0 * a(0, 2),
+                             2.0 * a(0, 1)).finished();
+    // clang-format on
+}
+
+/**
+ * Convert Voigt notation to second order tensor according to
+ * \f$  \begin{bmatrix} \varepsilon_{11} & \varepsilon_{12} \\
+ *                      \varepsilon_{21} & \varepsilon_{22}
+        \end{bmatrix} = \begin{bmatrix} \varepsilon_{11} \\
+                                        \varepsilon_{22} \\
+                                        2\varepsilon_{12}
+                        \end{bmatrix} \f$
+ */
+[[nodiscard]] inline matrix2 from(vector3 const& a)
+{
+    // clang-format off
+        return (matrix2() <<     a(0), a(3)/2.0,
+                             a(3)/2.0,     a(1)).finished();
     // clang-format on
 }
 
@@ -159,13 +193,26 @@ namespace kinematic
  * \varepsilon_{22} \\ \varepsilon_{33} \\ 2\varepsilon_{23}
  * \\ 2\varepsilon_{13} \\ 2\varepsilon_{12} \end{bmatrix} \f$
  */
-[[nodiscard]] inline Matrix3 from(Vector6 const& a)
+[[nodiscard]] inline matrix3 from(vector6 const& a)
 {
     // clang-format off
-    return (Matrix3() <<     a(0), a(5)/2.0, a(4)/2.0,
-                         a(5)/2.0,     a(1),     a(3),
-                         a(4)/2.0, a(3)/2.0,     a(2)).finished();
+        return (matrix3() <<     a(0), a(5)/2.0, a(4)/2.0,
+                             a(5)/2.0,     a(1),     a(3),
+                             a(4)/2.0, a(3)/2.0,     a(2)).finished();
     // clang-format on
+}
+}
+
+template <typename matrix_expression>
+[[nodiscard]] inline auto to(matrix_expression const& a)
+{
+    return detail::to(a.eval());
+}
+
+template <typename matrix_expression>
+[[nodiscard]] inline auto from(matrix_expression const& a)
+{
+    return detail::from(a.eval());
 }
 
 /**
@@ -173,10 +220,10 @@ namespace kinematic
  * \f$ \mathbb{P} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) -
  * \frac{1}{3}\delta_{ij} \delta_{kl} \f$
  */
-[[nodiscard]] inline Matrix6 deviatoric()
+[[nodiscard]] inline matrix6 deviatoric()
 {
     // clang-format off
-    return (Matrix6() << 2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,
+    return (matrix6() << 2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,
                         -1.0 / 3.0,  2.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,
                         -1.0 / 3.0, -1.0 / 3.0,  2.0 / 3.0, 0.0, 0.0, 0.0,
                                0.0,        0.0,        0.0, 0.5, 0.0, 0.0,
@@ -189,10 +236,10 @@ namespace kinematic
  * Compute the fourth order symmetric identity tensor in Voigt notation according to
  * \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
  */
-[[nodiscard]] inline Matrix6 fourth_order_identity()
+[[nodiscard]] inline matrix6 fourth_order_identity()
 {
     // clang-format off
-    return (Matrix6() << 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    return (matrix6() << 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                          0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
                          0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
                          0.0, 0.0, 0.0, 0.5, 0.0, 0.0,
@@ -205,10 +252,10 @@ namespace kinematic
  * Compute the fourth order symmetric identity tensor in Voigt notation according to
  * \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
  */
-[[nodiscard]] inline Matrix6 identity()
+[[nodiscard]] inline matrix6 identity()
 {
     // clang-format off
-    return (Matrix6() << 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    return (matrix6() << 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                          0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
                          0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
                          0.0, 0.0, 0.0, 0.5, 0.0, 0.0,
@@ -222,6 +269,19 @@ namespace kinematic
 //! are not multiplied by a factor of two
 namespace kinetic
 {
+namespace detail
+{
+/**
+ * Convert second order tensor to Voigt notation according to
+ * \f$ \begin{bmatrix} \sigma_{11} \\ \sigma_{22} \\ \sigma_{12} \end{bmatrix} = \begin{bmatrix} \sigma_{11} & \sigma_{12}  \\
+ * \sigma_{21} & \sigma_{22} \end{bmatrix}
+ * \f$
+ */
+[[nodiscard]] inline vector3 to(matrix2 const& a)
+{
+    return (vector3() << a(0, 0), a(1, 1), a(0, 1)).finished();
+}
+
 /**
  * Convert second order tensor to Voigt notation according to
  * \f$ \begin{bmatrix} \sigma_{11} \\ \sigma_{22} \\ \sigma_{33} \\ \sigma_{23} \\ \sigma_{13} \\
@@ -229,9 +289,9 @@ namespace kinetic
  * \sigma_{21} & \sigma_{22} & \sigma_{23} \\ \sigma_{31} & \sigma_{32} & \sigma_{33} \end{bmatrix}
  * \f$
  */
-[[nodiscard]] inline Vector6 to(Matrix3 const& a)
+[[nodiscard]] inline vector6 to(matrix3 const& a)
 {
-    return (Vector6() << a(0, 0), a(1, 1), a(2, 2), a(1, 2), a(0, 2), a(0, 1)).finished();
+    return (vector6() << a(0, 0), a(1, 1), a(2, 2), a(1, 2), a(0, 2), a(0, 1)).finished();
 }
 
 /**
@@ -242,13 +302,42 @@ namespace kinetic
  * \sigma_{12} \end{bmatrix}
  * \f$
  */
-[[nodiscard]] inline Matrix3 from(Vector6 const& a)
+[[nodiscard]] inline matrix2 from(vector3 const& a)
 {
     // clang-format off
-    return (Matrix3() << a(0), a(5), a(4),
+    return (matrix2() << a(0), a(2),
+                         a(2), a(1)).finished();
+    // clang-format on
+}
+
+/**
+ * Convert Voigt notation to second order tensor according to
+ * \f$ \begin{bmatrix} \sigma_{11} & \sigma_{12} & \sigma_{13} \\
+ * \sigma_{21} & \sigma_{22} & \sigma_{23} \\ \sigma_{31} & \sigma_{32} & \sigma_{33} \end{bmatrix}
+ * = \begin{bmatrix} \sigma_{11} \\ \sigma_{22} \\ \sigma_{33} \\ \sigma_{23} \\ \sigma_{13} \\
+ * \sigma_{12} \end{bmatrix}
+ * \f$
+ */
+[[nodiscard]] inline matrix3 from(vector6 const& a)
+{
+    // clang-format off
+    return (matrix3() << a(0), a(5), a(4),
                          a(5), a(1), a(3),
                          a(4), a(3), a(2)).finished();
     // clang-format on
+}
+}
+
+template <typename matrix_expression>
+[[nodiscard]] inline auto from(matrix_expression const& a)
+{
+    return detail::from(a.eval());
+}
+
+template <typename matrix_expression>
+[[nodiscard]] inline auto to(matrix_expression const& a)
+{
+    return detail::to(a.eval());
 }
 
 /**
@@ -256,10 +345,10 @@ namespace kinetic
  * \f$ \mathbb{P} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) -
  * \frac{1}{3}\delta_{ij} \delta_{kl} \f$
  */
-[[nodiscard]] inline Matrix6 deviatoric()
+[[nodiscard]] inline matrix6 deviatoric()
 {
     // clang-format off
-    return (Matrix6() << 2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,
+    return (matrix6() << 2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,
                         -1.0 / 3.0,  2.0 / 3.0, -1.0 / 3.0, 0.0, 0.0, 0.0,
                         -1.0 / 3.0, -1.0 / 3.0,  2.0 / 3.0, 0.0, 0.0, 0.0,
                                0.0,        0.0,        0.0, 1.0, 0.0, 0.0,
@@ -272,17 +361,17 @@ namespace kinetic
  * Compute the fourth order symmetric identity tensor in Voigt notation according to
  * \f$ \mathbb{I} = \delta_{ijkl} \f$
  */
-[[nodiscard]] inline Matrix6 fourth_order_identity() { return Matrix6::Identity(); }
+[[nodiscard]] inline matrix6 fourth_order_identity() { return matrix6::Identity(); }
 }
 }
 /*! @} End of Doxygen Groups */
 
-[[nodiscard]] inline Matrix3 outer_product(Vector3 const& a, Vector3 const& b)
+[[nodiscard]] inline matrix3 outer_product(Vector3 const& a, Vector3 const& b)
 {
     return a * b.transpose();
 }
 
-[[nodiscard]] inline Matrix6 outer_product(Matrix3 const& a, Matrix3 const& b)
+[[nodiscard]] inline matrix6 outer_product(matrix3 const& a, matrix3 const& b)
 {
     return voigt::kinetic::to(a) * voigt::kinetic::to(b).transpose();
 }
@@ -293,7 +382,7 @@ namespace kinetic
         & \mathbf{a} \otimes \mathbf{b} \otimes \mathbf{c} \otimes \mathbf{d}
     \f}
 */
-[[nodiscard]] inline Matrix6 outer_product(Vector3 const& a,
+[[nodiscard]] inline matrix6 outer_product(Vector3 const& a,
                                            Vector3 const& b,
                                            Vector3 const& c,
                                            Vector3 const& d)
@@ -307,7 +396,7 @@ namespace kinetic
         & \mathbf{a} \otimes \mathbf{b}
     \f}
 */
-[[nodiscard]] inline Matrix6 outer_product(Matrix3 const& h) { return outer_product(h, h); }
+[[nodiscard]] inline matrix6 outer_product(matrix3 const& h) { return outer_product(h, h); }
 
 /**
  * Convert a fourth order tensor in Voigt notation to Mandel notation.  This
@@ -319,7 +408,7 @@ namespace kinetic
       [\mathbf{c}] &= [\mathbf{a}] [\mathbf{b}]
      \f}
  */
-[[nodiscard]] inline Matrix6 mandel_notation(Matrix6 A)
+[[nodiscard]] inline matrix6 mandel_notation(matrix6 A)
 {
     A.block<3, 3>(0, 3) *= std::sqrt(2.0);
     A.block<3, 3>(3, 0) *= std::sqrt(2.0);
