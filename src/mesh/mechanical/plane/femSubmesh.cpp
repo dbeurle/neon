@@ -106,7 +106,8 @@ matrix femSubmesh::geometric_tangent_stiffness(matrix2x const& x, int32 const el
                                        [&](auto const& femval, auto const& l) -> matrix {
                                            auto const& [N, rhea] = femval;
 
-                                           auto const Jacobian = local_deformation_gradient(rhea, x);
+                                           matrix2 const Jacobian = local_deformation_gradient(rhea,
+                                                                                               x);
 
                                            auto const cauchy = cauchy_stresses[view(element, l)];
 
@@ -131,7 +132,7 @@ matrix femSubmesh::material_tangent_stiffness(matrix2x const& x, int32 const ele
 
                                           auto const& D = tangent_operators[view(element, l)];
 
-                                          auto const Jacobian = local_deformation_gradient(rhea, x);
+                                          matrix2 const Jacobian{local_deformation_gradient(rhea, x)};
 
                                           auto const B = fem::sym_gradient<2>(
                                               (rhea * Jacobian.inverse()).transpose());
@@ -152,7 +153,7 @@ vector femSubmesh::internal_nodal_force(matrix2x const& x, int32 const element) 
                                [&](auto const& femval, auto const& l) -> rowmatrix {
                                    auto const& [N, dN] = femval;
 
-                                   auto const Jacobian = local_deformation_gradient(dN, x);
+                                   matrix2 const Jacobian = local_deformation_gradient(dN, x);
 
                                    auto const& cauchy_stress = cauchy_stresses[view(element, l)];
 

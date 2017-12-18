@@ -93,7 +93,8 @@ protected:
        \f}
      * Where B is the gradient operator in the finite element discretization
      */
-    [[nodiscard]] Matrix geometric_tangent_stiffness(Matrix const& configuration, int element) const;
+    [[nodiscard]] Matrix geometric_tangent_stiffness(matrix3x const& configuration,
+                                                     int32 const element) const;
 
     /**
      * Compute the material tangent stiffness using the formula
@@ -101,7 +102,8 @@ protected:
      * k_{mat} &= I_{2x2} \int_{V} B_I^{T} \sigma B_{J} dV
      * \f}
      */
-    [[nodiscard]] Matrix material_tangent_stiffness(Matrix const& configuration, int element) const;
+    [[nodiscard]] Matrix material_tangent_stiffness(matrix3x const& configuration,
+                                                    int32 const element) const;
 
     /**
      * Compute the internal force vector using the formula
@@ -110,7 +112,8 @@ protected:
      * \f}
      * @return the internal nodal force vector
      */
-    [[nodiscard]] Vector internal_nodal_force(Matrix const& configuration, int element) const;
+    [[nodiscard]] Vector internal_nodal_force(matrix3x const& configuration,
+                                              int32 const element) const;
 
 private:
     std::shared_ptr<MaterialCoordinates> material_coordinates;
