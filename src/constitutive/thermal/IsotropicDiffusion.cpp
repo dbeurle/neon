@@ -5,12 +5,13 @@
 
 namespace neon::diffusion
 {
-IsotropicDiffusion::IsotropicDiffusion(InternalVariables& variables, Json::Value const& material_data)
+IsotropicDiffusion::IsotropicDiffusion(std::shared_ptr<InternalVariables>& variables,
+                                       Json::Value const& material_data)
     : ConstitutiveModel(variables), material(material_data)
 {
-    variables.add(InternalVariables::Tensor::Conductivity);
+    variables->add(InternalVariables::Tensor::Conductivity);
 
-    for (auto& k : variables(InternalVariables::Tensor::Conductivity))
+    for (auto& k : variables->fetch(InternalVariables::Tensor::Conductivity))
     {
         k = material.conductivity_coefficient() * Matrix3::Identity();
     }

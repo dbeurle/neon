@@ -11,7 +11,7 @@
 
 namespace neon::mechanical::solid
 {
-NonAffineMicrosphere::NonAffineMicrosphere(InternalVariables& variables,
+NonAffineMicrosphere::NonAffineMicrosphere(std::shared_ptr<InternalVariables>& variables,
                                            Json::Value const& material_data,
                                            UnitSphereQuadrature::Rule const rule)
     : AffineMicrosphere(variables, material_data, rule), material(material_data)
@@ -25,13 +25,14 @@ NonAffineMicrosphere::NonAffineMicrosphere(InternalVariables& variables,
 
 void NonAffineMicrosphere::update_internal_variables(double const time_step_size)
 {
-    auto const& deformation_gradients = variables(InternalVariables::Tensor::DeformationGradient);
-    auto& cauchy_stresses = variables(InternalVariables::Tensor::Cauchy);
+    auto const& deformation_gradients = variables->fetch(
+        InternalVariables::Tensor::DeformationGradient);
+    auto& cauchy_stresses = variables->fetch(InternalVariables::Tensor::Cauchy);
 
-    auto const& detF_list = variables(InternalVariables::Scalar::DetF);
+    auto const& detF_list = variables->fetch(InternalVariables::Scalar::DetF);
 
     // Compute tangent moduli
-    auto& tangent_operators = variables(InternalVariables::Matrix::TangentOperator);
+    auto& tangent_operators = variables->fetch(InternalVariables::Matrix::TangentOperator);
 
     // Material properties
     auto const K_eff = material.bulk_modulus();

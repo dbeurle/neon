@@ -41,7 +41,7 @@ public:
         /** @return The internal variable store */
         [[nodiscard]] InternalVariables const& internal_variables() const
     {
-        return variables;
+        return *variables;
     }
 
     void save_internal_variables(bool const have_converged);
@@ -117,8 +117,8 @@ private:
 
     std::unique_ptr<VolumeInterpolation> sf; //!< Shape function
 
-    InternalVariables variables;
     variable_view view;
+    std::shared_ptr<InternalVariables> variables;
 
     std::unique_ptr<ConstitutiveModel> cm; //!< Constitutive model
 

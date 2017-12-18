@@ -29,12 +29,16 @@ public:
                         std::shared_ptr<MaterialCoordinates>& material_coordinates,
                         Submesh const& submesh);
 
-    [[nodiscard]] local_indices const& local_dof_view(int32 const element) const
-    {
+    femSubmesh(femSubmesh&&) = default;
+
+    [[nodiscard]] local_indices const& local_dof_view(int32 const element) const {
         return dof_list.at(element);
     }
 
-    [[nodiscard]] InternalVariables const& internal_variables() const { return variables; }
+        [[nodiscard]] InternalVariables const& internal_variables() const
+    {
+        return *variables;
+    }
 
     void save_internal_variables(bool const have_converged);
 
@@ -86,7 +90,7 @@ protected:
        \f}
      * Where B is the gradient operator in the finite element discretization
      */
-    [[nodiscard]] matrix geometric_tangent_stiffness(matrix const& configuration,
+    [[nodiscard]] matrix geometric_tangent_stiffness(matrix2x const& configuration,
                                                      int32 const element) const;
 
     /**
@@ -95,7 +99,7 @@ protected:
      * k_{mat} &= I_{2x2} \int_{V} B_I^{T} \sigma B_{J} dV
      * \f}
      */
-    [[nodiscard]] matrix material_tangent_stiffness(matrix const& configuration,
+    [[nodiscard]] matrix material_tangent_stiffness(matrix2x const& configuration,
                                                     int32 const element) const;
 
     /**
@@ -105,7 +109,8 @@ protected:
      * \f}
      * @return the internal nodal force vector
      */
-    [[nodiscard]] Vector internal_nodal_force(matrix const& configuration, int32 const element) const;
+    [[nodiscard]] Vector internal_nodal_force(matrix2x const& configuration,
+                                              int32 const element) const;
 
 private:
     std::shared_ptr<MaterialCoordinates> material_coordinates;
@@ -113,7 +118,7 @@ private:
     std::unique_ptr<SurfaceInterpolation> sf; //!< Shape function
 
     variable_view view;
-    InternalVariables variables;
+    std::shared_ptr<InternalVariables> variables;
 
     std::unique_ptr<ConstitutiveModel> cm; //!< Constitutive model
 

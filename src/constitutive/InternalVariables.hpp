@@ -149,13 +149,13 @@ public:
     bool has(Matrix const name) const { return rank4tensors.find(name) != rank4tensors.end(); }
 
     /** Const access to the converged tensor variables */
-    std::vector<rank2tensor_type> const& operator[](Tensor const tensorType) const
+    std::vector<rank2tensor_type> const& fetch_old(Tensor const tensorType) const
     {
         return rank2tensors_old.find(tensorType)->second;
     }
 
     /** Const access to the converged scalar variables */
-    std::vector<scalar_type> const& operator[](Scalar const scalarType) const
+    std::vector<scalar_type> const& fetch_old(Scalar const scalarType) const
     {
         return scalars_old.find(scalarType)->second;
     }
@@ -165,26 +165,23 @@ public:
      *-------------------------------------------------------------*/
 
     /** Mutable access to the non-converged scalar variables */
-    std::vector<scalar_type>& operator()(Scalar scalarType)
-    {
-        return scalars.find(scalarType)->second;
-    }
+    std::vector<scalar_type>& fetch(Scalar scalarType) { return scalars.find(scalarType)->second; }
 
     /** Mutable access to the non-converged tensor variables */
-    std::vector<rank2tensor_type>& operator()(Tensor tensorType)
+    std::vector<rank2tensor_type>& fetch(Tensor tensorType)
     {
         return rank2tensors.find(tensorType)->second;
     }
 
     /** Mutable access to the non-converged matrix variables */
-    std::vector<rank4tensor_type>& operator()(Matrix matrixType)
+    std::vector<rank4tensor_type>& fetch(Matrix matrixType)
     {
         return rank4tensors.find(matrixType)->second;
     }
 
     /** Mutable access to the non-converged scalar variables */
     template <typename... ScalarTps>
-    auto operator()(Scalar var0, Scalar var1, ScalarTps... vars)
+    auto fetch(Scalar var0, Scalar var1, ScalarTps... vars)
     {
         return std::make_tuple(std::ref(scalars.find(var0)->second),
                                std::ref(scalars.find(var1)->second),
@@ -193,7 +190,7 @@ public:
 
     /** Mutable access to the non-converged tensor variables */
     template <typename... TensorTps>
-    auto operator()(Tensor var0, Tensor var1, TensorTps... vars)
+    auto fetch(Tensor var0, Tensor var1, TensorTps... vars)
     {
         return std::make_tuple(std::ref(rank2tensors.find(var0)->second),
                                std::ref(rank2tensors.find(var1)->second),
@@ -201,7 +198,7 @@ public:
     }
 
     template <typename... MatrixTps>
-    auto operator()(Matrix var0, Matrix var1, MatrixTps... vars)
+    auto fetch(Matrix var0, Matrix var1, MatrixTps... vars)
     {
         return std::make_tuple(std::ref(rank4tensors.find(var0)->second),
                                std::ref(rank4tensors.find(var1)->second),
@@ -213,26 +210,26 @@ public:
      *-------------------------------------------------------------*/
 
     /** Constant access to the non-converged scalar variables */
-    std::vector<scalar_type> const& operator()(Scalar scalarType) const
+    std::vector<scalar_type> const& fetch(Scalar scalarType) const
     {
         return scalars.find(scalarType)->second;
     }
 
     /** Non-mutable access to the non-converged tensor variables */
-    std::vector<rank2tensor_type> const& operator()(Tensor tensorType) const
+    std::vector<rank2tensor_type> const& fetch(Tensor tensorType) const
     {
         return rank2tensors.find(tensorType)->second;
     }
 
     /** Non-mutable access to the non-converged matrix variables */
-    std::vector<rank4tensor_type> const& operator()(Matrix matrixType) const
+    std::vector<rank4tensor_type> const& fetch(Matrix matrixType) const
     {
         return rank4tensors.find(matrixType)->second;
     }
 
     /** Const access to the non-converged scalar variables */
     template <typename... ScalarTps>
-    auto operator()(Scalar var0, Scalar var1, ScalarTps... vars) const
+    auto fetch(Scalar var0, Scalar var1, ScalarTps... vars) const
     {
         return std::make_tuple(std::cref(scalars.find(var0)->second),
                                std::cref(scalars.find(var1)->second),
@@ -241,7 +238,7 @@ public:
 
     /** Const access to the non-converged tensor variables */
     template <typename... TensorTps>
-    auto operator()(Tensor var0, Tensor var1, TensorTps... vars) const
+    auto fetch(Tensor var0, Tensor var1, TensorTps... vars) const
     {
         return std::make_tuple(std::cref(rank2tensors.find(var0)->second),
                                std::cref(rank2tensors.find(var1)->second),
@@ -249,7 +246,7 @@ public:
     }
 
     template <typename... MatrixTps>
-    auto operator()(Matrix var0, Matrix var1, MatrixTps... vars) const
+    auto fetch(Matrix var0, Matrix var1, MatrixTps... vars) const
     {
         return std::make_tuple(std::cref(rank4tensors.find(var0)->second),
                                std::cref(rank4tensors.find(var1)->second),

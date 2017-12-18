@@ -13,19 +13,17 @@
 
 namespace neon::mechanical::solid
 {
-FiniteJ2Plasticity::FiniteJ2Plasticity(InternalVariables& variables, Json::Value const& material_data)
+FiniteJ2Plasticity::FiniteJ2Plasticity(std::shared_ptr<InternalVariables>& variables,
+                                       Json::Value const& material_data)
     : J2Plasticity(variables, material_data)
 {
-    variables.add(InternalVariables::Scalar::VonMisesStress,
-                  InternalVariables::Scalar::EffectivePlasticStrain);
-
-    variables.add(InternalVariables::Tensor::HenckyStrainElastic);
+    variables->add(InternalVariables::Scalar::VonMisesStress,
+                   InternalVariables::Scalar::EffectivePlasticStrain,
+                   InternalVariables::Tensor::HenckyStrainElastic);
 
     // Add material tangent with the linear elasticity moduli
-    variables.add(InternalVariables::Matrix::TangentOperator,
-                  consistent_tangent(1.0, Matrix3::Zero(), Matrix3::Zero(), C_e));
-
-    // std::cout << "Constructed finite strain J2 plasticity model\n";
+    variables->add(InternalVariables::Matrix::TangentOperator,
+                   consistent_tangent(1.0, Matrix3::Zero(), Matrix3::Zero(), C_e));
 }
 
 FiniteJ2Plasticity::~FiniteJ2Plasticity() = default;
@@ -39,20 +37,21 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
     // Extract the internal variables
     auto [deformation_gradients,
           log_strain_e_list,
-          cauchy_stresses] = variables(InternalVariables::Tensor::DeformationGradient,
-                                       InternalVariables::Tensor::HenckyStrainElastic,
-                                       InternalVariables::Tensor::Cauchy);
+          cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DeformationGradient,
+                                              InternalVariables::Tensor::HenckyStrainElastic,
+                                              InternalVariables::Tensor::Cauchy);
 
-    auto const old_deformation_gradients = variables[InternalVariables::Tensor::DeformationGradient];
+    auto const old_deformation_gradients = variables->fetch_old(
+        InternalVariables::Tensor::DeformationGradient);
 
-    auto const J_list = variables(InternalVariables::Scalar::DetF);
+    auto const J_list = variables->fetch(InternalVariables::Scalar::DetF);
 
     // Retrieve the accumulated internal variables
     auto [accumulated_plastic_strains,
-          von_mises_stresses] = variables(InternalVariables::Scalar::EffectivePlasticStrain,
-                                          InternalVariables::Scalar::VonMisesStress);
+          von_mises_stresses] = variables->fetch(InternalVariables::Scalar::EffectivePlasticStrain,
+                                                 InternalVariables::Scalar::VonMisesStress);
 
-    auto& tangent_operators = variables(InternalVariables::Matrix::TangentOperator);
+    auto& tangent_operators = variables->fetch(InternalVariables::Matrix::TangentOperator);
 
     auto const incremental_deformation_gradients = view::zip(deformation_gradients,
                                                              old_deformation_gradients)

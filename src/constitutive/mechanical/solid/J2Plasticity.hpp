@@ -18,7 +18,8 @@ namespace neon::mechanical::solid
 class J2Plasticity : public IsotropicLinearElasticity
 {
 public:
-    explicit J2Plasticity(InternalVariables& variables, Json::Value const& material_data);
+    explicit J2Plasticity(std::shared_ptr<InternalVariables>& variables,
+                          Json::Value const& material_data);
 
     virtual ~J2Plasticity();
 

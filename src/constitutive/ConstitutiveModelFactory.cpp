@@ -20,7 +20,7 @@
 
 namespace neon::mechanical::solid
 {
-std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& variables,
+std::unique_ptr<ConstitutiveModel> make_constitutive_model(std::shared_ptr<InternalVariables>& variables,
                                                            Json::Value const& material_data,
                                                            Json::Value const& mesh_data)
 {
@@ -122,7 +122,7 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& va
 
 namespace neon::mechanical::plane
 {
-std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& variables,
+std::unique_ptr<ConstitutiveModel> make_constitutive_model(std::shared_ptr<InternalVariables>& variables,
                                                            Json::Value const& material_data,
                                                            Json::Value const& mesh_data)
 {
@@ -144,13 +144,13 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& va
     {
         return std::make_unique<IsotropicLinearElasticity>(variables,
                                                            material_data,
-                                                           IsotropicLinearElasticity::State::PlaneStrain);
+                                                           IsotropicLinearElasticity::plane::strain);
     }
     else if (model_name == "PlaneStress")
     {
         return std::make_unique<IsotropicLinearElasticity>(variables,
                                                            material_data,
-                                                           IsotropicLinearElasticity::State::PlaneStress);
+                                                           IsotropicLinearElasticity::plane::stress);
     }
     throw std::runtime_error("The model name " + model_name + " is not recognised\n"
                              + "Supported models are \"PlaneStrain\" and \"PlaneStress\"\n");
@@ -160,7 +160,7 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& va
 
 namespace neon::diffusion
 {
-std::unique_ptr<ConstitutiveModel> make_constitutive_model(InternalVariables& variables,
+std::unique_ptr<ConstitutiveModel> make_constitutive_model(std::shared_ptr<InternalVariables>& variables,
                                                            Json::Value const& material_data,
                                                            Json::Value const& mesh_data)
 {

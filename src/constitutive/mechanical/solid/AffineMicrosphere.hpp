@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "Hyperelastic.hpp"
+#include "constitutive/ConstitutiveModel.hpp"
 
 #include "material/MicromechanicalElastomer.hpp"
 #include "numeric/Tensor.hpp"
@@ -21,14 +21,14 @@ namespace neon::mechanical::solid
  * sphere and this internal variable update can be computationally expensive and
  * is therefore multithreaded.
  */
-class AffineMicrosphere : public Hyperelastic
+class AffineMicrosphere : public ConstitutiveModel
 {
 public:
     /**
      * @param variables Reference to internal state variable store
      * @param material_data Json object with input file material data
      */
-    explicit AffineMicrosphere(InternalVariables& variables,
+    explicit AffineMicrosphere(std::shared_ptr<InternalVariables>& variables,
                                Json::Value const& material_data,
                                UnitSphereQuadrature::Rule const rule);
 
@@ -133,13 +133,12 @@ protected:
      * and the vector associated with the quadrature point on the unit sphere
      */
     [[nodiscard]] Vector3 deformed_tangent(Matrix3 const& F_unimodular,
-                                           Vector3 const& surface_vector) const
-    {
+                                           Vector3 const& surface_vector) const {
         return F_unimodular * surface_vector;
     }
 
-    /** Compute the microstretch, which is the norm of the deformed tangent vector */
-    [[nodiscard]] auto compute_microstretch(Vector3 const& deformed_tangent) const
+        /** Compute the microstretch, which is the norm of the deformed tangent vector */
+        [[nodiscard]] auto compute_microstretch(Vector3 const& deformed_tangent) const
     {
         return deformed_tangent.norm();
     }
@@ -191,7 +190,7 @@ public:
      * @param variables Reference to internal state variable store
      * @param material_data Json object with input file material data
      */
-    explicit AffineMicrosphereWithDegradation(InternalVariables& variables,
+    explicit AffineMicrosphereWithDegradation(std::shared_ptr<InternalVariables>& variables,
                                               Json::Value const& material_data,
                                               UnitSphereQuadrature::Rule const rule);
 

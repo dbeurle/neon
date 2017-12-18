@@ -9,12 +9,12 @@
 
 namespace neon::mechanical::solid
 {
-NeoHooke::NeoHooke(InternalVariables& variables, Json::Value const& material_data)
-    : Hyperelastic(variables), material(material_data)
+NeoHooke::NeoHooke(std::shared_ptr<InternalVariables>& variables, Json::Value const& material_data)
+    : ConstitutiveModel(variables), material(material_data)
 {
     // The Neo-Hookean model requires the deformation gradient and the Cauchy
     // stress, which are both allocated by default in the mesh object
-    variables.add(InternalVariables::Matrix::TangentOperator);
+    variables->add(InternalVariables::Matrix::TangentOperator);
 }
 
 void NeoHooke::update_internal_variables(double const time_step_size)
@@ -22,11 +22,11 @@ void NeoHooke::update_internal_variables(double const time_step_size)
     using namespace ranges;
 
     // Get references into the hash table
-    auto [F_list, cauchy_stresses] = variables(InternalVariables::Tensor::DeformationGradient,
-                                               InternalVariables::Tensor::Cauchy);
+    auto [F_list, cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DeformationGradient,
+                                                      InternalVariables::Tensor::Cauchy);
 
-    auto& tangent_operators = variables(InternalVariables::Matrix::TangentOperator);
-    auto const& detF_list = variables(InternalVariables::Scalar::DetF);
+    auto& tangent_operators = variables->fetch(InternalVariables::Matrix::TangentOperator);
+    auto const& detF_list = variables->fetch(InternalVariables::Scalar::DetF);
 
     auto const I = Matrix3::Identity();
 

@@ -10,13 +10,14 @@
 
 namespace neon::mechanical::solid
 {
-J2Plasticity::J2Plasticity(InternalVariables& variables, Json::Value const& material_data)
+J2Plasticity::J2Plasticity(std::shared_ptr<InternalVariables>& variables,
+                           Json::Value const& material_data)
     : IsotropicLinearElasticity(variables, material_data), material(material_data)
 {
-    variables.add(InternalVariables::Tensor::LinearisedPlasticStrain);
-    variables.add(InternalVariables::Scalar::EffectivePlasticStrain);
+    variables->add(InternalVariables::Tensor::LinearisedPlasticStrain);
+    variables->add(InternalVariables::Scalar::EffectivePlasticStrain);
 
-    variables.commit();
+    variables->commit();
 }
 
 J2Plasticity::~J2Plasticity() = default;
@@ -28,19 +29,19 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
     // Extract the internal variables
     auto [plastic_strains,
           strains,
-          cauchy_stresses] = variables(InternalVariables::Tensor::LinearisedPlasticStrain,
-                                       InternalVariables::Tensor::LinearisedStrain,
-                                       InternalVariables::Tensor::Cauchy);
+          cauchy_stresses] = variables->fetch(InternalVariables::Tensor::LinearisedPlasticStrain,
+                                              InternalVariables::Tensor::LinearisedStrain,
+                                              InternalVariables::Tensor::Cauchy);
 
     // Retrieve the accumulated internal variables
     auto [accumulated_plastic_strains,
-          von_mises_stresses] = variables(InternalVariables::Scalar::EffectivePlasticStrain,
-                                          InternalVariables::Scalar::VonMisesStress);
+          von_mises_stresses] = variables->fetch(InternalVariables::Scalar::EffectivePlasticStrain,
+                                                 InternalVariables::Scalar::VonMisesStress);
 
-    auto& tangent_operators = variables(InternalVariables::Matrix::TangentOperator);
+    auto& tangent_operators = variables->fetch(InternalVariables::Matrix::TangentOperator);
 
     // Compute the linear strain gradient from the displacement gradient
-    strains = variables(InternalVariables::Tensor::DisplacementGradient)
+    strains = variables->fetch(InternalVariables::Tensor::DisplacementGradient)
               | ranges::view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
     // Perform the update algorithm for each quadrature point

@@ -34,8 +34,7 @@ public:
     }
 
     /** @return the tangent consistent stiffness matrix */
-    [[nodiscard]] std::pair<local_indices const&, matrix> tangent_stiffness(int32 const element) const
-    {
+    [[nodiscard]] std::pair<local_indices const&, matrix> tangent_stiffness(int32 const element) const {
         return static_cast<mesh_type*>(this)->tangent_stiffness(element);
     }
 

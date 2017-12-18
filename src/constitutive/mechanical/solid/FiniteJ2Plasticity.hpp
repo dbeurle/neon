@@ -25,7 +25,8 @@ namespace neon::mechanical::solid
 class FiniteJ2Plasticity : public J2Plasticity
 {
 public:
-    FiniteJ2Plasticity(InternalVariables& variables, Json::Value const& material_data);
+    FiniteJ2Plasticity(std::shared_ptr<InternalVariables>& variables,
+                       Json::Value const& material_data);
 
     ~FiniteJ2Plasticity();
 

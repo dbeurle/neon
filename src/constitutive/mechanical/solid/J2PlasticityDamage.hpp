@@ -18,7 +18,8 @@ namespace neon::mechanical::solid
 class J2PlasticityDamage : public J2Plasticity
 {
 public:
-    J2PlasticityDamage(InternalVariables& variables, Json::Value const& material_data);
+    J2PlasticityDamage(std::shared_ptr<InternalVariables>& variables,
+                       Json::Value const& material_data);
 
     ~J2PlasticityDamage();
 

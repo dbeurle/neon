@@ -19,7 +19,7 @@ public:
      * @param variables Reference to internal state variable store
      * @param material_data Json object with material data
      */
-    explicit NonAffineMicrosphere(InternalVariables& variables,
+    explicit NonAffineMicrosphere(std::shared_ptr<InternalVariables>& variables,
                                   Json::Value const& material_data,
                                   UnitSphereQuadrature::Rule const rule);
 

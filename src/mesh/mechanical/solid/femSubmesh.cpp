@@ -31,21 +31,22 @@ femSubmesh::femSubmesh(Json::Value const& material_data,
     : Submesh(submesh),
       material_coordinates(material_coordinates),
       sf(make_volume_interpolation(topology(), mesh_data)),
-      variables(elements() * sf->quadrature().points()),
       view(sf->quadrature().points()),
+      variables(std::make_shared<InternalVariables>(elements() * sf->quadrature().points())),
       cm(make_constitutive_model(variables, material_data, mesh_data))
 {
     // Allocate storage for the displacement gradient
-    variables.add(InternalVariables::Tensor::DisplacementGradient,
-                  InternalVariables::Tensor::DeformationGradient,
-                  InternalVariables::Tensor::Cauchy);
+    variables->add(InternalVariables::Tensor::DisplacementGradient,
+                   InternalVariables::Tensor::DeformationGradient,
+                   InternalVariables::Tensor::Cauchy);
 
-    variables.add(InternalVariables::Scalar::DetF);
+    variables->add(InternalVariables::Scalar::DetF);
 
     // Get the old data to the undeformed configuration
-    ranges::fill(variables(InternalVariables::Tensor::DeformationGradient), Matrix3::Identity());
+    ranges::fill(variables->fetch(InternalVariables::Tensor::DeformationGradient),
+                 Matrix3::Identity());
 
-    variables.commit();
+    variables->commit();
 
     dof_list = allocate_dof_list(this->dofs_per_node(), nodal_connectivity);
 }
@@ -54,11 +55,11 @@ void femSubmesh::save_internal_variables(bool const have_converged)
 {
     if (have_converged)
     {
-        variables.commit();
+        variables->commit();
     }
     else
     {
-        variables.revert();
+        variables->revert();
     }
 }
 
@@ -66,7 +67,7 @@ std::tuple<List const&, Matrix> femSubmesh::tangent_stiffness(int const element)
 {
     auto const x = material_coordinates->current_configuration(local_node_list(element));
 
-    Matrix ke = material_tangent_stiffness(x, element);
+    matrix ke = material_tangent_stiffness(x, element);
 
     if (!cm->is_finite_deformation()) return {local_dof_list(element), ke};
 
@@ -84,7 +85,7 @@ std::tuple<List const&, Vector> femSubmesh::internal_force(int const element) co
 
 Matrix femSubmesh::geometric_tangent_stiffness(Matrix const& x, int const element) const
 {
-    auto const& cauchy_stresses = variables(InternalVariables::Tensor::Cauchy);
+    auto const& cauchy_stresses = variables->fetch(InternalVariables::Tensor::Cauchy);
 
     auto n = nodes_per_element();
 
@@ -110,7 +111,7 @@ Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int const element
 {
     auto const local_dofs = nodes_per_element() * dofs_per_node();
 
-    auto const& tangent_operators = variables(InternalVariables::Matrix::TangentOperator);
+    auto const& tangent_operators = variables->fetch(InternalVariables::Matrix::TangentOperator);
 
     Matrix kmat = Matrix::Zero(local_dofs, local_dofs);
 
@@ -130,7 +131,7 @@ Matrix femSubmesh::material_tangent_stiffness(Matrix const& x, int const element
 
 Vector femSubmesh::internal_nodal_force(Matrix const& x, int const element) const
 {
-    auto const& cauchy_stresses = variables(InternalVariables::Tensor::Cauchy);
+    auto const& cauchy_stresses = variables->fetch(InternalVariables::Tensor::Cauchy);
 
     auto const [m, n] = std::make_tuple(nodes_per_element(), dofs_per_node());
 
@@ -200,8 +201,8 @@ void femSubmesh::update_internal_variables(double const time_step_size)
 
 void femSubmesh::update_deformation_measures()
 {
-    auto& H_list = variables(InternalVariables::Tensor::DisplacementGradient);
-    auto& F_list = variables(InternalVariables::Tensor::DeformationGradient);
+    auto& H_list = variables->fetch(InternalVariables::Tensor::DisplacementGradient);
+    auto& F_list = variables->fetch(InternalVariables::Tensor::DeformationGradient);
 
 #pragma omp parallel for
     for (auto element = 0; element < elements(); ++element)
@@ -231,8 +232,9 @@ void femSubmesh::update_deformation_measures()
 
 void femSubmesh::update_Jacobian_determinants()
 {
-    auto const& deformation_gradients = variables(InternalVariables::Tensor::DeformationGradient);
-    auto& deformation_gradient_determinants = variables(InternalVariables::Scalar::DetF);
+    auto const& deformation_gradients = variables->fetch(
+        InternalVariables::Tensor::DeformationGradient);
+    auto& deformation_gradient_determinants = variables->fetch(InternalVariables::Scalar::DetF);
 
     deformation_gradient_determinants = deformation_gradients
                                         | ranges::view::transform(
@@ -262,7 +264,7 @@ femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(InternalVariables::Te
     Vector count = Vector::Zero(material_coordinates->size() * 9);
     Vector value = count;
 
-    auto const& tensor_list = variables(tensor_name);
+    auto const& tensor_list = variables->fetch(tensor_name);
 
     auto const& E = sf->local_quadrature_extrapolation();
 
@@ -303,7 +305,7 @@ femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(InternalVariables::Sc
     Vector count = Vector::Zero(material_coordinates->size());
     Vector value = count;
 
-    auto const& scalar_list = variables(scalar_name);
+    auto const& scalar_list = variables->fetch(scalar_name);
 
     auto const& E = sf->local_quadrature_extrapolation();
 

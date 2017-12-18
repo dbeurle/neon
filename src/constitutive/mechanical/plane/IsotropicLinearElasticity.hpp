@@ -12,13 +12,13 @@ namespace neon::mechanical::plane
 class IsotropicLinearElasticity : public ConstitutiveModel
 {
 public:
-    enum class State { PlaneStress, PlaneStrain };
+    enum class plane { stress, strain };
 
 public:
     /** Provide an internal variable class to be populated by the constitutive model */
-    IsotropicLinearElasticity(InternalVariables& variables,
-                              Json::Value const& material_data,
-                              State const state);
+    explicit IsotropicLinearElasticity(std::shared_ptr<InternalVariables>& variables,
+                                       Json::Value const& material_data,
+                                       plane const state);
 
     ~IsotropicLinearElasticity();
 
@@ -37,16 +37,16 @@ public:
     [[nodiscard]] virtual bool is_symmetric() const { return true; };
 
 protected:
-    [[nodiscard]] Matrix2 compute_cauchy_stress(Matrix2 const& elastic_strain) const;
+    [[nodiscard]] matrix2 compute_cauchy_stress(matrix2 const& elastic_strain) const;
 
-    [[nodiscard]] Matrix3 elastic_moduli() const;
+    [[nodiscard]] matrix3 elastic_moduli() const;
 
 private:
     LinearElastic material;
 
 protected:
-    State state;
+    plane state;
 
-    Matrix3 const C_e = elastic_moduli();
+    matrix3 const C_e = elastic_moduli();
 };
 }

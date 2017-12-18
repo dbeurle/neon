@@ -11,29 +11,30 @@
 
 namespace neon::mechanical::solid
 {
-AffineMicrosphere::AffineMicrosphere(InternalVariables& variables,
+AffineMicrosphere::AffineMicrosphere(std::shared_ptr<InternalVariables>& variables,
                                      Json::Value const& material_data,
                                      UnitSphereQuadrature::Rule const rule)
-    : Hyperelastic(variables), unit_sphere(rule), material(material_data)
+    : ConstitutiveModel(variables), unit_sphere(rule), material(material_data)
 {
-    variables.add(InternalVariables::Matrix::TangentOperator);
+    variables->add(InternalVariables::Matrix::TangentOperator);
 
     // Deviatoric stress
-    variables.add(InternalVariables::Tensor::Kirchhoff);
+    variables->add(InternalVariables::Tensor::Kirchhoff);
 
     // Commit these to history in case of failure on first time step
-    variables.commit();
+    variables->commit();
 }
 
 void AffineMicrosphere::update_internal_variables(double const time_step_size)
 {
-    auto& tangent_operators = variables(InternalVariables::Matrix::TangentOperator);
+    auto& tangent_operators = variables->fetch(InternalVariables::Matrix::TangentOperator);
 
-    auto const& deformation_gradients = variables(InternalVariables::Tensor::DeformationGradient);
-    auto& cauchy_stresses = variables(InternalVariables::Tensor::Cauchy);
-    auto& macro_stresses = variables(InternalVariables::Tensor::Kirchhoff);
+    auto const& deformation_gradients = variables->fetch(
+        InternalVariables::Tensor::DeformationGradient);
+    auto& cauchy_stresses = variables->fetch(InternalVariables::Tensor::Cauchy);
+    auto& macro_stresses = variables->fetch(InternalVariables::Tensor::Kirchhoff);
 
-    auto const& det_deformation_gradients = variables(InternalVariables::Scalar::DetF);
+    auto const& det_deformation_gradients = variables->fetch(InternalVariables::Scalar::DetF);
 
     auto const K = material.bulk_modulus();
     auto const G = material.shear_modulus();
@@ -133,25 +134,26 @@ Matrix6 AffineMicrosphere::compute_macro_moduli(Matrix3 const& F_unimodular,
     // clang-format on
 }
 
-AffineMicrosphereWithDegradation::AffineMicrosphereWithDegradation(InternalVariables& variables,
-                                                                   Json::Value const& material_data,
-                                                                   UnitSphereQuadrature::Rule const rule)
+AffineMicrosphereWithDegradation::AffineMicrosphereWithDegradation(
+    std::shared_ptr<InternalVariables>& variables,
+    Json::Value const& material_data,
+    UnitSphereQuadrature::Rule const rule)
     : AffineMicrosphere(variables, material_data, rule), material(material_data)
 {
-    variables.add(InternalVariables::Scalar::Chains, InternalVariables::Scalar::ShearModuli);
+    variables->add(InternalVariables::Scalar::Chains, InternalVariables::Scalar::ShearModuli);
 
     // Shrink these down to the correct size
-    variables(InternalVariables::Scalar::Chains).resize(material.groups(), 0.0);
-    variables(InternalVariables::Scalar::ShearModuli).resize(material.groups(), 0.0);
-    variables(InternalVariables::Scalar::Chains).shrink_to_fit();
-    variables(InternalVariables::Scalar::ShearModuli).shrink_to_fit();
+    variables->fetch(InternalVariables::Scalar::Chains).resize(material.groups(), 0.0);
+    variables->fetch(InternalVariables::Scalar::ShearModuli).resize(material.groups(), 0.0);
+    variables->fetch(InternalVariables::Scalar::Chains).shrink_to_fit();
+    variables->fetch(InternalVariables::Scalar::ShearModuli).shrink_to_fit();
 
     // Fill the data with material properties using the material class
-    variables(InternalVariables::Scalar::Chains) = material.chain_groups();
-    variables(InternalVariables::Scalar::ShearModuli) = material.shear_moduli_groups();
+    variables->fetch(InternalVariables::Scalar::Chains) = material.chain_groups();
+    variables->fetch(InternalVariables::Scalar::ShearModuli) = material.shear_moduli_groups();
 
     // Commit these to history in case of failure on first time step
-    variables.commit();
+    variables->commit();
 }
 
 void AffineMicrosphereWithDegradation::update_internal_variables(double const time_step_size)

@@ -10,15 +10,15 @@
 
 namespace neon::mechanical::solid
 {
-IsotropicLinearElasticity::IsotropicLinearElasticity(InternalVariables& variables,
+IsotropicLinearElasticity::IsotropicLinearElasticity(std::shared_ptr<InternalVariables>& variables,
                                                      Json::Value const& material_data)
     : ConstitutiveModel(variables), material(material_data)
 {
-    variables.add(InternalVariables::Tensor::LinearisedStrain);
-    variables.add(InternalVariables::Scalar::VonMisesStress);
+    variables->add(InternalVariables::Tensor::LinearisedStrain,
+                   InternalVariables::Scalar::VonMisesStress);
 
     // Add material tangent with the linear elasticity spatial moduli
-    variables.add(InternalVariables::Matrix::TangentOperator, elastic_moduli());
+    variables->add(InternalVariables::Matrix::TangentOperator, elastic_moduli());
 }
 
 IsotropicLinearElasticity::~IsotropicLinearElasticity() = default;
@@ -28,13 +28,14 @@ void IsotropicLinearElasticity::update_internal_variables(double const time_step
     using namespace ranges;
 
     // Extract the internal variables
-    auto [elastic_strains, cauchy_stresses] = variables(InternalVariables::Tensor::LinearisedStrain,
-                                                        InternalVariables::Tensor::Cauchy);
+    auto [elastic_strains,
+          cauchy_stresses] = variables->fetch(InternalVariables::Tensor::LinearisedStrain,
+                                              InternalVariables::Tensor::Cauchy);
 
-    auto& von_mises_stresses = variables(InternalVariables::Scalar::VonMisesStress);
+    auto& von_mises_stresses = variables->fetch(InternalVariables::Scalar::VonMisesStress);
 
     // Compute the linear strain gradient from the displacement gradient
-    elastic_strains = variables(InternalVariables::Tensor::DisplacementGradient)
+    elastic_strains = variables->fetch(InternalVariables::Tensor::DisplacementGradient)
                       | view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
     // Compute Cauchy stress from the linear elastic strains

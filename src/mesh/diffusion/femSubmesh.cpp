@@ -24,7 +24,7 @@ femSubmesh::femSubmesh(Json::Value const& material_data,
     : Submesh(submesh),
       material_coordinates(material_coordinates),
       sf(make_volume_interpolation(topology(), mesh_data)),
-      variables(elements() * sf->quadrature().points()),
+      variables(std::make_shared<InternalVariables>(elements() * sf->quadrature().points())),
       cm(make_constitutive_model(variables, material_data, mesh_data))
 {
 }
@@ -33,11 +33,11 @@ void femSubmesh::save_internal_variables(bool const have_converged)
 {
     if (have_converged)
     {
-        variables.commit();
+        variables->commit();
     }
     else
     {
-        variables.revert();
+        variables->revert();
     }
 }
 
@@ -47,7 +47,7 @@ std::tuple<List const&, Matrix> femSubmesh::tangent_stiffness(int const element)
 
     auto const n = nodes_per_element();
 
-    auto const& D_Vec = variables(InternalVariables::Tensor::Conductivity);
+    auto const& D_Vec = variables->fetch(InternalVariables::Tensor::Conductivity);
 
     Matrix const kmat = sf->quadrature()
                             .integrate(Matrix::Zero(n, n).eval(),
@@ -56,10 +56,10 @@ std::tuple<List const&, Matrix> femSubmesh::tangent_stiffness(int const element)
 
                                            auto const& D = D_Vec[offset(element, l)];
 
-                                           Matrix3 const Jacobian = local_jacobian(rhea, X);
+                                           matrix3 const Jacobian = local_jacobian(rhea, X);
 
                                            // Compute the symmetric gradient operator
-                                           Matrix const B = (rhea * Jacobian.inverse()).transpose();
+                                           matrix const B = (rhea * Jacobian.inverse()).transpose();
 
                                            return B.transpose() * D * B * Jacobian.determinant();
                                        });
@@ -120,7 +120,7 @@ femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(InternalVariables::Sc
     Vector count = Vector::Zero(material_coordinates->size());
     Vector value = count;
 
-    auto const& scalar_list = variables(scalar_name);
+    auto const& scalar_list = variables->fetch(scalar_name);
 
     auto const& E = sf->local_quadrature_extrapolation();
 

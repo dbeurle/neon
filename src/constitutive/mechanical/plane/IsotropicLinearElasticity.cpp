@@ -10,16 +10,22 @@
 
 namespace neon::mechanical::plane
 {
-IsotropicLinearElasticity::IsotropicLinearElasticity(InternalVariables& variables,
+IsotropicLinearElasticity::IsotropicLinearElasticity(std::shared_ptr<InternalVariables>& variables,
                                                      Json::Value const& material_data,
-                                                     State const state)
+                                                     plane const state)
     : ConstitutiveModel(variables), material(material_data), state(state)
 {
-    variables.add(InternalVariables::Tensor::LinearisedStrain);
-    variables.add(InternalVariables::Scalar::VonMisesStress);
+    variables->add(InternalVariables::Tensor::LinearisedStrain,
+                   InternalVariables::Scalar::VonMisesStress);
 
     // Add material tangent with the linear elasticity spatial moduli
-    variables.add(InternalVariables::Matrix::TangentOperator, elastic_moduli());
+    variables->add(InternalVariables::Matrix::TangentOperator, elastic_moduli());
+
+    std::cout << "Has linearised strain "
+              << variables->has(InternalVariables::Tensor::LinearisedStrain) << std::endl;
+
+    std::cout << "Has VonMisesStress strain "
+              << variables->has(InternalVariables::Scalar::VonMisesStress) << std::endl;
 }
 
 IsotropicLinearElasticity::~IsotropicLinearElasticity() = default;
@@ -30,21 +36,28 @@ void IsotropicLinearElasticity::update_internal_variables(double const time_step
 
     std::cout << "Performing the internal variable updates" << std::endl;
 
+    std::cout << "Has variables " << variables->has(InternalVariables::Tensor::LinearisedStrain)
+              << std::endl;
+
     // Extract the internal variables
-    auto[elastic_strains, cauchy_stresses] = variables(InternalVariables::Tensor::LinearisedStrain,
-                                                       InternalVariables::Tensor::Cauchy);
+    auto [elastic_strains,
+          cauchy_stresses] = variables->fetch(InternalVariables::Tensor::LinearisedStrain,
+                                              InternalVariables::Tensor::Cauchy);
+
+    std::cout << "Size of elastic strains: " << elastic_strains.size() << std::endl;
 
     std::cout << "Accessing the von Mises stress" << std::endl;
 
-    auto& von_mises_stresses = variables(InternalVariables::Scalar::VonMisesStress);
+    auto& von_mises_stresses = variables->fetch(InternalVariables::Scalar::VonMisesStress);
 
     std::cout << "Size of displacement gradient: "
-              << variables(InternalVariables::Tensor::DisplacementGradient).size() << std::endl;
+              << variables->fetch(InternalVariables::Tensor::DisplacementGradient).size()
+              << std::endl;
 
     std::cout << "Computing elastic strains" << std::endl;
 
     // Compute the linear strain gradient from the displacement gradient
-    elastic_strains = variables(InternalVariables::Tensor::DisplacementGradient)
+    elastic_strains = variables->fetch(InternalVariables::Tensor::DisplacementGradient)
                       | view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
     std::cout << "Computing Cauchy stress" << std::endl;
@@ -66,9 +79,9 @@ void IsotropicLinearElasticity::update_internal_variables(double const time_step
 
 matrix3 IsotropicLinearElasticity::elastic_moduli() const
 {
-    auto[lambda, shear_modulus] = material.Lame_parameters();
+    auto [lambda, shear_modulus] = material.Lame_parameters();
 
-    if (state == State::PlaneStress)
+    if (state == plane::stress)
     {
         lambda = 2.0 * lambda * shear_modulus / (lambda + 2.0 * shear_modulus);
     }

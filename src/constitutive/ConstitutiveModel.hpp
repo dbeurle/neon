@@ -3,6 +3,8 @@
 
 #include "InternalVariablesForwards.hpp"
 
+#include <memory>
+
 namespace neon
 {
 class Material;
@@ -18,7 +20,8 @@ class ConstitutiveModel
 {
 public:
     /** Provide an internal variable class to be populated by the constitutive model */
-    ConstitutiveModel(InternalVariables<rank2_dimension, rank4_dimension>& variables)
+    explicit ConstitutiveModel(
+        std::shared_ptr<InternalVariables<rank2_dimension, rank4_dimension>>& variables)
         : variables(variables)
     {
     }
@@ -38,7 +41,7 @@ public:
     [[nodiscard]] virtual bool is_symmetric() const { return true; };
 
 protected:
-    InternalVariables<rank2_dimension, rank4_dimension>& variables;
+    std::shared_ptr<InternalVariables<rank2_dimension, rank4_dimension>> variables;
 };
 
 namespace mechanical::solid
