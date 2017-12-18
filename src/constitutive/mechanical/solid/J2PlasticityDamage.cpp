@@ -54,25 +54,25 @@ void J2PlasticityDamage::update_internal_variables(double const time_step_size)
               | view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
     // Perform the update algorithm for each quadrature point
-    for (auto l = 0ul, internal_variables{strains.size()}; l < internal_variables; l++)
+    auto const internal_variables{strains.size()};
+
+#pragma omp parallel for
+    for (auto l = 0ul; l < internal_variables; l++)
     {
         auto const& strain = strains[l];
         auto& plastic_strain = plastic_strains[l];
         auto& cauchy_stress = cauchy_stresses[l];
-        auto& accumulated_plastic_strain = accumulated_plastic_strains[l];
         auto& von_mises = von_mises_stresses[l];
         auto& back_stress = back_stresses[l];
-        auto& kin_hard = accumulated_kinematic_stresses[l];
         auto& scalar_damage = scalar_damages[l];
         auto& energy_var = energy_release_rates[l];
-        auto& C_algorithmic = tangent_operators[l];
 
         // Elastic stress predictor
         cauchy_stress = compute_cauchy_stress(material.shear_modulus(),
                                               material.lambda(),
                                               strain - plastic_strain);
 
-        Matrix3 tau = deviatoric(cauchy_stress) / (1.0 - scalar_damage) - deviatoric(back_stress);
+        matrix3 tau = deviatoric(cauchy_stress) / (1.0 - scalar_damage) - deviatoric(back_stress);
 
         // Trial von Mises stress
         von_mises = von_mises_stress(tau);
@@ -94,9 +94,9 @@ void J2PlasticityDamage::update_internal_variables(double const time_step_size)
         auto const plastic_increment = perform_radial_return(cauchy_stress,
                                                              back_stress,
                                                              scalar_damage,
-                                                             kin_hard,
+                                                             accumulated_kinematic_stresses[l],
                                                              energy_var,
-                                                             C_algorithmic,
+                                                             tangent_operators[l],
                                                              time_step_size,
                                                              strain - plastic_strain);
 
@@ -106,7 +106,7 @@ void J2PlasticityDamage::update_internal_variables(double const time_step_size)
 
         plastic_strain += plastic_increment * 3.0 / 2.0 * tau / (von_mises * (1 - scalar_damage));
 
-        accumulated_plastic_strain += plastic_increment / (1 - scalar_damage);
+        accumulated_plastic_strains[l] += plastic_increment / (1 - scalar_damage);
 
         // cauchy_stress, back_stress, scalar_damage, kin_hard, energy_var, C_algorithmic, are
         // updated within the radial_return routine std::cout << "delta_t  " << time_step_size <<
@@ -114,32 +114,32 @@ void J2PlasticityDamage::update_internal_variables(double const time_step_size)
     }
 }
 
-double J2PlasticityDamage::perform_radial_return(Matrix3& cauchy_stress,
-                                                 Matrix3& back_stress,
+double J2PlasticityDamage::perform_radial_return(matrix3& cauchy_stress,
+                                                 matrix3& back_stress,
                                                  double& scalar_damage,
-                                                 Matrix3& kin_hard,
+                                                 matrix3& kin_hard,
                                                  double& energy_var,
                                                  Matrix6& tangent_operator,
                                                  double const& delta_t,
-                                                 Matrix3 const& eps_e_t)
+                                                 matrix3 const& eps_e_t)
 {
     // TODO: initial guess could be computed base on a frozen yield surface (at
     // the increment n) to obtain good convergence. check computational methods for plasticity book
 
     // Fixed size matrices to avoid dynamic memory allocation
-    using Vector16 = Eigen::Matrix<double, 16, 1>;
-    using Matrix16 = Eigen::Matrix<double, 16, 16>;
+    using vector16 = Eigen::Matrix<double, 16, 1>;
+    using matrix16 = Eigen::Matrix<double, 16, 16>;
 
-    Vector16 y;
+    vector16 y;
     y << 0.0, 0.0, voigt::kinetic::to(cauchy_stress), voigt::kinetic::to(back_stress),
         scalar_damage, energy_var;
 
     // The residual
-    Vector16 f = Vector16::Ones();
+    vector16 f = vector16::Ones();
 
     int iterations = 0, max_iterations = 25;
 
-    Matrix16 M = Matrix16::Zero();
+    matrix16 M = matrix16::Zero();
 
     M(0, 0) = M(1, 1) = M(14, 14) = M(15, 15) = 1.0;
 
@@ -166,15 +166,15 @@ double J2PlasticityDamage::perform_radial_return(Matrix3& cauchy_stress,
         auto const d = y(14);
         auto const Y = y(15);
 
-        Matrix3 const tau = deviatoric(sigma) / (1.0 - d) - deviatoric(beta);
+        matrix3 const tau = deviatoric(sigma) / (1.0 - d) - deviatoric(beta);
 
         auto const von_mises = von_mises_stress(tau);
 
         auto const f_vp = std::max(0.0, evaluate_yield_function(von_mises, beta));
         auto const f_d = std::max(0.0, evaluate_damage_yield_function(Y));
 
-        Matrix3 const normal_tild = 3.0 / 2.0 * tau / von_mises;
-        Matrix3 const normal = normal_tild / (1.0 - d);
+        matrix3 const normal_tild = 3.0 / 2.0 * tau / von_mises;
+        matrix3 const normal = normal_tild / (1.0 - d);
 
         // The residual TODO: compute_stress_like_vector and compute_stress_like_matrix could be
         // optimised
@@ -244,7 +244,7 @@ double J2PlasticityDamage::perform_radial_return(Matrix3& cauchy_stress,
 }
 
 double J2PlasticityDamage::evaluate_yield_function(double const von_mises,
-                                                   Matrix3 const& back_stress) const
+                                                   matrix3 const& back_stress) const
 {
     return von_mises
            + 0.5 * material.softening_multiplier() / material.kinematic_hardening_modulus()
@@ -257,15 +257,15 @@ double J2PlasticityDamage::evaluate_damage_yield_function(double const energy_va
     return energy_var - std::pow(material.yield_stress(0.0), 2) / (2 * material.elastic_modulus());
 }
 
-Matrix3 J2PlasticityDamage::compute_stress_like_matrix(Matrix6 const& tangent_operator,
-                                                       Matrix3 const& strain_like) const
+matrix3 J2PlasticityDamage::compute_stress_like_matrix(Matrix6 const& tangent_operator,
+                                                       matrix3 const& strain_like) const
 {
     // could get the tangent_operator directly without passing it to this function
     return voigt::kinetic::from(tangent_operator * voigt::kinematic::to(strain_like));
 }
 
 Vector6 J2PlasticityDamage::compute_stress_like_vector(Matrix6 const& tangent_operator,
-                                                       Matrix3 const& strain_like) const
+                                                       matrix3 const& strain_like) const
 {
     // could get the tangent_operator directly without passing it to this function
     return tangent_operator * voigt::kinematic::to(strain_like);
