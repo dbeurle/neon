@@ -18,6 +18,7 @@ using Matrix2 = Eigen::Matrix<double, 2, 2>;
 using Matrix3 = Eigen::Matrix<double, 3, 3>;
 using Matrix6 = Eigen::Matrix<double, 6, 6>;
 using Matrix9 = Eigen::Matrix<double, 9, 9>;
+
 /** Compile time fixed rows for nodal coordinates in two dimensions */
 using Matrix2x = Eigen::Matrix<double, 2, Eigen::Dynamic>;
 /** Compile time fixed rows for nodal coordinates in three dimensions */
@@ -35,6 +36,9 @@ using matrix2 = Eigen::Matrix<double, 2, 2>;
 using matrix3 = Eigen::Matrix<double, 3, 3>;
 using matrix6 = Eigen::Matrix<double, 6, 6>;
 using matrix9 = Eigen::Matrix<double, 9, 9>;
+
+template <int geometric_dimension>
+using matrixxd = Eigen::Matrix<double, Eigen::Dynamic, geometric_dimension>;
 
 /** Compile time fixed rows for nodal coordinates in two dimensions */
 using matrix2x = Eigen::Matrix<double, 2, Eigen::Dynamic>;

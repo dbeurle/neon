@@ -11,8 +11,8 @@
 
 namespace neon
 {
-template <int coordinate, int stride>
-using vector_view = Eigen::Map<vector, coordinate, Eigen::InnerStride<stride>>;
+template <int stride>
+using vector_view = Eigen::Map<vector, 0, Eigen::InnerStride<stride>>;
 
 MaterialCoordinates::MaterialCoordinates(Vector const& initial_coordinates)
     : NodalCoordinates(initial_coordinates), x(initial_coordinates)
@@ -26,7 +26,7 @@ Vector MaterialCoordinates::displacement(List const& local_dofs) const
     Vector localdisp(local_dofs.size());
 
     for_each(view::zip(view::ints(0), local_dofs), [&](auto const& zip_pair) {
-        auto const & [i, local_dof] = zip_pair;
+        auto const& [i, local_dof] = zip_pair;
         localdisp(i) = x(local_dof) - X(local_dof);
     });
     return localdisp;
@@ -34,23 +34,19 @@ Vector MaterialCoordinates::displacement(List const& local_dofs) const
 
 void MaterialCoordinates::update_current_xy_configuration(vector const& u)
 {
-    std::cout << "Hallo.....!" << std::endl;
+    // std::cout << "New solution vector u\n" << u << std::endl;
+    // std::cout << "Before modification\n" << x << std::endl;
 
-    std::cout << "Size of the vector " << u.size() << std::endl;
-    std::cout << "Number of nodes " << u.size() / 2 << std::endl;
+    vector_view<3>(x.data(), x.size() / 3) = vector_view<3>(X.data(), X.size() / 3)
+                                             + vector_view<2>(const_cast<vector::Scalar*>(u.data()),
+                                                              u.size() / 2);
 
-    std::cout << "Coordinates of the vector " << x.size() << std::endl;
-    std::cout << "Number of nodes " << x.size() / 3 << std::endl;
+    vector_view<3>(x.data() + 1,
+                   x.size() / 3) = vector_view<3>(X.data() + 1, X.size() / 3)
+                                   + vector_view<2>(const_cast<vector::Scalar*>(u.data() + 1),
+                                                    u.size() / 2);
 
-    vector_view<0, 3>(x.data(),
-                      x.size() / 3) = vector_view<0, 3>(X.data(), X.size() / 3)
-                                      + vector_view<0, 2>(const_cast<vector::Scalar*>(u.data()),
-                                                          u.size() / 2);
-
-    vector_view<1, 3>(x.data(),
-                      x.size() / 3) = vector_view<1, 3>(X.data(), X.size() / 3)
-                                      + vector_view<1, 2>(const_cast<vector::Scalar*>(u.data()),
-                                                          u.size() / 2);
+    // std::cout << "After modification\n" << x << std::endl;
 }
 
 vtkSmartPointer<vtkPoints> MaterialCoordinates::vtk_coordinates() const
@@ -63,13 +59,13 @@ vtkSmartPointer<vtkPoints> MaterialCoordinates::vtk_coordinates() const
     {
         points->InsertNextPoint(X(i), X(i + 1), X(i + 2));
     }
-
     return points;
 }
 
 vtkSmartPointer<vtkDoubleArray> MaterialCoordinates::vtk_displacement() const
 {
     auto displacements = vtkSmartPointer<vtkDoubleArray>::New();
+    displacements->Allocate(X.size() / 3);
     displacements->SetNumberOfComponents(3);
     displacements->SetName("Displacements");
 

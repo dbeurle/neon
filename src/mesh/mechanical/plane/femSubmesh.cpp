@@ -35,20 +35,11 @@ femSubmesh::femSubmesh(Json::Value const& material_data,
       variables(std::make_shared<InternalVariables>(elements() * sf->quadrature().points())),
       cm(make_constitutive_model(variables, material_data, simulation_data))
 {
-    std::cout << "femsubmesh" << std::endl;
-
-    std::cout << "Number of quadrature points: " << sf->quadrature().points() << std::endl;
-    std::cout << "Number of elements: " << elements() << std::endl;
-
     // Allocate storage for the displacement gradient
     variables->add(InternalVariables::Tensor::DisplacementGradient,
                    InternalVariables::Tensor::DeformationGradient,
                    InternalVariables::Tensor::Cauchy,
                    InternalVariables::Scalar::DetF);
-
-    std::cout << "size of internal variable store: "
-              << variables->fetch(InternalVariables::Tensor::DeformationGradient).size()
-              << std::endl;
 
     // Get the old data to the undeformed configuration
     for (auto& F : variables->fetch(InternalVariables::Tensor::DeformationGradient))
@@ -106,7 +97,8 @@ matrix femSubmesh::geometric_tangent_stiffness(matrix2x const& x, int32 const el
                                        [&](auto const& femval, auto const& l) -> matrix {
                                            auto const& [N, rhea] = femval;
 
-                                           auto const Jacobian = local_deformation_gradient(rhea, x);
+                                           matrix2 const Jacobian = local_deformation_gradient(rhea,
+                                                                                               x);
 
                                            auto const cauchy = cauchy_stresses[view(element, l)];
 
@@ -131,7 +123,7 @@ matrix femSubmesh::material_tangent_stiffness(matrix2x const& x, int32 const ele
 
                                           auto const& D = tangent_operators[view(element, l)];
 
-                                          auto const Jacobian = local_deformation_gradient(rhea, x);
+                                          matrix2 const Jacobian{local_deformation_gradient(rhea, x)};
 
                                           auto const B = fem::sym_gradient<2>(
                                               (rhea * Jacobian.inverse()).transpose());
@@ -152,7 +144,7 @@ vector femSubmesh::internal_nodal_force(matrix2x const& x, int32 const element) 
                                [&](auto const& femval, auto const& l) -> rowmatrix {
                                    auto const& [N, dN] = femval;
 
-                                   auto const Jacobian = local_deformation_gradient(dN, x);
+                                   matrix2 const Jacobian = local_deformation_gradient(dN, x);
 
                                    auto const& cauchy_stress = cauchy_stresses[view(element, l)];
 

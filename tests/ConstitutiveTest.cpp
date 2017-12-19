@@ -407,7 +407,7 @@ TEST_CASE("Plane stress elasticity model")
     using namespace neon::mechanical::plane;
 
     // Create a json reader object from a string
-    std::string input_data = "{\"Name\": \"steel\", \"ElasticModulus\": 200.0e9, "
+    std::string input_data = "{\"Name\": \"steel\", \"ElasticModulus\": 200.0e3, "
                              "\"PoissonsRatio\": 0.3}";
 
     std::string mesh_input = "{\"ConstitutiveModel\" : {\"Name\" : \"PlaneStress\"}}";
@@ -460,6 +460,17 @@ TEST_CASE("Plane stress elasticity model")
         // Ensure symmetry is correct
         for (auto const& material_tangent : material_tangents)
         {
+            REQUIRE(material_tangent(0, 0) == Approx(219780.21978022));
+            REQUIRE(material_tangent(1, 1) == Approx(219780.21978022));
+            REQUIRE(material_tangent(2, 2) == Approx(76923.0769230769));
+            REQUIRE(material_tangent(0, 1) == Approx(65934.065934066));
+            REQUIRE(material_tangent(1, 0) == Approx(65934.065934066));
+
+            REQUIRE(material_tangent(0, 2) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(2, 0) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(1, 2) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(2, 1) == Approx(0.0).margin(ZERO_MARGIN));
+
             REQUIRE((material_tangent - material_tangent.transpose()).norm()
                     == Approx(0.0).margin(ZERO_MARGIN));
 
@@ -485,6 +496,17 @@ TEST_CASE("Plane stress elasticity model")
 
         for (auto const& material_tangent : material_tangents)
         {
+            REQUIRE(material_tangent(0, 0) == Approx(219780.21978022));
+            REQUIRE(material_tangent(1, 1) == Approx(219780.21978022));
+            REQUIRE(material_tangent(2, 2) == Approx(76923.0769230769));
+            REQUIRE(material_tangent(0, 1) == Approx(65934.065934066));
+            REQUIRE(material_tangent(1, 0) == Approx(65934.065934066));
+
+            REQUIRE(material_tangent(0, 2) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(2, 0) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(1, 2) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(2, 1) == Approx(0.0).margin(ZERO_MARGIN));
+
             // Ensure symmetry is correct
             REQUIRE((material_tangent - material_tangent.transpose()).norm()
                     == Approx(0.0).margin(ZERO_MARGIN));
@@ -514,7 +536,7 @@ TEST_CASE("Plane strain elasticity model")
     using namespace neon::mechanical::plane;
 
     // Create a json reader object from a string
-    std::string input_data = "{\"Name\": \"steel\", \"ElasticModulus\": 200.0e9, "
+    std::string input_data = "{\"Name\": \"steel\", \"ElasticModulus\": 200.0e3, "
                              "\"PoissonsRatio\": 0.3}";
 
     std::string mesh_input = "{\"ConstitutiveModel\" : {\"Name\" : \"PlaneStrain\"}}";
@@ -567,6 +589,16 @@ TEST_CASE("Plane strain elasticity model")
         // Ensure symmetry is correct
         for (auto const& material_tangent : material_tangents)
         {
+            REQUIRE(material_tangent(0, 0) == Approx(269230.769230769));
+            REQUIRE(material_tangent(1, 1) == Approx(269230.769230769));
+            REQUIRE(material_tangent(2, 2) == Approx(76923.0769230769));
+            REQUIRE(material_tangent(0, 1) == Approx(115384.615384615));
+
+            REQUIRE(material_tangent(0, 2) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(2, 0) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(1, 2) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(2, 1) == Approx(0.0).margin(ZERO_MARGIN));
+
             REQUIRE((material_tangent - material_tangent.transpose()).norm()
                     == Approx(0.0).margin(ZERO_MARGIN));
 
@@ -592,6 +624,181 @@ TEST_CASE("Plane strain elasticity model")
 
         for (auto const& material_tangent : material_tangents)
         {
+            REQUIRE(material_tangent(0, 0) == Approx(269230.769230769));
+            REQUIRE(material_tangent(1, 1) == Approx(269230.769230769));
+            REQUIRE(material_tangent(2, 2) == Approx(76923.0769230769));
+            REQUIRE(material_tangent(0, 1) == Approx(115384.615384615));
+
+            REQUIRE(material_tangent(0, 2) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(2, 0) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(1, 2) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(2, 1) == Approx(0.0).margin(ZERO_MARGIN));
+
+            // Ensure symmetry is correct
+            REQUIRE((material_tangent - material_tangent.transpose()).norm()
+                    == Approx(0.0).margin(ZERO_MARGIN));
+
+            eigen_solver.compute(material_tangent);
+            REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
+        }
+
+        for (auto const& cauchy_stress : cauchy_stresses)
+        {
+            REQUIRE(cauchy_stress.norm() != Approx(0.0).margin(ZERO_MARGIN));
+
+            // Shear components should be close to zero
+            REQUIRE(cauchy_stress(0, 1) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(cauchy_stress(0, 0) > 0.0);
+            REQUIRE(cauchy_stress(1, 1) > 0.0);
+        }
+
+        for (auto& von_mises_stress : von_mises_stresses)
+        {
+            REQUIRE(von_mises_stress < 200.0e6);
+        }
+    }
+}
+TEST_CASE("Solid mechanics elasticity model")
+{
+    using namespace neon::mechanical::solid;
+
+    // Create a json reader object from a string
+    std::string input_data = "{\"Name\": \"steel\", \"ElasticModulus\": 200.0e3, "
+                             "\"PoissonsRatio\": 0.3}";
+
+    std::string mesh_input = "{\"ConstitutiveModel\" : {\"Name\" : \"IsotropicLinearElasticity\"}}";
+
+    Json::Value material_data, mesh_data;
+
+    std::istringstream input_data_stream(input_data), mesh_input_stream(mesh_input);
+
+    REQUIRE(Json::parseFromStream(reader, input_data_stream, &material_data, &input_errors));
+    REQUIRE(Json::parseFromStream(reader, mesh_input_stream, &mesh_data, &input_errors));
+
+    auto variables = std::make_shared<InternalVariables>(internal_variable_size);
+
+    // Add the required variables for an updated Lagrangian formulation
+    variables->add(InternalVariables::Tensor::DisplacementGradient,
+                   InternalVariables::Tensor::Cauchy,
+                   InternalVariables::Scalar::DetF);
+
+    auto elastic_model = make_constitutive_model(variables, material_data, mesh_data);
+
+    // Get the tensor variables
+    auto [displacement_gradients,
+          cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DisplacementGradient,
+                                              InternalVariables::Tensor::Cauchy);
+
+    auto& J_list = variables->fetch(InternalVariables::Scalar::DetF);
+
+    auto& material_tangents = variables->fetch(InternalVariables::Matrix::TangentOperator);
+
+    for (auto& H : displacement_gradients) H = InternalVariables::rank2tensor_type::Zero();
+    for (auto& J : J_list) J = 1.0;
+
+    Eigen::EigenSolver<Eigen::MatrixXd> eigen_solver;
+
+    SECTION("Sanity checks")
+    {
+        REQUIRE(elastic_model->is_symmetric());
+        REQUIRE(elastic_model->is_finite_deformation() == false);
+        REQUIRE(elastic_model->intrinsic_material().name() == "steel");
+
+        REQUIRE(variables->has(InternalVariables::Scalar::VonMisesStress));
+        REQUIRE(variables->has(InternalVariables::Tensor::Cauchy));
+        REQUIRE(variables->has(InternalVariables::Tensor::LinearisedStrain));
+        REQUIRE(variables->has(InternalVariables::Matrix::TangentOperator));
+    }
+    SECTION("No load")
+    {
+        elastic_model->update_internal_variables(1.0);
+
+        // Ensure symmetry is correct
+        for (auto const& material_tangent : material_tangents)
+        {
+            REQUIRE(material_tangent(0, 0) == Approx(269230.769230769));
+            REQUIRE(material_tangent(1, 1) == Approx(269230.769230769));
+            REQUIRE(material_tangent(2, 2) == Approx(269230.769230769));
+
+            REQUIRE(material_tangent(3, 3) == Approx(76923.0769230769));
+            REQUIRE(material_tangent(4, 4) == Approx(76923.0769230769));
+            REQUIRE(material_tangent(5, 5) == Approx(76923.0769230769));
+
+            REQUIRE(material_tangent(0, 1) == Approx(115384.615384615));
+            REQUIRE(material_tangent(0, 2) == Approx(115384.615384615));
+            REQUIRE(material_tangent(1, 2) == Approx(115384.615384615));
+
+            REQUIRE(material_tangent(0, 3) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(0, 4) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(0, 5) == Approx(0.0).margin(ZERO_MARGIN));
+
+            REQUIRE(material_tangent(1, 3) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(1, 4) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(1, 5) == Approx(0.0).margin(ZERO_MARGIN));
+
+            REQUIRE(material_tangent(2, 3) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(2, 4) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(2, 5) == Approx(0.0).margin(ZERO_MARGIN));
+
+            REQUIRE(material_tangent(3, 4) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(3, 5) == Approx(0.0).margin(ZERO_MARGIN));
+
+            REQUIRE(material_tangent(4, 5) == Approx(0.0).margin(ZERO_MARGIN));
+
+            REQUIRE((material_tangent - material_tangent.transpose()).norm()
+                    == Approx(0.0).margin(ZERO_MARGIN));
+
+            eigen_solver.compute(material_tangent);
+            REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
+        }
+
+        for (auto& cauchy_stress : cauchy_stresses)
+        {
+            REQUIRE(cauchy_stress.norm() == Approx(0.0).margin(ZERO_MARGIN));
+        }
+    }
+    SECTION("Uniaxial elastic load")
+    {
+        for (auto& H : displacement_gradients) H(1, 1) = 0.001;
+
+        elastic_model->update_internal_variables(1.0);
+
+        auto [von_mises_stresses,
+              accumulated_plastic_strains] = variables
+                                                 ->fetch(InternalVariables::Scalar::VonMisesStress,
+                                                         InternalVariables::Scalar::EffectivePlasticStrain);
+
+        for (auto const& material_tangent : material_tangents)
+        {
+            REQUIRE(material_tangent(0, 0) == Approx(269230.769230769));
+            REQUIRE(material_tangent(1, 1) == Approx(269230.769230769));
+            REQUIRE(material_tangent(2, 2) == Approx(269230.769230769));
+
+            REQUIRE(material_tangent(3, 3) == Approx(76923.0769230769));
+            REQUIRE(material_tangent(4, 4) == Approx(76923.0769230769));
+            REQUIRE(material_tangent(5, 5) == Approx(76923.0769230769));
+
+            REQUIRE(material_tangent(0, 1) == Approx(115384.615384615));
+            REQUIRE(material_tangent(0, 2) == Approx(115384.615384615));
+            REQUIRE(material_tangent(1, 2) == Approx(115384.615384615));
+
+            REQUIRE(material_tangent(0, 3) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(0, 4) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(0, 5) == Approx(0.0).margin(ZERO_MARGIN));
+
+            REQUIRE(material_tangent(1, 3) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(1, 4) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(1, 5) == Approx(0.0).margin(ZERO_MARGIN));
+
+            REQUIRE(material_tangent(2, 3) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(2, 4) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(2, 5) == Approx(0.0).margin(ZERO_MARGIN));
+
+            REQUIRE(material_tangent(3, 4) == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(material_tangent(3, 5) == Approx(0.0).margin(ZERO_MARGIN));
+
+            REQUIRE(material_tangent(4, 5) == Approx(0.0).margin(ZERO_MARGIN));
+
             // Ensure symmetry is correct
             REQUIRE((material_tangent - material_tangent.transpose()).norm()
                     == Approx(0.0).margin(ZERO_MARGIN));

@@ -14,7 +14,7 @@ template <typename Quadrature>
 class ShapeFunction
 {
 public:
-    using Coordinates = typename Quadrature::Coordinate;
+    using Coordinates = typename Quadrature::coordinate_type;
 
 public:
     /** Construct the shape function by consuming a quadrature implementation */

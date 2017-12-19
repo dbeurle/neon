@@ -27,9 +27,9 @@ template <typename ShapeFunctionDerivatives, typename Configuration>
  * @param X Reference configuration (spatial coordinates, local nodes)
  * @param x Current configuration (spatial coordinates, local nodes)
  */
-[[nodiscard]] inline Matrix2 deformation_gradient(Matrix const& rhea,
-                                                  Matrix2x const& X,
-                                                  Matrix2x const& x)
+[[nodiscard]] inline matrix2 deformation_gradient(matrix const& rhea,
+                                                  matrix2x const& X,
+                                                  matrix2x const& x)
 {
     // Deformation gradient in the reference and current configuration
     return local_deformation_gradient(rhea, x) * local_deformation_gradient(rhea, X).inverse();
@@ -44,9 +44,9 @@ template <typename ShapeFunctionDerivatives, typename Configuration>
  * @param X Reference configuration (spatial coordinates, local nodes)
  * @param x Current configuration (spatial coordinates, local nodes)
  */
-[[nodiscard]] inline Matrix3 deformation_gradient(Matrix const& rhea,
-                                                  Matrix3x const& X,
-                                                  Matrix3x const& x)
+[[nodiscard]] inline matrix3 deformation_gradient(matrix const& rhea,
+                                                  matrix3x const& X,
+                                                  matrix3x const& x)
 {
     // Deformation gradient in the reference and current configuration
     return local_deformation_gradient(rhea, x) * local_deformation_gradient(rhea, X).inverse();
