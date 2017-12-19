@@ -24,7 +24,7 @@
             "Period" : 1.0,
             "Increments" : {
                 "Initial" : 1.0,
-                "Minimum" : 0.00001,
+                "Minimum" : 1.0,
                 "Maximum" : 1.0
             }
         },
@@ -58,7 +58,7 @@
                 "Type" : "Displacement",
                 "Time" : [0.0, 1.0],
                 "Values" : {
-                    "x" : [0.0, 0.1]
+                    "x" : [0.0, 0.01]
                 }
             }]
         }],
@@ -68,8 +68,7 @@
     	    "Tolerance"  : 1.0e-8
         },
         "Visualisation" : {
-            "Fields" : ["Displacement", "LinearisedStrain", "LinearisedPlasticStrain",
-                        "CauchyStress", "VonMisesStress", "AccumulatedPlasticStrain"]
+            "Fields" : ["Displacement", "LinearisedStrain", "CauchyStress", "VonMisesStress"]
         }
         }
     ]
