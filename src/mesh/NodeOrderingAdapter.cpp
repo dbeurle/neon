@@ -13,6 +13,7 @@ std::unordered_map<int, ElementTopology> const gmsh_converter{{1, ElementTopolog
                                                               {4, ElementTopology::Tetrahedron4},
                                                               {5, ElementTopology::Hexahedron8},
                                                               {6, ElementTopology::Prism6},
+                                                              {8, ElementTopology::Line3},
                                                               {9, ElementTopology::Triangle6},
                                                               {11, ElementTopology::Tetrahedron10},
                                                               {10, ElementTopology::Quadrilateral9},

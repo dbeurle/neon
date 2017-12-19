@@ -17,13 +17,13 @@ void Triangle3::precompute_shape_functions()
 
     // Initialize nodal coordinates array as Xi, Eta, Zeta
     std::array<NodalCoordinate, 3> constexpr local_coordinates = {{
-        {0, 0.0, 0.0},
-        {1, 1.0, 0.0},
-        {2, 0.0, 1.0},
+        {0, 1.0, 0.0},
+        {1, 0.0, 1.0},
+        {2, 0.0, 0.0},
     }};
 
-    Matrix N_matrix(numerical_quadrature->points(), nodes());
-    Matrix local_quadrature_coordinates = Matrix::Ones(numerical_quadrature->points(), 3);
+    matrix N_matrix(numerical_quadrature->points(), nodes());
+    matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 3);
 
     numerical_quadrature->evaluate([&](auto const& coordinates) {
         auto const& [l, r, s] = coordinates;

@@ -7,6 +7,7 @@
 #include "numeric/mechanics"
 
 #include <range/v3/view/transform.hpp>
+#include <range/v3/view/zip.hpp>
 
 namespace neon::mechanical::plane
 {
@@ -20,12 +21,6 @@ IsotropicLinearElasticity::IsotropicLinearElasticity(std::shared_ptr<InternalVar
 
     // Add material tangent with the linear elasticity spatial moduli
     variables->add(InternalVariables::Matrix::TangentOperator, elastic_moduli());
-
-    std::cout << "Has linearised strain "
-              << variables->has(InternalVariables::Tensor::LinearisedStrain) << std::endl;
-
-    std::cout << "Has VonMisesStress strain "
-              << variables->has(InternalVariables::Scalar::VonMisesStress) << std::endl;
 }
 
 IsotropicLinearElasticity::~IsotropicLinearElasticity() = default;
@@ -34,47 +29,50 @@ void IsotropicLinearElasticity::update_internal_variables(double const time_step
 {
     using namespace ranges;
 
-    std::cout << "Performing the internal variable updates" << std::endl;
-
-    std::cout << "Has variables " << variables->has(InternalVariables::Tensor::LinearisedStrain)
-              << std::endl;
+    // std::cout << "Performing the internal variable updates" << std::endl;
 
     // Extract the internal variables
     auto [elastic_strains,
           cauchy_stresses] = variables->fetch(InternalVariables::Tensor::LinearisedStrain,
                                               InternalVariables::Tensor::Cauchy);
 
-    std::cout << "Size of elastic strains: " << elastic_strains.size() << std::endl;
-
-    std::cout << "Accessing the von Mises stress" << std::endl;
-
     auto& von_mises_stresses = variables->fetch(InternalVariables::Scalar::VonMisesStress);
 
-    std::cout << "Size of displacement gradient: "
-              << variables->fetch(InternalVariables::Tensor::DisplacementGradient).size()
-              << std::endl;
+    auto const& tangents = variables->fetch(InternalVariables::Matrix::TangentOperator);
 
-    std::cout << "Computing elastic strains" << std::endl;
+    // std::cout << "Computing elastic strains" << std::endl;
 
     // Compute the linear strain gradient from the displacement gradient
     elastic_strains = variables->fetch(InternalVariables::Tensor::DisplacementGradient)
                       | view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
-    std::cout << "Computing Cauchy stress" << std::endl;
+    for (auto const& elastic_strain : elastic_strains)
+    {
+        if (elastic_strain.hasNaN()) std::cout << "NAN DETECTED\n";
+    }
 
     // Compute Cauchy stress from the linear elastic strains
-    cauchy_stresses = elastic_strains | view::transform([this](auto const& elastic_strain) {
-                          return compute_cauchy_stress(elastic_strain);
+    cauchy_stresses = view::zip(tangents, elastic_strains) | view::transform([this](auto const& tpl) {
+                          auto const& [C, elastic_strain] = tpl;
+                          return voigt::kinetic::from(C * voigt::kinematic::to(elastic_strain));
                       });
 
-    std::cout << "Computing von Mises stress" << std::endl;
+    for (auto const& cauchy_stress : cauchy_stresses)
+    {
+        if (cauchy_stress.hasNaN()) std::cout << "NAN DETECTED\n";
+    }
+
+    // for (auto const& cauchy_stress : cauchy_stresses)
+    // {
+    //     std::cout << cauchy_stress << std::endl << std::endl;
+    // }
 
     // Compute the von Mises equivalent stress
     von_mises_stresses = cauchy_stresses | view::transform([](auto const& cauchy_stress) {
                              return von_mises_stress(cauchy_stress);
                          });
 
-    std::cout << "All done!" << std::endl;
+    // std::cout << "All done!" << std::endl;
 }
 
 matrix3 IsotropicLinearElasticity::elastic_moduli() const

@@ -18,8 +18,10 @@ template <typename Xi, typename... Eta>
 class NumericalQuadrature
 {
 public:
-    using Coordinate = std::tuple<int, Xi, Eta...>;
-    using femValue = std::tuple<Vector, Matrix>;
+    using coordinate_type = std::tuple<int, Xi, Eta...>;
+
+    /** Fix the size of the shape function derivative to the size of the quadrature points */
+    using fem_value_type = std::tuple<Vector, matrixxd<std::tuple_size<coordinate_type>::value - 1>>;
 
 public:
     /**
@@ -86,11 +88,11 @@ public:
     auto const& coordinates() const { return clist; }
 
 protected:
-    std::vector<double> w;         //!< Quadrature weightings
-    std::vector<Coordinate> clist; //!< Quadrature coordinates
+    std::vector<double> w;              //!< Quadrature weightings
+    std::vector<coordinate_type> clist; //!< Quadrature coordinates
 
-    std::vector<femValue> femvals; //!< Shape functions and their derivatives
-                                   //!< evaluated at the quadrature points
+    std::vector<fem_value_type> femvals; //!< Shape functions and their derivatives
+                                         //!< evaluated at the quadrature points
 };
 
 using SurfaceQuadrature = NumericalQuadrature<double, double>;

@@ -21,8 +21,8 @@ void Quadrilateral4::precompute_shape_functions()
     std::array<NodalCoordinate, 4> constexpr local_coordinates = {
         {{0, -1.0, -1.0}, {1, 1.0, -1.0}, {2, 1.0, 1.0}, {3, -1.0, 1.0}}};
 
-    Matrix N_matrix(numerical_quadrature->points(), nodes());
-    Matrix local_quadrature_coordinates = Matrix::Ones(numerical_quadrature->points(), 3);
+    matrix N_matrix(numerical_quadrature->points(), nodes());
+    matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 3);
 
     numerical_quadrature->evaluate([&](auto const& coordinate) {
         auto const& [l, xi, eta] = coordinate;
@@ -46,7 +46,7 @@ void Quadrilateral4::precompute_shape_functions()
     });
 
     // Compute extrapolation algorithm matrices
-    Matrix local_nodal_coordinates = Matrix::Ones(nodes(), 3);
+    matrix local_nodal_coordinates = matrix::Ones(nodes(), 3);
 
     for (auto const& [a, xi_a, eta_a] : local_coordinates)
     {
