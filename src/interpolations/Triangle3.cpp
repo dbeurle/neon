@@ -13,17 +13,14 @@ Triangle3::Triangle3(TriangleQuadrature::Rule rule)
 
 void Triangle3::precompute_shape_functions()
 {
-    using NodalCoordinate = std::tuple<int, double, double>;
+    // using NodalCoordinate = std::tuple<int, double, double>;
 
-    // Initialize nodal coordinates array as Xi, Eta, Zeta
-    std::array<NodalCoordinate, 3> constexpr local_coordinates = {{
-        {0, 1.0, 0.0},
-        {1, 0.0, 1.0},
-        {2, 0.0, 0.0},
-    }};
-
-    matrix N_matrix(numerical_quadrature->points(), nodes());
-    matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 3);
+    // Initialize nodal coordinates array as r and s
+    // std::array<NodalCoordinate, 3> constexpr local_coordinates = {{
+    //     {0, 1.0, 0.0},
+    //     {1, 0.0, 1.0},
+    //     {2, 0.0, 0.0},
+    // }};
 
     numerical_quadrature->evaluate([&](auto const& coordinates) {
         auto const& [l, r, s] = coordinates;
@@ -43,23 +40,10 @@ void Triangle3::precompute_shape_functions()
         rhea(1, 1) = 1.0;
         rhea(2, 1) = -1.0;
 
-        local_quadrature_coordinates(l, 0) = r;
-        local_quadrature_coordinates(l, 1) = s;
-
-        N_matrix.row(l) = N;
-
         return std::make_tuple(N, rhea);
     });
 
-    // Compute extrapolation algorithm matrices
-    Matrix local_nodal_coordinates = Matrix::Ones(nodes(), 3);
-
-    for (auto const& [a, r, s] : local_coordinates)
-    {
-        local_nodal_coordinates(a, 0) = r;
-        local_nodal_coordinates(a, 1) = s;
-    }
-    compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
+    extrapolation = matrix::Ones(nodes(), 1);
 }
 
 double Triangle3::compute_measure(Matrix const& nodal_coordinates) const
