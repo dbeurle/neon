@@ -14,20 +14,20 @@ class NodalCoordinates
 public:
     NodalCoordinates() = default;
 
-    /** Construct with a list of coordinates (x, y, z, x, y, z, ...) */
-    explicit NodalCoordinates(vector coordinates);
+    /** Construct with a list of coordinates */
+    explicit NodalCoordinates(matrix3x const coordinates);
 
     /** Construct with a list of coordinates in json format */
     explicit NodalCoordinates(Json::Value const& mesh_file);
 
-    [[nodiscard]] auto size() const { return X.rows() / 3; }
+    [[nodiscard]] auto size() const { return X.cols(); }
 
-    [[nodiscard]] vector const& coordinates() const { return X; }
+    [[nodiscard]] matrix3x const& coordinates() const;
 
     /** @return the coordinates using fancy indexing */
-    [[nodiscard]] vector coordinates(List const& local_node_list) const;
+    [[nodiscard]] matrix3x coordinates(local_indices const& local_node_list) const;
 
 protected:
-    vector X; //!< Reference configuration encoded as (x1, y1, z1, x2, y2, z2)
+    matrix3x X; //!< Reference configuration encoded as (x1, y1, z1, x2, y2, z2)
 };
 }

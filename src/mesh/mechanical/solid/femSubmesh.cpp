@@ -65,7 +65,7 @@ void femSubmesh::save_internal_variables(bool const have_converged)
 
 std::tuple<List const&, matrix> femSubmesh::tangent_stiffness(int32 const element) const
 {
-    auto const x = material_coordinates->current_configuration(local_node_list(element));
+    auto const& x = material_coordinates->current_configuration(local_node_list(element));
 
     matrix ke = material_tangent_stiffness(x, element);
 
@@ -78,7 +78,7 @@ std::tuple<List const&, matrix> femSubmesh::tangent_stiffness(int32 const elemen
 
 std::tuple<List const&, vector> femSubmesh::internal_force(int32 const element) const
 {
-    auto x = material_coordinates->current_configuration(local_node_list(element));
+    auto const& x = material_coordinates->current_configuration(local_node_list(element));
 
     return {local_dof_list(element), internal_nodal_force(x, element)};
 }
@@ -155,7 +155,7 @@ vector femSubmesh::internal_nodal_force(matrix3x const& x, int32 const element) 
 
 std::tuple<List const&, matrix> femSubmesh::consistent_mass(int32 const element) const
 {
-    auto X = material_coordinates->initial_configuration(local_node_list(element));
+    auto const& X = material_coordinates->initial_configuration(local_node_list(element));
 
     auto const density_0 = cm->intrinsic_material().initial_density();
 
