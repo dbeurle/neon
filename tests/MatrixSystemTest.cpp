@@ -53,16 +53,4 @@ TEST_CASE("Nonlinear system equilibrium solver test")
 
         fem_matrix.solve();
     }
-    // SECTION("NonlinearOptions displacement increment incorrect")
-    // {
-    //     REQUIRE(reader.parse(nonlinear_options_disp_broken_json.c_str(), nonlinear_data));
-    //
-    //     REQUIRE_THROWS_AS(femStaticMatrix(fem_mesh, simulation_data), std::runtime_error);
-    // }
-    // SECTION("NonlinearOptions residual force incorrect")
-    // {
-    //     REQUIRE(reader.parse(nonlinear_options_force_broken_json.c_str(), nonlinear_data));
-    //
-    //     REQUIRE_THROWS_AS(femStaticMatrix(fem_mesh, sosimulation_data), std::runtime_error);
-    // }
 }

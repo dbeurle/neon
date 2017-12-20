@@ -103,8 +103,10 @@ TEST_CASE("Traction test for triangle", "[Traction]")
     Json::Value times, loads;
 
     // Build a right angled triangle
-    vector coordinates(9);
-    coordinates << 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0;
+    matrix3x coordinates(3, 3);
+    coordinates << 0.0, 1.0, 0.0, //
+        0.0, 0.0, 1.0,            //
+        0.0, 0.0, 0.0;
 
     auto material_coordinates = std::make_shared<MaterialCoordinates>(coordinates);
 
@@ -128,9 +130,9 @@ TEST_CASE("Traction test for triangle", "[Traction]")
 
         REQUIRE(patch.elements() == 1);
 
-        auto const& [dofs, t] = patch.external_force(0, 1.0);
+        auto const & [dofs, t] = patch.external_force(0, 1.0);
 
-        REQUIRE((t - 1.0 / 6.0 * vector3::Ones()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((t - vector3::Constant(1.0 / 6.0)).norm() == Approx(0.0).margin(ZERO_MARGIN));
         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
     }
     SECTION("Twice unit load")
@@ -149,9 +151,9 @@ TEST_CASE("Traction test for triangle", "[Traction]")
 
         REQUIRE(patch.elements() == 1);
 
-        auto const& [dofs, t] = patch.external_force(0, 1.0);
+        auto const & [dofs, t] = patch.external_force(0, 1.0);
 
-        REQUIRE((t - 2.0 / 6.0 * vector3::Ones()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((t - vector3::Constant(2.0 / 6.0)).norm() == Approx(0.0).margin(ZERO_MARGIN));
         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
     }
 }
@@ -162,8 +164,10 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
     Json::Value times, loads;
 
     // Build a right angled triangle
-    vector coordinates(9);
-    coordinates << 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0;
+    matrix3x coordinates(3, 3);
+    coordinates << 0.0, 1.0, 0.0, //
+        0.0, 0.0, 1.0,            //
+        0.0, 0.0, 0.0;
 
     auto material_coordinates = std::make_shared<MaterialCoordinates>(coordinates);
 
@@ -187,7 +191,7 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
 
         REQUIRE(pressure_patch.elements() == 1);
 
-        auto const& [dofs, f_ext] = pressure_patch.external_force(0, 1.0);
+        auto const & [dofs, f_ext] = pressure_patch.external_force(0, 1.0);
 
         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
 
@@ -212,7 +216,7 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
 
         REQUIRE(pressure_patch.elements() == 1);
 
-        auto const& [dofs, f_ext] = pressure_patch.external_force(0, 1.0);
+        auto const & [dofs, f_ext] = pressure_patch.external_force(0, 1.0);
 
         REQUIRE((vector3(f_ext(2), f_ext(5), f_ext(8)) - 2.0 / 6.0 * vector3::Ones()).norm()
                 == Approx(0.0).margin(ZERO_MARGIN));
@@ -277,13 +281,13 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
                                   boundary,
                                   {{"x", 0}, {"y", 1}, {"z", 2}});
 
-    for (auto const& [is_dof_active, meshes] : loads.interface())
+    for (auto const & [is_dof_active, meshes] : loads.interface())
     {
         if (is_dof_active)
         {
             std::visit(
                 [&](auto const& mesh) {
-                    auto const& [dofs_tri, f_tri] = mesh.external_force(0, 1.0);
+                    auto const & [dofs_tri, f_tri] = mesh.external_force(0, 1.0);
 
                     REQUIRE(dofs_tri.size() == 3);
                     REQUIRE(f_tri.rows() == 3);
@@ -295,7 +299,7 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
 
             std::visit(
                 [&](auto const& mesh) {
-                    auto const& [dofs_quad, f_quad] = mesh.external_force(0, 1.0);
+                    auto const & [dofs_quad, f_quad] = mesh.external_force(0, 1.0);
 
                     REQUIRE(dofs_quad.size() == 4);
                     REQUIRE(f_quad.rows() == 4);
@@ -314,8 +318,10 @@ TEST_CASE("Newton cooling boundary conditions")
     Json::Value times, flux, T_inf;
 
     // Build a right angled triangle
-    vector coordinates(9);
-    coordinates << 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0;
+    matrix3x coordinates(3, 3);
+    coordinates << 0.0, 1.0, 0.0, //
+        0.0, 0.0, 1.0,            //
+        0.0, 0.0, 0.0;
 
     auto material_coordinates = std::make_shared<MaterialCoordinates>(coordinates);
 
@@ -341,10 +347,10 @@ TEST_CASE("Newton cooling boundary conditions")
 
         REQUIRE(patch.elements() == 1);
 
-        auto const& [dofs_0, t] = patch.external_force(0, 1.0);
-        auto const& [dofs_1, k] = patch.external_stiffness(0, 1.0);
+        auto const & [dofs_0, t] = patch.external_force(0, 1.0);
+        auto const & [dofs_1, k] = patch.external_stiffness(0, 1.0);
 
-        REQUIRE((t - 1.0 / 6.0 * vector3::Ones()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((t - vector3::Constant(1.0 / 6.0)).norm() == Approx(0.0).margin(ZERO_MARGIN));
 
         REQUIRE(k.norm() > 0.0);
 
