@@ -10,7 +10,7 @@ ExternalProject_Add(
     TIMEOUT 10
     # UPDATE_COMMAND ${HG_EXECUTABLE} pull
     UPDATE_COMMAND ""
-    HG_TAG 3.3
+    HG_TAG default
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
