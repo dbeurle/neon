@@ -29,12 +29,12 @@ public:
     [[nodiscard]] virtual bool is_finite_deformation() const override { return false; }
 
 protected:
-    [[nodiscard]] Matrix6 elastic_moduli() const;
+    [[nodiscard]] matrix6 elastic_moduli() const;
 
 private:
     LinearElastic material;
 
 protected:
-    Matrix6 const C_e = elastic_moduli();
+    matrix6 const C_e = elastic_moduli();
 };
 }

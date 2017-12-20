@@ -28,7 +28,7 @@ public:
     Quadrature const& quadrature() const { return *numerical_quadrature.get(); };
 
     /** Quadrature point to nodal point extrapolation matrix */
-    Matrix const& local_quadrature_extrapolation() const { return extrapolation; }
+    matrix const& local_quadrature_extrapolation() const { return extrapolation; }
 
 protected:
     /**
@@ -37,20 +37,20 @@ protected:
      * least squares (for example with quadratric tetrahedron elements)
      * developed in \cite Durand2014
      */
-    void compute_extrapolation_matrix(Matrix const N,
-                                      Matrix const local_nodal_coordinates,
-                                      Matrix const local_quadrature_coordinates);
+    void compute_extrapolation_matrix(matrix const N,
+                                      matrix const local_nodal_coordinates,
+                                      matrix const local_quadrature_coordinates);
 
 protected:
-    Matrix extrapolation; //!< Quadrature point to nodal point mapping
+    matrix extrapolation; //!< Quadrature point to nodal point mapping
 
     std::unique_ptr<Quadrature> numerical_quadrature;
 };
 
 template <typename Quadrature>
-void ShapeFunction<Quadrature>::compute_extrapolation_matrix(Matrix const N,
-                                                             Matrix const local_nodal_coordinates,
-                                                             Matrix const local_quadrature_coordinates)
+void ShapeFunction<Quadrature>::compute_extrapolation_matrix(matrix const N,
+                                                             matrix const local_nodal_coordinates,
+                                                             matrix const local_quadrature_coordinates)
 {
     // Take short names for consistency with algorithm
     auto const n = local_nodal_coordinates.rows();
@@ -73,12 +73,12 @@ void ShapeFunction<Quadrature>::compute_extrapolation_matrix(Matrix const N,
         return;
     }
 
-    Matrix const N_plus = N.transpose() * (N * N.transpose()).inverse();
+    matrix const N_plus = N.transpose() * (N * N.transpose()).inverse();
 
     // Number of quadrature points are less than the number of nodes
     auto const xi_hat_plus = xi_hat.transpose() * (xi_hat * xi_hat.transpose()).inverse();
 
-    extrapolation = N_plus * (Matrix::Identity(m, m) - xi_hat * xi_hat_plus) + xi * xi_hat_plus;
+    extrapolation = N_plus * (matrix::Identity(m, m) - xi_hat * xi_hat_plus) + xi * xi_hat_plus;
 }
 
 using LineInterpolation = ShapeFunction<NumericalQuadrature<double>>;

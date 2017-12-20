@@ -7,7 +7,7 @@
 
 namespace neon
 {
-NodalCoordinates::NodalCoordinates(Vector coordinates) : X(coordinates) {}
+NodalCoordinates::NodalCoordinates(vector coordinates) : X(coordinates) {}
 
 NodalCoordinates::NodalCoordinates(Json::Value const& mesh_file)
 {
@@ -29,9 +29,9 @@ NodalCoordinates::NodalCoordinates(Json::Value const& mesh_file)
     }
 }
 
-Vector NodalCoordinates::coordinates(List const& local_node_list) const
+vector NodalCoordinates::coordinates(List const& local_node_list) const
 {
-    Vector local_coordinates(local_node_list.size() * 3);
+    vector local_coordinates(local_node_list.size() * 3);
 
     for (auto i = 0; i < local_node_list.size(); ++i)
     {

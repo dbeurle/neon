@@ -38,7 +38,7 @@ public:
      * and update the internal variables with the new deformation and the
      * time step increment
      */
-    void update_internal_variables(Vector const& u, double const time_step_size = 0.0);
+    void update_internal_variables(vector const& u, double const time_step_size = 0.0);
 
     /**
      * Update the internal variables if converged, otherwise revert back

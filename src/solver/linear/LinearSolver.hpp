@@ -13,7 +13,7 @@ namespace neon
 class LinearSolver
 {
 public:
-    virtual void solve(SparseMatrix const& A, Vector& x, Vector const& b) = 0;
+    virtual void solve(SparseMatrix const& A, vector& x, vector const& b) = 0;
 
     /** Notifies the linear solvers to of a change in sparsity structure of A */
     void update_sparsity_pattern() { build_sparsity_pattern = true; }
@@ -49,7 +49,7 @@ class ConjugateGradient : public IterativeLinearSolver
 public:
     using IterativeLinearSolver::IterativeLinearSolver;
 
-    void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
+    void solve(SparseMatrix const& A, vector& x, vector const& b) override final;
 };
 
 /**
@@ -66,7 +66,7 @@ class BiCGStab : public IterativeLinearSolver
 public:
     using IterativeLinearSolver::IterativeLinearSolver;
 
-    void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
+    void solve(SparseMatrix const& A, vector& x, vector const& b) override final;
 };
 
 class DirectLinearSolver : public LinearSolver
@@ -81,7 +81,7 @@ class DirectLinearSolver : public LinearSolver
 class SparseLU : public DirectLinearSolver
 {
 public:
-    void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
+    void solve(SparseMatrix const& A, vector& x, vector const& b) override final;
 
 private:
     Eigen::SparseLU<SparseMatrix, Eigen::AMDOrdering<int>> lu;
@@ -95,7 +95,7 @@ private:
 class SparseLLT : public DirectLinearSolver
 {
 public:
-    void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
+    void solve(SparseMatrix const& A, vector& x, vector const& b) override final;
 
 private:
     Eigen::SimplicialLLT<Eigen::SparseMatrix<SparseMatrix::Scalar>> llt;

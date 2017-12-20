@@ -18,7 +18,7 @@ IsotropicLinearElasticity::IsotropicLinearElasticity(std::shared_ptr<InternalVar
                    InternalVariables::Scalar::VonMisesStress);
 
     // Add material tangent with the linear elasticity spatial moduli
-    variables->add(InternalVariables::Matrix::TangentOperator, elastic_moduli());
+    variables->add(InternalVariables::rank4::tangent_operator, elastic_moduli());
 }
 
 IsotropicLinearElasticity::~IsotropicLinearElasticity() = default;
@@ -51,12 +51,12 @@ void IsotropicLinearElasticity::update_internal_variables(double const time_step
                          });
 }
 
-Matrix6 IsotropicLinearElasticity::elastic_moduli() const
+matrix6 IsotropicLinearElasticity::elastic_moduli() const
 {
     auto const [lambda, shear_modulus] = material.Lame_parameters();
 
     // clang-format off
-    return (Matrix6() << lambda + 2.0 * shear_modulus, lambda, lambda, 0.0, 0.0, 0.0,
+    return (matrix6() << lambda + 2.0 * shear_modulus, lambda, lambda, 0.0, 0.0, 0.0,
                          lambda, lambda + 2.0 * shear_modulus, lambda, 0.0, 0.0, 0.0,
                          lambda, lambda, lambda + 2.0 * shear_modulus, 0.0, 0.0, 0.0,
                          0.0, 0.0, 0.0, shear_modulus, 0.0, 0.0,

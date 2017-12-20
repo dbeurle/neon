@@ -47,7 +47,7 @@ void J2PlasticityDamage::update_internal_variables(double const time_step_size)
                                                    InternalVariables::Scalar::Damage,
                                                    InternalVariables::Scalar::EnergyReleaseRate);
 
-    auto& tangent_operators = variables->fetch(InternalVariables::Matrix::TangentOperator);
+    auto& tangent_operators = variables->fetch(InternalVariables::rank4::tangent_operator);
 
     // Compute the linear strain gradient from the displacement gradient
     strains = variables->fetch(InternalVariables::Tensor::DisplacementGradient)
@@ -119,16 +119,12 @@ double J2PlasticityDamage::perform_radial_return(matrix3& cauchy_stress,
                                                  double& scalar_damage,
                                                  matrix3& kin_hard,
                                                  double& energy_var,
-                                                 Matrix6& tangent_operator,
+                                                 matrix6& tangent_operator,
                                                  double const& delta_t,
                                                  matrix3 const& eps_e_t)
 {
     // TODO: initial guess could be computed base on a frozen yield surface (at
     // the increment n) to obtain good convergence. check computational methods for plasticity book
-
-    // Fixed size matrices to avoid dynamic memory allocation
-    using vector16 = Eigen::Matrix<double, 16, 1>;
-    using matrix16 = Eigen::Matrix<double, 16, 16>;
 
     vector16 y;
     y << 0.0, 0.0, voigt::kinetic::to(cauchy_stress), voigt::kinetic::to(back_stress),
@@ -212,7 +208,7 @@ double J2PlasticityDamage::perform_radial_return(matrix3& cauchy_stress,
         // double cond = svd.singularValues()(0) /
         // svd.singularValues()(svd.singularValues().size()
         // - 1); std::cout << cond << "\n\n";
-        // Vector a = -M.inverse() * f;
+        // vector a = -M.inverse() * f;
 
         y -= M.fullPivLu().solve(f);
 
@@ -257,14 +253,14 @@ double J2PlasticityDamage::evaluate_damage_yield_function(double const energy_va
     return energy_var - std::pow(material.yield_stress(0.0), 2) / (2 * material.elastic_modulus());
 }
 
-matrix3 J2PlasticityDamage::compute_stress_like_matrix(Matrix6 const& tangent_operator,
+matrix3 J2PlasticityDamage::compute_stress_like_matrix(matrix6 const& tangent_operator,
                                                        matrix3 const& strain_like) const
 {
     // could get the tangent_operator directly without passing it to this function
     return voigt::kinetic::from(tangent_operator * voigt::kinematic::to(strain_like));
 }
 
-Vector6 J2PlasticityDamage::compute_stress_like_vector(Matrix6 const& tangent_operator,
+vector6 J2PlasticityDamage::compute_stress_like_vector(matrix6 const& tangent_operator,
                                                        matrix3 const& strain_like) const
 {
     // could get the tangent_operator directly without passing it to this function

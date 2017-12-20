@@ -14,14 +14,14 @@ namespace neon
  * to perform the integration for a functor that accepts a quadrature point
  * index.
  */
-template <typename Xi, typename... Eta>
+template <typename... Xi>
 class NumericalQuadrature
 {
 public:
-    using coordinate_type = std::tuple<int, Xi, Eta...>;
+    using coordinate_type = std::tuple<int, Xi...>;
 
     /** Fix the size of the shape function derivative to the size of the quadrature points */
-    using fem_value_type = std::tuple<Vector, matrixxd<std::tuple_size<coordinate_type>::value - 1>>;
+    using fem_value_type = std::tuple<vector, matrixxd<std::tuple_size<coordinate_type>::value - 1>>;
 
 public:
     /**
@@ -39,8 +39,8 @@ public:
         }
         return integral;
     }
-    /**
 
+    /**
      * Perform the numerical integration of a lambda function.
      * @param integral - Initial value for the numerical integration
      * @param f - A lambda function that accepts an femValue and quadrature point
@@ -59,7 +59,7 @@ public:
     template <typename Functor>
     void for_each(Functor&& eval_func) const
     {
-        for (int l = 0; l < points(); ++l) eval_func(femvals[l], l);
+        for (auto l = 0; l < points(); ++l) eval_func(femvals[l], l);
     }
 
     /**
@@ -74,7 +74,7 @@ public:
         femvals.reserve(points());
         for (auto const& coordinate : clist)
         {
-            femvals.push_back(f(coordinate));
+            femvals.emplace_back(f(coordinate));
         }
     }
 

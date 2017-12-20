@@ -103,7 +103,7 @@ TEST_CASE("Traction test for triangle", "[Traction]")
     Json::Value times, loads;
 
     // Build a right angled triangle
-    Vector coordinates(9);
+    vector coordinates(9);
     coordinates << 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0;
 
     auto material_coordinates = std::make_shared<MaterialCoordinates>(coordinates);
@@ -130,7 +130,7 @@ TEST_CASE("Traction test for triangle", "[Traction]")
 
         auto const& [dofs, t] = patch.external_force(0, 1.0);
 
-        REQUIRE((t - 1.0 / 6.0 * Vector3::Ones()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((t - 1.0 / 6.0 * vector3::Ones()).norm() == Approx(0.0).margin(ZERO_MARGIN));
         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
     }
     SECTION("Twice unit load")
@@ -151,7 +151,7 @@ TEST_CASE("Traction test for triangle", "[Traction]")
 
         auto const& [dofs, t] = patch.external_force(0, 1.0);
 
-        REQUIRE((t - 2.0 / 6.0 * Vector3::Ones()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((t - 2.0 / 6.0 * vector3::Ones()).norm() == Approx(0.0).margin(ZERO_MARGIN));
         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
     }
 }
@@ -162,7 +162,7 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
     Json::Value times, loads;
 
     // Build a right angled triangle
-    Vector coordinates(9);
+    vector coordinates(9);
     coordinates << 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0;
 
     auto material_coordinates = std::make_shared<MaterialCoordinates>(coordinates);
@@ -192,7 +192,7 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
 
         // Compare the z-component to the analytical solution
-        REQUIRE((Vector3(f_ext(2), f_ext(5), f_ext(8)) - 1.0 / 6.0 * Vector3::Ones()).norm()
+        REQUIRE((vector3(f_ext(2), f_ext(5), f_ext(8)) - 1.0 / 6.0 * vector3::Ones()).norm()
                 == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Twice unit load")
@@ -214,7 +214,7 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
 
         auto const& [dofs, f_ext] = pressure_patch.external_force(0, 1.0);
 
-        REQUIRE((Vector3(f_ext(2), f_ext(5), f_ext(8)) - 2.0 / 6.0 * Vector3::Ones()).norm()
+        REQUIRE((vector3(f_ext(2), f_ext(5), f_ext(8)) - 2.0 / 6.0 * vector3::Ones()).norm()
                 == Approx(0.0).margin(ZERO_MARGIN));
         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
     }
@@ -225,7 +225,7 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
     // triangle mesh
     using namespace neon::mechanical::solid;
 
-    Vector coordinates(3 * 5);
+    vector coordinates(3 * 5);
     coordinates << 0.0, 0.0, 0.0, //
         1.0, 0.0, 0.0,            //
         1.0, 1.0, 0.0,            //
@@ -314,7 +314,7 @@ TEST_CASE("Newton cooling boundary conditions")
     Json::Value times, flux, T_inf;
 
     // Build a right angled triangle
-    Vector coordinates(9);
+    vector coordinates(9);
     coordinates << 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0;
 
     auto material_coordinates = std::make_shared<MaterialCoordinates>(coordinates);
@@ -344,7 +344,7 @@ TEST_CASE("Newton cooling boundary conditions")
         auto const& [dofs_0, t] = patch.external_force(0, 1.0);
         auto const& [dofs_1, k] = patch.external_stiffness(0, 1.0);
 
-        REQUIRE((t - 1.0 / 6.0 * Vector3::Ones()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((t - 1.0 / 6.0 * vector3::Ones()).norm() == Approx(0.0).margin(ZERO_MARGIN));
 
         REQUIRE(k.norm() > 0.0);
 

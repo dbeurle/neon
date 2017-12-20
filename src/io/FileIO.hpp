@@ -36,7 +36,7 @@ protected:
     virtual void write_to_file(int const time_step, double const total_time);
 
     /** Write out the field to a vtk file */
-    void add_field(std::string const& name, Vector const& data, int const components);
+    void add_field(std::string const& name, vector const& data, int const components);
 
 protected:
     std::string const directory_name = "visualisation";
@@ -123,7 +123,7 @@ void FileIO<femMeshType>::write(int const time_step, double const total_time)
 {
     if (time_step % write_every != 0) return;
 
-    Vector nodal_averaged_value, insertions;
+    vector nodal_averaged_value, insertions;
 
     // Write out the required fields
     for (auto const& name : output_set)
@@ -221,7 +221,7 @@ namespace diffusion
 class FileIO : public neon::FileIO
 {
 public:
-    using VectorMap = std::map<std::string, InternalVariables::Vector>;
+    using VectorMap = std::map<std::string, InternalVariables::vector>;
 
     std::string const primary_field{"Temperature"};
 
@@ -232,7 +232,7 @@ public:
 
     FileIO(FileIO&&) = default;
 
-    void write(int const time_step, double const total_time, Vector const& temperature);
+    void write(int const time_step, double const total_time, vector const& temperature);
 
 private:
     void add_mesh();
@@ -240,7 +240,7 @@ private:
 private:
     femMesh const& fem_mesh;
 
-    VectorMap const vector_map{{"HeatFlux", InternalVariables::Vector::HeatFlux}};
+    VectorMap const vector_map{{"HeatFlux", InternalVariables::vector::HeatFlux}};
 };
 }
 }

@@ -62,28 +62,28 @@ protected:
      {\lambda}_{vp} \ \mathbf{\tilde{N}} \ \frac{1}{1-D} \right ) = 0 \f]
       * Note that all the n+1 indices are ommited for the sake of simplicity.
       */
-    [[nodiscard]] double perform_radial_return(Matrix3& cauchy_stress,
-                                               Matrix3& back_stress,
+    [[nodiscard]] double perform_radial_return(matrix3& cauchy_stress,
+                                               matrix3& back_stress,
                                                double& damage_var,
-                                               Matrix3& kin_hard,
+                                               matrix3& kin_hard,
                                                double& energy_var,
-                                               Matrix6& C_list,
+                                               matrix6& C_list,
                                                double const& delta_t,
-                                               Matrix3 const& eps_e_t);
+                                               matrix3 const& eps_e_t);
     /**
      * Evaluates the yield function and returns greater than zero if
      * the yield function has been violated
      */
     [[nodiscard]] double evaluate_yield_function(double const von_mises,
-                                                 Matrix3 const& back_stress) const;
+                                                 matrix3 const& back_stress) const;
 
     [[nodiscard]] double evaluate_damage_yield_function(double const energy_var) const;
 
-    [[nodiscard]] Matrix3 compute_stress_like_matrix(Matrix6 const& tangent_operator,
-                                                     Matrix3 const& strain_like) const;
+    [[nodiscard]] matrix3 compute_stress_like_matrix(matrix6 const& tangent_operator,
+                                                     matrix3 const& strain_like) const;
 
-    [[nodiscard]] Vector6 compute_stress_like_vector(Matrix6 const& tangent_operator,
-                                                     Matrix3 const& strain_like) const;
+    [[nodiscard]] vector6 compute_stress_like_vector(matrix6 const& tangent_operator,
+                                                     matrix3 const& strain_like) const;
 
 protected:
     IsotropicElasticPlasticDamage material;

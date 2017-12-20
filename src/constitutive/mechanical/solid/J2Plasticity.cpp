@@ -38,13 +38,14 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
           von_mises_stresses] = variables->fetch(InternalVariables::Scalar::EffectivePlasticStrain,
                                                  InternalVariables::Scalar::VonMisesStress);
 
-    auto& tangent_operators = variables->fetch(InternalVariables::Matrix::TangentOperator);
+    auto& tangent_operators = variables->fetch(InternalVariables::rank4::tangent_operator);
 
     // Compute the linear strain gradient from the displacement gradient
     strains = variables->fetch(InternalVariables::Tensor::DisplacementGradient)
               | ranges::view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
     // Perform the update algorithm for each quadrature point
+    // #pragma omp parallel for
     for (auto l = 0; l < strains.size(); l++)
     {
         auto const& strain = strains[l];
@@ -73,7 +74,7 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
 
         // Compute the normal direction to the yield surface which remains
         // constant throughout the radial return method
-        Matrix3 const normal = deviatoric(cauchy_stress) / deviatoric(cauchy_stress).norm();
+        matrix3 const normal = deviatoric(cauchy_stress) / deviatoric(cauchy_stress).norm();
 
         auto const plastic_increment = perform_radial_return(von_mises, accumulated_plastic_strain);
 
@@ -92,10 +93,10 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
     }
 }
 
-Matrix6 J2Plasticity::algorithmic_tangent(double const plastic_increment,
+matrix6 J2Plasticity::algorithmic_tangent(double const plastic_increment,
                                           double const accumulated_plastic_strain,
                                           double const von_mises,
-                                          Matrix3 const& normal) const
+                                          matrix3 const& normal) const
 {
     auto const G = material.shear_modulus();
     auto const H = material.hardening_modulus(accumulated_plastic_strain);

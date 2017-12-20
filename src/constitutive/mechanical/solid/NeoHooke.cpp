@@ -14,7 +14,7 @@ NeoHooke::NeoHooke(std::shared_ptr<InternalVariables>& variables, Json::Value co
 {
     // The Neo-Hookean model requires the deformation gradient and the Cauchy
     // stress, which are both allocated by default in the mesh object
-    variables->add(InternalVariables::Matrix::TangentOperator);
+    variables->add(InternalVariables::rank4::tangent_operator);
 }
 
 void NeoHooke::update_internal_variables(double const time_step_size)
@@ -25,14 +25,14 @@ void NeoHooke::update_internal_variables(double const time_step_size)
     auto [F_list, cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DeformationGradient,
                                                       InternalVariables::Tensor::Cauchy);
 
-    auto& tangent_operators = variables->fetch(InternalVariables::Matrix::TangentOperator);
+    auto& tangent_operators = variables->fetch(InternalVariables::rank4::tangent_operator);
     auto const& detF_list = variables->fetch(InternalVariables::Scalar::DetF);
 
-    auto const I = Matrix3::Identity();
+    auto const I = matrix3::Identity();
 
     // Compute stresses
     cauchy_stresses = view::zip(F_list, detF_list)
-                      | view::transform([this, &I](auto const& tpl) -> Matrix3 {
+                      | view::transform([this, &I](auto const& tpl) -> matrix3 {
                             auto const [lambda, shear_modulus] = material.Lame_parameters();
 
                             auto const& [F, J] = tpl;

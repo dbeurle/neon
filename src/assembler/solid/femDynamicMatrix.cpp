@@ -11,8 +11,8 @@ namespace neon::mechanical::solid
 {
 femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh, Json::Value const& simulation)
     : femStaticMatrix(fem_mesh, simulation),
-      a(Vector::Zero(fem_mesh.active_dofs())),
-      v(Vector::Zero(fem_mesh.active_dofs())),
+      a(vector::Zero(fem_mesh.active_dofs())),
+      v(vector::Zero(fem_mesh.active_dofs())),
       newmark(simulation["Time"])
 {
 }
@@ -60,7 +60,7 @@ void femDynamicMatrix::assemble_mass()
 {
     // auto start = std::chrono::high_resolution_clock::now();
     //
-    // M = Vector::Zero(fem_mesh.active_dofs());
+    // M = vector::Zero(fem_mesh.active_dofs());
     //
     // for (auto const& submesh : fem_mesh.meshes())
     // {
@@ -83,7 +83,7 @@ void femDynamicMatrix::assemble_mass()
 
 void femDynamicMatrix::perform_equilibrium_iterations()
 {
-    // Vector delta_d = Vector::Zero(fem_mesh.active_dofs());
+    // vector delta_d = vector::Zero(fem_mesh.active_dofs());
     //
     // // Full Newton-Raphson iteration to solve nonlinear equations
     // auto constexpr max_iterations = 20;
@@ -105,7 +105,7 @@ void femDynamicMatrix::perform_equilibrium_iterations()
     //
     //     auto f = -fint;
     //
-    //     Vector residual = M.cwiseProduct(a) - f;
+    //     vector residual = M.cwiseProduct(a) - f;
     //
     //     // Build A = 1 / (β Δt^2) * M + K_int - K_ext
     //     assemble_stiffness();

@@ -8,29 +8,29 @@ namespace neon::mechanical
 namespace detail
 {
 /** Compute the von Mises stress based on the reduced stress tensor */
-[[nodiscard]] inline auto von_mises_stress(Matrix2 const& a)
+[[nodiscard]] inline auto von_mises_stress(matrix2 const& a)
 {
     return std::sqrt(3.0 / 2.0) * deviatoric(a).norm();
 }
 
 /** Compute the von Mises stress based on the full stress tensor */
-[[nodiscard]] inline auto von_mises_stress(Matrix3 const& a)
+[[nodiscard]] inline auto von_mises_stress(matrix3 const& a)
 {
     return std::sqrt(3.0 / 2.0) * deviatoric(a).norm();
 }
 
-[[nodiscard]] inline Matrix2 compute_cauchy_stress(double const G,
+[[nodiscard]] inline matrix2 compute_cauchy_stress(double const G,
                                                    double const lambda_e,
-                                                   Matrix2 const& elastic_strain)
+                                                   matrix2 const& elastic_strain)
 {
-    return lambda_e * elastic_strain.trace() * Matrix2::Identity() + 2.0 * G * elastic_strain;
+    return lambda_e * elastic_strain.trace() * matrix2::Identity() + 2.0 * G * elastic_strain;
 }
 
-[[nodiscard]] inline Matrix3 compute_cauchy_stress(double const G,
+[[nodiscard]] inline matrix3 compute_cauchy_stress(double const G,
                                                    double const lambda_e,
-                                                   Matrix3 const& elastic_strain)
+                                                   matrix3 const& elastic_strain)
 {
-    return lambda_e * elastic_strain.trace() * Matrix3::Identity() + 2.0 * G * elastic_strain;
+    return lambda_e * elastic_strain.trace() * matrix3::Identity() + 2.0 * G * elastic_strain;
 }
 }
 

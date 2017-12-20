@@ -47,7 +47,7 @@ MUMPS::~MUMPS()
     MUMPSAdapter::mumps_c(info);
 }
 
-void MUMPS::internal_solve(SparseMatrix const& A, Vector& x, Vector const& b)
+void MUMPS::internal_solve(SparseMatrix const& A, vector& x, vector const& b)
 {
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -142,7 +142,7 @@ void MUMPSLLT::allocate_coordinate_format_storage(SparseMatrix const& A)
     }
 }
 
-void MUMPSLLT::solve(SparseMatrix const& A, Vector& x, Vector const& b)
+void MUMPSLLT::solve(SparseMatrix const& A, vector& x, vector const& b)
 {
     this->allocate_coordinate_format_storage(A);
     internal_solve(A, x, b);
@@ -169,7 +169,7 @@ void MUMPSLU::allocate_coordinate_format_storage(SparseMatrix const& A)
     }
 }
 
-void MUMPSLU::solve(SparseMatrix const& A, Vector& x, Vector const& b)
+void MUMPSLU::solve(SparseMatrix const& A, vector& x, vector const& b)
 {
     this->allocate_coordinate_format_storage(A);
     internal_solve(A, x, b);

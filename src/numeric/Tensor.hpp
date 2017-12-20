@@ -17,9 +17,9 @@ template <class MatrixLeft, class MatrixRight>
 namespace detail
 {
 /** @return the volumetric part of the tensor */
-[[nodiscard]] inline Matrix2 volumetric(Matrix2 const& a)
+[[nodiscard]] inline matrix2 volumetric(matrix2 const& a)
 {
-    return Matrix2::Identity() * a.trace() / 3.0;
+    return matrix2::Identity() * a.trace() / 3.0;
 }
 
 /** @return the volumetric part of the tensor */
@@ -29,7 +29,7 @@ namespace detail
 }
 
 /** @return the deviatoric part of the tensor */
-[[nodiscard]] inline Matrix2 deviatoric(Matrix2 const& a) { return a - volumetric(a); }
+[[nodiscard]] inline matrix2 deviatoric(matrix2 const& a) { return a - volumetric(a); }
 
 /** @return the deviatoric part of the tensor */
 [[nodiscard]] inline matrix3 deviatoric(matrix3 const& a) { return a - volumetric(a); }
@@ -62,7 +62,7 @@ template <typename MatrixExpression>
 }
 
 /** @return The symmetric part of the tensor */
-[[nodiscard]] inline Matrix2 symmetric(Matrix2 const& a) { return 0.5 * (a.transpose() + a); }
+[[nodiscard]] inline matrix2 symmetric(matrix2 const& a) { return 0.5 * (a.transpose() + a); }
 
 /** @return The symmetric part of the tensor */
 [[nodiscard]] inline matrix3 symmetric(matrix3 const& a) { return 0.5 * (a.transpose() + a); }
@@ -90,11 +90,11 @@ template <typename MatrixExpression>
 /** @return Third invariant, which is the determinant of the tensor */
 [[nodiscard]] inline double I3(matrix3 const& a) { return a.determinant(); }
 
-[[nodiscard]] inline Matrix identity_expansion(Matrix const& H, int const nodal_dofs)
+[[nodiscard]] inline matrix identity_expansion(matrix const& H, int const nodal_dofs)
 {
     assert(H.rows() == H.cols());
     // Create the geometric part of the tangent stiffness matrix
-    Matrix K = Matrix::Zero(H.rows() * nodal_dofs, H.rows() * nodal_dofs);
+    matrix K = matrix::Zero(H.rows() * nodal_dofs, H.rows() * nodal_dofs);
     for (auto i = 0; i < H.rows(); ++i)
         for (auto j = 0; j < H.rows(); ++j)
             for (auto k = 0; k < nodal_dofs; ++k)
@@ -366,7 +366,7 @@ template <typename matrix_expression>
 }
 /*! @} End of Doxygen Groups */
 
-[[nodiscard]] inline matrix3 outer_product(Vector3 const& a, Vector3 const& b)
+[[nodiscard]] inline matrix3 outer_product(vector3 const& a, vector3 const& b)
 {
     return a * b.transpose();
 }
@@ -382,10 +382,10 @@ template <typename matrix_expression>
         & \mathbf{a} \otimes \mathbf{b} \otimes \mathbf{c} \otimes \mathbf{d}
     \f}
 */
-[[nodiscard]] inline matrix6 outer_product(Vector3 const& a,
-                                           Vector3 const& b,
-                                           Vector3 const& c,
-                                           Vector3 const& d)
+[[nodiscard]] inline matrix6 outer_product(vector3 const& a,
+                                           vector3 const& b,
+                                           vector3 const& c,
+                                           vector3 const& d)
 {
     return outer_product(outer_product(a, b), outer_product(c, d));
 }

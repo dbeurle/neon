@@ -53,15 +53,15 @@ public:
      * Compute the external force due to a Neumann type boundary condition.
      * This computes the following integral on a boundary element
      */
-    virtual std::tuple<List const&, Vector> external_force(int const element,
+    virtual std::tuple<List const&, vector> external_force(int const element,
                                                            double const load_factor) const override
     {
         auto const X = geometry::project_to_plane(
             material_coordinates->initial_configuration(nodal_connectivity[element]));
 
         // Perform the computation of the external load vector
-        auto const f_ext = sf->quadrature().integrate(Vector::Zero(X.cols()).eval(),
-                                                      [&](auto const& femval, auto const& l) -> Vector {
+        auto const f_ext = sf->quadrature().integrate(vector::Zero(X.cols()).eval(),
+                                                      [&](auto const& femval, auto const& l) -> vector {
                                                           auto const& [N, dN] = femval;
 
                                                           auto const j = (X * dN).determinant();
@@ -90,7 +90,7 @@ public:
     {
     }
 
-    std::tuple<List const&, Vector> external_force(int const element,
+    std::tuple<List const&, vector> external_force(int const element,
                                                    double const load_factor) const override
     {
         auto const X = material_coordinates->initial_configuration(nodal_connectivity[element]);
@@ -98,8 +98,8 @@ public:
         auto const f = interpolate_prescribed_load(load_factor);
 
         // Perform the computation of the external load vector
-        auto const f_ext = sf->quadrature().integrate(Vector::Zero(X.cols()).eval(),
-                                                      [&](auto const& femval, auto const& l) -> Vector {
+        auto const f_ext = sf->quadrature().integrate(vector::Zero(X.cols()).eval(),
+                                                      [&](auto const& femval, auto const& l) -> vector {
                                                           auto const& [N, dN] = femval;
 
                                                           auto const j = (X * dN).determinant();

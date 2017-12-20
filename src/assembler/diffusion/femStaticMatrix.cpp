@@ -12,8 +12,8 @@ namespace neon::diffusion
 {
 femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& simulation_data)
     : fem_mesh(fem_mesh),
-      f(Vector::Zero(fem_mesh.active_dofs())),
-      d(Vector::Zero(fem_mesh.active_dofs())),
+      f(vector::Zero(fem_mesh.active_dofs())),
+      d(vector::Zero(fem_mesh.active_dofs())),
       file_io(simulation_data["Name"].asString(), simulation_data["Visualisation"], fem_mesh),
       linear_solver(make_linear_solver(simulation_data["LinearSolver"]))
 {
@@ -146,7 +146,7 @@ void femStaticMatrix::assemble_stiffness()
               << "s\n";
 }
 
-void femStaticMatrix::apply_dirichlet_conditions(SparseMatrix& A, Vector& x, Vector& b)
+void femStaticMatrix::apply_dirichlet_conditions(SparseMatrix& A, vector& x, vector& b)
 {
     for (auto const& [name, dirichlet_boundaries] : fem_mesh.dirichlet_boundaries())
     {

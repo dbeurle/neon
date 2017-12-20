@@ -53,16 +53,16 @@ public:
     [[nodiscard]] auto const& constitutive() const { return *cm.get(); }
 
     /** @return the tangent consistent stiffness matrix */
-    [[nodiscard]] std::tuple<List const&, Matrix> tangent_stiffness(int const element) const;
+    [[nodiscard]] std::tuple<List const&, matrix> tangent_stiffness(int const element) const;
 
     /** @return the internal element force */
-    [[nodiscard]] std::tuple<List const&, Vector> internal_force(int const element) const;
+    [[nodiscard]] std::tuple<List const&, vector> internal_force(int const element) const;
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    [[nodiscard]] std::tuple<List const&, Matrix> consistent_mass(int const element) const;
+    [[nodiscard]] std::tuple<List const&, matrix> consistent_mass(int const element) const;
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    [[nodiscard]] std::tuple<List const&, Vector> diagonal_mass(int const element) const;
+    [[nodiscard]] std::tuple<List const&, vector> diagonal_mass(int const element) const;
 
     /** Update the internal variables for the mesh group
      *  \sa update_deformation_measures()
@@ -93,7 +93,7 @@ protected:
        \f}
      * Where B is the gradient operator in the finite element discretization
      */
-    [[nodiscard]] Matrix geometric_tangent_stiffness(matrix3x const& configuration,
+    [[nodiscard]] matrix geometric_tangent_stiffness(matrix3x const& configuration,
                                                      int32 const element) const;
 
     /**
@@ -102,7 +102,7 @@ protected:
      * k_{mat} &= I_{2x2} \int_{V} B_I^{T} \sigma B_{J} dV
      * \f}
      */
-    [[nodiscard]] Matrix material_tangent_stiffness(matrix3x const& configuration,
+    [[nodiscard]] matrix material_tangent_stiffness(matrix3x const& configuration,
                                                     int32 const element) const;
 
     /**
@@ -112,7 +112,7 @@ protected:
      * \f}
      * @return the internal nodal force vector
      */
-    [[nodiscard]] Vector internal_nodal_force(matrix3x const& configuration,
+    [[nodiscard]] vector internal_nodal_force(matrix3x const& configuration,
                                               int32 const element) const;
 
 private:

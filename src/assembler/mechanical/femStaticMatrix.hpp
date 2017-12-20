@@ -93,14 +93,14 @@ protected:
     double relative_force_norm;
 
     SparseMatrix Kt; //!< Tangent matrix stiffness
-    Vector fint;     //!< Internal force vector
-    Vector fext;     //!< External force vector
+    vector fint;     //!< Internal force vector
+    vector fext;     //!< External force vector
 
-    Vector displacement;     //!< Displacement vector
-    Vector displacement_old; //!< Last displacement vector
-    Vector delta_d;          //!< Incremental displacement vector
+    vector displacement;     //!< Displacement vector
+    vector displacement_old; //!< Last displacement vector
+    vector delta_d;          //!< Incremental displacement vector
 
-    Vector minus_residual; //!< Minus residual vector
+    vector minus_residual; //!< Minus residual vector
 
     std::unique_ptr<LinearSolver> linear_solver;
 };
@@ -110,11 +110,11 @@ femStaticMatrix<femMeshType>::femStaticMatrix(fem_mesh_type& fem_mesh, Json::Val
     : fem_mesh(fem_mesh),
       io(simulation["Name"].asString(), simulation["Visualisation"], fem_mesh),
       adaptive_load(simulation["Time"], fem_mesh.time_history()),
-      fint(Vector::Zero(fem_mesh.active_dofs())),
-      fext(Vector::Zero(fem_mesh.active_dofs())),
-      displacement(Vector::Zero(fem_mesh.active_dofs())),
-      displacement_old(Vector::Zero(fem_mesh.active_dofs())),
-      delta_d(Vector::Zero(fem_mesh.active_dofs())),
+      fint(vector::Zero(fem_mesh.active_dofs())),
+      fext(vector::Zero(fem_mesh.active_dofs())),
+      displacement(vector::Zero(fem_mesh.active_dofs())),
+      displacement_old(vector::Zero(fem_mesh.active_dofs())),
+      delta_d(vector::Zero(fem_mesh.active_dofs())),
       linear_solver(make_linear_solver(simulation["LinearSolver"], fem_mesh.is_symmetric()))
 {
     if (!simulation["NonlinearOptions"].isMember("DisplacementTolerance"))
@@ -310,7 +310,7 @@ void femStaticMatrix<femMeshType>::assemble_stiffness()
 }
 
 template <class femMeshType>
-void femStaticMatrix<femMeshType>::enforce_dirichlet_conditions(SparseMatrix& A, Vector& b) const
+void femStaticMatrix<femMeshType>::enforce_dirichlet_conditions(SparseMatrix& A, vector& b) const
 {
     for (auto const& [name, boundaries] : fem_mesh.displacement_boundaries())
     {

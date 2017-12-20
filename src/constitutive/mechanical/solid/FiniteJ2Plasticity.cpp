@@ -22,8 +22,8 @@ FiniteJ2Plasticity::FiniteJ2Plasticity(std::shared_ptr<InternalVariables>& varia
                    InternalVariables::Tensor::HenckyStrainElastic);
 
     // Add material tangent with the linear elasticity moduli
-    variables->add(InternalVariables::Matrix::TangentOperator,
-                   consistent_tangent(1.0, Matrix3::Zero(), Matrix3::Zero(), C_e));
+    variables->add(InternalVariables::rank4::tangent_operator,
+                   consistent_tangent(1.0, matrix3::Zero(), matrix3::Zero(), C_e));
 }
 
 FiniteJ2Plasticity::~FiniteJ2Plasticity() = default;
@@ -51,7 +51,7 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
           von_mises_stresses] = variables->fetch(InternalVariables::Scalar::EffectivePlasticStrain,
                                                  InternalVariables::Scalar::VonMisesStress);
 
-    auto& tangent_operators = variables->fetch(InternalVariables::Matrix::TangentOperator);
+    auto& tangent_operators = variables->fetch(InternalVariables::rank4::tangent_operator);
 
     auto const incremental_deformation_gradients = view::zip(deformation_gradients,
                                                              old_deformation_gradients)
@@ -74,14 +74,14 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
         // std::cout << "log strain elastic\n" << log_strain_e << std::endl;
 
         // Elastic trial deformation gradient
-        Matrix3 const B_e = (2.0 * log_strain_e).exp();
+        matrix3 const B_e = (2.0 * log_strain_e).exp();
 
         // std::cout << "B elastic\n" << B_e << std::endl;
 
         // std::cout << "Finc\n" << F_inc << std::endl;
 
         // Elastic trial left Cauchy-Green deformation tensor
-        Matrix3 const B_e_trial = F_inc * B_e * F_inc.transpose();
+        matrix3 const B_e_trial = F_inc * B_e * F_inc.transpose();
 
         // std::cout << "B elastic trial\n" << B_e_trial << std::endl;
 
@@ -113,7 +113,7 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
 
         // Compute the normal direction to the yield surface which remains
         // constant throughout the radial return method
-        Matrix3 const normal = deviatoric(cauchy_stress) / deviatoric(cauchy_stress).norm();
+        matrix3 const normal = deviatoric(cauchy_stress) / deviatoric(cauchy_stress).norm();
 
         // Initialise the plastic increment
         auto const plastic_increment = perform_radial_return(von_mises, accumulated_plastic_strain);
@@ -142,36 +142,36 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
     }
 }
 
-Matrix6 FiniteJ2Plasticity::consistent_tangent(double const J,
-                                               Matrix3 const& Be_trial,
-                                               Matrix3 const& cauchy_stress,
-                                               Matrix6 const& C)
+matrix6 FiniteJ2Plasticity::consistent_tangent(double const J,
+                                               matrix3 const& Be_trial,
+                                               matrix3 const& cauchy_stress,
+                                               matrix6 const& C)
 {
     // Convert to Mandel notation so matrix multiplication == double dot operation
-    Matrix6 const D = voigt_to_mandel(C);
-    Matrix6 const L = voigt_to_mandel(compute_L(Be_trial));
-    Matrix6 const B = voigt_to_mandel(compute_B(Be_trial));
+    matrix6 const D = voigt_to_mandel(C);
+    matrix6 const L = voigt_to_mandel(compute_L(Be_trial));
+    matrix6 const B = voigt_to_mandel(compute_B(Be_trial));
 
-    Matrix6 const H = compute_H(cauchy_stress);
+    matrix6 const H = compute_H(cauchy_stress);
 
     return 1.0 / (2.0 * J) * D * L * B - H;
 }
 
-std::tuple<Vector3, std::array<Matrix3, 3>, bool, std::array<int, 3>> FiniteJ2Plasticity::
-    compute_eigenvalues_eigenprojections(Matrix3 const& X) const
+std::tuple<vector3, std::array<matrix3, 3>, bool, std::array<int, 3>> FiniteJ2Plasticity::
+    compute_eigenvalues_eigenprojections(matrix3 const& X) const
 {
-    Eigen::SelfAdjointEigenSolver<Matrix3> eigen_solver(X);
+    Eigen::SelfAdjointEigenSolver<matrix3> eigen_solver(X);
 
     if (eigen_solver.info() != Eigen::Success)
     {
         throw computational_error("Eigenvalue solver failed in finite plasticity routine\n");
     }
 
-    Vector3 const x = eigen_solver.eigenvalues();
-    Matrix3 const v = eigen_solver.eigenvectors();
+    vector3 const x = eigen_solver.eigenvalues();
+    matrix3 const v = eigen_solver.eigenvectors();
 
     // Eigenprojections
-    std::array<Matrix3, 3> E = {{v.col(0) * v.col(0).transpose(),
+    std::array<matrix3, 3> E = {{v.col(0) * v.col(0).transpose(),
                                  v.col(1) * v.col(1).transpose(),
                                  v.col(2) * v.col(2).transpose()}};
 
@@ -183,34 +183,34 @@ std::tuple<Vector3, std::array<Matrix3, 3>, bool, std::array<int, 3>> FiniteJ2Pl
     if (is_approx(x(0), x(1)) && is_approx(x(1), x(2)))
     {
         std::cout << "We have repeated eigenvalues!\n" << x << std::endl;
-        E[0] = Matrix3::Identity();
+        E[0] = matrix3::Identity();
         is_repeated = true;
         abc_ordering = {{-1, -1, -1}};
     }
     else if (!is_approx(x(0), x(1)) && is_approx(x(1), x(2)))
     {
-        E[1] = Matrix3::Identity() - E[0];
+        E[1] = matrix3::Identity() - E[0];
         is_repeated = true;
         abc_ordering = {{0, 1, 2}};
     }
     else if (!is_approx(x(2), x(0)) && is_approx(x(0), x(1)))
     {
-        E[0] = Matrix3::Identity() - E[2];
+        E[0] = matrix3::Identity() - E[2];
         is_repeated = true;
         abc_ordering = {{2, 0, 1}};
     }
     else if (!is_approx(x(1), x(2)) && is_approx(x(2), x(0)))
     {
-        E[2] = Matrix3::Identity() - E[1];
+        E[2] = matrix3::Identity() - E[1];
         is_repeated = true;
         abc_ordering = {{1, 2, 0}};
     }
     return {x, E, is_repeated, abc_ordering};
 }
 
-Matrix6 FiniteJ2Plasticity::derivative_tensor_log_unique(Matrix3 const& Be_trial,
-                                                         Vector3 const& x,
-                                                         std::array<Matrix3, 3> const& E,
+matrix6 FiniteJ2Plasticity::derivative_tensor_log_unique(matrix3 const& Be_trial,
+                                                         vector3 const& x,
+                                                         std::array<matrix3, 3> const& E,
                                                          std::array<int, 3> const& abc_ordering) const
 {
     auto const [a, b, c] = abc_ordering;
@@ -221,7 +221,7 @@ Matrix6 FiniteJ2Plasticity::derivative_tensor_log_unique(Matrix3 const& Be_trial
            + 1.0 / x(a) * outer_product(E[a]);
 }
 
-Matrix6 FiniteJ2Plasticity::compute_L(Matrix3 const& Be_trial) const
+matrix6 FiniteJ2Plasticity::compute_L(matrix3 const& Be_trial) const
 {
     auto const [x, E, is_repeated, abc_ordering] = compute_eigenvalues_eigenprojections(Be_trial);
 
@@ -238,7 +238,7 @@ Matrix6 FiniteJ2Plasticity::compute_L(Matrix3 const& Be_trial) const
 
         std::cout << "Eigenvalues\n" << x << std::endl;
 
-        Vector3 const y = x.array().log();
+        vector3 const y = x.array().log();
 
         std::cout << "log Eigenvalues\n" << y << std::endl;
 
@@ -252,18 +252,18 @@ Matrix6 FiniteJ2Plasticity::compute_L(Matrix3 const& Be_trial) const
         auto const s6 = std::pow(x(c), 2) * s3;
 
         return s1 * dX2_dX(Be_trial) - s2 * Isym - s3 * outer_product(Be_trial)
-               + s4 * outer_product(Be_trial, Matrix3::Identity())
-               + s5 * outer_product(Matrix3::Identity(), Be_trial)
-               + s6 * outer_product(Matrix3::Identity());
+               + s4 * outer_product(Be_trial, matrix3::Identity())
+               + s5 * outer_product(matrix3::Identity(), Be_trial)
+               + s6 * outer_product(matrix3::Identity());
     }
     // Derivative with all repeated eigenvalues
     std::cout << "Returning the symmetrix identity tensor and the first eigenvalue " << x(0) << "\n";
     return x.norm() < 1.0e-5 ? Isym : Isym / x(0);
 }
 
-Matrix6 FiniteJ2Plasticity::compute_B(Matrix3 const& Be_trial) const
+matrix6 FiniteJ2Plasticity::compute_B(matrix3 const& Be_trial) const
 {
-    Matrix6 B(6, 6);
+    matrix6 B(6, 6);
     // clang-format off
     B << 2 * Be_trial(0, 0),                  0,                  0,                  0, 2 * Be_trial(0, 2), 2 * Be_trial(0, 1),
                           0, 2 * Be_trial(1, 1),                  0, 2 * Be_trial(1, 2),                  0,                  0,
@@ -275,9 +275,9 @@ Matrix6 FiniteJ2Plasticity::compute_B(Matrix3 const& Be_trial) const
     return B;
 }
 
-Matrix6 FiniteJ2Plasticity::compute_H(Matrix3 const& s) const
+matrix6 FiniteJ2Plasticity::compute_H(matrix3 const& s) const
 {
-    Matrix6 H(6, 6);
+    matrix6 H(6, 6);
     // clang-format off
     H << 2 * s(0, 0),           0,           0,           0, 2 * s(0, 2), 2 * s(0, 1),
                    0, 2 * s(1, 1),           0, 2 * s(1, 2),           0,           0,
@@ -289,9 +289,9 @@ Matrix6 FiniteJ2Plasticity::compute_H(Matrix3 const& s) const
     return H;
 }
 
-Matrix6 FiniteJ2Plasticity::dX2_dX(Matrix3 const& X) const
+matrix6 FiniteJ2Plasticity::dX2_dX(matrix3 const& X) const
 {
-    Matrix6 dx2_dx(6, 6);
+    matrix6 dx2_dx(6, 6);
     // clang-format off
     dx2_dx << 2 * X(0, 0),         0.0,         0.0,               0.0,           X(2, 0),          X(1, 0),
                       0.0, 2 * X(1, 1),         0.0,           X(2, 1),               0.0,          X(1, 0),
@@ -303,9 +303,9 @@ Matrix6 FiniteJ2Plasticity::dX2_dX(Matrix3 const& X) const
     return dx2_dx;
 }
 
-Matrix6 FiniteJ2Plasticity::mandel_transformation() const
+matrix6 FiniteJ2Plasticity::mandel_transformation() const
 {
-    Matrix6 M = Matrix6::Ones();
+    matrix6 M = matrix6::Ones();
 
     M.block<3, 3>(0, 3) *= std::sqrt(2);
     M.block<3, 3>(3, 0) *= std::sqrt(2);
@@ -324,11 +324,11 @@ Matrix6 FiniteJ2Plasticity::mandel_transformation() const
 //
 // auto const theta = std::acos(R / std::sqrt(std::pow(Q, 3)));
 //
-// Vector3 x(-2.0 * std::sqrt(Q) * std::cos(theta / 3.0) + I1 / 3.0,
+// vector3 x(-2.0 * std::sqrt(Q) * std::cos(theta / 3.0) + I1 / 3.0,
 //           -2.0 * std::sqrt(Q) * std::cos((theta + 2.0 * M_PI) / 3.0) + I1 / 3.0,
 //           -2.0 * std::sqrt(Q) * std::cos((theta - 2.0 * M_PI) / 3.0) + I1 / 3.0);
 //
-// std::array<Matrix3, 3> E;
+// std::array<matrix3, 3> E;
 // int repeated_eigenvalues = 0;
 //
 // // Perform checks to determine if there are repeated eigenvalues
@@ -337,7 +337,7 @@ Matrix6 FiniteJ2Plasticity::mandel_transformation() const
 //     for (int i = 0; i < 3; i++)
 //     {
 //         E[i] = x(i) / (2.0 * std::pow(x(i), 3) - I1 * std::pow(x(i), 2) + I3)
-//                * (X * X - (I1 - x(i)) * X + I3 / x(i) * Matrix3::Identity());
+//                * (X * X - (I1 - x(i)) * X + I3 / x(i) * matrix3::Identity());
 //     }
 // }
 // else if (!is_approx(x1, x2) && is_approx(x2, x3))
@@ -346,6 +346,6 @@ Matrix6 FiniteJ2Plasticity::mandel_transformation() const
 // }
 // else
 // {
-//     E[0] = Matrix3::Identity();
+//     E[0] = matrix3::Identity();
 //     repeated_eigenvalue = 2;
 // }

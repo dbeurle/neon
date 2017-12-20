@@ -5,7 +5,7 @@
 
 namespace neon::geometry
 {
-Matrix2x project_to_plane(Matrix3x const& nodal_coordinates);
+matrix2x project_to_plane(matrix3x const& nodal_coordinates);
 
-Vector3 unit_outward_normal(Matrix3x const& nodal_coordinates);
+vector3 unit_outward_normal(matrix3x const& nodal_coordinates);
 }

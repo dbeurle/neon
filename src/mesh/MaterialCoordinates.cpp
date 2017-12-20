@@ -14,16 +14,16 @@ namespace neon
 template <int stride>
 using vector_view = Eigen::Map<vector, 0, Eigen::InnerStride<stride>>;
 
-MaterialCoordinates::MaterialCoordinates(Vector const& initial_coordinates)
+MaterialCoordinates::MaterialCoordinates(vector const& initial_coordinates)
     : NodalCoordinates(initial_coordinates), x(initial_coordinates)
 {
 }
 
-Vector MaterialCoordinates::displacement(List const& local_dofs) const
+vector MaterialCoordinates::displacement(List const& local_dofs) const
 {
     using namespace ranges;
 
-    Vector localdisp(local_dofs.size());
+    vector localdisp(local_dofs.size());
 
     for_each(view::zip(view::ints(0), local_dofs), [&](auto const& zip_pair) {
         auto const& [i, local_dof] = zip_pair;

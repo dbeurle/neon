@@ -20,7 +20,7 @@ IsotropicLinearElasticity::IsotropicLinearElasticity(std::shared_ptr<InternalVar
                    InternalVariables::Scalar::VonMisesStress);
 
     // Add material tangent with the linear elasticity spatial moduli
-    variables->add(InternalVariables::Matrix::TangentOperator, elastic_moduli());
+    variables->add(InternalVariables::rank4::tangent_operator, elastic_moduli());
 }
 
 IsotropicLinearElasticity::~IsotropicLinearElasticity() = default;
@@ -38,7 +38,7 @@ void IsotropicLinearElasticity::update_internal_variables(double const time_step
 
     auto& von_mises_stresses = variables->fetch(InternalVariables::Scalar::VonMisesStress);
 
-    auto const& tangents = variables->fetch(InternalVariables::Matrix::TangentOperator);
+    auto const& tangents = variables->fetch(InternalVariables::rank4::tangent_operator);
 
     // std::cout << "Computing elastic strains" << std::endl;
 

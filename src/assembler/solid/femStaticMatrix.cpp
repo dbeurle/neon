@@ -17,11 +17,11 @@ femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& simulatio
     : fem_mesh(fem_mesh),
       io(simulation["Name"].asString(), simulation["Visualisation"], fem_mesh),
       adaptive_load(simulation["Time"], fem_mesh.time_history()),
-      fint(Vector::Zero(fem_mesh.active_dofs())),
-      fext(Vector::Zero(fem_mesh.active_dofs())),
-      displacement(Vector::Zero(fem_mesh.active_dofs())),
-      displacement_old(Vector::Zero(fem_mesh.active_dofs())),
-      delta_d(Vector::Zero(fem_mesh.active_dofs())),
+      fint(vector::Zero(fem_mesh.active_dofs())),
+      fext(vector::Zero(fem_mesh.active_dofs())),
+      displacement(vector::Zero(fem_mesh.active_dofs())),
+      displacement_old(vector::Zero(fem_mesh.active_dofs())),
+      delta_d(vector::Zero(fem_mesh.active_dofs())),
       linear_solver(make_linear_solver(simulation["LinearSolver"], fem_mesh.is_symmetric()))
 {
     if (!simulation["NonlinearOptions"].isMember("DisplacementTolerance"))
@@ -194,9 +194,9 @@ void femStaticMatrix::assemble_stiffness()
             auto const& dofs = std::get<0>(tpl);
             auto const& ke = std::get<1>(tpl);
 
-            for (auto b = 0; b < dofs.size(); b++)
+            for (auto a = 0; a < dofs.size(); a++)
             {
-                for (auto a = 0; a < dofs.size(); a++)
+                for (auto b = 0; b < dofs.size(); b++)
                 {
 #pragma omp atomic
                     Kt.coeffRef(dofs[a], dofs[b]) += ke(a, b);
@@ -212,7 +212,7 @@ void femStaticMatrix::assemble_stiffness()
               << elapsed_seconds.count() << "s\n";
 }
 
-void femStaticMatrix::enforce_dirichlet_conditions(SparseMatrix& A, Vector& b) const
+void femStaticMatrix::enforce_dirichlet_conditions(SparseMatrix& A, vector& b) const
 {
     for (auto const& [name, boundaries] : fem_mesh.displacement_boundaries())
     {

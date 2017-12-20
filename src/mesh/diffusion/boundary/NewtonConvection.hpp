@@ -45,7 +45,7 @@ public:
          k_{ab} &= \int_{\Gamma} N_a \lambda N_b d\Gamma
        \f}
      */
-    [[nodiscard]] std::tuple<List const&, Matrix> external_stiffness(int const element,
+    [[nodiscard]] std::tuple<List const&, matrix> external_stiffness(int const element,
                                                                      double const load_factor) const;
 
 protected:

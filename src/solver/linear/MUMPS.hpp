@@ -68,7 +68,7 @@ protected:
      */
     virtual void allocate_coordinate_format_storage(SparseMatrix const& A) = 0;
 
-    void internal_solve(SparseMatrix const& A, Vector& x, Vector const& b);
+    void internal_solve(SparseMatrix const& A, vector& x, vector const& b);
 
 protected:
     MUMPSAdapter::MUMPS_STRUC_C info;
@@ -87,7 +87,7 @@ class MUMPSLLT : public MUMPS
 public:
     MUMPSLLT() : MUMPS(MUMPS::MatrixProperty::SPD) {}
 
-    void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
+    void solve(SparseMatrix const& A, vector& x, vector const& b) override final;
 
 protected:
     virtual void allocate_coordinate_format_storage(SparseMatrix const& A) override final;
@@ -103,7 +103,7 @@ class MUMPSLU : public MUMPS
 public:
     MUMPSLU() : MUMPS(MUMPS::MatrixProperty::Unsymmetric) {}
 
-    void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
+    void solve(SparseMatrix const& A, vector& x, vector const& b) override final;
 
 protected:
     virtual void allocate_coordinate_format_storage(SparseMatrix const& A) override final;

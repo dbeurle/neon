@@ -16,7 +16,7 @@ femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh, Json::Value const& simulat
         && simulation_data["InitialConditions"].isMember("Uniform"))
     {
         d = simulation_data["InitialConditions"]["Uniform"].asDouble()
-            * Vector::Ones(fem_mesh.active_dofs());
+            * vector::Ones(fem_mesh.active_dofs());
     }
 }
 
@@ -45,7 +45,7 @@ void femDynamicMatrix::solve()
 
         SparseMatrix A = M + time_solver.current_time_step_size() * K;
 
-        Vector b = M * d + time_solver.current_time_step_size() * f;
+        vector b = M * d + time_solver.current_time_step_size() * f;
 
         apply_dirichlet_conditions(A, d, b);
 

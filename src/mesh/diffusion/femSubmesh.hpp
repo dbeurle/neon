@@ -22,7 +22,7 @@ namespace diffusion
 class femSubmesh : public Submesh
 {
 public:
-    using ValueCount = std::tuple<Vector, Vector>;
+    using ValueCount = std::tuple<vector, vector>;
 
 public:
     explicit femSubmesh(Json::Value const& material_data,
@@ -31,7 +31,7 @@ public:
                         Submesh const& submesh);
 
     /** @return list of global degrees of freedom for an element */
-    [[nodiscard]] List const& local_dof_list(int const element) const {
+    [[nodiscard]] local_indices const& local_dof_list(int const element) const {
         return local_node_list(element);
     }
 
@@ -57,7 +57,7 @@ public:
      * where \f$ \kappa \f$ is the conductivity
      * @return DoFs and stiffness matrix
      */
-    [[nodiscard]] std::tuple<List const&, Matrix> tangent_stiffness(int const element) const;
+    [[nodiscard]] std::tuple<local_indices const&, matrix> tangent_stiffness(int const element) const;
 
     /**
      * Compute the consistent (full) mass matrix according to
@@ -67,10 +67,10 @@ public:
      * where \f$ \rho \f$ is the density and \f$ c_p \f$ is the specific heat
      * @return DoFs and consistent mass matrix \sa diagonal_mass
      */
-    [[nodiscard]] std::tuple<List const&, Matrix> consistent_mass(int const element) const;
+    [[nodiscard]] std::tuple<local_indices const&, matrix> consistent_mass(int const element) const;
 
     /** @return Diagonal mass matrix using row sum technique \sa consistent_mass */
-    [[nodiscard]] std::tuple<List const&, Vector> diagonal_mass(int const element) const;
+    [[nodiscard]] std::tuple<local_indices const&, vector> diagonal_mass(int const element) const;
 
     /** Update the internal variables for the mesh group */
     void update_internal_variables(double const time_step_size);
@@ -80,7 +80,7 @@ public:
      * @param rhea Shape function gradients at quadrature point
      * @param configuration Configuration of the element (coordinates)
      */
-    [[nodiscard]] Matrix3 local_jacobian(Matrix const& rhea, Matrix const& configuration) const {
+    [[nodiscard]] matrix3 local_jacobian(matrix const& rhea, matrix const& configuration) const {
         return configuration * rhea;
     }
 

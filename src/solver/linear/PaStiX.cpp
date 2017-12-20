@@ -20,7 +20,7 @@ PaStiXLDLT::PaStiXLDLT()
     // ldlt.iparm(64) = 1;
 }
 
-void PaStiXLDLT::solve(SparseMatrix const& A, Vector& x, Vector const& b)
+void PaStiXLDLT::solve(SparseMatrix const& A, vector& x, vector const& b)
 {
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -52,7 +52,7 @@ PaStiXLU::PaStiXLU()
     // ldlt.iparm(64) = 1;
 }
 
-void PaStiXLU::solve(SparseMatrix const& A, Vector& x, Vector const& b)
+void PaStiXLU::solve(SparseMatrix const& A, vector& x, vector const& b)
 {
     auto start = std::chrono::high_resolution_clock::now();
 

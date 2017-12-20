@@ -41,7 +41,7 @@ void femSubmesh::save_internal_variables(bool const have_converged)
     }
 }
 
-std::tuple<List const&, Matrix> femSubmesh::tangent_stiffness(int const element) const
+std::tuple<local_indices const&, matrix> femSubmesh::tangent_stiffness(int const element) const
 {
     auto const X = material_coordinates->current_configuration(local_node_list(element));
 
@@ -49,9 +49,9 @@ std::tuple<List const&, Matrix> femSubmesh::tangent_stiffness(int const element)
 
     auto const& D_Vec = variables->fetch(InternalVariables::Tensor::Conductivity);
 
-    Matrix const kmat = sf->quadrature()
-                            .integrate(Matrix::Zero(n, n).eval(),
-                                       [&](auto const& femval, auto const& l) -> Matrix {
+    matrix const kmat = sf->quadrature()
+                            .integrate(matrix::Zero(n, n).eval(),
+                                       [&](auto const& femval, auto const& l) -> matrix {
                                            auto const& [N, rhea] = femval;
 
                                            auto const& D = D_Vec[offset(element, l)];
@@ -67,15 +67,15 @@ std::tuple<List const&, Matrix> femSubmesh::tangent_stiffness(int const element)
     return {local_dof_list(element), kmat};
 }
 
-std::tuple<List const&, Matrix> femSubmesh::consistent_mass(int const element) const
+std::tuple<local_indices const&, matrix> femSubmesh::consistent_mass(int const element) const
 {
     auto X = material_coordinates->current_configuration(local_node_list(element));
 
     auto const density = cm->intrinsic_material().initial_density();
     auto const specific_heat = cm->intrinsic_material().specific_heat();
 
-    auto m = sf->quadrature().integrate(Matrix::Zero(nodes_per_element(), nodes_per_element()).eval(),
-                                        [&](auto const& femval, auto const& l) -> Matrix {
+    auto m = sf->quadrature().integrate(matrix::Zero(nodes_per_element(), nodes_per_element()).eval(),
+                                        [&](auto const& femval, auto const& l) -> matrix {
                                             auto const& [N, dN] = femval;
 
                                             auto const Jacobian = local_jacobian(dN, X);
@@ -86,11 +86,11 @@ std::tuple<List const&, Matrix> femSubmesh::consistent_mass(int const element) c
     return {local_dof_list(element), m};
 }
 
-std::tuple<List const&, Vector> femSubmesh::diagonal_mass(int const element) const
+std::tuple<local_indices const&, vector> femSubmesh::diagonal_mass(int const element) const
 {
     auto const& [dofs, consistent_m] = this->consistent_mass(element);
 
-    Vector diagonal_m(consistent_m.rows());
+    vector diagonal_m(consistent_m.rows());
     for (auto i = 0; i < consistent_m.rows(); ++i)
     {
         diagonal_m(i) = consistent_m.row(i).sum();
@@ -117,15 +117,15 @@ int femSubmesh::offset(int const element, int const quadrature_point) const
 
 femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(InternalVariables::Scalar const scalar_name) const
 {
-    Vector count = Vector::Zero(material_coordinates->size());
-    Vector value = count;
+    vector count = vector::Zero(material_coordinates->size());
+    vector value = count;
 
     auto const& scalar_list = variables->fetch(scalar_name);
 
     auto const& E = sf->local_quadrature_extrapolation();
 
-    // Vector format of values
-    Vector component = Vector::Zero(sf->quadrature().points());
+    // vector format of values
+    vector component = vector::Zero(sf->quadrature().points());
 
     for (auto e = 0; e < elements(); ++e)
     {
@@ -138,7 +138,7 @@ femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(InternalVariables::Sc
         }
 
         // Local extrapolation to the nodes
-        Vector const nodal_component = E * component;
+        vector const nodal_component = E * component;
 
         for (auto n = 0; n < nodal_component.rows(); n++)
         {

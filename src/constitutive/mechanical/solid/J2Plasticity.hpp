@@ -30,10 +30,10 @@ public:
     virtual bool is_finite_deformation() const override { return false; }
 
 protected:
-    [[nodiscard]] Matrix6 algorithmic_tangent(double const plastic_increment,
+    [[nodiscard]] matrix6 algorithmic_tangent(double const plastic_increment,
                                               double const accumulated_plastic_strain,
                                               double const von_mises,
-                                              Matrix3 const& normal) const;
+                                              matrix3 const& normal) const;
 
     /**
      * Performs the radial return algorithm with nonlinear hardening for
@@ -54,6 +54,6 @@ protected:
 protected:
     IsotropicElasticPlastic material;
 
-    Matrix6 const I_dev = voigt::kinematic::deviatoric();
+    matrix6 const I_dev = voigt::kinematic::deviatoric();
 };
 }

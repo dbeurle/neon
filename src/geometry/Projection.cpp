@@ -5,24 +5,24 @@
 
 namespace neon::geometry
 {
-Matrix2x project_to_plane(Matrix3x const& nodal_coordinates)
+matrix2x project_to_plane(matrix3x const& nodal_coordinates)
 {
     auto const lnodes = nodal_coordinates.cols();
 
-    Matrix2x plane_coordinates = Matrix::Zero(2, lnodes);
+    matrix2x plane_coordinates = matrix::Zero(2, lnodes);
 
     auto const normal = unit_outward_normal(nodal_coordinates);
 
     // Orthogonal basis vectors
-    Vector3 e1, e2;
+    vector3 e1, e2;
 
     // Algorithm implemented from Jeppe Revall Frisvad titled
     // Building an Orthonormal Basis from a 3D Unit Vector Without Normalization
     if (normal(2) <= -0.9999999)
     {
         // Handle the singularity
-        e1 = -Vector3::UnitY();
-        e2 = -Vector3::UnitX();
+        e1 = -vector3::UnitY();
+        e2 = -vector3::UnitX();
     }
     else
     {
@@ -40,7 +40,7 @@ Matrix2x project_to_plane(Matrix3x const& nodal_coordinates)
     return plane_coordinates;
 }
 
-Vector3 unit_outward_normal(Matrix3x const& nodal_coordinates)
+vector3 unit_outward_normal(matrix3x const& nodal_coordinates)
 {
     using namespace Eigen;
     Hyperplane<double, 3> hp = Hyperplane<double, 3>::Through(nodal_coordinates.col(0),
