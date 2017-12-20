@@ -14,39 +14,24 @@ namespace neon
 template <int stride>
 using vector_view = Eigen::Map<vector, 0, Eigen::InnerStride<stride>>;
 
-MaterialCoordinates::MaterialCoordinates(vector const& initial_coordinates)
+MaterialCoordinates::MaterialCoordinates(matrix3x const& initial_coordinates)
     : NodalCoordinates(initial_coordinates), x(initial_coordinates)
 {
 }
 
-vector MaterialCoordinates::displacement(List const& local_dofs) const
-{
-    using namespace ranges;
-
-    vector localdisp(local_dofs.size());
-
-    for_each(view::zip(view::ints(0), local_dofs), [&](auto const& zip_pair) {
-        auto const& [i, local_dof] = zip_pair;
-        localdisp(i) = x(local_dof) - X(local_dof);
-    });
-    return localdisp;
-}
+matrix3x MaterialCoordinates::displacement() const { return x - X; }
 
 void MaterialCoordinates::update_current_xy_configuration(vector const& u)
 {
-    // std::cout << "New solution vector u\n" << u << std::endl;
-    // std::cout << "Before modification\n" << x << std::endl;
+    x.row(0) = X.row(0) + u(Eigen::seq(0, u.size() - 1, 2)).transpose();
+    x.row(1) = X.row(1) + u(Eigen::seq(1, u.size() - 1, 2)).transpose();
+}
 
-    vector_view<3>(x.data(), x.size() / 3) = vector_view<3>(X.data(), X.size() / 3)
-                                             + vector_view<2>(const_cast<vector::Scalar*>(u.data()),
-                                                              u.size() / 2);
-
-    vector_view<3>(x.data() + 1,
-                   x.size() / 3) = vector_view<3>(X.data() + 1, X.size() / 3)
-                                   + vector_view<2>(const_cast<vector::Scalar*>(u.data() + 1),
-                                                    u.size() / 2);
-
-    // std::cout << "After modification\n" << x << std::endl;
+void MaterialCoordinates::update_current_configuration(vector const& u)
+{
+    x.row(0) = X.row(0) + u(Eigen::seq(0, u.size() - 1, 3)).transpose();
+    x.row(1) = X.row(1) + u(Eigen::seq(1, u.size() - 1, 3)).transpose();
+    x.row(2) = X.row(2) + u(Eigen::seq(2, u.size() - 1, 3)).transpose();
 }
 
 vtkSmartPointer<vtkPoints> MaterialCoordinates::vtk_coordinates() const
@@ -64,27 +49,17 @@ vtkSmartPointer<vtkPoints> MaterialCoordinates::vtk_coordinates() const
 
 vtkSmartPointer<vtkDoubleArray> MaterialCoordinates::vtk_displacement() const
 {
+    static_assert(!X.IsRowMajor, "This assumes the storage is column major");
+
     auto displacements = vtkSmartPointer<vtkDoubleArray>::New();
-    displacements->Allocate(X.size() / 3);
-    displacements->SetNumberOfComponents(3);
+    displacements->Allocate(X.cols());
+    displacements->SetNumberOfComponents(X.rows());
     displacements->SetName("Displacements");
 
-    for (auto i = 0; i < X.size(); i += 3)
+    for (auto i = 0; i < X.cols(); i++)
     {
-        displacements->InsertNextTuple3(x(i) - X(i), x(i + 1) - X(i + 1), x(i + 2) - X(i + 2));
+        displacements->InsertNextTuple3(x(0, i) - X(0, i), x(1, i) - X(1, i), x(2, i) - X(2, i));
     }
     return displacements;
-}
-
-matrix3x MaterialCoordinates::get_configuration(local_indices const& local_nodes,
-                                                vector const& configuration) const
-{
-    matrix3x element_displacement(3, local_nodes.size());
-
-    for (auto lnode = 0; lnode < local_nodes.size(); lnode++)
-    {
-        element_displacement.col(lnode) = configuration.segment<3>(3 * local_nodes[lnode]);
-    }
-    return element_displacement;
 }
 }
