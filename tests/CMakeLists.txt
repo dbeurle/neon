@@ -1,5 +1,7 @@
 
 foreach(test
+             nodal_coordinates
+             material_coordinates
              AdaptiveIncrementTest
              BoundaryTest
              ConstitutiveTest

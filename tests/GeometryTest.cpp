@@ -26,57 +26,6 @@ constexpr auto ZERO_MARGIN = 1.0e-5;
 Json::CharReaderBuilder reader;
 JSONCPP_STRING input_errors;
 
-TEST_CASE("Testing material coordinates", "[MaterialCoordinates]")
-{
-    // Build a right angled triangle
-    vector coordinates(9);
-    coordinates << 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0;
-
-    // Setup the test case
-    NodalCoordinates nodes(coordinates);
-    MaterialCoordinates material_coordinates(coordinates);
-
-    // Test with a random displacement vector
-    vector local_displacements = vector::Random(9);
-
-    matrix local_initial_config(3, 3);
-    local_initial_config << 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0;
-
-    // Indices for the first three nodes
-    List local_node_list = view::ints(0, 3);
-
-    // Check that we are fetching the right local element vector
-    List local_dof_list = view::ints(0, 9);
-
-    SECTION("Nodes scaffolding")
-    {
-        vector triangle = vector::Zero(9);
-        triangle << 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0;
-        REQUIRE((nodes.coordinates() - triangle).norm() == Approx(0.0).margin(ZERO_MARGIN));
-    }
-    SECTION("Check initial displacements are zero")
-    {
-        REQUIRE(material_coordinates.displacement().norm() == Approx(0.0).margin(ZERO_MARGIN));
-    }
-    SECTION("Test update of coordinates")
-    {
-        material_coordinates.update_current_configuration(local_displacements);
-        REQUIRE((material_coordinates.displacement() - local_displacements).norm()
-                == Approx(0.0).margin(ZERO_MARGIN));
-    }
-    SECTION("Test local displacement via lookup")
-    {
-        material_coordinates.update_current_configuration(local_displacements);
-        REQUIRE((material_coordinates.displacement(local_dof_list) - local_displacements).norm()
-                == Approx(0.0).margin(ZERO_MARGIN));
-    }
-    SECTION("Test element view configuration")
-    {
-        REQUIRE(
-            (material_coordinates.initial_configuration(local_node_list) - local_initial_config).norm()
-            == Approx(0.0).margin(ZERO_MARGIN));
-    }
-}
 TEST_CASE("Basic mesh test")
 {
     // Read in a cube mesh from the json input file and use this to
@@ -231,7 +180,7 @@ TEST_CASE("Solid submesh test")
     }
     SECTION("Tangent stiffness")
     {
-        auto [local_dofs, stiffness] = fem_submesh.tangent_stiffness(0);
+        auto[local_dofs, stiffness] = fem_submesh.tangent_stiffness(0);
         REQUIRE(local_dofs.size() == number_of_local_dofs);
         REQUIRE(stiffness.rows() == number_of_local_dofs);
         REQUIRE(stiffness.cols() == number_of_local_dofs);
@@ -242,14 +191,14 @@ TEST_CASE("Solid submesh test")
     }
     SECTION("Internal force")
     {
-        auto [local_dofs, internal_force] = fem_submesh.internal_force(0);
+        auto[local_dofs, internal_force] = fem_submesh.internal_force(0);
         REQUIRE(internal_force.rows() == number_of_local_dofs);
         REQUIRE(local_dofs.size() == number_of_local_dofs);
     }
     SECTION("Consistent and diagonal mass")
     {
-        auto const& [local_dofs_0, mass_c] = fem_submesh.consistent_mass(0);
-        auto const& [local_dofs_1, mass_d] = fem_submesh.diagonal_mass(0);
+        auto const & [local_dofs_0, mass_c] = fem_submesh.consistent_mass(0);
+        auto const & [local_dofs_1, mass_d] = fem_submesh.diagonal_mass(0);
 
         REQUIRE(local_dofs_0.size() == number_of_local_dofs);
         REQUIRE(local_dofs_1.size() == number_of_local_dofs);
@@ -303,7 +252,7 @@ TEST_CASE("Solid mesh test")
 
     for (auto const& fem_submesh : fem_mesh.meshes())
     {
-        auto [local_dofs, internal_force] = fem_submesh.internal_force(0);
+        auto[local_dofs, internal_force] = fem_submesh.internal_force(0);
         REQUIRE(internal_force.rows() == number_of_local_dofs);
         REQUIRE(local_dofs.size() == number_of_local_dofs);
     }
@@ -334,20 +283,3 @@ TEST_CASE("Solid mesh test")
         }
     }
 }
-// TEST_CASE("Nodal ordering Adapater")
-// {
-//     NodeOrderingAdapter node_adapter;
-//
-//     SECTION("Tetrahedron10 ordering")
-//     {
-//         // Create a dummy connectivity set
-//         std::vector<List> nodal_connectivity = {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}};
-//
-//         node_adapter.convert_from_gmsh(nodal_connectivity, ElementTopology::Tetrahedron10);
-//
-//         REQUIRE(nodal_connectivity[0][4] == 9);
-//         REQUIRE(nodal_connectivity[0][9] == 4);
-//         REQUIRE(nodal_connectivity[0][3] == 0);
-//         REQUIRE(nodal_connectivity[0][0] == 3);
-//     }
-// }
