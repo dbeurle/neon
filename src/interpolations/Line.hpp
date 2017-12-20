@@ -6,7 +6,7 @@
 
 namespace neon
 {
-/** Triangular 3 node element with analytic integration */
+/** Line 2 node element with Gaussian integration */
 class Line2 : public LineInterpolation
 {
 public:
@@ -27,7 +27,7 @@ protected:
     void precompute_shape_functions();
 };
 
-/** Triangular 3 node element with analytic integration */
+/** Line 3 node element with Gaussian integration */
 class Line3 : public LineInterpolation
 {
 public:

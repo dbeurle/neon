@@ -32,7 +32,7 @@ protected:
         \lambda &= \left[ \sum_{i=1}^m (\bar{\lambda}_i)^p w_i \right]^{1/p}
       \f}
      */
-    double compute_nonaffine_stretch(Matrix3 const& F_deviatoric) const;
+    double compute_nonaffine_stretch(matrix3 const& F_deviatoric) const;
 
     /**
      * Evaluate the h tensor by numerical quadrature over the unit sphere
@@ -41,7 +41,7 @@ protected:
                       \mathbf{t}_i\otimes\mathbf{t}_i w_i
       \f}
      */
-    Matrix3 compute_h_tensor(Matrix3 const& F_deviatoric) const;
+    matrix3 compute_h_tensor(matrix3 const& F_deviatoric) const;
 
     /**
      * Evaluate the H tensor by numerical quadrature over the unit sphere
@@ -50,7 +50,7 @@ protected:
                       \mathbf{t}_i\otimes\mathbf{t}_i\otimes\mathbf{t}_i\otimes\mathbf{t}_i w_i
       \f}
      */
-    Matrix6 compute_H_tensor(Matrix3 const& F_deviatoric) const;
+    matrix6 compute_H_tensor(matrix3 const& F_deviatoric) const;
 
     /**
      * Evaluate the k tensor by numerical quadrature over the unit sphere
@@ -63,7 +63,7 @@ protected:
      * \sa non_affine_tube_parameter
      * @param F_deviatoric Deviatoric part deformation gradient
      */
-    Matrix3 compute_k_tensor(Matrix3 const& F_deviatoric) const;
+    matrix3 compute_k_tensor(matrix3 const& F_deviatoric) const;
 
     /**
      * Evaluate the K tensor by numerical quadrature over the unit sphere
@@ -74,7 +74,7 @@ protected:
      * where \f$ q \f$ is the non-affine tube parameter.
      * \sa non_affine_tube_parameter
      */
-    Matrix6 compute_K_tensor(Matrix3 const& F_deviatoric) const;
+    matrix6 compute_K_tensor(matrix3 const& F_deviatoric) const;
 
     /**
      * Evaluate the G tensor by numerical quadrature over the unit sphere
@@ -87,7 +87,7 @@ protected:
      * \sa non_affine_tube_parameter
      * \sa compute_o_dot_product
      */
-    Matrix6 compute_G_tensor(Matrix3 const& F_deviatoric) const;
+    matrix6 compute_G_tensor(matrix3 const& F_deviatoric) const;
 
     /**
      * Compute the o dot product for the material tangent matrix for the
@@ -99,14 +99,14 @@ protected:
      * is the deformed normal vector
      * \sa compute_G_tensor
      */
-    Matrix6 compute_o_dot_product(Vector3 const& n) const;
+    matrix6 compute_o_dot_product(vector3 const& n) const;
 
-    Vector3 deformed_normal(Matrix3 const& F_unimodular, Vector3 const& surface_vector) const
+    vector3 deformed_normal(matrix3 const& F_unimodular, vector3 const& surface_vector) const
     {
         return F_unimodular.inverse().transpose() * surface_vector;
     }
 
-    auto compute_area_stretch(Vector3 const& deformed_normal) const
+    auto compute_area_stretch(vector3 const& deformed_normal) const
     {
         return deformed_normal.norm();
     }
@@ -119,10 +119,10 @@ private:
     double non_affine_tube_parameter{1.0};    //!< Shape of constraint stress (q)
 };
 
-inline Matrix6 NonAffineMicrosphere::compute_o_dot_product(Vector3 const& n) const
+inline matrix6 NonAffineMicrosphere::compute_o_dot_product(vector3 const& n) const
 {
     // clang-format off
-    return (Matrix6() << 2.0 * n(0) * n(0),               0.0,               0.0,                               0.0,                       n(0) * n(2), n(0) * n(1),       //
+    return (matrix6() << 2.0 * n(0) * n(0),               0.0,               0.0,                               0.0,                       n(0) * n(2), n(0) * n(1),       //
                                        0.0, 2.0 * n(1) * n(1),               0.0,                       n(1) * n(2),                               0.0, n(0) * n(1),       //
                                        0.0,               0.0, 2.0 * n(2) * n(2),                       n(1) * n(2),                       n(0) * n(2), 0.0,               //
                                        0.0,       n(1) * n(2),       n(1) * n(2), 0.5 * (n(1) * n(1) + n(2) * n(2)),                 0.5 * n(0) * n(1), 0.5 * n(0) * n(2), //

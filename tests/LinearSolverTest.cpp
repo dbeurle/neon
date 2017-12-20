@@ -36,7 +36,7 @@ SparseMatrix create_sparse_matrix()
 }
 
 /** Create an example right hand side */
-Vector create_right_hand_side()
+vector create_right_hand_side()
 {
     Eigen::VectorXd b(3);
     b(0) = 1.0;
@@ -46,9 +46,9 @@ Vector create_right_hand_side()
 }
 
 /** The known solution */
-Vector solution()
+vector solution()
 {
-    Vector x(3);
+    vector x(3);
     x << 1.375, 1.75, 1.625;
     return x;
 }
@@ -56,8 +56,8 @@ Vector solution()
 TEST_CASE("Linear solver test suite")
 {
     SparseMatrix A = create_sparse_matrix();
-    Vector b = create_right_hand_side();
-    Vector x = b;
+    vector b = create_right_hand_side();
+    vector x = b;
 
     SECTION("Preconditioned Conjugate Gradient Default")
     {

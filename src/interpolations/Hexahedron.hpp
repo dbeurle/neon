@@ -19,7 +19,7 @@ public:
 
     int nodes() const override final { return 8; }
 
-    double compute_measure(Matrix const& nodal_coordinates) const;
+    double compute_measure(matrix const& nodal_coordinates) const;
 
 protected:
     /**
@@ -50,7 +50,7 @@ public:
 
     int nodes() const override final { return 20; }
 
-    double compute_measure(Matrix const& nodal_coordinates) const;
+    double compute_measure(matrix const& nodal_coordinates) const;
 
 protected:
     void precompute_shape_functions();
@@ -68,7 +68,7 @@ public:
 
     int nodes() const override final { return 27; }
 
-    double compute_measure(Matrix const& nodal_coordinates) const;
+    double compute_measure(matrix const& nodal_coordinates) const;
 
 protected:
     void precompute_shape_functions();

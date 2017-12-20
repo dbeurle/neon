@@ -15,15 +15,15 @@ public:
 
     [[nodiscard]] double mass_scaling_factor() const;
 
-    [[nodiscard]] Vector approximate_displacements(Vector const& a,
-                                                   Vector const& v,
-                                                   Vector const& d) const;
+    [[nodiscard]] vector approximate_displacements(vector const& a,
+                                                   vector const& v,
+                                                   vector const& d) const;
 
-    [[nodiscard]] Vector approximate_velocities(Vector const& a, Vector const& v) const;
+    [[nodiscard]] vector approximate_velocities(vector const& a, vector const& v) const;
 
-    [[nodiscard]] Vector accelerations(Vector const& a, Vector const& v, Vector const& d);
+    [[nodiscard]] vector accelerations(vector const& a, vector const& v, vector const& d);
 
-    [[nodiscard]] Vector velocities(Vector const& a, Vector const& v) const;
+    [[nodiscard]] vector velocities(vector const& a, vector const& v) const;
 
     /** Perform the time integration until returns false */
     [[nodiscard]] bool time_loop();
@@ -38,7 +38,7 @@ protected:
     double artifical_viscosity;
     double beta_parameter;
 
-    Vector a_old; //!< Old acceleration
+    vector a_old; //!< Old acceleration
 };
 
 inline double NewmarkBeta::mass_scaling_factor() const
@@ -47,9 +47,9 @@ inline double NewmarkBeta::mass_scaling_factor() const
     return 1.0 / (beta_parameter * std::pow(time_step_size, 2));
 }
 
-inline Vector NewmarkBeta::approximate_displacements(Vector const& a,
-                                                     Vector const& v,
-                                                     Vector const& d) const
+inline vector NewmarkBeta::approximate_displacements(vector const& a,
+                                                     vector const& v,
+                                                     vector const& d) const
 {
     auto const time_step_size = time_control.current_time_step_size();
 
@@ -57,13 +57,13 @@ inline Vector NewmarkBeta::approximate_displacements(Vector const& a,
            + std::pow(time_step_size, 2) / 2.0 * (1.0 - 2.0 * beta_parameter) * a;
 }
 
-inline Vector NewmarkBeta::approximate_velocities(Vector const& a, Vector const& v) const
+inline vector NewmarkBeta::approximate_velocities(vector const& a, vector const& v) const
 {
     auto const time_step_size = time_control.current_time_step_size();
     return v + (1.0 - artifical_viscosity) * time_step_size * a;
 }
 
-inline Vector NewmarkBeta::accelerations(Vector const& a, Vector const& v, Vector const& d)
+inline vector NewmarkBeta::accelerations(vector const& a, vector const& v, vector const& d)
 {
     auto const time_step_size = time_control.current_time_step_size();
     a_old = a;
@@ -71,7 +71,7 @@ inline Vector NewmarkBeta::accelerations(Vector const& a, Vector const& v, Vecto
     return 1.0 / (beta_parameter * std::pow(time_step_size, 2))
            * (d - approximate_displacements(a, v, d));
 }
-inline Vector NewmarkBeta::velocities(Vector const& a, Vector const& v) const
+inline vector NewmarkBeta::velocities(vector const& a, vector const& v) const
 {
     auto const time_step_size = time_control.current_time_step_size();
     return approximate_velocities(a_old, v) + artifical_viscosity * time_step_size * a;

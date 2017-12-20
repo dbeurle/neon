@@ -26,16 +26,16 @@ void Tetrahedron10::precompute_shape_functions()
                                                                     {8, 0.5, 0.0, 0.5},
                                                                     {9, 0.0, 0.5, 0.0}}};
 
-    Matrix N_matrix(numerical_quadrature->points(), nodes());
-    Matrix local_quadrature_coordinates = Matrix::Ones(numerical_quadrature->points(), 4);
+    matrix N_matrix(numerical_quadrature->points(), nodes());
+    matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 4);
 
     numerical_quadrature->evaluate([&](auto const& coordinate) {
         auto const& [l, r, s, t] = coordinate;
 
         auto const u = 1.0 - r - s - t;
 
-        Vector N(10);
-        Matrix rhea(10, 3);
+        vector N(10);
+        matrix rhea(10, 3);
 
         N(0) = r * (2.0 * r - 1.0);
         N(1) = s * (2.0 * s - 1.0);
@@ -91,7 +91,7 @@ void Tetrahedron10::precompute_shape_functions()
     });
 
     // Compute extrapolation algorithm matrices
-    Matrix local_nodal_coordinates = Matrix::Ones(nodes(), 4);
+    matrix local_nodal_coordinates = matrix::Ones(nodes(), 4);
 
     for (auto const& [a, r, s, t] : local_coordinates)
     {

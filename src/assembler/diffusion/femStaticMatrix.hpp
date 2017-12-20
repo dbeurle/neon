@@ -64,7 +64,7 @@ protected:
      * For inner and outer vector reference see
      * https://eigen.tuxfamily.org/dox/group__TutorialSparse.html
      */
-    void apply_dirichlet_conditions(SparseMatrix& A, Vector& x, Vector& b);
+    void apply_dirichlet_conditions(SparseMatrix& A, vector& x, vector& b);
 
 protected:
     femMesh& fem_mesh;
@@ -72,8 +72,8 @@ protected:
     bool is_sparsity_computed = false;
 
     SparseMatrix K; //!< Conductivity matrix
-    Vector f;       //!< Heat vector
-    Vector d;       //!< Temperature vector
+    vector f;       //!< Heat vector
+    vector d;       //!< Temperature vector
 
     FileIO file_io;
 

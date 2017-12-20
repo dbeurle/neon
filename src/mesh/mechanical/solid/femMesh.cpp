@@ -44,7 +44,7 @@ bool femMesh::is_symmetric() const
     return true;
 }
 
-void femMesh::update_internal_variables(Vector const& u, double const time_step_size)
+void femMesh::update_internal_variables(vector const& u, double const time_step_size)
 {
     auto start = std::chrono::high_resolution_clock::now();
 

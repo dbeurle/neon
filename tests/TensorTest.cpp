@@ -11,7 +11,7 @@ constexpr auto ZERO_MARGIN = 1.0e-5;
 
 TEST_CASE("Tensor decompositions")
 {
-    Matrix3 t = Matrix3::Random();
+    matrix3 t = matrix3::Random();
 
     auto const t_dev = deviatoric(t);
     auto const t_vol = volumetric(t);

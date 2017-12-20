@@ -29,7 +29,7 @@ JSONCPP_STRING input_errors;
 TEST_CASE("Testing material coordinates", "[MaterialCoordinates]")
 {
     // Build a right angled triangle
-    Vector coordinates(9);
+    vector coordinates(9);
     coordinates << 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0;
 
     // Setup the test case
@@ -37,9 +37,9 @@ TEST_CASE("Testing material coordinates", "[MaterialCoordinates]")
     MaterialCoordinates material_coordinates(coordinates);
 
     // Test with a random displacement vector
-    Vector local_displacements = Vector::Random(9);
+    vector local_displacements = vector::Random(9);
 
-    Matrix local_initial_config(3, 3);
+    matrix local_initial_config(3, 3);
     local_initial_config << 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0;
 
     // Indices for the first three nodes
@@ -50,7 +50,7 @@ TEST_CASE("Testing material coordinates", "[MaterialCoordinates]")
 
     SECTION("Nodes scaffolding")
     {
-        Vector triangle = Vector::Zero(9);
+        vector triangle = vector::Zero(9);
         triangle << 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0;
         REQUIRE((nodes.coordinates() - triangle).norm() == Approx(0.0).margin(ZERO_MARGIN));
     }
@@ -96,13 +96,13 @@ TEST_CASE("Basic mesh test")
 
     SECTION("Test corner vertices")
     {
-        REQUIRE((nodal_coordinates.coordinates({0}) - Vector3(0.0, 0.0, 0.0)).norm()
+        REQUIRE((nodal_coordinates.coordinates({0}) - vector3(0.0, 0.0, 0.0)).norm()
                 == Approx(0.0).margin(ZERO_MARGIN));
-        REQUIRE((nodal_coordinates.coordinates({1}) - Vector3(1.0, 0.0, 0.0)).norm()
+        REQUIRE((nodal_coordinates.coordinates({1}) - vector3(1.0, 0.0, 0.0)).norm()
                 == Approx(0.0).margin(ZERO_MARGIN));
-        REQUIRE((nodal_coordinates.coordinates({2}) - Vector3(0.0, 1.0, 0.0)).norm()
+        REQUIRE((nodal_coordinates.coordinates({2}) - vector3(0.0, 1.0, 0.0)).norm()
                 == Approx(0.0).margin(ZERO_MARGIN));
-        REQUIRE((nodal_coordinates.coordinates({3}) - Vector3(1.0, 1.0, 0.0)).norm()
+        REQUIRE((nodal_coordinates.coordinates({3}) - vector3(1.0, 1.0, 0.0)).norm()
                 == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Test mesh data for boundary and volume elements")
@@ -207,7 +207,7 @@ TEST_CASE("Solid submesh test")
     int constexpr number_of_dofs = number_of_nodes * 3;
     int constexpr number_of_local_dofs = 8 * 3;
 
-    Vector displacement = 0.001 * Vector::Random(number_of_dofs);
+    vector displacement = 0.001 * vector::Random(number_of_dofs);
 
     material_coordinates->update_current_configuration(displacement);
 
@@ -231,7 +231,7 @@ TEST_CASE("Solid submesh test")
     }
     SECTION("Tangent stiffness")
     {
-        auto[local_dofs, stiffness] = fem_submesh.tangent_stiffness(0);
+        auto [local_dofs, stiffness] = fem_submesh.tangent_stiffness(0);
         REQUIRE(local_dofs.size() == number_of_local_dofs);
         REQUIRE(stiffness.rows() == number_of_local_dofs);
         REQUIRE(stiffness.cols() == number_of_local_dofs);
@@ -242,14 +242,14 @@ TEST_CASE("Solid submesh test")
     }
     SECTION("Internal force")
     {
-        auto[local_dofs, internal_force] = fem_submesh.internal_force(0);
+        auto [local_dofs, internal_force] = fem_submesh.internal_force(0);
         REQUIRE(internal_force.rows() == number_of_local_dofs);
         REQUIRE(local_dofs.size() == number_of_local_dofs);
     }
     SECTION("Consistent and diagonal mass")
     {
-        auto const & [local_dofs_0, mass_c] = fem_submesh.consistent_mass(0);
-        auto const & [local_dofs_1, mass_d] = fem_submesh.diagonal_mass(0);
+        auto const& [local_dofs_0, mass_c] = fem_submesh.consistent_mass(0);
+        auto const& [local_dofs_1, mass_d] = fem_submesh.diagonal_mass(0);
 
         REQUIRE(local_dofs_0.size() == number_of_local_dofs);
         REQUIRE(local_dofs_1.size() == number_of_local_dofs);
@@ -303,7 +303,7 @@ TEST_CASE("Solid mesh test")
 
     for (auto const& fem_submesh : fem_mesh.meshes())
     {
-        auto[local_dofs, internal_force] = fem_submesh.internal_force(0);
+        auto [local_dofs, internal_force] = fem_submesh.internal_force(0);
         REQUIRE(internal_force.rows() == number_of_local_dofs);
         REQUIRE(local_dofs.size() == number_of_local_dofs);
     }

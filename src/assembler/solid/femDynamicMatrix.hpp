@@ -23,10 +23,10 @@ private:
     void perform_equilibrium_iterations();
 
 protected:
-    Vector M; //!< Diagonal mass matrix
+    vector M; //!< Diagonal mass matrix
 
-    Vector a; //!< Nodal acceleration
-    Vector v; //!< Nodal velocity
+    vector a; //!< Nodal acceleration
+    vector v; //!< Nodal velocity
 
     NewmarkBeta newmark;
 };

@@ -1315,7 +1315,7 @@ void UnitSphereQuadrature::precompute_coordinates()
     this->evaluate([](auto const& coordinate) {
         auto const& [l, r1, r2, r3] = coordinate;
 
-        Vector3 t(r1, r2, r3);
+        vector3 t(r1, r2, r3);
 
         return std::make_tuple(t, t * t.transpose());
     });

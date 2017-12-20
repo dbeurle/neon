@@ -44,7 +44,7 @@ femSubmesh::femSubmesh(Json::Value const& material_data,
 
     // Get the old data to the undeformed configuration
     ranges::fill(variables->fetch(InternalVariables::Tensor::DeformationGradient),
-                 Matrix3::Identity());
+                 matrix3::Identity());
 
     variables->commit();
 
@@ -63,7 +63,7 @@ void femSubmesh::save_internal_variables(bool const have_converged)
     }
 }
 
-std::tuple<List const&, Matrix> femSubmesh::tangent_stiffness(int32 const element) const
+std::tuple<List const&, matrix> femSubmesh::tangent_stiffness(int32 const element) const
 {
     auto const x = material_coordinates->current_configuration(local_node_list(element));
 
@@ -83,15 +83,15 @@ std::tuple<List const&, vector> femSubmesh::internal_force(int32 const element) 
     return {local_dof_list(element), internal_nodal_force(x, element)};
 }
 
-Matrix femSubmesh::geometric_tangent_stiffness(matrix3x const& x, int32 const element) const
+matrix femSubmesh::geometric_tangent_stiffness(matrix3x const& x, int32 const element) const
 {
     auto const& cauchy_stresses = variables->fetch(InternalVariables::Tensor::Cauchy);
 
     auto n = nodes_per_element();
 
     // clang-format off
-    matrix const kgeo = sf->quadrature().integrate(Matrix::Zero(n, n).eval(),
-                                                   [&](auto const& femval, auto const& l) -> Matrix {
+    matrix const kgeo = sf->quadrature().integrate(matrix::Zero(n, n).eval(),
+                                                   [&](auto const& femval, auto const& l) -> matrix {
                                                         auto const & [ N, rhea ] = femval;
 
                                                         matrix3 const Jacobian = local_deformation_gradient(rhea, x);
@@ -107,15 +107,15 @@ Matrix femSubmesh::geometric_tangent_stiffness(matrix3x const& x, int32 const el
     return identity_expansion(kgeo, dofs_per_node());
 }
 
-Matrix femSubmesh::material_tangent_stiffness(matrix3x const& x, int32 const element) const
+matrix femSubmesh::material_tangent_stiffness(matrix3x const& x, int32 const element) const
 {
     auto const local_dofs = nodes_per_element() * dofs_per_node();
 
-    auto const& tangent_operators = variables->fetch(InternalVariables::Matrix::TangentOperator);
+    auto const& tangent_operators = variables->fetch(InternalVariables::rank4::tangent_operator);
 
-    matrix const kmat = Matrix::Zero(local_dofs, local_dofs);
+    matrix const kmat = matrix::Zero(local_dofs, local_dofs);
 
-    return sf->quadrature().integrate(kmat, [&](auto const& femval, auto const& l) -> Matrix {
+    return sf->quadrature().integrate(kmat, [&](auto const& femval, auto const& l) -> matrix {
         auto const& [N, rhea] = femval;
 
         auto const& D = tangent_operators[view(element, l)];
@@ -137,8 +137,8 @@ vector femSubmesh::internal_nodal_force(matrix3x const& x, int32 const element) 
 
     vector fint = vector::Zero(m * n);
 
-    sf->quadrature().integrate(Eigen::Map<RowMatrix>(fint.data(), m, n),
-                               [&](auto const& femval, auto const& l) -> RowMatrix {
+    sf->quadrature().integrate(Eigen::Map<matrix>(fint.data(), m, n),
+                               [&](auto const& femval, auto const& l) -> matrix {
                                    auto const& [N, dN] = femval;
 
                                    matrix3 const Jacobian = local_deformation_gradient(dN, x);
@@ -153,14 +153,14 @@ vector femSubmesh::internal_nodal_force(matrix3x const& x, int32 const element) 
     return fint;
 }
 
-std::tuple<List const&, Matrix> femSubmesh::consistent_mass(int32 const element) const
+std::tuple<List const&, matrix> femSubmesh::consistent_mass(int32 const element) const
 {
     auto X = material_coordinates->initial_configuration(local_node_list(element));
 
     auto const density_0 = cm->intrinsic_material().initial_density();
 
-    auto m = sf->quadrature().integrate(Matrix::Zero(nodes_per_element(), nodes_per_element()).eval(),
-                                        [&](auto const& femval, auto const& l) -> Matrix {
+    auto m = sf->quadrature().integrate(matrix::Zero(nodes_per_element(), nodes_per_element()).eval(),
+                                        [&](auto const& femval, auto const& l) -> matrix {
                                             auto const& [N, dN] = femval;
 
                                             matrix3 const Jacobian = local_deformation_gradient(dN,

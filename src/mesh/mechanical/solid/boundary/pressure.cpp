@@ -7,7 +7,7 @@
 
 namespace neon::mechanical::solid
 {
-std::tuple<List const&, Vector> pressure::external_force(int const element,
+std::tuple<List const&, vector> pressure::external_force(int const element,
                                                          double const load_factor) const
 {
     auto const X = material_coordinates->initial_configuration(nodal_connectivity[element]);
@@ -17,23 +17,23 @@ std::tuple<List const&, Vector> pressure::external_force(int const element,
     auto const pressure = interpolate_prescribed_load(load_factor);
 
     // Perform the computation of the external load vector
-    RowMatrix f_ext = -pressure
+    matrix f_ext = -pressure
                       * sf->quadrature()
-                            .integrate(RowMatrix::Zero(X.cols(), 3).eval(),
-                                       [&](auto const& femval, auto const& l) -> RowMatrix {
+                            .integrate(matrix::Zero(X.cols(), 3).eval(),
+                                       [&](auto const& femval, auto const& l) -> matrix {
                                            auto const& [N, dN] = femval;
 
                                            auto const j = (X_surface * dN).determinant();
 
-                                           Vector3 const x_xi = (X * dN).col(0);
-                                           Vector3 const x_eta = (X * dN).col(1);
+                                           vector3 const x_xi = (X * dN).col(0);
+                                           vector3 const x_eta = (X * dN).col(1);
 
-                                           Vector3 const normal = x_xi.cross(x_eta).normalized();
+                                           vector3 const normal = x_xi.cross(x_eta).normalized();
 
                                            return N * normal.transpose() * j;
                                        });
 
     // Map the matrix back to a vector for the assembly operator
-    return {dof_list[element], Eigen::Map<RowMatrix>(f_ext.data(), X.cols() * 3, 1)};
+    return {dof_list[element], Eigen::Map<matrix>(f_ext.data(), X.cols() * 3, 1)};
 }
 }

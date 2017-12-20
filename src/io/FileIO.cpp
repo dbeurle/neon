@@ -80,7 +80,7 @@ void FileIO::write_to_file(int const time_step, double const total_time)
              << unstructured_mesh_writer->GetDefaultFileExtension() << "\" />\n";
 }
 
-void FileIO::add_field(std::string const& name, Vector const& field, int const components)
+void FileIO::add_field(std::string const& name, vector const& field, int const components)
 {
     auto scalar_value = vtkSmartPointer<vtkDoubleArray>::New();
 
@@ -112,7 +112,7 @@ FileIO::FileIO(std::string file_name, Json::Value const& visualisation_data, fem
     add_mesh();
 }
 
-void FileIO::write(int const time_step, double const total_time, Vector const& scalars)
+void FileIO::write(int const time_step, double const total_time, vector const& scalars)
 {
     if (time_step % write_every != 0) return;
 

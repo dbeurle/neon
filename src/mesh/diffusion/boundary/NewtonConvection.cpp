@@ -30,15 +30,15 @@ newton_cooling::newton_cooling(std::unique_ptr<SurfaceInterpolation>&& sf,
                                   | transform([](auto i) { return i.asDouble(); }));
 }
 
-std::tuple<List const&, Matrix> newton_cooling::external_stiffness(int const element,
+std::tuple<List const&, matrix> newton_cooling::external_stiffness(int const element,
                                                                    double const load_factor) const
 {
     auto const X = geometry::project_to_plane(
         material_coordinates->initial_configuration(nodal_connectivity[element]));
 
     // Perform the computation of the external element stiffness matrix
-    auto const k_ext = sf->quadrature().integrate(Matrix::Zero(X.cols(), X.cols()).eval(),
-                                                  [&](auto const& femval, auto const& l) -> Matrix {
+    auto const k_ext = sf->quadrature().integrate(matrix::Zero(X.cols(), X.cols()).eval(),
+                                                  [&](auto const& femval, auto const& l) -> matrix {
                                                       auto const& [N, dN] = femval;
 
                                                       auto const j = (X * dN).determinant();

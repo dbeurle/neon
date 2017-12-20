@@ -52,13 +52,13 @@ public:
     [[nodiscard]] std::pair<local_indices const&, matrix> tangent_stiffness(int32 const element) const;
 
     /** @return the internal element force */
-    [[nodiscard]] std::pair<local_indices const&, Vector> internal_force(int32 const element) const;
+    [[nodiscard]] std::pair<local_indices const&, vector> internal_force(int32 const element) const;
 
     /** @return the consistent mass matrix \sa diagonal_mass */
     [[nodiscard]] std::pair<local_indices const&, matrix> consistent_mass(int32 const element) const;
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    [[nodiscard]] std::pair<local_indices const&, Vector> diagonal_mass(int32 const element) const;
+    [[nodiscard]] std::pair<local_indices const&, vector> diagonal_mass(int32 const element) const;
 
     /** Update the internal variables for the mesh group
      *  \sa update_deformation_measures()
@@ -109,7 +109,7 @@ protected:
      * \f}
      * @return the internal nodal force vector
      */
-    [[nodiscard]] Vector internal_nodal_force(matrix2x const& configuration,
+    [[nodiscard]] vector internal_nodal_force(matrix2x const& configuration,
                                               int32 const element) const;
 
 private:

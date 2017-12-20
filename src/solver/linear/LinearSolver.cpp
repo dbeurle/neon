@@ -30,7 +30,7 @@ IterativeLinearSolver::IterativeLinearSolver(double const residual_tolerance, in
 {
 }
 
-void ConjugateGradient::solve(SparseMatrix const& A, Vector& x, Vector const& b)
+void ConjugateGradient::solve(SparseMatrix const& A, vector& x, vector const& b)
 {
 #ifdef ENABLE_OPENMP
     omp_set_num_threads(SimulationControl::threads);
@@ -63,7 +63,7 @@ void ConjugateGradient::solve(SparseMatrix const& A, Vector& x, Vector const& b)
               << residual_tolerance << ")\n";
 }
 
-void BiCGStab::solve(SparseMatrix const& A, Vector& x, Vector const& b)
+void BiCGStab::solve(SparseMatrix const& A, vector& x, vector const& b)
 {
     std::feclearexcept(FE_ALL_EXCEPT);
 
@@ -92,7 +92,7 @@ void BiCGStab::solve(SparseMatrix const& A, Vector& x, Vector const& b)
               << " (min. " << residual_tolerance << ")\n";
 }
 
-void SparseLU::solve(SparseMatrix const& A, Vector& x, Vector const& b)
+void SparseLU::solve(SparseMatrix const& A, vector& x, vector const& b)
 {
     if (build_sparsity_pattern)
     {
@@ -103,7 +103,7 @@ void SparseLU::solve(SparseMatrix const& A, Vector& x, Vector const& b)
     x = lu.solve(b);
 }
 
-void SparseLLT::solve(SparseMatrix const& A, Vector& x, Vector const& b)
+void SparseLLT::solve(SparseMatrix const& A, vector& x, vector const& b)
 {
     if (build_sparsity_pattern)
     {

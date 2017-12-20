@@ -19,7 +19,7 @@ public:
     using Boundary::Boundary;
 
     /** @return an element external force vector for a given element */
-    [[nodiscard]] virtual std::tuple<List const&, Vector> external_force(
+    [[nodiscard]] virtual std::tuple<List const&, vector> external_force(
         int32 const element, double const load_factor) const = 0;
 };
 }

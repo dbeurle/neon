@@ -20,8 +20,8 @@ void Tetrahedron4::precompute_shape_functions()
     numerical_quadrature->evaluate([&](auto const& coordinate) {
         auto const& [l, r, s, t] = coordinate;
 
-        Vector N(4);
-        Matrix rhea(4, 3);
+        vector N(4);
+        matrix rhea(4, 3);
 
         N(0) = r;
         N(1) = s;

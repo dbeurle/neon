@@ -56,7 +56,7 @@ public:
     static auto constexpr tensor_size = rank2_dimension * rank2_dimension;
 
 public:
-    enum class Matrix { TangentOperator };
+    enum class rank4 { tangent_operator };
 
     /** Enumerations for internal variables that are tensor types */
     enum class Tensor {
@@ -81,7 +81,7 @@ public:
         Conductivity
     };
 
-    enum class Vector { Chains, Segments, ShearModuli, HeatFlux };
+    enum class vector { Chains, Segments, ShearModuli, HeatFlux };
 
     enum class Scalar {
         Chains,      // Chains for the micromechanical model
@@ -138,15 +138,14 @@ public:
     }
 
     /** Allocate matrix internal variables with provided matrix */
-    void add(InternalVariables::Matrix const name,
-             rank4tensor_type const m = rank4tensor_type::Zero())
+    void add(InternalVariables::rank4 const name, rank4tensor_type const m = rank4tensor_type::Zero())
     {
         rank4tensors[name].resize(size, m);
     }
 
     bool has(Scalar const name) const { return scalars.find(name) != scalars.end(); }
     bool has(Tensor const name) const { return rank2tensors.find(name) != rank2tensors.end(); }
-    bool has(Matrix const name) const { return rank4tensors.find(name) != rank4tensors.end(); }
+    bool has(rank4 const name) const { return rank4tensors.find(name) != rank4tensors.end(); }
 
     /** Const access to the converged tensor variables */
     std::vector<rank2tensor_type> const& fetch_old(Tensor const tensorType) const
@@ -174,7 +173,7 @@ public:
     }
 
     /** Mutable access to the non-converged matrix variables */
-    std::vector<rank4tensor_type>& fetch(Matrix matrixType)
+    std::vector<rank4tensor_type>& fetch(rank4 const matrixType)
     {
         return rank4tensors.find(matrixType)->second;
     }
@@ -197,8 +196,8 @@ public:
                                std::ref(rank2tensors.find(vars)->second)...);
     }
 
-    template <typename... MatrixTps>
-    auto fetch(Matrix var0, Matrix var1, MatrixTps... vars)
+    template <typename... rank4_types>
+    auto fetch(rank4 var0, rank4 var1, rank4_types... vars)
     {
         return std::make_tuple(std::ref(rank4tensors.find(var0)->second),
                                std::ref(rank4tensors.find(var1)->second),
@@ -210,19 +209,19 @@ public:
      *-------------------------------------------------------------*/
 
     /** Constant access to the non-converged scalar variables */
-    std::vector<scalar_type> const& fetch(Scalar scalarType) const
+    std::vector<scalar_type> const& fetch(Scalar const scalarType) const
     {
         return scalars.find(scalarType)->second;
     }
 
     /** Non-mutable access to the non-converged tensor variables */
-    std::vector<rank2tensor_type> const& fetch(Tensor tensorType) const
+    std::vector<rank2tensor_type> const& fetch(Tensor const tensorType) const
     {
         return rank2tensors.find(tensorType)->second;
     }
 
     /** Non-mutable access to the non-converged matrix variables */
-    std::vector<rank4tensor_type> const& fetch(Matrix matrixType) const
+    std::vector<rank4tensor_type> const& fetch(rank4 const matrixType) const
     {
         return rank4tensors.find(matrixType)->second;
     }
@@ -245,8 +244,8 @@ public:
                                std::cref(rank2tensors.find(vars)->second)...);
     }
 
-    template <typename... MatrixTps>
-    auto fetch(Matrix var0, Matrix var1, MatrixTps... vars) const
+    template <typename... rank4_types>
+    auto fetch(rank4 const var0, rank4 const var1, rank4_types... vars) const
     {
         return std::make_tuple(std::cref(rank4tensors.find(var0)->second),
                                std::cref(rank4tensors.find(var1)->second),
@@ -275,7 +274,7 @@ protected:
     std::unordered_map<Tensor, std::vector<rank2tensor_type>> rank2tensors, rank2tensors_old;
     std::unordered_map<Scalar, std::vector<scalar_type>> scalars, scalars_old;
 
-    std::unordered_map<Matrix, std::vector<rank4tensor_type>> rank4tensors;
+    std::unordered_map<rank4, std::vector<rank4tensor_type>> rank4tensors;
 
     std::size_t size;
 };

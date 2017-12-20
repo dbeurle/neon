@@ -18,7 +18,7 @@ public:
      * @param nodal_coordinates element nodal coordinates
      * @return element face area
      */
-    double compute_measure(Matrix const& nodal_coordinates);
+    double compute_measure(matrix const& nodal_coordinates);
 
 protected:
     void precompute_shape_functions();

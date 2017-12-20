@@ -24,7 +24,7 @@ void Line2::precompute_shape_functions()
         auto const& [l, xi] = coordinates;
 
         vector N(2);
-        matrix rhea(2, 1);
+        row_matrix rhea(2, 1);
 
         N(0) = 1.0 / 2.0 * (1.0 - xi);
         N(1) = 1.0 / 2.0 * (1.0 + xi);
@@ -100,7 +100,7 @@ void Line3::precompute_shape_functions()
     compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
 }
 
-double Line3::compute_measure(Matrix const& nodal_coordinates) const
+double Line3::compute_measure(matrix const& nodal_coordinates) const
 {
     return (nodal_coordinates.col(0) - nodal_coordinates.col(2)).norm();
 }

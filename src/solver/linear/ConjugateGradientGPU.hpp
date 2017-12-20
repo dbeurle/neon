@@ -26,10 +26,10 @@ public:
 
     ~ConjugateGradientGPU();
 
-    void solve(SparseMatrix const& A, Vector& x, Vector const& b) override final;
+    void solve(SparseMatrix const& A, vector& x, vector const& b) override final;
 
 protected:
-    void allocate_device_memory(SparseMatrix const& A, Vector& x, Vector const& b);
+    void allocate_device_memory(SparseMatrix const& A, vector& x, vector const& b);
 
     void find_compute_device();
 

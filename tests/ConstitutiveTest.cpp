@@ -122,7 +122,7 @@ TEST_CASE("Neo-Hookean model")
     auto& J_list = variables->fetch(InternalVariables::Scalar::DetF);
 
     // Fill with identity matrix
-    for (auto& F : F_list) F = neon::Matrix3::Identity();
+    for (auto& F : F_list) F = neon::matrix3::Identity();
     for (auto& J : J_list) J = 1.0;
 
     neo_hooke->update_internal_variables(1.0);
@@ -149,7 +149,7 @@ TEST_CASE("Neo-Hookean model")
     SECTION("Check of material tangent")
     {
         // Get the matrix variable
-        auto& material_tangents = variables->fetch(InternalVariables::Matrix::TangentOperator);
+        auto& material_tangents = variables->fetch(InternalVariables::rank4::tangent_operator);
 
         for (auto const& material_tangent : material_tangents)
         {
@@ -228,7 +228,7 @@ TEST_CASE("Affine microsphere model", )
 
     for (auto& J : J_list) J = 1.0;
 
-    auto& material_tangents = variables->fetch(InternalVariables::Matrix::TangentOperator);
+    auto& material_tangents = variables->fetch(InternalVariables::rank4::tangent_operator);
 
     Eigen::EigenSolver<Eigen::MatrixXd> eigen_solver;
 
@@ -241,7 +241,7 @@ TEST_CASE("Affine microsphere model", )
     SECTION("Affine model under no load")
     {
         // Fill with identity matrix
-        for (auto& F : F_list) F = neon::Matrix3::Identity();
+        for (auto& F : F_list) F = neon::matrix3::Identity();
 
         affine->update_internal_variables(1.0);
 
@@ -323,7 +323,7 @@ TEST_CASE("NonAffine microsphere model")
 
     for (auto& J : J_list) J = 1.0;
 
-    auto& material_tangents = variables->fetch(InternalVariables::Matrix::TangentOperator);
+    auto& material_tangents = variables->fetch(InternalVariables::rank4::tangent_operator);
 
     Eigen::EigenSolver<Eigen::MatrixXd> eigen_solver;
 
@@ -336,7 +336,7 @@ TEST_CASE("NonAffine microsphere model")
     SECTION("NonAffine model under no load")
     {
         // Fill with identity matrix
-        for (auto& F : F_list) F = neon::Matrix3::Identity();
+        for (auto& F : F_list) F = neon::matrix3::Identity();
 
         affine->update_internal_variables(1.0);
 
@@ -435,7 +435,7 @@ TEST_CASE("Plane stress elasticity model")
 
     auto& J_list = variables->fetch(InternalVariables::Scalar::DetF);
 
-    auto& material_tangents = variables->fetch(InternalVariables::Matrix::TangentOperator);
+    auto& material_tangents = variables->fetch(InternalVariables::rank4::tangent_operator);
 
     for (auto& H : displacement_gradients) H = InternalVariables::rank2tensor_type::Zero();
     for (auto& J : J_list) J = 1.0;
@@ -451,7 +451,7 @@ TEST_CASE("Plane stress elasticity model")
         REQUIRE(variables->has(InternalVariables::Scalar::VonMisesStress));
         REQUIRE(variables->has(InternalVariables::Tensor::Cauchy));
         REQUIRE(variables->has(InternalVariables::Tensor::LinearisedStrain));
-        REQUIRE(variables->has(InternalVariables::Matrix::TangentOperator));
+        REQUIRE(variables->has(InternalVariables::rank4::tangent_operator));
     }
     SECTION("No load")
     {
@@ -564,7 +564,7 @@ TEST_CASE("Plane strain elasticity model")
 
     auto& J_list = variables->fetch(InternalVariables::Scalar::DetF);
 
-    auto& material_tangents = variables->fetch(InternalVariables::Matrix::TangentOperator);
+    auto& material_tangents = variables->fetch(InternalVariables::rank4::tangent_operator);
 
     for (auto& H : displacement_gradients) H = InternalVariables::rank2tensor_type::Zero();
     for (auto& J : J_list) J = 1.0;
@@ -580,7 +580,7 @@ TEST_CASE("Plane strain elasticity model")
         REQUIRE(variables->has(InternalVariables::Scalar::VonMisesStress));
         REQUIRE(variables->has(InternalVariables::Tensor::Cauchy));
         REQUIRE(variables->has(InternalVariables::Tensor::LinearisedStrain));
-        REQUIRE(variables->has(InternalVariables::Matrix::TangentOperator));
+        REQUIRE(variables->has(InternalVariables::rank4::tangent_operator));
     }
     SECTION("No load")
     {
@@ -691,7 +691,7 @@ TEST_CASE("Solid mechanics elasticity model")
 
     auto& J_list = variables->fetch(InternalVariables::Scalar::DetF);
 
-    auto& material_tangents = variables->fetch(InternalVariables::Matrix::TangentOperator);
+    auto& material_tangents = variables->fetch(InternalVariables::rank4::tangent_operator);
 
     for (auto& H : displacement_gradients) H = InternalVariables::rank2tensor_type::Zero();
     for (auto& J : J_list) J = 1.0;
@@ -707,7 +707,7 @@ TEST_CASE("Solid mechanics elasticity model")
         REQUIRE(variables->has(InternalVariables::Scalar::VonMisesStress));
         REQUIRE(variables->has(InternalVariables::Tensor::Cauchy));
         REQUIRE(variables->has(InternalVariables::Tensor::LinearisedStrain));
-        REQUIRE(variables->has(InternalVariables::Matrix::TangentOperator));
+        REQUIRE(variables->has(InternalVariables::rank4::tangent_operator));
     }
     SECTION("No load")
     {
@@ -878,7 +878,7 @@ TEST_CASE("Solid mechanics J2 plasticity model")
 
     auto& J_list = variables->fetch(InternalVariables::Scalar::DetF);
 
-    auto& material_tangents = variables->fetch(InternalVariables::Matrix::TangentOperator);
+    auto& material_tangents = variables->fetch(InternalVariables::rank4::tangent_operator);
 
     for (auto& H : displacement_gradients) H = neon::matrix3::Zero();
     for (auto& J : J_list) J = 1.0;
@@ -895,7 +895,7 @@ TEST_CASE("Solid mechanics J2 plasticity model")
         REQUIRE(variables->has(InternalVariables::Scalar::EffectivePlasticStrain));
         REQUIRE(variables->has(InternalVariables::Tensor::LinearisedStrain));
         REQUIRE(variables->has(InternalVariables::Tensor::LinearisedPlasticStrain));
-        REQUIRE(variables->has(InternalVariables::Matrix::TangentOperator));
+        REQUIRE(variables->has(InternalVariables::rank4::tangent_operator));
     }
     SECTION("No load")
     {
@@ -1046,9 +1046,9 @@ TEST_CASE("Solid mechanics J2 plasticity damage model", "[J2PlasticityDamage]")
     auto [J_list, damage_list] = variables->fetch(InternalVariables::Scalar::DetF,
                                                   InternalVariables::Scalar::Damage);
 
-    auto& material_tangents = variables->fetch(InternalVariables::Matrix::TangentOperator);
+    auto& material_tangents = variables->fetch(InternalVariables::rank4::tangent_operator);
 
-    for (auto& H : displacement_gradients) H = neon::Matrix3::Zero();
+    for (auto& H : displacement_gradients) H = neon::matrix3::Zero();
     for (auto& J : J_list) J = 1.0;
 
     Eigen::EigenSolver<Eigen::MatrixXd> eigen_solver;
@@ -1064,7 +1064,7 @@ TEST_CASE("Solid mechanics J2 plasticity damage model", "[J2PlasticityDamage]")
         REQUIRE(variables->has(InternalVariables::Scalar::EffectivePlasticStrain));
         REQUIRE(variables->has(InternalVariables::Tensor::LinearisedStrain));
         REQUIRE(variables->has(InternalVariables::Tensor::LinearisedPlasticStrain));
-        REQUIRE(variables->has(InternalVariables::Matrix::TangentOperator));
+        REQUIRE(variables->has(InternalVariables::rank4::tangent_operator));
         REQUIRE(variables->has(InternalVariables::Scalar::Damage));
         REQUIRE(variables->has(InternalVariables::Scalar::EnergyReleaseRate));
         REQUIRE(variables->has(InternalVariables::Tensor::KinematicHardening));
@@ -1193,9 +1193,9 @@ TEST_CASE("Solid mechanics J2 plasticity damage model", "[J2PlasticityDamage]")
 //
 //     auto& J_list = variables->fetch(InternalVariables::Scalar::DetF);
 //
-//     auto& material_tangents = variables->fetch(InternalVariables::Matrix::TangentOperator);
+//     auto& material_tangents = variables->fetch(InternalVariables::rank4::tangent_operator);
 //
-//     for (auto& F : F_list) F = neon::Matrix3::Identity();
+//     for (auto& F : F_list) F = neon::matrix3::Identity();
 //     for (auto& J : J_list) J = 1.0;
 //
 //     variables.commit();
@@ -1208,7 +1208,7 @@ TEST_CASE("Solid mechanics J2 plasticity damage model", "[J2PlasticityDamage]")
 //         REQUIRE(variables->has(InternalVariables::Scalar::VonMisesStress));
 //         REQUIRE(variables->has(InternalVariables::Scalar::EffectivePlasticStrain));
 //         REQUIRE(variables->has(InternalVariables::Tensor::HenckyStrainElastic));
-//         REQUIRE(variables->has(InternalVariables::Matrix::TangentOperator));
+//         REQUIRE(variables->has(InternalVariables::rank4::tangent_operator));
 //     }
 //     SECTION("Initial material tangent symmetry")
 //     {

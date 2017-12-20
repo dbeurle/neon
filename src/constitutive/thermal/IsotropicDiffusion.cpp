@@ -13,7 +13,7 @@ IsotropicDiffusion::IsotropicDiffusion(std::shared_ptr<InternalVariables>& varia
 
     for (auto& k : variables->fetch(InternalVariables::Tensor::Conductivity))
     {
-        k = material.conductivity_coefficient() * Matrix3::Identity();
+        k = material.conductivity_coefficient() * matrix3::Identity();
     }
 }
 

@@ -49,7 +49,7 @@ protected:
      * This method sets the incremental displacements to zero for the given
      * load increment such that incremental displacements are zero
      */
-    void enforce_dirichlet_conditions(SparseMatrix& A, Vector& b) const;
+    void enforce_dirichlet_conditions(SparseMatrix& A, vector& b) const;
 
     /** Move the nodes on the mesh for the Dirichlet boundary */
     void apply_displacement_boundaries();
@@ -81,14 +81,14 @@ protected:
     double relative_force_norm;
 
     SparseMatrix Kt; //!< Tangent matrix stiffness
-    Vector fint;     //!< Internal force vector
-    Vector fext;     //!< External force vector
+    vector fint;     //!< Internal force vector
+    vector fext;     //!< External force vector
 
-    Vector displacement;     //!< Displacement vector
-    Vector displacement_old; //!< Last displacement vector
-    Vector delta_d;          //!< Incremental displacement vector
+    vector displacement;     //!< Displacement vector
+    vector displacement_old; //!< Last displacement vector
+    vector delta_d;          //!< Incremental displacement vector
 
-    Vector minus_residual; //!< Minus residual vector
+    vector minus_residual; //!< Minus residual vector
 
     std::unique_ptr<LinearSolver> linear_solver;
 };

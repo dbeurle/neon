@@ -25,8 +25,8 @@ void Triangle3::precompute_shape_functions()
     numerical_quadrature->evaluate([&](auto const& coordinates) {
         auto const& [l, r, s] = coordinates;
 
-        Vector N(3);
-        Matrix rhea(3, 2);
+        vector N(3);
+        matrix rhea(3, 2);
 
         N(0) = r;
         N(1) = s;
@@ -46,13 +46,13 @@ void Triangle3::precompute_shape_functions()
     extrapolation = matrix::Ones(nodes(), 1);
 }
 
-double Triangle3::compute_measure(Matrix const& nodal_coordinates) const
+double Triangle3::compute_measure(matrix const& nodal_coordinates) const
 {
     // Use the cross product identity 2A = | a x b | to compute face area
-    Vector3 const direction0 = nodal_coordinates.col(0) - nodal_coordinates.col(2);
-    Vector3 const direction1 = nodal_coordinates.col(1) - nodal_coordinates.col(2);
+    vector3 const direction0 = nodal_coordinates.col(0) - nodal_coordinates.col(2);
+    vector3 const direction1 = nodal_coordinates.col(1) - nodal_coordinates.col(2);
 
-    Vector3 normal = direction0.cross(direction1);
+    vector3 normal = direction0.cross(direction1);
 
     return normal.norm() / 2.0;
 }

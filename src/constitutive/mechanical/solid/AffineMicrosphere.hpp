@@ -83,8 +83,8 @@ protected:
      * @param pressure Hydrostatic pressure
      * @param macro_stress Stress tensor from unit sphere homogenisation
      */
-    [[nodiscard]] Matrix3 compute_kirchhoff_stress(double const pressure,
-                                                   Matrix3 const& macro_stress) const;
+    [[nodiscard]] matrix3 compute_kirchhoff_stress(double const pressure,
+                                                   matrix3 const& macro_stress) const;
 
     /**
      * Compute the material tangent including the sdeviatoric projection defined as
@@ -99,10 +99,10 @@ protected:
      * @param macro_C Macromoduli from unit sphere
      * @param macro_stress Macrostress from unit sphere
      */
-    [[nodiscard]] Matrix6 compute_material_tangent(double const J,
+    [[nodiscard]] matrix6 compute_material_tangent(double const J,
                                                    double const K,
-                                                   Matrix6 const& macro_C,
-                                                   Matrix3 const& macro_stress) const;
+                                                   matrix6 const& macro_C,
+                                                   matrix3 const& macro_stress) const;
 
     /**
      * Compute the macro stress using the unit sphere homogenisation
@@ -112,7 +112,7 @@ protected:
      * @param N number of segments per chain
      * @return Kirchhoff stress tensor
      */
-    [[nodiscard]] Matrix3 compute_macro_stress(Matrix3 const& F_unimodular,
+    [[nodiscard]] matrix3 compute_macro_stress(matrix3 const& F_unimodular,
                                                double const bulk_modulus,
                                                double const N) const;
 
@@ -124,7 +124,7 @@ protected:
      * @param N number of segments per chain
      * @return Macromoduli from unit sphere homogenisation
      */
-    [[nodiscard]] Matrix6 compute_macro_moduli(Matrix3 const& F_unimodular,
+    [[nodiscard]] matrix6 compute_macro_moduli(matrix3 const& F_unimodular,
                                                double const bulk_modulus,
                                                double const N) const;
 
@@ -132,13 +132,13 @@ protected:
      * Compute the deformed tangent using the unimodular deformation gradient
      * and the vector associated with the quadrature point on the unit sphere
      */
-    [[nodiscard]] Vector3 deformed_tangent(Matrix3 const& F_unimodular,
-                                           Vector3 const& surface_vector) const {
+    [[nodiscard]] vector3 deformed_tangent(matrix3 const& F_unimodular,
+                                           vector3 const& surface_vector) const {
         return F_unimodular * surface_vector;
     }
 
         /** Compute the microstretch, which is the norm of the deformed tangent vector */
-        [[nodiscard]] auto compute_microstretch(Vector3 const& deformed_tangent) const
+        [[nodiscard]] auto compute_microstretch(vector3 const& deformed_tangent) const
     {
         return deformed_tangent.norm();
     }
@@ -146,9 +146,9 @@ protected:
 protected:
     UnitSphereQuadrature unit_sphere; //!< Unit sphere quadrature rule
 
-    Matrix6 const IoI = voigt::I_outer_I();                      //!< Outer product
-    Matrix6 const I = voigt::kinematic::fourth_order_identity(); //!< Fourth order identity
-    Matrix6 const P = voigt::kinetic::deviatoric();              //!< Deviatoric fourth order tensor
+    matrix6 const IoI = voigt::I_outer_I();                      //!< Outer product
+    matrix6 const I = voigt::kinematic::fourth_order_identity(); //!< Fourth order identity
+    matrix6 const P = voigt::kinetic::deviatoric();              //!< Deviatoric fourth order tensor
 private:
     MicromechanicalElastomer material; //!< Material with micromechanical parameters
 };

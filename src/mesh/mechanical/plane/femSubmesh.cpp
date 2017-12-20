@@ -115,7 +115,7 @@ matrix femSubmesh::material_tangent_stiffness(matrix2x const& x, int32 const ele
 {
     auto const local_dofs = nodes_per_element() * dofs_per_node();
 
-    auto const& tangent_operators = variables->fetch(InternalVariables::Matrix::TangentOperator);
+    auto const& tangent_operators = variables->fetch(InternalVariables::rank4::tangent_operator);
 
     return sf->quadrature().integrate(matrix::Zero(local_dofs, local_dofs).eval(),
                                       [&](auto const& femval, auto const& l) -> matrix {
@@ -140,8 +140,8 @@ vector femSubmesh::internal_nodal_force(matrix2x const& x, int32 const element) 
 
     vector fint = vector::Zero(m * n);
 
-    sf->quadrature().integrate(Eigen::Map<rowmatrix>(fint.data(), m, n),
-                               [&](auto const& femval, auto const& l) -> rowmatrix {
+    sf->quadrature().integrate(Eigen::Map<row_matrix>(fint.data(), m, n),
+                               [&](auto const& femval, auto const& l) -> row_matrix {
                                    auto const& [N, dN] = femval;
 
                                    matrix2 const Jacobian = local_deformation_gradient(dN, x);
@@ -264,15 +264,15 @@ void femSubmesh::update_Jacobian_determinants()
 std::pair<vector, vector> femSubmesh::nodal_averaged_variable(
     InternalVariables::Tensor const tensor_name) const
 {
-    Vector count = Vector::Zero(material_coordinates->size() * 4);
-    Vector value = count;
+    vector count = vector::Zero(material_coordinates->size() * 4);
+    vector value = count;
 
     auto const& tensor_list = variables->fetch(tensor_name);
 
     auto const& E = sf->local_quadrature_extrapolation();
 
-    // Vector format of values
-    Vector component = Vector::Zero(sf->quadrature().points());
+    // vector format of values
+    vector component = vector::Zero(sf->quadrature().points());
 
     for (auto element = 0; element < elements(); ++element)
     {
@@ -289,7 +289,7 @@ std::pair<vector, vector> femSubmesh::nodal_averaged_variable(
                 }
 
                 // Local extrapolation to the nodes
-                Vector const nodal_component = E * component;
+                vector const nodal_component = E * component;
 
                 for (auto n = 0; n < nodal_component.rows(); n++)
                 {
@@ -305,15 +305,15 @@ std::pair<vector, vector> femSubmesh::nodal_averaged_variable(
 std::pair<vector, vector> femSubmesh::nodal_averaged_variable(
     InternalVariables::Scalar const scalar_name) const
 {
-    Vector count = Vector::Zero(material_coordinates->size());
-    Vector value = count;
+    vector count = vector::Zero(material_coordinates->size());
+    vector value = count;
 
     auto const& scalar_list = variables->fetch(scalar_name);
 
     auto const& E = sf->local_quadrature_extrapolation();
 
-    // Vector format of values
-    Vector component = Vector::Zero(sf->quadrature().points());
+    // vector format of values
+    vector component = vector::Zero(sf->quadrature().points());
 
     for (auto element = 0; element < elements(); ++element)
     {
@@ -323,7 +323,7 @@ std::pair<vector, vector> femSubmesh::nodal_averaged_variable(
         }
 
         // Local extrapolation to the nodes
-        Vector const nodal_component = E * component;
+        vector const nodal_component = E * component;
 
         // Assemble these into the global value vector
         auto const& node_list = local_node_list(element);

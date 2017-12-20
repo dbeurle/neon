@@ -34,7 +34,7 @@ femMesh::femMesh(BasicMesh const& basic_mesh,
     allocate_boundary_conditions(mesh_data, basic_mesh);
 }
 
-void femMesh::update_internal_variables(Vector const& u, double const time_step_size)
+void femMesh::update_internal_variables(vector const& u, double const time_step_size)
 {
     auto const start = std::chrono::high_resolution_clock::now();
 

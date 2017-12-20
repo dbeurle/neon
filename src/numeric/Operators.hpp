@@ -36,13 +36,13 @@ namespace neon::fem
  * to the \f$ i \f$th dimension of the shape function in the parent domain
  */
 template <int spatial_dimension>
-inline Matrix sym_gradient(Matrix const& L)
+inline matrix sym_gradient(matrix const& L)
 {
     auto const nodes_per_element = L.cols();
 
     auto constexpr voigt_dimension = spatial_to_voigt(spatial_dimension);
 
-    Matrix B = Matrix::Zero(voigt_dimension, spatial_dimension * nodes_per_element);
+    matrix B = matrix::Zero(voigt_dimension, spatial_dimension * nodes_per_element);
 
     if (spatial_dimension == 3)
     {

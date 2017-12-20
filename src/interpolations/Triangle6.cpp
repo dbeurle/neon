@@ -31,8 +31,8 @@ void Triangle6::precompute_shape_functions()
 
         auto const t = 1.0 - r - s;
 
-        Vector N(6);
-        Matrix rhea(6, 2);
+        vector N(6);
+        matrix rhea(6, 2);
 
         N(0) = r * (2.0 * r - 1.0);
         N(1) = s * (2.0 * s - 1.0);
@@ -76,15 +76,15 @@ void Triangle6::precompute_shape_functions()
     compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
 }
 
-double Triangle6::compute_measure(Matrix const& nodal_coordinates)
+double Triangle6::compute_measure(matrix const& nodal_coordinates)
 {
     // Use numerical quadrature to compute int () dA
     double face_area = 0.0;
 
     // auto const L = numerical_quadrature->points();
     //
-    // Matrix rhea(6, 2);
-    // Matrix planarCoordinates = this->projectCoordinatesToPlane(nodal_coordinates);
+    // matrix rhea(6, 2);
+    // matrix planarCoordinates = this->projectCoordinatesToPlane(nodal_coordinates);
 
     // for (int l = 0; l < L; l++)
     // {

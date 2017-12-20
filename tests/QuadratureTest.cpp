@@ -84,7 +84,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
     {
         Quadrilateral4 quad4(QuadrilateralQuadrature::Rule::OnePoint);
 
-        Matrix x(3, 4);
+        matrix x(3, 4);
         x << 0.0, 1.0, 1.0, 0.0, //
             0.0, 0.0, 1.0, 1.0,  //
             0.0, 0.0, 0.0, 0.0;
@@ -115,7 +115,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
     {
         Quadrilateral4 quad4(QuadrilateralQuadrature::Rule::FourPoint);
 
-        Matrix x(3, 4);
+        matrix x(3, 4);
         x << 0.0, 1.0, 1.0, 0.0, //
             0.0, 0.0, 1.0, 1.0,  //
             0.0, 0.0, 0.0, 0.0;
@@ -146,7 +146,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
     {
         Quadrilateral8 quad8(QuadrilateralQuadrature::Rule::FourPoint);
 
-        Matrix x(3, 8);
+        matrix x(3, 8);
         x << 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5, 0.0, //
             0.0, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5,  //
             0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
@@ -176,7 +176,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
     {
         Quadrilateral8 quad8(QuadrilateralQuadrature::Rule::NinePoint);
 
-        Matrix x(3, 8);
+        matrix x(3, 8);
         x << 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5, 0.0, //
             0.0, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5,  //
             0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
@@ -206,7 +206,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
     {
         Quadrilateral9 quad9(QuadrilateralQuadrature::Rule::FourPoint);
 
-        Matrix x(3, 9);
+        matrix x(3, 9);
         x << 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5, 0.0, 0.5, //
             0.0, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5, 0.5,  //
             0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
@@ -236,7 +236,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
     {
         Quadrilateral9 quad9(QuadrilateralQuadrature::Rule::NinePoint);
 
-        Matrix x(3, 9);
+        matrix x(3, 9);
         x << 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5, 0.0, 0.5, //
             0.0, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5, 0.5,  //
             0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
@@ -318,7 +318,7 @@ TEST_CASE("Triangle quadrature scheme test", "[TriangleQuadrature]")
     {
         Triangle3 tri3(TriangleQuadrature::Rule::OnePoint);
 
-        Matrix x(3, 3);
+        matrix x(3, 3);
         x << 0.0, 0.0, 0.0, //
             1.0, 0.0, 0.0,  //
             0.0, 1.0, 0.0;
@@ -401,7 +401,7 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
     {
         Hexahedron8 hex8(HexahedronQuadrature::Rule::EightPoint);
 
-        Matrix x(3, 8);
+        matrix x(3, 8);
         x << 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, //
             0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0,  //
             0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0;
@@ -460,7 +460,7 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
         Hexahedron20 hex20(HexahedronQuadrature::Rule::EightPoint);
 
         // xyz coordinates of the unit cube
-        Matrix x(3, 20);
+        matrix x(3, 20);
         x << 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5, 0.0, 0.5, 1.0, 0.5, 0.0, 0.0,
             1.0, 1.0, 0.0, //
             0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, /**/ 0.0, 0.5, 1.0, 0.5, 0.0, 0.5, 1.0, 0.5,
@@ -619,7 +619,7 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
             Hexahedron27 hex27(HexahedronQuadrature::Rule::SixPoint);
 
             // xyz coordinates of the unit cube
-            Matrix x(3, 27);
+            matrix x(3, 27);
             x << 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, /**/ 0.5, 1.0, 0.5, 0.0, 0.5, 1.0, 0.5,
                 0.0, 0.0, 1.0, 1.0, 0.0, /**/ 0.5, 0.5, 0.5, 0.5, 0.0, 1.0, 0.5, //
                 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, /**/ 0.0, 0.5, 1.0, 0.5, 0.0, 0.5, 1.0, 0.5,
@@ -638,7 +638,7 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
             Hexahedron27 hex27(HexahedronQuadrature::Rule::EightPoint);
 
             // xyz coordinates of the unit cube
-            Matrix x(3, 27);
+            matrix x(3, 27);
             x << 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, /**/ 0.5, 1.0, 0.5, 0.0, 0.5, 1.0, 0.5,
                 0.0, 0.0, 1.0, 1.0, 0.0, /**/ 0.5, 0.5, 0.5, 0.5, 0.0, 1.0, 0.5, //
                 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, /**/ 0.0, 0.5, 1.0, 0.5, 0.0, 0.5, 1.0, 0.5,
@@ -764,7 +764,7 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
         SECTION("Parent element")
         {
             // Check that we have a Jacobian of one with a parent element
-            Matrix x(10, 3);
+            matrix x(10, 3);
             x << 1.0, 0.0, 0.0, //
                 0.0, 1.0, 0.0,  //
                 0.0, 0.0, 1.0,  //
@@ -784,14 +784,14 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
                 tet10.quadrature().for_each([&](auto const& femval, auto const& l) {
                     auto const& [N, rhea] = femval;
 
-                    Matrix3 const Jacobian = x * rhea;
+                    matrix3 const Jacobian = x * rhea;
 
                     REQUIRE(Jacobian.determinant() == Approx(1.0));
                 });
                 double vol = tet10.quadrature().integrate(0.0, [&](auto const& femval, auto const& l) {
                     auto const& [N, rhea] = femval;
 
-                    Matrix3 const Jacobian = x * rhea;
+                    matrix3 const Jacobian = x * rhea;
 
                     return Jacobian.determinant();
                 });
@@ -804,7 +804,7 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
                 tet10.quadrature().for_each([&](auto const& femval, auto const& l) {
                     auto const& [N, rhea] = femval;
 
-                    Matrix3 const Jacobian = x * rhea;
+                    matrix3 const Jacobian = x * rhea;
 
                     REQUIRE(Jacobian.determinant() == Approx(1.0));
                 });
@@ -812,7 +812,7 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
                 double vol = tet10.quadrature().integrate(0.0, [&](auto const& femval, auto const& l) {
                     auto const& [N, rhea] = femval;
 
-                    Matrix3 const Jacobian = x * rhea;
+                    matrix3 const Jacobian = x * rhea;
 
                     return Jacobian.determinant();
                 });
@@ -825,7 +825,7 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
                 tet10.quadrature().for_each([&](auto const& femval, auto const& l) {
                     auto const& [N, rhea] = femval;
 
-                    Matrix3 const Jacobian = x * rhea;
+                    matrix3 const Jacobian = x * rhea;
 
                     REQUIRE(Jacobian.determinant() == Approx(1.0));
                 });
@@ -833,7 +833,7 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
                 double vol = tet10.quadrature().integrate(0.0, [&](auto const& femval, auto const& l) {
                     auto const& [N, rhea] = femval;
 
-                    Matrix3 const Jacobian = x * rhea;
+                    matrix3 const Jacobian = x * rhea;
 
                     return Jacobian.determinant();
                 });
@@ -844,13 +844,13 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
         {
             Tetrahedron10 tet10(TetrahedronQuadrature::Rule::FourPoint);
 
-            Matrix x_vertices(4, 3);
+            matrix x_vertices(4, 3);
             x_vertices << 1.0, 0.0, 0.0,                          // Node 0
                 0.5, 0.5 * std::sqrt(3.0), 0.0,                   // Node 1
                 0.5, std::sqrt(1.0 / 12.0), std::sqrt(2.0 / 3.0), // Node 2
                 0.0, 0.0, 0.0;                                    // Node 3
 
-            Matrix x(10, 3);
+            matrix x(10, 3);
             x.row(0) = x_vertices.row(0);
             x.row(1) = x_vertices.row(1);
             x.row(2) = x_vertices.row(2);
@@ -868,7 +868,7 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
                                                             [&](auto const& femval, auto const& l) {
                                                                 auto const& [N, dN] = femval;
 
-                                                                Matrix3 const Jacobian = x * dN;
+                                                                matrix3 const Jacobian = x * dN;
 
                                                                 return Jacobian.determinant();
                                                             });
@@ -904,7 +904,7 @@ TEST_CASE("Unit sphere quadrature scheme test", "[UnitSphereQuadrature]")
         for (auto const& coordinate : unit_sphere.coordinates())
         {
             auto const& [l, x, y, z] = coordinate;
-            Vector3 norm_check(x, y, z);
+            vector3 norm_check(x, y, z);
             REQUIRE(norm_check.norm() == Approx(1.0));
         }
     }
@@ -918,7 +918,7 @@ TEST_CASE("Unit sphere quadrature scheme test", "[UnitSphereQuadrature]")
         for (auto const& coordinate : unit_sphere.coordinates())
         {
             auto const& [l, x, y, z] = coordinate;
-            Vector3 norm_check(x, y, z);
+            vector3 norm_check(x, y, z);
             REQUIRE(norm_check.norm() == Approx(1.0));
         }
     }
@@ -932,7 +932,7 @@ TEST_CASE("Unit sphere quadrature scheme test", "[UnitSphereQuadrature]")
         for (auto const& coordinate : unit_sphere.coordinates())
         {
             auto const& [l, x, y, z] = coordinate;
-            Vector3 norm_check(x, y, z);
+            vector3 norm_check(x, y, z);
             REQUIRE(norm_check.norm() == Approx(1.0));
         }
     }

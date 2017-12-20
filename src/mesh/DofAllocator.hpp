@@ -8,7 +8,7 @@ namespace neon
 /**
  * Allocates the dof lists from the nodal connectivity vector
  * @param nodal_dofs Number of degrees of freedom for each node
- * @param nodal_connectivity Vector of nodal coordinates
+ * @param nodal_connectivity vector of nodal coordinates
  * @return The global degrees of freedom
  */
 [[nodiscard]] std::vector<local_indices> allocate_dof_list(
@@ -17,7 +17,7 @@ namespace neon
 /**
  * Allocates the dof lists from the nodal connectivity vector
  * @param nodal_dofs Number of degrees of freedom for each node
- * @param nodal_connectivity Vector of nodal coordinates
+ * @param nodal_connectivity vector of nodal coordinates
  * @return The global degrees of freedom
  */
 
