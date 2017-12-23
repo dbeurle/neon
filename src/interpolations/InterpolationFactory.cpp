@@ -10,6 +10,7 @@
 #include "interpolations/Triangle6.hpp"
 
 #include "interpolations/Line.hpp"
+#include "interpolations/prism.hpp"
 
 #include <stdexcept>
 
@@ -70,6 +71,9 @@ std::unique_ptr<VolumeInterpolation> make_volume_interpolation(ElementTopology c
                                                        : TetrahedronQuadrature::Rule::FourPoint);
         }
         case ElementTopology::Prism6:
+        {
+            return std::make_unique<prism6>(PrismQuadrature::Rule::OnePoint);
+        }
         case ElementTopology::Pyramid5:
         case ElementTopology::Tetrahedron20:
         case ElementTopology::Tetrahedron35:

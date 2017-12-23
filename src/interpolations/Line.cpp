@@ -12,19 +12,19 @@ Line2::Line2(LineQuadrature::Rule rule) : LineInterpolation(std::make_unique<Lin
 
 void Line2::precompute_shape_functions()
 {
-    using NodalCoordinate = std::tuple<int, double>;
+    using coordinates_type = std::tuple<int, double>;
 
     // Initialize nodal coordinates array as Xi, Eta, Zeta
-    std::array<NodalCoordinate, 2> constexpr local_coordinates{{{0, -1.0}, {1, 1.0}}};
+    std::array<coordinates_type, 2> constexpr local_coordinates{{{0, -1.0}, {1, 1.0}}};
 
     matrix N_matrix(numerical_quadrature->points(), nodes());
     matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 2);
 
     numerical_quadrature->evaluate([&](auto const& coordinates) {
-        auto const& [l, xi] = coordinates;
+        auto const & [l, xi] = coordinates;
 
         vector N(2);
-        row_matrix rhea(2, 1);
+        matrix rhea(2, 1);
 
         N(0) = 1.0 / 2.0 * (1.0 - xi);
         N(1) = 1.0 / 2.0 * (1.0 + xi);
@@ -40,9 +40,9 @@ void Line2::precompute_shape_functions()
     });
 
     // Compute extrapolation algorithm matrices
-    matrix local_nodal_coordinates = matrix::Ones(nodes(), 3);
+    matrix local_nodal_coordinates = matrix::Ones(nodes(), 1);
 
-    for (auto const& [a, xi_a] : local_coordinates)
+    for (auto const & [a, xi_a] : local_coordinates)
     {
         local_nodal_coordinates(a, 0) = xi_a;
     }
@@ -61,16 +61,16 @@ Line3::Line3(LineQuadrature::Rule rule) : LineInterpolation(std::make_unique<Lin
 
 void Line3::precompute_shape_functions()
 {
-    using NodalCoordinate = std::tuple<int, double>;
+    using coordinates_type = std::tuple<int, double>;
 
     // Initialize nodal coordinates array as Xi, Eta, Zeta
-    std::array<NodalCoordinate, 2> constexpr local_coordinates{{{0, -1.0}, {1, 1.0}}};
+    std::array<coordinates_type, 2> constexpr local_coordinates{{{0, -1.0}, {1, 1.0}}};
 
     matrix N_matrix(numerical_quadrature->points(), nodes());
     matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 2);
 
     numerical_quadrature->evaluate([&](auto const& coordinates) {
-        auto const& [l, xi] = coordinates;
+        auto const & [l, xi] = coordinates;
 
         vector N(3);
         matrix rhea(3, 1);
@@ -91,7 +91,7 @@ void Line3::precompute_shape_functions()
     });
 
     // Compute extrapolation algorithm matrices
-    matrix local_nodal_coordinates = matrix::Ones(nodes(), 3);
+    matrix local_nodal_coordinates = matrix::Ones(nodes(), 1);
 
     for (auto const& [a, xi_a] : local_coordinates)
     {

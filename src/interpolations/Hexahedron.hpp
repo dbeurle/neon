@@ -17,7 +17,7 @@ class Hexahedron8 : public VolumeInterpolation
 public:
     explicit Hexahedron8(HexahedronQuadrature::Rule rule);
 
-    int nodes() const override final { return 8; }
+    virtual int nodes() const override final { return 8; }
 
     double compute_measure(matrix const& nodal_coordinates) const;
 

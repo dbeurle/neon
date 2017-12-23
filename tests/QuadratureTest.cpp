@@ -19,6 +19,8 @@
 #include "interpolations/Triangle3.hpp"
 #include "interpolations/Triangle6.hpp"
 
+#include "interpolations/prism.hpp"
+
 #include <range/v3/numeric/accumulate.hpp>
 
 using namespace neon;
@@ -41,6 +43,24 @@ TEST_CASE("Line quadrature scheme test", "[LineQuadrature]")
         REQUIRE(ranges::accumulate(l1.weights(), 0.0) == Approx(2.0));
         REQUIRE(ranges::accumulate(l2.weights(), 0.0) == Approx(2.0));
         REQUIRE(ranges::accumulate(l3.weights(), 0.0) == Approx(2.0));
+    }
+    SECTION("line 2 interpolation function - one point")
+    {
+        Line2 line(LineQuadrature::Rule::OnePoint);
+
+        REQUIRE(line.nodes() == 2);
+        REQUIRE(line.quadrature().points() == 1);
+
+        line.quadrature().for_each([&](auto const& femval, auto const& l) {
+            auto const & [N, rhea] = femval;
+
+            REQUIRE(N.sum() == Approx(1.0));
+
+            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+        });
+        REQUIRE(line.local_quadrature_extrapolation().rows() == 2);
+        REQUIRE(line.local_quadrature_extrapolation().cols() == 1);
+        REQUIRE(line.local_quadrature_extrapolation().allFinite());
     }
 }
 TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
@@ -70,7 +90,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
         REQUIRE(quad4.local_quadrature_extrapolation().cols() == 1);
 
         quad4.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -101,7 +121,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
         REQUIRE(quad4.local_quadrature_extrapolation().cols() == 4);
 
         quad4.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -132,7 +152,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
         REQUIRE(quad8.local_quadrature_extrapolation().cols() == 4);
 
         quad8.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -163,7 +183,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
         REQUIRE(quad8.local_quadrature_extrapolation().cols() == 9);
 
         quad8.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -193,7 +213,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
         REQUIRE(quad9.local_quadrature_extrapolation().cols() == 4);
 
         quad9.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -223,7 +243,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[QuadrilateralQuadrature]")
         REQUIRE(quad9.local_quadrature_extrapolation().cols() == 9);
 
         quad9.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -271,7 +291,7 @@ TEST_CASE("Triangle quadrature scheme test", "[TriangleQuadrature]")
         REQUIRE(tri3.local_quadrature_extrapolation().cols() == 1);
 
         tri3.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -288,7 +308,7 @@ TEST_CASE("Triangle quadrature scheme test", "[TriangleQuadrature]")
         REQUIRE(tri6.quadrature().points() == 3);
 
         tri6.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -305,7 +325,7 @@ TEST_CASE("Triangle quadrature scheme test", "[TriangleQuadrature]")
         REQUIRE(tri6.quadrature().points() == 4);
 
         tri6.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -357,7 +377,7 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
         REQUIRE(hex8.quadrature().points() == 1);
 
         hex8.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             // Check every entry
             for (int i = 0; i < 8; i++) REQUIRE(N(i) == Approx(0.125));
@@ -384,7 +404,7 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
         REQUIRE(hex8.quadrature().points() == 8);
 
         hex8.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -419,7 +439,7 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
         REQUIRE(hex20.quadrature().points() == 1);
 
         hex20.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -443,7 +463,7 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
         REQUIRE(hex20.quadrature().points() == 6);
 
         hex20.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -481,7 +501,7 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
         REQUIRE(hex20.quadrature().points() == 8);
 
         hex20.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -505,7 +525,7 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
         REQUIRE(hex20.quadrature().points() == 27);
 
         hex20.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -529,7 +549,7 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
         REQUIRE(hex27.quadrature().points() == 1);
 
         hex27.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -553,7 +573,7 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
         REQUIRE(hex27.quadrature().points() == 6);
 
         hex27.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -576,7 +596,7 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
         REQUIRE(hex27.quadrature().points() == 8);
 
         hex27.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -600,7 +620,7 @@ TEST_CASE("Hexahedron quadrature scheme test", "[HexahedronQuadrature]")
         REQUIRE(hex27.quadrature().points() == 27);
 
         hex27.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -680,7 +700,7 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
         REQUIRE(tet4.quadrature().points() == 1);
 
         tet4.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -702,7 +722,7 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
         REQUIRE(tet10.quadrature().points() == 1);
 
         tet10.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -724,7 +744,7 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
         REQUIRE(tet10.quadrature().points() == 4);
 
         tet10.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -746,7 +766,7 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
         REQUIRE(tet10.quadrature().points() == 5);
 
         tet10.quadrature().for_each([&](auto const& femval, auto const& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [N, rhea] = femval;
 
             REQUIRE(N.sum() == Approx(1.0));
 
@@ -782,14 +802,14 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
                 Tetrahedron10 tet10(TetrahedronQuadrature::Rule::OnePoint);
 
                 tet10.quadrature().for_each([&](auto const& femval, auto const& l) {
-                    auto const& [N, rhea] = femval;
+                    auto const & [N, rhea] = femval;
 
                     matrix3 const Jacobian = x * rhea;
 
                     REQUIRE(Jacobian.determinant() == Approx(1.0));
                 });
                 double vol = tet10.quadrature().integrate(0.0, [&](auto const& femval, auto const& l) {
-                    auto const& [N, rhea] = femval;
+                    auto const & [N, rhea] = femval;
 
                     matrix3 const Jacobian = x * rhea;
 
@@ -802,7 +822,7 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
                 Tetrahedron10 tet10(TetrahedronQuadrature::Rule::FourPoint);
 
                 tet10.quadrature().for_each([&](auto const& femval, auto const& l) {
-                    auto const& [N, rhea] = femval;
+                    auto const & [N, rhea] = femval;
 
                     matrix3 const Jacobian = x * rhea;
 
@@ -810,7 +830,7 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
                 });
 
                 double vol = tet10.quadrature().integrate(0.0, [&](auto const& femval, auto const& l) {
-                    auto const& [N, rhea] = femval;
+                    auto const & [N, rhea] = femval;
 
                     matrix3 const Jacobian = x * rhea;
 
@@ -823,7 +843,7 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
                 Tetrahedron10 tet10(TetrahedronQuadrature::Rule::FivePoint);
 
                 tet10.quadrature().for_each([&](auto const& femval, auto const& l) {
-                    auto const& [N, rhea] = femval;
+                    auto const & [N, rhea] = femval;
 
                     matrix3 const Jacobian = x * rhea;
 
@@ -831,7 +851,7 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
                 });
 
                 double vol = tet10.quadrature().integrate(0.0, [&](auto const& femval, auto const& l) {
-                    auto const& [N, rhea] = femval;
+                    auto const & [N, rhea] = femval;
 
                     matrix3 const Jacobian = x * rhea;
 
@@ -866,7 +886,7 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[TetrahedronQuadrature]")
 
             double const vol = tet10.quadrature().integrate(0.0,
                                                             [&](auto const& femval, auto const& l) {
-                                                                auto const& [N, dN] = femval;
+                                                                auto const & [N, dN] = femval;
 
                                                                 matrix3 const Jacobian = x * dN;
 
@@ -888,8 +908,49 @@ TEST_CASE("Prism quadrature scheme test", "[PrismQuadrature]")
         REQUIRE(p1.points() == 1);
         REQUIRE(p6.points() == 6);
 
-        REQUIRE(ranges::accumulate(p1.weights(), 0.0) == Approx(4.0));
-        REQUIRE(ranges::accumulate(p6.weights(), 0.0) == Approx(6.0));
+        REQUIRE(ranges::accumulate(p1.weights(), 0.0) == Approx(2.0));
+        REQUIRE(ranges::accumulate(p6.weights(), 0.0) == Approx(2.0));
+    }
+    SECTION("Six node - one point evaluation")
+    {
+        prism6 element(PrismQuadrature::Rule::OnePoint);
+
+        REQUIRE(element.nodes() == 6);
+        REQUIRE(element.quadrature().points() == 1);
+
+        element.quadrature().for_each([&](auto const& femval, auto const& l) {
+
+            auto const & [N, rhea] = femval;
+
+            REQUIRE(N.sum() == Approx(1.0));
+
+            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
+        });
+        REQUIRE(element.local_quadrature_extrapolation().rows() == 6);
+        REQUIRE(element.local_quadrature_extrapolation().cols() == 1);
+        REQUIRE(element.local_quadrature_extrapolation().allFinite());
+    }
+    SECTION("Six node - six point evaluation")
+    {
+        prism6 element(PrismQuadrature::Rule::SixPoint);
+
+        REQUIRE(element.nodes() == 6);
+        REQUIRE(element.quadrature().points() == 6);
+
+        element.quadrature().for_each([&](auto const& femval, auto const& l) {
+            auto const & [N, rhea] = femval;
+
+            REQUIRE(N.sum() == Approx(1.0));
+
+            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
+        });
+        REQUIRE(element.local_quadrature_extrapolation().rows() == 6);
+        REQUIRE(element.local_quadrature_extrapolation().cols() == 6);
+        REQUIRE(element.local_quadrature_extrapolation().allFinite());
     }
 }
 TEST_CASE("Unit sphere quadrature scheme test", "[UnitSphereQuadrature]")
@@ -903,7 +964,7 @@ TEST_CASE("Unit sphere quadrature scheme test", "[UnitSphereQuadrature]")
 
         for (auto const& coordinate : unit_sphere.coordinates())
         {
-            auto const& [l, x, y, z] = coordinate;
+            auto const & [l, x, y, z] = coordinate;
             vector3 norm_check(x, y, z);
             REQUIRE(norm_check.norm() == Approx(1.0));
         }
@@ -917,7 +978,7 @@ TEST_CASE("Unit sphere quadrature scheme test", "[UnitSphereQuadrature]")
 
         for (auto const& coordinate : unit_sphere.coordinates())
         {
-            auto const& [l, x, y, z] = coordinate;
+            auto const & [l, x, y, z] = coordinate;
             vector3 norm_check(x, y, z);
             REQUIRE(norm_check.norm() == Approx(1.0));
         }
@@ -931,7 +992,7 @@ TEST_CASE("Unit sphere quadrature scheme test", "[UnitSphereQuadrature]")
 
         for (auto const& coordinate : unit_sphere.coordinates())
         {
-            auto const& [l, x, y, z] = coordinate;
+            auto const & [l, x, y, z] = coordinate;
             vector3 norm_check(x, y, z);
             REQUIRE(norm_check.norm() == Approx(1.0));
         }
