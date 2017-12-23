@@ -22,7 +22,7 @@ namespace mechanical::solid
 class femSubmesh : public Submesh
 {
 public:
-    using ValueCount = std::tuple<vector, vector>;
+    using ValueCount = std::pair<vector, vector>;
 
     using internal_variable_type = InternalVariables;
 
@@ -34,7 +34,7 @@ public:
                         Submesh const& submesh);
 
     /** @return list of global degrees of freedom for an element */
-    [[nodiscard]] List const& local_dof_list(int const element) const {
+    [[nodiscard]] local_indices const& local_dof_list(int const element) const {
         return dof_list.at(element);
     }
 
@@ -125,7 +125,7 @@ private:
 
     std::unique_ptr<ConstitutiveModel> cm; //!< Constitutive model
 
-    std::vector<List> dof_list; //!< Map for the local to global dofs
+    std::vector<local_indices> dof_list; //!< Map for the local to global dofs
 };
 }
 }
