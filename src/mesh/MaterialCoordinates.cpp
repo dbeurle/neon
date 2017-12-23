@@ -23,15 +23,15 @@ matrix3x MaterialCoordinates::displacement() const { return x - X; }
 
 void MaterialCoordinates::update_current_xy_configuration(vector const& u)
 {
-    x.row(0) = X.row(0) + u(Eigen::seq(0, u.size() - 1, 2)).transpose();
-    x.row(1) = X.row(1) + u(Eigen::seq(1, u.size() - 1, 2)).transpose();
+    x.row(0) = X.row(0) + u.transpose()(Eigen::seq(0, u.size() - 1, 2));
+    x.row(1) = X.row(1) + u.transpose()(Eigen::seq(1, u.size() - 1, 2));
 }
 
 void MaterialCoordinates::update_current_configuration(vector const& u)
 {
-    x.row(0) = X.row(0) + u(Eigen::seq(0, u.size() - 1, 3)).transpose();
-    x.row(1) = X.row(1) + u(Eigen::seq(1, u.size() - 1, 3)).transpose();
-    x.row(2) = X.row(2) + u(Eigen::seq(2, u.size() - 1, 3)).transpose();
+    x.row(0) = X.row(0) + u.transpose()(Eigen::seq(0, u.size() - 1, 3));
+    x.row(1) = X.row(1) + u.transpose()(Eigen::seq(1, u.size() - 1, 3));
+    x.row(2) = X.row(2) + u.transpose()(Eigen::seq(2, u.size() - 1, 3));
 }
 
 vtkSmartPointer<vtkPoints> MaterialCoordinates::vtk_coordinates() const

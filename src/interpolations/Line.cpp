@@ -40,7 +40,7 @@ void Line2::precompute_shape_functions()
     });
 
     // Compute extrapolation algorithm matrices
-    matrix local_nodal_coordinates = matrix::Ones(nodes(), 1);
+    matrix local_nodal_coordinates = matrix::Ones(nodes(), 2);
 
     for (auto const & [a, xi_a] : local_coordinates)
     {
@@ -93,7 +93,7 @@ void Line3::precompute_shape_functions()
     // Compute extrapolation algorithm matrices
     matrix local_nodal_coordinates = matrix::Ones(nodes(), 1);
 
-    for (auto const& [a, xi_a] : local_coordinates)
+    for (auto const & [a, xi_a] : local_coordinates)
     {
         local_nodal_coordinates(a, 0) = xi_a;
     }

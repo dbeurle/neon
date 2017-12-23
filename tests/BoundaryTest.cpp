@@ -229,12 +229,10 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
     // triangle mesh
     using namespace neon::mechanical::solid;
 
-    vector coordinates(3 * 5);
-    coordinates << 0.0, 0.0, 0.0, //
-        1.0, 0.0, 0.0,            //
-        1.0, 1.0, 0.0,            //
-        0.0, 1.0, 0.0,            //
-        2.0, 1.0, 0.0;
+    matrix3x coordinates(3, 5);
+    coordinates << 0.0, 1.0, 1.0, 0.0, 2.0, //
+        0.0, 0.0, 1.0, 1.0, 1.0,            //
+        0.0, 0.0, 0.0, 0.0, 0.0;            //
 
     auto material_coordinates = std::make_shared<MaterialCoordinates>(coordinates);
 

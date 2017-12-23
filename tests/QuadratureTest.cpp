@@ -56,7 +56,7 @@ TEST_CASE("Line quadrature scheme test", "[LineQuadrature]")
 
             REQUIRE(N.sum() == Approx(1.0));
 
-            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.sum() == Approx(0.0).margin(ZERO_MARGIN));
         });
         REQUIRE(line.local_quadrature_extrapolation().rows() == 2);
         REQUIRE(line.local_quadrature_extrapolation().cols() == 1);
