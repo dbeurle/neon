@@ -133,7 +133,7 @@ vector femSubmesh::internal_nodal_force(matrix3x const& x, int32 const element) 
 {
     auto const& cauchy_stresses = variables->fetch(InternalVariables::Tensor::Cauchy);
 
-    auto const [m, n] = std::make_tuple(nodes_per_element(), dofs_per_node());
+    auto const [m, n] = std::make_pair(nodes_per_element(), dofs_per_node());
 
     vector fint = vector::Zero(m * n);
 
