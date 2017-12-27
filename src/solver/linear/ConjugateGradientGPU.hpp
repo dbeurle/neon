@@ -39,6 +39,7 @@ protected:
     double *d_val, *d_x;
 
     double *d_r, *d_p, *d_Ap, *d_y, *d_z;
+    double* d_M_inv;
 
     cublasHandle_t cublasHandle = 0;
     cusparseHandle_t cusparseHandle = 0;

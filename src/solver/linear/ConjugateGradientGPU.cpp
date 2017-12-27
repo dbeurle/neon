@@ -26,6 +26,7 @@
 
 #include "ConjugateGradientGPU.hpp"
 #include "Exceptions.hpp"
+#include "dmatrix_vector_product.hpp"
 
 #ifdef ENABLE_CUDA
 
@@ -89,6 +90,7 @@ ConjugateGradientGPU::~ConjugateGradientGPU()
     cudaFree(d_p);
     cudaFree(d_Ap);
     cudaFree(d_z);
+    cudaFree(d_M_inv);
 }
 
 void ConjugateGradientGPU::solve(SparseMatrix const& A, vector& x, vector const& b)
@@ -106,10 +108,15 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, vector& x, vector const&
     cudaMemcpy(d_r, b.data(), N * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(d_val, A.valuePtr(), A.nonZeros() * sizeof(double), cudaMemcpyHostToDevice);
 
+    {
+        vector const M_inv = A.diagonal().cwiseInverse();
+        cudaMemcpy(d_M_inv, M_inv.data(), N * sizeof(double), cudaMemcpyHostToDevice);
+    }
+
     int k = 0;
     double residual_old = 0.0, residual = 0.0;
 
-    // r * r.transpose()
+    // r.transpose() * z
     cublasDdot(cublasHandle, N, d_r, 1, d_r, 1, &residual);
 
     while (std::sqrt(residual) > residual_tolerance && k < max_iterations)
@@ -198,6 +205,7 @@ void ConjugateGradientGPU::allocate_device_memory(SparseMatrix const& A, vector&
     checkCudaErrors(cudaMalloc((void**)&d_p, N * sizeof(double)));
     checkCudaErrors(cudaMalloc((void**)&d_Ap, N * sizeof(double)));
     checkCudaErrors(cudaMalloc((void**)&d_z, N * sizeof(double)));
+    checkCudaErrors(cudaMalloc((void**)&d_M_inv, N * sizeof(double)));
 
     cudaMemcpy(d_row, A.outerIndexPtr(), (N + 1) * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_col, A.innerIndexPtr(), A.nonZeros() * sizeof(int), cudaMemcpyHostToDevice);
