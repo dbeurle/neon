@@ -116,8 +116,13 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, vector& x, vector const&
     int k = 0;
     double residual_old = 0.0, residual = 0.0;
 
+    cudaMemcpy(d_z, d_r, N * sizeof(double), cudaMemcpyDeviceToDevice);
+
+    // compute z0
+    cuda::diagonal_matrix_vector_product(d_M_inv, d_z, N);
+
     // r.transpose() * z
-    cublasDdot(cublasHandle, N, d_r, 1, d_r, 1, &residual);
+    cublasDdot(cublasHandle, N, d_r, 1, d_z, 1, &residual);
 
     while (std::sqrt(residual) > residual_tolerance && k < max_iterations)
     {
@@ -125,17 +130,17 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, vector& x, vector const&
 
         if (k == 1)
         {
-            // p = r
-            cublasDcopy(cublasHandle, N, d_r, 1, d_p, 1);
+            // p = z
+            cublasDcopy(cublasHandle, N, d_z, 1, d_p, 1);
         }
         else
         {
             double beta = residual / residual_old;
-            // p <= p * beta
+            // p <= beta * p
             cublasDscal(cublasHandle, N, &beta, d_p, 1);
 
-            //  p = p + r
-            cublasDaxpy(cublasHandle, N, &one, d_r, 1, d_p, 1);
+            //  p = p + z
+            cublasDaxpy(cublasHandle, N, &one, d_z, 1, d_p, 1);
         }
 
         // Perform y = alpha * A * x + beta * y
@@ -162,7 +167,7 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, vector& x, vector const&
         // residual == old residual
         double alpha = residual / p_dot_Ap;
 
-        // x <= alpha * p + x
+        // x <= x + alpha * p
         cublasDaxpy(cublasHandle, N, &alpha, d_p, 1, d_x, 1);
 
         // r = r - alpha * Ap;
@@ -171,8 +176,12 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, vector& x, vector const&
 
         residual_old = residual;
 
-        // r' * r and store in residual
-        cublasDdot(cublasHandle, N, d_r, 1, d_r, 1, &residual);
+        // z = M_inv * r
+        cudaMemcpy(d_z, d_r, N * sizeof(double), cudaMemcpyDeviceToDevice);
+        cuda::diagonal_matrix_vector_product(d_M_inv, d_z, N);
+
+        // z' * r and store in residual
+        cublasDdot(cublasHandle, N, d_z, 1, d_r, 1, &residual);
     }
 
     std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << k << " (max. "
