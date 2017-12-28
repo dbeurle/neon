@@ -8,12 +8,12 @@ add_library(neon ${NEON_SOURCES})
 
 target_compile_options(neon PUBLIC $<$<CONFIG:RELEASE>:-O3 -DNDEBUG>)
 
-add_dependencies(neon eigen3 range-v3 termcolor blaze dmatvec)
+add_dependencies(neon eigen3 range-v3 termcolor blaze)
 
 if (ENABLE_CUDA)
     cuda_add_library(dmatvec solver/linear/dmatrix_vector_product.cu STATIC)
-    target_link_libraries(dmatvec ${CUDA_LIBRARIES})
-    target_link_libraries(neon dmatvec)
+    add_dependencies(neon dmatvec)
+    target_link_libraries(neon dmatvec ${CUDA_LIBRARIES})
 endif()
 
 target_link_libraries(neon
