@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include <termcolor/termcolor.hpp>
 
+#include "mpi.hpp"
+
 int main(int argc, char* argv[])
 {
     using namespace neon;
@@ -15,6 +17,8 @@ int main(int argc, char* argv[])
         std::cerr << "No input file was provided.  Use <filename>.json\n";
         return 1;
     }
+
+    mpi::instance(argc, argv);
 
     try
     {

@@ -5,6 +5,9 @@ project(neonfe CXX)
 set(CMAKE_CXX_STANDARD 17)
 add_definitions("-Wall -Wno-unused-variable -Wno-sign-compare")
 
+find_package(MPI REQUIRED)
+include_directories(${MPI_CXX_INCLUDE_PATH})
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 option(ENABLE_CUDA "Enable CUDA linear solver" OFF)
@@ -32,12 +35,14 @@ add_subdirectory(${EXTERNAL_PROJECTS_DIR}/blaze)
 add_subdirectory(${EXTERNAL_PROJECTS_DIR}/eigen3)
 add_subdirectory(${EXTERNAL_PROJECTS_DIR}/range-v3)
 add_subdirectory(${EXTERNAL_PROJECTS_DIR}/termcolor)
+add_subdirectory(${EXTERNAL_PROJECTS_DIR}/cppmpi)
 
 include_directories(${CATCH_INCLUDE_DIR}
                     ${BLAZE_INCLUDE_DIR}
                     ${RV3_INCLUDE_DIR}
                     ${EIGEN_INCLUDE_DIR}
                     ${TERMCOLOR_INCLUDE_DIR}
+                    ${CPPMPI_INCLUDE_DIR}
                     ${COMMON_INCLUDES})
 
 find_package(VTK COMPONENTS vtkIOXML REQUIRED)
@@ -73,5 +78,7 @@ add_subdirectory(examples)
 add_executable(neonfe src/neon.cpp)
 
 target_link_libraries(neonfe neon)
+
+add_dependencies(neonfe cppmpi)
 
 install(TARGETS neonfe RUNTIME DESTINATION bin)

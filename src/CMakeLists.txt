@@ -20,6 +20,7 @@ target_link_libraries(neon
                       ${CUDA_LIBRARIES}
                       ${CUDA_CUBLAS_LIBRARIES}
                       ${CUDA_cusparse_LIBRARY}
+                      ${MPI_LIBRARIES}
                       pastix
                       scotch
                       scotcherr)
