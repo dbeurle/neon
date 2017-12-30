@@ -64,7 +64,7 @@ void femSubmesh::save_internal_variables(bool const have_converged)
     }
 }
 
-std::pair<local_indices const&, matrix> femSubmesh::tangent_stiffness(int32 const element) const
+std::pair<std::vector<int64> const&, matrix> femSubmesh::tangent_stiffness(int32 const element) const
 {
     auto const x = geometry::project_to_plane(
         material_coordinates->current_configuration(local_node_list(element)));
@@ -78,7 +78,7 @@ std::pair<local_indices const&, matrix> femSubmesh::tangent_stiffness(int32 cons
     return {local_dof_view(element), ke};
 }
 
-std::pair<local_indices const&, vector> femSubmesh::internal_force(int32 const element) const
+std::pair<std::vector<int64> const&, vector> femSubmesh::internal_force(int32 const element) const
 {
     auto const x = geometry::project_to_plane(
         material_coordinates->current_configuration(local_node_list(element)));
@@ -156,7 +156,7 @@ vector femSubmesh::internal_nodal_force(matrix2x const& x, int32 const element) 
     return fint;
 }
 
-std::pair<local_indices const&, matrix> femSubmesh::consistent_mass(int32 const element) const
+std::pair<std::vector<int64> const&, matrix> femSubmesh::consistent_mass(int32 const element) const
 {
     auto const X = material_coordinates->initial_configuration(local_node_list(element));
     return {local_dof_view(element), X};
@@ -174,7 +174,7 @@ std::pair<local_indices const&, matrix> femSubmesh::consistent_mass(int32 const 
     // return {local_dof_view(element), identity_expansion(m, dofs_per_node())};
 }
 
-std::pair<local_indices const&, vector> femSubmesh::diagonal_mass(int32 const element) const
+std::pair<std::vector<int64> const&, vector> femSubmesh::diagonal_mass(int32 const element) const
 {
     auto const& [dofs, consistent_m] = this->consistent_mass(element);
 

@@ -9,9 +9,10 @@
 
 namespace neon
 {
-local_indices allocate_element_dofs(int32 const nodal_dofs, local_indices const& element_nodes)
+std::vector<int64> allocate_element_dofs(int32 const nodal_dofs,
+                                         std::vector<int64> const& element_nodes)
 {
-    local_indices element_dof_list;
+    std::vector<int64> element_dof_list;
 
     element_dof_list.reserve(nodal_dofs * element_nodes.size());
 
@@ -25,10 +26,10 @@ local_indices allocate_element_dofs(int32 const nodal_dofs, local_indices const&
     return element_dof_list;
 }
 
-std::vector<local_indices> allocate_dof_list(int32 const nodal_dofs,
-                                             std::vector<local_indices> const& element_node_list)
+std::vector<std::vector<int64>> allocate_dof_list(
+    int32 const nodal_dofs, std::vector<std::vector<int64>> const& element_node_list)
 {
-    std::vector<local_indices> element_dof_list(element_node_list.size());
+    std::vector<std::vector<int64>> element_dof_list(element_node_list.size());
 
     std::transform(std::begin(element_node_list),
                    std::end(element_node_list),
@@ -40,9 +41,9 @@ std::vector<local_indices> allocate_dof_list(int32 const nodal_dofs,
     return element_dof_list;
 }
 
-std::vector<local_indices> filter_dof_list(int32 const nodal_dofs,
-                                           int32 const dof_offset,
-                                           std::vector<local_indices> const& nodal_connectivity)
+std::vector<std::vector<int64>> filter_dof_list(int32 const nodal_dofs,
+                                                int32 const dof_offset,
+                                                std::vector<std::vector<int64>> const& nodal_connectivity)
 {
     using namespace ranges;
     return nodal_connectivity | view::transform([=](auto const& node_list) {

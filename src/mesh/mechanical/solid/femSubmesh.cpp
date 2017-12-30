@@ -63,7 +63,7 @@ void femSubmesh::save_internal_variables(bool const have_converged)
     }
 }
 
-std::tuple<List const&, matrix> femSubmesh::tangent_stiffness(int32 const element) const
+std::pair<std::vector<int64> const&, matrix> femSubmesh::tangent_stiffness(int64 const element) const
 {
     auto const& x = material_coordinates->current_configuration(local_node_list(element));
 
@@ -76,14 +76,14 @@ std::tuple<List const&, matrix> femSubmesh::tangent_stiffness(int32 const elemen
     return {local_dof_list(element), ke};
 }
 
-std::tuple<List const&, vector> femSubmesh::internal_force(int32 const element) const
+std::pair<std::vector<int64> const&, vector> femSubmesh::internal_force(int64 const element) const
 {
     auto const& x = material_coordinates->current_configuration(local_node_list(element));
 
     return {local_dof_list(element), internal_nodal_force(x, element)};
 }
 
-matrix femSubmesh::geometric_tangent_stiffness(matrix3x const& x, int32 const element) const
+matrix femSubmesh::geometric_tangent_stiffness(matrix3x const& x, int64 const element) const
 {
     auto const& cauchy_stresses = variables->fetch(InternalVariables::Tensor::Cauchy);
 
@@ -107,7 +107,7 @@ matrix femSubmesh::geometric_tangent_stiffness(matrix3x const& x, int32 const el
     return identity_expansion(kgeo, dofs_per_node());
 }
 
-matrix femSubmesh::material_tangent_stiffness(matrix3x const& x, int32 const element) const
+matrix femSubmesh::material_tangent_stiffness(matrix3x const& x, int64 const element) const
 {
     auto const local_dofs = nodes_per_element() * dofs_per_node();
 
@@ -129,7 +129,7 @@ matrix femSubmesh::material_tangent_stiffness(matrix3x const& x, int32 const ele
     });
 }
 
-vector femSubmesh::internal_nodal_force(matrix3x const& x, int32 const element) const
+vector femSubmesh::internal_nodal_force(matrix3x const& x, int64 const element) const
 {
     auto const& cauchy_stresses = variables->fetch(InternalVariables::Tensor::Cauchy);
 
@@ -153,7 +153,7 @@ vector femSubmesh::internal_nodal_force(matrix3x const& x, int32 const element) 
     return fint;
 }
 
-std::tuple<List const&, matrix> femSubmesh::consistent_mass(int32 const element) const
+std::pair<std::vector<int64> const&, matrix> femSubmesh::consistent_mass(int64 const element) const
 {
     auto const& X = material_coordinates->initial_configuration(local_node_list(element));
 
@@ -172,7 +172,7 @@ std::tuple<List const&, matrix> femSubmesh::consistent_mass(int32 const element)
     return {local_dof_list(element), identity_expansion(m, dofs_per_node())};
 }
 
-std::tuple<List const&, vector> femSubmesh::diagonal_mass(int32 const element) const
+std::pair<std::vector<int64> const&, vector> femSubmesh::diagonal_mass(int64 const element) const
 {
     auto const& [dofs, consistent_m] = this->consistent_mass(element);
 

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/generic/Neumann.hpp"
+#include "mesh/generic/neumann.hpp"
 
 #include "NewtonConvection.hpp"
 
@@ -17,7 +17,7 @@ namespace diffusion
  * with the corresponding shape function.  These are required to be stored in a parent
  * container with the other groups from the collective boundary \sa SurfaceBoundary
  */
-using heat_flux = SurfaceLoad<SurfaceInterpolation>;
+using heat_flux = boundary::surface_load<SurfaceInterpolation>;
 
 // using heat_generation = VolumeLoad<VolumeInterpolation>;
 
@@ -42,7 +42,7 @@ public:
 protected:
     std::vector<heat_flux> load_boundaries;
 
-    std::vector<boundary::newton_cooling> stiffness_load_boundaries;
+    std::vector<newton_cooling> stiffness_load_boundaries;
 };
 }
 }

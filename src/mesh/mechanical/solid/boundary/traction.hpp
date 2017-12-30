@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/generic/Neumann.hpp"
+#include "mesh/generic/neumann.hpp"
 
 #include "interpolations/ShapeFunction.hpp"
 
@@ -13,5 +13,5 @@ namespace neon::mechanical::solid
  * equations
  * \sa NonFollowerLoad
  */
-using traction = SurfaceLoad<SurfaceInterpolation>;
+using traction = boundary::surface_load<SurfaceInterpolation>;
 }

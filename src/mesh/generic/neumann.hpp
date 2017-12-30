@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "VectorContribution.hpp"
+#include "vector_contribution.hpp"
 
 #include "geometry/Projection.hpp"
 #include "mesh/DofAllocator.hpp"
@@ -9,19 +9,19 @@
 
 #include <memory>
 
-namespace neon
+namespace neon::boundary
 {
 /**
- * Neumann is a base class for Neumann type boundary conditions.  This includes
+ * neumann is a base class for neumann type boundary conditions.  This includes
  * the nodal connectivities and degrees of freedom lists.  Derived classes must
  * implement shape functions and the appropriate finite element approximation
  * for the given problem
  */
-class Neumann : public VectorContribution
+class neumann : public vector_contribution
 {
 public:
-    explicit Neumann(std::vector<List> const& nodal_connectivity,
-                     std::vector<List> const& dof_list,
+    explicit neumann(std::vector<std::vector<int64>> const& nodal_connectivity,
+                     std::vector<std::vector<int64>> const& dof_list,
                      std::shared_ptr<MaterialCoordinates>& material_coordinates,
                      Json::Value const& times,
                      Json::Value const& loads);
@@ -29,22 +29,22 @@ public:
     [[nodiscard]] auto elements() const { return nodal_connectivity.size(); }
 
 protected:
-    std::vector<List> nodal_connectivity, dof_list;
+    std::vector<std::vector<int64>> nodal_connectivity, dof_list;
 
     std::shared_ptr<MaterialCoordinates> material_coordinates;
 };
 
 template <typename SurfaceInterpolation_Tp>
-class SurfaceLoad : public Neumann
+class surface_load : public neumann
 {
 public:
-    explicit SurfaceLoad(std::unique_ptr<SurfaceInterpolation_Tp>&& sf,
-                         std::vector<List> const& nodal_connectivity,
-                         std::vector<List> const& dof_list,
-                         std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                         Json::Value const& time_history,
-                         Json::Value const& load_history)
-        : Neumann(nodal_connectivity, dof_list, material_coordinates, time_history, load_history),
+    explicit surface_load(std::unique_ptr<SurfaceInterpolation_Tp>&& sf,
+                          std::vector<std::vector<int64>> const& nodal_connectivity,
+                          std::vector<std::vector<int64>> const& dof_list,
+                          std::shared_ptr<MaterialCoordinates>& material_coordinates,
+                          Json::Value const& time_history,
+                          Json::Value const& load_history)
+        : neumann(nodal_connectivity, dof_list, material_coordinates, time_history, load_history),
           sf(std::move(sf))
     {
     }
@@ -53,8 +53,8 @@ public:
      * Compute the external force due to a Neumann type boundary condition.
      * This computes the following integral on a boundary element
      */
-    virtual std::tuple<List const&, vector> external_force(int const element,
-                                                           double const load_factor) const override
+    virtual std::pair<std::vector<int64> const&, vector> external_force(
+        int64 const element, double const load_factor) const override
     {
         auto const X = geometry::project_to_plane(
             material_coordinates->initial_configuration(nodal_connectivity[element]));
@@ -76,26 +76,24 @@ protected:
 };
 
 template <typename VolumeInterpolation_Tp>
-class VolumeLoad : public Neumann
+class volume_load : public neumann
 {
 public:
-    explicit VolumeLoad(std::unique_ptr<VolumeInterpolation_Tp>&& sf,
-                        std::vector<List> const& nodal_connectivity,
-                        std::vector<List> const& dof_list,
-                        std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                        Json::Value const& time_history,
-                        Json::Value const& load_history)
-        : Neumann(nodal_connectivity, dof_list, material_coordinates, time_history, load_history),
+    explicit volume_load(std::unique_ptr<VolumeInterpolation_Tp>&& sf,
+                         std::vector<std::vector<int64>> const& nodal_connectivity,
+                         std::vector<std::vector<int64>> const& dof_list,
+                         std::shared_ptr<MaterialCoordinates>& material_coordinates,
+                         Json::Value const& time_history,
+                         Json::Value const& load_history)
+        : neumann(nodal_connectivity, dof_list, material_coordinates, time_history, load_history),
           sf(std::move(sf))
     {
     }
 
-    std::tuple<List const&, vector> external_force(int const element,
-                                                   double const load_factor) const override
+    std::pair<std::vector<int64> const&, vector> external_force(int64 const element,
+                                                                double const load_factor) const override
     {
         auto const X = material_coordinates->initial_configuration(nodal_connectivity[element]);
-
-        auto const f = interpolate_prescribed_load(load_factor);
 
         // Perform the computation of the external load vector
         auto const f_ext = sf->quadrature().integrate(vector::Zero(X.cols()).eval(),
@@ -104,7 +102,7 @@ public:
 
                                                           auto const j = (X * dN).determinant();
 
-                                                          return f * N * j;
+                                                          return N * j;
                                                       });
         return {dof_list.at(element), interpolate_prescribed_load(load_factor) * f_ext};
     }

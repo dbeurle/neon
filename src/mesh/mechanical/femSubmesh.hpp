@@ -28,30 +28,29 @@ public:
     explicit femSubmesh(Submesh const& submesh) : Submesh(submesh) {}
 
     /** @return mapping of the element degrees of freedom to the process matrix */
-    local_indices const& local_dof_view(int32 const element) const
+    std::vector<int64> const& local_dof_view(int64 const element) const
     {
         return static_cast<mesh_type*>(this)->local_dof_view(element);
     }
 
     /** @return the tangent consistent stiffness matrix */
-    [[nodiscard]] std::pair<local_indices const&, matrix> tangent_stiffness(int32 const element) const {
-        return static_cast<mesh_type*>(this)->tangent_stiffness(element);
-    }
+    [[nodiscard]] std::pair<std::vector<int64> const&, matrix> tangent_stiffness(int64 const element)
+        const { return static_cast<mesh_type*>(this)->tangent_stiffness(element); }
 
     /** @return the internal element force */
-    std::pair<local_indices const&, vector> internal_force(int32 const element) const
+    std::pair<std::vector<int64> const&, vector> internal_force(int64 const element) const
     {
         return static_cast<mesh_type*>(this)->internal_force(element);
     }
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    std::pair<local_indices const&, matrix> consistent_mass(int32 const element) const
+    std::pair<std::vector<int64> const&, matrix> consistent_mass(int64 const element) const
     {
         return static_cast<mesh_type*>(this)->consistent_mass(element);
     }
 
     /** @return the diagonal mass matrix as a vector \sa consistent_mass */
-    std::pair<local_indices const&, vector> diagonal_mass(int32 const element) const
+    std::pair<std::vector<int64> const&, vector> diagonal_mass(int64 const element) const
     {
         return static_cast<mesh_type*>(this)->diagonal_mass(element);
     }

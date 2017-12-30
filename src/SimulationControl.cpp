@@ -35,7 +35,10 @@ SimulationControl::SimulationControl(std::string const& input_file_name)
     std::string const extension = boost::filesystem::extension(input_path);
     std::string const base_name = boost::filesystem::basename(input_path);
 
-    if (extension != ".json") throw InvalidExtensionException(extension);
+    if (extension != ".json")
+    {
+        throw InvalidExtensionException(extension);
+    }
 
     this->parse();
 }
@@ -46,10 +49,14 @@ void SimulationControl::parse()
 {
     auto const start = std::chrono::high_resolution_clock::now();
 
-    this->print_banner();
+    if (mpi::rank() == 0)
+    {
+        this->print_banner();
 
-    std::cout << std::string(2, ' ') << termcolor::bold << "Preprocessing mesh and simulation data\n"
-              << termcolor::reset;
+        std::cout << std::string(2, ' ') << termcolor::bold
+                  << "Preprocessing mesh and simulation data\n"
+                  << termcolor::reset;
+    }
 
     std::ifstream file(input_file_name);
 
@@ -78,8 +85,14 @@ void SimulationControl::parse()
 
         // If distributed then append the partition number otherwise read the
         // mesh in like usual
-        std::ifstream mesh_input_stream(part["Name"].asString() + ".mesh"
-                                        + (mpi::size() == 1 ? "" : std::to_string(mpi::rank())));
+        std::string const mesh_file_name = part["Name"].asString() + ".mesh"
+                                           + (mpi::size() == 1 ? "" : std::to_string(mpi::rank()));
+
+        // clang-format off
+std::cout << "Process " << mpi::rank() << " reading in file " << mesh_file_name << std::endl;
+        // clang-format on
+
+        std::ifstream mesh_input_stream(mesh_file_name);
 
         Json::Value mesh_file;
 
@@ -135,8 +148,7 @@ void SimulationControl::parse()
     }
     build_simulation_tree();
 
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::chrono::duration<double> elapsed_seconds = std::chrono::high_resolution_clock::now() - start;
 
     std::cout << termcolor::bold << termcolor::green << std::string(2, ' ')
               << "Preprocessing complete in " << elapsed_seconds.count() << "s\n"
@@ -147,7 +159,7 @@ void SimulationControl::start()
 {
     // Allocate the modules storage, which automatically checks for correct input
     // and throws the appropriate exception when an error is detected
-    for (auto const & [name, simulations] : multistep_simulations)
+    for (auto const& [name, simulations] : multistep_simulations)
     {
         for (auto const& simulation : simulations)
         {
@@ -171,7 +183,7 @@ void SimulationControl::build_simulation_tree()
         }
     }
 
-    for (auto const & [name, queue] : multistep_simulations)
+    for (auto const& [name, queue] : multistep_simulations)
     {
         std::cout << std::string(4, ' ') << "Simulation \"" << name << "\" is continued by:\n";
         for (auto const& item : queue)
@@ -226,7 +238,7 @@ std::unordered_set<std::string> SimulationControl::parse_material_names(Json::Va
     {
         if (material["Name"].empty()) throw std::runtime_error("Material: Name");
 
-        auto const[it, inserted] = material_names.emplace(material["Name"].asString());
+        auto const [it, inserted] = material_names.emplace(material["Name"].asString());
 
         if (!inserted) throw DuplicateNameException("Material");
     }
@@ -249,7 +261,7 @@ std::unordered_set<std::string> SimulationControl::parse_part_names(
                                      "materials\n");
         }
 
-        auto const[it, inserted] = part_names.emplace(part["Name"].asString());
+        auto const [it, inserted] = part_names.emplace(part["Name"].asString());
 
         if (!inserted) throw DuplicateNameException("Part");
     }

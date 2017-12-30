@@ -1,11 +1,11 @@
 
 #pragma once
 
-#include "mesh/generic/Neumann.hpp"
+#include "mesh/generic/neumann.hpp"
 
 #include "interpolations/ShapeFunction.hpp"
 
-namespace neon::diffusion::boundary
+namespace neon::diffusion
 {
 /**
  * newton_cooling is responsible for computing the additional term to the
@@ -20,7 +20,7 @@ namespace neon::diffusion::boundary
  * leaving the surface.  The surrounding temperature \f$T_\infty\f$ is computed by
  * \f$ T_\infty = h / \lambda \f$
  */
-class newton_cooling : public SurfaceLoad<SurfaceInterpolation>
+class newton_cooling : public boundary::surface_load<SurfaceInterpolation>
 {
 public:
     /**
@@ -32,8 +32,8 @@ public:
      * @param external_temperature A list of heat transfer coefficients
      */
     explicit newton_cooling(std::unique_ptr<SurfaceInterpolation>&& sf,
-                            std::vector<List> const& nodal_connectivity,
-                            std::vector<List> const& dof_list,
+                            std::vector<std::vector<int64>> const& nodal_connectivity,
+                            std::vector<std::vector<int64>> const& dof_list,
                             std::shared_ptr<MaterialCoordinates>& material_coordinates,
                             Json::Value const& times,
                             Json::Value const& heat_flux,
@@ -45,8 +45,8 @@ public:
          k_{ab} &= \int_{\Gamma} N_a \lambda N_b d\Gamma
        \f}
      */
-    [[nodiscard]] std::tuple<List const&, matrix> external_stiffness(int const element,
-                                                                     double const load_factor) const;
+    [[nodiscard]] std::pair<std::vector<int64> const&, matrix> external_stiffness(
+        int64 const element, double const load_factor) const;
 
 protected:
     std::vector<std::pair<double, double>> stiffness_time_data;

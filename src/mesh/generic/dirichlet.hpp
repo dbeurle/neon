@@ -1,16 +1,16 @@
 
 #pragma once
 
-#include "mesh/generic/Boundary.hpp"
+#include "mesh/generic/interpolator.hpp"
 
 #include "numeric/IndexTypes.hpp"
 
-namespace neon
+namespace neon::boundary
 {
-class Dirichlet : public Boundary
+class dirichlet : public interpolator
 {
 public:
-    explicit Dirichlet(List dofs, Json::Value const& times, Json::Value const& loads);
+    explicit dirichlet(std::vector<int64> dofs, Json::Value const& times, Json::Value const& loads);
 
     [[nodiscard]] auto const& dof_view() const { return dofs; }
 
@@ -21,6 +21,6 @@ public:
     }
 
 protected:
-    List dofs;
+    std::vector<int64> dofs;
 };
 }

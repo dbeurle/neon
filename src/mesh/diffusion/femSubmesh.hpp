@@ -31,7 +31,7 @@ public:
                         Submesh const& submesh);
 
     /** @return list of global degrees of freedom for an element */
-    [[nodiscard]] local_indices const& local_dof_list(int const element) const {
+    [[nodiscard]] std::vector<int64> const& local_dof_list(int64 const element) const {
         return local_node_list(element);
     }
 
@@ -57,7 +57,8 @@ public:
      * where \f$ \kappa \f$ is the conductivity
      * @return DoFs and stiffness matrix
      */
-    [[nodiscard]] std::tuple<local_indices const&, matrix> tangent_stiffness(int const element) const;
+    [[nodiscard]] std::pair<std::vector<int64> const&, matrix> tangent_stiffness(
+        int64 const element) const;
 
     /**
      * Compute the consistent (full) mass matrix according to
@@ -67,31 +68,21 @@ public:
      * where \f$ \rho \f$ is the density and \f$ c_p \f$ is the specific heat
      * @return DoFs and consistent mass matrix \sa diagonal_mass
      */
-    [[nodiscard]] std::tuple<local_indices const&, matrix> consistent_mass(int const element) const;
+    [[nodiscard]] std::pair<std::vector<int64> const&, matrix> consistent_mass(int64 const element) const;
 
     /** @return Diagonal mass matrix using row sum technique \sa consistent_mass */
-    [[nodiscard]] std::tuple<local_indices const&, vector> diagonal_mass(int const element) const;
+    [[nodiscard]] std::pair<std::vector<int64> const&, vector> diagonal_mass(int64 const element) const;
 
     /** Update the internal variables for the mesh group */
     void update_internal_variables(double const time_step_size);
 
-    /**
-     * Compute the local Jacobian matrix \f$ \bf{x}_\xi \f$
-     * @param rhea Shape function gradients at quadrature point
-     * @param configuration Configuration of the element (coordinates)
-     */
-    [[nodiscard]] matrix3 local_jacobian(matrix const& rhea, matrix const& configuration) const {
-        return configuration * rhea;
-    }
-
-        [[nodiscard]] ValueCount
-        nodal_averaged_variable(InternalVariables::Tensor const tensor_name) const;
+    [[nodiscard]] ValueCount nodal_averaged_variable(InternalVariables::Tensor const tensor_name) const;
 
     [[nodiscard]] ValueCount nodal_averaged_variable(InternalVariables::Scalar const scalar_name) const;
 
 protected:
     /** @return the index into the internal variable store */
-    [[nodiscard]] int offset(int const element, int const quadraturePoint) const;
+    [[nodiscard]] int offset(int64 const element, int const quadraturePoint) const;
 
 private:
     std::shared_ptr<MaterialCoordinates> material_coordinates;

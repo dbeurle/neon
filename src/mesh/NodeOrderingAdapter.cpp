@@ -34,7 +34,8 @@ std::unordered_map<ElementTopology, VTKCellType> const
                   {ElementTopology::Hexahedron20, VTK_QUADRATIC_HEXAHEDRON},
                   {ElementTopology::Hexahedron27, VTK_TRIQUADRATIC_HEXAHEDRON}};
 
-void convert_from_gmsh(std::vector<List>& nodal_connectivity, ElementTopology const element_topology)
+void convert_from_gmsh(std::vector<std::vector<int64>>& nodal_connectivity,
+                       ElementTopology const element_topology)
 {
     // Reorder based on the differences between the local node numbering
     // provided from Section 9.3 Node ordering
@@ -156,8 +157,8 @@ void convert_from_gmsh(std::vector<List>& nodal_connectivity, ElementTopology co
     }
 }
 
-std::vector<List> convert_to_vtk(std::vector<List> nodal_connectivity,
-                                 ElementTopology const element_topology)
+std::vector<std::vector<int64>> convert_to_vtk(std::vector<std::vector<int64>> nodal_connectivity,
+                                               ElementTopology const element_topology)
 {
     switch (element_topology)
     {

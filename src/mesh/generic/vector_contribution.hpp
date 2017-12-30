@@ -1,25 +1,25 @@
 
 #pragma once
 
-#include "Boundary.hpp"
+#include "interpolator.hpp"
 
 #include "numeric/DenseMatrix.hpp"
 #include "numeric/IndexTypes.hpp"
 
-namespace neon
+namespace neon::boundary
 {
 /**
  * VectorContribution contributes to the right hand side loading vector.
  * This is intended as a base class for distributed loads \sa Neumann and
  * point loads.
  */
-class VectorContribution : public Boundary
+class vector_contribution : public interpolator
 {
 public:
-    using Boundary::Boundary;
+    using interpolator::interpolator;
 
     /** @return an element external force vector for a given element */
-    [[nodiscard]] virtual std::tuple<List const&, vector> external_force(
-        int32 const element, double const load_factor) const = 0;
+    [[nodiscard]] virtual std::pair<std::vector<int64> const&, vector> external_force(
+        int64 const element, double const load_factor) const = 0;
 };
 }

@@ -31,7 +31,7 @@ public:
 
     femSubmesh(femSubmesh&&) = default;
 
-    [[nodiscard]] local_indices const& local_dof_view(int32 const element) const {
+    [[nodiscard]] std::vector<int64> const& local_dof_view(int32 const element) const {
         return dof_list.at(element);
     }
 
@@ -49,16 +49,16 @@ public:
     [[nodiscard]] auto const& constitutive() const { return *cm.get(); }
 
     /** @return the tangent consistent stiffness matrix */
-    [[nodiscard]] std::pair<local_indices const&, matrix> tangent_stiffness(int32 const element) const;
+    [[nodiscard]] std::pair<std::vector<int64> const&, matrix> tangent_stiffness(int32 const element) const;
 
     /** @return the internal element force */
-    [[nodiscard]] std::pair<local_indices const&, vector> internal_force(int32 const element) const;
+    [[nodiscard]] std::pair<std::vector<int64> const&, vector> internal_force(int32 const element) const;
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    [[nodiscard]] std::pair<local_indices const&, matrix> consistent_mass(int32 const element) const;
+    [[nodiscard]] std::pair<std::vector<int64> const&, matrix> consistent_mass(int32 const element) const;
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    [[nodiscard]] std::pair<local_indices const&, vector> diagonal_mass(int32 const element) const;
+    [[nodiscard]] std::pair<std::vector<int64> const&, vector> diagonal_mass(int32 const element) const;
 
     /** Update the internal variables for the mesh group
      *  \sa update_deformation_measures()
@@ -122,7 +122,7 @@ private:
 
     std::unique_ptr<ConstitutiveModel> cm; //!< Constitutive model
 
-    std::vector<local_indices> dof_list; //!< Map for the local element to process indices
+    std::vector<std::vector<int64>> dof_list; //!< Map for the local element to process indices
 };
 }
 }

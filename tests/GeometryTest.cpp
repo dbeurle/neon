@@ -87,7 +87,8 @@ TEST_CASE("Basic mesh test")
         {
             auto const unique_node_list = mesh.unique_connectivities();
 
-            List const known_unique{0, 1, 2, 3, 14, 15, 16, 17, 18, 19, 26, 27, 36, 37, 38, 39};
+            std::vector<int64> const
+                known_unique{0, 1, 2, 3, 14, 15, 16, 17, 18, 19, 26, 27, 36, 37, 38, 39};
 
             REQUIRE(view::set_symmetric_difference(unique_node_list, known_unique).empty());
         }
@@ -103,9 +104,10 @@ TEST_CASE("Basic mesh test")
         {
             auto const unique_node_list = mesh.unique_connectivities();
 
-            List const known_unique{0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
-                                    16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
-                                    32, 33, 34, 35, 40, 41, 42, 43, 48, 49, 50, 51, 52, 53, 54, 55};
+            std::vector<int64> const known_unique{0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
+                                                  12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+                                                  24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
+                                                  40, 41, 42, 43, 48, 49, 50, 51, 52, 53, 54, 55};
 
             REQUIRE(view::set_symmetric_difference(unique_node_list, known_unique).empty());
         }
@@ -114,7 +116,8 @@ TEST_CASE("Basic mesh test")
         {
             auto const unique_node_list = mesh.unique_connectivities();
 
-            List const known_unique{4, 5, 6, 7, 10, 11, 22, 23, 28, 29, 30, 31, 44, 45, 46, 47};
+            std::vector<int64> const
+                known_unique{4, 5, 6, 7, 10, 11, 22, 23, 28, 29, 30, 31, 44, 45, 46, 47};
             REQUIRE(view::set_symmetric_difference(unique_node_list, known_unique).empty());
         }
     }
@@ -180,7 +183,7 @@ TEST_CASE("Solid submesh test")
     }
     SECTION("Tangent stiffness")
     {
-        auto[local_dofs, stiffness] = fem_submesh.tangent_stiffness(0);
+        auto [local_dofs, stiffness] = fem_submesh.tangent_stiffness(0);
         REQUIRE(local_dofs.size() == number_of_local_dofs);
         REQUIRE(stiffness.rows() == number_of_local_dofs);
         REQUIRE(stiffness.cols() == number_of_local_dofs);
@@ -191,14 +194,14 @@ TEST_CASE("Solid submesh test")
     }
     SECTION("Internal force")
     {
-        auto[local_dofs, internal_force] = fem_submesh.internal_force(0);
+        auto [local_dofs, internal_force] = fem_submesh.internal_force(0);
         REQUIRE(internal_force.rows() == number_of_local_dofs);
         REQUIRE(local_dofs.size() == number_of_local_dofs);
     }
     SECTION("Consistent and diagonal mass")
     {
-        auto const & [local_dofs_0, mass_c] = fem_submesh.consistent_mass(0);
-        auto const & [local_dofs_1, mass_d] = fem_submesh.diagonal_mass(0);
+        auto const& [local_dofs_0, mass_c] = fem_submesh.consistent_mass(0);
+        auto const& [local_dofs_1, mass_d] = fem_submesh.diagonal_mass(0);
 
         REQUIRE(local_dofs_0.size() == number_of_local_dofs);
         REQUIRE(local_dofs_1.size() == number_of_local_dofs);
@@ -252,7 +255,7 @@ TEST_CASE("Solid mesh test")
 
     for (auto const& fem_submesh : fem_mesh.meshes())
     {
-        auto[local_dofs, internal_force] = fem_submesh.internal_force(0);
+        auto [local_dofs, internal_force] = fem_submesh.internal_force(0);
         REQUIRE(internal_force.rows() == number_of_local_dofs);
         REQUIRE(local_dofs.size() == number_of_local_dofs);
     }

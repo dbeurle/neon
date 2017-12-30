@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/generic/Neumann.hpp"
+#include "mesh/generic/neumann.hpp"
 
 #include "interpolations/InterpolationFactory.hpp"
 #include "mesh/Submesh.hpp"
@@ -16,7 +16,7 @@ namespace neon::mechanical::plane
  * equations
  * \sa NonFollowerLoad
  */
-using Traction = SurfaceLoad<LineInterpolation>;
+using Traction = boundary::surface_load<LineInterpolation>;
 
 /**
  * BodyForce is a non-follower load that has a volume interpolation and
@@ -24,7 +24,7 @@ using Traction = SurfaceLoad<LineInterpolation>;
  * equations
  * \sa NonFollowerLoad
  */
-using BodyForce = VolumeLoad<SurfaceInterpolation>;
+using BodyForce = boundary::volume_load<SurfaceInterpolation>;
 
 /**
  * NonFollowerLoadBoundary contains the boundary conditions which contribute to

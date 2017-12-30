@@ -6,18 +6,18 @@
 
 #include <json/forwards.h>
 
-namespace neon
+namespace neon::boundary
 {
 /**
- * Boundary is a base class for boundary conditions which performs the load
+ * base is a base class for boundary conditions which performs the load
  * interpolation logic.
  */
-class Boundary
+class interpolator
 {
 public:
-    explicit Boundary(Json::Value const& times, Json::Value const& loads);
+    explicit interpolator(Json::Value const& times, Json::Value const& loads);
 
-    ~Boundary() = default;
+    ~interpolator() = default;
 
     [[nodiscard]] std::vector<double> time_history() const;
 

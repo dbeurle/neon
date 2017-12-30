@@ -2,10 +2,10 @@
 foreach(test
              nodal_coordinates
              material_coordinates
+             dof_allocation
              AdaptiveIncrementTest
              BoundaryTest
              ConstitutiveTest
-             DofAllocation
              GeometryTest
              LinearSolverTest
              MaterialTest

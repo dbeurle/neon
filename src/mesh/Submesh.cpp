@@ -42,18 +42,18 @@ Submesh::Submesh(Json::Value const& mesh)
 
     for (auto const& mesh_connectivity : mesh["NodalConnectivity"])
     {
-        nodal_connectivity.push_back(List());
+        nodal_connectivity.push_back({});
         nodal_connectivity.back().reserve(mesh_connectivity.size());
 
         for (auto const& node : mesh_connectivity)
         {
-            nodal_connectivity.back().push_back(node.asInt());
+            nodal_connectivity.back().push_back(node.asInt64());
         }
     }
     convert_from_gmsh(nodal_connectivity, element_topology);
 }
 
-List Submesh::unique_connectivities() const
+std::vector<int64> Submesh::unique_connectivities() const
 {
     using namespace ranges;
     return std::ref(nodal_connectivity) | action::join | action::sort | action::unique;

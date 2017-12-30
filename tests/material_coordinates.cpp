@@ -22,7 +22,7 @@ TEST_CASE("Material coordinates inheritence")
     // Setup the test case
     MaterialCoordinates single_triangle(coordinates);
 
-    local_indices const node_list{0, 1, 2};
+    std::vector<int64> const node_list{0, 1, 2};
 
     REQUIRE((single_triangle.coordinates() - coordinates).norm() == Approx(0.0).margin(ZERO_MARGIN));
 
@@ -46,9 +46,9 @@ TEST_CASE("Updating material coordinates")
 
     vector test_displacements = vector::Constant(9, 1.0);
 
-    local_indices const node_list{0, 1, 2};
+    std::vector<int64> const node_list{0, 1, 2};
 
-    local_indices local_dof_list(9);
+    std::vector<int64> local_dof_list(9);
     std::iota(std::begin(local_dof_list), std::end(local_dof_list), 0);
 
     SECTION("Check initial displacements are zero")

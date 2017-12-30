@@ -16,15 +16,15 @@ public:
     MaterialCoordinates(matrix3x const& initial_coordinates);
 
     /** @return element reference configuration based on the local node numbers*/
-    auto const initial_configuration(local_indices const& local_nodes) const
+    auto const initial_configuration(std::vector<int64> const& nodes) const
     {
-        return X(Eigen::placeholders::all, local_nodes);
+        return X(Eigen::placeholders::all, nodes);
     }
 
     /** @return element current configuration based on the local node numbers*/
-    auto const current_configuration(local_indices const& local_nodes) const
+    auto const current_configuration(std::vector<int64> const& nodes) const
     {
-        return x(Eigen::placeholders::all, local_nodes);
+        return x(Eigen::placeholders::all, nodes);
     }
 
     /** @param u - displacement vector from initial configuration (x,y,z...) */

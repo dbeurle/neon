@@ -85,12 +85,17 @@ void femStaticMatrix::compute_internal_force()
 
     for (auto const& submesh : fem_mesh.meshes())
     {
+#pragma omp parallel for
         for (auto element = 0; element < submesh.elements(); ++element)
         {
-            auto const& [dofs, fe_int] = submesh.internal_force(element);
+            // auto const& [dofs, fe_int] = submesh.internal_force(element);
+            auto const tpl = submesh.internal_force(element);
+            auto const dofs = std::get<0>(tpl);
+            auto const fe_int = std::get<1>(tpl);
 
             for (auto a = 0; a < fe_int.size(); ++a)
             {
+#pragma omp atomic
                 fint(dofs[a]) += fe_int(a);
             }
         }
@@ -184,15 +189,15 @@ void femStaticMatrix::assemble_stiffness()
 
     Kt.coeffs() = 0.0;
 
-    for (auto const& submesh : fem_mesh.meshes())
+    for (auto& submesh : fem_mesh.meshes())
     {
 #pragma omp parallel for
         for (auto element = 0; element < submesh.elements(); ++element)
         {
             // auto const[dofs, ke] = submesh.tangent_stiffness(element);
-            auto const& tpl = submesh.tangent_stiffness(element);
-            auto const& dofs = std::get<0>(tpl);
-            auto const& ke = std::get<1>(tpl);
+            auto tpl = submesh.tangent_stiffness(element);
+            auto dofs = std::get<0>(tpl);
+            auto ke = std::get<1>(tpl);
 
             for (auto a = 0; a < dofs.size(); a++)
             {

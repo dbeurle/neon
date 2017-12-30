@@ -1,5 +1,5 @@
 
-#include "Boundary.hpp"
+#include "interpolator.hpp"
 
 #include "numeric/FloatingPointCompare.hpp"
 
@@ -12,9 +12,9 @@
 
 #include <json/value.h>
 
-namespace neon
+namespace neon::boundary
 {
-Boundary::Boundary(Json::Value const& times, Json::Value const& loads)
+interpolator::interpolator(Json::Value const& times, Json::Value const& loads)
 {
     using namespace ranges;
 
@@ -46,15 +46,15 @@ Boundary::Boundary(Json::Value const& times, Json::Value const& loads)
                 });
 }
 
-std::vector<double> Boundary::time_history() const { return time_load | ranges::view::keys; }
+std::vector<double> interpolator::time_history() const { return time_load | ranges::view::keys; }
 
-double Boundary::interpolate_prescribed_load(double const step_time) const
+double interpolator::interpolate_prescribed_load(double const step_time) const
 {
     return interpolate_prescribed_load(time_load, step_time);
 }
 
-double Boundary::interpolate_prescribed_load(std::vector<std::pair<double, double>> const& time_value,
-                                             double const step_time) const
+double interpolator::interpolate_prescribed_load(
+    std::vector<std::pair<double, double>> const& time_value, double const step_time) const
 {
     using ranges::adjacent_find;
     using ranges::find_if;

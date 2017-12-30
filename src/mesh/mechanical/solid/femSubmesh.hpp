@@ -34,7 +34,7 @@ public:
                         Submesh const& submesh);
 
     /** @return list of global degrees of freedom for an element */
-    [[nodiscard]] List const& local_dof_list(int const element) const {
+    [[nodiscard]] std::vector<int64> const& local_dof_list(int64 const element) const {
         return dof_list.at(element);
     }
 
@@ -53,16 +53,17 @@ public:
     [[nodiscard]] auto const& constitutive() const { return *cm.get(); }
 
     /** @return the tangent consistent stiffness matrix */
-    [[nodiscard]] std::tuple<List const&, matrix> tangent_stiffness(int const element) const;
+    [[nodiscard]] std::pair<std::vector<int64> const&, matrix> tangent_stiffness(
+        int64 const element) const;
 
     /** @return the internal element force */
-    [[nodiscard]] std::tuple<List const&, vector> internal_force(int const element) const;
+    [[nodiscard]] std::pair<std::vector<int64> const&, vector> internal_force(int64 const element) const;
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    [[nodiscard]] std::tuple<List const&, matrix> consistent_mass(int const element) const;
+    [[nodiscard]] std::pair<std::vector<int64> const&, matrix> consistent_mass(int64 const element) const;
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    [[nodiscard]] std::tuple<List const&, vector> diagonal_mass(int const element) const;
+    [[nodiscard]] std::pair<std::vector<int64> const&, vector> diagonal_mass(int64 const element) const;
 
     /** Update the internal variables for the mesh group
      *  \sa update_deformation_measures()
@@ -94,7 +95,7 @@ protected:
      * Where B is the gradient operator in the finite element discretization
      */
     [[nodiscard]] matrix geometric_tangent_stiffness(matrix3x const& configuration,
-                                                     int32 const element) const;
+                                                     int64 const element) const;
 
     /**
      * Compute the material tangent stiffness using the formula
@@ -103,7 +104,7 @@ protected:
      * \f}
      */
     [[nodiscard]] matrix material_tangent_stiffness(matrix3x const& configuration,
-                                                    int32 const element) const;
+                                                    int64 const element) const;
 
     /**
      * Compute the internal force vector using the formula
@@ -113,7 +114,7 @@ protected:
      * @return the internal nodal force vector
      */
     [[nodiscard]] vector internal_nodal_force(matrix3x const& configuration,
-                                              int32 const element) const;
+                                              int64 const element) const;
 
 private:
     std::shared_ptr<MaterialCoordinates> material_coordinates;
@@ -125,7 +126,7 @@ private:
 
     std::unique_ptr<ConstitutiveModel> cm; //!< Constitutive model
 
-    std::vector<List> dof_list; //!< Map for the local to global dofs
+    std::vector<std::vector<int64>> dof_list; //!< Map for the local to global dofs
 };
 }
 }

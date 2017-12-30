@@ -31,7 +31,7 @@ NodalCoordinates::NodalCoordinates(Json::Value const& mesh_file)
 
 matrix3x const& NodalCoordinates::coordinates() const { return X; }
 
-matrix3x NodalCoordinates::coordinates(local_indices const& local_node_list) const
+matrix3x NodalCoordinates::coordinates(std::vector<int64> const& local_node_list) const
 {
     return X(Eigen::placeholders::all, local_node_list);
 }

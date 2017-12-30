@@ -1,7 +1,9 @@
 
 #pragma once
 
-#include "mesh/generic/Dirichlet.hpp"
+#include "mesh/generic/dirichlet.hpp"
+#include "mesh/generic/interprocess.hpp"
+
 #include "mesh/mechanical/solid/boundary/NonFollowerLoad.hpp"
 #include "mesh/mechanical/solid/femSubmesh.hpp"
 
@@ -48,8 +50,11 @@ public:
     /** Constant access to the sub-meshes */
     [[nodiscard]] std::vector<femSubmesh> const& meshes() const { return submeshes; }
 
-    /** Mutable access to the sub-meshes */
-    [[nodiscard]] std::vector<femSubmesh>& meshes() { return submeshes; }
+        /** Mutable access to the sub-meshes */
+        [[nodiscard]] std::vector<femSubmesh>& meshes()
+    {
+        return submeshes;
+    }
 
     [[nodiscard]] auto const& displacement_boundaries() const { return displacement_bcs; }
 
@@ -75,7 +80,7 @@ protected:
     [[nodiscard]] bool is_nonfollower_load(std::string const& boundary_type) const;
 
     /** Collapse the nodal connectivity arrays from the submesh for a node list */
-    [[nodiscard]] List filter_dof_list(std::vector<Submesh> const& boundary_mesh) const;
+    [[nodiscard]] std::vector<int64> filter_dof_list(std::vector<Submesh> const& boundary_mesh) const;
 
 protected:
     std::shared_ptr<MaterialCoordinates> material_coordinates;
@@ -83,8 +88,10 @@ protected:
     std::vector<femSubmesh> submeshes;
 
     // Boundary conditions for this mesh
-    std::map<std::string, std::vector<Dirichlet>> displacement_bcs;
+    std::map<std::string, std::vector<boundary::dirichlet>> displacement_bcs;
     std::map<std::string, NonFollowerLoadBoundary> nonfollower_loads;
+
+    boundary::interprocess process_boundaries;
 
     std::unordered_map<std::string, int> const dof_table = {{"x", 0}, {"y", 1}, {"z", 2}};
 };

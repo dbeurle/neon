@@ -25,7 +25,7 @@ public:
     [[nodiscard]] matrix3x const& coordinates() const;
 
     /** @return the coordinates using fancy indexing */
-    [[nodiscard]] matrix3x coordinates(local_indices const& local_node_list) const;
+    [[nodiscard]] matrix3x coordinates(std::vector<int64> const& local_node_list) const;
 
 protected:
     matrix3x X; //!< Reference configuration encoded as (x1, y1, z1, x2, y2, z2)

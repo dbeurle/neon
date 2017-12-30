@@ -10,7 +10,8 @@
 
 #include "mesh/Submesh.hpp"
 
-#include "mesh/generic/Boundary.hpp"
+#include "mesh/generic/interpolator.hpp"
+
 #include "mesh/mechanical/solid/boundary/NonFollowerLoad.hpp"
 
 #include "mesh/diffusion/boundary/NewtonConvection.hpp"
@@ -41,7 +42,7 @@ TEST_CASE("Boundary unit test", "[Boundary]")
         REQUIRE(Json::parseFromStream(reader, times_stream, &times, &input_errors));
         REQUIRE(Json::parseFromStream(reader, loads_stream, &loads, &input_errors));
 
-        Boundary boundary(times, loads);
+        boundary::interpolator boundary(times, loads);
 
         auto const time_history = boundary.time_history();
 
@@ -59,7 +60,7 @@ TEST_CASE("Boundary unit test", "[Boundary]")
         REQUIRE(Json::parseFromStream(reader, times_stream, &times, &input_errors));
         REQUIRE(Json::parseFromStream(reader, loads_stream, &loads, &input_errors));
 
-        Boundary boundary(times, loads);
+        boundary::interpolator boundary(times, loads);
 
         REQUIRE(boundary.interpolate_prescribed_load(0.75) == Approx(0.375));
         REQUIRE(boundary.interpolate_prescribed_load(0.5) == Approx(0.25));
@@ -79,7 +80,7 @@ TEST_CASE("Boundary unit test", "[Boundary]")
         REQUIRE(Json::parseFromStream(reader, times_stream, &times, &input_errors));
         REQUIRE(Json::parseFromStream(reader, loads_stream, &loads, &input_errors));
 
-        Boundary boundary(times, loads);
+        boundary::interpolator boundary(times, loads);
 
         REQUIRE(boundary.interpolate_prescribed_load(0.0) == Approx(0.0).margin(ZERO_MARGIN));
         REQUIRE(boundary.interpolate_prescribed_load(0.5) == Approx(0.5));
@@ -89,11 +90,13 @@ TEST_CASE("Boundary unit test", "[Boundary]")
     }
     SECTION("Non-matching length error test")
     {
-        REQUIRE_THROWS_AS(Boundary("[0.0, 1.0, 3.0]", "[0.0, 0.5, 1.0, 1.5]"), std::runtime_error);
+        REQUIRE_THROWS_AS(boundary::interpolator("[0.0, 1.0, 3.0]", "[0.0, 0.5, 1.0, 1.5]"),
+                          std::runtime_error);
     }
     SECTION("Unordered time error test")
     {
-        REQUIRE_THROWS_AS(Boundary("[0.0, 10.0, 3.0]", "[0.0, 0.5, 1.0]"), std::runtime_error);
+        REQUIRE_THROWS_AS(boundary::interpolator("[0.0, 10.0, 3.0]", "[0.0, 0.5, 1.0]"),
+                          std::runtime_error);
     }
 }
 TEST_CASE("Traction test for triangle", "[Traction]")
@@ -110,8 +113,8 @@ TEST_CASE("Traction test for triangle", "[Traction]")
 
     auto material_coordinates = std::make_shared<MaterialCoordinates>(coordinates);
 
-    std::vector<List> nodal_connectivity = {{0, 1, 2}};
-    std::vector<List> dof_list = {{0, 3, 6}};
+    std::vector<std::vector<int64>> nodal_connectivity = {{0, 1, 2}};
+    std::vector<std::vector<int64>> dof_list = {{0, 3, 6}};
 
     SECTION("Unit load")
     {
@@ -130,7 +133,7 @@ TEST_CASE("Traction test for triangle", "[Traction]")
 
         REQUIRE(patch.elements() == 1);
 
-        auto const & [dofs, t] = patch.external_force(0, 1.0);
+        auto const& [dofs, t] = patch.external_force(0, 1.0);
 
         REQUIRE((t - vector3::Constant(1.0 / 6.0)).norm() == Approx(0.0).margin(ZERO_MARGIN));
         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
@@ -151,7 +154,7 @@ TEST_CASE("Traction test for triangle", "[Traction]")
 
         REQUIRE(patch.elements() == 1);
 
-        auto const & [dofs, t] = patch.external_force(0, 1.0);
+        auto const& [dofs, t] = patch.external_force(0, 1.0);
 
         REQUIRE((t - vector3::Constant(2.0 / 6.0)).norm() == Approx(0.0).margin(ZERO_MARGIN));
         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
@@ -171,8 +174,8 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
 
     auto material_coordinates = std::make_shared<MaterialCoordinates>(coordinates);
 
-    std::vector<List> nodal_connectivity = {{0, 1, 2}};
-    std::vector<List> dof_list = {{0, 1, 2, 3, 4, 5, 6, 7, 8}};
+    std::vector<std::vector<int64>> nodal_connectivity = {{0, 1, 2}};
+    std::vector<std::vector<int64>> dof_list = {{0, 1, 2, 3, 4, 5, 6, 7, 8}};
 
     SECTION("Unit load")
     {
@@ -191,7 +194,7 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
 
         REQUIRE(pressure_patch.elements() == 1);
 
-        auto const & [dofs, f_ext] = pressure_patch.external_force(0, 1.0);
+        auto const& [dofs, f_ext] = pressure_patch.external_force(0, 1.0);
 
         REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
 
@@ -216,7 +219,7 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
 
         REQUIRE(pressure_patch.elements() == 1);
 
-        auto const & [dofs, f_ext] = pressure_patch.external_force(0, 1.0);
+        auto const& [dofs, f_ext] = pressure_patch.external_force(0, 1.0);
 
         REQUIRE((vector3(f_ext(2), f_ext(5), f_ext(8)) - 2.0 / 6.0 * vector3::Ones()).norm()
                 == Approx(0.0).margin(ZERO_MARGIN));
@@ -279,13 +282,13 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
                                   boundary,
                                   {{"x", 0}, {"y", 1}, {"z", 2}});
 
-    for (auto const & [is_dof_active, meshes] : loads.interface())
+    for (auto const& [is_dof_active, meshes] : loads.interface())
     {
         if (is_dof_active)
         {
             std::visit(
                 [&](auto const& mesh) {
-                    auto const & [dofs_tri, f_tri] = mesh.external_force(0, 1.0);
+                    auto const& [dofs_tri, f_tri] = mesh.external_force(0, 1.0);
 
                     REQUIRE(dofs_tri.size() == 3);
                     REQUIRE(f_tri.rows() == 3);
@@ -297,7 +300,7 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
 
             std::visit(
                 [&](auto const& mesh) {
-                    auto const & [dofs_quad, f_quad] = mesh.external_force(0, 1.0);
+                    auto const& [dofs_quad, f_quad] = mesh.external_force(0, 1.0);
 
                     REQUIRE(dofs_quad.size() == 4);
                     REQUIRE(f_quad.rows() == 4);
@@ -311,7 +314,7 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
 }
 TEST_CASE("Newton cooling boundary conditions")
 {
-    using diffusion::boundary::newton_cooling;
+    using diffusion::newton_cooling;
 
     Json::Value times, flux, T_inf;
 
@@ -323,8 +326,8 @@ TEST_CASE("Newton cooling boundary conditions")
 
     auto material_coordinates = std::make_shared<MaterialCoordinates>(coordinates);
 
-    std::vector<List> const nodal_connectivity = {{0, 1, 2}};
-    std::vector<List> const dof_list = {{0, 3, 6}};
+    std::vector<std::vector<int64>> const nodal_connectivity = {{0, 1, 2}};
+    std::vector<std::vector<int64>> const dof_list = {{0, 3, 6}};
 
     SECTION("Unit load")
     {
@@ -345,8 +348,8 @@ TEST_CASE("Newton cooling boundary conditions")
 
         REQUIRE(patch.elements() == 1);
 
-        auto const & [dofs_0, t] = patch.external_force(0, 1.0);
-        auto const & [dofs_1, k] = patch.external_stiffness(0, 1.0);
+        auto const& [dofs_0, t] = patch.external_force(0, 1.0);
+        auto const& [dofs_1, k] = patch.external_stiffness(0, 1.0);
 
         REQUIRE((t - vector3::Constant(1.0 / 6.0)).norm() == Approx(0.0).margin(ZERO_MARGIN));
 

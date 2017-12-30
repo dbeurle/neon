@@ -22,8 +22,20 @@ namespace neon::mechanical::solid
 femMesh::femMesh(BasicMesh const& basic_mesh,
                  Json::Value const& material_data,
                  Json::Value const& simulation_data)
-    : material_coordinates(std::make_shared<MaterialCoordinates>(basic_mesh.coordinates()))
+    : material_coordinates(std::make_shared<MaterialCoordinates>(basic_mesh.coordinates())),
+      process_boundaries(basic_mesh.local_to_nonlocal_ordering(), basic_mesh.process_interfaces())
 {
+    // for (auto const& [process, indices] : interprocess_boundaries)
+    // {
+    //     std::cout << "Process " << process << std::endl;
+    //
+    //     std::cout << "Indices\n";
+    //     for (auto i : indices)
+    //     {
+    //         std::cout << i << std::endl;
+    //     }
+    // }
+
     check_boundary_conditions(simulation_data["BoundaryConditions"]);
 
     auto const& simulation_name = simulation_data["Name"].asString();
@@ -37,11 +49,9 @@ femMesh::femMesh(BasicMesh const& basic_mesh,
 
 bool femMesh::is_symmetric() const
 {
-    for (auto const& submesh : submeshes)
-    {
-        if (!submesh.constitutive().is_symmetric()) return false;
-    }
-    return true;
+    return std::all_of(std::begin(submeshes), std::end(submeshes), [](auto const& submesh) {
+        return submesh.constitutive().is_symmetric();
+    });
 }
 
 void femMesh::update_internal_variables(vector const& u, double const time_step_size)
@@ -78,6 +88,10 @@ void femMesh::allocate_boundary_conditions(Json::Value const& simulation_data,
     for (auto const& boundary : boundary_data)
     {
         auto const& boundary_name = boundary["Name"].asString();
+
+        // This process might not have all the boundaries on this partition
+        if (!basic_mesh.has(boundary_name)) continue;
+
         auto const& boundary_type = boundary["Type"].asString();
 
         if (boundary_type == "Displacement")
@@ -133,16 +147,16 @@ std::vector<double> femMesh::time_history() const
     std::vector<double> history;
 
     // Append time history from each boundary condition
-    for (auto const & [key, boundaries] : displacement_bcs)
+    for (auto const& [key, boundaries] : displacement_bcs)
     {
         for (auto const& boundary : boundaries)
         {
             history |= ranges::action::push_back(boundary.time_history());
         }
     }
-    for (auto const & [key, nonfollower_load] : nonfollower_loads)
+    for (auto const& [key, nonfollower_load] : nonfollower_loads)
     {
-        for (auto const & [is_dof_active, boundaries] : nonfollower_load.interface())
+        for (auto const& [is_dof_active, boundaries] : nonfollower_load.interface())
         {
             if (!is_dof_active) continue;
 
@@ -174,7 +188,7 @@ void femMesh::check_boundary_conditions(Json::Value const& boundary_data) const
     }
 }
 
-List femMesh::filter_dof_list(std::vector<Submesh> const& boundary_mesh) const
+std::vector<int64> femMesh::filter_dof_list(std::vector<Submesh> const& boundary_mesh) const
 {
     using namespace ranges;
 

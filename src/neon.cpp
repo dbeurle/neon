@@ -10,7 +10,7 @@
 
 int main(int argc, char* argv[])
 {
-    mpi::instance(argc, argv);
+    mpi::instance instance(argc, argv);
 
     if (argc <= 1)
     {

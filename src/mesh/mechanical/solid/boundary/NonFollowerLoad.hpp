@@ -24,10 +24,10 @@ namespace neon::mechanical::solid
 class NonFollowerLoadBoundary
 {
 public:
-    using value_types = std::variant<traction, pressure, body_force>;
+    using boundary_types = std::variant<traction, pressure, body_force>;
 
     /** Specifying the allowable nonfollower loads */
-    using BoundaryMeshes = std::vector<std::variant<traction, pressure, body_force>>;
+    using BoundaryMeshes = std::vector<boundary_types>;
 
 public:
     explicit NonFollowerLoadBoundary(std::shared_ptr<MaterialCoordinates>& material_coordinates,

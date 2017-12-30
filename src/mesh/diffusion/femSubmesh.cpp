@@ -41,7 +41,7 @@ void femSubmesh::save_internal_variables(bool const have_converged)
     }
 }
 
-std::tuple<local_indices const&, matrix> femSubmesh::tangent_stiffness(int const element) const
+std::pair<std::vector<int64> const&, matrix> femSubmesh::tangent_stiffness(int64 const element) const
 {
     auto const X = material_coordinates->current_configuration(local_node_list(element));
 
@@ -52,14 +52,14 @@ std::tuple<local_indices const&, matrix> femSubmesh::tangent_stiffness(int const
     matrix const kmat = sf->quadrature()
                             .integrate(matrix::Zero(n, n).eval(),
                                        [&](auto const& femval, auto const& l) -> matrix {
-                                           auto const& [N, rhea] = femval;
+                                           auto const& [N, dN] = femval;
 
                                            auto const& D = D_Vec[offset(element, l)];
 
-                                           matrix3 const Jacobian = local_jacobian(rhea, X);
+                                           matrix3 const Jacobian = X * dN;
 
                                            // Compute the symmetric gradient operator
-                                           matrix const B = (rhea * Jacobian.inverse()).transpose();
+                                           matrix const B = (dN * Jacobian.inverse()).transpose();
 
                                            return B.transpose() * D * B * Jacobian.determinant();
                                        });
@@ -67,7 +67,7 @@ std::tuple<local_indices const&, matrix> femSubmesh::tangent_stiffness(int const
     return {local_dof_list(element), kmat};
 }
 
-std::tuple<local_indices const&, matrix> femSubmesh::consistent_mass(int const element) const
+std::pair<std::vector<int64> const&, matrix> femSubmesh::consistent_mass(int64 const element) const
 {
     auto X = material_coordinates->current_configuration(local_node_list(element));
 
@@ -78,7 +78,7 @@ std::tuple<local_indices const&, matrix> femSubmesh::consistent_mass(int const e
                                         [&](auto const& femval, auto const& l) -> matrix {
                                             auto const& [N, dN] = femval;
 
-                                            auto const Jacobian = local_jacobian(dN, X);
+                                            matrix3 const Jacobian = X * dN;
 
                                             return N * density * specific_heat * N.transpose()
                                                    * Jacobian.determinant();
@@ -86,7 +86,7 @@ std::tuple<local_indices const&, matrix> femSubmesh::consistent_mass(int const e
     return {local_dof_list(element), m};
 }
 
-std::tuple<local_indices const&, vector> femSubmesh::diagonal_mass(int const element) const
+std::pair<std::vector<int64> const&, vector> femSubmesh::diagonal_mass(int64 const element) const
 {
     auto const& [dofs, consistent_m] = this->consistent_mass(element);
 
@@ -110,7 +110,7 @@ void femSubmesh::update_internal_variables(double const time_step_size)
     }
 }
 
-int femSubmesh::offset(int const element, int const quadrature_point) const
+int femSubmesh::offset(int64 const element, int const quadrature_point) const
 {
     return sf->quadrature().points() * element + quadrature_point;
 }

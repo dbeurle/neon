@@ -6,21 +6,21 @@
 
 #include <json/value.h>
 
-namespace neon::diffusion::boundary
+namespace neon::diffusion
 {
 newton_cooling::newton_cooling(std::unique_ptr<SurfaceInterpolation>&& sf,
-                               std::vector<List> const& nodal_connectivity,
-                               std::vector<List> const& dof_list,
+                               std::vector<std::vector<int64>> const& nodal_connectivity,
+                               std::vector<std::vector<int64>> const& dof_list,
                                std::shared_ptr<MaterialCoordinates>& material_coordinates,
                                Json::Value const& times,
                                Json::Value const& heat_flux,
                                Json::Value const& heat_transfer_coefficient)
-    : SurfaceLoad<SurfaceInterpolation>(std::move(sf),
-                                        nodal_connectivity,
-                                        dof_list,
-                                        material_coordinates,
-                                        times,
-                                        heat_flux)
+    : boundary::surface_load<SurfaceInterpolation>(std::move(sf),
+                                                   nodal_connectivity,
+                                                   dof_list,
+                                                   material_coordinates,
+                                                   times,
+                                                   heat_flux)
 {
     using ranges::view::transform;
     using ranges::view::zip;
@@ -30,8 +30,8 @@ newton_cooling::newton_cooling(std::unique_ptr<SurfaceInterpolation>&& sf,
                                   | transform([](auto i) { return i.asDouble(); }));
 }
 
-std::tuple<List const&, matrix> newton_cooling::external_stiffness(int const element,
-                                                                   double const load_factor) const
+std::pair<std::vector<int64> const&, matrix> newton_cooling::external_stiffness(
+    int64 const element, double const load_factor) const
 {
     auto const X = geometry::project_to_plane(
         material_coordinates->initial_configuration(nodal_connectivity[element]));

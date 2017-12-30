@@ -20,7 +20,7 @@ TEST_CASE("Nodal coordinates")
     // Setup the test case
     NodalCoordinates nodes(coordinates);
 
-    local_indices const node_list{0, 1, 2};
+    std::vector<int64> const node_list{0, 1, 2};
 
     REQUIRE((nodes.coordinates() - coordinates).norm() == Approx(0.0).margin(ZERO_MARGIN));
 
