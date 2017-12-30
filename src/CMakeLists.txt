@@ -8,7 +8,7 @@ add_library(neon ${NEON_SOURCES})
 
 target_compile_options(neon PUBLIC $<$<CONFIG:RELEASE>:-O3 -DNDEBUG>)
 
-add_dependencies(neon eigen3 range-v3 termcolor blaze)
+add_dependencies(neon eigen3 range-v3 termcolor blaze cppmpi)
 
 target_link_libraries(neon
                       ${Boost_LIBRARIES}
