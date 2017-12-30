@@ -52,9 +52,6 @@ MacroBlockBegin: ''
 MacroBlockEnd:   ''
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None
-ObjCBlockIndentWidth: 4
-ObjCSpaceAfterProperty: false
-ObjCSpaceBeforeProtocolList: true
 PenaltyBreakAssignment: 100000
 PenaltyBreakBeforeFirstCallParameter: 1000000
 PenaltyBreakComment: 300
@@ -63,7 +60,7 @@ PenaltyBreakString: 10
 PenaltyExcessCharacter: 10
 PenaltyReturnTypeOnItsOwnLine: 1000000
 PointerAlignment: Left
-ReflowComments:  true
+ReflowComments:  false
 SortIncludes:    true
 SpaceAfterCStyleCast: false
 SpaceBeforeAssignmentOperators: true
@@ -71,11 +68,11 @@ SpaceBeforeParens: ControlStatements
 SpaceInEmptyParentheses: false
 SpacesBeforeTrailingComments: 1
 SpacesInAngles:  false
-SpacesInContainerLiterals: true
+SpacesInContainerLiterals: false
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
+FixNamespaceComments: false
 Standard:        Cpp11
 TabWidth:        4
 UseTab:          Never
-FixNamespaceComments: false
