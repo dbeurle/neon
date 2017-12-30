@@ -10,7 +10,7 @@
 
 int main(int argc, char* argv[])
 {
-    using namespace neon;
+    mpi::instance(argc, argv);
 
     if (argc <= 1)
     {
@@ -18,11 +18,9 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    mpi::instance(argc, argv);
-
     try
     {
-        SimulationControl simulation(argv[1]);
+        neon::SimulationControl simulation(argv[1]);
 
         simulation.start();
     }
