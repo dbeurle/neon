@@ -18,6 +18,8 @@
 #include <range/v3/algorithm/find.hpp>
 #include <range/v3/algorithm/find_if.hpp>
 
+#include "mpi.hpp"
+
 namespace neon
 {
 int SimulationControl::threads = std::thread::hardware_concurrency();
@@ -27,13 +29,12 @@ SimulationControl::SimulationControl(std::string const& input_file_name)
 {
     if (input_file_name == "" || input_file_name.empty()) throw NoInputException();
 
-    boost::filesystem::path input_path(input_file_name);
+    boost::filesystem::path const input_path(input_file_name);
 
     // Strip the extension from the filename
-    std::string extension = boost::filesystem::extension(input_path);
-    std::string base_name = boost::filesystem::basename(input_path);
+    std::string const extension = boost::filesystem::extension(input_path);
+    std::string const base_name = boost::filesystem::basename(input_path);
 
-    // Attempt to open the json input file
     if (extension != ".json") throw InvalidExtensionException(extension);
 
     this->parse();
@@ -43,7 +44,7 @@ SimulationControl::~SimulationControl() = default;
 
 void SimulationControl::parse()
 {
-    auto start = std::chrono::high_resolution_clock::now();
+    auto const start = std::chrono::high_resolution_clock::now();
 
     this->print_banner();
 
@@ -75,7 +76,10 @@ void SimulationControl::parse()
 
         auto const read_start = std::chrono::high_resolution_clock::now();
 
-        std::ifstream mesh_input_stream(part["Name"].asString() + ".mesh");
+        // If distributed then append the partition number otherwise read the
+        // mesh in like usual
+        std::ifstream mesh_input_stream(part["Name"].asString() + ".mesh"
+                                        + (mpi::size() == 1 ? "" : std::to_string(mpi::rank())));
 
         Json::Value mesh_file;
 
@@ -143,7 +147,7 @@ void SimulationControl::start()
 {
     // Allocate the modules storage, which automatically checks for correct input
     // and throws the appropriate exception when an error is detected
-    for (auto const& [name, simulations] : multistep_simulations)
+    for (auto const & [name, simulations] : multistep_simulations)
     {
         for (auto const& simulation : simulations)
         {
@@ -167,7 +171,7 @@ void SimulationControl::build_simulation_tree()
         }
     }
 
-    for (auto const& [name, queue] : multistep_simulations)
+    for (auto const & [name, queue] : multistep_simulations)
     {
         std::cout << std::string(4, ' ') << "Simulation \"" << name << "\" is continued by:\n";
         for (auto const& item : queue)
@@ -222,7 +226,7 @@ std::unordered_set<std::string> SimulationControl::parse_material_names(Json::Va
     {
         if (material["Name"].empty()) throw std::runtime_error("Material: Name");
 
-        auto const [it, inserted] = material_names.emplace(material["Name"].asString());
+        auto const[it, inserted] = material_names.emplace(material["Name"].asString());
 
         if (!inserted) throw DuplicateNameException("Material");
     }
@@ -245,7 +249,7 @@ std::unordered_set<std::string> SimulationControl::parse_part_names(
                                      "materials\n");
         }
 
-        auto const [it, inserted] = part_names.emplace(part["Name"].asString());
+        auto const[it, inserted] = part_names.emplace(part["Name"].asString());
 
         if (!inserted) throw DuplicateNameException("Part");
     }
