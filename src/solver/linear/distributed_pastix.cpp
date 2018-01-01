@@ -1,5 +1,5 @@
 
-#include "PaStiX.hpp"
+#include "distributed_pastix.hpp"
 
 #include "SimulationControl.hpp"
 
@@ -8,69 +8,100 @@
 
 namespace neon
 {
-PaStiXLDLT::PaStiXLDLT()
+distributed_pastix_ldlt::distributed_pastix_ldlt()
 {
     // Verbosity
-    ldlt.iparm(3) = 0;
+    // ldlt.iparm(3) = 0;
 
     // Number of threads
-    ldlt.iparm(34) = SimulationControl::threads;
+    iparm[IPARM_THREAD_NBR] = SimulationControl::threads;
 
     // Number of Cuda devices
     // ldlt.iparm(64) = 1;
 }
 
-void PaStiXLDLT::solve(SparseMatrix const& A, vector& x, vector const& b)
+distributed_pastix_ldlt::solve(SparseMatrix const& A, vector& x, vector const& b)
 {
-    auto const start = std::chrono::high_resolution_clock::now();
+    x = b;
 
     if (build_sparsity_pattern)
     {
-        ldlt.analyzePattern(A);
+        // Permutation tabular
+        dpastix(&pastix_data,
+                MPI_COMM_WORLD,
+                A.rows(),
+                colptr.data(),
+                rows.data(),
+                A.valuePtr(),
+                mapping.data(),
+                perm.data(),
+                invp.data(),
+                x.data(),
+                1,
+                iparm.data(),
+                dparm.data());
+
         build_sparsity_pattern = false;
     }
 
-    ldlt.factorize(A);
+    // Customise parameters
+    iparm[IPARM_SYM] = API_SYM_YES;
+    iparm[IPARM_FACTORIZATION] = API_FACT_LDLT;
+    iparm[IPARM_MATRIX_VERIFICATION] = API_NO;
+    iparm[IPARM_VERBOSE] = 2;
+    iparm[IPARM_ORDERING] = API_ORDER_SCOTCH;
+    iparm[IPARM_RHS_MAKING] = API_RHS_B;
 
-    x = ldlt.solve(b);
-
-    auto const end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
-    std::cout << std::string(6, ' ') << "PaStiX LDLT direct solver took " << elapsed_seconds.count()
-              << "s\n";
-}
-
-PaStiXLU::PaStiXLU()
-{
-    // Verbosity
-    lu.iparm(3) = 0;
-
-    // Number of threads
-    lu.iparm(34) = SimulationControl::threads;
-
-    // Number of Cuda devices
-    // ldlt.iparm(64) = 1;
-}
-
-void PaStiXLU::solve(SparseMatrix const& A, vector& x, vector const& b)
-{
-    auto start = std::chrono::high_resolution_clock::now();
-
-    if (build_sparsity_pattern)
+    // Re-read parameters to set IPARM/DPARM
+    if (EXIT_FAILURE == get_idparm(argc, argv, iparm.data(), dparm.data()))
     {
-        lu.analyzePattern(A);
-        build_sparsity_pattern = false;
+        return EXIT_FAILURE;
     }
 
-    lu.factorize(A);
+    iparm[IPARM_START_TASK] = API_TASK_ORDERING;
+    iparm[IPARM_END_TASK] = API_TASK_CLEAN;
 
-    x = lu.solve(b);
+    // Copy the right hand side as it will be replaced by solution
+    auto rhssaved = rhs;
 
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
-    std::cout << std::string(6, ' ') << "PaStiX LU direct solver took " << elapsed_seconds.count()
-              << "s\n";
+    pastix_int_t number_of_dofs = mpi::all_reduce(local_number_of_dofs, mpi::sum{});
+
+    // right hand side (save, global)
+    std::vector<pastix_float_t> rhssaved_g(number_of_dofs, 0.0);
+    for (auto i = 0; i < local_number_of_dofs; i++)
+    {
+        rhssaved_g[mapping[i] - 1] = rhssaved[i];
+    }
+
+    rhssaved_g = mpi::all_reduce(rhssaved_g, mpi::sum{});
+
+    // Call pastix
+    dpastix(&pastix_data,
+            MPI_COMM_WORLD,
+            local_number_of_dofs,
+            colptr.data(),
+            rows.data(),
+            values.data(),
+            mapping.data(),
+            perm.data(),
+            nullptr, // No need to allocate invp in dpastix
+            rhs.data(),
+            1,
+            iparm.data(),
+            dparm.data());
+
+    for (auto x : rhs)
+    {
+        if (std::abs(x - 1.0) > 0.001)
+        {
+            std::cout << x << std::endl;
+            std::cout << "Solution not correct!" << std::endl;
+            mpi::finalise();
+        }
+    }
 }
+
+void distributed_pastix_ldlt::analyse_pattern() {}
 }
 
 // FIXME When new pastix comes out, test this against it.  Currently segfaults

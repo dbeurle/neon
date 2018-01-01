@@ -7,6 +7,17 @@
 
 #include <Eigen/PaStiXSupport>
 
+// Respect this order for access functions from libpastix because of silly design
+extern "C" {
+#include "pastix.h"
+
+#include "cscd_utils.h"
+
+#include "read_matrix.h"
+
+#include "get_options.h"
+}
+
 namespace neon
 {
 /**
@@ -22,6 +33,9 @@ public:
 
 private:
     Eigen::PastixLDLT<Eigen::SparseMatrix<double>, Eigen::Upper> ldlt;
+
+    std::array<pastix_int_t, IPARM_SIZE> iparm; /* integer parameters for pastix */
+    std::array<double, DPARM_SIZE> dparm;       /* floating parameters for pastix */
 };
 
 /**
