@@ -47,7 +47,9 @@ public:
 
     auto const& surface_boundaries() const { return boundary_meshes; }
 
-    auto const& coordinates() const { return *(material_coordinates.get()); }
+    [[deprecated]] auto const& coordinates() const { return *material_coordinates; }
+
+    auto const& geometry() const { return *material_coordinates; }
 
 protected:
     void check_boundary_conditions(Json::Value const& boundary_data) const;
