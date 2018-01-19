@@ -13,7 +13,9 @@ before_install:
     - docker build -t neon .
 script:
     - docker run -e TRAVIS=$TRAVIS -e TRAVIS_JOB_ID=$TRAVIS_JOB_ID --name neon-docker -d -t neon /bin/bash
-    - docker exec neon-docker /bin/bash -c "mkdir -p neon/build && cd neon/build && cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_COVERAGE=TRUE .. && make all -j2"
+    - docker exec neon-docker /bin/bash -c "mkdir -p neon/build && cd neon/build && cmake -DCMAKE_BUILD_TYPE=Debug .. && make all -j2"
+    - docker exec neon-docker /bin/bash -c "cd neon/build && make install && ctest"
+    - docker exec neon-docker /bin/bash -c "cd neon/build && cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_COVERAGE=TRUE .. && make all -j2"
     - docker exec neon-docker /bin/bash -c "cd neon/build && make install && ctest"
 after_success:
     # Coverage
