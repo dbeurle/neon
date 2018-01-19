@@ -11,35 +11,35 @@
 namespace neon::mechanical::plane
 {
 /**
- * Traction is a non-follower load that has a surface interpolation and
+ * traction is a non-follower load that has a surface interpolation and
  * computes the element external load vector contribution to the system of
  * equations
  * \sa NonFollowerLoad
  */
-using Traction = SurfaceLoad<LineInterpolation>;
+using traction = SurfaceLoad<LineInterpolation>;
 
 /**
- * BodyForce is a non-follower load that has a volume interpolation and
+ * body_force is a non-follower load that has a volume interpolation and
  * computes the element external load vector contribution to the system of
  * equations
  * \sa NonFollowerLoad
  */
-using BodyForce = VolumeLoad<SurfaceInterpolation>;
+using body_force = VolumeLoad<SurfaceInterpolation>;
 
 /**
  * NonFollowerLoadBoundary contains the boundary conditions which contribute to
  * the external force vector.  This can include tractions, pressures, nodal
  * forces and volume forces computed in the initial configuration
  *
- * \sa Traction
+ * \sa traction
  * \sa Pressure
- * \sa BodyForce
+ * \sa body_force
  */
 class NonFollowerLoadBoundary
 {
 public:
     /** Specifying the allowable nonfollower loads */
-    using BoundaryMeshes = std::vector<std::variant<Traction, BodyForce>>;
+    using BoundaryMeshes = std::vector<std::variant<traction, body_force>>;
 
 public:
     explicit NonFollowerLoadBoundary(std::shared_ptr<MaterialCoordinates>& material_coordinates,
