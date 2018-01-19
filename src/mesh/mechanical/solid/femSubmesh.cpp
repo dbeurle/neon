@@ -96,7 +96,7 @@ matrix femSubmesh::geometric_tangent_stiffness(matrix3x const& x, int32 const el
 
                                                         matrix3 const Jacobian = local_deformation_gradient(rhea, x);
 
-                                                        auto const& cauchy_stress = cauchy_stresses[view(element, l)];
+                                                        matrix3 const& cauchy_stress = cauchy_stresses[view(element, l)];
 
                                                         // Compute the symmetric gradient operator
                                                         auto const L = (rhea * Jacobian.inverse()).transpose();
