@@ -3,7 +3,7 @@
 
 #include "AbstractModule.hpp"
 
-#include "assembler/solid/femStaticMatrix.hpp"
+#include "assembler/mechanical/solid/femStaticMatrix.hpp"
 #include "mesh/mechanical/solid/femMesh.hpp"
 
 #include "assembler/mechanical/plane/femStaticMatrix.hpp"
