@@ -49,11 +49,8 @@ public:
     /** Constant access to the sub-meshes */
     [[nodiscard]] std::vector<femSubmesh> const& meshes() const { return submeshes; }
 
-        /** Mutable access to the sub-meshes */
-        [[nodiscard]] std::vector<femSubmesh>& meshes()
-    {
-        return submeshes;
-    }
+    /** Mutable access to the sub-meshes */
+    [[nodiscard]] std::vector<femSubmesh>& meshes() { return submeshes; }
 
     [[nodiscard]] auto const& displacement_boundaries() const { return displacement_bcs; }
 
@@ -67,7 +64,9 @@ public:
      */
     [[nodiscard]] std::vector<double> time_history() const;
 
-    [[nodiscard]] auto const& coordinates() const { return *(material_coordinates.get()); }
+    [[deprecated]][[nodiscard]] auto const& coordinates() const { return *material_coordinates; }
+
+    [[nodiscard]] auto const& geometry() const { return *material_coordinates; }
 
 protected:
     void check_boundary_conditions(Json::Value const& boundary_data) const;

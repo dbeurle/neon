@@ -1,19 +1,11 @@
 
 #include "MaterialCoordinates.hpp"
 
-#include <range/v3/algorithm/for_each.hpp>
-
-#include <range/v3/view/iota.hpp>
-#include <range/v3/view/zip.hpp>
-
 #include "vtkDoubleArray.h"
 #include "vtkPoints.h"
 
 namespace neon
 {
-template <int stride>
-using vector_view = Eigen::Map<vector, 0, Eigen::InnerStride<stride>>;
-
 MaterialCoordinates::MaterialCoordinates(matrix3x const& initial_coordinates)
     : NodalCoordinates(initial_coordinates), x(initial_coordinates)
 {

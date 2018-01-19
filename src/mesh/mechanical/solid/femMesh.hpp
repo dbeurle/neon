@@ -63,7 +63,10 @@ public:
      */
     [[nodiscard]] std::vector<double> time_history() const;
 
-    [[nodiscard]] auto const& coordinates() const { return *(material_coordinates.get()); }
+    [[deprecated]][[nodiscard]] auto const& coordinates() const { return *material_coordinates; }
+
+    /** Provide const access to the discretised geometry for this mesh */
+    [[nodiscard]] auto const& geometry() const { return *material_coordinates; }
 
 protected:
     void check_boundary_conditions(Json::Value const& boundary_data) const;
