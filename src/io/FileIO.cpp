@@ -130,7 +130,7 @@ void FileIO::write(int const time_step, double const total_time, vector const& s
 void FileIO::add_mesh()
 {
     // Populate an unstructured grid object
-    unstructured_mesh->SetPoints(fem_mesh.coordinates().vtk_coordinates());
+    unstructured_mesh->SetPoints(io::vtk_coordinates(fem_mesh.geometry().coordinates()));
 
     for (auto const& submesh : fem_mesh.meshes())
     {

@@ -21,6 +21,8 @@
 #include "vtkUnstructuredGrid.h"
 #include "vtkXMLUnstructuredGridWriter.h"
 
+#include "io/vtk_coordinates.hpp"
+
 namespace neon
 {
 class FileIO
@@ -62,8 +64,8 @@ public:
 
     using variable_type = typename fem_mesh_type::internal_variable_type;
 
-    using ScalarMap = std::map<std::string, typename variable_type::Scalar>;
-    using TensorMap = std::map<std::string, typename variable_type::Tensor>;
+    using scalar_map_t = std::map<std::string, typename variable_type::Scalar>;
+    using tensor_map_t = std::map<std::string, typename variable_type::Tensor>;
 
 public:
     std::string const primary_field{"Displacement"};
@@ -84,18 +86,18 @@ private:
     fem_mesh_type const& fem_mesh;
 
     // clang-format off
-    ScalarMap const scalar_map{{"AccumulatedPlasticStrain", variable_type::Scalar::EffectivePlasticStrain},
-                               {"VonMisesStress", variable_type::Scalar::VonMisesStress},
-                               {"Damage", variable_type::Scalar::Damage},
-                               {"EnergyReleaseRate", variable_type::Scalar::EnergyReleaseRate}};
+    scalar_map_t const scalar_map{{"AccumulatedPlasticStrain", variable_type::Scalar::EffectivePlasticStrain},
+                                  {"VonMisesStress", variable_type::Scalar::VonMisesStress},
+                                  {"Damage", variable_type::Scalar::Damage},
+                                  {"EnergyReleaseRate", variable_type::Scalar::EnergyReleaseRate}};
 
-    TensorMap const tensor_map{{"CauchyStress", variable_type::Tensor::Cauchy},
-                               {"LinearisedStrain", variable_type::Tensor::LinearisedStrain},
-                               {"LinearisedPlasticStrain", variable_type::Tensor::LinearisedPlasticStrain},
-                               {"DeformationGradient", variable_type::Tensor::DeformationGradient},
-                               {"DisplacementGradient", variable_type::Tensor::DisplacementGradient},
-                               {"KinematicHardening", variable_type::Tensor::KinematicHardening},
-                               {"BackStress", variable_type::Tensor::BackStress}};
+    tensor_map_t const tensor_map{{"CauchyStress", variable_type::Tensor::Cauchy},
+                                  {"LinearisedStrain", variable_type::Tensor::LinearisedStrain},
+                                  {"LinearisedPlasticStrain", variable_type::Tensor::LinearisedPlasticStrain},
+                                  {"DeformationGradient", variable_type::Tensor::DeformationGradient},
+                                  {"DisplacementGradient", variable_type::Tensor::DisplacementGradient},
+                                  {"KinematicHardening", variable_type::Tensor::KinematicHardening},
+                                  {"BackStress", variable_type::Tensor::BackStress}};
     // clang-format on
 };
 
@@ -132,9 +134,9 @@ void FileIO<femMeshType>::write(int const time_step, double const total_time)
         {
             auto const tensor_size = femMeshType::internal_variable_type::tensor_size;
 
-            nodal_averaged_value.resize(fem_mesh.coordinates().size() * tensor_size);
+            nodal_averaged_value.resize(fem_mesh.geometry().size() * tensor_size);
 
-            insertions.resize(fem_mesh.coordinates().size() * tensor_size);
+            insertions.resize(fem_mesh.geometry().size() * tensor_size);
 
             nodal_averaged_value.setZero();
             insertions.setZero();
@@ -159,9 +161,9 @@ void FileIO<femMeshType>::write(int const time_step, double const total_time)
         }
         else if (auto found = scalar_map.find(name); found != scalar_map.end())
         {
-            nodal_averaged_value.resize(fem_mesh.coordinates().size());
+            nodal_averaged_value.resize(fem_mesh.geometry().size());
 
-            insertions.resize(fem_mesh.coordinates().size());
+            insertions.resize(fem_mesh.geometry().size());
 
             nodal_averaged_value.setZero();
 
@@ -180,7 +182,8 @@ void FileIO<femMeshType>::write(int const time_step, double const total_time)
         }
         else if (name == primary_field)
         {
-            unstructured_mesh->GetPointData()->AddArray(fem_mesh.coordinates().vtk_displacement());
+            unstructured_mesh->GetPointData()->AddArray(
+                io::vtk_displacement(fem_mesh.geometry().displacement()));
         }
         else
         {
@@ -195,7 +198,7 @@ template <class femMeshType>
 void FileIO<femMeshType>::add_mesh()
 {
     // Populate an unstructured grid object
-    unstructured_mesh->SetPoints(fem_mesh.coordinates().vtk_coordinates());
+    unstructured_mesh->SetPoints(io::vtk_coordinates(fem_mesh.geometry().coordinates()));
 
     for (auto const& submesh : fem_mesh.meshes())
     {
@@ -212,7 +215,8 @@ void FileIO<femMeshType>::add_mesh()
             unstructured_mesh->InsertNextCell(to_vtk(submesh.topology()), vtk_node_list);
         }
     }
-    unstructured_mesh->GetPointData()->AddArray(fem_mesh.coordinates().vtk_displacement());
+    unstructured_mesh->GetPointData()->AddArray(
+        io::vtk_displacement(fem_mesh.geometry().coordinates()));
 }
 }
 
