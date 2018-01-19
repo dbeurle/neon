@@ -39,7 +39,7 @@ class NonFollowerLoadBoundary
 {
 public:
     /** Specifying the allowable nonfollower loads */
-    using BoundaryMeshes = std::vector<std::variant<Traction, BodyForce>>;
+    using boundary_type = std::vector<std::variant<Traction, BodyForce>>;
 
 public:
     explicit NonFollowerLoadBoundary(std::shared_ptr<MaterialCoordinates>& material_coordinates,
@@ -73,6 +73,6 @@ public:
     auto const& interface() const { return nonfollower_load; }
 
 protected:
-    std::array<std::pair<bool, BoundaryMeshes>, 2> nonfollower_load;
+    std::array<std::pair<bool, boundary_type>, 2> nonfollower_load;
 };
 }
