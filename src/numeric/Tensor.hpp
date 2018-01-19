@@ -9,7 +9,7 @@ namespace neon
  * Performs the tensor dot product on two second order tensors in three dimensions.
  */
 template <class MatrixLeft, class MatrixRight>
-[[nodiscard]] inline double double_dot(MatrixLeft const& a, MatrixRight const& b)
+[[nodiscard]] double double_dot(MatrixLeft const& a, MatrixRight const& b)
 {
     return (a.array() * b.array()).sum();
 }
@@ -37,14 +37,14 @@ namespace detail
 
 /** @return the volumetric part of the tensor */
 template <typename MatrixExpression>
-[[nodiscard]] inline auto volumetric(MatrixExpression const& a)
+[[nodiscard]] auto volumetric(MatrixExpression const& a)
 {
     return detail::volumetric(a.eval());
 }
 
 /** @return the deviatoric part of the tensor */
 template <typename MatrixExpression>
-[[nodiscard]] inline auto deviatoric(MatrixExpression const& a)
+[[nodiscard]] auto deviatoric(MatrixExpression const& a)
 {
     return detail::deviatoric(a.eval());
 }
@@ -273,9 +273,8 @@ namespace detail
 {
 /**
  * Convert second order tensor to Voigt notation according to
- * \f$ \begin{bmatrix} \sigma_{11} \\ \sigma_{22} \\ \sigma_{12} \end{bmatrix} = \begin{bmatrix} \sigma_{11} & \sigma_{12}  \\
- * \sigma_{21} & \sigma_{22} \end{bmatrix}
- * \f$
+ * \f$ \begin{bmatrix} \sigma_{11} \\ \sigma_{22} \\ \sigma_{12} \end{bmatrix} = \begin{bmatrix}
+ * \sigma_{11} & \sigma_{12}  \\ \sigma_{21} & \sigma_{22} \end{bmatrix} \f$
  */
 [[nodiscard]] inline vector3 to(matrix2 const& a)
 {
