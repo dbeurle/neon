@@ -74,16 +74,20 @@ std::unique_ptr<VolumeInterpolation> make_volume_interpolation(ElementTopology c
         {
             return std::make_unique<prism6>(PrismQuadrature::Rule::OnePoint);
         }
+        case ElementTopology::Prism15:
+        {
+            return std::make_unique<prism15>(is_reduced ? PrismQuadrature::Rule::OnePoint
+                                                        : PrismQuadrature::Rule::SixPoint);
+        }
+        case ElementTopology::Prism18:
         case ElementTopology::Pyramid5:
+        case ElementTopology::Pyramid13:
+        case ElementTopology::Pyramid14:
         case ElementTopology::Tetrahedron20:
         case ElementTopology::Tetrahedron35:
         case ElementTopology::Tetrahedron56:
         case ElementTopology::Hexahedron64:
         case ElementTopology::Hexahedron125:
-        case ElementTopology::Prism18:
-        case ElementTopology::Pyramid14:
-        case ElementTopology::Prism15:
-        case ElementTopology::Pyramid13:
         default:
             throw std::runtime_error("Volume interpolation "
                                      + std::to_string(static_cast<int>(topology))

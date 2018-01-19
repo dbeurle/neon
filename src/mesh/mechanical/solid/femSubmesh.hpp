@@ -22,7 +22,7 @@ namespace mechanical::solid
 class femSubmesh : public Submesh
 {
 public:
-    using ValueCount = std::tuple<vector, vector>;
+    using ValueCount = std::pair<vector, vector>;
 
     using internal_variable_type = InternalVariables;
 
@@ -34,7 +34,7 @@ public:
                         Submesh const& submesh);
 
     /** @return list of global degrees of freedom for an element */
-    [[nodiscard]] List const& local_dof_list(int const element) const
+    [[nodiscard]] local_indices const& local_dof_list(int const element) const
     {
         return dof_list.at(element);
     }
@@ -51,16 +51,16 @@ public:
     [[nodiscard]] auto const& constitutive() const { return *cm.get(); }
 
     /** @return the tangent consistent stiffness matrix */
-    [[nodiscard]] std::tuple<List const&, matrix> tangent_stiffness(int const element) const;
+    [[nodiscard]] std::pair<List const&, matrix> tangent_stiffness(int const element) const;
 
     /** @return the internal element force */
-    [[nodiscard]] std::tuple<List const&, vector> internal_force(int const element) const;
+    [[nodiscard]] std::pair<List const&, vector> internal_force(int const element) const;
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    [[nodiscard]] std::tuple<List const&, matrix> consistent_mass(int const element) const;
+    [[nodiscard]] std::pair<List const&, matrix> consistent_mass(int const element) const;
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    [[nodiscard]] std::tuple<List const&, vector> diagonal_mass(int const element) const;
+    [[nodiscard]] std::pair<List const&, vector> diagonal_mass(int const element) const;
 
     /** Update the internal variables for the mesh group
      *  \sa update_deformation_measures()
@@ -123,7 +123,7 @@ private:
 
     std::unique_ptr<ConstitutiveModel> cm; //!< Constitutive model
 
-    std::vector<List> dof_list; //!< Map for the local to global dofs
+    std::vector<local_indices> dof_list; //!< Map for the local to global dofs
 };
 }
 }

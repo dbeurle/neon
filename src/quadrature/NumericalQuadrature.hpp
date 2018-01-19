@@ -42,6 +42,21 @@ public:
 
     /**
      * Perform the numerical integration of a lambda function.
+     * @param integral - Value for the numerical integration (accumulated into)
+     * @param f - A lambda function that accepts an femValue and quadrature point
+     * @return The numerically integrated matrix
+     */
+    template <typename Functor>
+    void integrate_inplace(Eigen::Map<matrix> integral, Functor&& f) const
+    {
+        for (int l = 0; l < points(); ++l)
+        {
+            integral.noalias() += f(femvals[l], l) * w[l];
+        }
+    }
+
+    /**
+     * Perform the numerical integration of a lambda function.
      * @param integral - Initial value for the numerical integration
      * @param f - A lambda function that accepts an femValue and quadrature point
      * @return The numerically integrated scalar

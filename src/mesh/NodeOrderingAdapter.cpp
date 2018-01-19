@@ -18,7 +18,9 @@ std::unordered_map<int, ElementTopology> const gmsh_converter{{1, ElementTopolog
                                                               {11, ElementTopology::Tetrahedron10},
                                                               {10, ElementTopology::Quadrilateral9},
                                                               {12, ElementTopology::Hexahedron27},
+                                                              {13, ElementTopology::Prism18},
                                                               {16, ElementTopology::Quadrilateral8},
+                                                              {18, ElementTopology::Prism15},
                                                               {17, ElementTopology::Hexahedron20}};
 
 std::unordered_map<ElementTopology, VTKCellType> const
@@ -31,6 +33,8 @@ std::unordered_map<ElementTopology, VTKCellType> const
                   {ElementTopology::Prism6, VTK_WEDGE},
                   {ElementTopology::Triangle6, VTK_QUADRATIC_TRIANGLE},
                   {ElementTopology::Tetrahedron10, VTK_QUADRATIC_TETRA},
+                  {ElementTopology::Prism15, VTK_QUADRATIC_WEDGE},
+                  // {ElementTopology::Prism18, VTK_TRIQUADRATIC_WEDGE},
                   {ElementTopology::Hexahedron20, VTK_QUADRATIC_HEXAHEDRON},
                   {ElementTopology::Hexahedron27, VTK_TRIQUADRATIC_HEXAHEDRON}};
 
@@ -59,6 +63,35 @@ void convert_from_gmsh(std::vector<List>& nodal_connectivity, ElementTopology co
                 std::swap(nodal_list.at(0), nodal_list.at(3));
                 std::swap(nodal_list.at(0), nodal_list.at(2));
                 std::swap(nodal_list.at(0), nodal_list.at(1));
+            }
+            break;
+        }
+        case ElementTopology::Prism6:
+        {
+            for (auto& nodal_list : nodal_connectivity)
+            {
+                std::swap(nodal_list.at(0), nodal_list.at(1));
+                std::swap(nodal_list.at(3), nodal_list.at(4));
+            }
+            break;
+        }
+        case ElementTopology::Prism15:
+        {
+            for (auto& nodal_list : nodal_connectivity)
+            {
+                // -1 face
+                std::swap(nodal_list.at(0), nodal_list.at(1));
+                std::swap(nodal_list.at(3), nodal_list.at(6));
+                std::swap(nodal_list.at(7), nodal_list.at(4));
+                std::swap(nodal_list.at(5), nodal_list.at(9));
+
+                // mid face
+                std::swap(nodal_list.at(8), nodal_list.at(7));
+                std::swap(nodal_list.at(10), nodal_list.at(6));
+                std::swap(nodal_list.at(11), nodal_list.at(8));
+
+                // +1 face
+                std::swap(nodal_list.at(11), nodal_list.at(9));
             }
             break;
         }

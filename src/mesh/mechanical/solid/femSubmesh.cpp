@@ -63,7 +63,7 @@ void femSubmesh::save_internal_variables(bool const have_converged)
     }
 }
 
-std::tuple<List const&, matrix> femSubmesh::tangent_stiffness(int32 const element) const
+std::pair<List const&, matrix> femSubmesh::tangent_stiffness(int32 const element) const
 {
     auto const& x = material_coordinates->current_configuration(local_node_list(element));
 
@@ -76,7 +76,7 @@ std::tuple<List const&, matrix> femSubmesh::tangent_stiffness(int32 const elemen
     return {local_dof_list(element), ke};
 }
 
-std::tuple<List const&, vector> femSubmesh::internal_force(int32 const element) const
+std::pair<List const&, vector> femSubmesh::internal_force(int32 const element) const
 {
     auto const& x = material_coordinates->current_configuration(local_node_list(element));
 
@@ -114,6 +114,7 @@ matrix femSubmesh::material_tangent_stiffness(matrix3x const& x, int32 const ele
     auto const& tangent_operators = variables->fetch(InternalVariables::rank4::tangent_operator);
 
     matrix const kmat = matrix::Zero(local_dofs, local_dofs);
+    matrix B = matrix::Zero(6, local_dofs);
 
     return sf->quadrature().integrate(kmat, [&](auto const& femval, auto const& l) -> matrix {
         auto const& [N, rhea] = femval;
@@ -123,7 +124,7 @@ matrix femSubmesh::material_tangent_stiffness(matrix3x const& x, int32 const ele
         matrix3 const Jacobian = local_deformation_gradient(rhea, x);
 
         // Compute the symmetric gradient operator
-        auto const B = fem::sym_gradient<3>((rhea * Jacobian.inverse()).transpose());
+        fem::sym_gradient<3>(B, (rhea * Jacobian.inverse()).transpose());
 
         return B.transpose() * D * B * Jacobian.determinant();
     });
@@ -133,27 +134,27 @@ vector femSubmesh::internal_nodal_force(matrix3x const& x, int32 const element) 
 {
     auto const& cauchy_stresses = variables->fetch(InternalVariables::Tensor::Cauchy);
 
-    auto const [m, n] = std::make_tuple(nodes_per_element(), dofs_per_node());
+    auto const [m, n] = std::make_pair(nodes_per_element(), dofs_per_node());
 
     vector fint = vector::Zero(m * n);
 
-    sf->quadrature().integrate(Eigen::Map<matrix>(fint.data(), m, n),
-                               [&](auto const& femval, auto const& l) -> matrix {
-                                   auto const& [N, dN] = femval;
+    sf->quadrature().integrate_inplace(Eigen::Map<matrix>(fint.data(), m, n),
+                                       [&](auto const& femval, auto const& l) {
+                                           auto const& [N, dN] = femval;
 
-                                   matrix3 const Jacobian = local_deformation_gradient(dN, x);
+                                           matrix3 const Jacobian = local_deformation_gradient(dN, x);
 
-                                   auto const& cauchy_stress = cauchy_stresses[view(element, l)];
+                                           auto const& cauchy_stress = cauchy_stresses[view(element, l)];
 
-                                   // Compute the symmetric gradient operator
-                                   auto const Bt = dN * Jacobian.inverse();
+                                           // Compute the symmetric gradient operator
+                                           auto const Bt = dN * Jacobian.inverse();
 
-                                   return Bt * cauchy_stress * Jacobian.determinant();
-                               });
+                                           return Bt * cauchy_stress * Jacobian.determinant();
+                                       });
     return fint;
 }
 
-std::tuple<List const&, matrix> femSubmesh::consistent_mass(int32 const element) const
+std::pair<List const&, matrix> femSubmesh::consistent_mass(int32 const element) const
 {
     auto const& X = material_coordinates->initial_configuration(local_node_list(element));
 
@@ -172,7 +173,7 @@ std::tuple<List const&, matrix> femSubmesh::consistent_mass(int32 const element)
     return {local_dof_list(element), identity_expansion(m, dofs_per_node())};
 }
 
-std::tuple<List const&, vector> femSubmesh::diagonal_mass(int32 const element) const
+std::pair<List const&, vector> femSubmesh::diagonal_mass(int32 const element) const
 {
     auto const& [dofs, consistent_m] = this->consistent_mass(element);
 

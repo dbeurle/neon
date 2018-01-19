@@ -2,6 +2,7 @@
 foreach(test
              nodal_coordinates
              material_coordinates
+             gauss_quadrature
              AdaptiveIncrementTest
              BoundaryTest
              ConstitutiveTest
@@ -11,7 +12,6 @@ foreach(test
              MaterialTest
              MatrixSystemTest
              ModuleTest
-             QuadratureTest
              TensorTest
              )
     add_executable(${test} ${test}.cpp)
