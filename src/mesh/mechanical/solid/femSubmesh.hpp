@@ -84,9 +84,8 @@ protected:
     void update_Jacobian_determinants();
 
     /**
-     * Compute the geometric stiffness matrix for in the computation solid
-     * mechanics element. The expression to be evaluated through numerical
-     * integration is the following:
+     * Compute the geometric stiffness matrix for the solid element. The
+     * expression to be evaluated through numerical integration is:
        \f{align*}{
         k_{geo} &= \sum_l^{L} B(\xi_l, \eta_l, \zeta_l)^T \sigma(l) B(\xi_l,
      \eta_l, \zeta_l) w(l)
