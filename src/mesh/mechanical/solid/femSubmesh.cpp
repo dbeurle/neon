@@ -136,22 +136,20 @@ vector femSubmesh::internal_nodal_force(matrix3x const& x, int32 const element) 
 
     auto const [m, n] = std::make_pair(nodes_per_element(), dofs_per_node());
 
-    vector fint = vector::Zero(m * n);
-
-    sf->quadrature().integrate_inplace(Eigen::Map<matrix>(fint.data(), m, n),
-                                       [&](auto const& femval, auto const& l) {
+    matrix fint_matrix = sf->quadrature().integrate(matrix::Zero(m, n).eval(),
+                                       [&](auto const& femval, auto const& l) ->matrix {
                                            auto const& [N, dN] = femval;
 
                                            matrix3 const Jacobian = local_deformation_gradient(dN, x);
 
-                                           auto const& cauchy_stress = cauchy_stresses[view(element, l)];
+                                           matrix3 const& cauchy_stress = cauchy_stresses[view(element, l)];
 
                                            // Compute the symmetric gradient operator
                                            auto const Bt = dN * Jacobian.inverse();
 
                                            return Bt * cauchy_stress * Jacobian.determinant();
                                        });
-    return fint;
+    return Eigen::Map<vector>(fint_matrix.data(), fint_matrix.size());
 }
 
 std::pair<List const&, matrix> femSubmesh::consistent_mass(int32 const element) const
