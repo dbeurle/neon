@@ -5,6 +5,7 @@
 #include "numeric/FloatingPointCompare.hpp"
 #include "solver/linear/LinearSolverFactory.hpp"
 
+#include <cfenv>
 #include <chrono>
 
 #include <json/value.h>
@@ -83,17 +84,23 @@ void femStaticMatrix::compute_internal_force()
 {
     fint.setZero();
 
+    std::feclearexcept(FE_ALL_EXCEPT);
+
     for (auto const& submesh : fem_mesh.meshes())
     {
         for (auto element = 0; element < submesh.elements(); ++element)
         {
-            auto const & [ dofs, fe_int ] = submesh.internal_force(element);
+            auto const& [dofs, fe_int] = submesh.internal_force(element);
 
             for (auto a = 0; a < fe_int.size(); ++a)
             {
                 fint(dofs[a]) += fe_int(a);
             }
         }
+    }
+    if (std::fetestexcept(FE_INVALID))
+    {
+        throw computational_error("Floating point error reported\n");
     }
 }
 
@@ -103,11 +110,13 @@ void femStaticMatrix::compute_external_force()
 
     auto const step_time = adaptive_load.step_time();
 
+    std::feclearexcept(FE_ALL_EXCEPT);
+
     fext.setZero();
 
-    for (auto const & [ name, nf_loads ] : fem_mesh.nonfollower_load_boundaries())
+    for (auto const& [name, nf_loads] : fem_mesh.nonfollower_load_boundaries())
     {
-        for (auto const & [ is_dof_active, boundary_conditions ] : nf_loads.interface())
+        for (auto const& [is_dof_active, boundary_conditions] : nf_loads.interface())
         {
             if (!is_dof_active) continue;
 
@@ -130,6 +139,11 @@ void femStaticMatrix::compute_external_force()
             }
         }
     }
+    if (std::fetestexcept(FE_INVALID))
+    {
+        throw computational_error("Floating point error reported\n");
+    }
+
     auto const end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
     std::cout << std::string(6, ' ') << "External forces assembly took " << elapsed_seconds.count()
@@ -180,7 +194,7 @@ void femStaticMatrix::assemble_stiffness()
 {
     if (!is_sparsity_computed) compute_sparsity_pattern();
 
-    auto start = std::chrono::high_resolution_clock::now();
+    auto const start = std::chrono::high_resolution_clock::now();
 
     Kt.coeffs() = 0.0;
 
@@ -191,8 +205,8 @@ void femStaticMatrix::assemble_stiffness()
         {
             // auto const[dofs, ke] = submesh.tangent_stiffness(element);
             auto const& tpl = submesh.tangent_stiffness(element);
-            auto const& dofs = std::get<0>(tpl);
-            auto const& ke = std::get<1>(tpl);
+            auto const dofs = std::get<0>(tpl);
+            auto const ke = std::get<1>(tpl);
 
             for (auto a = 0; a < dofs.size(); a++)
             {
@@ -205,7 +219,7 @@ void femStaticMatrix::assemble_stiffness()
         }
     }
 
-    auto end = std::chrono::high_resolution_clock::now();
+    auto const end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
 
     std::cout << std::string(6, ' ') << "Tangent stiffness assembly took "
@@ -214,7 +228,7 @@ void femStaticMatrix::assemble_stiffness()
 
 void femStaticMatrix::enforce_dirichlet_conditions(SparseMatrix& A, vector& b) const
 {
-    for (auto const & [ name, boundaries ] : fem_mesh.displacement_boundaries())
+    for (auto const& [name, boundaries] : fem_mesh.displacement_boundaries())
     {
         for (auto const& dirichlet_boundary : boundaries)
         {
@@ -253,7 +267,7 @@ void femStaticMatrix::apply_displacement_boundaries()
 {
     Eigen::SparseVector<double> prescribed_increment(displacement.size());
 
-    for (auto const & [ name, boundaries ] : fem_mesh.displacement_boundaries())
+    for (auto const& [name, boundaries] : fem_mesh.displacement_boundaries())
     {
         for (auto const& boundary : boundaries)
         {
@@ -320,11 +334,6 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
         current_iteration++;
     }
-    if (current_iteration == max_iterations)
-    {
-        throw computational_error("Reached Newton-Raphson iteration limit");
-    }
-
     if (current_iteration != max_iterations)
     {
         adaptive_load.update_convergence_state(current_iteration != max_iterations);
@@ -332,6 +341,10 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
         displacement_old = displacement;
         io.write(adaptive_load.step(), adaptive_load.time());
+    }
+    else
+    {
+        throw computational_error("Reached Newton-Raphson iteration limit");
     }
 }
 
