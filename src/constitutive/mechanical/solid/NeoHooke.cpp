@@ -38,7 +38,7 @@ void NeoHooke::update_internal_variables(double const time_step_size)
                             auto const& [F, J] = tpl;
 
                             // Left Cauchy Green deformation tensor
-                            auto const B = F * F.transpose();
+                            matrix3 const B = F * F.transpose();
 
                             // Compute Kirchhoff stress and transform to Cauchy
                             return (lambda * std::log(J) * I + shear_modulus * (B - I)) / J;
