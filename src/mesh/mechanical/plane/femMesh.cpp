@@ -87,7 +87,7 @@ void femMesh::allocate_boundary_conditions(Json::Value const& simulation_data,
         else if (is_nonfollower_load(boundary_type))
         {
             nonfollower_loads.emplace(boundary_name,
-                                      NonFollowerLoadBoundary(material_coordinates,
+                                      nonfollower_load_boundary(material_coordinates,
                                                               basic_mesh.meshes(boundary_name),
                                                               simulation_data,
                                                               boundary,
@@ -114,7 +114,7 @@ void femMesh::allocate_displacement_boundary(Json::Value const& boundary, BasicM
 
         if (dof_table.find(name) == dof_table.end())
         {
-            throw std::runtime_error("x, y or z are acceptable coordinates\n");
+            throw std::runtime_error("x or y are acceptable coordinates\n");
         }
 
         // Offset the degrees of freedom on the boundary
@@ -148,8 +148,7 @@ std::vector<double> femMesh::time_history() const
 
             for (auto const& boundary_variant : boundaries)
             {
-                std::visit(
-                    [&](auto const& surface_mesh) {
+                std::visit([&](auto const& surface_mesh) {
                         history |= ranges::action::push_back(surface_mesh.time_history());
                     },
                     boundary_variant);

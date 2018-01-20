@@ -27,7 +27,7 @@ using traction = SurfaceLoad<LineInterpolation>;
 using body_force = VolumeLoad<SurfaceInterpolation>;
 
 /**
- * NonFollowerLoadBoundary contains the boundary conditions which contribute to
+ * nonfollower_load_boundary contains the boundary conditions which contribute to
  * the external force vector.  This can include tractions, pressures, nodal
  * forces and volume forces computed in the initial configuration
  *
@@ -35,14 +35,14 @@ using body_force = VolumeLoad<SurfaceInterpolation>;
  * \sa Pressure
  * \sa body_force
  */
-class NonFollowerLoadBoundary
+class nonfollower_load_boundary
 {
 public:
     /** Specifying the allowable nonfollower loads */
     using boundary_type = std::vector<std::variant<traction, body_force>>;
 
 public:
-    explicit NonFollowerLoadBoundary(std::shared_ptr<MaterialCoordinates>& material_coordinates,
+    explicit nonfollower_load_boundary(std::shared_ptr<MaterialCoordinates>& material_coordinates,
                                      std::vector<Submesh> const& submeshes,
                                      Json::Value const& simulation_data,
                                      Json::Value const& boundary,

@@ -11,7 +11,7 @@
 
 namespace neon::mechanical::plane
 {
-NonFollowerLoadBoundary::NonFollowerLoadBoundary(
+nonfollower_load_boundary::nonfollower_load_boundary(
     std::shared_ptr<MaterialCoordinates>& material_coordinates,
     std::vector<Submesh> const& submeshes,
     Json::Value const& simulation_data,
@@ -40,7 +40,7 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
 
             for (auto const& mesh : submeshes)
             {
-                boundary_meshes.emplace_back(std::in_place_type_t<Traction>{},
+                boundary_meshes.emplace_back(std::in_place_type_t<traction>{},
                                              make_line_interpolation(mesh.topology(), simulation_data),
                                              mesh.connectivities(),
                                              filter_dof_list(2, dof_offset, mesh.connectivities()),
@@ -56,7 +56,7 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
         {
             if (dof_table.find(name) == dof_table.end())
             {
-                throw std::runtime_error("x, y or z are acceptable coordinates\n");
+                throw std::runtime_error("x or y are acceptable coordinates\n");
             }
             auto const dof_offset = dof_table.find(name)->second;
 
@@ -66,7 +66,7 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
 
             for (auto const& mesh : submeshes)
             {
-                boundary_meshes.emplace_back(std::in_place_type_t<BodyForce>{},
+                boundary_meshes.emplace_back(std::in_place_type_t<body_force>{},
                                              make_surface_interpolation(mesh.topology(),
                                                                         simulation_data),
                                              mesh.connectivities(),

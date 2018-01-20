@@ -87,7 +87,7 @@ protected:
 
     // Boundary conditions for this mesh
     std::map<std::string, std::vector<Dirichlet>> displacement_bcs;
-    std::map<std::string, NonFollowerLoadBoundary> nonfollower_loads;
+    std::map<std::string, nonfollower_load_boundary> nonfollower_loads;
 
     std::unordered_map<std::string, int> const dof_table = {{"x", 0}, {"y", 1}};
 };
