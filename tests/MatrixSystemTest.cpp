@@ -11,7 +11,6 @@
 
 #include "assembler/mechanical/solid/femStaticMatrix.hpp"
 
-#include "assembler/mechanical/solid/femDynamicMatrix.hpp"
 #include "solver/TimeControl.hpp"
 
 #include <json/json.h>
