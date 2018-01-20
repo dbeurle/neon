@@ -129,7 +129,7 @@ inline std::string simulation_data_json()
            "\"Values\" : {\"z\" : [0.0, 1.0e-3]}}],"
            //
            "\"ConstitutiveModel\" : {\"Name\":\"NeoHooke\"}, "
-           "\"ElementOptions\" : {\"Quadrature\" : \"Reduced\"}, "
+           "\"ElementOptions\" : {\"Quadrature\" : \"Full\"}, "
            "\"Name\" : \"cube\", "
            //
            "\"Visualisation\" : {\"Fields\" : [\"Displacement\", \"CauchyStress\"]},"
@@ -162,7 +162,7 @@ inline std::string simulation_data_traction_json()
            "\"Values\" : {\"y\" : [0.0, 1.0e-3]}} ], "
            //
            "\"ConstitutiveModel\" : {\"Name\":\"NeoHooke\"}, "
-           "\"ElementOptions\" : {\"Quadrature\" : \"Reduced\"}, "
+           "\"ElementOptions\" : {\"Quadrature\" : \"Full\"}, "
            "\"Name\" : \"cube\"}";
 }
 
