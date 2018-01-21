@@ -10,11 +10,11 @@
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/zip.hpp>
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 namespace neon
 {
-Boundary::Boundary(Json::Value const& times, Json::Value const& loads)
+Boundary::Boundary(json const& times, json const& loads)
 {
     using namespace ranges;
 

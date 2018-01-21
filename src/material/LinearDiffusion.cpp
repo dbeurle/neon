@@ -1,13 +1,13 @@
 
 #include "LinearDiffusion.hpp"
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 #include "Exceptions.hpp"
 
 namespace neon
 {
-LinearDiffusion::LinearDiffusion(Json::Value const& material_data) : Material(material_data)
+LinearDiffusion::LinearDiffusion(json const& material_data) : Material(material_data)
 {
     if (material_data.isMember("Conductivity"))
     {

@@ -35,9 +35,9 @@ public:
                             std::vector<List> const& nodal_connectivity,
                             std::vector<List> const& dof_list,
                             std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                            Json::Value const& times,
-                            Json::Value const& heat_flux,
-                            Json::Value const& heat_transfer_coefficient);
+                            json const& times,
+                            json const& heat_flux,
+                            json const& heat_transfer_coefficient);
 
     /**
      * Compute the element stiffness matrix contributing to the mixed boundary condition

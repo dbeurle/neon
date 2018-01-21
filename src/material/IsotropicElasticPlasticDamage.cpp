@@ -7,7 +7,7 @@
 
 namespace neon
 {
-IsotropicElasticPlasticDamage::IsotropicElasticPlasticDamage(Json::Value const& material_data)
+IsotropicElasticPlasticDamage::IsotropicElasticPlasticDamage(json const& material_data)
     : IsotropicElasticPlastic(material_data)
 {
     if (material_data["SofteningMultiplier"].empty())

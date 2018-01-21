@@ -17,7 +17,7 @@ public:
      * @param material_data Json object with material data
      */
     explicit NeoHooke(std::shared_ptr<InternalVariables>& variables,
-                      Json::Value const& material_data);
+                      json const& material_data);
 
     ~NeoHooke() = default;
 

@@ -8,7 +8,7 @@
 #include <memory>
 #include <numeric>
 
-#include <json/value.h>
+#include "io/json.hpp"
 #include <termcolor/termcolor.hpp>
 
 #include <range/v3/action/join.hpp>
@@ -20,8 +20,8 @@
 namespace neon::mechanical::solid
 {
 femMesh::femMesh(BasicMesh const& basic_mesh,
-                 Json::Value const& material_data,
-                 Json::Value const& simulation_data)
+                 json const& material_data,
+                 json const& simulation_data)
     : material_coordinates(std::make_shared<MaterialCoordinates>(basic_mesh.coordinates()))
 {
     check_boundary_conditions(simulation_data["BoundaryConditions"]);
@@ -69,7 +69,7 @@ bool femMesh::is_nonfollower_load(std::string const& boundary_type) const
     return boundary_type == "Traction" || boundary_type == "Pressure" || boundary_type == "BodyForce";
 }
 
-void femMesh::allocate_boundary_conditions(Json::Value const& simulation_data,
+void femMesh::allocate_boundary_conditions(json const& simulation_data,
                                            BasicMesh const& basic_mesh)
 {
     auto const& boundary_data = simulation_data["BoundaryConditions"];
@@ -100,7 +100,7 @@ void femMesh::allocate_boundary_conditions(Json::Value const& simulation_data,
     }
 }
 
-void femMesh::allocate_displacement_boundary(Json::Value const& boundary, BasicMesh const& basic_mesh)
+void femMesh::allocate_displacement_boundary(json const& boundary, BasicMesh const& basic_mesh)
 {
     using namespace ranges;
 
@@ -159,7 +159,7 @@ std::vector<double> femMesh::time_history() const
     return std::move(history) | ranges::action::sort | ranges::action::unique;
 }
 
-void femMesh::check_boundary_conditions(Json::Value const& boundary_data) const
+void femMesh::check_boundary_conditions(json const& boundary_data) const
 {
     for (auto const& boundary : boundary_data)
     {

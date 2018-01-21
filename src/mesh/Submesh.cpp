@@ -5,7 +5,7 @@
 
 #include "Exceptions.hpp"
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 #include <range/v3/action/join.hpp>
 #include <range/v3/action/sort.hpp>
@@ -13,7 +13,7 @@
 
 namespace neon
 {
-Submesh::Submesh(Json::Value const& mesh)
+Submesh::Submesh(json const& mesh)
 {
     // Error checking for empty fields
     if (!mesh.isMember("Name"))

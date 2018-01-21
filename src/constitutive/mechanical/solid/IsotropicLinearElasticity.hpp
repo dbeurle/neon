@@ -18,7 +18,7 @@ class IsotropicLinearElasticity : public ConstitutiveModel
 {
 public:
     explicit IsotropicLinearElasticity(std::shared_ptr<InternalVariables>& variables,
-                                       Json::Value const& material_data);
+                                       json const& material_data);
 
     virtual ~IsotropicLinearElasticity();
 

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 namespace neon
 {
@@ -19,6 +19,6 @@ public:
     virtual ~AbstractModule() = default;
 
 protected:
-    std::map<std::string, std::vector<Json::Value>> multistep_simulations;
+    std::map<std::string, std::vector<json>> multistep_simulations;
 };
 }

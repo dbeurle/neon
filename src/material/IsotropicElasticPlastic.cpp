@@ -3,11 +3,11 @@
 
 #include "Exceptions.hpp"
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 namespace neon
 {
-IsotropicElasticPlastic::IsotropicElasticPlastic(Json::Value const& material_data)
+IsotropicElasticPlastic::IsotropicElasticPlastic(json const& material_data)
     : LinearElastic(material_data)
 {
     if (!material_data.isMember("YieldStress"))

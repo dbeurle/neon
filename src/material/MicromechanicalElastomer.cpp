@@ -4,7 +4,7 @@
 #include "numeric/DenseMatrix.hpp"
 #include "numeric/FloatingPointCompare.hpp"
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 #include <cmath>
 #include <random>
@@ -30,7 +30,7 @@ double binomial_pmf(int const n, int const k, double const p = 0.5)
            * std::pow(p, k) * std::pow(1.0 - p, n - k);
 }
 
-MicromechanicalElastomer::MicromechanicalElastomer(Json::Value const& material_data)
+MicromechanicalElastomer::MicromechanicalElastomer(json const& material_data)
     : LinearElastic(material_data)
 {
     if (!material_data.isMember("SegmentsPerChain"))
@@ -39,7 +39,7 @@ MicromechanicalElastomer::MicromechanicalElastomer(Json::Value const& material_d
     }
 }
 
-StochasticMicromechanicalElastomer::StochasticMicromechanicalElastomer(Json::Value const& material_data)
+StochasticMicromechanicalElastomer::StochasticMicromechanicalElastomer(json const& material_data)
     : LinearElastic(material_data)
 {
     if (!material_data.isMember("Segments"))
@@ -49,7 +49,7 @@ StochasticMicromechanicalElastomer::StochasticMicromechanicalElastomer(Json::Val
     compute_chains_and_segments(material_data["Segments"]);
 }
 
-void StochasticMicromechanicalElastomer::compute_chains_and_segments(Json::Value const& segments_data)
+void StochasticMicromechanicalElastomer::compute_chains_and_segments(json const& segments_data)
 {
     // Basic error checking
     if (!segments_data.isMember("Groups"))

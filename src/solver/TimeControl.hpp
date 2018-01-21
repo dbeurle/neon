@@ -12,7 +12,7 @@ public:
     TimeControl() = default;
 
     /** Constructor for dynamic solution */
-    TimeControl(Json::Value const& time_data);
+    TimeControl(json const& time_data);
 
     [[nodiscard]] double current_time_step_size() const { return time_step_size; }
 

@@ -18,7 +18,7 @@ public:
     explicit NodalCoordinates(matrix3x const coordinates);
 
     /** Construct with a list of coordinates in json format */
-    explicit NodalCoordinates(Json::Value const& mesh_file);
+    explicit NodalCoordinates(json const& mesh_file);
 
     [[nodiscard]] auto size() const { return X.cols(); }
 

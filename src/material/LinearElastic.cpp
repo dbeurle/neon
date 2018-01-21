@@ -1,13 +1,13 @@
 
 #include "LinearElastic.hpp"
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 #include "Exceptions.hpp"
 
 namespace neon
 {
-LinearElastic::LinearElastic(Json::Value const& material_data) : Material(material_data)
+LinearElastic::LinearElastic(json const& material_data) : Material(material_data)
 {
     // Determine input value types.  The allowable inputs are:
     //   1)  Elastic modulus and Poisson ratio

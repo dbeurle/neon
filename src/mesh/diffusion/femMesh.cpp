@@ -8,7 +8,7 @@
 #include <memory>
 #include <numeric>
 
-#include <json/value.h>
+#include "io/json.hpp"
 #include <termcolor/termcolor.hpp>
 
 #include <range/v3/action/join.hpp>
@@ -19,8 +19,8 @@
 namespace neon::diffusion
 {
 femMesh::femMesh(BasicMesh const& basic_mesh,
-                 Json::Value const& material_data,
-                 Json::Value const& mesh_data)
+                 json const& material_data,
+                 json const& mesh_data)
     : material_coordinates(std::make_shared<MaterialCoordinates>(basic_mesh.coordinates()))
 {
     check_boundary_conditions(mesh_data["BoundaryConditions"]);
@@ -52,7 +52,7 @@ void femMesh::save_internal_variables(bool const have_converged)
     for (auto& submesh : submeshes) submesh.save_internal_variables(have_converged);
 }
 
-void femMesh::allocate_boundary_conditions(Json::Value const& mesh_data, BasicMesh const& basic_mesh)
+void femMesh::allocate_boundary_conditions(json const& mesh_data, BasicMesh const& basic_mesh)
 {
     auto const& boundary_data = mesh_data["BoundaryConditions"];
 
@@ -110,7 +110,7 @@ void femMesh::allocate_boundary_conditions(Json::Value const& mesh_data, BasicMe
     }
 }
 
-void femMesh::check_boundary_conditions(Json::Value const& boundary_data) const
+void femMesh::check_boundary_conditions(json const& boundary_data) const
 {
     for (auto const& boundary : boundary_data)
     {

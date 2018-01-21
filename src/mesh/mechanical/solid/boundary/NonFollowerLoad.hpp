@@ -32,8 +32,8 @@ public:
 public:
     explicit NonFollowerLoadBoundary(std::shared_ptr<MaterialCoordinates>& material_coordinates,
                                      std::vector<Submesh> const& submeshes,
-                                     Json::Value const& simulation_data,
-                                     Json::Value const& boundary,
+                                     json const& simulation_data,
+                                     json const& boundary,
                                      std::unordered_map<std::string, int> const& dof_table);
 
     /**

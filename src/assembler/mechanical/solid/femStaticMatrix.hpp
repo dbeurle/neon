@@ -17,11 +17,11 @@ namespace neon::mechanical::solid
 class femStaticMatrix
 {
 public:
-    explicit femStaticMatrix(femMesh& fem_mesh, Json::Value const& simulation);
+    explicit femStaticMatrix(femMesh& fem_mesh, json const& simulation);
 
     ~femStaticMatrix();
 
-    void internal_restart(Json::Value const& solver_data, Json::Value const& new_increment_data);
+    void internal_restart(json const& solver_data, json const& new_increment_data);
 
     virtual void solve();
 

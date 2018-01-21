@@ -3,11 +3,11 @@
 
 #include <iostream>
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 namespace neon
 {
-GeneralisedTrapezoidal::GeneralisedTrapezoidal(Json::Value const& time_data)
+GeneralisedTrapezoidal::GeneralisedTrapezoidal(json const& time_data)
 {
     for (auto const f : {"Increments", "Period", "Method"})
     {

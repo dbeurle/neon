@@ -16,7 +16,7 @@ namespace neon
 class LinearDiffusion : public Material
 {
 public:
-    LinearDiffusion(Json::Value const& material_data);
+    LinearDiffusion(json const& material_data);
 
     auto diffusivity_coefficient() const { return conductivity / (specific_heat * density_0); }
 

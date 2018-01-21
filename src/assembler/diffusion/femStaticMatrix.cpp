@@ -5,12 +5,12 @@
 #include "solver/linear/LinearSolverFactory.hpp"
 
 #include <chrono>
-#include <json/value.h>
+#include "io/json.hpp"
 #include <omp.h>
 
 namespace neon::diffusion
 {
-femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& simulation_data)
+femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, json const& simulation_data)
     : fem_mesh(fem_mesh),
       f(vector::Zero(fem_mesh.active_dofs())),
       d(vector::Zero(fem_mesh.active_dofs())),

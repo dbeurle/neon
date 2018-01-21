@@ -10,7 +10,7 @@ namespace neon::diffusion
 class femDynamicMatrix : public femStaticMatrix
 {
 public:
-    explicit femDynamicMatrix(femMesh& fem_mesh, Json::Value const& simulation_data);
+    explicit femDynamicMatrix(femMesh& fem_mesh, json const& simulation_data);
 
     void solve() override final;
 

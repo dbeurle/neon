@@ -4,12 +4,12 @@
 #include "solver/linear/LinearSolver.hpp"
 
 #include <chrono>
-#include <json/value.h>
+#include "io/json.hpp"
 #include <termcolor/termcolor.hpp>
 
 namespace neon::diffusion
 {
-femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh, Json::Value const& simulation_data)
+femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh, json const& simulation_data)
     : femStaticMatrix(fem_mesh, simulation_data), time_solver(simulation_data["Time"])
 {
     if (simulation_data.isMember("InitialConditions")

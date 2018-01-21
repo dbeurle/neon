@@ -25,8 +25,8 @@ class LinearDiffusionModule : public AbstractModule
 {
 public:
     explicit LinearDiffusionModule(BasicMesh const& mesh,
-                                   Json::Value const& material,
-                                   Json::Value const& simulation)
+                                   json const& material,
+                                   json const& simulation)
         : fem_mesh(mesh, material, simulation["Mesh"][0]), fem_matrix(fem_mesh, simulation)
     {
     }

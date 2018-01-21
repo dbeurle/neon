@@ -9,7 +9,7 @@ namespace neon
 class Material
 {
 public:
-    Material(Json::Value const& intrinsic_material_data);
+    Material(json const& intrinsic_material_data);
 
     virtual ~Material() = default;
 

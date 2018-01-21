@@ -5,13 +5,13 @@
 #include "numeric/mechanics"
 
 #include <iostream>
-#include <json/value.h>
+#include "io/json.hpp"
 #include <range/v3/view.hpp>
 
 namespace neon::mechanical::solid
 {
 J2PlasticityDamage::J2PlasticityDamage(std::shared_ptr<InternalVariables>& variables,
-                                       Json::Value const& material_data)
+                                       json const& material_data)
     : J2Plasticity(variables, material_data), material(material_data)
 {
     variables->add(InternalVariables::Tensor::BackStress,

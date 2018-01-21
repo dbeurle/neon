@@ -4,7 +4,7 @@
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/zip.hpp>
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 namespace neon::diffusion::boundary
 {
@@ -12,9 +12,9 @@ newton_cooling::newton_cooling(std::unique_ptr<SurfaceInterpolation>&& sf,
                                std::vector<List> const& nodal_connectivity,
                                std::vector<List> const& dof_list,
                                std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                               Json::Value const& times,
-                               Json::Value const& heat_flux,
-                               Json::Value const& heat_transfer_coefficient)
+                               json const& times,
+                               json const& heat_flux,
+                               json const& heat_transfer_coefficient)
     : SurfaceLoad<SurfaceInterpolation>(std::move(sf),
                                         nodal_connectivity,
                                         dof_list,

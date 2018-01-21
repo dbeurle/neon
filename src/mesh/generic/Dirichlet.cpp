@@ -3,7 +3,7 @@
 
 namespace neon
 {
-Dirichlet::Dirichlet(List dofs, Json::Value const& times, Json::Value const& loads)
+Dirichlet::Dirichlet(List dofs, json const& times, json const& loads)
     : Boundary(times, loads), dofs(dofs)
 {
 }

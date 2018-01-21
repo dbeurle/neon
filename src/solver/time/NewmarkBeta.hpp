@@ -11,7 +11,7 @@ namespace neon
 class NewmarkBeta
 {
 public:
-    NewmarkBeta(Json::Value const& time_solver_data);
+    NewmarkBeta(json const& time_solver_data);
 
     [[nodiscard]] double mass_scaling_factor() const;
 

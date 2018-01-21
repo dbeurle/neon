@@ -71,7 +71,7 @@ namespace neon
 class AdaptiveLoadStep
 {
 public:
-    AdaptiveLoadStep(Json::Value const& increment_data, std::vector<double> mandatory_time_history);
+    AdaptiveLoadStep(json const& increment_data, std::vector<double> mandatory_time_history);
 
     /** Check if the load increment is finalised */
     [[nodiscard]] bool is_fully_applied() const { return is_applied; }
@@ -94,12 +94,12 @@ public:
     /** Update the convergence state to determine the next increment */
     void update_convergence_state(bool const is_converged);
 
-    void reset(Json::Value const& new_increment_data);
+    void reset(json const& new_increment_data);
 
 protected:
-    void parse_input(Json::Value const& increment_data, double const maximum_mandatory_time);
+    void parse_input(json const& increment_data, double const maximum_mandatory_time);
 
-    void check_increment_data(Json::Value const& increment_data);
+    void check_increment_data(json const& increment_data);
 
     [[nodiscard]] bool is_highly_nonlinear() const
     {

@@ -15,7 +15,7 @@ class IsotropicDiffusion : public diffusion::ConstitutiveModel
 {
 public:
     IsotropicDiffusion(std::shared_ptr<InternalVariables>& variables,
-                       Json::Value const& material_data);
+                       json const& material_data);
 
     void update_internal_variables(double const time_step_size) override;
 

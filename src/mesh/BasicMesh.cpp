@@ -3,11 +3,11 @@
 
 #include "Exceptions.hpp"
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 namespace neon
 {
-BasicMesh::BasicMesh(Json::Value const& mesh_file) : NodalCoordinates(mesh_file)
+BasicMesh::BasicMesh(json const& mesh_file) : NodalCoordinates(mesh_file)
 {
     if (!mesh_file.isMember("Elements"))
     {

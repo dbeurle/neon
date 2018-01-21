@@ -15,14 +15,14 @@
 
 #include "mechanical/plane/IsotropicLinearElasticity.hpp"
 
-#include <json/value.h>
+#include "io/json.hpp"
 #include <stdexcept>
 
 namespace neon::mechanical::solid
 {
 std::unique_ptr<ConstitutiveModel> make_constitutive_model(std::shared_ptr<InternalVariables>& variables,
-                                                           Json::Value const& material_data,
-                                                           Json::Value const& mesh_data)
+                                                           json const& material_data,
+                                                           json const& mesh_data)
 {
     if (!mesh_data.isMember("ConstitutiveModel"))
     {
@@ -123,8 +123,8 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(std::shared_ptr<Inter
 namespace neon::mechanical::plane
 {
 std::unique_ptr<ConstitutiveModel> make_constitutive_model(std::shared_ptr<InternalVariables>& variables,
-                                                           Json::Value const& material_data,
-                                                           Json::Value const& mesh_data)
+                                                           json const& material_data,
+                                                           json const& mesh_data)
 {
     if (!mesh_data.isMember("ConstitutiveModel"))
     {
@@ -161,8 +161,8 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(std::shared_ptr<Inter
 namespace neon::diffusion
 {
 std::unique_ptr<ConstitutiveModel> make_constitutive_model(std::shared_ptr<InternalVariables>& variables,
-                                                           Json::Value const& material_data,
-                                                           Json::Value const& mesh_data)
+                                                           json const& material_data,
+                                                           json const& mesh_data)
 {
     if (!mesh_data.isMember("ConstitutiveModel"))
     {

@@ -14,7 +14,7 @@
 namespace neon::mechanical::solid
 {
 FiniteJ2Plasticity::FiniteJ2Plasticity(std::shared_ptr<InternalVariables>& variables,
-                                       Json::Value const& material_data)
+                                       json const& material_data)
     : J2Plasticity(variables, material_data)
 {
     variables->add(InternalVariables::Scalar::VonMisesStress,

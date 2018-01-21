@@ -21,8 +21,8 @@ public:
 
 public:
     femMesh(BasicMesh const& basic_mesh,
-            Json::Value const& material_data,
-            Json::Value const& simulation_data);
+            json const& material_data,
+            json const& simulation_data);
 
     /** The number of active degrees of freedom in this mesh */
     [[nodiscard]] auto active_dofs() const { return 2 * material_coordinates->size(); }
@@ -69,11 +69,11 @@ public:
     [[nodiscard]] auto const& geometry() const { return *material_coordinates; }
 
 protected:
-    void check_boundary_conditions(Json::Value const& boundary_data) const;
+    void check_boundary_conditions(json const& boundary_data) const;
 
-    void allocate_boundary_conditions(Json::Value const& boundary_data, BasicMesh const& basic_mesh);
+    void allocate_boundary_conditions(json const& boundary_data, BasicMesh const& basic_mesh);
 
-    void allocate_displacement_boundary(Json::Value const& boundary, BasicMesh const& basic_mesh);
+    void allocate_displacement_boundary(json const& boundary, BasicMesh const& basic_mesh);
 
     [[nodiscard]] bool is_nonfollower_load(std::string const& boundary_type) const;
 

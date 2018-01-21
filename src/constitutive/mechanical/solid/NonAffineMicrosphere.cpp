@@ -4,7 +4,7 @@
 #include "constitutive/InternalVariables.hpp"
 #include "numeric/DenseMatrix.hpp"
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 #include <exception>
 #include <omp.h>
@@ -12,7 +12,7 @@
 namespace neon::mechanical::solid
 {
 NonAffineMicrosphere::NonAffineMicrosphere(std::shared_ptr<InternalVariables>& variables,
-                                           Json::Value const& material_data,
+                                           json const& material_data,
                                            UnitSphereQuadrature::Rule const rule)
     : AffineMicrosphere(variables, material_data, rule), material(material_data)
 {

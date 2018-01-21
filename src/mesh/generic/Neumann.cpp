@@ -6,8 +6,8 @@ namespace neon
 Neumann::Neumann(std::vector<List> const& nodal_connectivity,
                  std::vector<List> const& dof_list,
                  std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                 Json::Value const& times,
-                 Json::Value const& loads)
+                 json const& times,
+                 json const& loads)
     : VectorContribution(times, loads),
       nodal_connectivity(nodal_connectivity),
       dof_list(dof_list),

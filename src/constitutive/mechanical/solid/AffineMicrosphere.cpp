@@ -12,7 +12,7 @@
 namespace neon::mechanical::solid
 {
 AffineMicrosphere::AffineMicrosphere(std::shared_ptr<InternalVariables>& variables,
-                                     Json::Value const& material_data,
+                                     json const& material_data,
                                      UnitSphereQuadrature::Rule const rule)
     : ConstitutiveModel(variables), unit_sphere(rule), material(material_data)
 {
@@ -136,7 +136,7 @@ matrix6 AffineMicrosphere::compute_macro_moduli(matrix3 const& F_unimodular,
 
 AffineMicrosphereWithDegradation::AffineMicrosphereWithDegradation(
     std::shared_ptr<InternalVariables>& variables,
-    Json::Value const& material_data,
+    json const& material_data,
     UnitSphereQuadrature::Rule const rule)
     : AffineMicrosphere(variables, material_data, rule), material(material_data)
 {

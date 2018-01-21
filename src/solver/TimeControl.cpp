@@ -2,11 +2,11 @@
 #include "TimeControl.hpp"
 
 #include <exception>
-#include <json/value.h>
+#include "io/json.hpp"
 
 namespace neon
 {
-TimeControl::TimeControl(Json::Value const& time_data)
+TimeControl::TimeControl(json const& time_data)
 {
     if (time_data["Start"].empty())
         throw std::runtime_error("Start time not specified in input (\"Start\")\n");

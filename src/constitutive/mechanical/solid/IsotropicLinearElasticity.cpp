@@ -11,7 +11,7 @@
 namespace neon::mechanical::solid
 {
 IsotropicLinearElasticity::IsotropicLinearElasticity(std::shared_ptr<InternalVariables>& variables,
-                                                     Json::Value const& material_data)
+                                                     json const& material_data)
     : ConstitutiveModel(variables), material(material_data)
 {
     variables->add(InternalVariables::Tensor::LinearisedStrain,

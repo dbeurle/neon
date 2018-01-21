@@ -8,11 +8,11 @@
 
 #include <range/v3/algorithm/max_element.hpp>
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 namespace neon
 {
-AdaptiveLoadStep::AdaptiveLoadStep(Json::Value const& increment_data,
+AdaptiveLoadStep::AdaptiveLoadStep(json const& increment_data,
                                    std::vector<double> mandatory_time_history)
 {
     // Set the time history to the input data
@@ -94,7 +94,7 @@ void AdaptiveLoadStep::update_convergence_state(bool const is_converged)
     }
 }
 
-void AdaptiveLoadStep::reset(Json::Value const& new_increment_data)
+void AdaptiveLoadStep::reset(json const& new_increment_data)
 {
     // Update the history counters
     total_time += current_time;
@@ -107,7 +107,7 @@ void AdaptiveLoadStep::reset(Json::Value const& new_increment_data)
     consecutive_unconverged = consecutive_converged = 0;
 }
 
-void AdaptiveLoadStep::parse_input(Json::Value const& increment_data,
+void AdaptiveLoadStep::parse_input(json const& increment_data,
                                    double const maximum_mandatory_time)
 {
     check_increment_data(increment_data);
@@ -131,7 +131,7 @@ void AdaptiveLoadStep::parse_input(Json::Value const& increment_data,
     current_time = std::min(time_queue.top(), initial_time);
 }
 
-void AdaptiveLoadStep::check_increment_data(Json::Value const& increment_data)
+void AdaptiveLoadStep::check_increment_data(json const& increment_data)
 {
     if (!increment_data.isMember("Period"))
         throw std::runtime_error("Time data requires a \"Period\" value\n");

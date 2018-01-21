@@ -9,7 +9,7 @@
 
 namespace neon::mechanical::solid
 {
-NeoHooke::NeoHooke(std::shared_ptr<InternalVariables>& variables, Json::Value const& material_data)
+NeoHooke::NeoHooke(std::shared_ptr<InternalVariables>& variables, json const& material_data)
     : ConstitutiveModel(variables), material(material_data)
 {
     // The Neo-Hookean model requires the deformation gradient and the Cauchy

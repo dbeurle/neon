@@ -3,11 +3,11 @@
 
 #include "Exceptions.hpp"
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 namespace neon
 {
-Material::Material(Json::Value const& intrinsic_material_data)
+Material::Material(json const& intrinsic_material_data)
 {
     if (!intrinsic_material_data.isMember("Name"))
     {

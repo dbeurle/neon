@@ -17,8 +17,8 @@
 
 namespace neon::diffusion
 {
-femSubmesh::femSubmesh(Json::Value const& material_data,
-                       Json::Value const& mesh_data,
+femSubmesh::femSubmesh(json const& material_data,
+                       json const& mesh_data,
                        std::shared_ptr<MaterialCoordinates>& material_coordinates,
                        Submesh const& submesh)
     : Submesh(submesh),

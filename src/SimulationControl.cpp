@@ -51,17 +51,16 @@ void SimulationControl::parse()
               << termcolor::reset;
 
     std::ifstream file(input_file_name);
+    file >> root;
+    std::cout << root << std::endl;
 
-    Json::CharReaderBuilder reader;
+    this->check_input_fields();
 
-    if (JSONCPP_STRING input_errors; !Json::parseFromStream(reader, file, &root, &input_errors))
+    if (root.count("Cores"))
     {
-        throw std::runtime_error(input_errors);
+        threads = root["Cores"];
+        std::cout << threads << std::endl;
     }
-
-    this->check_input_fields(root);
-
-    if (root.isMember("Cores")) threads = root["Cores"].asInt();
 
     auto const material_names = this->parse_material_names(root["Material"]);
     auto const part_names = this->parse_part_names(root["Part"], material_names);
@@ -70,68 +69,57 @@ void SimulationControl::parse()
     for (auto const& part : root["Part"])
     {
         auto const material = *ranges::find_if(root["Material"], [&part](auto const& material) {
-            return material["Name"].asString() == part["Material"].asString();
+            return material["Name"] == part["Material"];
         });
 
         auto const read_start = std::chrono::high_resolution_clock::now();
 
-        std::ifstream mesh_input_stream(part["Name"].asString() + ".mesh");
+        std::ifstream mesh_input_stream(part["Name"].get<std::string>() + ".mesh");
 
-        Json::Value mesh_file;
+        json mesh_file;
 
-        if (JSONCPP_STRING mesh_errors;
-            !Json::parseFromStream(reader, mesh_input_stream, &mesh_file, &mesh_errors))
-        {
-            throw std::runtime_error(mesh_errors);
-        }
+        mesh_input_stream >> mesh_file;
 
         auto const read_end = std::chrono::high_resolution_clock::now();
 
-        std::cout << std::string(4, ' ') << "Parsed " << part["Name"].asString()
-                  << " mesh from file in "
+        std::cout << std::string(4, ' ') << "Parsed " << part["Name"] << " mesh from file in "
                   << std::chrono::duration<double>(read_end - read_start).count() << "s\n";
 
-        mesh_store.try_emplace(part["Name"].asString(), mesh_file, material);
+        mesh_store.try_emplace(part["Name"], mesh_file, material);
 
-        std::cout << std::string(4, ' ') << "Allocated internal storage for "
-                  << part["Name"].asString() << " in "
+        std::cout << std::string(4, ' ') << "Allocated internal storage for " << part["Name"]
+                  << " in "
                   << std::chrono::duration<double>(std::chrono::high_resolution_clock::now()
                                                    - read_end)
                          .count()
                   << "s\n";
     }
 
-    std::vector<std::string> const required_fields{"Name",
-                                                   "Time",
-                                                   "Solution",
-                                                   "Visualisation",
-                                                   "LinearSolver"};
-
     // Build a list of all the load steps for a given mesh
     for (auto const& simulation : root["SimulationCases"])
     {
         // Ensure the required fields exist
-        for (auto const& required_field : required_fields)
+        for (auto required_field : {"Name", "Time", "Solution", "Visualisation", "LinearSolver"})
         {
-            if (!simulation.isMember(required_field))
+            if (!simulation.count(required_field))
             {
-                throw std::runtime_error("A simulation case needs a \"" + required_field
-                                         + "\" field\n");
+                throw std::runtime_error("A simulation case needs a \""
+                                         + std::string(required_field) + "\" field\n");
             }
         }
         // Multibody simulations not (yet) supported
         assert(simulation["Mesh"].size() == 1);
 
         // Make sure the simulation mesh exists in the mesh store
-        if (mesh_store.find(simulation["Mesh"][0]["Name"].asString()) == mesh_store.end())
+        if (mesh_store.find(simulation["Mesh"][0]["Name"]) == mesh_store.end())
         {
-            throw std::runtime_error("Mesh name \"" + simulation["Mesh"][0]["Name"].asString()
+            throw std::runtime_error("Mesh name \"" + simulation["Mesh"][0]["Name"].get<std::string>()
                                      + "\" was not found in the mesh store");
         }
     }
     build_simulation_tree();
 
-    auto end = std::chrono::high_resolution_clock::now();
+    auto const end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
 
     std::cout << termcolor::bold << termcolor::green << std::string(2, ' ')
@@ -160,10 +148,10 @@ void SimulationControl::build_simulation_tree()
     // Build a list of all the load steps for a given mesh
     for (auto const& simulation : root["SimulationCases"])
     {
-        if (!simulation.isMember("Inherits"))
+        if (!simulation.count("Inherits"))
         {
-            multistep_simulations[simulation["Name"].asString()].emplace_front(simulation);
-            find_children(simulation["Name"].asString(), simulation["Name"].asString());
+            multistep_simulations[simulation["Name"]].emplace_front(simulation);
+            find_children(simulation["Name"], simulation["Name"]);
         }
     }
 
@@ -172,7 +160,7 @@ void SimulationControl::build_simulation_tree()
         std::cout << std::string(4, ' ') << "Simulation \"" << name << "\" is continued by:\n";
         for (auto const& item : queue)
         {
-            std::cout << std::string(4, ' ') << "\"" << item["Name"].asString() << "\"" << std::endl;
+            std::cout << std::string(4, ' ') << "\"" << item["Name"] << "\"" << std::endl;
         }
     }
 }
@@ -182,13 +170,13 @@ void SimulationControl::find_children(std::string const& parent_name,
 {
     for (auto const& simulation : root["SimulationCases"])
     {
-        if (!simulation.isMember("Inherits")) continue;
+        if (!simulation.count("Inherits")) continue;
 
-        if (simulation["Inherits"].asString() == next_parent_name)
+        if (simulation["Inherits"].get<std::string>() == next_parent_name)
         {
             multistep_simulations[parent_name].push_back(simulation);
             // Recursive step
-            find_children(parent_name, simulation["Name"].asString());
+            find_children(parent_name, simulation["Name"]);
         }
     }
 }
@@ -204,50 +192,67 @@ void SimulationControl::print_banner() const
     std::cout << termcolor::reset << std::endl << std::setfill(' ');
 }
 
-void SimulationControl::check_input_fields(Json::Value const& root) const
+void SimulationControl::check_input_fields() const
 {
     // Check the important fields exist before anything else is done
-    if (!root.isMember("Part")) throw std::runtime_error("Part is not in input file");
-    if (!root.isMember("Name")) throw std::runtime_error("Name is not in input file");
-    if (!root.isMember("Material")) throw std::runtime_error("Material is not in input file");
-    if (!root.isMember("SimulationCases"))
+    if (!root.count("Part"))
+    {
+        throw std::runtime_error("Part is not in input file");
+    }
+    if (!root.count("Name"))
+    {
+        throw std::runtime_error("Name is not in input file");
+    }
+    if (!root.count("Material"))
+    {
+        throw std::runtime_error("Material is not in input file");
+    }
+    if (!root.count("SimulationCases"))
+    {
         throw std::runtime_error("SimulationCases is not in input file");
+    }
 }
 
-std::unordered_set<std::string> SimulationControl::parse_material_names(Json::Value const& materials) const
+std::unordered_set<std::string> SimulationControl::parse_material_names(json const& materials) const
 {
     std::unordered_set<std::string> material_names;
 
     for (auto const& material : root["Material"])
     {
-        if (material["Name"].empty()) throw std::runtime_error("Material: Name");
+        if (!material.count("Name"))
+        {
+            throw std::runtime_error("Material: Name is missing");
+        }
 
-        auto const [it, inserted] = material_names.emplace(material["Name"].asString());
+        auto const [it, inserted] = material_names.emplace(material["Name"]);
 
-        if (!inserted) throw DuplicateNameException("Material");
+        if (!inserted) throw std::domain_error("Material");
     }
     return material_names;
 }
 
 std::unordered_set<std::string> SimulationControl::parse_part_names(
-    Json::Value const& parts, std::unordered_set<std::string> const& material_names) const
+    json const& parts, std::unordered_set<std::string> const& material_names) const
 {
     std::unordered_set<std::string> part_names;
 
     // Load in all the part names and error check
     for (auto const& part : root["Part"])
     {
-        if (part["Name"].empty()) throw std::runtime_error("Part: Name");
-
-        if (ranges::find(material_names, part["Material"].asString()) == material_names.end())
+        if (!part.count("Name"))
         {
-            throw std::runtime_error("The part material was not found in the provided "
-                                     "materials\n");
+            throw std::domain_error("Part: Name is missing");
         }
 
-        auto const [it, inserted] = part_names.emplace(part["Name"].asString());
+        if (ranges::find(material_names, part["Material"]) == material_names.end())
+        {
+            throw std::domain_error("The part material was not found in the provided "
+                                    "materials\n");
+        }
 
-        if (!inserted) throw DuplicateNameException("Part");
+        auto const [it, inserted] = part_names.emplace(part["Name"]);
+
+        if (!inserted) throw std::domain_error("Part is defined more than once");
     }
     return part_names;
 }

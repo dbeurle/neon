@@ -2,11 +2,11 @@
 #include "NewmarkBeta.hpp"
 
 #include <iostream>
-#include <json/value.h>
+#include "io/json.hpp"
 
 namespace neon
 {
-NewmarkBeta::NewmarkBeta(Json::Value const& time_solver_data) : time_control(time_solver_data)
+NewmarkBeta::NewmarkBeta(json const& time_solver_data) : time_control(time_solver_data)
 {
     if (time_solver_data["IntegrationOptions"].empty())
     {
