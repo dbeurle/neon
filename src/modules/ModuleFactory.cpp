@@ -9,16 +9,15 @@
 namespace neon
 {
 std::unique_ptr<AbstractModule> make_module(
-    json const& simulation,
-    std::map<std::string, std::pair<BasicMesh, json>> const& mesh_store)
+    json const& simulation, std::map<std::string, std::pair<BasicMesh, json>> const& mesh_store)
 {
     auto const& mesh_data = simulation["Mesh"][0];
 
-    auto const& simulation_mesh = mesh_store.find(mesh_data["Name"].asString());
+    auto const& simulation_mesh = mesh_store.find(mesh_data["Name"].get<std::string>());
 
-    auto const& name = simulation["Name"].asString();
-    auto const& module_type = simulation["Module"].asString();
-    auto const& solution_type = simulation["Solution"].asString();
+    auto const& name = simulation["Name"].get<std::string>();
+    auto const& module_type = simulation["Module"].get<std::string>();
+    auto const& solution_type = simulation["Solution"].get<std::string>();
 
     std::cout << std::string(4, ' ') << "Name     \"" << name << "\"\n";
     std::cout << std::string(4, ' ') << "Module   \"" << module_type << "\"\n";
@@ -28,7 +27,7 @@ std::unique_ptr<AbstractModule> make_module(
 
     if (module_type == "SolidMechanics")
     {
-        if (!simulation.isMember("NonlinearOptions"))
+        if (!simulation.count("NonlinearOptions"))
         {
             throw std::runtime_error("\"NonlinearOptions\" needs to be present for a "
                                      "SolidMechanics simulation");
@@ -37,7 +36,7 @@ std::unique_ptr<AbstractModule> make_module(
     }
     else if (module_type == "PlaneMechanics")
     {
-        if (!simulation.isMember("NonlinearOptions"))
+        if (!simulation.count("NonlinearOptions"))
         {
             throw std::runtime_error("\"NonlinearOptions\" needs to be present for a "
                                      "SolidMechanics simulation");

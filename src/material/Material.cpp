@@ -9,25 +9,25 @@ namespace neon
 {
 Material::Material(json const& intrinsic_material_data)
 {
-    if (!intrinsic_material_data.isMember("Name"))
+    if (!intrinsic_material_data.count("Name"))
     {
         throw MaterialPropertyException("Name");
     }
 
-    material_name = intrinsic_material_data["Name"].asString();
+    material_name = intrinsic_material_data["Name"];
 
-    is_density_specified = intrinsic_material_data.isMember("Density");
+    is_density_specified = intrinsic_material_data.count("Density");
 
     if (is_density_specified)
     {
-        density_0 = intrinsic_material_data["Density"].asDouble();
+        density_0 = intrinsic_material_data["Density"];
     }
 
-    is_specific_heat_specified = intrinsic_material_data.isMember("SpecificHeat");
+    is_specific_heat_specified = intrinsic_material_data.count("SpecificHeat");
 
     if (is_specific_heat_specified)
     {
-        c_p = intrinsic_material_data["SpecificHeat"].asDouble();
+        c_p = intrinsic_material_data["SpecificHeat"];
     }
 }
 

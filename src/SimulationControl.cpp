@@ -244,7 +244,7 @@ std::unordered_set<std::string> SimulationControl::parse_part_names(
             throw std::domain_error("Part: Name is missing");
         }
 
-        if (ranges::find(material_names, part["Material"]) == material_names.end())
+        if (ranges::find(material_names, part["Material"].get<std::string>()) == material_names.end())
         {
             throw std::domain_error("The part material was not found in the provided "
                                     "materials\n");

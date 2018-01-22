@@ -24,7 +24,7 @@ NodalCoordinates::NodalCoordinates(json const& mesh_file)
     {
         for (auto i = 0; i < 3; ++i)
         {
-            X(i, node) = coordinates[node][i].asDouble();
+            X(i, node) = coordinates[node][i];
         }
     }
 }

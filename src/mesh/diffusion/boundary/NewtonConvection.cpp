@@ -25,9 +25,8 @@ newton_cooling::newton_cooling(std::unique_ptr<SurfaceInterpolation>&& sf,
     using ranges::view::transform;
     using ranges::view::zip;
 
-    stiffness_time_data = zip(times | transform([](auto i) { return i.asDouble(); }),
-                              heat_transfer_coefficient
-                                  | transform([](auto i) { return i.asDouble(); }));
+    stiffness_time_data = zip(times | transform([](auto const i) { return i; }),
+                              heat_transfer_coefficient | transform([](auto const i) { return i; }));
 }
 
 std::tuple<List const&, matrix> newton_cooling::external_stiffness(int const element,

@@ -33,7 +33,7 @@ double binomial_pmf(int const n, int const k, double const p = 0.5)
 MicromechanicalElastomer::MicromechanicalElastomer(json const& material_data)
     : LinearElastic(material_data)
 {
-    if (!material_data.isMember("SegmentsPerChain"))
+    if (!material_data.count("SegmentsPerChain"))
     {
         throw std::runtime_error("SegmentsPerChain not specified in material data\n");
     }
@@ -42,7 +42,7 @@ MicromechanicalElastomer::MicromechanicalElastomer(json const& material_data)
 StochasticMicromechanicalElastomer::StochasticMicromechanicalElastomer(json const& material_data)
     : LinearElastic(material_data)
 {
-    if (!material_data.isMember("Segments"))
+    if (!material_data.count("Segments"))
     {
         throw std::runtime_error("Segments not specified in material data\n");
     }
@@ -52,29 +52,29 @@ StochasticMicromechanicalElastomer::StochasticMicromechanicalElastomer(json cons
 void StochasticMicromechanicalElastomer::compute_chains_and_segments(json const& segments_data)
 {
     // Basic error checking
-    if (!segments_data.isMember("Groups"))
+    if (!segments_data.count("Groups"))
     {
         throw std::runtime_error("Groups not specified in \"Segment\" data\n");
     }
-    if (!segments_data.isMember("Average"))
+    if (!segments_data.count("Average"))
     {
         throw std::runtime_error("Average not specified in \"Segment\" data\n");
     }
-    if (!segments_data.isMember("StandardDeviation"))
+    if (!segments_data.count("StandardDeviation"))
     {
         throw std::runtime_error("StandardDeviation not specified in \"Segment\" data\n");
     }
-    if (!segments_data.isMember("ScissionLikelihood"))
+    if (!segments_data.count("ScissionLikelihood"))
     {
         throw std::runtime_error("ScissionLikelihood not specified in \"Segment\" "
                                  "data\n");
     }
 
-    number_of_groups = segments_data["Groups"].asInt();
-    p_scission = segments_data["ScissionLikelihood"].asDouble();
+    number_of_groups = segments_data["Groups"];
+    p_scission = segments_data["ScissionLikelihood"];
 
-    auto const N_avg = segments_data["Average"].asInt();
-    auto const N_std = segments_data["StandardDeviation"].asInt();
+    auto const N_avg = segments_data["Average"].get<int64_t>();
+    auto const N_std = segments_data["StandardDeviation"].get<int64_t>();
 
     auto const n0 = LinearElastic::shear_modulus() / (boltzmann_constant * temperature);
 

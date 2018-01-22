@@ -4,7 +4,7 @@
 #include "mesh/ElementTopology.hpp"
 #include "numeric/IndexTypes.hpp"
 
-#include <json/forwards.h>
+#include "io/json.hpp"
 
 namespace neon
 {

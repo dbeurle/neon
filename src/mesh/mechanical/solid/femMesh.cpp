@@ -19,14 +19,12 @@
 
 namespace neon::mechanical::solid
 {
-femMesh::femMesh(BasicMesh const& basic_mesh,
-                 json const& material_data,
-                 json const& simulation_data)
+femMesh::femMesh(BasicMesh const& basic_mesh, json const& material_data, json const& simulation_data)
     : material_coordinates(std::make_shared<MaterialCoordinates>(basic_mesh.coordinates()))
 {
     check_boundary_conditions(simulation_data["BoundaryConditions"]);
 
-    auto const& simulation_name = simulation_data["Name"].asString();
+    auto const& simulation_name = simulation_data["Name"].get<std::string>();
 
     for (auto const& submesh : basic_mesh.meshes(simulation_name))
     {
@@ -69,16 +67,15 @@ bool femMesh::is_nonfollower_load(std::string const& boundary_type) const
     return boundary_type == "Traction" || boundary_type == "Pressure" || boundary_type == "BodyForce";
 }
 
-void femMesh::allocate_boundary_conditions(json const& simulation_data,
-                                           BasicMesh const& basic_mesh)
+void femMesh::allocate_boundary_conditions(json const& simulation_data, BasicMesh const& basic_mesh)
 {
     auto const& boundary_data = simulation_data["BoundaryConditions"];
 
     // Populate the boundary conditions and their corresponding mesh
     for (auto const& boundary : boundary_data)
     {
-        auto const& boundary_name = boundary["Name"].asString();
-        auto const& boundary_type = boundary["Type"].asString();
+        auto const& boundary_name = boundary["Name"].get<std::string>();
+        auto const& boundary_type = boundary["Type"].get<std::string>();
 
         if (boundary_type == "Displacement")
         {
@@ -104,15 +101,17 @@ void femMesh::allocate_displacement_boundary(json const& boundary, BasicMesh con
 {
     using namespace ranges;
 
-    auto const& boundary_name = boundary["Name"].asString();
+    auto const& boundary_name = boundary["Name"].get<std::string>();
 
     auto const dirichlet_dofs = this->filter_dof_list(basic_mesh.meshes(boundary_name));
 
-    for (auto const& name : boundary["Values"].getMemberNames())
-    {
-        auto const& dof_offset = dof_table.find(name)->second;
+    auto const& values = boundary["Values"];
 
-        if (dof_table.find(name) == dof_table.end())
+    for (json::const_iterator it = values.begin(); it != values.end(); ++it)
+    {
+        auto const& dof_offset = dof_table.find(it.key())->second;
+
+        if (dof_table.find(it.key()) == dof_table.end())
         {
             throw std::runtime_error("x, y or z are acceptable coordinates\n");
         }
@@ -122,9 +121,7 @@ void femMesh::allocate_displacement_boundary(json const& boundary, BasicMesh con
             return dof + dof_offset;
         });
 
-        displacement_bcs[boundary_name].emplace_back(boundary_dofs,
-                                                     boundary["Time"],
-                                                     boundary["Values"][name]);
+        displacement_bcs[boundary_name].emplace_back(boundary_dofs, boundary["Time"], it.value());
     }
 }
 
@@ -133,16 +130,16 @@ std::vector<double> femMesh::time_history() const
     std::vector<double> history;
 
     // Append time history from each boundary condition
-    for (auto const & [key, boundaries] : displacement_bcs)
+    for (auto const& [key, boundaries] : displacement_bcs)
     {
         for (auto const& boundary : boundaries)
         {
             history |= ranges::action::push_back(boundary.time_history());
         }
     }
-    for (auto const & [key, nonfollower_load] : nonfollower_loads)
+    for (auto const& [key, nonfollower_load] : nonfollower_loads)
     {
-        for (auto const & [is_dof_active, boundaries] : nonfollower_load.interface())
+        for (auto const& [is_dof_active, boundaries] : nonfollower_load.interface())
         {
             if (!is_dof_active) continue;
 
@@ -165,7 +162,7 @@ void femMesh::check_boundary_conditions(json const& boundary_data) const
     {
         for (auto const& mandatory_field : {"Name", "Time", "Type", "Values"})
         {
-            if (!boundary.isMember(mandatory_field))
+            if (!boundary.count(mandatory_field))
             {
                 throw std::runtime_error("\"" + std::string(mandatory_field)
                                          + "\" was not specified in \"BoundaryCondition\".");

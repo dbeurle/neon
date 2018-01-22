@@ -1,10 +1,10 @@
 
 #pragma once
 
-#include <json/forwards.h>
-
 #include "numeric/DenseMatrix.hpp"
 #include "solver/TimeControl.hpp"
+
+#include "io/json.hpp"
 
 namespace neon
 {
@@ -30,8 +30,7 @@ public:
 
     [[nodiscard]] double time_step_size() const { return time_control.current_time_step_size(); }
 
-protected:
-    [[nodiscard]] bool are_parameters_unstable() const;
+    protected : [[nodiscard]] bool are_parameters_unstable() const;
 
 protected:
     TimeControl time_control;

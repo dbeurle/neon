@@ -10,21 +10,21 @@ namespace neon
 IsotropicElasticPlastic::IsotropicElasticPlastic(json const& material_data)
     : LinearElastic(material_data)
 {
-    if (!material_data.isMember("YieldStress"))
+    if (!material_data.count("YieldStress"))
     {
-        throw MaterialPropertyException("YieldStress");
+        throw std::domain_error("\"YieldStress\" was not specified in material properties");
     }
 
-    stress_y = material_data["YieldStress"].asDouble();
+    stress_y = material_data["YieldStress"];
 
-    if (material_data.isMember("IsotropicHardeningModulus"))
+    if (material_data.count("IsotropicHardeningModulus"))
     {
-        H_iso = material_data["IsotropicHardeningModulus"].asDouble();
+        H_iso = material_data["IsotropicHardeningModulus"];
     }
 
-    if (material_data.isMember("IsotropicKinematicModulus"))
+    if (material_data.count("IsotropicKinematicModulus"))
     {
-        K_iso = material_data["IsotropicKinematicModulus"].asDouble();
+        K_iso = material_data["IsotropicKinematicModulus"];
     }
 }
 

@@ -4,7 +4,7 @@
 #include "numeric/DenseMatrix.hpp"
 #include "numeric/IndexTypes.hpp"
 
-#include <json/forwards.h>
+#include "io/json.hpp"
 
 namespace neon
 {

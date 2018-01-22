@@ -16,17 +16,17 @@ namespace neon
 Submesh::Submesh(json const& mesh)
 {
     // Error checking for empty fields
-    if (!mesh.isMember("Name"))
+    if (!mesh.count("Name"))
     {
         throw std::runtime_error("The element group in the mesh file is missing the "
                                  "\"Name\" field");
     }
-    if (!mesh.isMember("Type"))
+    if (!mesh.count("Type"))
     {
         throw std::runtime_error("The element group in the mesh file is missing the "
                                  "\"Type\" field");
     }
-    if (!mesh.isMember("NodalConnectivity"))
+    if (!mesh.count("NodalConnectivity"))
     {
         throw std::runtime_error("The element group in the mesh file is missing the "
                                  "\"NodalConnectivity\" field");
@@ -36,7 +36,7 @@ Submesh::Submesh(json const& mesh)
         throw std::runtime_error("The element group in the mesh file is empty");
     }
 
-    element_topology = gmsh_type_to_enum(mesh["Type"].asInt());
+    element_topology = gmsh_type_to_enum(mesh["Type"].get<int64_t>());
 
     nodal_connectivity.reserve(mesh["NodalConnectivity"].size());
 
@@ -47,7 +47,7 @@ Submesh::Submesh(json const& mesh)
 
         for (auto const& node : mesh_connectivity)
         {
-            nodal_connectivity.back().push_back(node.asInt());
+            nodal_connectivity.back().push_back(node.get<int64_t>());
         }
     }
     convert_from_gmsh(nodal_connectivity, element_topology);

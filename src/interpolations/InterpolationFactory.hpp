@@ -3,9 +3,9 @@
 
 #include "ShapeFunction.hpp"
 
+#include "io/json.hpp"
 #include "mesh/ElementTopology.hpp"
 
-#include <json/forwards.h>
 #include <memory>
 
 namespace neon

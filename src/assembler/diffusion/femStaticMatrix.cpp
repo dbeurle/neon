@@ -4,8 +4,8 @@
 #include "Exceptions.hpp"
 #include "solver/linear/LinearSolverFactory.hpp"
 
-#include <chrono>
 #include "io/json.hpp"
+#include <chrono>
 #include <omp.h>
 
 namespace neon::diffusion
@@ -14,7 +14,7 @@ femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, json const& simulation_data)
     : fem_mesh(fem_mesh),
       f(vector::Zero(fem_mesh.active_dofs())),
       d(vector::Zero(fem_mesh.active_dofs())),
-      file_io(simulation_data["Name"].asString(), simulation_data["Visualisation"], fem_mesh),
+      file_io(simulation_data["Name"].get<std::string>(), simulation_data["Visualisation"], fem_mesh),
       linear_solver(make_linear_solver(simulation_data["LinearSolver"]))
 {
 }

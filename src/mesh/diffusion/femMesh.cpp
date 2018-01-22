@@ -18,14 +18,12 @@
 
 namespace neon::diffusion
 {
-femMesh::femMesh(BasicMesh const& basic_mesh,
-                 json const& material_data,
-                 json const& mesh_data)
+femMesh::femMesh(BasicMesh const& basic_mesh, json const& material_data, json const& mesh_data)
     : material_coordinates(std::make_shared<MaterialCoordinates>(basic_mesh.coordinates()))
 {
     check_boundary_conditions(mesh_data["BoundaryConditions"]);
 
-    auto const& simulation_name = mesh_data["Name"].asString();
+    auto const& simulation_name = mesh_data["Name"].get<std::string>();
 
     for (auto const& submesh : basic_mesh.meshes(simulation_name))
     {
@@ -59,16 +57,17 @@ void femMesh::allocate_boundary_conditions(json const& mesh_data, BasicMesh cons
     // Populate the boundary meshes
     for (auto const& boundary : boundary_data)
     {
-        auto const& boundary_name = boundary["Name"].asString();
+        auto const& boundary_name = boundary["Name"].get<std::string>();
 
-        if (!boundary.isMember("Time"))
+        if (!boundary.count("Time"))
         {
             throw std::runtime_error("BoundaryCondition requires a \"Time\" field.");
         }
 
-        if (auto const& boundary_type = boundary["Type"].asString(); boundary_type == "Temperature")
+        if (auto const& boundary_type = boundary["Type"].get<std::string>();
+            boundary_type == "Temperature")
         {
-            if (!boundary.isMember("Value"))
+            if (!boundary.count("Value"))
             {
                 throw std::runtime_error("BoundaryCondition \"" + boundary_type
                                          + "\" requires a \"Value\" field.");
@@ -81,14 +80,14 @@ void femMesh::allocate_boundary_conditions(json const& mesh_data, BasicMesh cons
         }
         else if (boundary_type == "HeatFlux" || boundary_type == "NewtonCooling")
         {
-            if (boundary_type == "HeatFlux" && !boundary.isMember("Value"))
+            if (boundary_type == "HeatFlux" && !boundary.count("Value"))
             {
                 throw std::runtime_error("BoundaryCondition \"" + boundary_type
                                          + "\" requires a \"Value\" field.");
             }
             else if (boundary_type == "NewtonCooling"
-                     && (!boundary.isMember("HeatTransferCoefficient")
-                         || !boundary.isMember("AmbientTemperature")))
+                     && (!boundary.count("HeatTransferCoefficient")
+                         || !boundary.count("AmbientTemperature")))
             {
                 throw std::runtime_error("BoundaryCondition \"" + boundary_type
                                          + "\" requires a \"HeatTransferCoefficient\" and "
@@ -116,7 +115,7 @@ void femMesh::check_boundary_conditions(json const& boundary_data) const
     {
         for (auto const& required_field : {"Name", "Type"})
         {
-            if (!boundary.isMember(required_field))
+            if (!boundary.count(required_field))
             {
                 throw std::runtime_error("Missing " + std::string(required_field)
                                          + " in BoundaryConditions\n");
