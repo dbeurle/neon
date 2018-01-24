@@ -7,12 +7,11 @@ foreach(test
              nodal_coordinates
              tensor
              linear_solvers
-             # BoundaryTest
+             material
+             boundary
              # ConstitutiveTest
              # GeometryTest
-             # MaterialTest
              # MatrixSystemTest
-             # ModuleTest
              )
     add_executable(${test} ${test}.cpp)
     add_dependencies(${test} catch)

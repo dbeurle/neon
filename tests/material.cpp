@@ -3,7 +3,6 @@
 
 #include "catch.hpp"
 
-#include <json/json.h>
 #include <range/v3/numeric.hpp>
 
 #include "material/IsotropicElasticPlastic.hpp"
@@ -14,77 +13,15 @@
 
 #include "Exceptions.hpp"
 
-Json::CharReaderBuilder reader;
-JSONCPP_STRING input_errors;
+#include "io/json.hpp"
 
 using namespace neon;
 
-std::string linear_material_input()
-{
-    return "{\"Name\": \"steel\", \"ElasticModulus\": 200.0e9, \"PoissonsRatio\": 0.3}";
-}
-
-std::string linear_diffusion_material_input()
-{
-    return "{\"Name\": \"steel\", \"Density\": 7800.0, \"Conductivity\": 300.0, \"SpecificHeat\": "
-           "280.0}";
-}
-
-std::string linear_material_input_incompressible()
-{
-    return "{\"Name\": \"steel\", \"BulkModulus\": 200.0e9, \"ShearModulus\": 100.0e6}";
-}
-
-std::string linear_material_input_incorrect()
-{
-    return "{\"Name\": \"steel\", \"Elastiodulus\": 200.0e9, \"PssonsRatio\": 0.3}";
-}
-
-std::string perfect_plastic_input()
-{
-    std::string linear = linear_material_input();
-    linear.pop_back();
-    return linear + ",\"YieldStress\": 200.0e6}";
-}
-
-std::string isotropic_plastic_input()
-{
-    std::string plastic = perfect_plastic_input();
-    plastic.pop_back();
-    return plastic
-           + ",\"IsotropicHardeningModulus\": 400.0e6, \"IsotropicKinematicModulus\": "
-             "100.0e6}";
-}
-
-std::string perfect_plastic_input_incorrect()
-{
-    std::string linear = linear_material_input();
-    linear.pop_back();
-    return linear + ",\"Yieldress\": 200.0e6}";
-}
-
-std::string micromechanical_input()
-{
-    return "{\"Name\" : \"rubber\", "
-           "\"ElasticModulus\" : 10.0e6, "
-           "\"PoissonsRatio\" : 0.45, "
-           "\"Segments\" : { "
-           "\"Groups\" : 5, "
-           "\"Average\" : 50, "
-           "\"StandardDeviation\" : 10, "
-           "\"ScissionLikelihood\" : 0.0001}}";
-}
-
 TEST_CASE("Linear elastic material", "[LinearElastic]")
 {
-    Json::Value material_data;
-
     SECTION("Linear elastic properties")
     {
-        // Read in a cube mesh from the json input file and use this to
-        // test the functionality of the basic mesh
-        std::istringstream material_stream(linear_material_input());
-        REQUIRE(Json::parseFromStream(reader, material_stream, &material_data, &input_errors));
+        json material_data{{"Name", "steel"}, {"ElasticModulus", 200.0e9}, {"PoissonsRatio", 0.3}};
 
         LinearElastic linear_elastic(material_data);
 
@@ -107,8 +44,7 @@ TEST_CASE("Linear elastic material", "[LinearElastic]")
     }
     SECTION("Incompressible elastic properties")
     {
-        std::istringstream material_stream(linear_material_input_incompressible());
-        REQUIRE(Json::parseFromStream(reader, material_stream, &material_data, &input_errors));
+        json material_data{{"Name", "steel"}, {"BulkModulus", 200.0e9}, {"ShearModulus", 100.0e6}};
 
         LinearElastic linear_elastic(material_data);
 
@@ -117,18 +53,17 @@ TEST_CASE("Linear elastic material", "[LinearElastic]")
     }
     SECTION("Incorrect elastic properties")
     {
-        std::istringstream material_stream(linear_material_input_incorrect());
-        REQUIRE(Json::parseFromStream(reader, material_stream, &material_data, &input_errors));
+        json material_data{{"Name", "steel"}, {"ElasticModulus", 200.0e9}, {"PssonsRatio", 0.3}};
 
         REQUIRE_THROWS_AS(LinearElastic(material_data), MaterialPropertyException);
     }
 }
 TEST_CASE("Perfect plastic material", "[PerfectPlasticElastic]")
 {
-    Json::Value material_data;
-
-    std::istringstream material_stream(perfect_plastic_input());
-    REQUIRE(Json::parseFromStream(reader, material_stream, &material_data, &input_errors));
+    json material_data{{"Name", "steel"},
+                       {"ElasticModulus", 200.0e9},
+                       {"PoissonsRatio", 0.3},
+                       {"YieldStress", 200.0e6}};
 
     IsotropicElasticPlastic perfect_plastic_elastic(material_data);
 
@@ -142,10 +77,12 @@ TEST_CASE("Perfect plastic material", "[PerfectPlasticElastic]")
 }
 TEST_CASE("Isotropic hardening", "[IsotropicPlasticElastic]")
 {
-    Json::Value material_data;
-
-    std::istringstream material_stream(isotropic_plastic_input());
-    REQUIRE(Json::parseFromStream(reader, material_stream, &material_data, &input_errors));
+    json material_data{{"Name", "steel"},
+                       {"ElasticModulus", 200.0e9},
+                       {"PoissonsRatio", 0.3},
+                       {"YieldStress", 200.0e6},
+                       {"IsotropicHardeningModulus", 400.0e6},
+                       {"IsotropicKinematicModulus", 100.0e6}};
 
     IsotropicElasticPlastic iso_plastic_elastic(material_data);
 
@@ -161,19 +98,25 @@ TEST_CASE("Isotropic hardening", "[IsotropicPlasticElastic]")
 }
 TEST_CASE("Missing yield stress", "[IsotropicPlasticElastic]")
 {
-    Json::Value material_data;
+    json material_data{{"Name", "steel"},
+                       {"ElasticModulus", 200.0e9},
+                       {"PoissonsRatio", 0.3},
+                       {"YieldStrs", 200.0e6},
+                       {"IsotropicHardeningModulus", 400.0e6},
+                       {"IsotropicKinematicModulus", 100.0e6}};
 
-    std::istringstream material_stream(perfect_plastic_input_incorrect());
-    REQUIRE(Json::parseFromStream(reader, material_stream, &material_data, &input_errors));
-
-    REQUIRE_THROWS_AS(IsotropicElasticPlastic(material_data), MaterialPropertyException);
+    REQUIRE_THROWS_AS(IsotropicElasticPlastic(material_data), std::domain_error);
 }
 TEST_CASE("Micromechanical elastomer", "[StochasticMicromechanicalElastomer]")
 {
-    Json::Value material_data;
-
-    std::istringstream material_stream(micromechanical_input());
-    REQUIRE(Json::parseFromStream(reader, material_stream, &material_data, &input_errors));
+    json material_data{{"Name", "rubber"},
+                       {"ElasticModulus", 10.0e6},
+                       {"PoissonsRatio", 0.45},
+                       {"Segments",
+                        {{"Groups", 5},
+                         {"Average", 50},
+                         {"StandardDeviation", 10},
+                         {"ScissionLikelihood", 0.0001}}}};
 
     StochasticMicromechanicalElastomer elastomer(material_data);
 
@@ -202,10 +145,10 @@ TEST_CASE("Micromechanical elastomer", "[StochasticMicromechanicalElastomer]")
 }
 TEST_CASE("Diffusion material", "[LinearDiffusion]")
 {
-    Json::Value material_data;
-
-    std::istringstream material_stream(linear_diffusion_material_input());
-    REQUIRE(Json::parseFromStream(reader, material_stream, &material_data, &input_errors));
+    json material_data{{"Name", "steel"},
+                       {"Density", 7800.0},
+                       {"Conductivity", 300.0},
+                       {"SpecificHeat", 280.0}};
 
     LinearDiffusion linear_diffusion(material_data);
 
