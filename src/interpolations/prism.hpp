@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include "ShapeFunction.hpp"
-#include "quadrature/PrismQuadrature.hpp"
+#include "shape_function.hpp"
+#include "quadrature/prism_quadrature.hpp"
 
 namespace neon
 {
@@ -11,10 +11,10 @@ namespace neon
  * wedge shaped six noded element.
  * The shape functions and nodal orderings are taken from \cite{Hughes2012}
  */
-class prism6 : public VolumeInterpolation
+class prism6 : public volume_interpolation
 {
 public:
-    explicit prism6(PrismQuadrature::Rule rule);
+    explicit prism6(prism_quadrature::Rule rule);
 
     virtual int nodes() const override final { return 6; }
 
@@ -40,10 +40,10 @@ protected:
  * wedge shaped six noded element.
  * The shape functions and nodal orderings are taken from \cite{Hughes2012}
  */
-class prism15 : public VolumeInterpolation
+class prism15 : public volume_interpolation
 {
 public:
-    explicit prism15(PrismQuadrature::Rule rule);
+    explicit prism15(prism_quadrature::Rule rule);
 
     virtual int nodes() const override final { return 15; }
 

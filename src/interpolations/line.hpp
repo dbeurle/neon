@@ -1,16 +1,16 @@
 
 #pragma once
 
-#include "ShapeFunction.hpp"
-#include "quadrature/LineQuadrature.hpp"
+#include "shape_function.hpp"
+#include "quadrature/line_quadrature.hpp"
 
 namespace neon
 {
 /** Line 2 node element with Gaussian integration */
-class Line2 : public LineInterpolation
+class line2 : public line_interpolation
 {
 public:
-    Line2(LineQuadrature::Rule rule);
+    line2(line_quadrature::Rule rule);
 
     virtual int nodes() const override final { return 2; }
 
@@ -28,10 +28,10 @@ protected:
 };
 
 /** Line 3 node element with Gaussian integration */
-class Line3 : public LineInterpolation
+class line3 : public line_interpolation
 {
 public:
-    Line3(LineQuadrature::Rule rule);
+    line3(line_quadrature::Rule rule);
 
     virtual int nodes() const override final { return 3; }
 

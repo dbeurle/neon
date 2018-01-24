@@ -17,9 +17,9 @@ namespace diffusion
  * with the corresponding shape function.  These are required to be stored in a parent
  * container with the other groups from the collective boundary \sa SurfaceBoundary
  */
-using heat_flux = SurfaceLoad<SurfaceInterpolation>;
+using heat_flux = SurfaceLoad<surface_interpolation>;
 
-// using heat_generation = VolumeLoad<VolumeInterpolation>;
+// using heat_generation = VolumeLoad<volume_interpolation>;
 
 /* boundary_mesh contains the boundary conditions and meshes which contribute to
  * the external load vector.  This can include flux boundary conditions and Newton

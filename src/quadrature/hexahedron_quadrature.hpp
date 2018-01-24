@@ -1,11 +1,11 @@
 
 #pragma once
 
-#include "NumericalQuadrature.hpp"
+#include "numerical_quadrature.hpp"
 
 namespace neon
 {
-class HexahedronQuadrature : public VolumeQuadrature
+class hexahedron_quadrature : public volume_quadrature
 {
 public:
     /** Available quadrature rules for this element type */
@@ -17,6 +17,6 @@ public:
     };
 
 public:
-    HexahedronQuadrature(Rule const rule);
+    hexahedron_quadrature(Rule const rule);
 };
 }

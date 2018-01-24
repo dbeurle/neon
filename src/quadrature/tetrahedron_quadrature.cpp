@@ -1,11 +1,11 @@
 
-#include "TetrahedronQuadrature.hpp"
+#include "tetrahedron_quadrature.hpp"
 
 #include <range/v3/action/transform.hpp>
 
 namespace neon
 {
-TetrahedronQuadrature::TetrahedronQuadrature(Rule rule)
+tetrahedron_quadrature::tetrahedron_quadrature(Rule rule)
 {
     switch (rule)
     {

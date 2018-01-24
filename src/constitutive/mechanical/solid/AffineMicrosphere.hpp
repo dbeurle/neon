@@ -5,7 +5,7 @@
 
 #include "material/MicromechanicalElastomer.hpp"
 #include "numeric/Tensor.hpp"
-#include "quadrature/UnitSphereQuadrature.hpp"
+#include "quadrature/unit_sphere_quadrature.hpp"
 
 #include <json/forwards.h>
 
@@ -29,8 +29,8 @@ public:
      * @param material_data Json object with input file material data
      */
     explicit AffineMicrosphere(std::shared_ptr<InternalVariables>& variables,
-                               json const& material_data,
-                               UnitSphereQuadrature::Rule const rule);
+                               Json::Value const& material_data,
+                               unit_sphere_quadrature::Rule const rule);
 
     virtual void update_internal_variables(double const time_step_size) override;
 
@@ -144,7 +144,7 @@ protected:
     }
 
 protected:
-    UnitSphereQuadrature unit_sphere; //!< Unit sphere quadrature rule
+    unit_sphere_quadrature unit_sphere; //!< Unit sphere quadrature rule
 
     matrix6 const IoI = voigt::I_outer_I();                      //!< Outer product
     matrix6 const I = voigt::kinematic::fourth_order_identity(); //!< Fourth order identity
@@ -191,8 +191,8 @@ public:
      * @param material_data Json object with input file material data
      */
     explicit AffineMicrosphereWithDegradation(std::shared_ptr<InternalVariables>& variables,
-                                              json const& material_data,
-                                              UnitSphereQuadrature::Rule const rule);
+                                              Json::Value const& material_data,
+                                              unit_sphere_quadrature::Rule const rule);
 
     virtual void update_internal_variables(double const time_step_size) override;
 

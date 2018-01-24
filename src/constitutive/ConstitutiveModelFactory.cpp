@@ -60,10 +60,10 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(
 
         // TODO Check for ageing model
 
-        std::map<std::string, UnitSphereQuadrature::Rule> const str_to_enum =
-            {{"BO21", UnitSphereQuadrature::Rule::BO21},
-             {"BO33", UnitSphereQuadrature::Rule::BO33},
-             {"FM900", UnitSphereQuadrature::Rule::FM900}};
+        std::map<std::string, unit_sphere_quadrature::Rule> const str_to_enum =
+            {{"BO21", unit_sphere_quadrature::Rule::BO21},
+             {"BO33", unit_sphere_quadrature::Rule::BO33},
+             {"FM900", unit_sphere_quadrature::Rule::FM900}};
 
         auto const entry = str_to_enum.find(constitutive_model["Quadrature"].get<std::string>());
 

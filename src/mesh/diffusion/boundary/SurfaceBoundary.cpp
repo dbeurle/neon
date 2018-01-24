@@ -1,7 +1,7 @@
 
 #include "SurfaceBoundary.hpp"
 
-#include "interpolations/InterpolationFactory.hpp"
+#include "interpolations/interpolation_factory.hpp"
 #include "mesh/Submesh.hpp"
 
 #include "io/json.hpp"

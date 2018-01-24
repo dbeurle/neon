@@ -36,7 +36,7 @@ Submesh::Submesh(json const& mesh)
         throw std::runtime_error("The element group in the mesh file is empty");
     }
 
-    element_topology = gmsh_type_to_enum(mesh["Type"].get<int64_t>());
+    m_topology = gmsh_type_to_enum(mesh["Type"].asInt());
 
     nodal_connectivity.reserve(mesh["NodalConnectivity"].size());
 
@@ -50,7 +50,7 @@ Submesh::Submesh(json const& mesh)
             nodal_connectivity.back().push_back(node.get<int64_t>());
         }
     }
-    convert_from_gmsh(nodal_connectivity, element_topology);
+    convert_from_gmsh(nodal_connectivity, m_topology);
 }
 
 List Submesh::unique_connectivities() const

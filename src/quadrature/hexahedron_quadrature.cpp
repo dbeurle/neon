@@ -1,9 +1,9 @@
 
-#include "HexahedronQuadrature.hpp"
+#include "hexahedron_quadrature.hpp"
 
 namespace neon
 {
-HexahedronQuadrature::HexahedronQuadrature(Rule const rule)
+hexahedron_quadrature::hexahedron_quadrature(Rule const rule)
 {
     switch (rule)
     {

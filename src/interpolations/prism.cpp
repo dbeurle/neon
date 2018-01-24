@@ -7,8 +7,8 @@
 
 namespace neon
 {
-prism6::prism6(PrismQuadrature::Rule rule)
-    : VolumeInterpolation(std::make_unique<PrismQuadrature>(rule))
+prism6::prism6(prism_quadrature::Rule rule)
+    : volume_interpolation(std::make_unique<prism_quadrature>(rule))
 {
     this->precompute_shape_functions();
 }
@@ -96,8 +96,8 @@ double prism6::compute_measure(matrix3x const& nodal_coordinates) const
     });
 }
 
-prism15::prism15(PrismQuadrature::Rule rule)
-    : VolumeInterpolation(std::make_unique<PrismQuadrature>(rule))
+prism15::prism15(prism_quadrature::Rule rule)
+    : volume_interpolation(std::make_unique<prism_quadrature>(rule))
 {
     this->precompute_shape_functions();
 }

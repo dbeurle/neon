@@ -1,12 +1,12 @@
 
 #pragma once
 
-#include "NumericalQuadrature.hpp"
+#include "numerical_quadrature.hpp"
 
 namespace neon
 {
-/** UnitSphereQuadrature implements the symmetric quadrature rules */
-class UnitSphereQuadrature : public VolumeQuadrature
+/** unit_sphere_quadrature implements the symmetric quadrature rules */
+class unit_sphere_quadrature : public volume_quadrature
 {
 public:
     /**
@@ -19,7 +19,7 @@ public:
 
 public:
     /** Fill the quadrature coordinates and weightings */
-    UnitSphereQuadrature(Rule const rule);
+    unit_sphere_quadrature(Rule const rule);
 
 protected:
     void precompute_coordinates();

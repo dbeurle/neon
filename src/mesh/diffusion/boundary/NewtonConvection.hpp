@@ -3,7 +3,7 @@
 
 #include "mesh/generic/Neumann.hpp"
 
-#include "interpolations/ShapeFunction.hpp"
+#include "interpolations/shape_function.hpp"
 
 namespace neon::diffusion::boundary
 {
@@ -20,7 +20,7 @@ namespace neon::diffusion::boundary
  * leaving the surface.  The surrounding temperature \f$T_\infty\f$ is computed by
  * \f$ T_\infty = h / \lambda \f$
  */
-class newton_cooling : public SurfaceLoad<SurfaceInterpolation>
+class newton_cooling : public SurfaceLoad<surface_interpolation>
 {
 public:
     /**
@@ -31,7 +31,7 @@ public:
      * @param heat_flux A list of heat fluxes
      * @param external_temperature A list of heat transfer coefficients
      */
-    explicit newton_cooling(std::unique_ptr<SurfaceInterpolation>&& sf,
+    explicit newton_cooling(std::unique_ptr<surface_interpolation>&& sf,
                             std::vector<List> const& nodal_connectivity,
                             std::vector<List> const& dof_list,
                             std::shared_ptr<MaterialCoordinates>& material_coordinates,

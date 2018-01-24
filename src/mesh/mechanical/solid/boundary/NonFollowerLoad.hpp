@@ -5,7 +5,7 @@
 #include "pressure.hpp"
 #include "traction.hpp"
 
-#include "interpolations/ShapeFunction.hpp"
+#include "interpolations/shape_function.hpp"
 #include "mesh/Submesh.hpp"
 
 #include <variant>

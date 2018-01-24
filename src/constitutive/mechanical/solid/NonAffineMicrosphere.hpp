@@ -20,8 +20,8 @@ public:
      * @param material_data Json object with material data
      */
     explicit NonAffineMicrosphere(std::shared_ptr<InternalVariables>& variables,
-                                  json const& material_data,
-                                  UnitSphereQuadrature::Rule const rule);
+                                  Json::Value const& material_data,
+                                  unit_sphere_quadrature::Rule const rule);
 
     virtual void update_internal_variables(double const time_step_size) override;
 

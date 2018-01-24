@@ -1,16 +1,16 @@
 
 #pragma once
 
-#include "ShapeFunction.hpp"
-#include "quadrature/QuadrilateralQuadrature.hpp"
+#include "shape_function.hpp"
+#include "quadrature/quadrilateral_quadrature.hpp"
 
 namespace neon
 {
 /** A finite element with 4 nodal points and an isoparametric formulation */
-class Quadrilateral4 : public SurfaceInterpolation
+class quadrilateral4 : public surface_interpolation
 {
 public:
-    Quadrilateral4(QuadrilateralQuadrature::Rule rule);
+    quadrilateral4(quadrilateral_quadrature::Rule rule);
 
     virtual int nodes() const override final { return 4; }
 
@@ -32,10 +32,10 @@ protected:
 };
 
 /** A finite element with 8 nodal points and an isoparametric formulation */
-class Quadrilateral8 : public SurfaceInterpolation
+class quadrilateral8 : public surface_interpolation
 {
 public:
-    Quadrilateral8(QuadrilateralQuadrature::Rule rule);
+    quadrilateral8(quadrilateral_quadrature::Rule rule);
 
     int nodes() const override final { return 8; }
 
@@ -46,10 +46,10 @@ protected:
 };
 
 /** A finite element with 8 nodal points and an isoparametric formulation */
-class Quadrilateral9 : public SurfaceInterpolation
+class quadrilateral9 : public surface_interpolation
 {
 public:
-    Quadrilateral9(QuadrilateralQuadrature::Rule rule);
+    quadrilateral9(quadrilateral_quadrature::Rule rule);
 
     int nodes() const override final { return 9; }
 
