@@ -3,10 +3,6 @@
 
 #include "mesh/NodalCoordinates.hpp"
 
-#include "vtkSmartPointer.h"
-class vtkPoints;
-class vtkDoubleArray;
-
 namespace neon
 {
 class MaterialCoordinates : public NodalCoordinates
@@ -34,12 +30,6 @@ public:
     void update_current_xy_configuration(vector const& u);
 
     [[nodiscard]] matrix3x displacement() const;
-
-    /** @return a vtk object of the initial coordinates */
-    [[deprecated]][[nodiscard]] vtkSmartPointer<vtkPoints> vtk_coordinates() const;
-
-    /** @return a vtk array of nodal displacements */
-    [[deprecated]][[nodiscard]] vtkSmartPointer<vtkDoubleArray> vtk_displacement() const;
 
 protected:
     matrix3x x; //!< Current configuration
