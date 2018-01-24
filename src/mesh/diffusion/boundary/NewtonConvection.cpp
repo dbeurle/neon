@@ -15,12 +15,12 @@ newton_cooling::newton_cooling(std::unique_ptr<surface_interpolation>&& sf,
                                json const& times,
                                json const& heat_flux,
                                json const& heat_transfer_coefficient)
-    : SurfaceLoad<SurfaceInterpolation>(std::move(sf),
-                                        nodal_connectivity,
-                                        dof_list,
-                                        material_coordinates,
-                                        times,
-                                        heat_flux)
+    : SurfaceLoad<surface_interpolation>(std::move(sf),
+                                         nodal_connectivity,
+                                         dof_list,
+                                         material_coordinates,
+                                         times,
+                                         heat_flux)
 {
     using ranges::view::transform;
     using ranges::view::zip;

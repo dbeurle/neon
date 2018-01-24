@@ -12,20 +12,20 @@
 
 #include <stdexcept>
 
-#include <json/value.h>
+#include <io/json.hpp>
 
 namespace neon
 {
 bool is_reduced_integration(json const& mesh_data)
 {
-    return mesh_data["ElementOptions"]["Quadrature"].empty()
+    return mesh_data["ElementOptions"]["Quadrature"].is_null()
                ? false
-               : mesh_data["ElementOptions"]["Quadrature"].asString() == "Reduced";
+               : mesh_data["ElementOptions"]["Quadrature"].get<std::string>() == "Reduced";
 }
 
 void check_element_options(json const& mesh_data)
 {
-    if (!mesh_data.isMember("ElementOptions"))
+    if (!mesh_data.count("ElementOptions"))
     {
         throw std::runtime_error("Missing \"Part\": \"ElementOptions\"");
     }

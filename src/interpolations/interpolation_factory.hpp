@@ -5,7 +5,8 @@
 
 #include "mesh/element_topology.hpp"
 
-#include <json/forwards.h>
+// TODO forward declaration
+#include "io/json.hpp"
 
 #include <memory>
 

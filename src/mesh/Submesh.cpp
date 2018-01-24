@@ -36,7 +36,7 @@ Submesh::Submesh(json const& mesh)
         throw std::runtime_error("The element group in the mesh file is empty");
     }
 
-    m_topology = gmsh_type_to_enum(mesh["Type"].asInt());
+    m_topology = gmsh_type_to_enum(mesh["Type"].get<int>());
 
     nodal_connectivity.reserve(mesh["NodalConnectivity"].size());
 
