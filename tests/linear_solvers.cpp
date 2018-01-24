@@ -7,14 +7,11 @@
 
 #include <stdexcept>
 
-#include <json/json.h>
+#include "io/json.hpp"
 
 using namespace neon;
 
 constexpr auto ZERO_MARGIN = 1.0e-5;
-
-Json::CharReaderBuilder reader;
-JSONCPP_STRING input_errors;
 
 /** Create a SPD matrix for solver testing */
 SparseMatrix create_sparse_matrix()
@@ -61,12 +58,7 @@ TEST_CASE("Linear solver test suite")
 
     SECTION("Preconditioned Conjugate Gradient Default")
     {
-        std::string solver_str = "{\"Solver\":\"Iterative\"}";
-
-        Json::Value solver_data;
-
-        std::istringstream input_data(solver_str);
-        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
+        json solver_data{{"Solver", "Iterative"}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -77,12 +69,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Conjugate Gradient Tolerance")
     {
-        std::string solver_str = "{\"Solver\":\"Iterative\",\"Tolerance\":1e-8}";
-
-        Json::Value solver_data;
-
-        std::istringstream input_data(solver_str);
-        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
+        json solver_data{{"Solver", "Iterative"}, {"Tolerance", 1.0e-8}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -93,12 +80,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Conjugate Gradient Iterations")
     {
-        std::string solver_str = "{\"Solver\":\"Iterative\",\"MaxIterations\":100}";
-
-        Json::Value solver_data;
-
-        std::istringstream input_data(solver_str);
-        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
+        json solver_data{{"Solver", "Iterative"}, {"MaxIterations", 100}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -109,13 +91,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Conjugate Gradient Iterations and Tolerance")
     {
-        std::string solver_str = "{\"Solver\":\"Iterative\",\"MaxIterations\":"
-                                 "100,\"Tolerance\":1e-8}";
-
-        Json::Value solver_data;
-
-        std::istringstream input_data(solver_str);
-        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
+        json solver_data{{"Solver", "Iterative"}, {"MaxIterations", 100}, {"Tolerance", 1.0e-8}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -126,12 +102,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Bi-conjugate Gradient Stab Default")
     {
-        std::string solver_str = "{\"Solver\":\"Iterative\"}";
-
-        Json::Value solver_data;
-
-        std::istringstream input_data(solver_str);
-        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
+        json solver_data{{"Solver", "Iterative"}};
 
         auto linear_solver = make_linear_solver(solver_data, false);
 
@@ -142,12 +113,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Bi-conjugate Gradient Stab Tolerance")
     {
-        std::string solver_str = "{\"Solver\":\"Iterative\",\"Tolerance\":1e-8}";
-
-        Json::Value solver_data;
-
-        std::istringstream input_data(solver_str);
-        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
+        json solver_data{{"Solver", "Iterative"}, {"Tolerance", 1.0e-8}};
 
         auto linear_solver = make_linear_solver(solver_data, false);
 
@@ -158,12 +124,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Bi-conjugate Gradient Stab Iterations")
     {
-        std::string solver_str = "{\"Solver\":\"Iterative\",\"MaxIterations\":100}";
-
-        Json::Value solver_data;
-
-        std::istringstream input_data(solver_str);
-        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
+        json solver_data{{"Solver", "Iterative"}, {"MaxIterations", 100}};
 
         auto linear_solver = make_linear_solver(solver_data, false);
 
@@ -174,13 +135,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Bi-conjugate Gradient Stab Iterations and Tolerance")
     {
-        std::string solver_str = "{\"Solver\":\"Iterative\",\"MaxIterations\":100,"
-                                 "\"Tolerance\":1e-8}";
-
-        Json::Value solver_data;
-
-        std::istringstream input_data(solver_str);
-        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
+        json solver_data{{"Solver", "Iterative"}, {"MaxIterations", 100}, {"Tolerance", 1.0e-8}};
 
         auto linear_solver = make_linear_solver(solver_data, false);
 
@@ -191,12 +146,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("PaStiX SPD")
     {
-        std::string solver_str = "{\"Solver\":\"PaStiX\"}";
-
-        Json::Value solver_data;
-
-        std::istringstream input_data(solver_str);
-        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
+        json solver_data{{"Solver", "PaStiX"}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -207,12 +157,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("PaStiX LU")
     {
-        std::string solver_str = "{\"Solver\":\"PaStiX\"}";
-
-        Json::Value solver_data;
-
-        std::istringstream input_data(solver_str);
-        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
+        json solver_data{{"Solver", "PaStiX"}};
 
         auto linear_solver = make_linear_solver(solver_data, false);
 
@@ -223,12 +168,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("MUMPS SPD")
     {
-        std::string solver_str = "{\"Solver\":\"MUMPS\"}";
-
-        Json::Value solver_data;
-
-        std::istringstream input_data(solver_str);
-        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
+        json solver_data{{"Solver", "MUMPS"}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -239,12 +179,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("MUMPS LU")
     {
-        std::string solver_str = "{\"Solver\":\"MUMPS\"}";
-
-        Json::Value solver_data;
-
-        std::istringstream input_data(solver_str);
-        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
+        json solver_data{{"Solver", "MUMPS"}};
 
         auto linear_solver = make_linear_solver(solver_data, false);
 
@@ -255,12 +190,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("SparseLU")
     {
-        std::string solver_str = "{\"Solver\":\"Direct\"}";
-
-        Json::Value solver_data;
-
-        std::istringstream input_data(solver_str);
-        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
+        json solver_data{{"Solver", "Direct"}};
 
         auto linear_solver = make_linear_solver(solver_data, false);
 
@@ -271,12 +201,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("SparseLDLT")
     {
-        std::string solver_str = "{\"Solver\":\"Direct\"}";
-
-        Json::Value solver_data;
-
-        std::istringstream input_data(solver_str);
-        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
+        json solver_data{{"Solver", "Direct"}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -288,12 +213,7 @@ TEST_CASE("Linear solver test suite")
 #ifdef ENABLE_CUDA
     SECTION("GPU Preconditioned Conjugate Gradient Default")
     {
-        std::string solver_str = "{\"Solver\":\"IterativeGPU\"}";
-
-        Json::Value solver_data;
-
-        std::istringstream input_data(solver_str);
-        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
+        json solver_data{{"Solver", "IterativeGPU"}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -304,12 +224,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("GPU Preconditioned Conjugate Gradient Tolerance")
     {
-        std::string solver_str = "{\"Solver\":\"IterativeGPU\",\"Tolerance\":1e-8}";
-
-        Json::Value solver_data;
-
-        std::istringstream input_data(solver_str);
-        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
+        json solver_data{{"Solver", "Iterative"}, {"Tolerance", 1.0e-8}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -320,12 +235,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("GPU Preconditioned Conjugate Gradient Iterations")
     {
-        std::string solver_str = "{\"Solver\":\"IterativeGPU\",\"MaxIterations\":100}";
-
-        Json::Value solver_data;
-
-        std::istringstream input_data(solver_str);
-        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
+        json solver_data{{"Solver", "Iterative"}, {"MaxIterations", 100}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -336,13 +246,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("GPU Preconditioned Conjugate Gradient Iterations and Tolerance")
     {
-        std::string solver_str = "{\"Solver\":\"IterativeGPU\",\"MaxIterations\":"
-                                 "100,\"Tolerance\":1e-8}";
-
-        Json::Value solver_data;
-
-        std::istringstream input_data(solver_str);
-        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
+        json solver_data{{"Solver", "Iterative"}, {"MaxIterations", 100}, {"Tolerance", 1.0e-8}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -354,12 +258,7 @@ TEST_CASE("Linear solver test suite")
 #endif
     SECTION("Error")
     {
-        std::string solver_str = "{\"Solver\":\"PurpleMonkey\"}";
-
-        Json::Value solver_data;
-
-        std::istringstream input_data(solver_str);
-        REQUIRE(Json::parseFromStream(reader, input_data, &solver_data, &input_errors));
+        json solver_data{{"Solver", "PurpleMonkey"}};
 
         REQUIRE_THROWS_AS(make_linear_solver(solver_data), std::runtime_error);
     }
