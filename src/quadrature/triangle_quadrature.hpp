@@ -1,17 +1,17 @@
 
 #pragma once
 
-#include "NumericalQuadrature.hpp"
+#include "numerical_quadrature.hpp"
 
 namespace neon
 {
-class TriangleQuadrature : public SurfaceQuadrature
+class triangle_quadrature : public surface_quadrature
 {
 public:
     /** Available quadrature rules for this element type */
     enum class Rule { OnePoint, ThreePoint, FourPoint };
 
 public:
-    explicit TriangleQuadrature(Rule rule);
+    explicit triangle_quadrature(Rule rule);
 };
 }

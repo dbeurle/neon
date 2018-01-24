@@ -1,9 +1,9 @@
 
-#include "UnitSphereQuadrature.hpp"
+#include "unit_sphere_quadrature.hpp"
 
 namespace neon
 {
-UnitSphereQuadrature::UnitSphereQuadrature(Rule const rule)
+unit_sphere_quadrature::unit_sphere_quadrature(Rule const rule)
 {
     switch (rule)
     {
@@ -1310,10 +1310,10 @@ UnitSphereQuadrature::UnitSphereQuadrature(Rule const rule)
     this->precompute_coordinates();
 }
 
-void UnitSphereQuadrature::precompute_coordinates()
+void unit_sphere_quadrature::precompute_coordinates()
 {
     this->evaluate([](auto const& coordinate) {
-        auto const& [l, r1, r2, r3] = coordinate;
+        auto const & [ l, r1, r2, r3 ] = coordinate;
 
         vector3 t(r1, r2, r3);
 

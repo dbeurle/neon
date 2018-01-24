@@ -3,7 +3,7 @@
 
 #include "mesh/generic/Neumann.hpp"
 
-#include "interpolations/ShapeFunction.hpp"
+#include "interpolations/shape_function.hpp"
 
 namespace neon::mechanical::solid
 {
@@ -13,5 +13,5 @@ namespace neon::mechanical::solid
  * equations
  * \sa NonFollowerLoad
  */
-using traction = SurfaceLoad<SurfaceInterpolation>;
+using traction = SurfaceLoad<surface_interpolation>;
 }

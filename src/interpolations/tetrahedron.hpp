@@ -1,16 +1,39 @@
 
 #pragma once
 
-#include "ShapeFunction.hpp"
-#include "quadrature/TetrahedronQuadrature.hpp"
+#include "shape_function.hpp"
+#include "quadrature/tetrahedron_quadrature.hpp"
 
 namespace neon
 {
-/** Isoparametric quadratric tetrahedral element (10 nodes) */
-class Tetrahedron10 : public VolumeInterpolation
+/**
+ * tetrahedron4 is an isoparametric simplex 4 node element numerical integration.
+ */
+class tetrahedron4 : public volume_interpolation
 {
 public:
-    Tetrahedron10(TetrahedronQuadrature::Rule rule);
+    tetrahedron4(tetrahedron_quadrature::Rule rule = tetrahedron_quadrature::Rule::OnePoint);
+
+    virtual int nodes() const override final { return 4; }
+
+protected:
+    /**
+     * Initialize the shape functions to the following polynomials
+     * \f{align*}{
+     * N_1(r, s, t) &= r \\
+     * N_2(r, s, t) &= s \\
+     * N_3(r, s, t) &= t \\
+     * N_4(r, s, t) &= 1 - r - s - t
+     * \f}
+     */
+    void precompute_shape_functions();
+};
+
+/** Isoparametric quadratric tetrahedral element (10 nodes) */
+class tetrahedron10 : public volume_interpolation
+{
+public:
+    tetrahedron10(tetrahedron_quadrature::Rule rule);
 
     virtual int nodes() const override final { return 10; }
 

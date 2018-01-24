@@ -1,9 +1,9 @@
 
-#include "QuadrilateralQuadrature.hpp"
+#include "quadrilateral_quadrature.hpp"
 
 namespace neon
 {
-QuadrilateralQuadrature::QuadrilateralQuadrature(Rule rule)
+quadrilateral_quadrature::quadrilateral_quadrature(Rule rule)
 {
     switch (rule)
     {

@@ -5,7 +5,7 @@
 
 #include "constitutive/ConstitutiveModel.hpp"
 #include "constitutive/InternalVariables.hpp"
-#include "interpolations/ShapeFunction.hpp"
+#include "interpolations/shape_function.hpp"
 
 #include <memory>
 
@@ -96,7 +96,7 @@ protected:
 private:
     std::shared_ptr<MaterialCoordinates> material_coordinates;
 
-    std::unique_ptr<VolumeInterpolation> sf; //!< Shape function
+    std::unique_ptr<volume_interpolation> sf; //!< Shape function
 
     std::shared_ptr<InternalVariables> variables;
 

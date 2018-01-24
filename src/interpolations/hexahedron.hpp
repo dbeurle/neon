@@ -1,21 +1,21 @@
 
 #pragma once
 
-#include "ShapeFunction.hpp"
-#include "quadrature/HexahedronQuadrature.hpp"
+#include "shape_function.hpp"
+#include "quadrature/hexahedron_quadrature.hpp"
 
 namespace neon
 {
 /**
- * Hexahedron8 is responsible for computing the tri-linear shape functions for an
+ * hexahedron8 is responsible for computing the tri-linear shape functions for an
  * eight noded hexahedron element.
  * The shape functions and ordering is taken from Hughes 1986 - Linear static and dynamic finite
  * elements.
  */
-class Hexahedron8 : public VolumeInterpolation
+class hexahedron8 : public volume_interpolation
 {
 public:
-    explicit Hexahedron8(HexahedronQuadrature::Rule rule);
+    explicit hexahedron8(hexahedron_quadrature::Rule rule);
 
     virtual int nodes() const override final { return 8; }
 
@@ -39,14 +39,14 @@ protected:
 };
 
 /**
- * Hexahedron20 is responsible for computing the quadratic shape functions for an
+ * hexahedron20 is responsible for computing the quadratic shape functions for an
  * twenty noded hexahedron element.  Nodes are only defined on the midside
  * and corner nodes.  The node ordering is from Hughes.
  */
-class Hexahedron20 : public VolumeInterpolation
+class hexahedron20 : public volume_interpolation
 {
 public:
-    explicit Hexahedron20(HexahedronQuadrature::Rule rule);
+    explicit hexahedron20(hexahedron_quadrature::Rule rule);
 
     int nodes() const override final { return 20; }
 
@@ -57,14 +57,14 @@ protected:
 };
 
 /**
- * Hexahedron27 is responsible for computing the quadratic shape functions for an
+ * hexahedron27 is responsible for computing the quadratic shape functions for an
  * twenty-nine noded hexahedron element.  Nodes are also on the faces and the centre
  * of the reference cube.  The node ordering is from Hughes.
  */
-class Hexahedron27 : public VolumeInterpolation
+class hexahedron27 : public volume_interpolation
 {
 public:
-    explicit Hexahedron27(HexahedronQuadrature::Rule rule);
+    explicit hexahedron27(hexahedron_quadrature::Rule rule);
 
     int nodes() const override final { return 27; }
 

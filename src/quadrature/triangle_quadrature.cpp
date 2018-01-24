@@ -1,11 +1,11 @@
 
-#include "TriangleQuadrature.hpp"
+#include "triangle_quadrature.hpp"
 
 #include <range/v3/action/transform.hpp>
 
 namespace neon
 {
-TriangleQuadrature::TriangleQuadrature(Rule rule)
+triangle_quadrature::triangle_quadrature(Rule rule)
 {
     switch (rule)
     {

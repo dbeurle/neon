@@ -8,14 +8,14 @@
 
 namespace neon::diffusion::boundary
 {
-newton_cooling::newton_cooling(std::unique_ptr<SurfaceInterpolation>&& sf,
+newton_cooling::newton_cooling(std::unique_ptr<surface_interpolation>&& sf,
                                std::vector<List> const& nodal_connectivity,
                                std::vector<List> const& dof_list,
                                std::shared_ptr<MaterialCoordinates>& material_coordinates,
                                Json::Value const& times,
                                Json::Value const& heat_flux,
                                Json::Value const& heat_transfer_coefficient)
-    : SurfaceLoad<SurfaceInterpolation>(std::move(sf),
+    : SurfaceLoad<surface_interpolation>(std::move(sf),
                                         nodal_connectivity,
                                         dof_list,
                                         material_coordinates,

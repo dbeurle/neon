@@ -7,45 +7,45 @@
 
 namespace neon
 {
-std::unordered_map<int, ElementTopology> const gmsh_converter{{1, ElementTopology::Line2},
-                                                              {2, ElementTopology::Triangle3},
-                                                              {3, ElementTopology::Quadrilateral4},
-                                                              {4, ElementTopology::Tetrahedron4},
-                                                              {5, ElementTopology::Hexahedron8},
-                                                              {6, ElementTopology::Prism6},
-                                                              {8, ElementTopology::Line3},
-                                                              {9, ElementTopology::Triangle6},
-                                                              {11, ElementTopology::Tetrahedron10},
-                                                              {10, ElementTopology::Quadrilateral9},
-                                                              {12, ElementTopology::Hexahedron27},
-                                                              {13, ElementTopology::Prism18},
-                                                              {16, ElementTopology::Quadrilateral8},
-                                                              {18, ElementTopology::Prism15},
-                                                              {17, ElementTopology::Hexahedron20}};
+std::unordered_map<int, element_topology> const gmsh_converter{{1, element_topology::line2},
+                                                               {2, element_topology::triangle3},
+                                                               {3, element_topology::quadrilateral4},
+                                                               {4, element_topology::tetrahedron4},
+                                                               {5, element_topology::hexahedron8},
+                                                               {6, element_topology::prism6},
+                                                               {8, element_topology::line3},
+                                                               {9, element_topology::triangle6},
+                                                               {11, element_topology::tetrahedron10},
+                                                               {10, element_topology::quadrilateral9},
+                                                               {12, element_topology::hexahedron27},
+                                                               {13, element_topology::prism18},
+                                                               {16, element_topology::quadrilateral8},
+                                                               {18, element_topology::prism15},
+                                                               {17, element_topology::hexahedron20}};
 
-std::unordered_map<ElementTopology, VTKCellType> const
-    vtk_converter{{ElementTopology::Triangle3, VTK_TRIANGLE},
-                  {ElementTopology::Quadrilateral4, VTK_QUAD},
-                  {ElementTopology::Quadrilateral8, VTK_QUADRATIC_QUAD},
-                  {ElementTopology::Quadrilateral9, VTK_BIQUADRATIC_QUAD},
-                  {ElementTopology::Tetrahedron4, VTK_TETRA},
-                  {ElementTopology::Hexahedron8, VTK_HEXAHEDRON},
-                  {ElementTopology::Prism6, VTK_WEDGE},
-                  {ElementTopology::Triangle6, VTK_QUADRATIC_TRIANGLE},
-                  {ElementTopology::Tetrahedron10, VTK_QUADRATIC_TETRA},
-                  {ElementTopology::Prism15, VTK_QUADRATIC_WEDGE},
-                  // {ElementTopology::Prism18, VTK_TRIQUADRATIC_WEDGE},
-                  {ElementTopology::Hexahedron20, VTK_QUADRATIC_HEXAHEDRON},
-                  {ElementTopology::Hexahedron27, VTK_TRIQUADRATIC_HEXAHEDRON}};
+std::unordered_map<element_topology, VTKCellType> const
+    vtk_converter{{element_topology::triangle3, VTK_TRIANGLE},
+                  {element_topology::quadrilateral4, VTK_QUAD},
+                  {element_topology::quadrilateral8, VTK_QUADRATIC_QUAD},
+                  {element_topology::quadrilateral9, VTK_BIQUADRATIC_QUAD},
+                  {element_topology::tetrahedron4, VTK_TETRA},
+                  {element_topology::hexahedron8, VTK_HEXAHEDRON},
+                  {element_topology::prism6, VTK_WEDGE},
+                  {element_topology::triangle6, VTK_QUADRATIC_TRIANGLE},
+                  {element_topology::tetrahedron10, VTK_QUADRATIC_TETRA},
+                  {element_topology::prism15, VTK_QUADRATIC_WEDGE},
+                  // {element_topology::prism18, VTK_TRIQUADRATIC_WEDGE},
+                  {element_topology::hexahedron20, VTK_QUADRATIC_HEXAHEDRON},
+                  {element_topology::hexahedron27, VTK_TRIQUADRATIC_HEXAHEDRON}};
 
-void convert_from_gmsh(std::vector<List>& nodal_connectivity, ElementTopology const element_topology)
+void convert_from_gmsh(std::vector<List>& nodal_connectivity, element_topology const topology)
 {
     // Reorder based on the differences between the local node numbering
     // provided from Section 9.3 Node ordering
     // http://gmsh.info/doc/texinfo/gmsh.html#Node-ordering
-    switch (element_topology)
+    switch (topology)
     {
-        case ElementTopology::Tetrahedron10:
+        case element_topology::tetrahedron10:
         {
             for (auto& nodal_list : nodal_connectivity)
             {
@@ -56,7 +56,7 @@ void convert_from_gmsh(std::vector<List>& nodal_connectivity, ElementTopology co
                 std::swap(nodal_list.at(6), nodal_list.at(9));
             }
         }
-        case ElementTopology::Tetrahedron4:
+        case element_topology::tetrahedron4:
         {
             for (auto& nodal_list : nodal_connectivity)
             {
@@ -66,7 +66,7 @@ void convert_from_gmsh(std::vector<List>& nodal_connectivity, ElementTopology co
             }
             break;
         }
-        case ElementTopology::Prism6:
+        case element_topology::prism6:
         {
             for (auto& nodal_list : nodal_connectivity)
             {
@@ -75,7 +75,7 @@ void convert_from_gmsh(std::vector<List>& nodal_connectivity, ElementTopology co
             }
             break;
         }
-        case ElementTopology::Prism15:
+        case element_topology::prism15:
         {
             for (auto& nodal_list : nodal_connectivity)
             {
@@ -95,7 +95,7 @@ void convert_from_gmsh(std::vector<List>& nodal_connectivity, ElementTopology co
             }
             break;
         }
-        case ElementTopology::Hexahedron27:
+        case element_topology::hexahedron27:
         {
             /*
             Gmsh ordering (0 based indexing) taken from gmsh.info
@@ -136,7 +136,7 @@ void convert_from_gmsh(std::vector<List>& nodal_connectivity, ElementTopology co
             }
             [[fallthrough]];
         }
-        case ElementTopology::Hexahedron20:
+        case element_topology::hexahedron20:
         {
             /*
               Gmsh ordering (0 based indexing) taken from gmsh.info
@@ -189,12 +189,11 @@ void convert_from_gmsh(std::vector<List>& nodal_connectivity, ElementTopology co
     }
 }
 
-std::vector<List> convert_to_vtk(std::vector<List> nodal_connectivity,
-                                 ElementTopology const element_topology)
+std::vector<List> convert_to_vtk(std::vector<List> nodal_connectivity, element_topology const topology)
 {
-    switch (element_topology)
+    switch (topology)
     {
-        case ElementTopology::Tetrahedron4:
+        case element_topology::tetrahedron4:
         {
             for (auto& nodal_list : nodal_connectivity)
             {
@@ -202,7 +201,7 @@ std::vector<List> convert_to_vtk(std::vector<List> nodal_connectivity,
             }
             break;
         }
-        case ElementTopology::Tetrahedron10:
+        case element_topology::tetrahedron10:
         {
             for (auto& nodal_list : nodal_connectivity)
             {
@@ -211,7 +210,7 @@ std::vector<List> convert_to_vtk(std::vector<List> nodal_connectivity,
             }
             break;
         }
-        case ElementTopology::Hexahedron20:
+        case element_topology::hexahedron20:
         {
             // The ordering of the twenty points defining the cell is point ids (0-7,8-19) where
             // point ids 0-7 are the eight corner vertices of the cube; followed by twelve midedge
@@ -223,7 +222,7 @@ std::vector<List> convert_to_vtk(std::vector<List> nodal_connectivity,
             // NOTE This corresponds nicely to the Hughes ordering
             break;
         }
-        case ElementTopology::Hexahedron27:
+        case element_topology::hexahedron27:
         {
             /* top
              *  7--14--6
@@ -259,7 +258,7 @@ std::vector<List> convert_to_vtk(std::vector<List> nodal_connectivity,
     return nodal_connectivity;
 }
 
-ElementTopology gmsh_type_to_enum(int const element_code)
+element_topology gmsh_type_to_enum(int const element_code)
 {
     auto const found = gmsh_converter.find(element_code);
     if (found == gmsh_converter.end())
@@ -270,12 +269,12 @@ ElementTopology gmsh_type_to_enum(int const element_code)
     return found->second;
 }
 
-VTKCellType to_vtk(ElementTopology const element_topology)
+VTKCellType to_vtk(element_topology const topology)
 {
-    auto const found = vtk_converter.find(element_topology);
+    auto const found = vtk_converter.find(topology);
     if (found == vtk_converter.end())
     {
-        throw std::runtime_error("Element code " + std::to_string(static_cast<int>(element_topology))
+        throw std::runtime_error("Element code " + std::to_string(static_cast<int>(topology))
                                  + " not implemented for vtk element type");
     }
     return found->second;

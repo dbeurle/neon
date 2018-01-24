@@ -6,26 +6,26 @@
 #include <vector>
 
 #include "numeric/DenseMatrix.hpp"
-#include "quadrature/NumericalQuadrature.hpp"
+#include "quadrature/numerical_quadrature.hpp"
 
 namespace neon
 {
-template <typename Quadrature>
-class ShapeFunction
+template <typename QuadratureType>
+class shape_function
 {
 public:
-    using Coordinates = typename Quadrature::coordinate_type;
+    using quadrature_type = QuadratureType;
 
 public:
     /** Construct the shape function by consuming a quadrature implementation */
-    ShapeFunction(std::unique_ptr<Quadrature>&& quadratureImpl)
-        : numerical_quadrature(std::move(quadratureImpl))
+    shape_function(std::unique_ptr<quadrature_type>&& quadrature_impl)
+        : numerical_quadrature(std::move(quadrature_impl))
     {
     }
 
     virtual int nodes() const = 0;
 
-    Quadrature const& quadrature() const { return *numerical_quadrature.get(); };
+    quadrature_type const& quadrature() const { return *numerical_quadrature; };
 
     /** Quadrature point to nodal point extrapolation matrix */
     matrix const& local_quadrature_extrapolation() const { return extrapolation; }
@@ -44,13 +44,12 @@ protected:
 protected:
     matrix extrapolation; //!< Quadrature point to nodal point mapping
 
-    std::unique_ptr<Quadrature> numerical_quadrature;
+    std::unique_ptr<quadrature_type> numerical_quadrature;
 };
 
-template <typename Quadrature>
-void ShapeFunction<Quadrature>::compute_extrapolation_matrix(matrix const N,
-                                                             matrix const local_nodal_coordinates,
-                                                             matrix const local_quadrature_coordinates)
+template <typename quadrature_t>
+void shape_function<quadrature_t>::compute_extrapolation_matrix(
+    matrix const N, matrix const local_nodal_coordinates, matrix const local_quadrature_coordinates)
 {
     // Take short names for consistency with algorithm
     auto const n = local_nodal_coordinates.rows();
@@ -81,7 +80,7 @@ void ShapeFunction<Quadrature>::compute_extrapolation_matrix(matrix const N,
     extrapolation = N_plus * (matrix::Identity(m, m) - xi_hat * xi_hat_plus) + xi * xi_hat_plus;
 }
 
-using LineInterpolation = ShapeFunction<NumericalQuadrature<double>>;
-using SurfaceInterpolation = ShapeFunction<SurfaceQuadrature>;
-using VolumeInterpolation = ShapeFunction<VolumeQuadrature>;
+using line_interpolation = shape_function<numerical_quadrature<double>>;
+using surface_interpolation = shape_function<surface_quadrature>;
+using volume_interpolation = shape_function<volume_quadrature>;
 }

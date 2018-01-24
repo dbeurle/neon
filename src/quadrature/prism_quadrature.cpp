@@ -1,9 +1,9 @@
 
-#include "PrismQuadrature.hpp"
+#include "prism_quadrature.hpp"
 
 namespace neon
 {
-PrismQuadrature::PrismQuadrature(Rule rule)
+prism_quadrature::prism_quadrature(Rule rule)
 {
     switch (rule)
     {
