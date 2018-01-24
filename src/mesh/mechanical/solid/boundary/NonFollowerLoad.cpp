@@ -1,7 +1,7 @@
 
 #include "NonFollowerLoad.hpp"
 
-#include "interpolations/InterpolationFactory.hpp"
+#include "interpolations/interpolation_factory.hpp"
 
 #include <utility>
 

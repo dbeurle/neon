@@ -1,16 +1,16 @@
 
-#include "Line.hpp"
+#include "line.hpp"
 
 #include <Eigen/Geometry>
 
 namespace neon
 {
-Line2::Line2(LineQuadrature::Rule rule) : LineInterpolation(std::make_unique<LineQuadrature>(rule))
+line2::line2(line_quadrature::Rule rule) : line_interpolation(std::make_unique<line_quadrature>(rule))
 {
     this->precompute_shape_functions();
 }
 
-void Line2::precompute_shape_functions()
+void line2::precompute_shape_functions()
 {
     using coordinates_type = std::tuple<int, double>;
 
@@ -49,17 +49,17 @@ void Line2::precompute_shape_functions()
     compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
 }
 
-double Line2::compute_measure(matrix const& nodal_coordinates) const
+double line2::compute_measure(matrix const& nodal_coordinates) const
 {
     return (nodal_coordinates.col(0) - nodal_coordinates.col(1)).norm();
 }
 
-Line3::Line3(LineQuadrature::Rule rule) : LineInterpolation(std::make_unique<LineQuadrature>(rule))
+line3::line3(line_quadrature::Rule rule) : line_interpolation(std::make_unique<line_quadrature>(rule))
 {
     this->precompute_shape_functions();
 }
 
-void Line3::precompute_shape_functions()
+void line3::precompute_shape_functions()
 {
     using coordinates_type = std::tuple<int, double>;
 
@@ -100,7 +100,7 @@ void Line3::precompute_shape_functions()
     compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
 }
 
-double Line3::compute_measure(matrix const& nodal_coordinates) const
+double line3::compute_measure(matrix const& nodal_coordinates) const
 {
     return (nodal_coordinates.col(0) - nodal_coordinates.col(2)).norm();
 }

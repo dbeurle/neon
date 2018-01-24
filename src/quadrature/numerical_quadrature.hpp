@@ -9,19 +9,19 @@
 namespace neon
 {
 /**
- * NumericalQuadrature is a variadic class that defines a generic numerical
+ * numerical_quadrature is a variadic class that defines a generic numerical
  * quadrature class that encapsulates the coordinates, weightings and a method
  * to perform the integration for a functor that accepts a quadrature point
  * index.
  */
 template <typename... Xi>
-class NumericalQuadrature
+class numerical_quadrature
 {
 public:
     using coordinate_type = std::tuple<int, Xi...>;
 
     /** Fix the size of the shape function derivative to the size of the quadrature points */
-    using fem_value_type = std::tuple<vector, matrixxd<std::tuple_size<coordinate_type>::value - 1>>;
+    using fem_value_type = std::tuple<vector, matrixxd<sizeof...(Xi)>>;
 
 public:
     /**
@@ -110,6 +110,6 @@ protected:
                                          //!< evaluated at the quadrature points
 };
 
-using SurfaceQuadrature = NumericalQuadrature<double, double>;
-using VolumeQuadrature = NumericalQuadrature<double, double, double>;
+using surface_quadrature = numerical_quadrature<double, double>;
+using volume_quadrature = numerical_quadrature<double, double, double>;
 }

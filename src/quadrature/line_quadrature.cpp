@@ -1,9 +1,9 @@
 
-#include "LineQuadrature.hpp"
+#include "line_quadrature.hpp"
 
 namespace neon
 {
-LineQuadrature::LineQuadrature(Rule rule)
+line_quadrature::line_quadrature(Rule rule)
 {
     switch (rule)
     {

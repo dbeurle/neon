@@ -1,5 +1,5 @@
 
-#include "Quadrilateral.hpp"
+#include "quadrilateral.hpp"
 
 #include "geometry/Projection.hpp"
 
@@ -8,13 +8,13 @@
 
 namespace neon
 {
-Quadrilateral4::Quadrilateral4(QuadrilateralQuadrature::Rule rule)
-    : SurfaceInterpolation(std::make_unique<QuadrilateralQuadrature>(rule))
+quadrilateral4::quadrilateral4(quadrilateral_quadrature::Rule rule)
+    : surface_interpolation(std::make_unique<quadrilateral_quadrature>(rule))
 {
     this->precompute_shape_functions();
 }
 
-void Quadrilateral4::precompute_shape_functions()
+void quadrilateral4::precompute_shape_functions()
 {
     using NodalCoordinate = std::tuple<int, double, double>;
 
@@ -25,12 +25,12 @@ void Quadrilateral4::precompute_shape_functions()
     matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 3);
 
     numerical_quadrature->evaluate([&](auto const& coordinate) {
-        auto const& [l, xi, eta] = coordinate;
+        auto const & [ l, xi, eta ] = coordinate;
 
         vector N(4);
         matrix rhea(4, 2);
 
-        for (auto const& [a, xi_a, eta_a] : local_coordinates)
+        for (auto const & [ a, xi_a, eta_a ] : local_coordinates)
         {
             N(a) = 0.25 * (1.0 + xi_a * xi) * (1.0 + eta_a * eta);
             rhea(a, 0) = 0.25 * (1.0 + eta_a * eta) * xi_a;
@@ -48,7 +48,7 @@ void Quadrilateral4::precompute_shape_functions()
     // Compute extrapolation algorithm matrices
     matrix local_nodal_coordinates = matrix::Ones(nodes(), 3);
 
-    for (auto const& [a, xi_a, eta_a] : local_coordinates)
+    for (auto const & [ a, xi_a, eta_a ] : local_coordinates)
     {
         local_nodal_coordinates(a, 0) = xi_a;
         local_nodal_coordinates(a, 1) = eta_a;
@@ -56,10 +56,10 @@ void Quadrilateral4::precompute_shape_functions()
     compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
 }
 
-double Quadrilateral4::compute_measure(matrix const& nodal_coordinates) const
+double quadrilateral4::compute_measure(matrix const& nodal_coordinates) const
 {
     return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
-        auto const& [N, dN] = femval;
+        auto const & [ N, dN ] = femval;
 
         matrix2 const Jacobian = geometry::project_to_plane(nodal_coordinates) * dN;
 
@@ -67,13 +67,13 @@ double Quadrilateral4::compute_measure(matrix const& nodal_coordinates) const
     });
 }
 
-Quadrilateral8::Quadrilateral8(QuadrilateralQuadrature::Rule rule)
-    : SurfaceInterpolation(std::make_unique<QuadrilateralQuadrature>(rule))
+quadrilateral8::quadrilateral8(quadrilateral_quadrature::Rule rule)
+    : surface_interpolation(std::make_unique<quadrilateral_quadrature>(rule))
 {
     this->precompute_shape_functions();
 }
 
-void Quadrilateral8::precompute_shape_functions()
+void quadrilateral8::precompute_shape_functions()
 {
     using NodalCoordinate = std::tuple<int, double, double>;
 
@@ -90,7 +90,7 @@ void Quadrilateral8::precompute_shape_functions()
     matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 3);
 
     numerical_quadrature->evaluate([&](auto const& coordinate) {
-        auto const& [l, xi, eta] = coordinate;
+        auto const & [ l, xi, eta ] = coordinate;
 
         vector N(8);
         matrix rhea(8, 2);
@@ -133,7 +133,7 @@ void Quadrilateral8::precompute_shape_functions()
     // Compute extrapolation algorithm matrices
     matrix local_nodal_coordinates = matrix::Ones(nodes(), 3);
 
-    for (auto const& [a, xi_a, eta_a] : local_coordinates)
+    for (auto const & [ a, xi_a, eta_a ] : local_coordinates)
     {
         local_nodal_coordinates(a, 0) = xi_a;
         local_nodal_coordinates(a, 1) = eta_a;
@@ -141,10 +141,10 @@ void Quadrilateral8::precompute_shape_functions()
     compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
 }
 
-double Quadrilateral8::compute_measure(matrix const& nodal_coordinates) const
+double quadrilateral8::compute_measure(matrix const& nodal_coordinates) const
 {
     return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
-        auto const& [N, dN] = femval;
+        auto const & [ N, dN ] = femval;
 
         matrix2 const Jacobian = geometry::project_to_plane(nodal_coordinates) * dN;
 
@@ -152,13 +152,13 @@ double Quadrilateral8::compute_measure(matrix const& nodal_coordinates) const
     });
 }
 
-Quadrilateral9::Quadrilateral9(QuadrilateralQuadrature::Rule rule)
-    : SurfaceInterpolation(std::make_unique<QuadrilateralQuadrature>(rule))
+quadrilateral9::quadrilateral9(quadrilateral_quadrature::Rule rule)
+    : surface_interpolation(std::make_unique<quadrilateral_quadrature>(rule))
 {
     this->precompute_shape_functions();
 }
 
-void Quadrilateral9::precompute_shape_functions()
+void quadrilateral9::precompute_shape_functions()
 {
     using NodalCoordinate = std::tuple<int, double, double>;
 
@@ -176,7 +176,7 @@ void Quadrilateral9::precompute_shape_functions()
     matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 3);
 
     numerical_quadrature->evaluate([&](auto const& coordinate) {
-        auto const& [l, xi, eta] = coordinate;
+        auto const & [ l, xi, eta ] = coordinate;
 
         vector N(9);
         matrix rhea(9, 2);
@@ -222,7 +222,7 @@ void Quadrilateral9::precompute_shape_functions()
     // Compute extrapolation algorithm matrices
     matrix local_nodal_coordinates = matrix::Ones(nodes(), 3);
 
-    for (auto const& [a, xi_a, eta_a] : local_coordinates)
+    for (auto const & [ a, xi_a, eta_a ] : local_coordinates)
     {
         local_nodal_coordinates(a, 0) = xi_a;
         local_nodal_coordinates(a, 1) = eta_a;
@@ -230,10 +230,10 @@ void Quadrilateral9::precompute_shape_functions()
     compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
 }
 
-double Quadrilateral9::compute_measure(matrix const& nodal_coordinates) const
+double quadrilateral9::compute_measure(matrix const& nodal_coordinates) const
 {
     return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
-        auto const& [N, dN] = femval;
+        auto const & [ N, dN ] = femval;
 
         matrix2 const Jacobian = geometry::project_to_plane(nodal_coordinates) * dN;
 

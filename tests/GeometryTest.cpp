@@ -4,7 +4,7 @@
 #include <catch.hpp>
 
 #include "mesh/BasicMesh.hpp"
-#include "mesh/ElementTopology.hpp"
+#include "mesh/element_topology.hpp"
 #include "mesh/NodeOrderingAdapter.hpp"
 
 #include "mesh/MaterialCoordinates.hpp"
@@ -58,25 +58,25 @@ TEST_CASE("Basic mesh test")
     {
         for (auto const& mesh : basic_mesh.meshes("bottom"))
         {
-            REQUIRE(mesh.topology() == ElementTopology::Quadrilateral4);
+            REQUIRE(mesh.topology() == element_topology::quadrilateral4);
             REQUIRE(mesh.nodes_per_element() == 4);
             REQUIRE(mesh.elements() == 9);
         }
         for (auto const& mesh : basic_mesh.meshes("cube"))
         {
-            REQUIRE(mesh.topology() == ElementTopology::Hexahedron8);
+            REQUIRE(mesh.topology() == element_topology::hexahedron8);
             REQUIRE(mesh.nodes_per_element() == 8);
             REQUIRE(mesh.elements() == 27);
         }
         for (auto const& mesh : basic_mesh.meshes("sides"))
         {
-            REQUIRE(mesh.topology() == ElementTopology::Quadrilateral4);
+            REQUIRE(mesh.topology() == element_topology::quadrilateral4);
             REQUIRE(mesh.nodes_per_element() == 4);
             REQUIRE(mesh.elements() == 36);
         }
         for (auto const& mesh : basic_mesh.meshes("top"))
         {
-            REQUIRE(mesh.topology() == ElementTopology::Quadrilateral4);
+            REQUIRE(mesh.topology() == element_topology::quadrilateral4);
             REQUIRE(mesh.nodes_per_element() == 4);
             REQUIRE(mesh.elements() == 9);
         }

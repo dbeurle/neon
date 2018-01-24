@@ -1,15 +1,69 @@
 
-#include "Triangle6.hpp"
+#include "triangle.hpp"
+
+#include <Eigen/Geometry>
 
 namespace neon
 {
-Triangle6::Triangle6(TriangleQuadrature::Rule rule)
-    : SurfaceInterpolation(std::make_unique<SurfaceQuadrature>(TriangleQuadrature(rule)))
+triangle3::triangle3(triangle_quadrature::Rule rule)
+    : surface_interpolation(std::make_unique<triangle_quadrature>(rule))
 {
     this->precompute_shape_functions();
 }
 
-void Triangle6::precompute_shape_functions()
+void triangle3::precompute_shape_functions()
+{
+    // using NodalCoordinate = std::tuple<int, double, double>;
+
+    // Initialize nodal coordinates array as r and s
+    // std::array<NodalCoordinate, 3> constexpr local_coordinates = {{
+    //     {0, 1.0, 0.0},
+    //     {1, 0.0, 1.0},
+    //     {2, 0.0, 0.0},
+    // }};
+
+    numerical_quadrature->evaluate([&](auto const& coordinates) {
+        auto const & [ l, r, s ] = coordinates;
+
+        vector N(3);
+        matrix rhea(3, 2);
+
+        N(0) = r;
+        N(1) = s;
+        N(2) = 1.0 - r - s;
+
+        rhea(0, 0) = 1.0;
+        rhea(1, 0) = 0.0;
+        rhea(2, 0) = -1.0;
+
+        rhea(0, 1) = 0.0;
+        rhea(1, 1) = 1.0;
+        rhea(2, 1) = -1.0;
+
+        return std::make_tuple(N, rhea);
+    });
+
+    extrapolation = matrix::Ones(nodes(), 1);
+}
+
+double triangle3::compute_measure(matrix const& nodal_coordinates) const
+{
+    // Use the cross product identity 2A = | a x b | to compute face area
+    vector3 const direction0 = nodal_coordinates.col(0) - nodal_coordinates.col(2);
+    vector3 const direction1 = nodal_coordinates.col(1) - nodal_coordinates.col(2);
+
+    vector3 normal = direction0.cross(direction1);
+
+    return normal.norm() / 2.0;
+}
+
+triangle6::triangle6(triangle_quadrature::Rule rule)
+    : surface_interpolation(std::make_unique<surface_quadrature>(triangle_quadrature(rule)))
+{
+    this->precompute_shape_functions();
+}
+
+void triangle6::precompute_shape_functions()
 {
     using NodalCoordinate = std::tuple<int, double, double>;
 
@@ -27,7 +81,7 @@ void Triangle6::precompute_shape_functions()
     matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 3);
 
     numerical_quadrature->evaluate([&](auto const& coordinate) {
-        auto const& [l, r, s] = coordinate;
+        auto const & [ l, r, s ] = coordinate;
 
         auto const t = 1.0 - r - s;
 
@@ -68,7 +122,7 @@ void Triangle6::precompute_shape_functions()
     // Compute extrapolation algorithm matkrices
     matrix local_nodal_coordinates = matrix::Ones(nodes(), 3);
 
-    for (auto const& [a, r, s] : local_coordinates)
+    for (auto const & [ a, r, s ] : local_coordinates)
     {
         local_nodal_coordinates(a, 0) = r;
         local_nodal_coordinates(a, 1) = s;
@@ -76,7 +130,7 @@ void Triangle6::precompute_shape_functions()
     compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
 }
 
-double Triangle6::compute_measure(matrix const& nodal_coordinates)
+double triangle6::compute_measure(matrix const& nodal_coordinates)
 {
     // Use numerical quadrature to compute int () dA
     double face_area = 0.0;
