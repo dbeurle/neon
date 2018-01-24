@@ -104,9 +104,8 @@ inline matrix sym_gradient(matrix const& L)
 {
     auto const nodes_per_element = L.cols();
 
-    auto constexpr voigt_dimension = spatial_to_voigt(spatial_dimension);
-
-    matrix B = matrix::Zero(voigt_dimension, spatial_dimension * nodes_per_element);
+    matrix B = matrix::Zero(spatial_to_voigt(spatial_dimension),
+                            spatial_dimension * nodes_per_element);
 
     if (spatial_dimension == 3)
     {

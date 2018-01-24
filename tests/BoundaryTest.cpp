@@ -5,8 +5,8 @@
 
 #include "mesh/DofAllocator.hpp"
 
-#include "interpolations/Triangle3.hpp"
-#include "quadrature/TriangleQuadrature.hpp"
+#include "interpolations/triangle.hpp"
+#include "quadrature/triangle_quadrature.hpp"
 
 #include "mesh/Submesh.hpp"
 
@@ -121,7 +121,7 @@ TEST_CASE("Traction test for triangle", "[Traction]")
         REQUIRE(Json::parseFromStream(reader, times_stream, &times, &input_errors));
         REQUIRE(Json::parseFromStream(reader, loads_stream, &loads, &input_errors));
 
-        traction patch(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
+        traction patch(std::make_unique<triangle3>(triangle_quadrature::Rule::OnePoint),
                        nodal_connectivity,
                        dof_list,
                        material_coordinates,
@@ -142,7 +142,7 @@ TEST_CASE("Traction test for triangle", "[Traction]")
         REQUIRE(Json::parseFromStream(reader, times_stream, &times, &input_errors));
         REQUIRE(Json::parseFromStream(reader, loads_stream, &loads, &input_errors));
 
-        traction patch(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
+        traction patch(std::make_unique<triangle3>(triangle_quadrature::Rule::OnePoint),
                        nodal_connectivity,
                        dof_list,
                        material_coordinates,
@@ -182,7 +182,7 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
         REQUIRE(Json::parseFromStream(reader, times_stream, &times, &input_errors));
         REQUIRE(Json::parseFromStream(reader, loads_stream, &loads, &input_errors));
 
-        pressure pressure_patch(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
+        pressure pressure_patch(std::make_unique<triangle3>(triangle_quadrature::Rule::OnePoint),
                                 nodal_connectivity,
                                 dof_list,
                                 material_coordinates,
@@ -207,7 +207,7 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
         REQUIRE(Json::parseFromStream(reader, times_stream, &times, &input_errors));
         REQUIRE(Json::parseFromStream(reader, loads_stream, &loads, &input_errors));
 
-        pressure pressure_patch(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
+        pressure pressure_patch(std::make_unique<triangle3>(triangle_quadrature::Rule::OnePoint),
                                 nodal_connectivity,
                                 dof_list,
                                 material_coordinates,
@@ -265,8 +265,8 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
     REQUIRE(submeshes.at(0).elements() == 1);
     REQUIRE(submeshes.at(1).elements() == 1);
 
-    REQUIRE(submeshes.at(0).topology() == ElementTopology::Triangle3);
-    REQUIRE(submeshes.at(1).topology() == ElementTopology::Quadrilateral4);
+    REQUIRE(submeshes.at(0).topology() == element_topology::triangle3);
+    REQUIRE(submeshes.at(1).topology() == element_topology::quadrilateral4);
 
     REQUIRE(submeshes.at(0).nodes_per_element() == 3);
     REQUIRE(submeshes.at(1).nodes_per_element() == 4);
@@ -335,7 +335,7 @@ TEST_CASE("Newton cooling boundary conditions")
         REQUIRE(Json::parseFromStream(reader, h_stream, &flux, &input_errors));
         REQUIRE(Json::parseFromStream(reader, T_inf_stream, &T_inf, &input_errors));
 
-        newton_cooling patch(std::make_unique<Triangle3>(TriangleQuadrature::Rule::OnePoint),
+        newton_cooling patch(std::make_unique<triangle3>(triangle_quadrature::Rule::OnePoint),
                              nodal_connectivity,
                              dof_list,
                              material_coordinates,

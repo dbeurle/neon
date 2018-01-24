@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/ElementTopology.hpp"
+#include "mesh/element_topology.hpp"
 #include "numeric/IndexTypes.hpp"
 
 #include <json/forwards.h>
@@ -19,7 +19,7 @@ public:
     auto elements() const { return nodal_connectivity.size(); }
 
     /** @return The element topology for this mesh */
-    ElementTopology const& topology() const { return element_topology; }
+    element_topology const& topology() const { return m_topology; }
 
     /** @return a list of the element nodal connectivities */
     List const& local_node_list(int const element) const { return nodal_connectivity[element]; }
@@ -34,7 +34,7 @@ public:
     auto const& connectivities() const { return nodal_connectivity; }
 
 protected:
-    ElementTopology element_topology;
+    element_topology m_topology;
     std::vector<List> nodal_connectivity;
 };
 }

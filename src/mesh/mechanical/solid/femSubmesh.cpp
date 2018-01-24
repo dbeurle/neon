@@ -4,7 +4,7 @@
 #include "Exceptions.hpp"
 
 #include "constitutive/ConstitutiveModelFactory.hpp"
-#include "interpolations/InterpolationFactory.hpp"
+#include "interpolations/interpolation_factory.hpp"
 #include "material/Material.hpp"
 #include "mesh/DofAllocator.hpp"
 #include "mesh/MaterialCoordinates.hpp"
