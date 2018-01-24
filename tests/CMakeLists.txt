@@ -9,7 +9,7 @@ foreach(test
              linear_solvers
              material
              boundary
-             # ConstitutiveTest
+             constitutive
              # GeometryTest
              # MatrixSystemTest
              )
