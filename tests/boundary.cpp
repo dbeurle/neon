@@ -30,12 +30,12 @@ constexpr auto ZERO_MARGIN = 1.0e-5;
 
 TEST_CASE("Boundary unit test", "[Boundary]")
 {
+    std::vector<double> times{0.0, 1.0, 2.0, 3.0};
     SECTION("Check time data saved correctly")
     {
-        std::vector<double> times{0.0, 1.0, 2.0, 3.0};
         std::vector<double> loads{0.0, 1.0, 2.0, 3.0};
 
-        Boundary boundary(json::parse(times), json::parse(loads));
+        Boundary boundary(times, loads);
 
         auto const time_history = boundary.time_history();
 
@@ -46,8 +46,9 @@ TEST_CASE("Boundary unit test", "[Boundary]")
     }
     SECTION("Monotonic loading interpolation test")
     {
-        Boundary boundary(json::parse(std::vector<double>{0.0, 1.0, 2.0, 3.0}),
-                          json::parse(std::vector<double>{0.0, 0.5, 1.0, 1.5}));
+        std::vector<double> loads{0.0, 0.5, 1.0, 1.5};
+
+        Boundary boundary(times, loads);
 
         REQUIRE(boundary.interpolate_prescribed_load(0.75) == Approx(0.375));
         REQUIRE(boundary.interpolate_prescribed_load(0.5) == Approx(0.25));
@@ -60,8 +61,9 @@ TEST_CASE("Boundary unit test", "[Boundary]")
     }
     SECTION("Unload interpolation test")
     {
-        Boundary boundary(json::parse(std::vector<double>{0.0, 1.0, 2.0, 3.0}),
-                          json::parse(std::vector<double>{0.0, 1.0, 0.0, 3.0}));
+        std::vector<double> loads{0.0, 1.0, 0.0, 3.0};
+
+        Boundary boundary(times, loads);
 
         REQUIRE(boundary.interpolate_prescribed_load(0.0) == Approx(0.0).margin(ZERO_MARGIN));
         REQUIRE(boundary.interpolate_prescribed_load(0.5) == Approx(0.5));
@@ -99,8 +101,8 @@ TEST_CASE("Traction test for triangle", "[Traction]")
                        nodal_connectivity,
                        dof_list,
                        material_coordinates,
-                       "[0.0, 1.0]",
-                       "[0.0, 1.0]");
+                       json::parse("[0.0, 1.0]"),
+                       json::parse("[0.0, 1.0]"));
 
         REQUIRE(patch.elements() == 1);
 
@@ -115,8 +117,8 @@ TEST_CASE("Traction test for triangle", "[Traction]")
                        nodal_connectivity,
                        dof_list,
                        material_coordinates,
-                       "[0.0, 1.0]",
-                       "[0.0, 2.0]");
+                       json::parse("[0.0, 1.0]"),
+                       json::parse("[0.0, 2.0]"));
 
         REQUIRE(patch.elements() == 1);
 
@@ -147,8 +149,8 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
                                 nodal_connectivity,
                                 dof_list,
                                 material_coordinates,
-                                "[0.0, 1.0]",
-                                "[0.0, -1.0]");
+                                json::parse("[0.0, 1.0]"),
+                                json::parse("[0.0, -1.0]"));
 
         REQUIRE(pressure_patch.elements() == 1);
 
@@ -166,8 +168,8 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
                                 nodal_connectivity,
                                 dof_list,
                                 material_coordinates,
-                                "[0.0, 1.0]",
-                                "[0.0, -2.0]");
+                                json::parse("[0.0, 1.0]"),
+                                json::parse("[0.0, -2.0]"));
 
         REQUIRE(pressure_patch.elements() == 1);
 
