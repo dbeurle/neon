@@ -70,9 +70,9 @@ mesh_coordinates<traits>::mesh_coordinates(mesh_coordinates::coordinate_t coordi
 }
 
 template <typename traits>
-mesh_coordinates<traits>::mesh_coordinates(Json::Value const& mesh_file)
+mesh_coordinates<traits>::mesh_coordinates(json const& mesh_file)
 {
-    if (mesh_file["Nodes"].empty())
+    if (mesh_file["Nodes"].is_null())
     {
         throw std::runtime_error("The mesh file is missing the \"Nodes\" field");
     }
@@ -87,7 +87,7 @@ mesh_coordinates<traits>::mesh_coordinates(Json::Value const& mesh_file)
     {
         for (auto i = 0; i < fixed_size; ++i)
         {
-            X(i, node) = input_coordinates[node][i].asDouble();
+            X(i, node) = input_coordinates[node][i];
         }
     }
 }
