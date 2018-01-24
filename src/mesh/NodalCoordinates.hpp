@@ -47,7 +47,7 @@ public:
     explicit mesh_coordinates(coordinate_t const coordinates);
 
     /** Construct with a list of coordinates in json format */
-    explicit mesh_coordinates(Json::Value const& mesh_file);
+    explicit mesh_coordinates(json const& mesh_file);
 
     [[nodiscard]] auto size() const { return X.cols(); }
 

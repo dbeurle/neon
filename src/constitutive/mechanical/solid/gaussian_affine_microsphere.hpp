@@ -29,7 +29,7 @@ public:
      * @param material_data Json object with input file material data
      */
     explicit gaussian_affine_microsphere(std::shared_ptr<InternalVariables>& variables,
-                                         Json::Value const& material_data,
+                                         json const& material_data,
                                          unit_sphere_quadrature::Rule const rule);
 
     virtual void update_internal_variables(double const time_step_size) override;

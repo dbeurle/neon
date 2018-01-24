@@ -16,14 +16,14 @@
 
 namespace neon
 {
-bool is_reduced_integration(Json::Value const& mesh_data)
+bool is_reduced_integration(json const& mesh_data)
 {
     return mesh_data["ElementOptions"]["Quadrature"].empty()
                ? false
                : mesh_data["ElementOptions"]["Quadrature"].asString() == "Reduced";
 }
 
-void check_element_options(Json::Value const& mesh_data)
+void check_element_options(json const& mesh_data)
 {
     if (!mesh_data.isMember("ElementOptions"))
     {
@@ -33,7 +33,7 @@ void check_element_options(Json::Value const& mesh_data)
 
 /** Factory method for the three dimensional shape functions */
 std::unique_ptr<volume_interpolation> make_volume_interpolation(element_topology const topology,
-                                                                Json::Value const& mesh_data)
+                                                                json const& mesh_data)
 {
     check_element_options(mesh_data);
 
@@ -97,7 +97,7 @@ std::unique_ptr<volume_interpolation> make_volume_interpolation(element_topology
 }
 
 std::unique_ptr<surface_interpolation> make_surface_interpolation(element_topology const topology,
-                                                                  Json::Value const& mesh_data)
+                                                                  json const& mesh_data)
 {
     check_element_options(mesh_data);
 
@@ -142,7 +142,7 @@ std::unique_ptr<surface_interpolation> make_surface_interpolation(element_topolo
 }
 
 std::unique_ptr<line_interpolation> make_line_interpolation(element_topology const topology,
-                                                            Json::Value const& mesh_data)
+                                                            json const& mesh_data)
 {
     check_element_options(mesh_data);
 
