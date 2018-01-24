@@ -10,7 +10,7 @@ foreach(test
              material
              boundary
              constitutive
-             # GeometryTest
+             mesh
              # MatrixSystemTest
              )
     add_executable(${test} ${test}.cpp)
