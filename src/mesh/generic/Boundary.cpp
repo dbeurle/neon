@@ -10,11 +10,11 @@
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/zip.hpp>
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 namespace neon
 {
-Boundary::Boundary(Json::Value const& times, Json::Value const& loads)
+Boundary::Boundary(json const& times, json const& loads)
 {
     using namespace ranges;
 
@@ -32,17 +32,13 @@ Boundary::Boundary(Json::Value const& times, Json::Value const& loads)
     {
         throw std::runtime_error("The time and load vectors must be of the same size.");
     }
-    if (ranges::adjacent_find(times,
-                              [](auto const& left_value, auto const& right_value) {
-                                  return left_value.asDouble() > right_value.asDouble();
-                              })
-        != times.end())
+    if (!std::is_sorted(std::begin(times), std::end(times)))
     {
         throw std::runtime_error("Load times must be monotonically increasing.");
     }
 
-    time_load = view::zip(times, loads) | view::transform([](auto const& time_load) {
-                    return std::make_pair(time_load.first.asDouble(), time_load.second.asDouble());
+    time_load = view::zip(times, loads) | view::transform([](auto const time_load) {
+                    return std::make_pair(time_load.first, time_load.second);
                 });
 }
 

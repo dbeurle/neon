@@ -17,7 +17,7 @@ namespace neon
 class BasicMesh : public NodalCoordinates
 {
 public:
-    BasicMesh(Json::Value const& mesh_file);
+    BasicMesh(json const& mesh_file);
 
     /** @return mesh matching a specific name */
     [[nodiscard]] std::vector<Submesh> const& meshes(std::string const& name) const;

@@ -8,11 +8,11 @@
 
 #include <range/v3/algorithm/max_element.hpp>
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 namespace neon
 {
-AdaptiveLoadStep::AdaptiveLoadStep(Json::Value const& increment_data,
+AdaptiveLoadStep::AdaptiveLoadStep(json const& increment_data,
                                    std::vector<double> mandatory_time_history)
 {
     // Set the time history to the input data
@@ -94,7 +94,7 @@ void AdaptiveLoadStep::update_convergence_state(bool const is_converged)
     }
 }
 
-void AdaptiveLoadStep::reset(Json::Value const& new_increment_data)
+void AdaptiveLoadStep::reset(json const& new_increment_data)
 {
     // Update the history counters
     total_time += current_time;
@@ -107,18 +107,17 @@ void AdaptiveLoadStep::reset(Json::Value const& new_increment_data)
     consecutive_unconverged = consecutive_converged = 0;
 }
 
-void AdaptiveLoadStep::parse_input(Json::Value const& increment_data,
-                                   double const maximum_mandatory_time)
+void AdaptiveLoadStep::parse_input(json const& increment_data, double const maximum_mandatory_time)
 {
     check_increment_data(increment_data);
 
     // Initial factor determined by input
-    initial_time = increment_data["Increments"]["Initial"].asDouble();
+    initial_time = increment_data["Increments"]["Initial"];
 
-    minimum_increment = increment_data["Increments"]["Minimum"].asDouble();
-    maximum_increment = increment_data["Increments"]["Maximum"].asDouble();
+    minimum_increment = increment_data["Increments"]["Minimum"];
+    maximum_increment = increment_data["Increments"]["Maximum"];
 
-    final_time = increment_data["Period"].asDouble();
+    final_time = increment_data["Period"];
 
     if (maximum_mandatory_time > final_time)
     {
@@ -131,21 +130,21 @@ void AdaptiveLoadStep::parse_input(Json::Value const& increment_data,
     current_time = std::min(time_queue.top(), initial_time);
 }
 
-void AdaptiveLoadStep::check_increment_data(Json::Value const& increment_data)
+void AdaptiveLoadStep::check_increment_data(json const& increment_data)
 {
-    if (!increment_data.isMember("Period"))
+    if (!increment_data.count("Period"))
         throw std::runtime_error("Time data requires a \"Period\" value\n");
 
-    if (!increment_data.isMember("Increments"))
+    if (!increment_data.count("Increments"))
         throw std::runtime_error("\"Increments\" not provided!\n");
 
-    if (!increment_data["Increments"].isMember("Initial"))
+    if (!increment_data["Increments"].count("Initial"))
         throw std::runtime_error("Increment-Initial data not provided!\n");
 
-    if (!increment_data["Increments"].isMember("Minimum"))
+    if (!increment_data["Increments"].count("Minimum"))
         throw std::runtime_error("Increment-Minimum data not provided!\n");
 
-    if (!increment_data["Increments"].isMember("Maximum"))
+    if (!increment_data["Increments"].count("Maximum"))
         throw std::runtime_error("Increment-Maximum data not provided!\n");
 }
 }

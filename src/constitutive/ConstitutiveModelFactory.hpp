@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include <json/forwards.h>
+#include "io/json.hpp"
 
 #include "InternalVariablesForwards.hpp"
 
@@ -17,16 +17,16 @@ namespace mechanical::solid
 using ConstitutiveModel = neon::ConstitutiveModel<3, 6>;
 
 std::unique_ptr<ConstitutiveModel> make_constitutive_model(std::shared_ptr<InternalVariables>& variables,
-                                                           Json::Value const& material_data,
-                                                           Json::Value const& simulation_data);
+                                                           json const& material_data,
+                                                           json const& simulation_data);
 }
 namespace mechanical::plane
 {
 using ConstitutiveModel = neon::ConstitutiveModel<2, 3>;
 
 std::unique_ptr<ConstitutiveModel> make_constitutive_model(std::shared_ptr<InternalVariables>& variables,
-                                                           Json::Value const& material_data,
-                                                           Json::Value const& simulation_data);
+                                                           json const& material_data,
+                                                           json const& simulation_data);
 }
 
 namespace diffusion
@@ -34,7 +34,7 @@ namespace diffusion
 using ConstitutiveModel = neon::ConstitutiveModel<3, 3>;
 
 std::unique_ptr<ConstitutiveModel> make_constitutive_model(std::shared_ptr<InternalVariables>& variables,
-                                                           Json::Value const& material_data,
-                                                           Json::Value const& simulation_data);
+                                                           json const& material_data,
+                                                           json const& simulation_data);
 }
 }

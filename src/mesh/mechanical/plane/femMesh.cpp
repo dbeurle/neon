@@ -8,7 +8,7 @@
 #include <memory>
 #include <numeric>
 
-#include <json/value.h>
+#include "io/json.hpp"
 #include <termcolor/termcolor.hpp>
 
 #include <range/v3/action/join.hpp>
@@ -19,14 +19,12 @@
 
 namespace neon::mechanical::plane
 {
-femMesh::femMesh(BasicMesh const& basic_mesh,
-                 Json::Value const& material_data,
-                 Json::Value const& simulation_data)
+femMesh::femMesh(BasicMesh const& basic_mesh, json const& material_data, json const& simulation_data)
     : material_coordinates(std::make_shared<MaterialCoordinates>(basic_mesh.coordinates()))
 {
     check_boundary_conditions(simulation_data["BoundaryConditions"]);
 
-    auto const& simulation_name = simulation_data["Name"].asString();
+    auto const& simulation_name = simulation_data["Name"].get<std::string>();
 
     for (auto const& submesh : basic_mesh.meshes(simulation_name))
     {
@@ -69,16 +67,15 @@ bool femMesh::is_nonfollower_load(std::string const& boundary_type) const
     return boundary_type == "Traction" || boundary_type == "Pressure" || boundary_type == "BodyForce";
 }
 
-void femMesh::allocate_boundary_conditions(Json::Value const& simulation_data,
-                                           BasicMesh const& basic_mesh)
+void femMesh::allocate_boundary_conditions(json const& simulation_data, BasicMesh const& basic_mesh)
 {
     auto const& boundary_data = simulation_data["BoundaryConditions"];
 
     // Populate the boundary conditions and their corresponding mesh
     for (auto const& boundary : boundary_data)
     {
-        auto const& boundary_name = boundary["Name"].asString();
-        auto const& boundary_type = boundary["Type"].asString();
+        auto const& boundary_name = boundary["Name"].get<std::string>();
+        auto const& boundary_type = boundary["Type"].get<std::string>();
 
         if (boundary_type == "Displacement")
         {
@@ -88,10 +85,10 @@ void femMesh::allocate_boundary_conditions(Json::Value const& simulation_data,
         {
             nonfollower_loads.emplace(boundary_name,
                                       nonfollower_load_boundary(material_coordinates,
-                                                              basic_mesh.meshes(boundary_name),
-                                                              simulation_data,
-                                                              boundary,
-                                                              dof_table));
+                                                                basic_mesh.meshes(boundary_name),
+                                                                simulation_data,
+                                                                boundary,
+                                                                dof_table));
         }
         else
         {
@@ -100,19 +97,20 @@ void femMesh::allocate_boundary_conditions(Json::Value const& simulation_data,
     }
 }
 
-void femMesh::allocate_displacement_boundary(Json::Value const& boundary, BasicMesh const& basic_mesh)
+void femMesh::allocate_displacement_boundary(json const& boundary, BasicMesh const& basic_mesh)
 {
     using namespace ranges;
 
-    auto const& boundary_name = boundary["Name"].asString();
+    auto const& boundary_name = boundary["Name"].get<std::string>();
 
     auto const dirichlet_dofs = this->filter_dof_list(basic_mesh.meshes(boundary_name));
 
-    for (auto const& name : boundary["Values"].getMemberNames())
+    for (json::const_iterator it = std::begin(boundary["Values"]); it != std::end(boundary["Values"]);
+         ++it)
     {
-        auto const& dof_offset = dof_table.find(name)->second;
+        auto const& dof_offset = dof_table.find(it.key())->second;
 
-        if (dof_table.find(name) == dof_table.end())
+        if (dof_table.find(it.key()) == dof_table.end())
         {
             throw std::runtime_error("x or y are acceptable coordinates\n");
         }
@@ -122,9 +120,7 @@ void femMesh::allocate_displacement_boundary(Json::Value const& boundary, BasicM
             return dof + dof_offset;
         });
 
-        displacement_bcs[boundary_name].emplace_back(boundary_dofs,
-                                                     boundary["Time"],
-                                                     boundary["Values"][name]);
+        displacement_bcs[boundary_name].emplace_back(boundary_dofs, boundary["Time"], it.value());
     }
 }
 
@@ -148,7 +144,8 @@ std::vector<double> femMesh::time_history() const
 
             for (auto const& boundary_variant : boundaries)
             {
-                std::visit([&](auto const& surface_mesh) {
+                std::visit(
+                    [&](auto const& surface_mesh) {
                         history |= ranges::action::push_back(surface_mesh.time_history());
                     },
                     boundary_variant);
@@ -158,13 +155,13 @@ std::vector<double> femMesh::time_history() const
     return std::move(history) | ranges::action::sort | ranges::action::unique;
 }
 
-void femMesh::check_boundary_conditions(Json::Value const& boundary_data) const
+void femMesh::check_boundary_conditions(json const& boundary_data) const
 {
     for (auto const& boundary : boundary_data)
     {
         for (auto const& mandatory_field : {"Name", "Time", "Type", "Values"})
         {
-            if (!boundary.isMember(mandatory_field))
+            if (!boundary.count(mandatory_field))
             {
                 throw std::runtime_error("\"" + std::string(mandatory_field)
                                          + "\" was not specified in \"BoundaryCondition\".");

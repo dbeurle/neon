@@ -17,7 +17,7 @@ public:
 public:
     /** Provide an internal variable class to be populated by the constitutive model */
     explicit IsotropicLinearElasticity(std::shared_ptr<InternalVariables>& variables,
-                                       Json::Value const& material_data,
+                                       json const& material_data,
                                        plane const state);
 
     ~IsotropicLinearElasticity();

@@ -30,8 +30,8 @@ class boundary_mesh
 public:
     explicit boundary_mesh(std::shared_ptr<MaterialCoordinates>& material_coordinates,
                            std::vector<Submesh> const& submeshes,
-                           Json::Value const& boundary,
-                           Json::Value const& mesh_data);
+                           json const& boundary,
+                           json const& mesh_data);
 
     /** @return the boundaries which contribute only to the load vector */
     [[nodiscard]] auto const& load_interface() const { return load_boundaries; }

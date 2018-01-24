@@ -15,12 +15,12 @@
 
 namespace neon
 {
-FileIO::FileIO(std::string file_name, Json::Value const& visualisation_data)
+FileIO::FileIO(std::string file_name, json const& visualisation_data)
     : file_name(file_name), unstructured_mesh(vtkSmartPointer<vtkUnstructuredGrid>::New())
 {
-    if (visualisation_data.isMember("WriteEvery"))
+    if (visualisation_data.count("WriteEvery"))
     {
-        write_every = visualisation_data["WriteEvery"].asInt();
+        write_every = visualisation_data["WriteEvery"];
     }
 
     boost::filesystem::path directory_path(directory_name);
@@ -39,11 +39,11 @@ FileIO::FileIO(std::string file_name, Json::Value const& visualisation_data)
 
     unstructured_mesh->Allocate();
 
-    if (visualisation_data.isMember("Fields"))
+    if (visualisation_data.count("Fields"))
     {
         for (auto const& field : visualisation_data["Fields"])
         {
-            output_set.insert(field.asString());
+            output_set.insert(field.get<std::string>());
         }
     }
 }
@@ -97,7 +97,7 @@ void FileIO::add_field(std::string const& name, vector const& field, int const c
 
 namespace diffusion
 {
-FileIO::FileIO(std::string file_name, Json::Value const& visualisation_data, femMesh const& fem_mesh)
+FileIO::FileIO(std::string file_name, json const& visualisation_data, femMesh const& fem_mesh)
     : neon::FileIO(file_name, visualisation_data), fem_mesh(fem_mesh)
 {
     // Check the output set against the known values for this module

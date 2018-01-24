@@ -4,7 +4,7 @@
 #include <utility>
 #include <vector>
 
-#include <json/forwards.h>
+#include "io/json.hpp"
 
 namespace neon
 {
@@ -15,7 +15,7 @@ namespace neon
 class Boundary
 {
 public:
-    explicit Boundary(Json::Value const& times, Json::Value const& loads);
+    explicit Boundary(json const& times, json const& loads);
 
     ~Boundary() = default;
 

@@ -7,28 +7,40 @@
 
 namespace neon
 {
-IsotropicElasticPlasticDamage::IsotropicElasticPlasticDamage(Json::Value const& material_data)
+IsotropicElasticPlasticDamage::IsotropicElasticPlasticDamage(json const& material_data)
     : IsotropicElasticPlastic(material_data)
 {
-    if (material_data["SofteningMultiplier"].empty())
+    if (!material_data.count("SofteningMultiplier"))
+    {
         throw MaterialPropertyException("SofteningMultiplier");
-    if (material_data["KinematicHardeningModulus"].empty())
+    }
+    if (!material_data.count("KinematicHardeningModulus"))
+    {
         throw MaterialPropertyException("KinematicHardeningModulus");
-    if (material_data["PlasticityViscousExponent"].empty())
+    }
+    if (!material_data.count("PlasticityViscousExponent"))
+    {
         throw MaterialPropertyException("PlasticityViscousExponent");
-    if (material_data["PlasticityViscousMultiplier"].empty())
+    }
+    if (!material_data.count("PlasticityViscousMultiplier"))
+    {
         throw MaterialPropertyException("PlasticityViscousMultiplier");
-    if (material_data["DamageViscousExponent"].empty())
+    }
+    if (!material_data.count("DamageViscousExponent"))
+    {
         throw MaterialPropertyException("DamageViscousExponent");
-    if (material_data["DamageViscousMultiplier"].empty())
+    }
+    if (!material_data.count("DamageViscousMultiplier"))
+    {
         throw MaterialPropertyException("DamageViscousMultiplier");
+    }
 
-    gamma = material_data["SofteningMultiplier"].asDouble();
-    C = material_data["KinematicHardeningModulus"].asDouble();
-    np = material_data["PlasticityViscousExponent"].asDouble();
-    kp = material_data["PlasticityViscousMultiplier"].asDouble();
-    nd = material_data["DamageViscousExponent"].asDouble();
-    kd = material_data["DamageViscousMultiplier"].asDouble();
+    gamma = material_data["SofteningMultiplier"];
+    C = material_data["KinematicHardeningModulus"];
+    np = material_data["PlasticityViscousExponent"];
+    kp = material_data["PlasticityViscousMultiplier"];
+    nd = material_data["DamageViscousExponent"];
+    kd = material_data["DamageViscousMultiplier"];
     // TODO: may use "IsotropicHardeningModulus" : 400.0e6,
 }
 }

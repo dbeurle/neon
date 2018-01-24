@@ -4,12 +4,12 @@
 #include "solver/linear/LinearSolver.hpp"
 
 #include <chrono>
-#include <json/value.h>
+#include "io/json.hpp"
 #include <termcolor/termcolor.hpp>
 
 namespace neon::mechanical::solid
 {
-femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh, Json::Value const& simulation)
+femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh, json const& simulation)
     : femStaticMatrix(fem_mesh, simulation),
       a(vector::Zero(fem_mesh.active_dofs())),
       v(vector::Zero(fem_mesh.active_dofs())),

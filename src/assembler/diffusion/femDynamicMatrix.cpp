@@ -1,21 +1,21 @@
 
 #include "femDynamicMatrix.hpp"
 
+#include "io/json.hpp"
 #include "solver/linear/LinearSolver.hpp"
 
 #include <chrono>
-#include <json/value.h>
 #include <termcolor/termcolor.hpp>
 
 namespace neon::diffusion
 {
-femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh, Json::Value const& simulation_data)
+femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh, json const& simulation_data)
     : femStaticMatrix(fem_mesh, simulation_data), time_solver(simulation_data["Time"])
 {
-    if (simulation_data.isMember("InitialConditions")
-        && simulation_data["InitialConditions"].isMember("Uniform"))
+    if (simulation_data.count("InitialConditions")
+        && simulation_data["InitialConditions"].count("Uniform"))
     {
-        d = simulation_data["InitialConditions"]["Uniform"].asDouble()
+        d = simulation_data["InitialConditions"]["Uniform"].get<double>()
             * vector::Ones(fem_mesh.active_dofs());
     }
 }

@@ -10,14 +10,13 @@
 
 #include <exception>
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 namespace neon
 {
-std::unique_ptr<LinearSolver> make_linear_solver(Json::Value const& solver_data,
-                                                 bool const is_symmetric)
+std::unique_ptr<LinearSolver> make_linear_solver(json const& solver_data, bool const is_symmetric)
 {
-    std::string const& solver_name = solver_data["Solver"].asString();
+    std::string const& solver_name = solver_data["Solver"].get<std::string>();
 
     if (solver_name == "PaStiX")
     {
@@ -37,31 +36,31 @@ std::unique_ptr<LinearSolver> make_linear_solver(Json::Value const& solver_data,
     }
     else if (solver_name == "Iterative")
     {
-        if (solver_data.isMember("Tolerance") && solver_data.isMember("MaxIterations"))
+        if (solver_data.count("Tolerance") && solver_data.count("MaxIterations"))
         {
             if (is_symmetric)
             {
-                return std::make_unique<ConjugateGradient>(solver_data["Tolerance"].asDouble(),
-                                                           solver_data["MaxIterations"].asInt());
+                return std::make_unique<ConjugateGradient>(solver_data["Tolerance"].get<double>(),
+                                                           solver_data["MaxIterations"].get<int>());
             }
-            return std::make_unique<BiCGStab>(solver_data["Tolerance"].asDouble(),
-                                              solver_data["MaxIterations"].asInt());
+            return std::make_unique<BiCGStab>(solver_data["Tolerance"].get<double>(),
+                                              solver_data["MaxIterations"].get<int>());
         }
-        else if (solver_data.isMember("Tolerance"))
+        else if (solver_data.count("Tolerance"))
         {
             if (is_symmetric)
             {
-                return std::make_unique<ConjugateGradient>(solver_data["Tolerance"].asDouble());
+                return std::make_unique<ConjugateGradient>(solver_data["Tolerance"].get<double>());
             }
-            return std::make_unique<BiCGStab>(solver_data["Tolerance"].asDouble());
+            return std::make_unique<BiCGStab>(solver_data["Tolerance"].get<double>());
         }
-        else if (solver_data.isMember("MaxIterations"))
+        else if (solver_data.count("MaxIterations"))
         {
             if (is_symmetric)
             {
-                return std::make_unique<ConjugateGradient>(solver_data["MaxIterations"].asInt());
+                return std::make_unique<ConjugateGradient>(solver_data["MaxIterations"].get<int>());
             }
-            return std::make_unique<BiCGStab>(solver_data["MaxIterations"].asInt());
+            return std::make_unique<BiCGStab>(solver_data["MaxIterations"].get<int>());
         }
         else
         {
@@ -80,18 +79,18 @@ std::unique_ptr<LinearSolver> make_linear_solver(Json::Value const& solver_data,
                                      "implemented\n");
         }
 
-        if (solver_data.isMember("Tolerance") && solver_data.isMember("MaxIterations"))
+        if (solver_data.count("Tolerance") && solver_data.count("MaxIterations"))
         {
-            return std::make_unique<ConjugateGradientGPU>(solver_data["Tolerance"].asDouble(),
-                                                          solver_data["MaxIterations"].asInt());
+            return std::make_unique<ConjugateGradientGPU>(solver_data["Tolerance"].get<double>(),
+                                                          solver_data["MaxIterations"].get<int>());
         }
-        else if (solver_data.isMember("Tolerance"))
+        else if (solver_data.count("Tolerance"))
         {
-            return std::make_unique<ConjugateGradientGPU>(solver_data["Tolerance"].asDouble());
+            return std::make_unique<ConjugateGradientGPU>(solver_data["Tolerance"].get<double>());
         }
-        else if (solver_data.isMember("MaxIterations"))
+        else if (solver_data.count("MaxIterations"))
         {
-            return std::make_unique<ConjugateGradientGPU>(solver_data["MaxIterations"].asInt());
+            return std::make_unique<ConjugateGradientGPU>(solver_data["MaxIterations"].get<int>());
         }
         else
         {

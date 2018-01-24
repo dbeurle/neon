@@ -24,8 +24,8 @@ class femSubmesh : public detail::femSubmesh<plane::femSubmesh, plane::InternalV
 {
 public:
     /** Constructor providing the material coordinates reference */
-    explicit femSubmesh(Json::Value const& material_data,
-                        Json::Value const& simulation_data,
+    explicit femSubmesh(json const& material_data,
+                        json const& simulation_data,
                         std::shared_ptr<MaterialCoordinates>& material_coordinates,
                         Submesh const& submesh);
 

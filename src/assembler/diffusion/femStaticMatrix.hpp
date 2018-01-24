@@ -28,7 +28,7 @@ namespace neon::diffusion
 class femStaticMatrix
 {
 public:
-    explicit femStaticMatrix(femMesh& fem_mesh, Json::Value const& simulation_data);
+    explicit femStaticMatrix(femMesh& fem_mesh, json const& simulation_data);
 
     ~femStaticMatrix();
 

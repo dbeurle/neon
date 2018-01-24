@@ -5,15 +5,15 @@
 
 #include <utility>
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 namespace neon::mechanical::solid
 {
 NonFollowerLoadBoundary::NonFollowerLoadBoundary(
     std::shared_ptr<MaterialCoordinates>& material_coordinates,
     std::vector<Submesh> const& submeshes,
-    Json::Value const& simulation_data,
-    Json::Value const& boundary,
+    json const& simulation_data,
+    json const& boundary,
     std::unordered_map<std::string, int> const& dof_table)
 {
     for (auto& [is_dof_active, var] : nonfollower_load)
@@ -21,16 +21,18 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
         is_dof_active = false;
     }
 
-    if (auto const& type = boundary["Type"].asString(); type == "Traction")
+    auto const& values = boundary["Values"];
+
+    if (auto const& type = boundary["Type"].get<std::string>(); type == "Traction")
     {
-        for (auto const& name : boundary["Values"].getMemberNames())
+        for (json::const_iterator it = values.begin(); it != values.end(); ++it)
         {
-            if (dof_table.find(name) == dof_table.end())
+            if (dof_table.find(it.key()) == dof_table.end())
             {
                 throw std::runtime_error("x, y or z are acceptable coordinates\n");
             }
 
-            auto const dof_offset = dof_table.find(name)->second;
+            auto const dof_offset = dof_table.find(it.key())->second;
 
             auto& [is_dof_active, boundary_meshes] = nonfollower_load[dof_offset];
 
@@ -45,7 +47,7 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
                                              filter_dof_list(3, dof_offset, mesh.connectivities()),
                                              material_coordinates,
                                              boundary["Time"],
-                                             boundary["Values"][name]);
+                                             it.value());
             }
         }
     }
@@ -68,13 +70,13 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
     }
     else if (type == "BodyForce")
     {
-        for (auto const& name : boundary["Values"].getMemberNames())
+        for (json::const_iterator it = values.begin(); it != values.end(); ++it)
         {
-            if (dof_table.find(name) == dof_table.end())
+            if (dof_table.find(it.key()) == dof_table.end())
             {
                 throw std::runtime_error("x, y or z are acceptable coordinates\n");
             }
-            auto const dof_offset = dof_table.find(name)->second;
+            auto const dof_offset = dof_table.find(it.key())->second;
 
             auto& [is_dof_active, boundary_meshes] = nonfollower_load[dof_offset];
 
@@ -89,7 +91,7 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
                                              filter_dof_list(3, dof_offset, mesh.connectivities()),
                                              material_coordinates,
                                              boundary["Time"],
-                                             boundary["Values"][name]);
+                                             it.value());
             }
         }
     }

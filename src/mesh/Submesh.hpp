@@ -4,7 +4,7 @@
 #include "mesh/element_topology.hpp"
 #include "numeric/IndexTypes.hpp"
 
-#include <json/forwards.h>
+#include "io/json.hpp"
 
 namespace neon
 {
@@ -13,7 +13,7 @@ class Submesh
 {
 public:
     /** Construct using a json object */
-    Submesh(Json::Value const& mesh);
+    Submesh(json const& mesh);
 
     /** @return the number of elements */
     auto elements() const { return nodal_connectivity.size(); }

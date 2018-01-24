@@ -27,6 +27,7 @@ endif()
 
 set(EXTERNAL_PROJECTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external")
 
+add_subdirectory(${EXTERNAL_PROJECTS_DIR}/json)
 add_subdirectory(${EXTERNAL_PROJECTS_DIR}/catch)
 add_subdirectory(${EXTERNAL_PROJECTS_DIR}/blaze)
 add_subdirectory(${EXTERNAL_PROJECTS_DIR}/eigen3)
@@ -55,14 +56,9 @@ endif()
 find_package(MUMPS REQUIRED)
 include_directories(${MUMPS_INCLUDE_DIR})
 
-find_package(Jsoncpp REQUIRED)
-include_directories(${JSONCPP_INCLUDE_DIR})
-
 find_package(BLAS REQUIRED)
 
 find_package(HwLoc REQUIRED)
-
-include_directories("${CMAKE_SOURCE_DIR}/src")
 
 add_subdirectory(src)
 

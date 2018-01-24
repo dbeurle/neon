@@ -3,20 +3,20 @@
 
 #include "Exceptions.hpp"
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 namespace neon
 {
-BasicMesh::BasicMesh(Json::Value const& mesh_file) : NodalCoordinates(mesh_file)
+BasicMesh::BasicMesh(json const& mesh_file) : NodalCoordinates(mesh_file)
 {
-    if (!mesh_file.isMember("Elements"))
+    if (!mesh_file.count("Elements"))
     {
         throw std::runtime_error("The mesh file is missing the \"Elements\" field");
     }
 
     for (auto const& mesh : mesh_file["Elements"])
     {
-        meshes_map[mesh["Name"].asString()].push_back(mesh);
+        meshes_map[mesh["Name"].get<std::string>()].push_back(mesh);
     }
 }
 

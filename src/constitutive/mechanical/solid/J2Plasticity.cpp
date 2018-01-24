@@ -11,7 +11,7 @@
 namespace neon::mechanical::solid
 {
 J2Plasticity::J2Plasticity(std::shared_ptr<InternalVariables>& variables,
-                           Json::Value const& material_data)
+                           json const& material_data)
     : IsotropicLinearElasticity(variables, material_data), material(material_data)
 {
     variables->add(InternalVariables::Tensor::LinearisedPlasticStrain);

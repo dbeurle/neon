@@ -2,6 +2,7 @@
 -Ibuild/eigen3/src/eigen3
 -Ibuild/range-v3/src/range-v3/include
 -Ibuild/termcolor/src/termcolor/include
+-Ibuild/json/src/json
 -Isrc
 -I/usr/include/jsoncpp
 -I/usr/local/include

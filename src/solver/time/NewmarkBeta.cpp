@@ -1,12 +1,12 @@
 
 #include "NewmarkBeta.hpp"
 
+#include "io/json.hpp"
 #include <iostream>
-#include <json/value.h>
 
 namespace neon
 {
-NewmarkBeta::NewmarkBeta(Json::Value const& time_solver_data) : time_control(time_solver_data)
+NewmarkBeta::NewmarkBeta(json const& time_solver_data) : time_control(time_solver_data)
 {
     if (time_solver_data["IntegrationOptions"].empty())
     {
@@ -23,19 +23,25 @@ NewmarkBeta::NewmarkBeta(Json::Value const& time_solver_data) : time_control(tim
     }
     else
     {
-        if (time_solver_data["IntegrationOptions"]["ViscousDamping"].empty())
+        if (time_solver_data["IntegrationOptions"]["ViscousDamping"].is_null())
+        {
             throw std::runtime_error("IterationOptions - ViscousDamping was not set\n");
+        }
 
-        if (time_solver_data["IntegrationOptions"]["BetaParameter"].empty())
+        if (time_solver_data["IntegrationOptions"]["BetaParameter"].is_null())
+        {
             throw std::runtime_error("IterationOptions - BetaParameter was not set\n");
+        }
 
-        artifical_viscosity = time_solver_data["IntegrationOptions"]["ViscousDamping"].asDouble();
+        artifical_viscosity = time_solver_data["IntegrationOptions"]["ViscousDamping"];
 
-        beta_parameter = time_solver_data["IntegrationOptions"]["BetaParameter"].asDouble();
+        beta_parameter = time_solver_data["IntegrationOptions"]["BetaParameter"];
     }
 
     if (are_parameters_unstable())
+    {
         throw std::runtime_error("Chosen Newmark-Beta parameters are not stable\n");
+    }
 }
 
 bool NewmarkBeta::time_loop()

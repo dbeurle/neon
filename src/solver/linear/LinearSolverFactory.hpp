@@ -5,10 +5,10 @@
 
 #include <memory>
 
-#include <json/forwards.h>
+#include "io/json.hpp"
 
 namespace neon
 {
-std::unique_ptr<LinearSolver> make_linear_solver(Json::Value const& solver_data,
+std::unique_ptr<LinearSolver> make_linear_solver(json const& solver_data,
                                                  bool const is_symmetric = true);
 }

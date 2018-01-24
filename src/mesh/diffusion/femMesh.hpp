@@ -19,8 +19,8 @@ class femMesh
 {
 public:
     femMesh(BasicMesh const& basic_mesh,
-            Json::Value const& material_data,
-            Json::Value const& mesh_data);
+            json const& material_data,
+            json const& mesh_data);
 
     auto active_dofs() const { return material_coordinates->size(); }
 
@@ -52,9 +52,9 @@ public:
     auto const& geometry() const { return *material_coordinates; }
 
 protected:
-    void check_boundary_conditions(Json::Value const& boundary_data) const;
+    void check_boundary_conditions(json const& boundary_data) const;
 
-    void allocate_boundary_conditions(Json::Value const& boundary_data, BasicMesh const& basic_mesh);
+    void allocate_boundary_conditions(json const& boundary_data, BasicMesh const& basic_mesh);
 
     /** Collapse the nodal connectivity arrays from the submesh for a node list */
     List filter_dof_list(std::vector<Submesh> const& boundary_mesh) const;

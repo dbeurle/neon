@@ -23,8 +23,8 @@ public:
     explicit Neumann(std::vector<List> const& nodal_connectivity,
                      std::vector<List> const& dof_list,
                      std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                     Json::Value const& times,
-                     Json::Value const& loads);
+                     json const& times,
+                     json const& loads);
 
     [[nodiscard]] auto elements() const { return nodal_connectivity.size(); }
 
@@ -42,8 +42,8 @@ public:
                          std::vector<List> const& nodal_connectivity,
                          std::vector<List> const& dof_list,
                          std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                         Json::Value const& time_history,
-                         Json::Value const& load_history)
+                         json const& time_history,
+                         json const& load_history)
         : Neumann(nodal_connectivity, dof_list, material_coordinates, time_history, load_history),
           sf(std::move(sf))
     {
@@ -83,8 +83,8 @@ public:
                         std::vector<List> const& nodal_connectivity,
                         std::vector<List> const& dof_list,
                         std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                        Json::Value const& time_history,
-                        Json::Value const& load_history)
+                        json const& time_history,
+                        json const& load_history)
         : Neumann(nodal_connectivity, dof_list, material_coordinates, time_history, load_history),
           sf(std::move(sf))
     {

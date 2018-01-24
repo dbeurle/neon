@@ -12,7 +12,7 @@
 namespace neon::mechanical::plane
 {
 IsotropicLinearElasticity::IsotropicLinearElasticity(std::shared_ptr<InternalVariables>& variables,
-                                                     Json::Value const& material_data,
+                                                     json const& material_data,
                                                      plane const state)
     : ConstitutiveModel(variables), material(material_data), state(state)
 {

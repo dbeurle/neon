@@ -24,8 +24,8 @@
 
 namespace neon::mechanical::plane
 {
-femSubmesh::femSubmesh(Json::Value const& material_data,
-                       Json::Value const& simulation_data,
+femSubmesh::femSubmesh(json const& material_data,
+                       json const& simulation_data,
                        std::shared_ptr<MaterialCoordinates>& material_coordinates,
                        Submesh const& submesh)
     : detail::femSubmesh<plane::femSubmesh, plane::InternalVariables>(submesh),

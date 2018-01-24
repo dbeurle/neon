@@ -32,8 +32,8 @@ class SolidMechanicsModule : public AbstractModule
 {
 public:
     SolidMechanicsModule(BasicMesh const& mesh,
-                         Json::Value const& material,
-                         Json::Value const& simulation);
+                         json const& material,
+                         json const& simulation);
 
     virtual ~SolidMechanicsModule() = default;
 
@@ -52,8 +52,8 @@ class PlaneMechanicsModule : public AbstractModule
 {
 public:
     PlaneMechanicsModule(BasicMesh const& mesh,
-                         Json::Value const& material,
-                         Json::Value const& simulation);
+                         json const& material,
+                         json const& simulation);
 
     virtual ~PlaneMechanicsModule() = default;
 

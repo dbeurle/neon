@@ -25,8 +25,8 @@ public:
     using ValueCount = std::tuple<vector, vector>;
 
 public:
-    explicit femSubmesh(Json::Value const& material_data,
-                        Json::Value const& mesh_data,
+    explicit femSubmesh(json const& material_data,
+                        json const& mesh_data,
                         std::shared_ptr<MaterialCoordinates>& material_coordinates,
                         Submesh const& submesh);
 

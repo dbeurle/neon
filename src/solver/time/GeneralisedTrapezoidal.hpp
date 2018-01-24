@@ -1,14 +1,14 @@
 
 #pragma once
 
-#include <json/forwards.h>
+#include "io/json.hpp"
 
 namespace neon
 {
 class GeneralisedTrapezoidal
 {
 public:
-    GeneralisedTrapezoidal(Json::Value const& time_solver_data);
+    GeneralisedTrapezoidal(json const& time_solver_data);
 
     /** Perform the time integration until returns false */
     bool loop();

@@ -5,7 +5,7 @@
 
 #include "Exceptions.hpp"
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 #include <range/v3/action/join.hpp>
 #include <range/v3/action/sort.hpp>
@@ -13,20 +13,20 @@
 
 namespace neon
 {
-Submesh::Submesh(Json::Value const& mesh)
+Submesh::Submesh(json const& mesh)
 {
     // Error checking for empty fields
-    if (!mesh.isMember("Name"))
+    if (!mesh.count("Name"))
     {
         throw std::runtime_error("The element group in the mesh file is missing the "
                                  "\"Name\" field");
     }
-    if (!mesh.isMember("Type"))
+    if (!mesh.count("Type"))
     {
         throw std::runtime_error("The element group in the mesh file is missing the "
                                  "\"Type\" field");
     }
-    if (!mesh.isMember("NodalConnectivity"))
+    if (!mesh.count("NodalConnectivity"))
     {
         throw std::runtime_error("The element group in the mesh file is missing the "
                                  "\"NodalConnectivity\" field");
@@ -47,7 +47,7 @@ Submesh::Submesh(Json::Value const& mesh)
 
         for (auto const& node : mesh_connectivity)
         {
-            nodal_connectivity.back().push_back(node.asInt());
+            nodal_connectivity.back().push_back(node.get<int64_t>());
         }
     }
     convert_from_gmsh(nodal_connectivity, m_topology);

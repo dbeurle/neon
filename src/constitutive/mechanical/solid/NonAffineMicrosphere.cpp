@@ -4,7 +4,7 @@
 #include "constitutive/InternalVariables.hpp"
 #include "numeric/DenseMatrix.hpp"
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 #include <exception>
 #include <omp.h>
@@ -16,11 +16,11 @@ NonAffineMicrosphere::NonAffineMicrosphere(std::shared_ptr<InternalVariables>& v
                                            unit_sphere_quadrature::Rule const rule)
     : AffineMicrosphere(variables, material_data, rule), material(material_data)
 {
-    if (!material_data.isMember("NonAffineStretchParameter"))
+    if (!material_data.count("NonAffineStretchParameter"))
     {
         throw std::runtime_error("\"NonAffineStretchParameter\" not specified in material data\n");
     }
-    non_affine_stretch_parameter = material_data["NonAffineStretchParameter"].asDouble();
+    non_affine_stretch_parameter = material_data["NonAffineStretchParameter"];
 }
 
 void NonAffineMicrosphere::update_internal_variables(double const time_step_size)

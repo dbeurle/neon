@@ -1,29 +1,29 @@
 
 #include "LinearElastic.hpp"
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 #include "Exceptions.hpp"
 
 namespace neon
 {
-LinearElastic::LinearElastic(Json::Value const& material_data) : Material(material_data)
+LinearElastic::LinearElastic(json const& material_data) : Material(material_data)
 {
     // Determine input value types.  The allowable inputs are:
     //   1)  Elastic modulus and Poisson ratio
     //   2)  Bulk modulus and shear modulus
 
-    if (material_data.isMember("BulkModulus") && material_data.isMember("ShearModulus"))
+    if (material_data.count("BulkModulus") && material_data.count("ShearModulus"))
     {
         // Fill the elastic modulus and Poisson's ratio from the bulk and shear
         // moduli
-        K = material_data["BulkModulus"].asDouble();
-        G = material_data["ShearModulus"].asDouble();
+        K = material_data["BulkModulus"];
+        G = material_data["ShearModulus"];
     }
-    else if (material_data.isMember("ElasticModulus") && material_data.isMember("PoissonsRatio"))
+    else if (material_data.count("ElasticModulus") && material_data.count("PoissonsRatio"))
     {
-        auto const E = material_data["ElasticModulus"].asDouble();
-        auto const nu = material_data["PoissonsRatio"].asDouble();
+        auto const E = material_data["ElasticModulus"].get<double>();
+        auto const nu = material_data["PoissonsRatio"].get<double>();
 
         if (nu > 0.5)
         {

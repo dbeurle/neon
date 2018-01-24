@@ -9,7 +9,7 @@ using namespace neon;
 
 constexpr auto ZERO_MARGIN = 1.0e-5;
 
-TEST_CASE("Tensor decompositions")
+TEST_CASE("deviatoric and volumetric decomposition")
 {
     matrix3 t = matrix3::Random();
 

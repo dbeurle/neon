@@ -4,7 +4,7 @@
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/zip.hpp>
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 namespace neon::diffusion::boundary
 {
@@ -12,10 +12,10 @@ newton_cooling::newton_cooling(std::unique_ptr<surface_interpolation>&& sf,
                                std::vector<List> const& nodal_connectivity,
                                std::vector<List> const& dof_list,
                                std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                               Json::Value const& times,
-                               Json::Value const& heat_flux,
-                               Json::Value const& heat_transfer_coefficient)
-    : SurfaceLoad<surface_interpolation>(std::move(sf),
+                               json const& times,
+                               json const& heat_flux,
+                               json const& heat_transfer_coefficient)
+    : SurfaceLoad<SurfaceInterpolation>(std::move(sf),
                                         nodal_connectivity,
                                         dof_list,
                                         material_coordinates,
@@ -25,9 +25,8 @@ newton_cooling::newton_cooling(std::unique_ptr<surface_interpolation>&& sf,
     using ranges::view::transform;
     using ranges::view::zip;
 
-    stiffness_time_data = zip(times | transform([](auto i) { return i.asDouble(); }),
-                              heat_transfer_coefficient
-                                  | transform([](auto i) { return i.asDouble(); }));
+    stiffness_time_data = zip(times | transform([](auto const i) { return i; }),
+                              heat_transfer_coefficient | transform([](auto const i) { return i; }));
 }
 
 std::tuple<List const&, matrix> newton_cooling::external_stiffness(int const element,

@@ -1,18 +1,17 @@
 
 foreach(test
-             nodal_coordinates
-             material_coordinates
+             adaptive_increment
+             boundary
+             constitutive
+             dof_numbering
              gauss_quadrature
-             AdaptiveIncrementTest
-             BoundaryTest
-             ConstitutiveTest
-             DofAllocation
-             GeometryTest
-             LinearSolverTest
-             MaterialTest
-             MatrixSystemTest
-             ModuleTest
-             TensorTest
+             linear_solvers
+             material
+             material_coordinates
+             matrix_system
+             mesh
+             nodal_coordinates
+             tensor
              )
     add_executable(${test} ${test}.cpp)
     add_dependencies(${test} catch)

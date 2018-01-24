@@ -8,7 +8,11 @@ add_library(neon ${NEON_SOURCES})
 
 target_compile_options(neon PUBLIC $<$<CONFIG:RELEASE>:-O3 -DNDEBUG>)
 
-add_dependencies(neon eigen3 range-v3 termcolor blaze)
+target_include_directories(neon PUBLIC ${CMAKE_SOURCE_DIR}/src)
+
+target_include_directories(neon PUBLIC ${JSON_INCLUDE_DIR})
+
+add_dependencies(neon eigen3 range-v3 termcolor blaze json)
 
 if (ENABLE_CUDA)
     cuda_add_library(dmatvec solver/linear/dmatrix_vector_product.cu STATIC)
@@ -18,7 +22,6 @@ endif()
 
 target_link_libraries(neon
                       ${Boost_LIBRARIES}
-                      ${JSONCPP_LIBRARY}
                       ${MUMPS_LIBRARY}
                       ${BLAS_LIBRARIES}
                       ${VTK_LIBRARIES}
@@ -27,5 +30,6 @@ target_link_libraries(neon
                       ${CUDA_CUBLAS_LIBRARIES}
                       ${CUDA_cusparse_LIBRARY}
                       pastix
+                      jsoncpp
                       scotch
                       scotcherr)

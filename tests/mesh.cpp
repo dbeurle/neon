@@ -11,7 +11,8 @@
 #include "mesh/mechanical/solid/femMesh.hpp"
 #include "mesh/mechanical/solid/femSubmesh.hpp"
 
-#include <json/json.h>
+#include "io/json.hpp"
+
 #include <range/v3/view.hpp>
 
 #include <sstream>
@@ -23,23 +24,15 @@ using namespace ranges;
 
 constexpr auto ZERO_MARGIN = 1.0e-5;
 
-Json::CharReaderBuilder reader;
-JSONCPP_STRING input_errors;
-
 TEST_CASE("Basic mesh test")
 {
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh
-    Json::Value mesh_data;
+    BasicMesh basic_mesh(json::parse(cube_mesh_json()));
 
-    std::istringstream input_data(cube_mesh_json());
-    REQUIRE(Json::parseFromStream(reader, input_data, &mesh_data, &input_errors));
+    NodalCoordinates nodal_coordinates(json::parse(cube_mesh_json()));
 
-    // Create the test objects
-    BasicMesh basic_mesh(mesh_data);
-    NodalCoordinates nodal_coordinates(mesh_data);
-
-    int constexpr number_of_nodes = 64;
+    auto constexpr number_of_nodes = 64;
 
     REQUIRE(nodal_coordinates.size() == number_of_nodes);
 
@@ -125,19 +118,10 @@ TEST_CASE("Solid submesh test")
 
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh
-    Json::Value mesh_data, material_data, simulation_data;
-
-    std::istringstream cube_mesh_input(cube_mesh_json());
-    std::istringstream material_data_input(material_data_json());
-    std::istringstream simulation_data_input(simulation_data_json());
-
-    REQUIRE(Json::parseFromStream(reader, cube_mesh_input, &mesh_data, &input_errors));
-    REQUIRE(Json::parseFromStream(reader, material_data_input, &material_data, &input_errors));
-    REQUIRE(Json::parseFromStream(reader, simulation_data_input, &simulation_data, &input_errors));
 
     // Create the test objects
-    BasicMesh basic_mesh(mesh_data);
-    NodalCoordinates nodal_coordinates(mesh_data);
+    BasicMesh basic_mesh(json::parse(cube_mesh_json()));
+    NodalCoordinates nodal_coordinates(json::parse(cube_mesh_json()));
 
     auto& submeshes = basic_mesh.meshes("cube");
 
@@ -147,8 +131,8 @@ TEST_CASE("Solid submesh test")
 
     auto material_coordinates = std::make_shared<MaterialCoordinates>(nodal_coordinates.coordinates());
 
-    mechanical::solid::femSubmesh fem_submesh(material_data,
-                                              simulation_data,
+    mechanical::solid::femSubmesh fem_submesh(json::parse(material_data_json()),
+                                              json::parse(simulation_data_json()),
                                               material_coordinates,
                                               submesh);
 
@@ -180,7 +164,7 @@ TEST_CASE("Solid submesh test")
     }
     SECTION("Tangent stiffness")
     {
-        auto[local_dofs, stiffness] = fem_submesh.tangent_stiffness(0);
+        auto [local_dofs, stiffness] = fem_submesh.tangent_stiffness(0);
         REQUIRE(local_dofs.size() == number_of_local_dofs);
         REQUIRE(stiffness.rows() == number_of_local_dofs);
         REQUIRE(stiffness.cols() == number_of_local_dofs);
@@ -191,14 +175,14 @@ TEST_CASE("Solid submesh test")
     }
     SECTION("Internal force")
     {
-        auto[local_dofs, internal_force] = fem_submesh.internal_force(0);
+        auto [local_dofs, internal_force] = fem_submesh.internal_force(0);
         REQUIRE(internal_force.rows() == number_of_local_dofs);
         REQUIRE(local_dofs.size() == number_of_local_dofs);
     }
     SECTION("Consistent and diagonal mass")
     {
-        auto const & [local_dofs_0, mass_c] = fem_submesh.consistent_mass(0);
-        auto const & [local_dofs_1, mass_d] = fem_submesh.diagonal_mass(0);
+        auto const& [local_dofs_0, mass_c] = fem_submesh.consistent_mass(0);
+        auto const& [local_dofs_1, mass_d] = fem_submesh.diagonal_mass(0);
 
         REQUIRE(local_dofs_0.size() == number_of_local_dofs);
         REQUIRE(local_dofs_1.size() == number_of_local_dofs);
@@ -222,19 +206,12 @@ TEST_CASE("Solid mesh test")
 
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh
-    Json::Value mesh_data, material_data, simulation_data;
-
-    std::istringstream cube_mesh_input(cube_mesh_json());
-    std::istringstream material_data_input(material_data_json());
-    std::istringstream simulation_data_input(simulation_data_json());
-
-    REQUIRE(Json::parseFromStream(reader, cube_mesh_input, &mesh_data, &input_errors));
-    REQUIRE(Json::parseFromStream(reader, material_data_input, &material_data, &input_errors));
-    REQUIRE(Json::parseFromStream(reader, simulation_data_input, &simulation_data, &input_errors));
+    auto material_data = json::parse(material_data_json());
+    auto simulation_data = json::parse(simulation_data_json());
 
     // Create the test objects
-    BasicMesh basic_mesh(mesh_data);
-    NodalCoordinates nodal_coordinates(mesh_data);
+    BasicMesh basic_mesh(json::parse(cube_mesh_json()));
+    NodalCoordinates nodal_coordinates(json::parse(cube_mesh_json()));
 
     REQUIRE(!simulation_data["Name"].empty());
 
@@ -252,7 +229,7 @@ TEST_CASE("Solid mesh test")
 
     for (auto const& fem_submesh : fem_mesh.meshes())
     {
-        auto[local_dofs, internal_force] = fem_submesh.internal_force(0);
+        auto [local_dofs, internal_force] = fem_submesh.internal_force(0);
         REQUIRE(internal_force.rows() == number_of_local_dofs);
         REQUIRE(local_dofs.size() == number_of_local_dofs);
     }

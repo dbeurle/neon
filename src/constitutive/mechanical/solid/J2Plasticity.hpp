@@ -19,7 +19,7 @@ class J2Plasticity : public IsotropicLinearElasticity
 {
 public:
     explicit J2Plasticity(std::shared_ptr<InternalVariables>& variables,
-                          Json::Value const& material_data);
+                          json const& material_data);
 
     virtual ~J2Plasticity();
 

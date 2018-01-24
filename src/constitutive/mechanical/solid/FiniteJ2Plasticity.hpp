@@ -26,7 +26,7 @@ class FiniteJ2Plasticity : public J2Plasticity
 {
 public:
     FiniteJ2Plasticity(std::shared_ptr<InternalVariables>& variables,
-                       Json::Value const& material_data);
+                       json const& material_data);
 
     ~FiniteJ2Plasticity();
 

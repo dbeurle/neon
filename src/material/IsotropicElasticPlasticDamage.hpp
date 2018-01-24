@@ -9,7 +9,7 @@ namespace neon
 class IsotropicElasticPlasticDamage : public IsotropicElasticPlastic
 {
 public:
-    IsotropicElasticPlasticDamage(Json::Value const& material_data);
+    IsotropicElasticPlasticDamage(json const& material_data);
 
     ~IsotropicElasticPlasticDamage() = default;
 

@@ -13,7 +13,7 @@
 #include "vtkIdList.h"
 #include "vtkSmartPointer.h"
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 #include "vtkDoubleArray.h"
 #include "vtkIdTypeArray.h"
@@ -28,7 +28,7 @@ namespace neon
 class FileIO
 {
 public:
-    explicit FileIO(std::string file_name, Json::Value const& visualisation_data);
+    explicit FileIO(std::string file_name, json const& visualisation_data);
 
     virtual ~FileIO();
 
@@ -72,7 +72,7 @@ public:
 
 public:
     explicit FileIO(std::string file_name,
-                    Json::Value const& visualisation_data,
+                    json const& visualisation_data,
                     fem_mesh_type const& fem_mesh);
 
     FileIO(FileIO&&) = default;
@@ -103,7 +103,7 @@ private:
 
 template <class femMeshType>
 FileIO<femMeshType>::FileIO(std::string file_name,
-                            Json::Value const& visualisation_data,
+                            json const& visualisation_data,
                             femMeshType const& fem_mesh)
     : neon::FileIO(file_name, visualisation_data), fem_mesh(fem_mesh)
 {
@@ -231,7 +231,7 @@ public:
 
 public:
     explicit FileIO(std::string file_name,
-                    Json::Value const& visualisation_data,
+                    json const& visualisation_data,
                     femMesh const& fem_mesh);
 
     FileIO(FileIO&&) = default;

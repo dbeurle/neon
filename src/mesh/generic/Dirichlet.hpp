@@ -10,7 +10,7 @@ namespace neon
 class Dirichlet : public Boundary
 {
 public:
-    explicit Dirichlet(List dofs, Json::Value const& times, Json::Value const& loads);
+    explicit Dirichlet(List dofs, json const& times, json const& loads);
 
     [[nodiscard]] auto const& dof_view() const { return dofs; }
 

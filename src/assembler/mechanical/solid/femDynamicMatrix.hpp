@@ -10,7 +10,7 @@ namespace neon::mechanical::solid
 class femDynamicMatrix : public femStaticMatrix
 {
 public:
-    explicit femDynamicMatrix(femMesh& fem_mesh, Json::Value const& simulation);
+    explicit femDynamicMatrix(femMesh& fem_mesh, json const& simulation);
 
     ~femDynamicMatrix() = default;
 

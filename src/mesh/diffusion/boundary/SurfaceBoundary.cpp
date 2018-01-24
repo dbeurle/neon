@@ -4,16 +4,16 @@
 #include "interpolations/interpolation_factory.hpp"
 #include "mesh/Submesh.hpp"
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 namespace neon::diffusion
 {
 boundary_mesh::boundary_mesh(std::shared_ptr<MaterialCoordinates>& material_coordinates,
                              std::vector<Submesh> const& submeshes,
-                             Json::Value const& boundary,
-                             Json::Value const& mesh_data)
+                             json const& boundary,
+                             json const& mesh_data)
 {
-    if (auto const& type = boundary["Type"].asString(); type == "HeatFlux")
+    if (auto const& type = boundary["Type"].get<std::string>(); type == "HeatFlux")
     {
         for (auto const& mesh : submeshes)
         {
@@ -31,11 +31,11 @@ boundary_mesh::boundary_mesh(std::shared_ptr<MaterialCoordinates>& material_coor
         {
             // Create the heat flux from the heat transfer coefficient and the
             // ambient temperature
-            Json::Value heat_flux;
+            json heat_flux;
             for (auto i = 0; i < boundary["HeatTransferCoefficient"].size(); ++i)
             {
-                heat_flux.append(Json::Value{boundary["HeatTransferCoefficient"][i].asDouble()
-                                             * boundary["AmbientTemperature"][i].asDouble()});
+                heat_flux.emplace_back(boundary["HeatTransferCoefficient"][i].get<double>()
+                                       * boundary["AmbientTemperature"][i].get<double>());
             }
 
             stiffness_load_boundaries.emplace_back(make_surface_interpolation(mesh.topology(),

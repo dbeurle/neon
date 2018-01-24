@@ -8,15 +8,15 @@
 #include <cfenv>
 #include <chrono>
 
-#include <json/value.h>
+#include "io/json.hpp"
 #include <omp.h>
 #include <termcolor/termcolor.hpp>
 
 namespace neon::mechanical::solid
 {
-femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& simulation)
+femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, json const& simulation)
     : fem_mesh(fem_mesh),
-      io(simulation["Name"].asString(), simulation["Visualisation"], fem_mesh),
+      io(simulation["Name"].get<std::string>(), simulation["Visualisation"], fem_mesh),
       adaptive_load(simulation["Time"], fem_mesh.time_history()),
       fint(vector::Zero(fem_mesh.active_dofs())),
       fext(vector::Zero(fem_mesh.active_dofs())),
@@ -25,18 +25,18 @@ femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& simulatio
       delta_d(vector::Zero(fem_mesh.active_dofs())),
       linear_solver(make_linear_solver(simulation["LinearSolver"], fem_mesh.is_symmetric()))
 {
-    if (!simulation["NonlinearOptions"].isMember("DisplacementTolerance"))
+    if (!simulation["NonlinearOptions"].count("DisplacementTolerance"))
     {
         throw std::runtime_error("DisplacementTolerance not specified in "
                                  "NonlinearOptions");
     }
-    if (!simulation["NonlinearOptions"].isMember("ResidualTolerance"))
+    if (!simulation["NonlinearOptions"].count("ResidualTolerance"))
     {
         throw std::runtime_error("ResidualTolerance not specified in "
                                  "NonlinearOptions");
     }
-    residual_tolerance = simulation["NonlinearOptions"]["ResidualTolerance"].asDouble();
-    displacement_tolerance = simulation["NonlinearOptions"]["DisplacementTolerance"].asDouble();
+    residual_tolerance = simulation["NonlinearOptions"]["ResidualTolerance"];
+    displacement_tolerance = simulation["NonlinearOptions"]["DisplacementTolerance"];
 
     // Perform Newton-Raphson iterations
     std::cout << "\n"
@@ -46,8 +46,7 @@ femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, Json::Value const& simulatio
 
 femStaticMatrix::~femStaticMatrix() = default;
 
-void femStaticMatrix::internal_restart(Json::Value const& solver_data,
-                                       Json::Value const& new_increment_data)
+void femStaticMatrix::internal_restart(json const& solver_data, json const& new_increment_data)
 {
     adaptive_load.reset(new_increment_data);
     linear_solver = make_linear_solver(solver_data);

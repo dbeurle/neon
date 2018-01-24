@@ -4,7 +4,7 @@
 #include "numeric/DenseMatrix.hpp"
 #include "numeric/IndexTypes.hpp"
 
-#include <json/value.h>
+#include "io/json.hpp"
 
 namespace neon
 {
@@ -18,7 +18,7 @@ public:
     explicit NodalCoordinates(matrix3x const coordinates);
 
     /** Construct with a list of coordinates in json format */
-    explicit NodalCoordinates(Json::Value const& mesh_file);
+    explicit NodalCoordinates(json const& mesh_file);
 
     [[nodiscard]] auto size() const { return X.cols(); }
 
@@ -53,8 +53,8 @@ public:
 
     [[nodiscard]] coordinate_t const& coordinates() const { return X; }
 
-    /** @return the coordinates using fancy indexing */
-    [[nodiscard]] coordinate_t coordinates(local_indices const& local_node_list) const
+        /** @return the coordinates using fancy indexing */
+        [[nodiscard]] coordinate_t coordinates(local_indices const& local_node_list) const
     {
         return X(Eigen::placeholders::all, local_node_list);
     }
