@@ -62,17 +62,10 @@ void IsotropicLinearElasticity::update_internal_variables(double const time_step
         if (cauchy_stress.hasNaN()) std::cout << "NAN DETECTED\n";
     }
 
-    // for (auto const& cauchy_stress : cauchy_stresses)
-    // {
-    //     std::cout << cauchy_stress << std::endl << std::endl;
-    // }
-
     // Compute the von Mises equivalent stress
     von_mises_stresses = cauchy_stresses | view::transform([](auto const& cauchy_stress) {
                              return von_mises_stress(cauchy_stress);
                          });
-
-    // std::cout << "All done!" << std::endl;
 }
 
 matrix3 IsotropicLinearElasticity::elastic_moduli() const
