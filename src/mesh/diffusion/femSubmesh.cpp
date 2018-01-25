@@ -3,7 +3,7 @@
 
 #include "Exceptions.hpp"
 
-#include "constitutive/ConstitutiveModelFactory.hpp"
+#include "constitutive/constitutive_model_factory.hpp"
 #include "interpolations/interpolation_factory.hpp"
 #include "material/Material.hpp"
 #include "mesh/DofAllocator.hpp"

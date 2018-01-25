@@ -1,10 +1,12 @@
 
-#include "ConstitutiveModelFactory.hpp"
+#include "constitutive_model_factory.hpp"
 
 #include "mechanical/solid/J2Plasticity.hpp"
 #include "mechanical/solid/J2PlasticityDamage.hpp"
 
 #include "mechanical/solid/FiniteJ2Plasticity.hpp"
+
+#include "mechanical/solid/gaussian_affine_microsphere.hpp"
 
 #include "mechanical/solid/AffineMicrosphere.hpp"
 #include "mechanical/solid/NonAffineMicrosphere.hpp"
@@ -73,7 +75,13 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(
                                      "\"FM900\"");
         }
 
-        if (model_type == "Affine")
+        if (model_type == "GaussianAffine")
+        {
+            return std::make_unique<gaussian_affine_microsphere>(variables,
+                                                                 material_data,
+                                                                 entry->second);
+        }
+        else if (model_type == "Affine")
         {
             return std::make_unique<AffineMicrosphere>(variables, material_data, entry->second);
         }

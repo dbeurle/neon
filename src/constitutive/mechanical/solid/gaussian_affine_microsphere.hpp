@@ -7,7 +7,7 @@
 #include "numeric/Tensor.hpp"
 #include "quadrature/unit_sphere_quadrature.hpp"
 
-#include <json/forwards.h>
+#include "io/json.hpp"
 
 namespace neon::mechanical::solid
 {
