@@ -11,7 +11,7 @@
 #include "mechanical/solid/AffineMicrosphere.hpp"
 #include "mechanical/solid/NonAffineMicrosphere.hpp"
 
-#include "mechanical/solid/NeoHooke.hpp"
+#include "mechanical/solid/compressible_neohooke.hpp"
 
 #include "thermal/IsotropicDiffusion.hpp"
 
@@ -42,7 +42,11 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(
 
     if (model_name == "NeoHooke")
     {
-        return std::make_unique<NeoHooke>(variables, material_data);
+        return std::make_unique<compressible_neohooke>(variables, material_data);
+    }
+    else if (model_name == "CompressibleNeoHooke")
+    {
+        return std::make_unique<compressible_neohooke>(variables, material_data);
     }
     else if (model_name == "Microsphere")
     {

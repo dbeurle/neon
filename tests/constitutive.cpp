@@ -5,13 +5,12 @@
 
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
-#include <iostream>
 
 #include "constitutive/InternalVariables.hpp"
 
 #include "constitutive/mechanical/solid/AffineMicrosphere.hpp"
 #include "constitutive/mechanical/solid/J2Plasticity.hpp"
-#include "constitutive/mechanical/solid/NeoHooke.hpp"
+#include "constitutive/mechanical/solid/compressible_neohooke.hpp"
 
 #include "constitutive/mechanical/plane/IsotropicLinearElasticity.hpp"
 

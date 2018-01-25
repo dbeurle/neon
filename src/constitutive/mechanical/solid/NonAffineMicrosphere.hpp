@@ -6,6 +6,10 @@
 namespace neon::mechanical::solid
 {
 /**
+ * \ingroup Hyperelastic
+ * \addtogroup Hyperelastic
+ * \{
+ *
  * NonAffineMicrosphere model computes the Kirchhoff stress and the material
  * tangent for the non-affine microsphere model \cite Miehe2004.  This model includes
  * the interaction of the polymer chain with the neighbouring (forest) chains
@@ -118,6 +122,8 @@ private:
     double effective_tube_geometry{9.0};      //!< Additional constraint stiffness (U)
     double non_affine_tube_parameter{1.0};    //!< Shape of constraint stress (q)
 };
+
+/** \} */
 
 inline matrix6 NonAffineMicrosphere::compute_o_dot_product(vector3 const& n) const
 {

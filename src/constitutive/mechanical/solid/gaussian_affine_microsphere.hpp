@@ -12,11 +12,15 @@
 namespace neon::mechanical::solid
 {
 /**
+ * \ingroup Hyperelastic
+ * \addtogroup Hyperelastic
+ * \{
+ *
  * gaussian_affine_microsphere is responsible for computing the Cauchy stress and the
  * material tangent in implicit methods.  The affine microsphere model \cite Miehe2004
  * is used to model elastomer materials using micromechanical motivations and
  * homogenises the force from a single chain over a unit sphere.  In this variant
- * the non-Gaussian chain theory is replaced with Gaussian theory.
+ * the non-Gaussian chain theory is replaced with the Gaussian chain theory.
  *
  * This constitutive model requires the use of a quadrature scheme for the unit
  * sphere and this internal variable update can be computationally expensive.
@@ -26,7 +30,7 @@ class gaussian_affine_microsphere : public ConstitutiveModel
 public:
     /**
      * @param variables Reference to internal state variable store
-     * @param material_data Json object with input file material data
+     * @param material_data json object with input file material data
      */
     explicit gaussian_affine_microsphere(std::shared_ptr<InternalVariables>& variables,
                                          json const& material_data,
@@ -71,6 +75,10 @@ protected:
     /**
      * Compute the macro stress using the unit sphere homogenisation
      * technique for a given F and N and perform the deviatoric projection
+         \f{align*}{
+            \bar{\boldsymbol{\tau}}_f &= 3\mu \sum_{i=1}^{m}\boldsymbol{t}_i
+                                         \otimes \boldsymbol{t}_i w_i
+         \f}
      * @param F_unimodular Unimodular decomposition of the deformation gradient
      * @param bulk_modulus The material bulk modulus
      * @param N number of segments per chain
@@ -83,6 +91,13 @@ protected:
     /**
      * Compute the material tangent matrix using the unit sphere homogenisation
      * technique for a given F and N
+         \f{align*}{
+            \bar{\mathbb{C}}_f &= -3\mu \sum_{i=1}^{m} \bar{\lambda}_i^{-2}
+                                     \boldsymbol{t}_i \otimes
+                                     \boldsymbol{t}_i \otimes
+                                     \boldsymbol{t}_i \otimes
+                                     \boldsymbol{t}_i w_i
+         \f}
      * @param F_unimodular Unimodular decomposition of the deformation gradient
      * @param bulk_modulus The material bulk modulus
      * @param N number of segments per chain
@@ -117,4 +132,5 @@ protected:
 private:
     MicromechanicalElastomer material; //!< Material with micromechanical parameters
 };
+/** \} */
 }

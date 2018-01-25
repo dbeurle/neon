@@ -12,6 +12,10 @@
 namespace neon::mechanical::solid
 {
 /**
+ * \ingroup Hyperelastic
+ * \addtogroup Hyperelastic
+ * \{
+ *
  * AffineMicrosphere is responsible for computing the Cauchy stress and the
  * material tangent in implicit methods.  The affine microsphere model \cite Miehe2004
  * is used to model elastomer materials using micromechanical motivations and
@@ -133,12 +137,13 @@ protected:
      * and the vector associated with the quadrature point on the unit sphere
      */
     [[nodiscard]] vector3 deformed_tangent(matrix3 const& F_unimodular,
-                                           vector3 const& surface_vector) const {
+                                           vector3 const& surface_vector) const
+    {
         return F_unimodular * surface_vector;
     }
 
-        /** Compute the microstretch, which is the norm of the deformed tangent vector */
-        [[nodiscard]] auto compute_microstretch(vector3 const& deformed_tangent) const
+    /** Compute the microstretch, which is the norm of the deformed tangent vector */
+    [[nodiscard]] auto compute_microstretch(vector3 const& deformed_tangent) const
     {
         return deformed_tangent.norm();
     }
@@ -152,6 +157,8 @@ protected:
 private:
     MicromechanicalElastomer material; //!< Material with micromechanical parameters
 };
+
+/** \} */
 
 inline double AffineMicrosphere::volumetric_free_energy_dJ(double const J,
                                                            double const bulk_modulus) const
@@ -177,6 +184,10 @@ inline double AffineMicrosphere::pade_second(double const micro_stretch, double 
 }
 
 /**
+ * \ingroup Hyperelastic
+ * \addtogroup Hyperelastic
+ * \{
+ *
  * AffineMicrosphereWithDegradation is responsible for computing the Cauchy
  * stress and the material tangent in implicit methods when ageing is present.
  * The affine microsphere model is used to model elastomer materials using
@@ -203,6 +214,7 @@ protected:
 private:
     StochasticMicromechanicalElastomer material; //!< Material with micromechanical parameters
 };
+/** \} */
 
 template <typename MatrixTp, typename Functor>
 inline MatrixTp AffineMicrosphereWithDegradation::weighting(std::vector<double> const& G,
