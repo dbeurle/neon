@@ -50,16 +50,16 @@ void SimulationControl::parse()
     std::cout << std::string(2, ' ') << termcolor::bold << "Preprocessing mesh and simulation data\n"
               << termcolor::reset;
 
-    std::ifstream file(input_file_name);
-    file >> root;
-    std::cout << root << std::endl;
+    {
+        std::ifstream file(input_file_name);
+        file >> root;
+    }
 
     this->check_input_fields();
 
     if (root.count("Cores"))
     {
         threads = root["Cores"];
-        std::cout << threads << std::endl;
     }
 
     auto const material_names = this->parse_material_names(root["Material"]);
