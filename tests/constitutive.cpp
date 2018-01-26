@@ -8,11 +8,11 @@
 
 #include "constitutive/InternalVariables.hpp"
 
-#include "constitutive/mechanical/solid/AffineMicrosphere.hpp"
-#include "constitutive/mechanical/solid/J2Plasticity.hpp"
+#include "constitutive/mechanical/solid/affine_microsphere.hpp"
+#include "constitutive/mechanical/solid/small_strain_J2_plasticity.hpp"
 #include "constitutive/mechanical/solid/compressible_neohooke.hpp"
 
-#include "constitutive/mechanical/plane/IsotropicLinearElasticity.hpp"
+#include "constitutive/mechanical/plane/isotropic_linear_elasticity.hpp"
 
 #include "constitutive/thermal/IsotropicDiffusion.hpp"
 
@@ -677,7 +677,7 @@ TEST_CASE("Solid mechanics elasticity model")
                                                              "\"ElasticModulus\": 200.0e3, "
                                                              "\"PoissonsRatio\": 0.3}"),
                                                  json::parse("{\"ConstitutiveModel\" : {\"Name\" : "
-                                                             "\"IsotropicLinearElasticity\"}}"));
+                                                             "\"isotropic_linear_elasticity\"}}"));
 
     // Get the tensor variables
     auto[displacement_gradients,
@@ -827,7 +827,7 @@ TEST_CASE("Solid mechanics J2 plasticity model factory errors")
     REQUIRE_THROWS_AS(make_constitutive_model(variables,
                                               json::parse("{}"),
                                               json::parse("{\"ConstitutiveModel\" : {\"Name\" : "
-                                                          "\"J2Plasticity\"}}")),
+                                                          "\"small_strain_J2_plasticity\"}}")),
                       std::runtime_error);
 }
 TEST_CASE("Solid mechanics J2 plasticity model")
@@ -841,7 +841,7 @@ TEST_CASE("Solid mechanics J2 plasticity model")
                    InternalVariables::Tensor::Cauchy);
     variables->add(InternalVariables::Scalar::DetF);
 
-    auto j2plasticity = make_constitutive_model(variables,
+    auto small_strain_J2_plasticity = make_constitutive_model(variables,
                                                 json::parse("{\"Name\": \"steel\", "
                                                             "\"ElasticModulus\": 200.0e9, "
                                                             "\"PoissonsRatio\": 0.3, "
@@ -849,7 +849,7 @@ TEST_CASE("Solid mechanics J2 plasticity model")
                                                             "\"IsotropicHardeningModulus\": "
                                                             "400.0e6}"),
                                                 json::parse("{\"ConstitutiveModel\" : {\"Name\" : "
-                                                            "\"J2Plasticity\", "
+                                                            "\"small_strain_J2_plasticity\", "
                                                             "\"FiniteStrain\" : false}}"));
 
     // Get the tensor variables
@@ -868,9 +868,9 @@ TEST_CASE("Solid mechanics J2 plasticity model")
 
     SECTION("Sanity checks")
     {
-        REQUIRE(j2plasticity->is_symmetric());
-        REQUIRE(j2plasticity->is_finite_deformation() == false);
-        REQUIRE(j2plasticity->intrinsic_material().name() == "steel");
+        REQUIRE(small_strain_J2_plasticity->is_symmetric());
+        REQUIRE(small_strain_J2_plasticity->is_finite_deformation() == false);
+        REQUIRE(small_strain_J2_plasticity->intrinsic_material().name() == "steel");
 
         REQUIRE(variables->has(InternalVariables::Scalar::VonMisesStress));
         REQUIRE(variables->has(InternalVariables::Scalar::EffectivePlasticStrain));
@@ -880,7 +880,7 @@ TEST_CASE("Solid mechanics J2 plasticity model")
     }
     SECTION("No load")
     {
-        j2plasticity->update_internal_variables(1.0);
+        small_strain_J2_plasticity->update_internal_variables(1.0);
 
         // Ensure symmetry is correct
         for (auto const& material_tangent : material_tangents)
@@ -901,7 +901,7 @@ TEST_CASE("Solid mechanics J2 plasticity model")
     {
         for (auto& H : displacement_gradients) H(2, 2) = 0.001;
 
-        j2plasticity->update_internal_variables(1.0);
+        small_strain_J2_plasticity->update_internal_variables(1.0);
 
         auto[von_mises_stresses,
              accumulated_plastic_strains] = variables
@@ -945,7 +945,7 @@ TEST_CASE("Solid mechanics J2 plasticity model")
     {
         for (auto& H : displacement_gradients) H(2, 2) = 0.003;
 
-        j2plasticity->update_internal_variables(1.0);
+        small_strain_J2_plasticity->update_internal_variables(1.0);
 
         auto[von_mises_stresses,
              accumulated_plastic_strains] = variables
@@ -998,7 +998,7 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
                    InternalVariables::Tensor::Cauchy);
     variables->add(InternalVariables::Scalar::DetF);
 
-    auto J2PlasticityDamage = make_constitutive_model(variables,
+    auto small_strain_J2_plasticity_damage = make_constitutive_model(variables,
                                                       json::parse("{\"Name\": \"steel\", "
                                                                   "\"ElasticModulus\": 134.0e3, "
                                                                   "\"PoissonsRatio\": 0.3, "
@@ -1035,10 +1035,10 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
 
     SECTION("Sanity checks")
     {
-        REQUIRE(J2PlasticityDamage->is_finite_deformation() == false);
-        REQUIRE(J2PlasticityDamage->is_symmetric() == false);
+        REQUIRE(small_strain_J2_plasticity_damage->is_finite_deformation() == false);
+        REQUIRE(small_strain_J2_plasticity_damage->is_symmetric() == false);
 
-        REQUIRE(J2PlasticityDamage->intrinsic_material().name() == "steel");
+        REQUIRE(small_strain_J2_plasticity_damage->intrinsic_material().name() == "steel");
 
         REQUIRE(variables->has(InternalVariables::Scalar::VonMisesStress));
         REQUIRE(variables->has(InternalVariables::Scalar::EffectivePlasticStrain));
@@ -1054,7 +1054,7 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
     {
         for (auto& H : displacement_gradients) H(2, 2) = 0.0008;
 
-        J2PlasticityDamage->update_internal_variables(1.0);
+        small_strain_J2_plasticity_damage->update_internal_variables(1.0);
 
         auto[von_mises_stresses,
              accumulated_plastic_strains] = variables
@@ -1097,7 +1097,7 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
     {
         for (auto& H : displacement_gradients) H(2, 2) = 0.0009; // 0.000825 for comparison with 1D
 
-        J2PlasticityDamage->update_internal_variables(0.01); // time here is real (not pseudo time)
+        small_strain_J2_plasticity_damage->update_internal_variables(0.01); // time here is real (not pseudo time)
 
         auto[von_mises_stresses,
              accumulated_plastic_strains] = variables
@@ -1163,7 +1163,7 @@ TEST_CASE("Thermal isotropic model")
     Eigen::EigenSolver<Eigen::MatrixXd> eigen_solver;
 }
 
-// TEST_CASE("Finite J2 plasticity model", "[FiniteJ2Plasticity]")
+// TEST_CASE("Finite J2 plasticity model", "[finite_strain_J2_plasticity]")
 // {
 //     using namespace neon::mechanical::solid;
 //
@@ -1173,7 +1173,7 @@ TEST_CASE("Thermal isotropic model")
 //         "
 //                      "\"YieldStress\": 200.0e6, \"IsotropicHardeningModulus\": 400.0e6}";
 //
-//     std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\" : \"J2Plasticity\", "
+//     std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\" : \"small_strain_J2_plasticity\", "
 //                                    "\"FiniteStrain\":true}}";
 //
 //     Json::Value material_data, simulation_data;
@@ -1189,7 +1189,7 @@ TEST_CASE("Thermal isotropic model")
 //     variables->add(InternalVariables::Tensor::DeformationGradient,
 //     InternalVariables::Tensor::Cauchy); variables->add(InternalVariables::Scalar::DetF);
 //
-//     auto j2plasticity = make_constitutive_model(variables, material_data, simulation_data);
+//     auto small_strain_J2_plasticity = make_constitutive_model(variables, material_data, simulation_data);
 //
 //     // Get the tensor variables
 //     auto[F_list, cauchy_stresses] =
@@ -1207,8 +1207,8 @@ TEST_CASE("Thermal isotropic model")
 //
 //     SECTION("Sanity checks")
 //     {
-//         REQUIRE(j2plasticity->is_finite_deformation() == true);
-//         REQUIRE(j2plasticity->intrinsic_material().name() == "steel");
+//         REQUIRE(small_strain_J2_plasticity->is_finite_deformation() == true);
+//         REQUIRE(small_strain_J2_plasticity->intrinsic_material().name() == "steel");
 //
 //         REQUIRE(variables->has(InternalVariables::Scalar::VonMisesStress));
 //         REQUIRE(variables->has(InternalVariables::Scalar::EffectivePlasticStrain));
@@ -1225,7 +1225,7 @@ TEST_CASE("Thermal isotropic model")
 //     }
 //     SECTION("No load")
 //     {
-//         j2plasticity->update_internal_variables(1.0);
+//         small_strain_J2_plasticity->update_internal_variables(1.0);
 //
 //         for (auto const& material_tangent : material_tangents)
 //         {
@@ -1241,7 +1241,7 @@ TEST_CASE("Thermal isotropic model")
 //     // {
 //     //     for (auto& F : F_list) F(2, 2) = 1.001;
 //     //
-//     //     j2plasticity->update_internal_variables(1.0);
+//     //     small_strain_J2_plasticity->update_internal_variables(1.0);
 //     //
 //     //     for (auto const& material_tangent : material_tangents)
 //     //     {
@@ -1271,7 +1271,7 @@ TEST_CASE("Thermal isotropic model")
 //     // {
 //     //     for (auto& F : F_list) F(2, 2) = 0.003;
 //     //
-//     //     j2plasticity->update_internal_variables(1.0);
+//     //     small_strain_J2_plasticity->update_internal_variables(1.0);
 //     //
 //     //     auto[von_mises_stresses, accumulated_plastic_strains] =
 //     //     variables->fetch(InternalVariables::Scalar::VonMisesStress,

@@ -10,17 +10,17 @@
 namespace neon::mechanical::solid
 {
 /**
- * IsotropicLinearElasticity is responsible for compute the moduli and the
+ * isotropic_linear_elasticity is responsible for compute the moduli and the
  * stress for the three-dimensional theory.  See \cite Hughes2012 for the
  * theoretical developments.
  */
-class IsotropicLinearElasticity : public ConstitutiveModel
+class isotropic_linear_elasticity : public ConstitutiveModel
 {
 public:
-    explicit IsotropicLinearElasticity(std::shared_ptr<InternalVariables>& variables,
+    explicit isotropic_linear_elasticity(std::shared_ptr<InternalVariables>& variables,
                                        json const& material_data);
 
-    virtual ~IsotropicLinearElasticity();
+    virtual ~isotropic_linear_elasticity();
 
     virtual void update_internal_variables(double const time_step_size) override;
 

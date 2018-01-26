@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "IsotropicLinearElasticity.hpp"
+#include "isotropic_linear_elasticity.hpp"
 
 #include "numeric/Tensor.hpp"
 
@@ -10,18 +10,18 @@
 namespace neon::mechanical::solid
 {
 /**
- * J2Plasticity is responsible for computing the small strain J2 plasticity
+ * small_strain_J2_plasticity is responsible for computing the small strain J2 plasticity
  * stress and tangent operator matrix for each internal variable at the quadrature
  * points.  The method can be found for small strain plasticity using a combination
  * of \cite Neto2011 and \cite Belytschko2013nonlinear
  */
-class J2Plasticity : public IsotropicLinearElasticity
+class small_strain_J2_plasticity : public isotropic_linear_elasticity
 {
 public:
-    explicit J2Plasticity(std::shared_ptr<InternalVariables>& variables,
-                          json const& material_data);
+    explicit small_strain_J2_plasticity(std::shared_ptr<InternalVariables>& variables,
+                                        json const& material_data);
 
-    virtual ~J2Plasticity();
+    virtual ~small_strain_J2_plasticity();
 
     virtual void update_internal_variables(double const time_step_size) override;
 

@@ -74,7 +74,7 @@ public:
         DeformationGradientPlastic,
         DisplacementGradient,
         GreenLagrange,
-        //  J2Plasticity internal variables
+        //  small_strain_J2_plasticity internal variables
         BackStress,
         KinematicHardening,
         /* Tensors for diffusion applications */

@@ -1,5 +1,5 @@
 
-#include "IsotropicLinearElasticity.hpp"
+#include "isotropic_linear_elasticity.hpp"
 
 #include "Exceptions.hpp"
 #include "constitutive/InternalVariables.hpp"
@@ -10,7 +10,7 @@
 
 namespace neon::mechanical::solid
 {
-IsotropicLinearElasticity::IsotropicLinearElasticity(std::shared_ptr<InternalVariables>& variables,
+isotropic_linear_elasticity::isotropic_linear_elasticity(std::shared_ptr<InternalVariables>& variables,
                                                      json const& material_data)
     : ConstitutiveModel(variables), material(material_data)
 {
@@ -21,9 +21,9 @@ IsotropicLinearElasticity::IsotropicLinearElasticity(std::shared_ptr<InternalVar
     variables->add(InternalVariables::rank4::tangent_operator, elastic_moduli());
 }
 
-IsotropicLinearElasticity::~IsotropicLinearElasticity() = default;
+isotropic_linear_elasticity::~isotropic_linear_elasticity() = default;
 
-void IsotropicLinearElasticity::update_internal_variables(double const time_step_size)
+void isotropic_linear_elasticity::update_internal_variables(double const time_step_size)
 {
     using namespace ranges;
 
@@ -51,7 +51,7 @@ void IsotropicLinearElasticity::update_internal_variables(double const time_step
                          });
 }
 
-matrix6 IsotropicLinearElasticity::elastic_moduli() const
+matrix6 isotropic_linear_elasticity::elastic_moduli() const
 {
     auto const [lambda, shear_modulus] = material.Lame_parameters();
 

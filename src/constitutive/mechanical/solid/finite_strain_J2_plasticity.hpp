@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "J2Plasticity.hpp"
+#include "small_strain_J2_plasticity.hpp"
 
 #include "material/IsotropicElasticPlastic.hpp"
 #include "numeric/DenseMatrix.hpp"
@@ -12,23 +12,23 @@
 namespace neon::mechanical::solid
 {
 /**
- * FiniteJ2Plasticity is a material model for the large strain deformation
+ * finite_strain_J2_plasticity is a material model for the large strain deformation
  * according to the J2 yield theory.  This implementation follows the steps
  * outlined in \cite Neto2011 on pages 598.  This does not use the principal
- * stress formulation in order to reuse methods from J2Plasticity.
+ * stress formulation in order to reuse methods from small_strain_J2_plasticity.
  *
  * This class is responsible for computation of the Cauchy stress and the material
  * tangent matrix for use in the Newton Raphson iterations.
  *
- * \sa J2Plasticity
+ * \sa small_strain_J2_plasticity
  */
-class FiniteJ2Plasticity : public J2Plasticity
+class finite_strain_J2_plasticity : public small_strain_J2_plasticity
 {
 public:
-    FiniteJ2Plasticity(std::shared_ptr<InternalVariables>& variables,
+    finite_strain_J2_plasticity(std::shared_ptr<InternalVariables>& variables,
                        json const& material_data);
 
-    ~FiniteJ2Plasticity();
+    ~finite_strain_J2_plasticity();
 
     void update_internal_variables(double const time_step_size) override final;
 

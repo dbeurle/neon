@@ -1,5 +1,5 @@
 
-#include "IsotropicLinearElasticity.hpp"
+#include "isotropic_linear_elasticity.hpp"
 
 #include "Exceptions.hpp"
 #include "constitutive/InternalVariables.hpp"
@@ -11,9 +11,9 @@
 
 namespace neon::mechanical::plane
 {
-IsotropicLinearElasticity::IsotropicLinearElasticity(std::shared_ptr<InternalVariables>& variables,
-                                                     json const& material_data,
-                                                     plane const state)
+isotropic_linear_elasticity::isotropic_linear_elasticity(std::shared_ptr<InternalVariables>& variables,
+                                                         json const& material_data,
+                                                         plane const state)
     : ConstitutiveModel(variables), material(material_data), state(state)
 {
     variables->add(InternalVariables::Tensor::LinearisedStrain,
@@ -23,9 +23,9 @@ IsotropicLinearElasticity::IsotropicLinearElasticity(std::shared_ptr<InternalVar
     variables->add(InternalVariables::rank4::tangent_operator, elastic_moduli());
 }
 
-IsotropicLinearElasticity::~IsotropicLinearElasticity() = default;
+isotropic_linear_elasticity::~isotropic_linear_elasticity() = default;
 
-void IsotropicLinearElasticity::update_internal_variables(double const time_step_size)
+void isotropic_linear_elasticity::update_internal_variables(double const time_step_size)
 {
     using namespace ranges;
 
@@ -68,7 +68,7 @@ void IsotropicLinearElasticity::update_internal_variables(double const time_step
                          });
 }
 
-matrix3 IsotropicLinearElasticity::elastic_moduli() const
+matrix3 isotropic_linear_elasticity::elastic_moduli() const
 {
     auto [lambda, shear_modulus] = material.Lame_parameters();
 
@@ -83,7 +83,7 @@ matrix3 IsotropicLinearElasticity::elastic_moduli() const
     // clang-format on
 }
 
-matrix2 IsotropicLinearElasticity::compute_cauchy_stress(matrix2 const& elastic_strain) const
+matrix2 isotropic_linear_elasticity::compute_cauchy_stress(matrix2 const& elastic_strain) const
 {
     auto const G = material.shear_modulus();
     auto const lambda_e = material.lambda();

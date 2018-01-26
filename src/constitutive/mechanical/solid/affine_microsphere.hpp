@@ -16,7 +16,7 @@ namespace neon::mechanical::solid
  * \addtogroup Hyperelastic
  * \{
  *
- * AffineMicrosphere is responsible for computing the Cauchy stress and the
+ * affine_microsphere is responsible for computing the Cauchy stress and the
  * material tangent in implicit methods.  The affine microsphere model \cite Miehe2004
  * is used to model elastomer materials using micromechanical motivations and
  * homogenises the force from a single chain over a unit sphere.
@@ -25,14 +25,14 @@ namespace neon::mechanical::solid
  * sphere and this internal variable update can be computationally expensive and
  * is therefore multithreaded.
  */
-class AffineMicrosphere : public ConstitutiveModel
+class affine_microsphere : public ConstitutiveModel
 {
 public:
     /**
      * @param variables Reference to internal state variable store
      * @param material_data Json object with input file material data
      */
-    explicit AffineMicrosphere(std::shared_ptr<InternalVariables>& variables,
+    explicit affine_microsphere(std::shared_ptr<InternalVariables>& variables,
                                json const& material_data,
                                unit_sphere_quadrature::Rule const rule);
 
@@ -160,24 +160,24 @@ private:
 
 /** \} */
 
-inline double AffineMicrosphere::volumetric_free_energy_dJ(double const J,
+inline double affine_microsphere::volumetric_free_energy_dJ(double const J,
                                                            double const bulk_modulus) const
 {
     return bulk_modulus / 2.0 * (J - 1.0 / J);
 }
 
-inline double AffineMicrosphere::volumetric_free_energy_second_d2J(double const J,
+inline double affine_microsphere::volumetric_free_energy_second_d2J(double const J,
                                                                    double const bulk_modulus) const
 {
     return bulk_modulus / 2.0 * (1.0 + 1.0 / std::pow(J, 2));
 }
 
-inline double AffineMicrosphere::pade_first(double const micro_stretch, double const N) const
+inline double affine_microsphere::pade_first(double const micro_stretch, double const N) const
 {
     return (3.0 * N - std::pow(micro_stretch, 2)) / (N - std::pow(micro_stretch, 2));
 }
 
-inline double AffineMicrosphere::pade_second(double const micro_stretch, double const N) const
+inline double affine_microsphere::pade_second(double const micro_stretch, double const N) const
 {
     return (std::pow(micro_stretch, 4) + 3.0 * std::pow(N, 2))
            / std::pow(N - std::pow(micro_stretch, 2), 2);
@@ -194,7 +194,7 @@ inline double AffineMicrosphere::pade_second(double const micro_stretch, double 
  * micromechanical motivations and homogenises the force from a single chain
  * over a unit sphere.
  */
-class AffineMicrosphereWithDegradation : public AffineMicrosphere
+class AffineMicrosphereWithDegradation : public affine_microsphere
 {
 public:
     /**

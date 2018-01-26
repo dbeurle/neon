@@ -1,5 +1,5 @@
 
-#include "AffineMicrosphere.hpp"
+#include "affine_microsphere.hpp"
 
 #include "constitutive/InternalVariables.hpp"
 #include "numeric/DenseMatrix.hpp"
@@ -11,7 +11,7 @@
 
 namespace neon::mechanical::solid
 {
-AffineMicrosphere::AffineMicrosphere(std::shared_ptr<InternalVariables>& variables,
+affine_microsphere::affine_microsphere(std::shared_ptr<InternalVariables>& variables,
                                      json const& material_data,
                                      unit_sphere_quadrature::Rule const rule)
     : ConstitutiveModel(variables), unit_sphere(rule), material(material_data)
@@ -25,7 +25,7 @@ AffineMicrosphere::AffineMicrosphere(std::shared_ptr<InternalVariables>& variabl
     variables->commit();
 }
 
-void AffineMicrosphere::update_internal_variables(double const time_step_size)
+void affine_microsphere::update_internal_variables(double const time_step_size)
 {
     auto& tangent_operators = variables->fetch(InternalVariables::rank4::tangent_operator);
 
@@ -72,7 +72,7 @@ void AffineMicrosphere::update_internal_variables(double const time_step_size)
     }
 }
 
-matrix3 AffineMicrosphere::compute_kirchhoff_stress(double const pressure,
+matrix3 affine_microsphere::compute_kirchhoff_stress(double const pressure,
                                                     matrix3 const& macro_stress) const
 {
     // clang-format off
@@ -80,7 +80,7 @@ matrix3 AffineMicrosphere::compute_kirchhoff_stress(double const pressure,
     // clang-format on
 }
 
-matrix6 AffineMicrosphere::compute_material_tangent(double const J,
+matrix6 affine_microsphere::compute_material_tangent(double const J,
                                                     double const K,
                                                     matrix6 const& macro_C,
                                                     matrix3 const& macro_stress) const
@@ -98,7 +98,7 @@ matrix6 AffineMicrosphere::compute_material_tangent(double const J,
     return (kappa + pressure) * IoI - 2.0 * pressure * I + P * D * P;
 }
 
-matrix3 AffineMicrosphere::compute_macro_stress(matrix3 const& F_unimodular,
+matrix3 affine_microsphere::compute_macro_stress(matrix3 const& F_unimodular,
                                                 double const bulk_modulus,
                                                 double const N) const
 {
@@ -114,7 +114,7 @@ matrix3 AffineMicrosphere::compute_macro_stress(matrix3 const& F_unimodular,
                                    });
 }
 
-matrix6 AffineMicrosphere::compute_macro_moduli(matrix3 const& F_unimodular,
+matrix6 affine_microsphere::compute_macro_moduli(matrix3 const& F_unimodular,
                                                 double const bulk_modulus,
                                                 double const N) const
 {
@@ -138,7 +138,7 @@ AffineMicrosphereWithDegradation::AffineMicrosphereWithDegradation(
     std::shared_ptr<InternalVariables>& variables,
     json const& material_data,
     unit_sphere_quadrature::Rule const rule)
-    : AffineMicrosphere(variables, material_data, rule), material(material_data)
+    : affine_microsphere(variables, material_data, rule), material(material_data)
 {
     variables->add(InternalVariables::Scalar::Chains, InternalVariables::Scalar::ShearModuli);
 

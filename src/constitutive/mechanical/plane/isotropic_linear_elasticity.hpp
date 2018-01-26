@@ -9,18 +9,18 @@
 
 namespace neon::mechanical::plane
 {
-class IsotropicLinearElasticity : public ConstitutiveModel
+class isotropic_linear_elasticity : public ConstitutiveModel
 {
 public:
     enum class plane { stress, strain };
 
 public:
     /** Provide an internal variable class to be populated by the constitutive model */
-    explicit IsotropicLinearElasticity(std::shared_ptr<InternalVariables>& variables,
-                                       json const& material_data,
-                                       plane const state);
+    explicit isotropic_linear_elasticity(std::shared_ptr<InternalVariables>& variables,
+                                         json const& material_data,
+                                         plane const state);
 
-    ~IsotropicLinearElasticity();
+    ~isotropic_linear_elasticity();
 
     /**
      * Update the required internal variables and tangent matrix at quadrature

@@ -1,18 +1,18 @@
-#include "J2PlasticityDamage.hpp"
+#include "small_strain_J2_plasticity_damage.hpp"
 
 #include "Exceptions.hpp"
 #include "constitutive/InternalVariables.hpp"
 #include "numeric/mechanics"
 
-#include <iostream>
 #include "io/json.hpp"
+#include <iostream>
 #include <range/v3/view.hpp>
 
 namespace neon::mechanical::solid
 {
-J2PlasticityDamage::J2PlasticityDamage(std::shared_ptr<InternalVariables>& variables,
-                                       json const& material_data)
-    : J2Plasticity(variables, material_data), material(material_data)
+small_strain_J2_plasticity_damage::small_strain_J2_plasticity_damage(
+    std::shared_ptr<InternalVariables>& variables, json const& material_data)
+    : small_strain_J2_plasticity(variables, material_data), material(material_data)
 {
     variables->add(InternalVariables::Tensor::BackStress,
                    InternalVariables::Tensor::KinematicHardening,
@@ -20,9 +20,9 @@ J2PlasticityDamage::J2PlasticityDamage(std::shared_ptr<InternalVariables>& varia
                    InternalVariables::Scalar::EnergyReleaseRate);
 }
 
-J2PlasticityDamage::~J2PlasticityDamage() = default;
+small_strain_J2_plasticity_damage::~small_strain_J2_plasticity_damage() = default;
 
-void J2PlasticityDamage::update_internal_variables(double const time_step_size)
+void small_strain_J2_plasticity_damage::update_internal_variables(double const time_step_size)
 {
     using namespace ranges;
 
@@ -114,14 +114,14 @@ void J2PlasticityDamage::update_internal_variables(double const time_step_size)
     }
 }
 
-double J2PlasticityDamage::perform_radial_return(matrix3& cauchy_stress,
-                                                 matrix3& back_stress,
-                                                 double& scalar_damage,
-                                                 matrix3& kin_hard,
-                                                 double& energy_var,
-                                                 matrix6& tangent_operator,
-                                                 double const& delta_t,
-                                                 matrix3 const& eps_e_t)
+double small_strain_J2_plasticity_damage::perform_radial_return(matrix3& cauchy_stress,
+                                                                matrix3& back_stress,
+                                                                double& scalar_damage,
+                                                                matrix3& kin_hard,
+                                                                double& energy_var,
+                                                                matrix6& tangent_operator,
+                                                                double const& delta_t,
+                                                                matrix3 const& eps_e_t)
 {
     // TODO: initial guess could be computed base on a frozen yield surface (at
     // the increment n) to obtain good convergence. check computational methods for plasticity book
@@ -239,8 +239,8 @@ double J2PlasticityDamage::perform_radial_return(matrix3& cauchy_stress,
     return y(0) * delta_t; // plastic_increment
 }
 
-double J2PlasticityDamage::evaluate_yield_function(double const von_mises,
-                                                   matrix3 const& back_stress) const
+double small_strain_J2_plasticity_damage::evaluate_yield_function(double const von_mises,
+                                                                  matrix3 const& back_stress) const
 {
     return von_mises
            + 0.5 * material.softening_multiplier() / material.kinematic_hardening_modulus()
@@ -248,20 +248,20 @@ double J2PlasticityDamage::evaluate_yield_function(double const von_mises,
            - material.yield_stress(0.0);
 }
 
-double J2PlasticityDamage::evaluate_damage_yield_function(double const energy_var) const
+double small_strain_J2_plasticity_damage::evaluate_damage_yield_function(double const energy_var) const
 {
     return energy_var - std::pow(material.yield_stress(0.0), 2) / (2 * material.elastic_modulus());
 }
 
-matrix3 J2PlasticityDamage::compute_stress_like_matrix(matrix6 const& tangent_operator,
-                                                       matrix3 const& strain_like) const
+matrix3 small_strain_J2_plasticity_damage::compute_stress_like_matrix(matrix6 const& tangent_operator,
+                                                                      matrix3 const& strain_like) const
 {
     // could get the tangent_operator directly without passing it to this function
     return voigt::kinetic::from(tangent_operator * voigt::kinematic::to(strain_like));
 }
 
-vector6 J2PlasticityDamage::compute_stress_like_vector(matrix6 const& tangent_operator,
-                                                       matrix3 const& strain_like) const
+vector6 small_strain_J2_plasticity_damage::compute_stress_like_vector(matrix6 const& tangent_operator,
+                                                                      matrix3 const& strain_like) const
 {
     // could get the tangent_operator directly without passing it to this function
     return tangent_operator * voigt::kinematic::to(strain_like);

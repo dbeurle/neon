@@ -1,5 +1,5 @@
 
-#include "J2Plasticity.hpp"
+#include "small_strain_J2_plasticity.hpp"
 
 #include "Exceptions.hpp"
 
@@ -10,9 +10,9 @@
 
 namespace neon::mechanical::solid
 {
-J2Plasticity::J2Plasticity(std::shared_ptr<InternalVariables>& variables,
-                           json const& material_data)
-    : IsotropicLinearElasticity(variables, material_data), material(material_data)
+small_strain_J2_plasticity::small_strain_J2_plasticity(std::shared_ptr<InternalVariables>& variables,
+                                                       json const& material_data)
+    : isotropic_linear_elasticity(variables, material_data), material(material_data)
 {
     variables->add(InternalVariables::Tensor::LinearisedPlasticStrain);
     variables->add(InternalVariables::Scalar::EffectivePlasticStrain);
@@ -20,9 +20,9 @@ J2Plasticity::J2Plasticity(std::shared_ptr<InternalVariables>& variables,
     variables->commit();
 }
 
-J2Plasticity::~J2Plasticity() = default;
+small_strain_J2_plasticity::~small_strain_J2_plasticity() = default;
 
-void J2Plasticity::update_internal_variables(double const time_step_size)
+void small_strain_J2_plasticity::update_internal_variables(double const time_step_size)
 {
     auto const shear_modulus = material.shear_modulus();
 
@@ -93,10 +93,10 @@ void J2Plasticity::update_internal_variables(double const time_step_size)
     }
 }
 
-matrix6 J2Plasticity::algorithmic_tangent(double const plastic_increment,
-                                          double const accumulated_plastic_strain,
-                                          double const von_mises,
-                                          matrix3 const& normal) const
+matrix6 small_strain_J2_plasticity::algorithmic_tangent(double const plastic_increment,
+                                                        double const accumulated_plastic_strain,
+                                                        double const von_mises,
+                                                        matrix3 const& normal) const
 {
     auto const G = material.shear_modulus();
     auto const H = material.hardening_modulus(accumulated_plastic_strain);
@@ -106,8 +106,8 @@ matrix6 J2Plasticity::algorithmic_tangent(double const plastic_increment,
                  * outer_product(normal, normal);
 }
 
-double J2Plasticity::perform_radial_return(double const von_mises,
-                                           double const accumulated_plastic_strain) const
+double small_strain_J2_plasticity::perform_radial_return(double const von_mises,
+                                                         double const accumulated_plastic_strain) const
 {
     auto const shear_modulus = material.shear_modulus();
 
@@ -155,9 +155,9 @@ double J2Plasticity::perform_radial_return(double const von_mises,
     return plastic_increment;
 }
 
-double J2Plasticity::evaluate_yield_function(double const von_mises,
-                                             double const accumulated_plastic_strain,
-                                             double const plastic_increment) const
+double small_strain_J2_plasticity::evaluate_yield_function(double const von_mises,
+                                                           double const accumulated_plastic_strain,
+                                                           double const plastic_increment) const
 {
     return (von_mises - 3.0 * material.shear_modulus() * plastic_increment)
            - material.yield_stress(accumulated_plastic_strain + plastic_increment);

@@ -1,5 +1,5 @@
 
-#include "FiniteJ2Plasticity.hpp"
+#include "finite_strain_J2_plasticity.hpp"
 
 #include "Exceptions.hpp"
 #include "constitutive/InternalVariables.hpp"
@@ -13,9 +13,9 @@
 
 namespace neon::mechanical::solid
 {
-FiniteJ2Plasticity::FiniteJ2Plasticity(std::shared_ptr<InternalVariables>& variables,
+finite_strain_J2_plasticity::finite_strain_J2_plasticity(std::shared_ptr<InternalVariables>& variables,
                                        json const& material_data)
-    : J2Plasticity(variables, material_data)
+    : small_strain_J2_plasticity(variables, material_data)
 {
     variables->add(InternalVariables::Scalar::VonMisesStress,
                    InternalVariables::Scalar::EffectivePlasticStrain,
@@ -26,9 +26,9 @@ FiniteJ2Plasticity::FiniteJ2Plasticity(std::shared_ptr<InternalVariables>& varia
                    consistent_tangent(1.0, matrix3::Zero(), matrix3::Zero(), C_e));
 }
 
-FiniteJ2Plasticity::~FiniteJ2Plasticity() = default;
+finite_strain_J2_plasticity::~finite_strain_J2_plasticity() = default;
 
-void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
+void finite_strain_J2_plasticity::update_internal_variables(double const time_step_size)
 {
     using namespace ranges;
 
@@ -142,7 +142,7 @@ void FiniteJ2Plasticity::update_internal_variables(double const time_step_size)
     }
 }
 
-matrix6 FiniteJ2Plasticity::consistent_tangent(double const J,
+matrix6 finite_strain_J2_plasticity::consistent_tangent(double const J,
                                                matrix3 const& Be_trial,
                                                matrix3 const& cauchy_stress,
                                                matrix6 const& C)
@@ -157,7 +157,7 @@ matrix6 FiniteJ2Plasticity::consistent_tangent(double const J,
     return 1.0 / (2.0 * J) * D * L * B - H;
 }
 
-std::tuple<vector3, std::array<matrix3, 3>, bool, std::array<int, 3>> FiniteJ2Plasticity::
+std::tuple<vector3, std::array<matrix3, 3>, bool, std::array<int, 3>> finite_strain_J2_plasticity::
     compute_eigenvalues_eigenprojections(matrix3 const& X) const
 {
     Eigen::SelfAdjointEigenSolver<matrix3> eigen_solver(X);
@@ -208,7 +208,7 @@ std::tuple<vector3, std::array<matrix3, 3>, bool, std::array<int, 3>> FiniteJ2Pl
     return {x, E, is_repeated, abc_ordering};
 }
 
-matrix6 FiniteJ2Plasticity::derivative_tensor_log_unique(matrix3 const& Be_trial,
+matrix6 finite_strain_J2_plasticity::derivative_tensor_log_unique(matrix3 const& Be_trial,
                                                          vector3 const& x,
                                                          std::array<matrix3, 3> const& E,
                                                          std::array<int, 3> const& abc_ordering) const
@@ -221,7 +221,7 @@ matrix6 FiniteJ2Plasticity::derivative_tensor_log_unique(matrix3 const& Be_trial
            + 1.0 / x(a) * outer_product(E[a]);
 }
 
-matrix6 FiniteJ2Plasticity::compute_L(matrix3 const& Be_trial) const
+matrix6 finite_strain_J2_plasticity::compute_L(matrix3 const& Be_trial) const
 {
     auto const [x, E, is_repeated, abc_ordering] = compute_eigenvalues_eigenprojections(Be_trial);
 
@@ -261,7 +261,7 @@ matrix6 FiniteJ2Plasticity::compute_L(matrix3 const& Be_trial) const
     return x.norm() < 1.0e-5 ? Isym : Isym / x(0);
 }
 
-matrix6 FiniteJ2Plasticity::compute_B(matrix3 const& Be_trial) const
+matrix6 finite_strain_J2_plasticity::compute_B(matrix3 const& Be_trial) const
 {
     matrix6 B(6, 6);
     // clang-format off
@@ -275,7 +275,7 @@ matrix6 FiniteJ2Plasticity::compute_B(matrix3 const& Be_trial) const
     return B;
 }
 
-matrix6 FiniteJ2Plasticity::compute_H(matrix3 const& s) const
+matrix6 finite_strain_J2_plasticity::compute_H(matrix3 const& s) const
 {
     matrix6 H(6, 6);
     // clang-format off
@@ -289,7 +289,7 @@ matrix6 FiniteJ2Plasticity::compute_H(matrix3 const& s) const
     return H;
 }
 
-matrix6 FiniteJ2Plasticity::dX2_dX(matrix3 const& X) const
+matrix6 finite_strain_J2_plasticity::dX2_dX(matrix3 const& X) const
 {
     matrix6 dx2_dx(6, 6);
     // clang-format off
@@ -303,7 +303,7 @@ matrix6 FiniteJ2Plasticity::dX2_dX(matrix3 const& X) const
     return dx2_dx;
 }
 
-matrix6 FiniteJ2Plasticity::mandel_transformation() const
+matrix6 finite_strain_J2_plasticity::mandel_transformation() const
 {
     matrix6 M = matrix6::Ones();
 

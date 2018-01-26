@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "J2Plasticity.hpp"
+#include "small_strain_J2_plasticity.hpp"
 
 #include "numeric/Tensor.hpp"
 
@@ -10,18 +10,18 @@
 namespace neon::mechanical::solid
 {
 /**
- * J2PlasticityDamage is responsible for computing the constitutive model of a standard ductile
+ * small_strain_J2_plasticity_damage is responsible for computing the constitutive model of a standard ductile
  * Chaboche damage model without microdefects closure effects. Theoritical details can be found in
  * \cite Neto2011 (Lemaitre’s elastoplastic damage theory), \cite Ladeveze1999 (chapter 2) and \cite
  * Lemaitre2005 (Isotropic Damage without Microdefects Closure).
  */
-class J2PlasticityDamage : public J2Plasticity
+class small_strain_J2_plasticity_damage : public small_strain_J2_plasticity
 {
 public:
-    J2PlasticityDamage(std::shared_ptr<InternalVariables>& variables,
+    small_strain_J2_plasticity_damage(std::shared_ptr<InternalVariables>& variables,
                        json const& material_data);
 
-    ~J2PlasticityDamage();
+    ~small_strain_J2_plasticity_damage();
 
     /**
     * Compute the update of the internal variables based on the following evolution equations.

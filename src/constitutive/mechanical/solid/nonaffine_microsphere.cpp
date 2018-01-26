@@ -1,5 +1,5 @@
 
-#include "NonAffineMicrosphere.hpp"
+#include "nonaffine_microsphere.hpp"
 
 #include "constitutive/InternalVariables.hpp"
 #include "numeric/DenseMatrix.hpp"
@@ -11,10 +11,10 @@
 
 namespace neon::mechanical::solid
 {
-NonAffineMicrosphere::NonAffineMicrosphere(std::shared_ptr<InternalVariables>& variables,
+nonaffine_microsphere::nonaffine_microsphere(std::shared_ptr<InternalVariables>& variables,
                                            json const& material_data,
                                            unit_sphere_quadrature::Rule const rule)
-    : AffineMicrosphere(variables, material_data, rule), material(material_data)
+    : affine_microsphere(variables, material_data, rule), material(material_data)
 {
     if (!material_data.count("NonAffineStretchParameter"))
     {
@@ -23,7 +23,7 @@ NonAffineMicrosphere::NonAffineMicrosphere(std::shared_ptr<InternalVariables>& v
     non_affine_stretch_parameter = material_data["NonAffineStretchParameter"];
 }
 
-void NonAffineMicrosphere::update_internal_variables(double const time_step_size)
+void nonaffine_microsphere::update_internal_variables(double const time_step_size)
 {
     auto const& deformation_gradients = variables->fetch(
         InternalVariables::Tensor::DeformationGradient);
@@ -94,7 +94,7 @@ void NonAffineMicrosphere::update_internal_variables(double const time_step_size
     }
 }
 
-double NonAffineMicrosphere::compute_nonaffine_stretch(matrix3 const& F_unimodular) const
+double nonaffine_microsphere::compute_nonaffine_stretch(matrix3 const& F_unimodular) const
 {
     auto const p = non_affine_stretch_parameter;
 
@@ -109,7 +109,7 @@ double NonAffineMicrosphere::compute_nonaffine_stretch(matrix3 const& F_unimodul
                     1.0 / p);
 }
 
-matrix3 NonAffineMicrosphere::compute_h_tensor(matrix3 const& F_unimodular) const
+matrix3 nonaffine_microsphere::compute_h_tensor(matrix3 const& F_unimodular) const
 {
     auto const p = non_affine_stretch_parameter;
 
@@ -122,7 +122,7 @@ matrix3 NonAffineMicrosphere::compute_h_tensor(matrix3 const& F_unimodular) cons
     });
 }
 
-matrix6 NonAffineMicrosphere::compute_H_tensor(matrix3 const& F_unimodular) const
+matrix6 nonaffine_microsphere::compute_H_tensor(matrix3 const& F_unimodular) const
 {
     auto const p = non_affine_stretch_parameter;
 
@@ -138,7 +138,7 @@ matrix6 NonAffineMicrosphere::compute_H_tensor(matrix3 const& F_unimodular) cons
     // clang-format on
 }
 
-matrix3 NonAffineMicrosphere::compute_k_tensor(matrix3 const& F_unimodular) const
+matrix3 nonaffine_microsphere::compute_k_tensor(matrix3 const& F_unimodular) const
 {
     auto const q = non_affine_tube_parameter;
 
@@ -153,7 +153,7 @@ matrix3 NonAffineMicrosphere::compute_k_tensor(matrix3 const& F_unimodular) cons
     // clang-format on
 }
 
-matrix6 NonAffineMicrosphere::compute_K_tensor(matrix3 const& F_unimodular) const
+matrix6 nonaffine_microsphere::compute_K_tensor(matrix3 const& F_unimodular) const
 {
     auto const q = non_affine_tube_parameter;
 
@@ -169,7 +169,7 @@ matrix6 NonAffineMicrosphere::compute_K_tensor(matrix3 const& F_unimodular) cons
     // clang-format on
 }
 
-matrix6 NonAffineMicrosphere::compute_G_tensor(matrix3 const& F_unimodular) const
+matrix6 nonaffine_microsphere::compute_G_tensor(matrix3 const& F_unimodular) const
 {
     auto const q = non_affine_tube_parameter;
 

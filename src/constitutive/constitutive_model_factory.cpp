@@ -1,21 +1,21 @@
 
 #include "constitutive_model_factory.hpp"
 
-#include "mechanical/solid/J2Plasticity.hpp"
-#include "mechanical/solid/J2PlasticityDamage.hpp"
+#include "mechanical/solid/small_strain_J2_plasticity.hpp"
+#include "mechanical/solid/small_strain_J2_plasticity_damage.hpp"
 
-#include "mechanical/solid/FiniteJ2Plasticity.hpp"
+#include "mechanical/solid/finite_strain_J2_plasticity.hpp"
 
 #include "mechanical/solid/gaussian_affine_microsphere.hpp"
 
-#include "mechanical/solid/AffineMicrosphere.hpp"
-#include "mechanical/solid/NonAffineMicrosphere.hpp"
+#include "mechanical/solid/affine_microsphere.hpp"
+#include "mechanical/solid/nonaffine_microsphere.hpp"
 
 #include "mechanical/solid/compressible_neohooke.hpp"
 
 #include "thermal/IsotropicDiffusion.hpp"
 
-#include "mechanical/plane/IsotropicLinearElasticity.hpp"
+#include "mechanical/plane/isotropic_linear_elasticity.hpp"
 
 #include "io/json.hpp"
 
@@ -87,34 +87,34 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(
         }
         else if (model_type == "Affine")
         {
-            return std::make_unique<AffineMicrosphere>(variables, material_data, entry->second);
+            return std::make_unique<affine_microsphere>(variables, material_data, entry->second);
         }
         else if (model_type == "NonAffine")
         {
-            return std::make_unique<NonAffineMicrosphere>(variables, material_data, entry->second);
+            return std::make_unique<nonaffine_microsphere>(variables, material_data, entry->second);
         }
         else
         {
             throw std::runtime_error("Microsphere model options are \"Affine\" or \"Nonaffine\"");
         }
     }
-    else if (model_name == "IsotropicLinearElasticity")
+    else if (model_name == "isotropic_linear_elasticity")
     {
-        return std::make_unique<IsotropicLinearElasticity>(variables, material_data);
+        return std::make_unique<isotropic_linear_elasticity>(variables, material_data);
     }
-    else if (model_name == "J2Plasticity")
+    else if (model_name == "small_strain_J2_plasticity")
     {
         if (!constitutive_model.count("FiniteStrain"))
         {
-            throw std::runtime_error("\"J2Plasticity\" must have a boolean value for "
+            throw std::runtime_error("\"small_strain_J2_plasticity\" must have a boolean value for "
                                      "\"FiniteStrain\"");
         }
 
         if (mesh_data["ConstitutiveModel"]["FiniteStrain"].get<bool>())
         {
-            return std::make_unique<FiniteJ2Plasticity>(variables, material_data);
+            return std::make_unique<finite_strain_J2_plasticity>(variables, material_data);
         }
-        return std::make_unique<J2Plasticity>(variables, material_data);
+        return std::make_unique<small_strain_J2_plasticity>(variables, material_data);
     }
     else if (model_name == "ChabocheDamage")
     {
@@ -123,11 +123,11 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(
             throw std::runtime_error("\"ChabocheDamage\" is not implemented for "
                                      "\"FiniteStrain\"");
         }
-        return std::make_unique<J2PlasticityDamage>(variables, material_data);
+        return std::make_unique<small_strain_J2_plasticity_damage>(variables, material_data);
     }
     throw std::runtime_error("The model name " + model_name + " is not recognised\n"
                              + "Supported models are \"NeoHooke\", \"Microsphere\" "
-                               "and \"J2Plasticity\"\n");
+                               "and \"small_strain_J2_plasticity\"\n");
     return nullptr;
 }
 }
@@ -153,15 +153,15 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(
 
     if (model_name == "PlaneStrain")
     {
-        return std::make_unique<IsotropicLinearElasticity>(variables,
-                                                           material_data,
-                                                           IsotropicLinearElasticity::plane::strain);
+        return std::make_unique<isotropic_linear_elasticity>(variables,
+                                                             material_data,
+                                                             isotropic_linear_elasticity::plane::strain);
     }
     else if (model_name == "PlaneStress")
     {
-        return std::make_unique<IsotropicLinearElasticity>(variables,
-                                                           material_data,
-                                                           IsotropicLinearElasticity::plane::stress);
+        return std::make_unique<isotropic_linear_elasticity>(variables,
+                                                             material_data,
+                                                             isotropic_linear_elasticity::plane::stress);
     }
     throw std::runtime_error("The model name " + model_name + " is not recognised\n"
                              + "Supported models are \"PlaneStrain\" and \"PlaneStress\"\n");

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "AffineMicrosphere.hpp"
+#include "affine_microsphere.hpp"
 
 namespace neon::mechanical::solid
 {
@@ -10,22 +10,22 @@ namespace neon::mechanical::solid
  * \addtogroup Hyperelastic
  * \{
  *
- * NonAffineMicrosphere model computes the Kirchhoff stress and the material
+ * nonaffine_microsphere model computes the Kirchhoff stress and the material
  * tangent for the non-affine microsphere model \cite Miehe2004.  This model includes
  * the interaction of the polymer chain with the neighbouring (forest) chains
  * through the inclusion of the tube model.  This is effectively an extension
- * of the AffineMicrosphere constitutive model.
+ * of the affine_microsphere constitutive model.
  */
-class NonAffineMicrosphere : public AffineMicrosphere
+class nonaffine_microsphere : public affine_microsphere
 {
 public:
     /**
      * @param variables Reference to internal state variable store
      * @param material_data Json object with material data
      */
-    explicit NonAffineMicrosphere(std::shared_ptr<InternalVariables>& variables,
-                                  json const& material_data,
-                                  unit_sphere_quadrature::Rule const rule);
+    explicit nonaffine_microsphere(std::shared_ptr<InternalVariables>& variables,
+                                   json const& material_data,
+                                   unit_sphere_quadrature::Rule const rule);
 
     virtual void update_internal_variables(double const time_step_size) override;
 
@@ -125,7 +125,7 @@ private:
 
 /** \} */
 
-inline matrix6 NonAffineMicrosphere::compute_o_dot_product(vector3 const& n) const
+inline matrix6 nonaffine_microsphere::compute_o_dot_product(vector3 const& n) const
 {
     // clang-format off
     return (matrix6() << 2.0 * n(0) * n(0),               0.0,               0.0,                               0.0,                       n(0) * n(2), n(0) * n(1),       //
