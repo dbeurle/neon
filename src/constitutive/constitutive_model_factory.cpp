@@ -98,11 +98,11 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(
             throw std::runtime_error("Microsphere model options are \"Affine\" or \"Nonaffine\"");
         }
     }
-    else if (model_name == "isotropic_linear_elasticity")
+    else if (model_name == "IsotropicLinearElasticity")
     {
         return std::make_unique<isotropic_linear_elasticity>(variables, material_data);
     }
-    else if (model_name == "small_strain_J2_plasticity")
+    else if (model_name == "J2Plasticity")
     {
         if (!constitutive_model.count("FiniteStrain"))
         {

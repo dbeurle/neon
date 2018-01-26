@@ -14,7 +14,7 @@
 namespace neon::mechanical::solid
 {
 finite_strain_J2_plasticity::finite_strain_J2_plasticity(std::shared_ptr<InternalVariables>& variables,
-                                       json const& material_data)
+                                                         json const& material_data)
     : small_strain_J2_plasticity(variables, material_data)
 {
     variables->add(InternalVariables::Scalar::VonMisesStress,
@@ -143,9 +143,9 @@ void finite_strain_J2_plasticity::update_internal_variables(double const time_st
 }
 
 matrix6 finite_strain_J2_plasticity::consistent_tangent(double const J,
-                                               matrix3 const& Be_trial,
-                                               matrix3 const& cauchy_stress,
-                                               matrix6 const& C)
+                                                        matrix3 const& Be_trial,
+                                                        matrix3 const& cauchy_stress,
+                                                        matrix6 const& C)
 {
     // Convert to Mandel notation so matrix multiplication == double dot operation
     matrix6 const D = voigt_to_mandel(C);
@@ -208,10 +208,11 @@ std::tuple<vector3, std::array<matrix3, 3>, bool, std::array<int, 3>> finite_str
     return {x, E, is_repeated, abc_ordering};
 }
 
-matrix6 finite_strain_J2_plasticity::derivative_tensor_log_unique(matrix3 const& Be_trial,
-                                                         vector3 const& x,
-                                                         std::array<matrix3, 3> const& E,
-                                                         std::array<int, 3> const& abc_ordering) const
+matrix6 finite_strain_J2_plasticity::derivative_tensor_log_unique(
+    matrix3 const& Be_trial,
+    vector3 const& x,
+    std::array<matrix3, 3> const& E,
+    std::array<int, 3> const& abc_ordering) const
 {
     auto const [a, b, c] = abc_ordering;
     return std::log(x(a)) / ((x(a) - x(b)) * (x(a) - x(c)))

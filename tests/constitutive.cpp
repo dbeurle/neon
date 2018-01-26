@@ -9,8 +9,8 @@
 #include "constitutive/InternalVariables.hpp"
 
 #include "constitutive/mechanical/solid/affine_microsphere.hpp"
-#include "constitutive/mechanical/solid/small_strain_J2_plasticity.hpp"
 #include "constitutive/mechanical/solid/compressible_neohooke.hpp"
+#include "constitutive/mechanical/solid/small_strain_J2_plasticity.hpp"
 
 #include "constitutive/mechanical/plane/isotropic_linear_elasticity.hpp"
 
@@ -84,8 +84,8 @@ TEST_CASE("Neo-Hookean model")
                                                          "\"NeoHooke\"} }"));
 
     // Get the tensor variables
-    auto[F_list, cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DeformationGradient,
-                                                     InternalVariables::Tensor::Cauchy);
+    auto [F_list, cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DeformationGradient,
+                                                      InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables->fetch(InternalVariables::Scalar::DetF);
 
@@ -172,8 +172,8 @@ TEST_CASE("Gaussian affine microsphere model", )
                                                       ": \"GaussianAffine\", \"Quadrature\" : "
                                                       "\"BO21\"}}"));
 
-    auto[F_list, cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DeformationGradient,
-                                                     InternalVariables::Tensor::Cauchy);
+    auto [F_list, cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DeformationGradient,
+                                                      InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables->fetch(InternalVariables::Scalar::DetF);
 
@@ -256,8 +256,8 @@ TEST_CASE("Affine microsphere model")
                                                       "\"Microsphere\", \"Type\" "
                                                       ": \"Affine\", \"Quadrature\" : \"BO21\"}}"));
 
-    auto[F_list, cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DeformationGradient,
-                                                     InternalVariables::Tensor::Cauchy);
+    auto [F_list, cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DeformationGradient,
+                                                      InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables->fetch(InternalVariables::Scalar::DetF);
 
@@ -343,8 +343,8 @@ TEST_CASE("NonAffine microsphere model")
                                                       "\"BO21\"}}"));
 
     // Get the tensor variables
-    auto[F_list, cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DeformationGradient,
-                                                     InternalVariables::Tensor::Cauchy);
+    auto [F_list, cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DeformationGradient,
+                                                      InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables->fetch(InternalVariables::Scalar::DetF);
 
@@ -440,9 +440,9 @@ TEST_CASE("Plane stress elasticity model")
                                                              "\"PlaneStress\"}}"));
 
     // Get the tensor variables
-    auto[displacement_gradients,
-         cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DisplacementGradient,
-                                             InternalVariables::Tensor::Cauchy);
+    auto [displacement_gradients,
+          cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DisplacementGradient,
+                                              InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables->fetch(InternalVariables::Scalar::DetF);
 
@@ -500,10 +500,10 @@ TEST_CASE("Plane stress elasticity model")
 
         elastic_model->update_internal_variables(1.0);
 
-        auto[von_mises_stresses,
-             accumulated_plastic_strains] = variables
-                                                ->fetch(InternalVariables::Scalar::VonMisesStress,
-                                                        InternalVariables::Scalar::EffectivePlasticStrain);
+        auto [von_mises_stresses,
+              accumulated_plastic_strains] = variables
+                                                 ->fetch(InternalVariables::Scalar::VonMisesStress,
+                                                         InternalVariables::Scalar::EffectivePlasticStrain);
 
         for (auto const& material_tangent : material_tangents)
         {
@@ -561,9 +561,9 @@ TEST_CASE("Plane strain elasticity model")
                                                              "\"PlaneStrain\"}}"));
 
     // Get the tensor variables
-    auto[displacement_gradients,
-         cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DisplacementGradient,
-                                             InternalVariables::Tensor::Cauchy);
+    auto [displacement_gradients,
+          cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DisplacementGradient,
+                                              InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables->fetch(InternalVariables::Scalar::DetF);
 
@@ -620,10 +620,10 @@ TEST_CASE("Plane strain elasticity model")
 
         elastic_model->update_internal_variables(1.0);
 
-        auto[von_mises_stresses,
-             accumulated_plastic_strains] = variables
-                                                ->fetch(InternalVariables::Scalar::VonMisesStress,
-                                                        InternalVariables::Scalar::EffectivePlasticStrain);
+        auto [von_mises_stresses,
+              accumulated_plastic_strains] = variables
+                                                 ->fetch(InternalVariables::Scalar::VonMisesStress,
+                                                         InternalVariables::Scalar::EffectivePlasticStrain);
 
         for (auto const& material_tangent : material_tangents)
         {
@@ -677,12 +677,12 @@ TEST_CASE("Solid mechanics elasticity model")
                                                              "\"ElasticModulus\": 200.0e3, "
                                                              "\"PoissonsRatio\": 0.3}"),
                                                  json::parse("{\"ConstitutiveModel\" : {\"Name\" : "
-                                                             "\"isotropic_linear_elasticity\"}}"));
+                                                             "\"IsotropicLinearElasticity\"}}"));
 
     // Get the tensor variables
-    auto[displacement_gradients,
-         cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DisplacementGradient,
-                                             InternalVariables::Tensor::Cauchy);
+    auto [displacement_gradients,
+          cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DisplacementGradient,
+                                              InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables->fetch(InternalVariables::Scalar::DetF);
 
@@ -758,10 +758,10 @@ TEST_CASE("Solid mechanics elasticity model")
 
         elastic_model->update_internal_variables(1.0);
 
-        auto[von_mises_stresses,
-             accumulated_plastic_strains] = variables
-                                                ->fetch(InternalVariables::Scalar::VonMisesStress,
-                                                        InternalVariables::Scalar::EffectivePlasticStrain);
+        auto [von_mises_stresses,
+              accumulated_plastic_strains] = variables
+                                                 ->fetch(InternalVariables::Scalar::VonMisesStress,
+                                                         InternalVariables::Scalar::EffectivePlasticStrain);
 
         for (auto const& material_tangent : material_tangents)
         {
@@ -827,7 +827,7 @@ TEST_CASE("Solid mechanics J2 plasticity model factory errors")
     REQUIRE_THROWS_AS(make_constitutive_model(variables,
                                               json::parse("{}"),
                                               json::parse("{\"ConstitutiveModel\" : {\"Name\" : "
-                                                          "\"small_strain_J2_plasticity\"}}")),
+                                                          "\"J2Plasticity\"}}")),
                       std::runtime_error);
 }
 TEST_CASE("Solid mechanics J2 plasticity model")
@@ -841,21 +841,24 @@ TEST_CASE("Solid mechanics J2 plasticity model")
                    InternalVariables::Tensor::Cauchy);
     variables->add(InternalVariables::Scalar::DetF);
 
+    auto const material_data = json::parse("{\"Name\": \"steel\", "
+                                           "\"ElasticModulus\": 200.0e9, "
+                                           "\"PoissonsRatio\": 0.3, "
+                                           "\"YieldStress\": 200.0e6, "
+                                           "\"IsotropicHardeningModulus\": 400.0e6}");
+
+    auto const constitutive_data = json::parse("{\"ConstitutiveModel\" : "
+                                               "{\"Name\" : \"J2Plasticity\", "
+                                               "\"FiniteStrain\" : false}}");
+
     auto small_strain_J2_plasticity = make_constitutive_model(variables,
-                                                json::parse("{\"Name\": \"steel\", "
-                                                            "\"ElasticModulus\": 200.0e9, "
-                                                            "\"PoissonsRatio\": 0.3, "
-                                                            "\"YieldStress\": 200.0e6, "
-                                                            "\"IsotropicHardeningModulus\": "
-                                                            "400.0e6}"),
-                                                json::parse("{\"ConstitutiveModel\" : {\"Name\" : "
-                                                            "\"small_strain_J2_plasticity\", "
-                                                            "\"FiniteStrain\" : false}}"));
+                                                              material_data,
+                                                              constitutive_data);
 
     // Get the tensor variables
-    auto[displacement_gradients,
-         cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DisplacementGradient,
-                                             InternalVariables::Tensor::Cauchy);
+    auto [displacement_gradients,
+          cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DisplacementGradient,
+                                              InternalVariables::Tensor::Cauchy);
 
     auto& J_list = variables->fetch(InternalVariables::Scalar::DetF);
 
@@ -903,10 +906,10 @@ TEST_CASE("Solid mechanics J2 plasticity model")
 
         small_strain_J2_plasticity->update_internal_variables(1.0);
 
-        auto[von_mises_stresses,
-             accumulated_plastic_strains] = variables
-                                                ->fetch(InternalVariables::Scalar::VonMisesStress,
-                                                        InternalVariables::Scalar::EffectivePlasticStrain);
+        auto [von_mises_stresses,
+              accumulated_plastic_strains] = variables
+                                                 ->fetch(InternalVariables::Scalar::VonMisesStress,
+                                                         InternalVariables::Scalar::EffectivePlasticStrain);
 
         for (auto const& material_tangent : material_tangents)
         {
@@ -947,10 +950,10 @@ TEST_CASE("Solid mechanics J2 plasticity model")
 
         small_strain_J2_plasticity->update_internal_variables(1.0);
 
-        auto[von_mises_stresses,
-             accumulated_plastic_strains] = variables
-                                                ->fetch(InternalVariables::Scalar::VonMisesStress,
-                                                        InternalVariables::Scalar::EffectivePlasticStrain);
+        auto [von_mises_stresses,
+              accumulated_plastic_strains] = variables
+                                                 ->fetch(InternalVariables::Scalar::VonMisesStress,
+                                                         InternalVariables::Scalar::EffectivePlasticStrain);
 
         for (auto const& material_tangent : material_tangents)
         {
@@ -999,32 +1002,52 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
     variables->add(InternalVariables::Scalar::DetF);
 
     auto small_strain_J2_plasticity_damage = make_constitutive_model(variables,
-                                                      json::parse("{\"Name\": \"steel\", "
-                                                                  "\"ElasticModulus\": 134.0e3, "
-                                                                  "\"PoissonsRatio\": 0.3, "
-                                                                  "\"YieldStress\": 85, "
-                                                                  "\"KinematicHardeningModulus\": "
-                                                                  "5500,\"SofteningMultiplier\" : "
-                                                                  "250,"
-                                                                  "\"PlasticityViscousExponent\" : "
-                                                                  "2.5,"
-                                                                  "\"PlasticityViscousMultiplier\" "
-                                                                  ": "
-                                                                  "1.923536463026969e-08,"
-                                                                  "\"DamageViscousExponent\" : "
-                                                                  "2,\"DamageViscousMultiplier\" : "
-                                                                  "2.777777777777778}"),
-                                                      json::parse("{\"ConstitutiveModel\" : "
-                                                                  "{\"Name\" : \"ChabocheDamage\", "
-                                                                  "\"FiniteStrain\" : false}}"));
+                                                                     json::parse("{\"Name\": "
+                                                                                 "\"steel\", "
+                                                                                 "\"ElasticModulus"
+                                                                                 "\": 134.0e3, "
+                                                                                 "\"PoissonsRatio\""
+                                                                                 ": 0.3, "
+                                                                                 "\"YieldStress\": "
+                                                                                 "85, "
+                                                                                 "\"KinematicHarden"
+                                                                                 "ingModulus\": "
+                                                                                 "5500,"
+                                                                                 "\"SofteningMultip"
+                                                                                 "lier\" : "
+                                                                                 "250,"
+                                                                                 "\"PlasticityVisco"
+                                                                                 "usExponent\" : "
+                                                                                 "2.5,"
+                                                                                 "\"PlasticityVisco"
+                                                                                 "usMultiplier\" "
+                                                                                 ": "
+                                                                                 "1."
+                                                                                 "923536463026969e-"
+                                                                                 "08,"
+                                                                                 "\"DamageViscousEx"
+                                                                                 "ponent\" : "
+                                                                                 "2,"
+                                                                                 "\"DamageViscousMu"
+                                                                                 "ltiplier\" : "
+                                                                                 "2."
+                                                                                 "777777777777778"
+                                                                                 "}"),
+                                                                     json::parse("{\"ConstitutiveMo"
+                                                                                 "del\" : "
+                                                                                 "{\"Name\" : "
+                                                                                 "\"ChabocheDamage"
+                                                                                 "\", "
+                                                                                 "\"FiniteStrain\" "
+                                                                                 ": false}}"));
 
     // Get the tensor variables
-    auto[displacement_gradients,
-         cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DisplacementGradient,
-                                             InternalVariables::Tensor::Cauchy);
+    auto [displacement_gradients,
+          cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DisplacementGradient,
+                                              InternalVariables::Tensor::Cauchy);
 
-    auto[J_list, damage_list] = variables->fetch(InternalVariables::Scalar::DetF,
-                                                 InternalVariables::Scalar::Damage);
+    auto [J_list, damage_list] = variables->fetch(InternalVariables::Scalar::DetF,
+                                                  InternalVariables::Scalar::Damage);
 
     auto& material_tangents = variables->fetch(InternalVariables::rank4::tangent_operator);
 
@@ -1056,10 +1079,10 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
 
         small_strain_J2_plasticity_damage->update_internal_variables(1.0);
 
-        auto[von_mises_stresses,
-             accumulated_plastic_strains] = variables
-                                                ->fetch(InternalVariables::Scalar::VonMisesStress,
-                                                        InternalVariables::Scalar::EffectivePlasticStrain);
+        auto [von_mises_stresses,
+              accumulated_plastic_strains] = variables
+                                                 ->fetch(InternalVariables::Scalar::VonMisesStress,
+                                                         InternalVariables::Scalar::EffectivePlasticStrain);
 
         for (auto const& material_tangent : material_tangents)
         {
@@ -1097,12 +1120,13 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
     {
         for (auto& H : displacement_gradients) H(2, 2) = 0.0009; // 0.000825 for comparison with 1D
 
-        small_strain_J2_plasticity_damage->update_internal_variables(0.01); // time here is real (not pseudo time)
+        small_strain_J2_plasticity_damage->update_internal_variables(
+            0.01); // time here is real (not pseudo time)
 
-        auto[von_mises_stresses,
-             accumulated_plastic_strains] = variables
-                                                ->fetch(InternalVariables::Scalar::VonMisesStress,
-                                                        InternalVariables::Scalar::EffectivePlasticStrain);
+        auto [von_mises_stresses,
+              accumulated_plastic_strains] = variables
+                                                 ->fetch(InternalVariables::Scalar::VonMisesStress,
+                                                         InternalVariables::Scalar::EffectivePlasticStrain);
 
         for (auto const& cauchy_stress : cauchy_stresses)
         {
