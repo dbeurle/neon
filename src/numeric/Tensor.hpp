@@ -127,6 +127,22 @@ namespace voigt
     // clang-format on
 }
 
+namespace d2
+{
+/**
+ * Compute the outer product in Voigt notation according to
+ * \f$ \mathbb{\mathbf{1} \otimes \mathbf{1}} = \delta_{ij} \delta_{kl} \f$
+ */
+[[nodiscard]] inline matrix3 I_outer_I()
+{
+    // clang-format off
+     return (matrix3() << 1.0, 1.0, 0.0,
+                          1.0, 1.0, 0.0,
+                          0.0, 0.0, 0.0).finished();
+    // clang-format on
+}
+}
+
 //! Kinematic description of tensor to voigt notation where off diagonal components
 //! are multiplied by a factor of two (strain type)
 namespace kinematic
@@ -397,6 +413,25 @@ template <typename matrix_expression>
 */
 [[nodiscard]] inline matrix6 outer_product(matrix3 const& h) { return outer_product(h, h); }
 
+namespace detail
+{
+[[nodiscard]] inline matrix6 mandel_notation(matrix6 A)
+{
+    A.block<3, 3>(0, 3) *= std::sqrt(2.0);
+    A.block<3, 3>(3, 0) *= std::sqrt(2.0);
+    A.block<3, 3>(3, 3) *= 2.0;
+    return A;
+}
+
+[[nodiscard]] inline matrix3 mandel_notation(matrix3 A)
+{
+    A.block<1, 2>(2, 0) *= std::sqrt(2.0);
+    A.block<2, 1>(0, 2) *= std::sqrt(2.0);
+    A(2, 2) *= 2.0;
+    return A;
+}
+}
+
 /**
  * Convert a fourth order tensor in Voigt notation to Mandel notation.  This
  * is useful in computing the double dot product (contraction) between two
@@ -407,11 +442,9 @@ template <typename matrix_expression>
       [\mathbf{c}] &= [\mathbf{a}] [\mathbf{b}]
      \f}
  */
-[[nodiscard]] inline matrix6 mandel_notation(matrix6 A)
+template <typename matrix_expression>
+[[nodiscard]] inline auto mandel_notation(matrix_expression A)
 {
-    A.block<3, 3>(0, 3) *= std::sqrt(2.0);
-    A.block<3, 3>(3, 0) *= std::sqrt(2.0);
-    A.block<3, 3>(3, 3) *= 2.0;
-    return A;
+    return detail::mandel_notation(A.eval());
 }
 }
