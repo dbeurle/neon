@@ -35,8 +35,11 @@ protected:
 
 protected:
     // Device side pointers
-    int *d_col, *d_row;
-    double *d_val, *d_x;
+    int32_t* d_col{nullptr};
+    int32_t* d_row{nullptr};
+    double* d_val{nullptr};
+
+    double* d_x{nullptr};
 
     double *d_r, *d_p, *d_Ap, *d_y, *d_z;
     double* d_M_inv;
