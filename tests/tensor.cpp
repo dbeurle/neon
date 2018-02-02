@@ -3,7 +3,7 @@
 
 #include <catch.hpp>
 
-#include "numeric/Tensor.hpp"
+#include "numeric/tensor_operations.hpp"
 
 #include "numeric/spectral_decomposition.hpp"
 

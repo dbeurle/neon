@@ -3,7 +3,7 @@
 
 #include "small_strain_J2_plasticity.hpp"
 
-#include "numeric/Tensor.hpp"
+#include "numeric/tensor_operations.hpp"
 
 #include "material/IsotropicElasticPlasticDamage.hpp"
 

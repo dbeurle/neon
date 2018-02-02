@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "numeric/Tensor.hpp"
+#include "numeric/tensor_operations.hpp"
 
 namespace neon::mechanical
 {

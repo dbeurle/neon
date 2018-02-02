@@ -3,7 +3,7 @@
 
 #include "isotropic_linear_elasticity.hpp"
 
-#include "numeric/Tensor.hpp"
+#include "numeric/tensor_operations.hpp"
 
 #include "material/IsotropicElasticPlastic.hpp"
 

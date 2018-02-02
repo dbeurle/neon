@@ -4,7 +4,7 @@
 #include "constitutive/ConstitutiveModel.hpp"
 
 #include "material/MicromechanicalElastomer.hpp"
-#include "numeric/Tensor.hpp"
+#include "numeric/tensor_operations.hpp"
 #include "quadrature/unit_sphere_quadrature.hpp"
 
 #include <json/forwards.h>
