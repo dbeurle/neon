@@ -5,6 +5,8 @@
 
 #include "numeric/Tensor.hpp"
 
+#include "numeric/spectral_decomposition.hpp"
+
 using namespace neon;
 
 constexpr auto ZERO_MARGIN = 1.0e-5;
@@ -49,5 +51,32 @@ TEST_CASE("Mandel notation")
                 == Approx(9.0 * std::sqrt(2.0)).margin(ZERO_MARGIN));
         REQUIRE(mandel_ones.block<3, 3>(3, 0).sum()
                 == Approx(9.0 * std::sqrt(2.0)).margin(ZERO_MARGIN));
+    }
+}
+TEST_CASE("Spectral decomposition")
+{
+    SECTION("2x2 identity matrix")
+    {
+        matrix2 A = matrix2::Identity();
+
+        auto const[is_unique, eigenvalues, eigenprojections] = spectral_decomposition(A);
+
+        auto const[x1, x2] = eigenvalues;
+
+        REQUIRE(is_unique == false);
+        REQUIRE(x1 == Approx(1.0).margin(ZERO_MARGIN));
+        REQUIRE(x2 == Approx(1.0).margin(ZERO_MARGIN));
+    }
+    SECTION("2x2 unity matrix")
+    {
+        matrix2 A = matrix2::Ones();
+
+        auto const[is_unique, eigenvalues, eigenprojections] = spectral_decomposition(A);
+
+        auto const[x1, x2] = eigenvalues;
+
+        REQUIRE(is_unique == true);
+        REQUIRE(x1 == Approx(2.0).margin(ZERO_MARGIN));
+        REQUIRE(x2 == Approx(0.0).margin(ZERO_MARGIN));
     }
 }
