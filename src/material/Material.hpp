@@ -1,5 +1,5 @@
 
-#include "io/json.hpp"
+#include "io/json_forward.hpp"
 
 #include <string>
 

@@ -14,4 +14,4 @@ ExternalProject_Add(json
 
 ExternalProject_Get_Property(json source_dir)
 
-set(JSON_INCLUDE_DIR "${source_dir}" CACHE INTERNAL "json include directory")
+set(JSON_INCLUDE_DIR "${source_dir}/include" CACHE INTERNAL "json include directory")
