@@ -10,9 +10,7 @@
 #include <unordered_set>
 #include <utility>
 
-#include "io/json.hpp"
-
-#include "io/json.hpp"
+#include "io/json_forward.hpp"
 
 namespace neon
 {

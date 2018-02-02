@@ -4,7 +4,7 @@
 #include <utility>
 #include <vector>
 
-#include "io/json.hpp"
+#include "io/json_forward.hpp"
 
 namespace neon
 {

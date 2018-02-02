@@ -3,7 +3,6 @@
 
 #include "small_strain_J2_plasticity.hpp"
 
-#include "material/IsotropicElasticPlastic.hpp"
 #include "numeric/DenseMatrix.hpp"
 #include "numeric/Tensor.hpp"
 
