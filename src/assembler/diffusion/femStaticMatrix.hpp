@@ -3,7 +3,7 @@
 
 #include "io/FileIO.hpp"
 #include "mesh/diffusion/femMesh.hpp"
-#include "numeric/SparseMatrix.hpp"
+#include "numeric/sparse_matrix.hpp"
 
 #include <json/forwards.h>
 
@@ -64,14 +64,14 @@ protected:
      * For inner and outer vector reference see
      * https://eigen.tuxfamily.org/dox/group__TutorialSparse.html
      */
-    void apply_dirichlet_conditions(SparseMatrix& A, vector& x, vector& b);
+    void apply_dirichlet_conditions(sparse_matrix& A, vector& x, vector& b);
 
 protected:
     femMesh& fem_mesh;
 
     bool is_sparsity_computed = false;
 
-    SparseMatrix K; //!< Conductivity matrix
+    sparse_matrix K; //!< Conductivity matrix
     vector f;       //!< Heat vector
     vector d;       //!< Temperature vector
 

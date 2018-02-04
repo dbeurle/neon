@@ -30,7 +30,7 @@ IterativeLinearSolver::IterativeLinearSolver(double const residual_tolerance, in
 {
 }
 
-void ConjugateGradient::solve(SparseMatrix const& A, vector& x, vector const& b)
+void ConjugateGradient::solve(sparse_matrix const& A, vector& x, vector const& b)
 {
 #ifdef ENABLE_OPENMP
     omp_set_num_threads(SimulationControl::threads);
@@ -38,7 +38,7 @@ void ConjugateGradient::solve(SparseMatrix const& A, vector& x, vector const& b)
 
     std::feclearexcept(FE_ALL_EXCEPT);
 
-    Eigen::ConjugateGradient<SparseMatrix, Eigen::Lower | Eigen::Upper> pcg;
+    Eigen::ConjugateGradient<sparse_matrix, Eigen::Lower | Eigen::Upper> pcg;
 
     pcg.setTolerance(residual_tolerance);
     pcg.setMaxIterations(max_iterations);
@@ -63,11 +63,11 @@ void ConjugateGradient::solve(SparseMatrix const& A, vector& x, vector const& b)
               << residual_tolerance << ")\n";
 }
 
-void BiCGStab::solve(SparseMatrix const& A, vector& x, vector const& b)
+void BiCGStab::solve(sparse_matrix const& A, vector& x, vector const& b)
 {
     std::feclearexcept(FE_ALL_EXCEPT);
 
-    Eigen::BiCGSTAB<SparseMatrix> bicgstab; //, Eigen::IncompleteLUT<double>
+    Eigen::BiCGSTAB<sparse_matrix> bicgstab; //, Eigen::IncompleteLUT<double>
 
     bicgstab.setTolerance(residual_tolerance);
     bicgstab.setMaxIterations(max_iterations);
@@ -92,7 +92,7 @@ void BiCGStab::solve(SparseMatrix const& A, vector& x, vector const& b)
               << " (min. " << residual_tolerance << ")\n";
 }
 
-void SparseLU::solve(SparseMatrix const& A, vector& x, vector const& b)
+void SparseLU::solve(sparse_matrix const& A, vector& x, vector const& b)
 {
     if (build_sparsity_pattern)
     {
@@ -103,7 +103,7 @@ void SparseLU::solve(SparseMatrix const& A, vector& x, vector const& b)
     x = lu.solve(b);
 }
 
-void SparseLLT::solve(SparseMatrix const& A, vector& x, vector const& b)
+void SparseLLT::solve(sparse_matrix const& A, vector& x, vector const& b)
 {
     if (build_sparsity_pattern)
     {

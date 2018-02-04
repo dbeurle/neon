@@ -18,10 +18,10 @@ class PaStiXLDLT : public DirectLinearSolver
 public:
     PaStiXLDLT();
 
-    void solve(SparseMatrix const& A, vector& x, vector const& b) override final;
+    void solve(sparse_matrix const& A, vector& x, vector const& b) override final;
 
 private:
-    Eigen::PastixLDLT<Eigen::SparseMatrix<double>, Eigen::Upper> ldlt;
+    Eigen::PastixLDLT<Eigen::sparse_matrix<double>, Eigen::Upper> ldlt;
 };
 
 /**
@@ -33,12 +33,12 @@ class PaStiXLU : public DirectLinearSolver
 public:
     PaStiXLU();
 
-    void solve(SparseMatrix const& A, vector& x, vector const& b) override final;
+    void solve(sparse_matrix const& A, vector& x, vector const& b) override final;
 
 private:
     // BUG Likely not going to work with unsymmetric matrix because of row and
     // column ordering change.  Should give the transpose of the matrix but
     // unsure why Eigen can't handle this
-    Eigen::PastixLU<Eigen::SparseMatrix<double>> lu;
+    Eigen::PastixLU<Eigen::sparse_matrix<double>> lu;
 };
 }

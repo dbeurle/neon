@@ -47,7 +47,7 @@ MUMPS::~MUMPS()
     MUMPSAdapter::mumps_c(info);
 }
 
-void MUMPS::internal_solve(SparseMatrix const& A, vector& x, vector const& b)
+void MUMPS::internal_solve(sparse_matrix const& A, vector& x, vector const& b)
 {
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -100,7 +100,7 @@ void MUMPS::internal_solve(SparseMatrix const& A, vector& x, vector const& b)
     std::cout << std::string(6, ' ') << "MUMPS solver took " << elapsed_seconds.count() << "s\n";
 }
 
-void MUMPSLLT::allocate_coordinate_format_storage(SparseMatrix const& A)
+void MUMPSLLT::allocate_coordinate_format_storage(sparse_matrix const& A)
 {
     coefficients.clear();
     coefficients.reserve(A.nonZeros());
@@ -113,7 +113,7 @@ void MUMPSLLT::allocate_coordinate_format_storage(SparseMatrix const& A)
         // Decompress the upper part of the sparse matrix
         for (auto k = 0; k < A.outerSize(); ++k)
         {
-            for (SparseMatrix::InnerIterator it(A, k); it; ++it)
+            for (sparse_matrix::InnerIterator it(A, k); it; ++it)
             {
                 if (it.col() >= it.row())
                 {
@@ -131,7 +131,7 @@ void MUMPSLLT::allocate_coordinate_format_storage(SparseMatrix const& A)
         // Only update the non-zero numerical values
         for (auto k = 0; k < A.outerSize(); ++k)
         {
-            for (SparseMatrix::InnerIterator it(A, k); it; ++it)
+            for (sparse_matrix::InnerIterator it(A, k); it; ++it)
             {
                 if (it.col() >= it.row())
                 {
@@ -142,13 +142,13 @@ void MUMPSLLT::allocate_coordinate_format_storage(SparseMatrix const& A)
     }
 }
 
-void MUMPSLLT::solve(SparseMatrix const& A, vector& x, vector const& b)
+void MUMPSLLT::solve(sparse_matrix const& A, vector& x, vector const& b)
 {
     this->allocate_coordinate_format_storage(A);
     internal_solve(A, x, b);
 }
 
-void MUMPSLU::allocate_coordinate_format_storage(SparseMatrix const& A)
+void MUMPSLU::allocate_coordinate_format_storage(sparse_matrix const& A)
 {
     rows.clear();
     cols.clear();
@@ -160,7 +160,7 @@ void MUMPSLU::allocate_coordinate_format_storage(SparseMatrix const& A)
 
     for (auto k = 0; k < A.outerSize(); ++k)
     {
-        for (SparseMatrix::InnerIterator it(A, k); it; ++it)
+        for (sparse_matrix::InnerIterator it(A, k); it; ++it)
         {
             coefficients.emplace_back(it.value());
             rows.emplace_back(it.row() + 1);
@@ -169,7 +169,7 @@ void MUMPSLU::allocate_coordinate_format_storage(SparseMatrix const& A)
     }
 }
 
-void MUMPSLU::solve(SparseMatrix const& A, vector& x, vector const& b)
+void MUMPSLU::solve(sparse_matrix const& A, vector& x, vector const& b)
 {
     this->allocate_coordinate_format_storage(A);
     internal_solve(A, x, b);

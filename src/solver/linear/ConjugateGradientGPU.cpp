@@ -93,7 +93,7 @@ ConjugateGradientGPU::~ConjugateGradientGPU()
     cudaFree(d_M_inv);
 }
 
-void ConjugateGradientGPU::solve(SparseMatrix const& A, vector& x, vector const& b)
+void ConjugateGradientGPU::solve(sparse_matrix const& A, vector& x, vector const& b)
 {
     this->allocate_device_memory(A, x, b);
 
@@ -197,7 +197,7 @@ void ConjugateGradientGPU::solve(SparseMatrix const& A, vector& x, vector const&
     cudaMemcpy(x.data(), d_x, N * sizeof(double), cudaMemcpyDeviceToHost);
 }
 
-void ConjugateGradientGPU::allocate_device_memory(SparseMatrix const& A, vector& x, vector const& b)
+void ConjugateGradientGPU::allocate_device_memory(sparse_matrix const& A, vector& x, vector const& b)
 {
     // If this isn't our first time using the compute device or
     // the sparsity pattern hasn't changed, then we save on the allocation

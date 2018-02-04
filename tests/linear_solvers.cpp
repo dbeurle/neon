@@ -14,7 +14,7 @@ using namespace neon;
 constexpr auto ZERO_MARGIN = 1.0e-5;
 
 /** Create a SPD matrix for solver testing */
-SparseMatrix create_sparse_matrix()
+sparse_matrix create_sparse_matrix()
 {
     std::vector<Eigen::Triplet<double>> triplets = {{0, 0, 2.0},
                                                     {0, 1, -1.0},
@@ -26,7 +26,7 @@ SparseMatrix create_sparse_matrix()
                                                     {2, 1, -1.0},
                                                     {2, 2, 2.0}};
 
-    SparseMatrix A(3, 3);
+    sparse_matrix A(3, 3);
     A.setFromTriplets(std::begin(triplets), std::end(triplets));
     A.finalize();
     return A;
@@ -52,7 +52,7 @@ vector solution()
 
 TEST_CASE("Linear solver test suite")
 {
-    SparseMatrix A = create_sparse_matrix();
+    sparse_matrix A = create_sparse_matrix();
     vector b = create_right_hand_side();
     vector x = b;
 

@@ -146,7 +146,7 @@ void femStaticMatrix::assemble_stiffness()
               << "s\n";
 }
 
-void femStaticMatrix::apply_dirichlet_conditions(SparseMatrix& A, vector& x, vector& b)
+void femStaticMatrix::apply_dirichlet_conditions(sparse_matrix& A, vector& x, vector& b)
 {
     for (auto const& [name, dirichlet_boundaries] : fem_mesh.dirichlet_boundaries())
     {
@@ -160,7 +160,7 @@ void femStaticMatrix::apply_dirichlet_conditions(SparseMatrix& A, vector& x, vec
 
                 std::vector<int> non_zero_visitor;
 
-                for (SparseMatrix::InnerIterator it(A, fixed_dof); it; ++it)
+                for (sparse_matrix::InnerIterator it(A, fixed_dof); it; ++it)
                 {
                     if (!A.IsRowMajor) b(it.row()) -= it.valueRef() * x(fixed_dof);
 

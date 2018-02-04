@@ -53,7 +53,7 @@ public:
 
     enum MatrixProperty { Unsymmetric, SPD, GeneralSymmetric };
 
-    using MUMPSAdapter = MUMPSWrapper<SparseMatrix::Scalar>;
+    using MUMPSAdapter = MUMPSWrapper<sparse_matrix::Scalar>;
 
 public:
     explicit MUMPS(MatrixProperty const symmetric_flag);
@@ -66,9 +66,9 @@ protected:
      * diagonal values if the only_upper flag is set, otherwise expand
      * the entire matrix into compressed coordinate (COO) format
      */
-    virtual void allocate_coordinate_format_storage(SparseMatrix const& A) = 0;
+    virtual void allocate_coordinate_format_storage(sparse_matrix const& A) = 0;
 
-    void internal_solve(SparseMatrix const& A, vector& x, vector const& b);
+    void internal_solve(sparse_matrix const& A, vector& x, vector const& b);
 
 protected:
     MUMPSAdapter::MUMPS_STRUC_C info;
@@ -87,10 +87,10 @@ class MUMPSLLT : public MUMPS
 public:
     MUMPSLLT() : MUMPS(MUMPS::MatrixProperty::SPD) {}
 
-    void solve(SparseMatrix const& A, vector& x, vector const& b) override final;
+    void solve(sparse_matrix const& A, vector& x, vector const& b) override final;
 
 protected:
-    virtual void allocate_coordinate_format_storage(SparseMatrix const& A) override final;
+    virtual void allocate_coordinate_format_storage(sparse_matrix const& A) override final;
 };
 
 /**
@@ -103,9 +103,9 @@ class MUMPSLU : public MUMPS
 public:
     MUMPSLU() : MUMPS(MUMPS::MatrixProperty::Unsymmetric) {}
 
-    void solve(SparseMatrix const& A, vector& x, vector const& b) override final;
+    void solve(sparse_matrix const& A, vector& x, vector const& b) override final;
 
 protected:
-    virtual void allocate_coordinate_format_storage(SparseMatrix const& A) override final;
+    virtual void allocate_coordinate_format_storage(sparse_matrix const& A) override final;
 };
 }

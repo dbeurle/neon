@@ -1,11 +1,11 @@
-//
-// #include "finite_strain_J2_plasticity.hpp"
-//
-// #include "Exceptions.hpp"
-// #include "constitutive/InternalVariables.hpp"
-// #include "numeric/FloatingPointCompare.hpp"
-// #include "numeric/mechanics"
-//
+
+#include "constitutive/mechanical/plane/finite_strain_J2_plasticity.hpp"
+
+#include "Exceptions.hpp"
+#include "constitutive/InternalVariables.hpp"
+#include "numeric/FloatingPointCompare.hpp"
+#include "numeric/mechanics"
+
 // #include <range/v3/view/transform.hpp>
 // #include <range/v3/view/zip.hpp>
 //
