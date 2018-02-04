@@ -3,7 +3,7 @@
 
 #include "InternalVariablesForwards.hpp"
 
-#include "numeric/Tensor.hpp"
+#include "numeric/tensor_operations.hpp"
 
 #include <functional>
 #include <unordered_map>

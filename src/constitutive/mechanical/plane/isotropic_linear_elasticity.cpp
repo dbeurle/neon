@@ -82,11 +82,4 @@ matrix3 isotropic_linear_elasticity::elastic_moduli() const
                          0.0, 0.0, shear_modulus).finished();
     // clang-format on
 }
-
-matrix2 isotropic_linear_elasticity::compute_cauchy_stress(matrix2 const& elastic_strain) const
-{
-    auto const G = material.shear_modulus();
-    auto const lambda_e = material.lambda();
-    return lambda_e * elastic_strain.trace() * matrix2::Identity() + 2.0 * G * elastic_strain;
-}
 }

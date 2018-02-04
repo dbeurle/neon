@@ -37,8 +37,6 @@ public:
     [[nodiscard]] virtual bool is_symmetric() const { return true; };
 
 protected:
-    [[nodiscard]] matrix2 compute_cauchy_stress(matrix2 const& elastic_strain) const;
-
     [[nodiscard]] matrix3 elastic_moduli() const;
 
 private:

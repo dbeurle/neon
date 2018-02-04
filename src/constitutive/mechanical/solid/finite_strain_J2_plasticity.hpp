@@ -4,7 +4,7 @@
 #include "small_strain_J2_plasticity.hpp"
 
 #include "numeric/DenseMatrix.hpp"
-#include "numeric/Tensor.hpp"
+#include "numeric/tensor_operations.hpp"
 
 #include <array>
 

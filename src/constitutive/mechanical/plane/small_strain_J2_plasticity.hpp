@@ -7,7 +7,7 @@
 
 #include "material/IsotropicElasticPlastic.hpp"
 
-namespace neon::mechanical::solid
+namespace neon::mechanical::plane
 {
 /**
  * small_strain_J2_plasticity is responsible for computing the small strain J2 plasticity
@@ -30,11 +30,6 @@ public:
     virtual bool is_finite_deformation() const override { return false; }
 
 protected:
-    [[nodiscard]] matrix6 algorithmic_tangent(double const plastic_increment,
-                                              double const accumulated_plastic_strain,
-                                              double const von_mises,
-                                              matrix3 const& normal) const;
-
     /**
      * Performs the radial return algorithm with nonlinear hardening for
      * projecting the stress onto the yield surface.  This provides the plastic
@@ -43,17 +38,9 @@ protected:
     [[nodiscard]] double perform_radial_return(double const von_mises,
                                                double const accumulated_plastic_strain) const;
 
-    /**
-     * Evaluates the yield function and returns greater than zero if
-     * the yield function has been violated
-     */
-    [[nodiscard]] double evaluate_yield_function(double const von_mises,
-                                                 double const accumulated_plastic_strain,
-                                                 double const plastic_increment = 0.0) const;
-
 protected:
     IsotropicElasticPlastic material;
 
-    matrix6 const I_dev = voigt::kinematic::deviatoric();
+    matrix3 const I_dev = voigt::kinematic::d2::deviatoric();
 };
 }
