@@ -45,7 +45,7 @@ template <typename MatrixExpression>
 template <typename MatrixExpression>
 [[nodiscard]] inline auto compute_cauchy_stress(double const G,
                                                 double const lambda_e,
-                                                MatrixExpression const& elastic_strain)
+                                                MatrixExpression const elastic_strain)
 {
     return detail::compute_cauchy_stress(G, lambda_e, elastic_strain.eval());
 }

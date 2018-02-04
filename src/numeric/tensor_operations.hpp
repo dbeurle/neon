@@ -9,30 +9,29 @@ namespace neon
  * Performs the tensor dot product on two second order tensors in three dimensions.
  */
 template <class MatrixLeft, class MatrixRight>
-[[nodiscard]] double double_dot(MatrixLeft const& a, MatrixRight const& b)
-{
+[[nodiscard]] double double_dot(MatrixLeft const& a, MatrixRight const& b) {
     return (a.array() * b.array()).sum();
 }
 
 namespace detail
 {
-/** @return the volumetric part of the tensor */
-[[nodiscard]] inline matrix2 volumetric(matrix2 const& a)
-{
-    return matrix2::Identity() * a.trace() / 3.0;
-}
+    /** @return the volumetric part of the tensor */
+    [[nodiscard]] inline matrix2 volumetric(matrix2 const& a)
+    {
+        return matrix2::Identity() * a.trace() / 3.0;
+    }
 
-/** @return the volumetric part of the tensor */
-[[nodiscard]] inline matrix3 volumetric(matrix3 const& a)
-{
-    return matrix3::Identity() * a.trace() / 3.0;
-}
+    /** @return the volumetric part of the tensor */
+    [[nodiscard]] inline matrix3 volumetric(matrix3 const& a)
+    {
+        return matrix3::Identity() * a.trace() / 3.0;
+    }
 
-/** @return the deviatoric part of the tensor */
-[[nodiscard]] inline matrix2 deviatoric(matrix2 const& a) { return a - volumetric(a); }
+    /** @return the deviatoric part of the tensor */
+    [[nodiscard]] inline matrix2 deviatoric(matrix2 const& a) { return a - volumetric(a); }
 
-/** @return the deviatoric part of the tensor */
-[[nodiscard]] inline matrix3 deviatoric(matrix3 const& a) { return a - volumetric(a); }
+    /** @return the deviatoric part of the tensor */
+    [[nodiscard]] inline matrix3 deviatoric(matrix3 const& a) { return a - volumetric(a); }
 }
 
 /** @return the volumetric part of the tensor */
@@ -231,6 +230,23 @@ template <typename matrix_expression>
     return detail::from(a.eval());
 }
 
+namespace d2
+{
+/**
+ * Compute the deviatoric tensor in Voigt notation according to
+ * \f$ \mathbb{P} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) -
+ * \frac{1}{3}\delta_{ij} \delta_{kl} \f$
+ */
+[[nodiscard]] inline matrix3 deviatoric()
+{
+    // clang-format off
+        return (matrix3() << 2.0 / 3.0, -1.0 / 3.0, 0.0,
+                            -1.0 / 3.0,  2.0 / 3.0, 0.0,
+                                   0.0,        0.0, 0.5).finished();
+    // clang-format on
+}
+}
+
 /**
  * Compute the deviatoric tensor in Voigt notation according to
  * \f$ \mathbb{P} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) -
@@ -397,11 +413,38 @@ template <typename matrix_expression>
 }
 /*! @} End of Doxygen Groups */
 
+/**
+ * Computes the outer product of two second order tensors in Voigt notation
+ * in two dimensions
+    \f{align*}{
+        & \mathbf{a} \otimes \mathbf{b} \otimes
+    \f}
+ * @return fourth order tensor in Voigt notation
+ */
 [[nodiscard]] inline matrix3 outer_product(vector3 const& a, vector3 const& b)
 {
     return a * b.transpose();
 }
 
+/**
+ * Computes the outer product of two second order tensors in two dimensions
+    \f{align*}{
+        & \mathbf{a} \otimes \mathbf{b} \otimes
+    \f}
+ * @return fourth order tensor in Voigt notation
+ */
+[[nodiscard]] inline matrix3 outer_product(matrix2 const& a, matrix2 const& b)
+{
+    return voigt::kinetic::to(a) * voigt::kinetic::to(b).transpose();
+}
+
+/**
+ * Computes the outer product of two second order tensors in three dimensions
+    \f{align*}{
+        & \mathbf{a} \otimes \mathbf{b} \otimes
+    \f}
+ * @return fourth order tensor in Voigt notation
+ */
 [[nodiscard]] inline matrix6 outer_product(matrix3 const& a, matrix3 const& b)
 {
     return voigt::kinetic::to(a) * voigt::kinetic::to(b).transpose();
