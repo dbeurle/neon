@@ -4,7 +4,7 @@
 #include <tuple>
 #include <vector>
 
-#include "numeric/DenseMatrix.hpp"
+#include "numeric/dense_matrix.hpp"
 
 namespace neon
 {

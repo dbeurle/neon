@@ -4,7 +4,7 @@
 #include "constitutive/InternalVariables.hpp"
 #include "constitutive/mechanical/volumetric_free_energy.hpp"
 
-#include "numeric/DenseMatrix.hpp"
+#include "numeric/dense_matrix.hpp"
 
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/zip.hpp>

@@ -1,7 +1,7 @@
 
 #include "MicromechanicalElastomer.hpp"
 
-#include "numeric/DenseMatrix.hpp"
+#include "numeric/dense_matrix.hpp"
 #include "numeric/FloatingPointCompare.hpp"
 
 #include "io/json.hpp"
