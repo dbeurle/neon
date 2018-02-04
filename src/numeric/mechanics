@@ -6,4 +6,4 @@
 #include "numeric/deformation_gradient.hpp"
 #include "numeric/stress_routines.hpp"
 
-#include "numeric/Operators.hpp"
+#include "numeric/gradient_operator.hpp"
