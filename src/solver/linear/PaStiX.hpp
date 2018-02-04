@@ -21,7 +21,7 @@ public:
     void solve(sparse_matrix const& A, vector& x, vector const& b) override final;
 
 private:
-    Eigen::PastixLDLT<Eigen::sparse_matrix<double>, Eigen::Upper> ldlt;
+    Eigen::PastixLDLT<Eigen::SparseMatrix<double>, Eigen::Upper> ldlt;
 };
 
 /**
@@ -39,6 +39,6 @@ private:
     // BUG Likely not going to work with unsymmetric matrix because of row and
     // column ordering change.  Should give the transpose of the matrix but
     // unsure why Eigen can't handle this
-    Eigen::PastixLU<Eigen::sparse_matrix<double>> lu;
+    Eigen::PastixLU<Eigen::SparseMatrix<double>> lu;
 };
 }

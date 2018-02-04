@@ -98,6 +98,6 @@ public:
     void solve(sparse_matrix const& A, vector& x, vector const& b) override final;
 
 private:
-    Eigen::SimplicialLLT<Eigen::sparse_matrix<sparse_matrix::Scalar>> llt;
+    Eigen::SimplicialLLT<Eigen::SparseMatrix<sparse_matrix::Scalar>> llt;
 };
 }
