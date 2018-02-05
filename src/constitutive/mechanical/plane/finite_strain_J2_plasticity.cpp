@@ -3,7 +3,7 @@
 
 #include "Exceptions.hpp"
 #include "constitutive/InternalVariables.hpp"
-#include "numeric/FloatingPointCompare.hpp"
+#include "numeric/float_compare.hpp"
 #include "numeric/mechanics"
 
 // #include <range/v3/view/transform.hpp>

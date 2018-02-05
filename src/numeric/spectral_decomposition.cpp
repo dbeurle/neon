@@ -1,7 +1,7 @@
 
 #include "spectral_decomposition.hpp"
 
-#include "numeric/FloatingPointCompare.hpp"
+#include "numeric/float_compare.hpp"
 
 namespace neon
 {

@@ -1,7 +1,7 @@
 
 #include "Boundary.hpp"
 
-#include "numeric/FloatingPointCompare.hpp"
+#include "numeric/float_compare.hpp"
 
 #include <range/v3/algorithm/adjacent_find.hpp>
 #include <range/v3/algorithm/find_if.hpp>
