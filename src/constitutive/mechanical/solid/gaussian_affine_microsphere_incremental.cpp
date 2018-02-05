@@ -80,16 +80,15 @@ matrix6 gaussian_affine_microsphere_incremental::compute_material_tangent(
                     + 2.0 / 3.0 * macro_stress.trace() * voigt::kinematic::identity()
                     - 2.0 / 3.0 * (outer_product(macro_stress, matrix3::Identity()) +
                                    outer_product(matrix3::Identity(), macro_stress));
-
     // clang-format on
     return (kappa + pressure) * IoI - 2.0 * pressure * I + P * D * P;
 }
 
 matrix3 gaussian_affine_microsphere_incremental::compute_macro_stress(matrix3 const& F_unimodular,
-                                                                      double const bulk_modulus,
+                                                                      double const shear_modulus,
                                                                       double const N) const
 {
-    return 3.0 * bulk_modulus
+    return 3.0 * shear_modulus
            * unit_sphere.integrate(matrix3::Zero().eval(),
                                    [&](auto const& coordinates, auto const& l) -> matrix3 {
                                        auto const & [ r, r_outer_r ] = coordinates;
@@ -107,6 +106,7 @@ matrix6 gaussian_affine_microsphere_incremental::compute_macro_moduli(matrix3 co
     // clang-format off
     return -3.0 * bulk_modulus * unit_sphere.integrate(matrix6::Zero().eval(),
                                                       [&](auto const& coordinates, auto const& l) -> matrix6 {
+
                                                           auto const & [ r, r_outer_r ] = coordinates;
 
                                                           vector3 const t = deformed_tangent(F_unimodular, r);

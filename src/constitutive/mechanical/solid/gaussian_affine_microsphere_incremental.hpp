@@ -64,13 +64,13 @@ protected:
      \mathbb{I} - \frac{2}{3}
      (\bar{\boldsymbol{\tau}} \otimes \boldsymbol{g}^{-1} + \boldsymbol{g}^{-1} \otimes
      \bar{\boldsymbol{\tau}}) \right] : \mathbb{P} \f}
-     * @param J Determinant of deformation gradient
-     * @param K Shear modulus
+     * @param jacobian_determinant Determinant of deformation gradient
+     * @param shear_modulus Shear modulus
      * @param macro_C Macromoduli from unit sphere
      * @param macro_stress Macrostress from unit sphere
      */
-    [[nodiscard]] matrix6 compute_material_tangent(double const J,
-                                                   double const K,
+    [[nodiscard]] matrix6 compute_material_tangent(double const jacobian_determinant,
+                                                   double const shear_modulus,
                                                    matrix6 const& macro_C,
                                                    matrix3 const& macro_stress) const;
 
@@ -83,12 +83,12 @@ protected:
                                                \otimes \boldsymbol{\Delta t}_i w_i
          \f}
      * @param F_unimodular Unimodular decomposition of the deformation gradient
-     * @param bulk_modulus The material bulk modulus
+     * @param shear_modulus The material shear modulus
      * @param N number of segments per chain
      * @return Kirchhoff stress tensor
      */
     [[nodiscard]] matrix3 compute_macro_stress(matrix3 const& F_unimodular,
-                                               double const bulk_modulus,
+                                               double const shear_modulus,
                                                double const N) const;
 
     /**
