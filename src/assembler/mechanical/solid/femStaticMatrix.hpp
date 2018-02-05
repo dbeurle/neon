@@ -2,7 +2,7 @@
 #pragma once
 
 #include "mesh/mechanical/solid/femMesh.hpp"
-#include "numeric/SparseMatrix.hpp"
+#include "numeric/sparse_matrix.hpp"
 #include "solver/AdaptiveLoadStep.hpp"
 
 #include "io/FileIO.hpp"
@@ -49,7 +49,7 @@ protected:
      * This method sets the incremental displacements to zero for the given
      * load increment such that incremental displacements are zero
      */
-    void enforce_dirichlet_conditions(SparseMatrix& A, vector& b) const;
+    void enforce_dirichlet_conditions(sparse_matrix& A, vector& b) const;
 
     /** Move the nodes on the mesh for the Dirichlet boundary */
     void apply_displacement_boundaries();
@@ -80,7 +80,7 @@ protected:
     double relative_displacement_norm;
     double relative_force_norm;
 
-    SparseMatrix Kt; //!< Tangent matrix stiffness
+    sparse_matrix Kt; //!< Tangent matrix stiffness
     vector fint;     //!< Internal force vector
     vector fext;     //!< External force vector
 

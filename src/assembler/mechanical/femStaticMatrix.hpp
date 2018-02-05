@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "numeric/SparseMatrix.hpp"
+#include "numeric/sparse_matrix.hpp"
 
 #include "solver/AdaptiveLoadStep.hpp"
 
@@ -61,7 +61,7 @@ protected:
      * This method sets the incremental displacements to zero for the given
      * load increment such that incremental displacements are zero
      */
-    void enforce_dirichlet_conditions(SparseMatrix& A, vector& b) const;
+    void enforce_dirichlet_conditions(sparse_matrix& A, vector& b) const;
 
     /** Move the nodes on the mesh for the Dirichlet boundary */
     void apply_displacement_boundaries();
@@ -92,7 +92,7 @@ protected:
     double relative_displacement_norm;
     double relative_force_norm;
 
-    SparseMatrix Kt; //!< Tangent matrix stiffness
+    sparse_matrix Kt; //!< Tangent matrix stiffness
     vector fint;     //!< Internal force vector
     vector fext;     //!< External force vector
 
@@ -310,7 +310,7 @@ void femStaticMatrix<femMeshType>::assemble_stiffness()
 }
 
 template <class femMeshType>
-void femStaticMatrix<femMeshType>::enforce_dirichlet_conditions(SparseMatrix& A, vector& b) const
+void femStaticMatrix<femMeshType>::enforce_dirichlet_conditions(sparse_matrix& A, vector& b) const
 {
     for (auto const& [name, boundaries] : fem_mesh.displacement_boundaries())
     {
@@ -325,7 +325,7 @@ void femStaticMatrix<femMeshType>::enforce_dirichlet_conditions(SparseMatrix& A,
                 std::vector<int> non_zero_visitor;
 
                 // Zero the rows and columns
-                for (SparseMatrix::InnerIterator it(A, fixed_dof); it; ++it)
+                for (sparse_matrix::InnerIterator it(A, fixed_dof); it; ++it)
                 {
                     // Set the value of the col or row resp. to zero
                     it.valueRef() = 0.0;

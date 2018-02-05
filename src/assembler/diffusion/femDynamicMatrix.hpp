@@ -19,7 +19,7 @@ protected:
     void assemble_mass();
 
 protected:
-    SparseMatrix M; //!< Consistent capacity matrix
+    sparse_matrix M; //!< Consistent capacity matrix
 
     GeneralisedTrapezoidal time_solver;
 };

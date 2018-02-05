@@ -20,7 +20,7 @@ PaStiXLDLT::PaStiXLDLT()
     // ldlt.iparm(64) = 1;
 }
 
-void PaStiXLDLT::solve(SparseMatrix const& A, vector& x, vector const& b)
+void PaStiXLDLT::solve(sparse_matrix const& A, vector& x, vector const& b)
 {
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -52,7 +52,7 @@ PaStiXLU::PaStiXLU()
     // ldlt.iparm(64) = 1;
 }
 
-void PaStiXLU::solve(SparseMatrix const& A, vector& x, vector const& b)
+void PaStiXLU::solve(sparse_matrix const& A, vector& x, vector const& b)
 {
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -82,7 +82,7 @@ void PaStiXLU::solve(SparseMatrix const& A, vector& x, vector const& b)
 // #include <spm.h>
 //     }
 
-// SparseMatrix A = A_in;
+// sparse_matrix A = A_in;
 //
 // constexpr int nrhs = 1;
 //
@@ -147,7 +147,7 @@ void PaStiXLU::solve(SparseMatrix const& A, vector& x, vector const& b)
 // std::cout << "Solution norm : " << (A_in * x - b).norm() << std::endl;
 //
 // for (int k = 0; k < A_in.outerSize(); ++k)
-//     for (SparseMatrix::InnerIterator it(A_in, k); it; ++it)
+//     for (sparse_matrix::InnerIterator it(A_in, k); it; ++it)
 //     {
 //         // it.value();
 //         std::cout << "(" << it.row() << ", " << it.col() << ") with index "

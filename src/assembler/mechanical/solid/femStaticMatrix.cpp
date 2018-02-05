@@ -225,7 +225,7 @@ void femStaticMatrix::assemble_stiffness()
               << elapsed_seconds.count() << "s\n";
 }
 
-void femStaticMatrix::enforce_dirichlet_conditions(SparseMatrix& A, vector& b) const
+void femStaticMatrix::enforce_dirichlet_conditions(sparse_matrix& A, vector& b) const
 {
     for (auto const& [name, boundaries] : fem_mesh.displacement_boundaries())
     {
@@ -240,7 +240,7 @@ void femStaticMatrix::enforce_dirichlet_conditions(SparseMatrix& A, vector& b) c
                 std::vector<int> non_zero_visitor;
 
                 // Zero the rows and columns
-                for (SparseMatrix::InnerIterator it(A, fixed_dof); it; ++it)
+                for (sparse_matrix::InnerIterator it(A, fixed_dof); it; ++it)
                 {
                     // Set the value of the col or row resp. to zero
                     it.valueRef() = 0.0;

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "numeric/DenseMatrix.hpp"
+#include "numeric/dense_matrix.hpp"
 #include "solver/TimeControl.hpp"
 
 #include "io/json.hpp"

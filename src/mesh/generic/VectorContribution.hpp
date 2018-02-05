@@ -3,7 +3,7 @@
 
 #include "Boundary.hpp"
 
-#include "numeric/DenseMatrix.hpp"
+#include "numeric/dense_matrix.hpp"
 #include "numeric/IndexTypes.hpp"
 
 namespace neon

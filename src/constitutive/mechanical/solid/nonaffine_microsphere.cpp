@@ -2,7 +2,7 @@
 #include "nonaffine_microsphere.hpp"
 
 #include "constitutive/InternalVariables.hpp"
-#include "numeric/DenseMatrix.hpp"
+#include "numeric/dense_matrix.hpp"
 
 #include "io/json.hpp"
 

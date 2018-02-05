@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "DenseMatrix.hpp"
+#include "dense_matrix.hpp"
 
 namespace neon
 {

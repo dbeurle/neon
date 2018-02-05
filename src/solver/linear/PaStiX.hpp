@@ -18,7 +18,7 @@ class PaStiXLDLT : public DirectLinearSolver
 public:
     PaStiXLDLT();
 
-    void solve(SparseMatrix const& A, vector& x, vector const& b) override final;
+    void solve(sparse_matrix const& A, vector& x, vector const& b) override final;
 
 private:
     Eigen::PastixLDLT<Eigen::SparseMatrix<double>, Eigen::Upper> ldlt;
@@ -33,7 +33,7 @@ class PaStiXLU : public DirectLinearSolver
 public:
     PaStiXLU();
 
-    void solve(SparseMatrix const& A, vector& x, vector const& b) override final;
+    void solve(sparse_matrix const& A, vector& x, vector const& b) override final;
 
 private:
     // BUG Likely not going to work with unsymmetric matrix because of row and

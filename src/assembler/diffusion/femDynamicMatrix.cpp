@@ -43,7 +43,7 @@ void femDynamicMatrix::solve()
                   << time_solver.iteration() << ", simulation time: " << time_solver.current_time()
                   << termcolor::reset << std::endl;
 
-        SparseMatrix A = M + time_solver.current_time_step_size() * K;
+        sparse_matrix A = M + time_solver.current_time_step_size() * K;
 
         vector b = M * d + time_solver.current_time_step_size() * f;
 

@@ -5,7 +5,7 @@
 #include <utility>
 #include <vector>
 
-#include "numeric/DenseMatrix.hpp"
+#include "numeric/dense_matrix.hpp"
 #include "quadrature/numerical_quadrature.hpp"
 
 namespace neon
