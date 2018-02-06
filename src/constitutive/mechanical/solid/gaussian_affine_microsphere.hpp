@@ -3,7 +3,7 @@
 
 #include "constitutive/ConstitutiveModel.hpp"
 
-#include "material/MicromechanicalElastomer.hpp"
+#include "material/micromechanical_elastomer.hpp"
 #include "numeric/tensor_operations.hpp"
 #include "quadrature/unit_sphere_quadrature.hpp"
 
@@ -38,7 +38,9 @@ public:
 
     virtual void update_internal_variables(double const time_step_size) override;
 
-    [[nodiscard]] Material const& intrinsic_material() const override final { return material; };
+    [[nodiscard]] material_property const& intrinsic_material() const override final {
+        return material;
+    };
 
     [[nodiscard]] virtual bool is_finite_deformation() const override final { return true; };
 
@@ -80,12 +82,12 @@ protected:
                                          \otimes \boldsymbol{t}_i w_i
          \f}
      * @param F_unimodular Unimodular decomposition of the deformation gradient
-     * @param bulk_modulus The material bulk modulus
+     * @param shear_modulus The material shear modulus
      * @param N number of segments per chain
      * @return Kirchhoff stress tensor
      */
     [[nodiscard]] matrix3 compute_macro_stress(matrix3 const& F_unimodular,
-                                               double const bulk_modulus,
+                                               double const shear_modulus,
                                                double const N) const;
 
     /**
@@ -99,12 +101,12 @@ protected:
                                      \boldsymbol{t}_i w_i
          \f}
      * @param F_unimodular Unimodular decomposition of the deformation gradient
-     * @param bulk_modulus The material bulk modulus
+     * @param shear_modulus The material shear modulus
      * @param N number of segments per chain
      * @return Macromoduli from unit sphere homogenisation
      */
     [[nodiscard]] matrix6 compute_macro_moduli(matrix3 const& F_unimodular,
-                                               double const bulk_modulus,
+                                               double const shear_modulus,
                                                double const N) const;
 
     /**
@@ -112,13 +114,12 @@ protected:
      * and the vector associated with the quadrature point on the unit sphere
      */
     [[nodiscard]] vector3 deformed_tangent(matrix3 const& F_unimodular,
-                                           vector3 const& surface_vector) const
-    {
+                                           vector3 const& surface_vector) const {
         return F_unimodular * surface_vector;
     }
 
-    /** Compute the microstretch, which is the norm of the deformed tangent vector */
-    [[nodiscard]] auto compute_microstretch(vector3 const& deformed_tangent) const
+        /** Compute the microstretch, which is the norm of the deformed tangent vector */
+        [[nodiscard]] auto compute_microstretch(vector3 const& deformed_tangent) const
     {
         return deformed_tangent.norm();
     }
@@ -129,8 +130,8 @@ protected:
     matrix6 const IoI = voigt::I_outer_I();                      //!< Outer product
     matrix6 const I = voigt::kinematic::fourth_order_identity(); //!< Fourth order identity
     matrix6 const P = voigt::kinetic::deviatoric();              //!< Deviatoric fourth order tensor
-private:
-    MicromechanicalElastomer material; //!< Material with micromechanical parameters
+
+    micromechanical_elastomer material; //!< Material with micromechanical parameters
 };
 /** \} */
 }

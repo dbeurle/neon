@@ -1,5 +1,5 @@
 
-#include "IsotropicElasticPlasticDamage.hpp"
+#include "isotropic_elastic_plastic_damage.hpp"
 
 #include "Exceptions.hpp"
 
@@ -7,32 +7,32 @@
 
 namespace neon
 {
-IsotropicElasticPlasticDamage::IsotropicElasticPlasticDamage(json const& material_data)
-    : IsotropicElasticPlastic(material_data)
+isotropic_elastic_plastic_damage::isotropic_elastic_plastic_damage(json const& material_data)
+    : isotropic_elastic_plastic(material_data)
 {
     if (!material_data.count("SofteningMultiplier"))
     {
-        throw MaterialPropertyException("SofteningMultiplier");
+        throw std::domain_error("\"SofteningMultiplier\" needs to be specified");
     }
     if (!material_data.count("KinematicHardeningModulus"))
     {
-        throw MaterialPropertyException("KinematicHardeningModulus");
+        throw std::domain_error("\"KinematicHardeningModulus\" needs to be specified");
     }
     if (!material_data.count("PlasticityViscousExponent"))
     {
-        throw MaterialPropertyException("PlasticityViscousExponent");
+        throw std::domain_error("\"PlasticityViscousExponent\" needs to be specified");
     }
     if (!material_data.count("PlasticityViscousMultiplier"))
     {
-        throw MaterialPropertyException("PlasticityViscousMultiplier");
+        throw std::domain_error("\"PlasticityViscousMultiplier\" needs to be specified");
     }
     if (!material_data.count("DamageViscousExponent"))
     {
-        throw MaterialPropertyException("DamageViscousExponent");
+        throw std::domain_error("\"DamageViscousExponent\" needs to be specified");
     }
     if (!material_data.count("DamageViscousMultiplier"))
     {
-        throw MaterialPropertyException("DamageViscousMultiplier");
+        throw std::domain_error("\"DamageViscousMultiplier\" needs to be specified");
     }
 
     gamma = material_data["SofteningMultiplier"];

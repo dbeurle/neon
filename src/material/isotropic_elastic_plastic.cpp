@@ -1,5 +1,5 @@
 
-#include "IsotropicElasticPlastic.hpp"
+#include "isotropic_elastic_plastic.hpp"
 
 #include "Exceptions.hpp"
 
@@ -7,8 +7,8 @@
 
 namespace neon
 {
-IsotropicElasticPlastic::IsotropicElasticPlastic(json const& material_data)
-    : LinearElastic(material_data)
+isotropic_elastic_plastic::isotropic_elastic_plastic(json const& material_data)
+    : isotropic_elastic_property(material_data)
 {
     if (!material_data.count("YieldStress"))
     {
@@ -28,17 +28,17 @@ IsotropicElasticPlastic::IsotropicElasticPlastic(json const& material_data)
     }
 }
 
-double IsotropicElasticPlastic::yield_stress(double const effective_strain) const
+double isotropic_elastic_plastic::yield_stress(double const effective_strain) const
 {
     return stress_y + effective_strain * H_iso;
 }
 
-double IsotropicElasticPlastic::hardening_modulus(double const effective_strain) const
+double isotropic_elastic_plastic::hardening_modulus(double const effective_strain) const
 {
     return H_iso;
 }
 
-double IsotropicElasticPlastic::kinematic_modulus(double const effective_strain) const
+double isotropic_elastic_plastic::kinematic_modulus(double const effective_strain) const
 {
     return K_iso;
 }

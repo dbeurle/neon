@@ -1,17 +1,17 @@
 
 #pragma once
 
-#include "IsotropicElasticPlastic.hpp"
+#include "isotropic_elastic_plastic.hpp"
 
 namespace neon
 {
 /** PlasticMaterial is a base class for material exhibiting plastic behavior */
-class IsotropicElasticPlasticDamage : public IsotropicElasticPlastic
+class isotropic_elastic_plastic_damage : public isotropic_elastic_plastic
 {
 public:
-    IsotropicElasticPlasticDamage(json const& material_data);
+    isotropic_elastic_plastic_damage(json const& material_data);
 
-    ~IsotropicElasticPlasticDamage() = default;
+    ~isotropic_elastic_plastic_damage() = default;
 
     double softening_multiplier() const { return gamma; }
     double kinematic_hardening_modulus() const { return C; }

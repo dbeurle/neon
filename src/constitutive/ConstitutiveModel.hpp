@@ -7,7 +7,7 @@
 
 namespace neon
 {
-class Material;
+class material_property;
 
 /**
  * ConstitutiveModel is the templated base class for all constitutive models.
@@ -34,7 +34,7 @@ public:
     virtual void update_internal_variables(double const time_step_size) = 0;
 
     /** @return A base class reference to the common material properties */
-    [[nodiscard]] virtual Material const& intrinsic_material() const = 0;
+    [[nodiscard]] virtual material_property const& intrinsic_material() const = 0;
 
     [[nodiscard]] virtual bool is_finite_deformation() const = 0;
 

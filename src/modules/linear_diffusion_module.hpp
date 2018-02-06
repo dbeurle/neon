@@ -17,21 +17,19 @@ namespace diffusion
 }
 
 /**
- * LinearDiffusionModule is responsible for the construction and solution method
+ * linear_diffusionModule is responsible for the construction and solution method
  * of a linear diffusion problem
  */
 template <typename femMatrix_Tp>
-class LinearDiffusionModule : public AbstractModule
+class linear_diffusion_module : public AbstractModule
 {
 public:
-    explicit LinearDiffusionModule(BasicMesh const& mesh,
-                                   json const& material,
-                                   json const& simulation)
+    explicit linear_diffusion_module(BasicMesh const& mesh, json const& material, json const& simulation)
         : fem_mesh(mesh, material, simulation["Mesh"][0]), fem_matrix(fem_mesh, simulation)
     {
     }
 
-    virtual ~LinearDiffusionModule() = default;
+    virtual ~linear_diffusion_module() = default;
 
     void perform_simulation() override final { fem_matrix.solve(); }
 

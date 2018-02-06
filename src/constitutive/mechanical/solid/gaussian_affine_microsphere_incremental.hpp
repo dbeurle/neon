@@ -24,16 +24,9 @@ namespace neon::mechanical::solid
 class gaussian_affine_microsphere_incremental : public gaussian_affine_microsphere
 {
 public:
-    /**
-     * @param variables Reference to internal state variable store
-     * @param material_data json object with input file material data
-     */
     using gaussian_affine_microsphere::gaussian_affine_microsphere;
 
     virtual void update_internal_variables(double const time_step_size) override;
-
-private:
-    MicromechanicalElastomer material; //!< Material with micromechanical parameters
 };
 /** \} */
 }
