@@ -3,12 +3,6 @@
 
 #include "constitutive/mechanical/solid/gaussian_affine_microsphere.hpp"
 
-#include "material/micromechanical_elastomer.hpp"
-#include "numeric/tensor_operations.hpp"
-#include "quadrature/unit_sphere_quadrature.hpp"
-
-#include "io/json.hpp"
-
 namespace neon::mechanical::solid
 {
 /**
@@ -33,6 +27,7 @@ public:
     using gaussian_affine_microsphere::gaussian_affine_microsphere;
 
     virtual void update_internal_variables(double const time_step_size) override;
+<<<<<<< HEAD
 
 protected:
     /**
@@ -99,6 +94,8 @@ protected:
     [[nodiscard]] matrix6 compute_macro_moduli(matrix3 const& F_unimodular,
                                                double const bulk_modulus,
                                                double const N) const;
+=======
+>>>>>>> Remove code inherited from non-incremental version
 };
 /** \} */
 }
