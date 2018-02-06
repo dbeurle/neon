@@ -80,12 +80,12 @@ protected:
                                          \otimes \boldsymbol{t}_i w_i
          \f}
      * @param F_unimodular Unimodular decomposition of the deformation gradient
-     * @param bulk_modulus The material bulk modulus
+     * @param shear_modulus The material shear modulus
      * @param N number of segments per chain
      * @return Kirchhoff stress tensor
      */
     [[nodiscard]] matrix3 compute_macro_stress(matrix3 const& F_unimodular,
-                                               double const bulk_modulus,
+                                               double const shear_modulus,
                                                double const N) const;
 
     /**
@@ -99,12 +99,12 @@ protected:
                                      \boldsymbol{t}_i w_i
          \f}
      * @param F_unimodular Unimodular decomposition of the deformation gradient
-     * @param bulk_modulus The material bulk modulus
+     * @param shear_modulus The material shear modulus
      * @param N number of segments per chain
      * @return Macromoduli from unit sphere homogenisation
      */
     [[nodiscard]] matrix6 compute_macro_moduli(matrix3 const& F_unimodular,
-                                               double const bulk_modulus,
+                                               double const shear_modulus,
                                                double const N) const;
 
     /**
