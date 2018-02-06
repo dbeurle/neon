@@ -163,6 +163,20 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(
                                                              material_data,
                                                              isotropic_linear_elasticity::plane::stress);
     }
+    else if (model_name == "J2Plasticity")
+    {
+        if (!constitutive_model.count("FiniteStrain"))
+        {
+            throw std::runtime_error("\"small_strain_J2_plasticity\" must have a boolean value for "
+                                     "\"FiniteStrain\"");
+        }
+
+        if (mesh_data["ConstitutiveModel"]["FiniteStrain"].get<bool>())
+        {
+            return std::make_unique<finite_strain_J2_plasticity>(variables, material_data);
+        }
+        return std::make_unique<small_strain_J2_plasticity>(variables, material_data);
+    }
     throw std::runtime_error("The model name " + model_name + " is not recognised\n"
                              + "Supported models are \"PlaneStrain\" and \"PlaneStress\"\n");
     return nullptr;
