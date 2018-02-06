@@ -7,7 +7,7 @@
 #include "numeric/tensor_operations.hpp"
 #include "quadrature/unit_sphere_quadrature.hpp"
 
-#include "io/json.hpp"
+#include "io/json_forward.hpp"
 
 namespace neon::mechanical::solid
 {
@@ -55,7 +55,7 @@ protected:
                                                    matrix3 const& macro_stress) const;
 
     /**
-     * Compute the material tangent including the sdeviatoric projection defined as
+     * Compute the material tangent including the deviatoric projection defined as
      *\f{align*}{
         \boldsymbol{C} &= (\kappa + p) \mathbf{g}^{-1} \otimes \mathbf{g}^{-1} - 2p\mathbb{I} +
      \mathbb{P} : \left[\bar{\mathbb{C}} + \frac{2}{3}(\boldsymbol{\tau} : \boldsymbol{g})
