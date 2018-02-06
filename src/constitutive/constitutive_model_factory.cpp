@@ -17,6 +17,10 @@
 
 #include "mechanical/plane/isotropic_linear_elasticity.hpp"
 
+#include "mechanical/plane/small_strain_J2_plasticity.hpp"
+
+#include "mechanical/plane/finite_strain_J2_plasticity.hpp"
+
 #include "io/json.hpp"
 
 #include <stdexcept>
