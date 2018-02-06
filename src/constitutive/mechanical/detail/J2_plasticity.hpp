@@ -38,4 +38,81 @@ tangent_operator_type algorithmic_tangent(double const G,
            + 6.0 * std::pow(G, 2) * (plastic_increment / von_mises_stress - 1.0 / (3.0 * G + H))
                  * outer_product(normal, normal);
 }
+
+/**
+ * Apply the finite strain correction due to the geometry stiffness matrix.
+ * It returns the value
+ * \f{align*}{
+     \sigma_{il} \delta_{jk}
+   \f}
+ * for a plane strain formulation.
+ */
+[[nodiscard]] inline matrix3 finite_strain_correction(matrix2 const& s)
+{
+    matrix3 A(3, 3);
+    // clang-format off
+    A << s(0, 0),     0.0, s(0, 1),
+             0.0, s(1, 1),     0.0,
+         s(1, 0),     0.0,     0.0;
+    // clang-format on
+    return A;
+}
+
+/**
+ * Apply the finite strain correction due to the geometry stiffness matrix.
+ * It returns the value
+ * \f{align*}{
+     \sigma_{il} \delta_{jk}
+   \f}
+ * for a three-dimensional continuum formulation
+ */
+[[nodiscard]] inline matrix6 finite_strain_correction(matrix3 const& s)
+{
+    matrix6 H(6, 6);
+    // clang-format off
+    H << 2 * s(0, 0),           0,           0,           0, 2 * s(0, 2), 2 * s(0, 1),
+                   0, 2 * s(1, 1),           0, 2 * s(1, 2),           0,           0,
+                   0,           0, 2 * s(2, 2),           0,           0,           0,
+                   0, 2 * s(1, 2),           0,     s(2, 2),           0,           0,
+         2 * s(0, 2),           0,           0,           0,     s(2, 2),     s(2, 1),
+         2 * s(0, 1),           0,           0,           0,     s(1, 2),     s(2, 2);
+    // clang-format on
+    return H;
+}
+
+/**
+ * This computes the fourth order tensor B in Voigt notation for the plane strain
+ * formulation from \cite Neto2011 on page 598.
+ * \f{align*}{
+     B_{ijkl} &= \delta_{ik}(\boldsymbol{B}^{e, trial}_{jl}) + \delta_{jk}(\boldsymbol{B}^{e, trial}_{il})
+   \f}
+ */
+[[nodiscard]] inline matrix3 finite_strain_B_operator(matrix2 const& Be_trial)
+{
+    matrix3 A(3, 3);
+    // clang-format off
+    A << 2 * Be_trial(0, 0),                  0, 2 * Be_trial(0, 1),
+                          0, 2 * Be_trial(1, 1),                  0,
+         2 * Be_trial(1, 0),                  0,     Be_trial(2, 2);
+    // clang-format on
+    return A;
+}
+
+/**
+ * This computes the fourth order tensor B in Voigt notation for the three
+ * dimensional formulation from \cite Neto2011 on page 598.
+ */
+[[nodiscard]] inline matrix6 finite_strain_B_operator(matrix3 const& Be_trial)
+{
+    matrix6 B(6, 6);
+    // clang-format off
+    B << 2 * Be_trial(0, 0),                  0,                  0,                  0, 2 * Be_trial(0, 2), 2 * Be_trial(0, 1),
+                          0, 2 * Be_trial(1, 1),                  0, 2 * Be_trial(1, 2),                  0,                  0,
+                          0,                  0, 2 * Be_trial(2, 2),                  0,                  0,                  0,
+                          0, 2 * Be_trial(1, 2),                  0,     Be_trial(2, 2),                  0,                  0,
+         2 * Be_trial(0, 2),                  0,                  0,                  0,     Be_trial(2, 2),      Be_trial(2, 1),
+         2 * Be_trial(0, 1),                  0,                  0,                  0,     Be_trial(2, 1),      Be_trial(1, 1);
+    // clang-format on
+    return B;
+}
 }
