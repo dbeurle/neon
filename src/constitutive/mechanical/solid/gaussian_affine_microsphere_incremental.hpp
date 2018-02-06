@@ -27,9 +27,6 @@ public:
     using gaussian_affine_microsphere::gaussian_affine_microsphere;
 
     virtual void update_internal_variables(double const time_step_size) override;
-
-private:
-    MicromechanicalElastomer material; //!< Material with micromechanical parameters
 };
 /** \} */
 }
