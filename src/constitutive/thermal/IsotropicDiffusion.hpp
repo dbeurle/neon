@@ -3,7 +3,7 @@
 
 #include "constitutive/ConstitutiveModel.hpp"
 
-#include "material/LinearDiffusion.hpp"
+#include "material/linear_diffusion.hpp"
 
 namespace neon::diffusion
 {
@@ -19,11 +19,11 @@ public:
 
     void update_internal_variables(double const time_step_size) override;
 
-    Material const& intrinsic_material() const override { return material; }
+    material_property const& intrinsic_material() const override { return material; }
 
     bool is_finite_deformation() const override { return false; }
 
 protected:
-    LinearDiffusion material;
+    linear_diffusion material;
 };
 }

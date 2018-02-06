@@ -1,14 +1,14 @@
 
 #pragma once
 
-#include "LinearElastic.hpp"
+#include "isotropic_elastic_property.hpp"
 
 #include <vector>
 
 namespace neon
 {
 /**
- * MicromechanicalElastomer exposes an interface that returns the fundamental
+ * micromechanical_elastomer exposes an interface that returns the fundamental
  * material properties from a micromechanical point of view, including the
  * physical constants which make up the shear modulus for an entropy elastic
  * model.
@@ -16,10 +16,10 @@ namespace neon
  * These additional parameters are associated with the evolution of the segments per
  * chain in the network.
  */
-class MicromechanicalElastomer : public LinearElastic
+class micromechanical_elastomer : public isotropic_elastic_property
 {
 public:
-    MicromechanicalElastomer(json const& material_data);
+    micromechanical_elastomer(json const& material_data);
 
     /** @return The number of segments per polymer chain */
     auto const segments_per_chain() const { return N; }
@@ -29,13 +29,13 @@ protected:
 };
 
 /**
- * StochasticMicromechanicalElastomer is responsible for handling a distribution
+ * stochastic_micromechanical_elastomer is responsible for handling a distribution
  * for the material properties of an elastomer
  */
-class StochasticMicromechanicalElastomer : public LinearElastic
+class stochastic_micromechanical_elastomer : public isotropic_elastic_property
 {
 public:
-    StochasticMicromechanicalElastomer(json const& material_data);
+    stochastic_micromechanical_elastomer(json const& material_data);
 
     /** Updates the temperature for the material property */
     void update_temperature(double const T_new) { temperature = T_new; }

@@ -5,7 +5,7 @@
 
 #include "numeric/tensor_operations.hpp"
 
-#include "material/IsotropicElasticPlastic.hpp"
+#include "material/isotropic_elastic_plastic.hpp"
 
 namespace neon::mechanical::solid
 {
@@ -25,7 +25,7 @@ public:
 
     virtual void update_internal_variables(double const time_step_size) override;
 
-    virtual Material const& intrinsic_material() const override { return material; }
+    virtual material_property const& intrinsic_material() const override { return material; }
 
     virtual bool is_finite_deformation() const override { return false; }
 
@@ -52,7 +52,7 @@ protected:
                                                  double const plastic_increment = 0.0) const;
 
 protected:
-    IsotropicElasticPlastic material;
+    isotropic_elastic_plastic material;
 
     matrix6 const I_dev = voigt::kinematic::deviatoric();
 };
