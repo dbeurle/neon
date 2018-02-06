@@ -1,16 +1,17 @@
 
-#include "log_tensor_derivative.hpp"
+#include "numeric/log_tensor_derivative.hpp"
 
-#include "spectral_decomposition.hpp"
+#include "numeric/spectral_decomposition.hpp"
+#include "numeric/tensor_operations.hpp"
 
 namespace neon
 {
 matrix3 log_symmetric_tensor_derivative(matrix2 const& A)
 {
-    auto const[is_unique, eigenvalues, eigenprojections] = spectral_decomposition(A);
+    auto const [is_unique, eigenvalues, eigenprojections] = spectral_decomposition(A);
 
-    auto const[x1, x2] = eigenvalues;
-    auto const[E1, E2] = eigenprojections;
+    auto const [x1, x2] = eigenvalues;
+    auto const [E1, E2] = eigenprojections;
 
     // Derivative of log(x) is 1/x
     auto const y1 = 1.0 / x1;

@@ -132,10 +132,10 @@ void finite_strain_J2_plasticity::update_internal_variables(double const time_st
         accumulated_plastic_strain += plastic_increment;
 
         // Use the elastoplastic tangent from infinitesimal strain theory
-        auto const D_ep = algorithmic_tangent(plastic_increment,
-                                              accumulated_plastic_strain,
-                                              von_mises_trial,
-                                              normal);
+        matrix6 const D_ep = algorithmic_tangent(plastic_increment,
+                                                 accumulated_plastic_strain,
+                                                 von_mises_trial,
+                                                 normal);
 
         // Compute the elastic-plastic tangent modulus for large strain
         tangent_operators[l] = consistent_tangent(J, log_strain_e, cauchy_stress, D_ep);
@@ -315,38 +315,3 @@ matrix6 finite_strain_J2_plasticity::mandel_transformation() const
     return M;
 }
 }
-
-// auto const I1 = X.trace();
-// auto const I2 = 0.5 * (std::pow(X.trace(), 2) - (X * X).trace());
-// auto const I3 = X.determinant();
-//
-// auto const R = (-2.0 * I1 + 9.0 * I1 * I2 - 27.0 * I3) / 54.0;
-// auto const Q = (std::pow(I1, 2) - 3.0 * I2) / 9.0;
-//
-// auto const theta = std::acos(R / std::sqrt(std::pow(Q, 3)));
-//
-// vector3 x(-2.0 * std::sqrt(Q) * std::cos(theta / 3.0) + I1 / 3.0,
-//           -2.0 * std::sqrt(Q) * std::cos((theta + 2.0 * M_PI) / 3.0) + I1 / 3.0,
-//           -2.0 * std::sqrt(Q) * std::cos((theta - 2.0 * M_PI) / 3.0) + I1 / 3.0);
-//
-// std::array<matrix3, 3> E;
-// int repeated_eigenvalues = 0;
-//
-// // Perform checks to determine if there are repeated eigenvalues
-// if (!is_approx(x1, x2) && !is_approx(x2, x3) && !is_approx(x1, x3))
-// {
-//     for (int i = 0; i < 3; i++)
-//     {
-//         E[i] = x(i) / (2.0 * std::pow(x(i), 3) - I1 * std::pow(x(i), 2) + I3)
-//                * (X * X - (I1 - x(i)) * X + I3 / x(i) * matrix3::Identity());
-//     }
-// }
-// else if (!is_approx(x1, x2) && is_approx(x2, x3))
-// {
-//     repeated_eigenvalue = 1;
-// }
-// else
-// {
-//     E[0] = matrix3::Identity();
-//     repeated_eigenvalue = 2;
-// }
