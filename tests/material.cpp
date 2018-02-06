@@ -5,25 +5,25 @@
 
 #include <range/v3/numeric.hpp>
 
-#include "material/IsotropicElasticPlastic.hpp"
-#include "material/LinearElastic.hpp"
-#include "material/MicromechanicalElastomer.hpp"
+#include "material/isotropic_elastic_plastic.hpp"
+#include "material/isotropic_elastic_property.hpp"
+#include "material/micromechanical_elastomer.hpp"
 
-#include "material/LinearDiffusion.hpp"
+#include "material/linear_diffusion.hpp"
 
-#include "Exceptions.hpp"
+#include <stdexcept>
 
 #include "io/json.hpp"
 
 using namespace neon;
 
-TEST_CASE("Linear elastic material", "[LinearElastic]")
+TEST_CASE("Linear elastic material", "[isotropic_elastic_property]")
 {
     SECTION("Linear elastic properties")
     {
         json material_data{{"Name", "steel"}, {"ElasticModulus", 200.0e9}, {"PoissonsRatio", 0.3}};
 
-        LinearElastic linear_elastic(material_data);
+        isotropic_elastic_property linear_elastic(material_data);
 
         REQUIRE(linear_elastic.name() == "steel");
 
@@ -46,7 +46,7 @@ TEST_CASE("Linear elastic material", "[LinearElastic]")
     {
         json material_data{{"Name", "steel"}, {"BulkModulus", 200.0e9}, {"ShearModulus", 100.0e6}};
 
-        LinearElastic linear_elastic(material_data);
+        isotropic_elastic_property linear_elastic(material_data);
 
         REQUIRE(linear_elastic.bulk_modulus() == Approx(200.0e9));
         REQUIRE(linear_elastic.shear_modulus() == Approx(100.0e6));
@@ -55,7 +55,7 @@ TEST_CASE("Linear elastic material", "[LinearElastic]")
     {
         json material_data{{"Name", "steel"}, {"ElasticModulus", 200.0e9}, {"PssonsRatio", 0.3}};
 
-        REQUIRE_THROWS_AS(LinearElastic(material_data), MaterialPropertyException);
+        REQUIRE_THROWS_AS(isotropic_elastic_property(material_data), std::domain_error);
     }
 }
 TEST_CASE("Perfect plastic material", "[PerfectPlasticElastic]")
@@ -65,7 +65,7 @@ TEST_CASE("Perfect plastic material", "[PerfectPlasticElastic]")
                        {"PoissonsRatio", 0.3},
                        {"YieldStress", 200.0e6}};
 
-    IsotropicElasticPlastic perfect_plastic_elastic(material_data);
+    isotropic_elastic_plastic perfect_plastic_elastic(material_data);
 
     REQUIRE(perfect_plastic_elastic.name() == "steel");
 
@@ -84,7 +84,7 @@ TEST_CASE("Isotropic hardening", "[IsotropicPlasticElastic]")
                        {"IsotropicHardeningModulus", 400.0e6},
                        {"IsotropicKinematicModulus", 100.0e6}};
 
-    IsotropicElasticPlastic iso_plastic_elastic(material_data);
+    isotropic_elastic_plastic iso_plastic_elastic(material_data);
 
     REQUIRE(iso_plastic_elastic.name() == "steel");
 
@@ -105,9 +105,9 @@ TEST_CASE("Missing yield stress", "[IsotropicPlasticElastic]")
                        {"IsotropicHardeningModulus", 400.0e6},
                        {"IsotropicKinematicModulus", 100.0e6}};
 
-    REQUIRE_THROWS_AS(IsotropicElasticPlastic(material_data), std::domain_error);
+    REQUIRE_THROWS_AS(isotropic_elastic_plastic(material_data), std::domain_error);
 }
-TEST_CASE("Micromechanical elastomer", "[StochasticMicromechanicalElastomer]")
+TEST_CASE("Micromechanical elastomer", "[stochastic_micromechanical_elastomer]")
 {
     json material_data{{"Name", "rubber"},
                        {"ElasticModulus", 10.0e6},
@@ -118,7 +118,7 @@ TEST_CASE("Micromechanical elastomer", "[StochasticMicromechanicalElastomer]")
                          {"StandardDeviation", 10},
                          {"ScissionLikelihood", 0.0001}}}};
 
-    StochasticMicromechanicalElastomer elastomer(material_data);
+    stochastic_micromechanical_elastomer elastomer(material_data);
 
     // Initial chains and segment groups
     auto const chain_group_initial = elastomer.chain_groups();
@@ -143,16 +143,16 @@ TEST_CASE("Micromechanical elastomer", "[StochasticMicromechanicalElastomer]")
         }
     }
 }
-TEST_CASE("Diffusion material", "[LinearDiffusion]")
+TEST_CASE("Diffusion material", "[linear_diffusion]")
 {
     json material_data{{"Name", "steel"},
                        {"Density", 7800.0},
                        {"Conductivity", 300.0},
                        {"SpecificHeat", 280.0}};
 
-    LinearDiffusion linear_diffusion(material_data);
+    linear_diffusion material(material_data);
 
-    REQUIRE(linear_diffusion.initial_density() == Approx(7800.0));
-    REQUIRE(linear_diffusion.conductivity_coefficient() == Approx(300.0));
-    REQUIRE(linear_diffusion.specific_heat_coefficient() == Approx(280.0));
+    REQUIRE(material.initial_density() == Approx(7800.0));
+    REQUIRE(material.conductivity_coefficient() == Approx(300.0));
+    REQUIRE(material.specific_heat_coefficient() == Approx(280.0));
 }

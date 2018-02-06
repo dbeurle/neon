@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "constitutive/ConstitutiveModel.hpp"
+#include "constitutive/mechanical/solid/gaussian_affine_microsphere.hpp"
 
-#include "material/MicromechanicalElastomer.hpp"
+#include "material/micromechanical_elastomer.hpp"
 #include "numeric/tensor_operations.hpp"
 #include "quadrature/unit_sphere_quadrature.hpp"
 
@@ -30,19 +30,9 @@ namespace neon::mechanical::solid
 class gaussian_affine_microsphere_incremental : public gaussian_affine_microsphere
 {
 public:
-    /**
-     * @param variables Reference to internal state variable store
-     * @param material_data json object with input file material data
-     */
-    using gaussian_affine_microsphere(std::shared_ptr<InternalVariables>& variables,
-                                      json const& material_data,
-                                      unit_sphere_quadrature::Rule const rule);
+    using gaussian_affine_microsphere::gaussian_affine_microsphere;
 
     virtual void update_internal_variables(double const time_step_size) override;
-
-    [[nodiscard]] Material const& intrinsic_material() const override final { return material; };
-
-    [[nodiscard]] virtual bool is_finite_deformation() const override final { return true; };
 
 protected:
     /**
@@ -109,9 +99,6 @@ protected:
     [[nodiscard]] matrix6 compute_macro_moduli(matrix3 const& F_unimodular,
                                                double const bulk_modulus,
                                                double const N) const;
-
-private:
-    MicromechanicalElastomer material; //!< Material with micromechanical parameters
 };
 /** \} */
 }

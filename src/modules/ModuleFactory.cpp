@@ -1,8 +1,8 @@
 
 #include "ModuleFactory.hpp"
 
-#include "LinearDiffusionModule.hpp"
-#include "SolidMechanicsModule.hpp"
+#include "modules/SolidMechanicsModule.hpp"
+#include "modules/linear_diffusion_module.hpp"
 
 #include "io/json.hpp"
 
@@ -47,15 +47,15 @@ std::unique_ptr<AbstractModule> make_module(
     {
         if (solution_type == "Equilibrium")
         {
-            return std::make_unique<LinearDiffusionModule<diffusion::femStaticMatrix>>(mesh,
-                                                                                       material,
-                                                                                       simulation);
+            return std::make_unique<linear_diffusion_module<diffusion::femStaticMatrix>>(mesh,
+                                                                                         material,
+                                                                                         simulation);
         }
         else if (solution_type == "Transient")
         {
-            return std::make_unique<LinearDiffusionModule<diffusion::femDynamicMatrix>>(mesh,
-                                                                                        material,
-                                                                                        simulation);
+            return std::make_unique<linear_diffusion_module<diffusion::femDynamicMatrix>>(mesh,
+                                                                                          material,
+                                                                                          simulation);
         }
         throw std::runtime_error("Solution " + solution_type
                                  + " is not recognised.  Use \"Equilibrium\" or \"Transient\"\n");

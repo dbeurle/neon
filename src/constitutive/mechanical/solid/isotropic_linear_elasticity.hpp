@@ -5,7 +5,7 @@
 
 #include "numeric/dense_matrix.hpp"
 
-#include "material/LinearElastic.hpp"
+#include "material/isotropic_elastic_property.hpp"
 
 namespace neon::mechanical::solid
 {
@@ -24,7 +24,7 @@ public:
 
     virtual void update_internal_variables(double const time_step_size) override;
 
-    [[nodiscard]] virtual Material const& intrinsic_material() const override { return material; }
+    [[nodiscard]] virtual material_property const& intrinsic_material() const override { return material; }
 
     [[nodiscard]] virtual bool is_finite_deformation() const override { return false; }
 
@@ -32,7 +32,7 @@ protected:
     [[nodiscard]] matrix6 elastic_moduli() const;
 
 private:
-    LinearElastic material;
+    isotropic_elastic_property material;
 
 protected:
     matrix6 const C_e = elastic_moduli();

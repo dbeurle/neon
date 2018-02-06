@@ -1,17 +1,17 @@
 
 #pragma once
 
-#include "LinearElastic.hpp"
+#include "isotropic_elastic_property.hpp"
 
 namespace neon
 {
 /** PlasticMaterial is a base class for material exhibiting plastic behavior */
-class IsotropicElasticPlastic : public LinearElastic
+class isotropic_elastic_plastic : public isotropic_elastic_property
 {
 public:
-    IsotropicElasticPlastic(json const& material_data);
+    isotropic_elastic_plastic(json const& material_data);
 
-    ~IsotropicElasticPlastic() = default;
+    ~isotropic_elastic_plastic() = default;
 
     double yield_stress(double const effective_strain) const;
 

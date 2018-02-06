@@ -1,5 +1,5 @@
 
-#include "MicromechanicalElastomer.hpp"
+#include "micromechanical_elastomer.hpp"
 
 #include "numeric/dense_matrix.hpp"
 #include "numeric/float_compare.hpp"
@@ -30,44 +30,44 @@ double binomial_pmf(int const n, int const k, double const p = 0.5)
            * std::pow(p, k) * std::pow(1.0 - p, n - k);
 }
 
-MicromechanicalElastomer::MicromechanicalElastomer(json const& material_data)
-    : LinearElastic(material_data)
+micromechanical_elastomer::micromechanical_elastomer(json const& material_data)
+    : isotropic_elastic_property(material_data)
 {
     if (!material_data.count("SegmentsPerChain"))
     {
-        throw std::runtime_error("SegmentsPerChain not specified in material data\n");
+        throw std::domain_error("SegmentsPerChain not specified in material data\n");
     }
 }
 
-StochasticMicromechanicalElastomer::StochasticMicromechanicalElastomer(json const& material_data)
-    : LinearElastic(material_data)
+stochastic_micromechanical_elastomer::stochastic_micromechanical_elastomer(json const& material_data)
+    : isotropic_elastic_property(material_data)
 {
     if (!material_data.count("Segments"))
     {
-        throw std::runtime_error("Segments not specified in material data\n");
+        throw std::domain_error("Segments not specified in material data\n");
     }
     compute_chains_and_segments(material_data["Segments"]);
 }
 
-void StochasticMicromechanicalElastomer::compute_chains_and_segments(json const& segments_data)
+void stochastic_micromechanical_elastomer::compute_chains_and_segments(json const& segments_data)
 {
     // Basic error checking
     if (!segments_data.count("Groups"))
     {
-        throw std::runtime_error("Groups not specified in \"Segment\" data\n");
+        throw std::domain_error("Groups not specified in \"Segment\" data\n");
     }
     if (!segments_data.count("Average"))
     {
-        throw std::runtime_error("Average not specified in \"Segment\" data\n");
+        throw std::domain_error("Average not specified in \"Segment\" data\n");
     }
     if (!segments_data.count("StandardDeviation"))
     {
-        throw std::runtime_error("StandardDeviation not specified in \"Segment\" data\n");
+        throw std::domain_error("StandardDeviation not specified in \"Segment\" data\n");
     }
     if (!segments_data.count("ScissionLikelihood"))
     {
-        throw std::runtime_error("ScissionLikelihood not specified in \"Segment\" "
-                                 "data\n");
+        throw std::domain_error("ScissionLikelihood not specified in \"Segment\" "
+                                "data\n");
     }
 
     number_of_groups = segments_data["Groups"];
@@ -76,7 +76,7 @@ void StochasticMicromechanicalElastomer::compute_chains_and_segments(json const&
     auto const N_avg = segments_data["Average"].get<int64_t>();
     auto const N_std = segments_data["StandardDeviation"].get<int64_t>();
 
-    auto const n0 = LinearElastic::shear_modulus() / (boltzmann_constant * temperature);
+    auto const n0 = isotropic_elastic_property::shear_modulus() / (boltzmann_constant * temperature);
 
     // Create a normal distribution generator and sample the same number
     // with the segments per chain as the mean value
@@ -95,7 +95,7 @@ void StochasticMicromechanicalElastomer::compute_chains_and_segments(json const&
 
     if (!is_approx(n0, ranges::accumulate(chains, 0.0)))
     {
-        throw std::runtime_error("Material property error in StochasticMicromechanicalElastomer");
+        throw std::domain_error("Material property error in stochastic_micromechanical_elastomer");
     }
 
     // Partition the range based on the average segments in order
@@ -103,7 +103,7 @@ void StochasticMicromechanicalElastomer::compute_chains_and_segments(json const&
                              [&](auto const N) { return N <= N_avg; });
 }
 
-std::vector<double> StochasticMicromechanicalElastomer::update_chains(
+std::vector<double> stochastic_micromechanical_elastomer::update_chains(
     std::vector<double> const& chains_old, double const time_step_size)
 {
     using namespace ranges;
@@ -114,7 +114,7 @@ std::vector<double> StochasticMicromechanicalElastomer::update_chains(
            });
 }
 
-std::vector<double> StochasticMicromechanicalElastomer::compute_shear_moduli(
+std::vector<double> stochastic_micromechanical_elastomer::compute_shear_moduli(
     std::vector<double> const& chains_new)
 {
     return chains_new | ranges::view::transform([&](auto const& n) {
