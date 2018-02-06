@@ -1,7 +1,7 @@
 
 #include "AdaptiveLoadStep.hpp"
 
-#include "numeric/FloatingPointCompare.hpp"
+#include "numeric/float_compare.hpp"
 
 #include <exception>
 #include <termcolor/termcolor.hpp>

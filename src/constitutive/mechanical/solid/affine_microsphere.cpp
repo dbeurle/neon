@@ -12,8 +12,8 @@
 namespace neon::mechanical::solid
 {
 affine_microsphere::affine_microsphere(std::shared_ptr<InternalVariables>& variables,
-                                     json const& material_data,
-                                     unit_sphere_quadrature::Rule const rule)
+                                       json const& material_data,
+                                       unit_sphere_quadrature::Rule const rule)
     : ConstitutiveModel(variables), unit_sphere(rule), material(material_data)
 {
     variables->add(InternalVariables::rank4::tangent_operator);
@@ -51,7 +51,7 @@ void affine_microsphere::update_internal_variables(double const time_step_size)
     // Project the stresses to obtain the Cauchy stress
     cauchy_stresses = ranges::view::zip(macro_stresses, det_deformation_gradients)
                       | ranges::view::transform([&](auto const& tpl) -> matrix3 {
-                            auto const& [macro_stress, J] = tpl;
+                            auto const & [ macro_stress, J ] = tpl;
 
                             auto const pressure = J * volumetric_free_energy_dJ(J, K);
 
@@ -73,7 +73,7 @@ void affine_microsphere::update_internal_variables(double const time_step_size)
 }
 
 matrix3 affine_microsphere::compute_kirchhoff_stress(double const pressure,
-                                                    matrix3 const& macro_stress) const
+                                                     matrix3 const& macro_stress) const
 {
     // clang-format off
     return pressure * matrix3::Identity() + voigt::kinetic::from(P * voigt::kinetic::to(macro_stress));
@@ -81,9 +81,9 @@ matrix3 affine_microsphere::compute_kirchhoff_stress(double const pressure,
 }
 
 matrix6 affine_microsphere::compute_material_tangent(double const J,
-                                                    double const K,
-                                                    matrix6 const& macro_C,
-                                                    matrix3 const& macro_stress) const
+                                                     double const K,
+                                                     matrix6 const& macro_C,
+                                                     matrix3 const& macro_stress) const
 {
     auto const pressure = J * volumetric_free_energy_dJ(J, K);
     auto const kappa = std::pow(J, 2) * volumetric_free_energy_second_d2J(J, K);
@@ -99,13 +99,14 @@ matrix6 affine_microsphere::compute_material_tangent(double const J,
 }
 
 matrix3 affine_microsphere::compute_macro_stress(matrix3 const& F_unimodular,
-                                                double const bulk_modulus,
-                                                double const N) const
+                                                 double const bulk_modulus,
+                                                 double const N) const
 {
     return bulk_modulus
            * unit_sphere.integrate(matrix3::Zero().eval(),
                                    [&](auto const& coordinates, auto const& l) -> matrix3 {
-                                       auto const& [r, r_outer_r] = coordinates;
+
+                                       auto const & [ r, r_outer_r ] = coordinates;
 
                                        vector3 const t = deformed_tangent(F_unimodular, r);
 
@@ -115,8 +116,8 @@ matrix3 affine_microsphere::compute_macro_stress(matrix3 const& F_unimodular,
 }
 
 matrix6 affine_microsphere::compute_macro_moduli(matrix3 const& F_unimodular,
-                                                double const bulk_modulus,
-                                                double const N) const
+                                                 double const bulk_modulus,
+                                                 double const N) const
 {
     // clang-format off
     return bulk_modulus * unit_sphere.integrate(matrix6::Zero().eval(),

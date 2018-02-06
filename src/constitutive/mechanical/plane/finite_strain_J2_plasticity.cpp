@@ -3,7 +3,8 @@
 
 #include "Exceptions.hpp"
 #include "constitutive/InternalVariables.hpp"
-#include "numeric/FloatingPointCompare.hpp"
+
+#include "numeric/float_compare.hpp"
 #include "numeric/log_tensor_derivative.hpp"
 
 #include "numeric/mechanics"

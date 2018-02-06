@@ -9,29 +9,30 @@ namespace neon
  * Performs the tensor dot product on two second order tensors in three dimensions.
  */
 template <class MatrixLeft, class MatrixRight>
-[[nodiscard]] double double_dot(MatrixLeft const& a, MatrixRight const& b) {
+[[nodiscard]] double double_dot(MatrixLeft const& a, MatrixRight const& b)
+{
     return (a.array() * b.array()).sum();
 }
 
 namespace detail
 {
-    /** @return the volumetric part of the tensor */
-    [[nodiscard]] inline matrix2 volumetric(matrix2 const& a)
-    {
-        return matrix2::Identity() * a.trace() / 3.0;
-    }
+/** @return the volumetric part of the tensor */
+[[nodiscard]] inline matrix2 volumetric(matrix2 const& a)
+{
+    return matrix2::Identity() * a.trace() / 3.0;
+}
 
-    /** @return the volumetric part of the tensor */
-    [[nodiscard]] inline matrix3 volumetric(matrix3 const& a)
-    {
-        return matrix3::Identity() * a.trace() / 3.0;
-    }
+/** @return the volumetric part of the tensor */
+[[nodiscard]] inline matrix3 volumetric(matrix3 const& a)
+{
+    return matrix3::Identity() * a.trace() / 3.0;
+}
 
-    /** @return the deviatoric part of the tensor */
-    [[nodiscard]] inline matrix2 deviatoric(matrix2 const& a) { return a - volumetric(a); }
+/** @return the deviatoric part of the tensor */
+[[nodiscard]] inline matrix2 deviatoric(matrix2 const& a) { return a - volumetric(a); }
 
-    /** @return the deviatoric part of the tensor */
-    [[nodiscard]] inline matrix3 deviatoric(matrix3 const& a) { return a - volumetric(a); }
+/** @return the deviatoric part of the tensor */
+[[nodiscard]] inline matrix3 deviatoric(matrix3 const& a) { return a - volumetric(a); }
 }
 
 /** @return the volumetric part of the tensor */
@@ -101,7 +102,7 @@ template <typename MatrixExpression>
     return K;
 }
 
-/*!
+/**
  * Handles the representation of common tensors (deviatoric, identity, etc)
  * in Voigt notation suitable for the computation of tensor operations leveraging
  * matrix-vector or matrix-matrix operations.

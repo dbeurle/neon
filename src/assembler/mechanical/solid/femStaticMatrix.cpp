@@ -2,7 +2,7 @@
 #include "femStaticMatrix.hpp"
 
 #include "Exceptions.hpp"
-#include "numeric/FloatingPointCompare.hpp"
+#include "numeric/float_compare.hpp"
 #include "solver/linear/LinearSolverFactory.hpp"
 
 #include <cfenv>

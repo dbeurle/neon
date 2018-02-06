@@ -33,8 +33,8 @@ public:
      * @param material_data Json object with input file material data
      */
     explicit affine_microsphere(std::shared_ptr<InternalVariables>& variables,
-                               json const& material_data,
-                               unit_sphere_quadrature::Rule const rule);
+                                json const& material_data,
+                                unit_sphere_quadrature::Rule const rule);
 
     virtual void update_internal_variables(double const time_step_size) override;
 
@@ -161,13 +161,13 @@ private:
 /** \} */
 
 inline double affine_microsphere::volumetric_free_energy_dJ(double const J,
-                                                           double const bulk_modulus) const
+                                                            double const bulk_modulus) const
 {
     return bulk_modulus / 2.0 * (J - 1.0 / J);
 }
 
 inline double affine_microsphere::volumetric_free_energy_second_d2J(double const J,
-                                                                   double const bulk_modulus) const
+                                                                    double const bulk_modulus) const
 {
     return bulk_modulus / 2.0 * (1.0 + 1.0 / std::pow(J, 2));
 }
