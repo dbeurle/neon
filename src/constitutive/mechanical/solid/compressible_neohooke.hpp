@@ -3,7 +3,7 @@
 
 #include "constitutive/ConstitutiveModel.hpp"
 
-#include <material/LinearElastic.hpp>
+#include <material/isotropic_elastic_property.hpp>
 
 // #include <json/forwards.h>
 
@@ -38,12 +38,12 @@ public:
 
     virtual void update_internal_variables(double const time_step_size) override final;
 
-    virtual Material const& intrinsic_material() const override final { return material; };
+    virtual material_property const& intrinsic_material() const override final { return material; };
 
     virtual bool is_finite_deformation() const override final { return true; };
 
 private:
-    LinearElastic material; //!< Elastic model where C1 = mu/2 and C2 = bulk-modulus / 2
+    isotropic_elastic_property material; //!< Elastic model where C1 = mu/2 and C2 = bulk-modulus / 2
 };
 /** \} */
 }
