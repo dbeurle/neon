@@ -39,7 +39,6 @@ void gaussian_affine_microsphere_incremental::update_internal_variables(double c
     auto const incremental_deformation_gradients = zip(deformation_gradients,
                                                        deformation_gradients_old)
                                                    | transform([&](auto const& tpl) -> matrix3 {
-
                                                          auto const & [ F, F_old ] = tpl;
 
                                                          return F * F_old.inverse();
@@ -56,7 +55,6 @@ void gaussian_affine_microsphere_incremental::update_internal_variables(double c
     // Project the stresses to obtain the Cauchy stress
     cauchy_stresses = zip(macro_stresses, det_deformation_gradients)
                       | transform([&](auto const& tpl) -> matrix3 {
-
                             auto const & [ macro_stress, J ] = tpl;
 
                             auto const pressure = J * volumetric_free_energy_dJ(J, K);
