@@ -3,7 +3,7 @@
 
 #include "constitutive/mechanical/plane/small_strain_J2_plasticity.hpp"
 
-#include "material/IsotropicElasticPlastic.hpp"
+#include "material/isotropic_elastic_plastic.hpp"
 #include "numeric/dense_matrix.hpp"
 #include "numeric/tensor_operations.hpp"
 
@@ -30,7 +30,7 @@ public:
 
     void update_internal_variables(double const time_step_size) override final;
 
-    Material const& intrinsic_material() const override final { return material; }
+    material_property const& intrinsic_material() const override final { return material; }
 
     virtual bool is_finite_deformation() const override final { return true; };
 

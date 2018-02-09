@@ -25,7 +25,7 @@ public:
     }
 
 private:
-    std::size_t quadrature_points = 0;
+    std::size_t quadrature_points{0};
 };
 
 /**

@@ -6,19 +6,20 @@
 
 #include "io/json.hpp"
 
-#include <exception>
 #include <omp.h>
+
+#include <stdexcept>
 
 namespace neon::mechanical::solid
 {
 nonaffine_microsphere::nonaffine_microsphere(std::shared_ptr<InternalVariables>& variables,
-                                           json const& material_data,
-                                           unit_sphere_quadrature::Rule const rule)
+                                             json const& material_data,
+                                             unit_sphere_quadrature::Rule const rule)
     : affine_microsphere(variables, material_data, rule), material(material_data)
 {
     if (!material_data.count("NonAffineStretchParameter"))
     {
-        throw std::runtime_error("\"NonAffineStretchParameter\" not specified in material data\n");
+        throw std::domain_error("\"NonAffineStretchParameter\" not specified in material data\n");
     }
     non_affine_stretch_parameter = material_data["NonAffineStretchParameter"];
 }

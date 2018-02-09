@@ -5,7 +5,7 @@
 
 #include "numeric/tensor_operations.hpp"
 
-#include "material/IsotropicElasticPlasticDamage.hpp"
+#include "material/isotropic_elastic_plastic_damage.hpp"
 
 namespace neon::mechanical::solid
 {
@@ -35,7 +35,7 @@ public:
     */
     void update_internal_variables(double const time_step_size) override;
 
-    Material const& intrinsic_material() const override { return material; }
+    material_property const& intrinsic_material() const override { return material; }
 
     virtual bool is_finite_deformation() const override { return false; }
 
@@ -86,6 +86,6 @@ protected:
                                                      matrix3 const& strain_like) const;
 
 protected:
-    IsotropicElasticPlasticDamage material;
+    isotropic_elastic_plastic_damage material;
 };
 }

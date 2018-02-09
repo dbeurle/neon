@@ -7,6 +7,8 @@
 
 #include "numeric/spectral_decomposition.hpp"
 
+#include "numeric/log_tensor_derivative.hpp"
+
 using namespace neon;
 
 constexpr auto ZERO_MARGIN = 1.0e-5;
@@ -78,5 +80,31 @@ TEST_CASE("Spectral decomposition")
         REQUIRE(is_unique == true);
         REQUIRE(x1 == Approx(2.0).margin(ZERO_MARGIN));
         REQUIRE(x2 == Approx(0.0).margin(ZERO_MARGIN));
+    }
+}
+TEST_CASE("Log symmetric tensor derivative")
+{
+    SECTION("Unique eigenvalues")
+    {
+        matrix2 A(2, 2);
+        A << 2.0, 0.0, 0.0, 2.0;
+
+        matrix3 const dA = log_symmetric_tensor_derivative(A);
+
+        REQUIRE(dA(0, 0) == Approx(0.5).margin(ZERO_MARGIN));
+        REQUIRE(dA(1, 1) == Approx(0.5).margin(ZERO_MARGIN));
+        REQUIRE(dA(2, 2) == Approx(0.25).margin(ZERO_MARGIN));
+    }
+    SECTION("Zero eigenvalue")
+    {
+        matrix3 const dA = log_symmetric_tensor_derivative(matrix2::Ones());
+        REQUIRE(dA.hasNaN() == true);
+    }
+    SECTION("Repeated eigenvalue of one")
+    {
+        matrix3 const dA = log_symmetric_tensor_derivative(matrix2::Identity());
+        REQUIRE(dA(0, 0) == Approx(1.0).margin(ZERO_MARGIN));
+        REQUIRE(dA(1, 1) == Approx(1.0).margin(ZERO_MARGIN));
+        REQUIRE(dA(2, 2) == Approx(0.5).margin(ZERO_MARGIN));
     }
 }

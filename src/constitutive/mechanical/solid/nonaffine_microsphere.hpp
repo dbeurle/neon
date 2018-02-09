@@ -116,7 +116,7 @@ protected:
     }
 
 private:
-    MicromechanicalElastomer material; //!< Material with micromechanical parameters
+    micromechanical_elastomer material; //!< Material with micromechanical parameters
 
     double non_affine_stretch_parameter{9.0}; //!< Three-dimensional locking characteristics (p)
     double effective_tube_geometry{9.0};      //!< Additional constraint stiffness (U)

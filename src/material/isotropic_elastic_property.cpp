@@ -1,13 +1,14 @@
 
-#include "LinearElastic.hpp"
+#include "isotropic_elastic_property.hpp"
 
 #include "io/json.hpp"
 
-#include "Exceptions.hpp"
+#include <stdexcept>
 
 namespace neon
 {
-LinearElastic::LinearElastic(json const& material_data) : Material(material_data)
+isotropic_elastic_property::isotropic_elastic_property(json const& material_data)
+    : material_property(material_data)
 {
     // Determine input value types.  The allowable inputs are:
     //   1)  Elastic modulus and Poisson ratio
@@ -25,9 +26,9 @@ LinearElastic::LinearElastic(json const& material_data) : Material(material_data
         auto const E = material_data["ElasticModulus"].get<double>();
         auto const nu = material_data["PoissonsRatio"].get<double>();
 
-        if (nu > 0.5)
+        if (nu >= 0.5)
         {
-            throw MaterialPropertyException("\"PoissonsRatio\" must be less than or equal to 0.5");
+            throw std::domain_error("\"PoissonsRatio\" must be less than or equal to 0.5");
         }
 
         K = E / (3.0 * (1.0 - 2.0 * nu));
@@ -35,9 +36,9 @@ LinearElastic::LinearElastic(json const& material_data) : Material(material_data
     }
     else
     {
-        throw MaterialPropertyException("\"ElasticModulus\" and \"PoissonsRatio\" or "
-                                        "\"BulkModulus\" and \"ShearModulus\" need to be "
-                                        "specified as material properties");
+        throw std::domain_error("\"ElasticModulus\" and \"PoissonsRatio\" or "
+                                "\"BulkModulus\" and \"ShearModulus\" need to be "
+                                "specified as material properties");
     }
 }
 }
