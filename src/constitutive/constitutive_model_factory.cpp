@@ -7,7 +7,6 @@
 #include "mechanical/solid/finite_strain_J2_plasticity.hpp"
 
 #include "mechanical/solid/gaussian_affine_microsphere.hpp"
-#include "mechanical/solid/gaussian_affine_microsphere_incremental.hpp"
 
 #include "mechanical/solid/affine_microsphere.hpp"
 #include "mechanical/solid/nonaffine_microsphere.hpp"
@@ -89,12 +88,6 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(
             return std::make_unique<gaussian_affine_microsphere>(variables,
                                                                  material_data,
                                                                  entry->second);
-        }
-        if (model_type == "GaussianAffineIncremental")
-        {
-            return std::make_unique<gaussian_affine_microsphere_incremental>(variables,
-                                                                             material_data,
-                                                                             entry->second);
         }
         else if (model_type == "Affine")
         {
