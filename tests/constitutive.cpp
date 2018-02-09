@@ -43,7 +43,7 @@ TEST_CASE("No constitutive model error test")
     auto variables = std::make_shared<InternalVariables>(internal_variable_size);
 
     REQUIRE_THROWS_AS(make_constitutive_model(variables, json::parse("{}"), json::parse("{}")),
-                      std::runtime_error);
+                      std::domain_error);
 }
 TEST_CASE("Constitutive model no name error test")
 {
@@ -54,7 +54,7 @@ TEST_CASE("Constitutive model no name error test")
     REQUIRE_THROWS_AS(make_constitutive_model(variables,
                                               json::parse("{}"),
                                               json::parse("{\"ConstitutiveModel\" : {}}")),
-                      std::runtime_error);
+                      std::domain_error);
 }
 TEST_CASE("Constitutive model invalid name error test")
 {
@@ -66,7 +66,7 @@ TEST_CASE("Constitutive model invalid name error test")
                                               json::parse("{}"),
                                               json::parse("{\"ConstitutiveModel\" : "
                                                           "{\"Name\":\"PurpleMonkey\"}}")),
-                      std::runtime_error);
+                      std::domain_error);
 }
 TEST_CASE("Neo-Hookean model")
 {
@@ -149,7 +149,7 @@ TEST_CASE("Microsphere model error test")
                                               json::parse("{\"ConstitutiveModel\" : {\"Name\": "
                                                           "\"Microsphere\", \"Type\" "
                                                           ": \"Afwsfine\"}}")),
-                      std::runtime_error);
+                      std::domain_error);
 }
 TEST_CASE("Gaussian affine microsphere model", )
 {
@@ -419,7 +419,7 @@ TEST_CASE("Plane stress linear elasticity factory error")
                                               json::parse("{\"Badkey\" : \"donkey\"}"),
                                               json::parse("{\"ConstitutiveModel\" : {\"Name\" : "
                                                           "\"PlaneStrain\"}}")),
-                      neon::MaterialPropertyException);
+                      std::domain_error);
 }
 TEST_CASE("Plane stress elasticity model")
 {
@@ -828,7 +828,7 @@ TEST_CASE("Solid mechanics J2 plasticity model factory errors")
                                               json::parse("{}"),
                                               json::parse("{\"ConstitutiveModel\" : {\"Name\" : "
                                                           "\"J2Plasticity\"}}")),
-                      std::runtime_error);
+                      std::domain_error);
 }
 TEST_CASE("Solid mechanics J2 plasticity model")
 {

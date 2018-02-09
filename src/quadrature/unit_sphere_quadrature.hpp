@@ -9,12 +9,7 @@ namespace neon
 class unit_sphere_quadrature : public volume_quadrature
 {
 public:
-    /**
-     * Quadrature nomenclature from
-     * Numerical integration on the sphere and its effect on the material
-     * symmetry of constitutive equations - A comparative study
-     * by Ehret et.al.
-     */
+    /** Quadrature nomenclature from \cite Ehret2010 */
     enum class Rule { BO21, BO33, FM900 };
 
 public:

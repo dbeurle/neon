@@ -11,8 +11,10 @@ add_custom_target(coverage
                   COMMAND lcov --capture --directory ${CMAKE_BINARY_DIR} --output-file coverage.info
                   # Remove the external libraries to get coverage for source only
                   COMMAND lcov --remove coverage.info '/usr/*' -o coverage.info
+                  COMMAND lcov --remove coverage.info '/build/blaze/*' -o coverage.info
                   COMMAND lcov --remove coverage.info '/build/catch/*' -o coverage.info
                   COMMAND lcov --remove coverage.info '/build/eigen3/*' -o coverage.info
+                  COMMAND lcov --remove coverage.info '/build/json/*' -o coverage.info
                   COMMAND lcov --remove coverage.info '/build/range-v3/*' -o coverage.info
                   COMMAND lcov --remove coverage.info '/build/termcolor/*' -o coverage.info
                   # Generate

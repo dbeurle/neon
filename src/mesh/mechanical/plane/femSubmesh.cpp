@@ -6,7 +6,7 @@
 #include "constitutive/constitutive_model_factory.hpp"
 #include "geometry/Projection.hpp"
 #include "interpolations/interpolation_factory.hpp"
-#include "material/Material.hpp"
+#include "material/material_property.hpp"
 #include "mesh/DofAllocator.hpp"
 #include "mesh/MaterialCoordinates.hpp"
 

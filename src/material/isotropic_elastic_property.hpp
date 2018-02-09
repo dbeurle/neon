@@ -1,16 +1,14 @@
 
 #pragma once
 
-#include "Material.hpp"
-
-#include <json/forwards.h>
+#include "material/material_property.hpp"
 
 namespace neon
 {
-class LinearElastic : public Material
+class isotropic_elastic_property : public material_property
 {
 public:
-    explicit LinearElastic(json const& material_data);
+    explicit isotropic_elastic_property(json const& material_data);
 
     /** @return Elastic modulus or Young's modulus */
     auto elastic_modulus() const { return 9.0 * K * G / (3.0 * K + G); }

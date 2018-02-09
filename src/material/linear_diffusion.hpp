@@ -1,22 +1,20 @@
 
 #pragma once
 
-#include "Material.hpp"
-
-#include <json/forwards.h>
+#include "material_property.hpp"
 
 namespace neon
 {
 /**
- * LinearDiffusion is responsible for parsing the input file the for the correct
+ * linear_diffusion is responsible for parsing the input file the for the correct
  * material parameters for a thermal simulation.  The heat equation also has
  * additional meaning, for example with specie concentration and modelling
  * diffusive processes.
  */
-class LinearDiffusion : public Material
+class linear_diffusion : public material_property
 {
 public:
-    LinearDiffusion(json const& material_data);
+    linear_diffusion(json const& material_data);
 
     auto diffusivity_coefficient() const { return conductivity / (specific_heat * density_0); }
 
@@ -25,6 +23,6 @@ public:
     auto specific_heat_coefficient() const { return specific_heat; }
 
 protected:
-    double diffusivity = 0.0, conductivity = 0.0, specific_heat = 0.0;
+    double diffusivity{0.0}, conductivity{0.0}, specific_heat{0.0};
 };
 }

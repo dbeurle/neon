@@ -1,18 +1,22 @@
 
-#include "io/json_forward.hpp"
+#pragma once
 
 #include <string>
 
-#pragma once
+#include "io/json_forward.hpp"
 
 namespace neon
 {
-class Material
+/**
+ * A base class for the material properties.  This holds the common material
+ * properties for each material such as a density.
+ */
+class material_property
 {
 public:
-    Material(json const& intrinsic_material_data);
+    material_property(json const& intrinsic_material_data);
 
-    virtual ~Material() = default;
+    virtual ~material_property() = default;
 
     std::string const& name() const { return material_name; }
 

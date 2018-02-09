@@ -1,17 +1,17 @@
 
-#include "Material.hpp"
+#include "material_property.hpp"
 
-#include "Exceptions.hpp"
+#include <stdexcept>
 
 #include "io/json.hpp"
 
 namespace neon
 {
-Material::Material(json const& intrinsic_material_data)
+material_property::material_property(json const& intrinsic_material_data)
 {
     if (!intrinsic_material_data.count("Name"))
     {
-        throw MaterialPropertyException("Name");
+        throw std::domain_error("\"Name\" must be specified for a material");
     }
 
     material_name = intrinsic_material_data["Name"];
@@ -31,22 +31,22 @@ Material::Material(json const& intrinsic_material_data)
     }
 }
 
-double Material::initial_density() const
+double material_property::initial_density() const
 {
     if (!is_density_specified)
     {
-        throw std::runtime_error("Density was requested, but not specified in the input "
-                                 "file\n");
+        throw std::domain_error("Density was requested, but not specified in the input "
+                                "file\n");
     }
     return density_0;
 }
 
-double Material::specific_heat() const
+double material_property::specific_heat() const
 {
     if (!is_specific_heat_specified)
     {
-        throw std::runtime_error("Density was requested, but not specified in the input "
-                                 "file\n");
+        throw std::domain_error("Density was requested, but not specified in the input "
+                                "file\n");
     }
     return c_p;
 }

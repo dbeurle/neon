@@ -3,7 +3,7 @@
 
 #include "constitutive/ConstitutiveModel.hpp"
 
-#include "material/MicromechanicalElastomer.hpp"
+#include "material/micromechanical_elastomer.hpp"
 #include "numeric/tensor_operations.hpp"
 #include "quadrature/unit_sphere_quadrature.hpp"
 
@@ -38,7 +38,7 @@ public:
 
     virtual void update_internal_variables(double const time_step_size) override;
 
-    [[nodiscard]] Material const& intrinsic_material() const override final { return material; };
+    [[nodiscard]] material_property const& intrinsic_material() const override final { return material; };
 
     [[nodiscard]] virtual bool is_finite_deformation() const override final { return true; };
 
@@ -155,7 +155,7 @@ protected:
     matrix6 const I = voigt::kinematic::fourth_order_identity(); //!< Fourth order identity
     matrix6 const P = voigt::kinetic::deviatoric();              //!< Deviatoric fourth order tensor
 private:
-    MicromechanicalElastomer material; //!< Material with micromechanical parameters
+    micromechanical_elastomer material; //!< Material with micromechanical parameters
 };
 
 /** \} */
@@ -212,7 +212,7 @@ protected:
     MatrixTp weighting(std::vector<double> const& G, MatrixTp accumulator, Functor&& f) const;
 
 private:
-    StochasticMicromechanicalElastomer material; //!< Material with micromechanical parameters
+    stochastic_micromechanical_elastomer material; //!< Material with micromechanical parameters
 };
 /** \} */
 

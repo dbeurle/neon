@@ -1,5 +1,5 @@
 
-#include "LinearDiffusion.hpp"
+#include "linear_diffusion.hpp"
 
 #include "io/json.hpp"
 
@@ -7,7 +7,7 @@
 
 namespace neon
 {
-LinearDiffusion::LinearDiffusion(json const& material_data) : Material(material_data)
+linear_diffusion::linear_diffusion(json const& material_data) : material_property(material_data)
 {
     if (material_data.count("Conductivity"))
     {
@@ -19,8 +19,8 @@ LinearDiffusion::LinearDiffusion(json const& material_data) : Material(material_
     }
     else
     {
-        throw MaterialPropertyException("\"Diffusivity\" needs to be specified as a material "
-                                        "property");
+        throw std::domain_error("\"Diffusivity\" needs to be specified as a material "
+                                "property");
     }
 }
 }
