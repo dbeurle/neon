@@ -7,7 +7,7 @@
 
 namespace neon
 {
-class Submesh;
+class basic_submesh;
 
 namespace diffusion
 {
@@ -28,8 +28,8 @@ using heat_flux = SurfaceLoad<surface_interpolation>;
 class boundary_mesh
 {
 public:
-    explicit boundary_mesh(std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                           std::vector<Submesh> const& submeshes,
+    explicit boundary_mesh(std::shared_ptr<material_coordinates>& material_coordinates,
+                           std::vector<basic_submesh> const& submeshes,
                            json const& boundary,
                            json const& mesh_data);
 

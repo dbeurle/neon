@@ -1,7 +1,7 @@
 
-#include "femMesh.hpp"
+#include "fem_mesh.hpp"
 
-#include "mesh/BasicMesh.hpp"
+#include "mesh/basic_mesh.hpp"
 
 #include <chrono>
 #include <exception>
@@ -18,8 +18,8 @@
 
 namespace neon::diffusion
 {
-femMesh::femMesh(BasicMesh const& basic_mesh, json const& material_data, json const& mesh_data)
-    : material_coordinates(std::make_shared<MaterialCoordinates>(basic_mesh.coordinates()))
+fem_mesh::fem_mesh(basic_mesh const& basic_mesh, json const& material_data, json const& mesh_data)
+    : mesh_coordinates(std::make_shared<material_coordinates>(basic_mesh.coordinates()))
 {
     check_boundary_conditions(mesh_data["BoundaryConditions"]);
 
@@ -27,12 +27,12 @@ femMesh::femMesh(BasicMesh const& basic_mesh, json const& material_data, json co
 
     for (auto const& submesh : basic_mesh.meshes(simulation_name))
     {
-        submeshes.emplace_back(material_data, mesh_data, material_coordinates, submesh);
+        submeshes.emplace_back(material_data, mesh_data, mesh_coordinates, submesh);
     }
     allocate_boundary_conditions(mesh_data, basic_mesh);
 }
 
-void femMesh::update_internal_variables(vector const& u, double const time_step_size)
+void fem_mesh::update_internal_variables(vector const& u, double const time_step_size)
 {
     auto const start = std::chrono::high_resolution_clock::now();
 
@@ -45,12 +45,12 @@ void femMesh::update_internal_variables(vector const& u, double const time_step_
               << "s\n";
 }
 
-void femMesh::save_internal_variables(bool const have_converged)
+void fem_mesh::save_internal_variables(bool const have_converged)
 {
     for (auto& submesh : submeshes) submesh.save_internal_variables(have_converged);
 }
 
-void femMesh::allocate_boundary_conditions(json const& mesh_data, BasicMesh const& basic_mesh)
+void fem_mesh::allocate_boundary_conditions(json const& mesh_data, basic_mesh const& basic_mesh)
 {
     auto const& boundary_data = mesh_data["BoundaryConditions"];
 
@@ -94,7 +94,7 @@ void femMesh::allocate_boundary_conditions(json const& mesh_data, BasicMesh cons
                                            "\"AmbientTemperature\" "
                                            "field.");
             }
-            boundary_meshes[boundary_name].emplace_back(material_coordinates,
+            boundary_meshes[boundary_name].emplace_back(mesh_coordinates,
                                                         basic_mesh.meshes(boundary_name),
                                                         boundary,
                                                         mesh_data);
@@ -109,7 +109,7 @@ void femMesh::allocate_boundary_conditions(json const& mesh_data, BasicMesh cons
     }
 }
 
-void femMesh::check_boundary_conditions(json const& boundary_data) const
+void fem_mesh::check_boundary_conditions(json const& boundary_data) const
 {
     for (auto const& boundary : boundary_data)
     {
@@ -124,7 +124,7 @@ void femMesh::check_boundary_conditions(json const& boundary_data) const
     }
 }
 
-List femMesh::filter_dof_list(std::vector<Submesh> const& boundary_mesh) const
+local_indices fem_mesh::filter_dof_list(std::vector<basic_submesh> const& boundary_mesh) const
 {
     using namespace ranges;
 

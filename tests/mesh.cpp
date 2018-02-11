@@ -3,13 +3,13 @@
 
 #include <catch.hpp>
 
-#include "mesh/BasicMesh.hpp"
+#include "mesh/basic_mesh.hpp"
 #include "mesh/element_topology.hpp"
-#include "mesh/NodeOrderingAdapter.hpp"
+#include "mesh/node_ordering_adapter.hpp"
 
-#include "mesh/MaterialCoordinates.hpp"
-#include "mesh/mechanical/solid/femMesh.hpp"
-#include "mesh/mechanical/solid/femSubmesh.hpp"
+#include "mesh/material_coordinates.hpp"
+#include "mesh/mechanical/solid/fem_mesh.hpp"
+#include "mesh/mechanical/solid/fem_submesh.hpp"
 
 #include "io/json.hpp"
 
@@ -28,9 +28,9 @@ TEST_CASE("Basic mesh test")
 {
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh
-    BasicMesh basic_mesh(json::parse(cube_mesh_json()));
+    basic_mesh basic_mesh(json::parse(cube_mesh_json()));
 
-    NodalCoordinates nodal_coordinates(json::parse(cube_mesh_json()));
+    nodal_coordinates nodal_coordinates(json::parse(cube_mesh_json()));
 
     auto constexpr number_of_nodes = 64;
 
@@ -80,7 +80,7 @@ TEST_CASE("Basic mesh test")
         {
             auto const unique_node_list = mesh.unique_connectivities();
 
-            List const known_unique{0, 1, 2, 3, 14, 15, 16, 17, 18, 19, 26, 27, 36, 37, 38, 39};
+            local_indices const known_unique{0, 1, 2, 3, 14, 15, 16, 17, 18, 19, 26, 27, 36, 37, 38, 39};
 
             REQUIRE(view::set_symmetric_difference(unique_node_list, known_unique).empty());
         }
@@ -96,9 +96,10 @@ TEST_CASE("Basic mesh test")
         {
             auto const unique_node_list = mesh.unique_connectivities();
 
-            List const known_unique{0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
-                                    16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
-                                    32, 33, 34, 35, 40, 41, 42, 43, 48, 49, 50, 51, 52, 53, 54, 55};
+            local_indices const known_unique{0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
+                                             12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+                                             24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
+                                             40, 41, 42, 43, 48, 49, 50, 51, 52, 53, 54, 55};
 
             REQUIRE(view::set_symmetric_difference(unique_node_list, known_unique).empty());
         }
@@ -107,7 +108,7 @@ TEST_CASE("Basic mesh test")
         {
             auto const unique_node_list = mesh.unique_connectivities();
 
-            List const known_unique{4, 5, 6, 7, 10, 11, 22, 23, 28, 29, 30, 31, 44, 45, 46, 47};
+            local_indices const known_unique{4, 5, 6, 7, 10, 11, 22, 23, 28, 29, 30, 31, 44, 45, 46, 47};
             REQUIRE(view::set_symmetric_difference(unique_node_list, known_unique).empty());
         }
     }
@@ -120,8 +121,8 @@ TEST_CASE("Solid submesh test")
     // test the functionality of the basic mesh
 
     // Create the test objects
-    BasicMesh basic_mesh(json::parse(cube_mesh_json()));
-    NodalCoordinates nodal_coordinates(json::parse(cube_mesh_json()));
+    basic_mesh basic_mesh(json::parse(cube_mesh_json()));
+    nodal_coordinates nodal_coordinates(json::parse(cube_mesh_json()));
 
     auto& submeshes = basic_mesh.meshes("cube");
 
@@ -129,12 +130,12 @@ TEST_CASE("Solid submesh test")
 
     auto& submesh = submeshes[0];
 
-    auto material_coordinates = std::make_shared<MaterialCoordinates>(nodal_coordinates.coordinates());
+    auto mesh_coordinates = std::make_shared<material_coordinates>(nodal_coordinates.coordinates());
 
-    mechanical::solid::femSubmesh fem_submesh(json::parse(material_data_json()),
-                                              json::parse(simulation_data_json()),
-                                              material_coordinates,
-                                              submesh);
+    mechanical::solid::fem_submesh fem_submesh(json::parse(material_data_json()),
+                                               json::parse(simulation_data_json()),
+                                               mesh_coordinates,
+                                               submesh);
 
     int constexpr number_of_nodes = 64;
     int constexpr number_of_dofs = number_of_nodes * 3;
@@ -142,7 +143,7 @@ TEST_CASE("Solid submesh test")
 
     vector displacement = 0.001 * vector::Random(number_of_dofs);
 
-    material_coordinates->update_current_configuration(displacement);
+    mesh_coordinates->update_current_configuration(displacement);
 
     fem_submesh.update_internal_variables();
 
@@ -202,7 +203,7 @@ TEST_CASE("Solid submesh test")
 }
 TEST_CASE("Solid mesh test")
 {
-    using mechanical::solid::femMesh;
+    using mechanical::solid::fem_mesh;
 
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh
@@ -210,12 +211,12 @@ TEST_CASE("Solid mesh test")
     auto simulation_data = json::parse(simulation_data_json());
 
     // Create the test objects
-    BasicMesh basic_mesh(json::parse(cube_mesh_json()));
-    NodalCoordinates nodal_coordinates(json::parse(cube_mesh_json()));
+    basic_mesh basic_mesh(json::parse(cube_mesh_json()));
+    nodal_coordinates nodal_coordinates(json::parse(cube_mesh_json()));
 
     REQUIRE(!simulation_data["Name"].empty());
 
-    femMesh fem_mesh(basic_mesh, material_data, simulation_data);
+    fem_mesh fem_mesh(basic_mesh, material_data, simulation_data);
 
     REQUIRE(fem_mesh.active_dofs() == 192);
 

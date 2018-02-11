@@ -2,6 +2,8 @@
 #include "ModuleFactory.hpp"
 
 #include "modules/SolidMechanicsModule.hpp"
+#include "modules/plane_strain_module.hpp"
+
 #include "modules/linear_diffusion_module.hpp"
 
 #include "io/json.hpp"
@@ -9,7 +11,7 @@
 namespace neon
 {
 std::unique_ptr<AbstractModule> make_module(
-    json const& simulation, std::map<std::string, std::pair<BasicMesh, json>> const& mesh_store)
+    json const& simulation, std::map<std::string, std::pair<basic_mesh, json>> const& mesh_store)
 {
     auto const& mesh_data = simulation["Mesh"][0];
 
@@ -29,19 +31,19 @@ std::unique_ptr<AbstractModule> make_module(
     {
         if (!simulation.count("NonlinearOptions"))
         {
-            throw std::runtime_error("\"NonlinearOptions\" needs to be present for a "
-                                     "SolidMechanics simulation");
+            throw std::domain_error("\"NonlinearOptions\" needs to be present for a "
+                                    "SolidMechanics simulation");
         }
         return std::make_unique<SolidMechanicsModule>(mesh, material, simulation);
     }
-    else if (module_type == "PlaneMechanics")
+    else if (module_type == "PlaneStrain")
     {
         if (!simulation.count("NonlinearOptions"))
         {
-            throw std::runtime_error("\"NonlinearOptions\" needs to be present for a "
-                                     "SolidMechanics simulation");
+            throw std::domain_error("\"NonlinearOptions\" needs to be present for a "
+                                    "PlaneStrain simulation");
         }
-        return std::make_unique<PlaneMechanicsModule>(mesh, material, simulation);
+        return std::make_unique<plane_strain_module>(mesh, material, simulation);
     }
     else if (module_type == "HeatDiffusion")
     {
@@ -57,12 +59,12 @@ std::unique_ptr<AbstractModule> make_module(
                                                                                           material,
                                                                                           simulation);
         }
-        throw std::runtime_error("Solution " + solution_type
-                                 + " is not recognised.  Use \"Equilibrium\" or \"Transient\"\n");
+        throw std::domain_error("Solution " + solution_type
+                                + " is not recognised.  Use \"Equilibrium\" or \"Transient\"\n");
     }
-    throw std::runtime_error("Module " + module_type
-                             + " is not recognised.  Use \"SolidMechanics\" or "
-                               "\"HeatDiffusion\"\n");
+    throw std::domain_error("Module " + module_type
+                            + " is not recognised.  Use \"SolidMechanics\" or "
+                              "\"HeatDiffusion\"\n");
     return nullptr;
 }
 }

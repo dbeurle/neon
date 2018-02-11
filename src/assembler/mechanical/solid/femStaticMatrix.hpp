@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/mechanical/solid/femMesh.hpp"
+#include "mesh/mechanical/solid/fem_mesh.hpp"
 #include "numeric/sparse_matrix.hpp"
 #include "solver/AdaptiveLoadStep.hpp"
 
@@ -17,7 +17,7 @@ namespace neon::mechanical::solid
 class femStaticMatrix
 {
 public:
-    explicit femStaticMatrix(femMesh& fem_mesh, json const& simulation);
+    explicit femStaticMatrix(fem_mesh& mesh, json const& simulation);
 
     ~femStaticMatrix();
 
@@ -66,9 +66,9 @@ private:
     void perform_equilibrium_iterations();
 
 protected:
-    femMesh& fem_mesh;
+    fem_mesh& mesh;
 
-    FileIO<femMesh> io;
+    FileIO<fem_mesh> io;
 
     AdaptiveLoadStep adaptive_load;
 
@@ -81,8 +81,8 @@ protected:
     double relative_force_norm;
 
     sparse_matrix Kt; //!< Tangent matrix stiffness
-    vector fint;     //!< Internal force vector
-    vector fext;     //!< External force vector
+    vector fint;      //!< Internal force vector
+    vector fext;      //!< External force vector
 
     vector displacement;     //!< Displacement vector
     vector displacement_old; //!< Last displacement vector

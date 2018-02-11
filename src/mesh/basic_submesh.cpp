@@ -1,7 +1,7 @@
 
-#include "Submesh.hpp"
+#include "basic_submesh.hpp"
 
-#include "mesh/NodeOrderingAdapter.hpp"
+#include "mesh/node_ordering_adapter.hpp"
 
 #include "Exceptions.hpp"
 
@@ -13,7 +13,7 @@
 
 namespace neon
 {
-Submesh::Submesh(json const& mesh)
+basic_submesh::basic_submesh(json const& mesh)
 {
     // Error checking for empty fields
     if (!mesh.count("Name"))
@@ -42,7 +42,7 @@ Submesh::Submesh(json const& mesh)
 
     for (auto const& mesh_connectivity : mesh["NodalConnectivity"])
     {
-        nodal_connectivity.push_back(List());
+        nodal_connectivity.push_back(local_indices());
         nodal_connectivity.back().reserve(mesh_connectivity.size());
 
         for (auto const& node : mesh_connectivity)
@@ -53,7 +53,7 @@ Submesh::Submesh(json const& mesh)
     convert_from_gmsh(nodal_connectivity, m_topology);
 }
 
-List Submesh::unique_connectivities() const
+local_indices basic_submesh::unique_connectivities() const
 {
     using namespace ranges;
     return std::ref(nodal_connectivity) | action::join | action::sort | action::unique;

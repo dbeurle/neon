@@ -3,7 +3,7 @@
 
 #include <catch.hpp>
 
-#include "mesh/NodalCoordinates.hpp"
+#include "mesh/nodal_coordinates.hpp"
 
 constexpr auto ZERO_MARGIN = 1.0e-5;
 
@@ -18,7 +18,7 @@ TEST_CASE("Nodal coordinates")
         0.0, 0.0, 0.0;
 
     // Setup the test case
-    NodalCoordinates nodes(coordinates);
+    nodal_coordinates nodes(coordinates);
 
     local_indices const node_list{0, 1, 2};
 

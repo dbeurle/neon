@@ -1,5 +1,5 @@
 
-#include "mesh/NodeOrderingAdapter.hpp"
+#include "mesh/node_ordering_adapter.hpp"
 
 #include "Exceptions.hpp"
 
@@ -38,7 +38,7 @@ std::unordered_map<element_topology, VTKCellType> const
                   {element_topology::hexahedron20, VTK_QUADRATIC_HEXAHEDRON},
                   {element_topology::hexahedron27, VTK_TRIQUADRATIC_HEXAHEDRON}};
 
-void convert_from_gmsh(std::vector<List>& nodal_connectivity, element_topology const topology)
+void convert_from_gmsh(std::vector<local_indices>& nodal_connectivity, element_topology const topology)
 {
     // Reorder based on the differences between the local node numbering
     // provided from Section 9.3 Node ordering
@@ -189,7 +189,7 @@ void convert_from_gmsh(std::vector<List>& nodal_connectivity, element_topology c
     }
 }
 
-std::vector<List> convert_to_vtk(std::vector<List> nodal_connectivity, element_topology const topology)
+std::vector<local_indices> convert_to_vtk(std::vector<local_indices> nodal_connectivity, element_topology const topology)
 {
     switch (topology)
     {

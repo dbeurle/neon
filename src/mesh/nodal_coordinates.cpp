@@ -1,5 +1,5 @@
 
-#include "NodalCoordinates.hpp"
+#include "nodal_coordinates.hpp"
 
 #include "Exceptions.hpp"
 
@@ -7,9 +7,9 @@
 
 namespace neon
 {
-NodalCoordinates::NodalCoordinates(matrix3x coordinates) : X(coordinates) {}
+nodal_coordinates::nodal_coordinates(matrix3x coordinates) : X(coordinates) {}
 
-NodalCoordinates::NodalCoordinates(json const& mesh_file)
+nodal_coordinates::nodal_coordinates(json const& mesh_file)
 {
     if (mesh_file["Nodes"].empty())
         throw std::runtime_error("The mesh file is missing the \"Nodes\" field");
@@ -29,9 +29,9 @@ NodalCoordinates::NodalCoordinates(json const& mesh_file)
     }
 }
 
-matrix3x const& NodalCoordinates::coordinates() const { return X; }
+matrix3x const& nodal_coordinates::coordinates() const { return X; }
 
-matrix3x NodalCoordinates::coordinates(local_indices const& local_node_list) const
+matrix3x nodal_coordinates::coordinates(local_indices const& local_node_list) const
 {
     return X(Eigen::placeholders::all, local_node_list);
 }

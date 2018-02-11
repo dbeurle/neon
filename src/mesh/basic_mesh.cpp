@@ -1,5 +1,5 @@
 
-#include "BasicMesh.hpp"
+#include "basic_mesh.hpp"
 
 #include "Exceptions.hpp"
 
@@ -7,7 +7,7 @@
 
 namespace neon
 {
-BasicMesh::BasicMesh(json const& mesh_file) : NodalCoordinates(mesh_file)
+basic_mesh::basic_mesh(json const& mesh_file) : nodal_coordinates(mesh_file)
 {
     if (!mesh_file.count("Elements"))
     {
@@ -20,7 +20,7 @@ BasicMesh::BasicMesh(json const& mesh_file) : NodalCoordinates(mesh_file)
     }
 }
 
-std::vector<Submesh> const& BasicMesh::meshes(std::string const& name) const
+std::vector<basic_submesh> const& basic_mesh::meshes(std::string const& name) const
 {
     auto const found = meshes_map.find(name);
 

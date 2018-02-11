@@ -9,7 +9,7 @@
 
 namespace neon::diffusion
 {
-femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh, json const& simulation_data)
+femDynamicMatrix::femDynamicMatrix(fem_mesh& fem_mesh, json const& simulation_data)
     : femStaticMatrix(fem_mesh, simulation_data), time_solver(simulation_data["Time"])
 {
     if (simulation_data.count("InitialConditions")
@@ -26,7 +26,7 @@ void femDynamicMatrix::solve()
     file_io.write(0, 0.0, d);
 
     std::cout << "\n"
-              << std::string(4, ' ') << "Solving " << fem_mesh.active_dofs()
+              << std::string(4, ' ') << "Solving " << mesh.active_dofs()
               << " degrees of freedom\n\n";
 
     assemble_mass();
@@ -62,12 +62,12 @@ void femDynamicMatrix::solve()
 
 void femDynamicMatrix::assemble_mass()
 {
-    M.resize(fem_mesh.active_dofs(), fem_mesh.active_dofs());
+    M.resize(mesh.active_dofs(), mesh.active_dofs());
 
     std::vector<Doublet<int>> doublets;
-    doublets.reserve(fem_mesh.active_dofs());
+    doublets.reserve(mesh.active_dofs());
 
-    for (auto const& submesh : fem_mesh.meshes())
+    for (auto const& submesh : mesh.meshes())
     {
         for (auto element = 0; element < submesh.elements(); element++)
         {
@@ -86,7 +86,7 @@ void femDynamicMatrix::assemble_mass()
 
     auto const start = std::chrono::high_resolution_clock::now();
 
-    for (auto const& submesh : fem_mesh.meshes())
+    for (auto const& submesh : mesh.meshes())
     {
 #pragma omp parallel for
         for (auto element = 0; element < submesh.elements(); ++element)

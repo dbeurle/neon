@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/BasicMesh.hpp"
+#include "mesh/basic_mesh.hpp"
 
 #include <list>
 #include <map>
@@ -50,7 +50,7 @@ protected:
     std::string input_file_name;
 
     // Store the name, mesh connectivity and material
-    std::map<std::string, std::pair<BasicMesh, json>> mesh_store;
+    std::map<std::string, std::pair<basic_mesh, json>> mesh_store;
 
     std::map<std::string, std::list<json>> multistep_simulations;
 

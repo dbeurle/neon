@@ -3,29 +3,28 @@
 
 #include "mesh/generic/Dirichlet.hpp"
 #include "mesh/mechanical/plane/boundary/NonFollowerLoad.hpp"
-#include "mesh/mechanical/plane/femSubmesh.hpp"
+#include "mesh/mechanical/plane/fem_submesh.hpp"
 
 #include <map>
+#include <vector>
 #include <unordered_map>
 
 namespace neon
 {
-class BasicMesh;
+class basic_mesh;
 
 namespace mechanical::plane
 {
-class femMesh
+class fem_mesh
 {
 public:
     using internal_variable_type = InternalVariables;
 
 public:
-    femMesh(BasicMesh const& basic_mesh,
-            json const& material_data,
-            json const& simulation_data);
+    fem_mesh(basic_mesh const& basic_mesh, json const& material_data, json const& simulation_data);
 
     /** The number of active degrees of freedom in this mesh */
-    [[nodiscard]] auto active_dofs() const { return 2 * material_coordinates->size(); }
+    [[nodiscard]] auto active_dofs() const { return 2 * mesh_coordinates->size(); }
 
     /**
      * Checks the boundary conditions and constitutive model to ensure
@@ -47,10 +46,13 @@ public:
     void save_internal_variables(bool const have_converged);
 
     /** Constant access to the sub-meshes */
-    [[nodiscard]] std::vector<femSubmesh> const& meshes() const { return submeshes; }
+    [[nodiscard]] std::vector<fem_submesh> const& meshes() const { return submeshes; }
 
-    /** Mutable access to the sub-meshes */
-    [[nodiscard]] std::vector<femSubmesh>& meshes() { return submeshes; }
+        /** Mutable access to the sub-meshes */
+        [[nodiscard]] std::vector<fem_submesh>& meshes()
+    {
+        return submeshes;
+    }
 
     [[nodiscard]] auto const& displacement_boundaries() const { return displacement_bcs; }
 
@@ -58,32 +60,31 @@ public:
 
     /**
      * Gathers the time history for each boundary condition and
-     * returns a sorted vector which may contain traces of duplicates.
-     *
+     * returns a sorted vector which may contain duplicated entries.
      * \sa AdaptiveLoadStep
      */
     [[nodiscard]] std::vector<double> time_history() const;
 
-    [[deprecated]][[nodiscard]] auto const& coordinates() const { return *material_coordinates; }
+    [[deprecated]][[nodiscard]] auto const& coordinates() const { return *mesh_coordinates; }
 
-    [[nodiscard]] auto const& geometry() const { return *material_coordinates; }
+    [[nodiscard]] auto const& geometry() const { return *mesh_coordinates; }
 
 protected:
     void check_boundary_conditions(json const& boundary_data) const;
 
-    void allocate_boundary_conditions(json const& boundary_data, BasicMesh const& basic_mesh);
+    void allocate_boundary_conditions(json const& boundary_data, basic_mesh const& basic_mesh);
 
-    void allocate_displacement_boundary(json const& boundary, BasicMesh const& basic_mesh);
+    void allocate_displacement_boundary(json const& boundary, basic_mesh const& basic_mesh);
 
     [[nodiscard]] bool is_nonfollower_load(std::string const& boundary_type) const;
 
     /** Collapse the nodal connectivity arrays from the submesh for a node list */
-    [[nodiscard]] List filter_dof_list(std::vector<Submesh> const& boundary_mesh) const;
+    [[nodiscard]] local_indices filter_dof_list(std::vector<basic_submesh> const& boundary_mesh) const;
 
 protected:
-    std::shared_ptr<MaterialCoordinates> material_coordinates;
+    std::shared_ptr<material_coordinates> mesh_coordinates;
 
-    std::vector<femSubmesh> submeshes;
+    std::vector<fem_submesh> submeshes;
 
     // Boundary conditions for this mesh
     std::map<std::string, std::vector<Dirichlet>> displacement_bcs;

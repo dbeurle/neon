@@ -1,5 +1,5 @@
 
-#include "DofAllocator.hpp"
+#include "dof_allocator.hpp"
 
 #include <range/v3/view/for_each.hpp>
 #include <range/v3/view/iota.hpp>
@@ -9,7 +9,7 @@
 
 namespace neon
 {
-local_indices allocate_element_dofs(int32 const nodal_dofs, local_indices const& element_nodes)
+local_indices allocate_element_dofs(std::int32_t const nodal_dofs, local_indices const& element_nodes)
 {
     local_indices element_dof_list;
 
@@ -25,7 +25,7 @@ local_indices allocate_element_dofs(int32 const nodal_dofs, local_indices const&
     return element_dof_list;
 }
 
-std::vector<local_indices> allocate_dof_list(int32 const nodal_dofs,
+std::vector<local_indices> allocate_dof_list(std::int32_t const nodal_dofs,
                                              std::vector<local_indices> const& element_node_list)
 {
     std::vector<local_indices> element_dof_list(element_node_list.size());
@@ -40,8 +40,8 @@ std::vector<local_indices> allocate_dof_list(int32 const nodal_dofs,
     return element_dof_list;
 }
 
-std::vector<local_indices> filter_dof_list(int32 const nodal_dofs,
-                                           int32 const dof_offset,
+std::vector<local_indices> filter_dof_list(std::int32_t const nodal_dofs,
+                                           std::int32_t const dof_offset,
                                            std::vector<local_indices> const& nodal_connectivity)
 {
     using namespace ranges;

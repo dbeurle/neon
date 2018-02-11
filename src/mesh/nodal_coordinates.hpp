@@ -2,23 +2,23 @@
 #pragma once
 
 #include "numeric/dense_matrix.hpp"
-#include "numeric/IndexTypes.hpp"
+#include "numeric/index_types.hpp"
 
 #include "io/json.hpp"
 
 namespace neon
 {
-/** NodalCoordinates stores the list of coordinates of a discretized geometry */
-class NodalCoordinates
+/** nodal_coordinates.hpp stores the list of coordinates of a discretized geometry */
+class nodal_coordinates
 {
 public:
-    NodalCoordinates() = default;
+    nodal_coordinates() = default;
 
     /** Construct with a list of coordinates */
-    explicit NodalCoordinates(matrix3x const coordinates);
+    explicit nodal_coordinates(matrix3x const coordinates);
 
     /** Construct with a list of coordinates in json format */
-    explicit NodalCoordinates(json const& mesh_file);
+    explicit nodal_coordinates(json const& mesh_file);
 
     [[nodiscard]] auto size() const { return X.cols(); }
 

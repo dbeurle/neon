@@ -1,13 +1,13 @@
 
-#include "femSubmesh.hpp"
+#include "fem_submesh.hpp"
 
 #include "Exceptions.hpp"
 
 #include "constitutive/constitutive_model_factory.hpp"
 #include "interpolations/interpolation_factory.hpp"
 #include "material/material_property.hpp"
-#include "mesh/DofAllocator.hpp"
-#include "mesh/MaterialCoordinates.hpp"
+#include "mesh/dof_allocator.hpp"
+#include "mesh/material_coordinates.hpp"
 #include "numeric/gradient_operator.hpp"
 #include "numeric/mechanics"
 
@@ -24,12 +24,12 @@
 
 namespace neon::mechanical::solid
 {
-femSubmesh::femSubmesh(json const& material_data,
+fem_submesh::fem_submesh(json const& material_data,
                        json const& mesh_data,
-                       std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                       Submesh const& submesh)
-    : Submesh(submesh),
-      material_coordinates(material_coordinates),
+                       std::shared_ptr<material_coordinates>& mesh_coordinates,
+                       basic_submesh const& submesh)
+    : basic_submesh(submesh),
+      mesh_coordinates(mesh_coordinates),
       sf(make_volume_interpolation(topology(), mesh_data)),
       view(sf->quadrature().points()),
       variables(std::make_shared<InternalVariables>(elements() * sf->quadrature().points())),
@@ -51,7 +51,7 @@ femSubmesh::femSubmesh(json const& material_data,
     dof_list = allocate_dof_list(this->dofs_per_node(), nodal_connectivity);
 }
 
-void femSubmesh::save_internal_variables(bool const have_converged)
+void fem_submesh::save_internal_variables(bool const have_converged)
 {
     if (have_converged)
     {
@@ -63,9 +63,9 @@ void femSubmesh::save_internal_variables(bool const have_converged)
     }
 }
 
-std::pair<List const&, matrix> femSubmesh::tangent_stiffness(int32 const element) const
+std::pair<local_indices const&, matrix> fem_submesh::tangent_stiffness(std::int32_t const element) const
 {
-    auto const& x = material_coordinates->current_configuration(local_node_list(element));
+    auto const& x = mesh_coordinates->current_configuration(local_node_list(element));
 
     matrix ke = material_tangent_stiffness(x, element);
 
@@ -76,14 +76,14 @@ std::pair<List const&, matrix> femSubmesh::tangent_stiffness(int32 const element
     return {local_dof_list(element), ke};
 }
 
-std::pair<List const&, vector> femSubmesh::internal_force(int32 const element) const
+std::pair<local_indices const&, vector> fem_submesh::internal_force(std::int32_t const element) const
 {
-    auto const& x = material_coordinates->current_configuration(local_node_list(element));
+    auto const& x = mesh_coordinates->current_configuration(local_node_list(element));
 
     return {local_dof_list(element), internal_nodal_force(x, element)};
 }
 
-matrix femSubmesh::geometric_tangent_stiffness(matrix3x const& x, int32 const element) const
+matrix fem_submesh::geometric_tangent_stiffness(matrix3x const& x, std::int32_t const element) const
 {
     auto const& cauchy_stresses = variables->fetch(InternalVariables::Tensor::Cauchy);
 
@@ -107,7 +107,7 @@ matrix femSubmesh::geometric_tangent_stiffness(matrix3x const& x, int32 const el
     return identity_expansion(kgeo, dofs_per_node());
 }
 
-matrix femSubmesh::material_tangent_stiffness(matrix3x const& x, int32 const element) const
+matrix fem_submesh::material_tangent_stiffness(matrix3x const& x, std::int32_t const element) const
 {
     auto const local_dofs = nodes_per_element() * dofs_per_node();
 
@@ -130,31 +130,34 @@ matrix femSubmesh::material_tangent_stiffness(matrix3x const& x, int32 const ele
     });
 }
 
-vector femSubmesh::internal_nodal_force(matrix3x const& x, int32 const element) const
+vector fem_submesh::internal_nodal_force(matrix3x const& x, std::int32_t const element) const
 {
     auto const& cauchy_stresses = variables->fetch(InternalVariables::Tensor::Cauchy);
 
     auto const [m, n] = std::make_pair(nodes_per_element(), dofs_per_node());
 
-    matrix fint_matrix = sf->quadrature().integrate(matrix::Zero(m, n).eval(),
-                                       [&](auto const& femval, auto const& l) ->matrix {
-                                           auto const& [N, dN] = femval;
+    matrix fint_matrix = sf->quadrature()
+                             .integrate(matrix::Zero(m, n).eval(),
+                                        [&](auto const& femval, auto const& l) -> matrix {
+                                            auto const& [N, dN] = femval;
 
-                                           matrix3 const Jacobian = local_deformation_gradient(dN, x);
+                                            matrix3 const Jacobian = local_deformation_gradient(dN,
+                                                                                                x);
 
-                                           matrix3 const& cauchy_stress = cauchy_stresses[view(element, l)];
+                                            matrix3 const&
+                                                cauchy_stress = cauchy_stresses[view(element, l)];
 
-                                           // Compute the symmetric gradient operator
-                                           auto const Bt = dN * Jacobian.inverse();
+                                            // Compute the symmetric gradient operator
+                                            auto const Bt = dN * Jacobian.inverse();
 
-                                           return Bt * cauchy_stress * Jacobian.determinant();
-                                       });
+                                            return Bt * cauchy_stress * Jacobian.determinant();
+                                        });
     return Eigen::Map<vector>(fint_matrix.data(), fint_matrix.size());
 }
 
-std::pair<List const&, matrix> femSubmesh::consistent_mass(int32 const element) const
+std::pair<local_indices const&, matrix> fem_submesh::consistent_mass(std::int32_t const element) const
 {
-    auto const& X = material_coordinates->initial_configuration(local_node_list(element));
+    auto const& X = mesh_coordinates->initial_configuration(local_node_list(element));
 
     auto const density_0 = cm->intrinsic_material().initial_density();
 
@@ -171,7 +174,7 @@ std::pair<List const&, matrix> femSubmesh::consistent_mass(int32 const element) 
     return {local_dof_list(element), identity_expansion(m, dofs_per_node())};
 }
 
-std::pair<List const&, vector> femSubmesh::diagonal_mass(int32 const element) const
+std::pair<local_indices const&, vector> fem_submesh::diagonal_mass(std::int32_t const element) const
 {
     auto const& [dofs, consistent_m] = this->consistent_mass(element);
 
@@ -183,7 +186,7 @@ std::pair<List const&, vector> femSubmesh::diagonal_mass(int32 const element) co
     return {local_dof_list(element), diagonal_m};
 }
 
-void femSubmesh::update_internal_variables(double const time_step_size)
+void fem_submesh::update_internal_variables(double const time_step_size)
 {
     std::feclearexcept(FE_ALL_EXCEPT);
 
@@ -199,7 +202,7 @@ void femSubmesh::update_internal_variables(double const time_step_size)
     }
 }
 
-void femSubmesh::update_deformation_measures()
+void fem_submesh::update_deformation_measures()
 {
     auto& H_list = variables->fetch(InternalVariables::Tensor::DisplacementGradient);
     auto& F_list = variables->fetch(InternalVariables::Tensor::DeformationGradient);
@@ -208,8 +211,8 @@ void femSubmesh::update_deformation_measures()
     for (auto element = 0; element < elements(); ++element)
     {
         // Gather the material coordinates
-        auto const X = material_coordinates->initial_configuration(local_node_list(element));
-        auto const x = material_coordinates->current_configuration(local_node_list(element));
+        auto const X = mesh_coordinates->initial_configuration(local_node_list(element));
+        auto const x = mesh_coordinates->current_configuration(local_node_list(element));
 
         sf->quadrature().for_each([&](auto const& femval, const auto& l) {
             auto const& [N, rhea] = femval;
@@ -230,7 +233,7 @@ void femSubmesh::update_deformation_measures()
     }
 }
 
-void femSubmesh::update_Jacobian_determinants()
+void fem_submesh::update_Jacobian_determinants()
 {
     auto const& deformation_gradients = variables->fetch(
         InternalVariables::Tensor::DeformationGradient);
@@ -259,9 +262,9 @@ void femSubmesh::update_Jacobian_determinants()
     }
 }
 
-femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(InternalVariables::Tensor const tensor_name) const
+fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(InternalVariables::Tensor const tensor_name) const
 {
-    vector count = vector::Zero(material_coordinates->size() * 9);
+    vector count = vector::Zero(mesh_coordinates->size() * 9);
     vector value = count;
 
     auto const& tensor_list = variables->fetch(tensor_name);
@@ -300,9 +303,9 @@ femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(InternalVariables::Te
     return {value, count};
 }
 
-femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(InternalVariables::Scalar const scalar_name) const
+fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(InternalVariables::Scalar const scalar_name) const
 {
-    vector count = vector::Zero(material_coordinates->size());
+    vector count = vector::Zero(mesh_coordinates->size());
     vector value = count;
 
     auto const& scalar_list = variables->fetch(scalar_name);

@@ -51,10 +51,12 @@ protected:
      * Newton-Raphson iterations.
      *
      *
-     * @param J Determinant of the deformation gradient
-     * @param Be_trial Elastic trial left Cauchy Green deformation tensor
-     * @param cauchy_stress Cauchy stress
-     * @param D Tangent matrix from small-strain theory
+     * \param J Determinant of the deformation gradient
+     * \param Be_trial Elastic trial left Cauchy Green deformation tensor
+     * \param cauchy_stress Cauchy stress
+     * \param D Tangent matrix from small-strain theory
+     *
+     * \return Consistent tangent operator
      *
      * \sa compute_B
      * \sa compute_L
@@ -79,7 +81,7 @@ protected:
        \f{align*}{
          L &= \frac{\partial \ln \mathbf{B}_e^{trial}}{\partial \mathbf{B}_e^{trial}}
        \f}
-     * where \f{align*}{ \bm{B}_e^{trial} & \f} is the elastic trial left Cauchy
+     * where \f$ \mathbf{B}_e^{trial} \f$ is the elastic trial left Cauchy
      * Green deformation tensor
      */
     matrix3 compute_L(matrix2 const& trial_elastic_left_cauchy_green) const;

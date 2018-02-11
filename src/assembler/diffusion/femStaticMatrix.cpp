@@ -10,11 +10,11 @@
 
 namespace neon::diffusion
 {
-femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, json const& simulation_data)
-    : fem_mesh(fem_mesh),
-      f(vector::Zero(fem_mesh.active_dofs())),
-      d(vector::Zero(fem_mesh.active_dofs())),
-      file_io(simulation_data["Name"].get<std::string>(), simulation_data["Visualisation"], fem_mesh),
+femStaticMatrix::femStaticMatrix(fem_mesh& mesh, json const& simulation_data)
+    : mesh(mesh),
+      f(vector::Zero(mesh.active_dofs())),
+      d(vector::Zero(mesh.active_dofs())),
+      file_io(simulation_data["Name"].get<std::string>(), simulation_data["Visualisation"], mesh),
       linear_solver(make_linear_solver(simulation_data["LinearSolver"]))
 {
 }
@@ -24,11 +24,11 @@ femStaticMatrix::~femStaticMatrix() = default;
 void femStaticMatrix::compute_sparsity_pattern()
 {
     std::vector<Doublet<int>> doublets;
-    doublets.reserve(fem_mesh.active_dofs());
+    doublets.reserve(mesh.active_dofs());
 
-    K.resize(fem_mesh.active_dofs(), fem_mesh.active_dofs());
+    K.resize(mesh.active_dofs(), mesh.active_dofs());
 
-    for (auto const& submesh : fem_mesh.meshes())
+    for (auto const& submesh : mesh.meshes())
     {
         // Loop over the elements and add in the non-zero components
         for (auto element = 0; element < submesh.elements(); element++)
@@ -52,7 +52,7 @@ void femStaticMatrix::compute_external_force(double const load_factor)
 
     f.setZero();
 
-    for (auto const& [name, surfaces] : fem_mesh.surface_boundaries())
+    for (auto const& [name, surfaces] : mesh.surface_boundaries())
     {
         for (auto const& surface : surfaces)
         {
@@ -96,7 +96,7 @@ void femStaticMatrix::compute_external_force(double const load_factor)
 
 void femStaticMatrix::solve()
 {
-    std::cout << std::string(4, ' ') << "Linear equation system has " << fem_mesh.active_dofs()
+    std::cout << std::string(4, ' ') << "Linear equation system has " << mesh.active_dofs()
               << " degrees of freedom\n";
 
     assemble_stiffness();
@@ -118,7 +118,7 @@ void femStaticMatrix::assemble_stiffness()
 
     K.coeffs() = 0.0;
 
-    for (auto const& submesh : fem_mesh.meshes())
+    for (auto const& submesh : mesh.meshes())
     {
 #pragma omp parallel for
         for (auto element = 0; element < submesh.elements(); ++element)
@@ -148,7 +148,7 @@ void femStaticMatrix::assemble_stiffness()
 
 void femStaticMatrix::apply_dirichlet_conditions(sparse_matrix& A, vector& x, vector& b)
 {
-    for (auto const& [name, dirichlet_boundaries] : fem_mesh.dirichlet_boundaries())
+    for (auto const& [name, dirichlet_boundaries] : mesh.dirichlet_boundaries())
     {
         for (auto const& dirichlet_boundary : dirichlet_boundaries)
         {

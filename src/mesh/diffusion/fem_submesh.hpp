@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/Submesh.hpp"
+#include "mesh/basic_submesh.hpp"
 
 #include "constitutive/ConstitutiveModel.hpp"
 #include "constitutive/InternalVariables.hpp"
@@ -11,24 +11,24 @@
 
 namespace neon
 {
-class MaterialCoordinates;
+class material_coordinates;
 
 namespace diffusion
 {
 /**
- * femSubmesh provides the element local routines for computing the system
+ * fem_submesh provides the element local routines for computing the system
  * components for a three-dimensional heat equation discretisation.
  */
-class femSubmesh : public Submesh
+class fem_submesh : public basic_submesh
 {
 public:
     using ValueCount = std::tuple<vector, vector>;
 
 public:
-    explicit femSubmesh(json const& material_data,
+    explicit fem_submesh(json const& material_data,
                         json const& mesh_data,
-                        std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                        Submesh const& submesh);
+                        std::shared_ptr<material_coordinates>& mesh_coordinates,
+                        basic_submesh const& submesh);
 
     /** @return list of global degrees of freedom for an element */
     [[nodiscard]] local_indices const& local_dof_list(int const element) const {
@@ -94,13 +94,10 @@ protected:
     [[nodiscard]] int offset(int const element, int const quadraturePoint) const;
 
 private:
-    std::shared_ptr<MaterialCoordinates> material_coordinates;
-
-    std::unique_ptr<volume_interpolation> sf; //!< Shape function
-
+    std::shared_ptr<material_coordinates> mesh_coordinates; /// Nodal coordinates
+    std::unique_ptr<volume_interpolation> sf;               /// Shape function
     std::shared_ptr<InternalVariables> variables;
-
-    std::unique_ptr<ConstitutiveModel> cm; //!< Constitutive model
+    std::unique_ptr<ConstitutiveModel> cm; /// Constitutive model
 };
 }
 }

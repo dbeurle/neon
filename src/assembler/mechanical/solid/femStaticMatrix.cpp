@@ -14,16 +14,16 @@
 
 namespace neon::mechanical::solid
 {
-femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, json const& simulation)
-    : fem_mesh(fem_mesh),
-      io(simulation["Name"].get<std::string>(), simulation["Visualisation"], fem_mesh),
-      adaptive_load(simulation["Time"], fem_mesh.time_history()),
-      fint(vector::Zero(fem_mesh.active_dofs())),
-      fext(vector::Zero(fem_mesh.active_dofs())),
-      displacement(vector::Zero(fem_mesh.active_dofs())),
-      displacement_old(vector::Zero(fem_mesh.active_dofs())),
-      delta_d(vector::Zero(fem_mesh.active_dofs())),
-      linear_solver(make_linear_solver(simulation["LinearSolver"], fem_mesh.is_symmetric()))
+femStaticMatrix::femStaticMatrix(fem_mesh& mesh, json const& simulation)
+    : mesh(mesh),
+      io(simulation["Name"].get<std::string>(), simulation["Visualisation"], mesh),
+      adaptive_load(simulation["Time"], mesh.time_history()),
+      fint(vector::Zero(mesh.active_dofs())),
+      fext(vector::Zero(mesh.active_dofs())),
+      displacement(vector::Zero(mesh.active_dofs())),
+      displacement_old(vector::Zero(mesh.active_dofs())),
+      delta_d(vector::Zero(mesh.active_dofs())),
+      linear_solver(make_linear_solver(simulation["LinearSolver"], mesh.is_symmetric()))
 {
     if (!simulation["NonlinearOptions"].count("DisplacementTolerance"))
     {
@@ -40,7 +40,7 @@ femStaticMatrix::femStaticMatrix(femMesh& fem_mesh, json const& simulation)
 
     // Perform Newton-Raphson iterations
     std::cout << "\n"
-              << std::string(4, ' ') << "Non-linear equation system has " << fem_mesh.active_dofs()
+              << std::string(4, ' ') << "Non-linear equation system has " << mesh.active_dofs()
               << " degrees of freedom\n";
 }
 
@@ -54,12 +54,12 @@ void femStaticMatrix::internal_restart(json const& solver_data, json const& new_
 
 void femStaticMatrix::compute_sparsity_pattern()
 {
-    std::vector<Doublet<int32>> doublets;
-    doublets.reserve(fem_mesh.active_dofs());
+    std::vector<Doublet<std::int32_t>> doublets;
+    doublets.reserve(mesh.active_dofs());
 
-    Kt.resize(fem_mesh.active_dofs(), fem_mesh.active_dofs());
+    Kt.resize(mesh.active_dofs(), mesh.active_dofs());
 
-    for (auto const& submesh : fem_mesh.meshes())
+    for (auto const& submesh : mesh.meshes())
     {
         // Loop over the elements and add in the non-zero components
         for (auto element = 0; element < submesh.elements(); element++)
@@ -85,7 +85,7 @@ void femStaticMatrix::compute_internal_force()
 
     std::feclearexcept(FE_ALL_EXCEPT);
 
-    for (auto const& submesh : fem_mesh.meshes())
+    for (auto const& submesh : mesh.meshes())
     {
         for (auto element = 0; element < submesh.elements(); ++element)
         {
@@ -113,7 +113,7 @@ void femStaticMatrix::compute_external_force()
 
     fext.setZero();
 
-    for (auto const& [name, nf_loads] : fem_mesh.nonfollower_load_boundaries())
+    for (auto const& [name, nf_loads] : mesh.nonfollower_load_boundaries())
     {
         for (auto const& [is_dof_active, boundary_conditions] : nf_loads.interface())
         {
@@ -154,7 +154,7 @@ void femStaticMatrix::solve()
     try
     {
         // Initialise the mesh with zero displacements
-        fem_mesh.update_internal_variables(displacement);
+        mesh.update_internal_variables(displacement);
 
         while (!adaptive_load.is_fully_applied())
         {
@@ -177,7 +177,7 @@ void femStaticMatrix::solve()
                   << comp_error.what() << termcolor::reset << std::endl;
 
         adaptive_load.update_convergence_state(false);
-        fem_mesh.save_internal_variables(false);
+        mesh.save_internal_variables(false);
 
         displacement = displacement_old;
 
@@ -197,7 +197,7 @@ void femStaticMatrix::assemble_stiffness()
 
     Kt.coeffs() = 0.0;
 
-    for (auto const& submesh : fem_mesh.meshes())
+    for (auto const& submesh : mesh.meshes())
     {
 #pragma omp parallel for
         for (auto element = 0; element < submesh.elements(); ++element)
@@ -227,7 +227,7 @@ void femStaticMatrix::assemble_stiffness()
 
 void femStaticMatrix::enforce_dirichlet_conditions(sparse_matrix& A, vector& b) const
 {
-    for (auto const& [name, boundaries] : fem_mesh.displacement_boundaries())
+    for (auto const& [name, boundaries] : mesh.displacement_boundaries())
     {
         for (auto const& dirichlet_boundary : boundaries)
         {
@@ -266,7 +266,7 @@ void femStaticMatrix::apply_displacement_boundaries()
 {
     Eigen::SparseVector<double> prescribed_increment(displacement.size());
 
-    for (auto const& [name, boundaries] : fem_mesh.displacement_boundaries())
+    for (auto const& [name, boundaries] : mesh.displacement_boundaries())
     {
         for (auto const& boundary : boundaries)
         {
@@ -317,8 +317,8 @@ void femStaticMatrix::perform_equilibrium_iterations()
 
         displacement += delta_d;
 
-        fem_mesh.update_internal_variables(displacement,
-                                           current_iteration == 0 ? adaptive_load.increment() : 0.0);
+        mesh.update_internal_variables(displacement,
+                                       current_iteration == 0 ? adaptive_load.increment() : 0.0);
 
         update_relative_norms();
 
@@ -336,7 +336,7 @@ void femStaticMatrix::perform_equilibrium_iterations()
     if (current_iteration != max_iterations)
     {
         adaptive_load.update_convergence_state(current_iteration != max_iterations);
-        fem_mesh.save_internal_variables(current_iteration != max_iterations);
+        mesh.save_internal_variables(current_iteration != max_iterations);
 
         displacement_old = displacement;
         io.write(adaptive_load.step(), adaptive_load.time());

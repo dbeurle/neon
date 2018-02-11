@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "numeric/IndexTypes.hpp"
+#include "numeric/index_types.hpp"
 
 namespace neon
 {
@@ -12,7 +12,7 @@ namespace neon
  * @return The global degrees of freedom
  */
 [[nodiscard]] std::vector<local_indices> allocate_dof_list(
-    int32 const nodal_dofs, std::vector<local_indices> const& element_node_list);
+    std::int32_t const nodal_dofs, std::vector<local_indices> const& element_node_list);
 
 /**
  * Allocates the dof lists from the nodal connectivity vector
@@ -21,7 +21,7 @@ namespace neon
  * @return The global degrees of freedom
  */
 
-[[nodiscard]] local_indices allocate_element_dofs(int32 const nodal_dofs,
+[[nodiscard]] local_indices allocate_element_dofs(std::int32_t const nodal_dofs,
                                                   local_indices const& element_nodes);
 
 /**
@@ -30,7 +30,6 @@ namespace neon
  * use with the boundary classes, where each boundary class holds a dof_list
  * with the dofs associated only with the particular dof.
  */
-[[nodiscard]] std::vector<List> filter_dof_list(int const nodal_dofs,
-                                                int const dof_offset,
-                                                std::vector<List> const& nodal_connectivity);
+[[nodiscard]] std::vector<local_indices> filter_dof_list(
+    int const nodal_dofs, int const dof_offset, std::vector<local_indices> const& nodal_connectivity);
 }

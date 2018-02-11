@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/Submesh.hpp"
+#include "mesh/basic_submesh.hpp"
 
 #include "constitutive/ConstitutiveModel.hpp"
 #include "constitutive/InternalVariables.hpp"
@@ -11,15 +11,15 @@
 
 namespace neon
 {
-class MaterialCoordinates;
+class material_coordinates;
 
 namespace mechanical::solid
 {
 /**
- * femSubmesh provides the element local routines for computing the system
+ * fem_submesh provides the element local routines for computing the system
  * components for a three-dimensional continuum mechanics discretisation.
  */
-class femSubmesh : public Submesh
+class fem_submesh : public basic_submesh
 {
 public:
     using ValueCount = std::pair<vector, vector>;
@@ -28,39 +28,41 @@ public:
 
 public:
     /** Constructor providing the material coordinates reference */
-    explicit femSubmesh(json const& material_data,
+    explicit fem_submesh(json const& material_data,
                         json const& mesh_data,
-                        std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                        Submesh const& submesh);
+                        std::shared_ptr<material_coordinates>& material_coordinates,
+                        basic_submesh const& submesh);
 
     /** @return list of global degrees of freedom for an element */
-    [[nodiscard]] local_indices const& local_dof_list(int const element) const
-    {
+    [[nodiscard]] local_indices const& local_dof_list(int const element) const {
         return dof_list.at(element);
     }
 
-    /** @return The internal variable store */
-    [[nodiscard]] InternalVariables const& internal_variables() const { return *variables; }
+        /** @return The internal variable store */
+        [[nodiscard]] InternalVariables const& internal_variables() const
+    {
+        return *variables;
+    }
 
     void save_internal_variables(bool const have_converged);
 
     [[nodiscard]] auto dofs_per_node() const { return 3; }
 
-    [[nodiscard]] auto const& shape_function() const { return *sf.get(); }
+    [[nodiscard]] auto const& shape_function() const { return *sf; }
 
-    [[nodiscard]] auto const& constitutive() const { return *cm.get(); }
+    [[nodiscard]] auto const& constitutive() const { return *cm; }
 
     /** @return the tangent consistent stiffness matrix */
-    [[nodiscard]] std::pair<List const&, matrix> tangent_stiffness(int const element) const;
+    [[nodiscard]] std::pair<local_indices const&, matrix> tangent_stiffness(int const element) const;
 
     /** @return the internal element force */
-    [[nodiscard]] std::pair<List const&, vector> internal_force(int const element) const;
+    [[nodiscard]] std::pair<local_indices const&, vector> internal_force(int const element) const;
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    [[nodiscard]] std::pair<List const&, matrix> consistent_mass(int const element) const;
+    [[nodiscard]] std::pair<local_indices const&, matrix> consistent_mass(int const element) const;
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    [[nodiscard]] std::pair<List const&, vector> diagonal_mass(int const element) const;
+    [[nodiscard]] std::pair<local_indices const&, vector> diagonal_mass(int const element) const;
 
     /** Update the internal variables for the mesh group
      *  \sa update_deformation_measures()
@@ -91,7 +93,7 @@ protected:
      * Where B is the gradient operator in the finite element discretization
      */
     [[nodiscard]] matrix geometric_tangent_stiffness(matrix3x const& configuration,
-                                                     int32 const element) const;
+                                                     std::int32_t const element) const;
 
     /**
      * Compute the material tangent stiffness using the formula
@@ -100,7 +102,7 @@ protected:
      * \f}
      */
     [[nodiscard]] matrix material_tangent_stiffness(matrix3x const& configuration,
-                                                    int32 const element) const;
+                                                    std::int32_t const element) const;
 
     /**
      * Compute the internal force vector using the formula
@@ -110,10 +112,10 @@ protected:
      * @return the internal nodal force vector
      */
     [[nodiscard]] vector internal_nodal_force(matrix3x const& configuration,
-                                              int32 const element) const;
+                                              std::int32_t const element) const;
 
 private:
-    std::shared_ptr<MaterialCoordinates> material_coordinates;
+    std::shared_ptr<material_coordinates> mesh_coordinates;
 
     std::unique_ptr<volume_interpolation> sf; //!< Shape function
 

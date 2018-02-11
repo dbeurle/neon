@@ -8,9 +8,13 @@
 #include "Exceptions.hpp"
 #include "numeric/float_compare.hpp"
 #include "solver/linear/LinearSolverFactory.hpp"
-
+#include "io/FileIO.hpp"
 #include "io/json.hpp"
+
 #include <chrono>
+#include <memory>
+#include <string>
+#include <iostream>
 #include <termcolor/termcolor.hpp>
 
 #include <omp.h>
@@ -93,8 +97,8 @@ protected:
     double relative_force_norm;
 
     sparse_matrix Kt; //!< Tangent matrix stiffness
-    vector fint;     //!< Internal force vector
-    vector fext;     //!< External force vector
+    vector fint;      //!< Internal force vector
+    vector fext;      //!< External force vector
 
     vector displacement;     //!< Displacement vector
     vector displacement_old; //!< Last displacement vector
@@ -188,7 +192,7 @@ void femStaticMatrix<femMeshType>::solve()
 template <class femMeshType>
 void femStaticMatrix<femMeshType>::compute_sparsity_pattern()
 {
-    std::vector<Doublet<int32>> doublets;
+    std::vector<Doublet<std::int32_t>> doublets;
     doublets.reserve(fem_mesh.active_dofs());
 
     Kt.resize(fem_mesh.active_dofs(), fem_mesh.active_dofs());

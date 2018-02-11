@@ -1,13 +1,13 @@
 
-#include "femSubmesh.hpp"
+#include "fem_submesh.hpp"
 
 #include "Exceptions.hpp"
 
 #include "constitutive/constitutive_model_factory.hpp"
 #include "interpolations/interpolation_factory.hpp"
 #include "material/material_property.hpp"
-#include "mesh/DofAllocator.hpp"
-#include "mesh/MaterialCoordinates.hpp"
+#include "mesh/dof_allocator.hpp"
+#include "mesh/material_coordinates.hpp"
 #include "numeric/gradient_operator.hpp"
 
 #include <cfenv>
@@ -17,19 +17,19 @@
 
 namespace neon::diffusion
 {
-femSubmesh::femSubmesh(json const& material_data,
+fem_submesh::fem_submesh(json const& material_data,
                        json const& mesh_data,
-                       std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                       Submesh const& submesh)
-    : Submesh(submesh),
-      material_coordinates(material_coordinates),
+                       std::shared_ptr<material_coordinates>& mesh_coordinates,
+                       basic_submesh const& submesh)
+    : basic_submesh(submesh),
+      mesh_coordinates(mesh_coordinates),
       sf(make_volume_interpolation(topology(), mesh_data)),
       variables(std::make_shared<InternalVariables>(elements() * sf->quadrature().points())),
       cm(make_constitutive_model(variables, material_data, mesh_data))
 {
 }
 
-void femSubmesh::save_internal_variables(bool const have_converged)
+void fem_submesh::save_internal_variables(bool const have_converged)
 {
     if (have_converged)
     {
@@ -41,9 +41,9 @@ void femSubmesh::save_internal_variables(bool const have_converged)
     }
 }
 
-std::tuple<local_indices const&, matrix> femSubmesh::tangent_stiffness(int const element) const
+std::tuple<local_indices const&, matrix> fem_submesh::tangent_stiffness(int const element) const
 {
-    auto const X = material_coordinates->current_configuration(local_node_list(element));
+    auto const X = mesh_coordinates->current_configuration(local_node_list(element));
 
     auto const n = nodes_per_element();
 
@@ -67,9 +67,9 @@ std::tuple<local_indices const&, matrix> femSubmesh::tangent_stiffness(int const
     return {local_dof_list(element), kmat};
 }
 
-std::tuple<local_indices const&, matrix> femSubmesh::consistent_mass(int const element) const
+std::tuple<local_indices const&, matrix> fem_submesh::consistent_mass(int const element) const
 {
-    auto X = material_coordinates->current_configuration(local_node_list(element));
+    auto X = mesh_coordinates->current_configuration(local_node_list(element));
 
     auto const density = cm->intrinsic_material().initial_density();
     auto const specific_heat = cm->intrinsic_material().specific_heat();
@@ -86,7 +86,7 @@ std::tuple<local_indices const&, matrix> femSubmesh::consistent_mass(int const e
     return {local_dof_list(element), m};
 }
 
-std::tuple<local_indices const&, vector> femSubmesh::diagonal_mass(int const element) const
+std::tuple<local_indices const&, vector> fem_submesh::diagonal_mass(int const element) const
 {
     auto const& [dofs, consistent_m] = this->consistent_mass(element);
 
@@ -98,7 +98,7 @@ std::tuple<local_indices const&, vector> femSubmesh::diagonal_mass(int const ele
     return {local_dof_list(element), diagonal_m};
 }
 
-void femSubmesh::update_internal_variables(double const time_step_size)
+void fem_submesh::update_internal_variables(double const time_step_size)
 {
     std::feclearexcept(FE_ALL_EXCEPT);
 
@@ -110,14 +110,14 @@ void femSubmesh::update_internal_variables(double const time_step_size)
     }
 }
 
-int femSubmesh::offset(int const element, int const quadrature_point) const
+int fem_submesh::offset(int const element, int const quadrature_point) const
 {
     return sf->quadrature().points() * element + quadrature_point;
 }
 
-femSubmesh::ValueCount femSubmesh::nodal_averaged_variable(InternalVariables::Scalar const scalar_name) const
+fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(InternalVariables::Scalar const scalar_name) const
 {
-    vector count = vector::Zero(material_coordinates->size());
+    vector count = vector::Zero(mesh_coordinates->size());
     vector value = count;
 
     auto const& scalar_list = variables->fetch(scalar_name);

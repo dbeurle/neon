@@ -2,7 +2,7 @@
 #pragma once
 
 #include "io/FileIO.hpp"
-#include "mesh/diffusion/femMesh.hpp"
+#include "mesh/diffusion/fem_mesh.hpp"
 #include "numeric/sparse_matrix.hpp"
 
 #include <json/forwards.h>
@@ -28,7 +28,7 @@ namespace neon::diffusion
 class femStaticMatrix
 {
 public:
-    explicit femStaticMatrix(femMesh& fem_mesh, json const& simulation_data);
+    explicit femStaticMatrix(fem_mesh& mesh, json const& simulation_data);
 
     ~femStaticMatrix();
 
@@ -67,13 +67,13 @@ protected:
     void apply_dirichlet_conditions(sparse_matrix& A, vector& x, vector& b);
 
 protected:
-    femMesh& fem_mesh;
+    fem_mesh& mesh;
 
     bool is_sparsity_computed = false;
 
-    sparse_matrix K; //!< Conductivity matrix
-    vector f;       //!< Heat vector
-    vector d;       //!< Temperature vector
+    sparse_matrix K; /// Conductivity matrix
+    vector f;        /// Heat vector
+    vector d;        /// Temperature vector
 
     FileIO file_io;
 

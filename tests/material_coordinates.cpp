@@ -5,7 +5,7 @@
 
 #include <numeric>
 
-#include "mesh/MaterialCoordinates.hpp"
+#include "mesh/material_coordinates.hpp"
 
 constexpr auto ZERO_MARGIN = 1.0e-5;
 
@@ -20,7 +20,7 @@ TEST_CASE("Material coordinates inheritence")
         0.0, 0.0, 0.0;
 
     // Setup the test case
-    MaterialCoordinates single_triangle(coordinates);
+    material_coordinates single_triangle(coordinates);
 
     local_indices const node_list{0, 1, 2};
 
@@ -42,7 +42,7 @@ TEST_CASE("Updating material coordinates")
         0.0, 0.0, 1.0,            //
         0.0, 0.0, 0.0;
 
-    MaterialCoordinates single_triangle(coordinates);
+    material_coordinates single_triangle(coordinates);
 
     vector test_displacements = vector::Constant(9, 1.0);
 

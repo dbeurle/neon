@@ -2,9 +2,9 @@
 #pragma once
 
 #include "constitutive/InternalVariables.hpp"
-#include "mesh/NodeOrderingAdapter.hpp"
-#include "mesh/diffusion/femMesh.hpp"
-#include "mesh/mechanical/solid/femMesh.hpp"
+#include "mesh/node_ordering_adapter.hpp"
+#include "mesh/diffusion/fem_mesh.hpp"
+#include "mesh/mechanical/solid/fem_mesh.hpp"
 
 #include <map>
 #include <string>
@@ -71,9 +71,7 @@ public:
     std::string const primary_field{"Displacement"};
 
 public:
-    explicit FileIO(std::string file_name,
-                    json const& visualisation_data,
-                    fem_mesh_type const& fem_mesh);
+    explicit FileIO(std::string file_name, json const& visualisation_data, fem_mesh_type const& mesh);
 
     FileIO(FileIO&&) = default;
 
@@ -83,7 +81,7 @@ private:
     void add_mesh();
 
 private:
-    fem_mesh_type const& fem_mesh;
+    fem_mesh_type const& mesh;
 
     // clang-format off
     scalar_map_t const scalar_map{{"AccumulatedPlasticStrain", variable_type::Scalar::EffectivePlasticStrain},
@@ -104,8 +102,8 @@ private:
 template <class femMeshType>
 FileIO<femMeshType>::FileIO(std::string file_name,
                             json const& visualisation_data,
-                            femMeshType const& fem_mesh)
-    : neon::FileIO(file_name, visualisation_data), fem_mesh(fem_mesh)
+                            femMeshType const& mesh)
+    : neon::FileIO(file_name, visualisation_data), mesh(mesh)
 {
     // Check the output set against the known values for this module
     for (auto const& output : output_set)
@@ -134,15 +132,15 @@ void FileIO<femMeshType>::write(int const time_step, double const total_time)
         {
             auto const tensor_size = femMeshType::internal_variable_type::tensor_size;
 
-            nodal_averaged_value.resize(fem_mesh.geometry().size() * tensor_size);
+            nodal_averaged_value.resize(mesh.geometry().size() * tensor_size);
 
-            insertions.resize(fem_mesh.geometry().size() * tensor_size);
+            insertions.resize(mesh.geometry().size() * tensor_size);
 
             nodal_averaged_value.setZero();
             insertions.setZero();
 
             // Add internal variables
-            for (auto const& submesh : fem_mesh.meshes())
+            for (auto const& submesh : mesh.meshes())
             {
                 if (!submesh.internal_variables().has(found->second))
                 {
@@ -161,15 +159,15 @@ void FileIO<femMeshType>::write(int const time_step, double const total_time)
         }
         else if (auto found = scalar_map.find(name); found != scalar_map.end())
         {
-            nodal_averaged_value.resize(fem_mesh.geometry().size());
+            nodal_averaged_value.resize(mesh.geometry().size());
 
-            insertions.resize(fem_mesh.geometry().size());
+            insertions.resize(mesh.geometry().size());
 
             nodal_averaged_value.setZero();
 
             insertions.setZero();
 
-            for (auto const& submesh : fem_mesh.meshes())
+            for (auto const& submesh : mesh.meshes())
             {
                 auto const [value, count] = submesh.nodal_averaged_variable(found->second);
                 nodal_averaged_value += value;
@@ -183,7 +181,7 @@ void FileIO<femMeshType>::write(int const time_step, double const total_time)
         else if (name == primary_field)
         {
             unstructured_mesh->GetPointData()->AddArray(
-                io::vtk_displacement(fem_mesh.geometry().displacement()));
+                io::vtk_displacement(mesh.geometry().displacement()));
         }
         else
         {
@@ -198,9 +196,9 @@ template <class femMeshType>
 void FileIO<femMeshType>::add_mesh()
 {
     // Populate an unstructured grid object
-    unstructured_mesh->SetPoints(io::vtk_coordinates(fem_mesh.geometry().coordinates()));
+    unstructured_mesh->SetPoints(io::vtk_coordinates(mesh.geometry().coordinates()));
 
-    for (auto const& submesh : fem_mesh.meshes())
+    for (auto const& submesh : mesh.meshes())
     {
         auto const vtk_ordered_connectivity = convert_to_vtk(submesh.connectivities(),
                                                              submesh.topology());
@@ -215,8 +213,7 @@ void FileIO<femMeshType>::add_mesh()
             unstructured_mesh->InsertNextCell(to_vtk(submesh.topology()), vtk_node_list);
         }
     }
-    unstructured_mesh->GetPointData()->AddArray(
-        io::vtk_displacement(fem_mesh.geometry().coordinates()));
+    unstructured_mesh->GetPointData()->AddArray(io::vtk_displacement(mesh.geometry().coordinates()));
 }
 }
 
@@ -230,9 +227,7 @@ public:
     std::string const primary_field{"Temperature"};
 
 public:
-    explicit FileIO(std::string file_name,
-                    json const& visualisation_data,
-                    femMesh const& fem_mesh);
+    explicit FileIO(std::string file_name, json const& visualisation_data, fem_mesh const& mesh);
 
     FileIO(FileIO&&) = default;
 
@@ -242,7 +237,7 @@ private:
     void add_mesh();
 
 private:
-    femMesh const& fem_mesh;
+    fem_mesh const& mesh;
 
     VectorMap const vector_map{{"HeatFlux", InternalVariables::vector::HeatFlux}};
 };

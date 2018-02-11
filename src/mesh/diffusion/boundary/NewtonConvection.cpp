@@ -9,16 +9,16 @@
 namespace neon::diffusion::boundary
 {
 newton_cooling::newton_cooling(std::unique_ptr<surface_interpolation>&& sf,
-                               std::vector<List> const& nodal_connectivity,
-                               std::vector<List> const& dof_list,
-                               std::shared_ptr<MaterialCoordinates>& material_coordinates,
+                               std::vector<local_indices> const& nodal_connectivity,
+                               std::vector<local_indices> const& dof_list,
+                               std::shared_ptr<material_coordinates>& mesh_coordinates,
                                json const& times,
                                json const& heat_flux,
                                json const& heat_transfer_coefficient)
     : SurfaceLoad<surface_interpolation>(std::move(sf),
                                          nodal_connectivity,
                                          dof_list,
-                                         material_coordinates,
+                                         mesh_coordinates,
                                          times,
                                          heat_flux)
 {
@@ -29,11 +29,11 @@ newton_cooling::newton_cooling(std::unique_ptr<surface_interpolation>&& sf,
                               heat_transfer_coefficient | transform([](auto const i) { return i; }));
 }
 
-std::tuple<List const&, matrix> newton_cooling::external_stiffness(int const element,
-                                                                   double const load_factor) const
+std::pair<local_indices const&, matrix> newton_cooling::external_stiffness(int const element,
+                                                                           double const load_factor) const
 {
     auto const X = geometry::project_to_plane(
-        material_coordinates->initial_configuration(nodal_connectivity[element]));
+        coordinates->initial_configuration(nodal_connectivity[element]));
 
     // Perform the computation of the external element stiffness matrix
     auto const k_ext = sf->quadrature().integrate(matrix::Zero(X.cols(), X.cols()).eval(),

@@ -9,7 +9,7 @@
 
 namespace neon::mechanical::solid
 {
-femDynamicMatrix::femDynamicMatrix(femMesh& fem_mesh, json const& simulation)
+femDynamicMatrix::femDynamicMatrix(fem_mesh& fem_mesh, json const& simulation)
     : femStaticMatrix(fem_mesh, simulation),
       a(vector::Zero(fem_mesh.active_dofs())),
       v(vector::Zero(fem_mesh.active_dofs())),

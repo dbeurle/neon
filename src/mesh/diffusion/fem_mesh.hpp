@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/diffusion/femSubmesh.hpp"
+#include "mesh/diffusion/fem_submesh.hpp"
 
 #include "mesh/diffusion/boundary/SurfaceBoundary.hpp"
 #include "mesh/generic/Dirichlet.hpp"
@@ -11,18 +11,16 @@
 
 namespace neon
 {
-class BasicMesh;
+class basic_mesh;
 
 namespace diffusion
 {
-class femMesh
+class fem_mesh
 {
 public:
-    femMesh(BasicMesh const& basic_mesh,
-            json const& material_data,
-            json const& mesh_data);
+    fem_mesh(basic_mesh const& basic_mesh, json const& material_data, json const& mesh_data);
 
-    auto active_dofs() const { return material_coordinates->size(); }
+    auto active_dofs() const { return mesh_coordinates->size(); }
 
     /**
      * Deform the body by updating the displacement x = X + u
@@ -38,31 +36,31 @@ public:
     void save_internal_variables(bool const have_converged);
 
     /** Constant access to the sub-meshes */
-    std::vector<femSubmesh> const& meshes() const { return submeshes; }
+    std::vector<fem_submesh> const& meshes() const { return submeshes; }
 
     /** Mutable access to the sub-meshes */
-    std::vector<femSubmesh>& meshes() { return submeshes; }
+    std::vector<fem_submesh>& meshes() { return submeshes; }
 
     auto const& dirichlet_boundaries() const { return dirichlet_bcs; }
 
     auto const& surface_boundaries() const { return boundary_meshes; }
 
-    [[deprecated]] auto const& coordinates() const { return *material_coordinates; }
+    [[deprecated]] auto const& coordinates() const { return *mesh_coordinates; }
 
-    auto const& geometry() const { return *material_coordinates; }
+    auto const& geometry() const { return *mesh_coordinates; }
 
 protected:
     void check_boundary_conditions(json const& boundary_data) const;
 
-    void allocate_boundary_conditions(json const& boundary_data, BasicMesh const& basic_mesh);
+    void allocate_boundary_conditions(json const& boundary_data, basic_mesh const& basic_mesh);
 
     /** Collapse the nodal connectivity arrays from the submesh for a node list */
-    List filter_dof_list(std::vector<Submesh> const& boundary_mesh) const;
+    local_indices filter_dof_list(std::vector<basic_submesh> const& boundary_mesh) const;
 
 protected:
-    std::shared_ptr<MaterialCoordinates> material_coordinates;
+    std::shared_ptr<material_coordinates> mesh_coordinates;
 
-    std::vector<femSubmesh> submeshes;
+    std::vector<fem_submesh> submeshes;
 
     std::map<std::string, std::vector<Dirichlet>> dirichlet_bcs;
     std::map<std::string, std::vector<boundary_mesh>> boundary_meshes;
