@@ -4,7 +4,7 @@
 #include "mesh/generic/Neumann.hpp"
 
 #include "interpolations/interpolation_factory.hpp"
-#include "mesh/Submesh.hpp"
+#include "mesh/basic_submesh.hpp"
 
 #include <variant>
 
@@ -42,8 +42,8 @@ public:
     using boundary_type = std::vector<std::variant<traction, body_force>>;
 
 public:
-    explicit nonfollower_load_boundary(std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                                     std::vector<Submesh> const& submeshes,
+    explicit nonfollower_load_boundary(std::shared_ptr<material_coordinates>& material_coordinates,
+                                     std::vector<basic_submesh> const& submeshes,
                                      json const& simulation_data,
                                      json const& boundary,
                                      std::unordered_map<std::string, int> const& dof_table);

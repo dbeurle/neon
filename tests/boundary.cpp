@@ -3,12 +3,12 @@
 
 #include <catch.hpp>
 
-#include "mesh/DofAllocator.hpp"
+#include "mesh/dof_allocator.hpp"
 
 #include "interpolations/triangle.hpp"
 #include "quadrature/triangle_quadrature.hpp"
 
-#include "mesh/Submesh.hpp"
+#include "mesh/basic_submesh.hpp"
 
 #include "mesh/generic/Boundary.hpp"
 #include "mesh/mechanical/solid/boundary/NonFollowerLoad.hpp"
@@ -90,17 +90,17 @@ TEST_CASE("Traction test for triangle", "[Traction]")
         0.0, 0.0, 1.0,            //
         0.0, 0.0, 0.0;
 
-    auto material_coordinates = std::make_shared<MaterialCoordinates>(coordinates);
+    auto mesh_coordinates = std::make_shared<material_coordinates>(coordinates);
 
-    std::vector<List> nodal_connectivity = {{0, 1, 2}};
-    std::vector<List> dof_list = {{0, 3, 6}};
+    std::vector<local_indices> nodal_connectivity = {{0, 1, 2}};
+    std::vector<local_indices> dof_list = {{0, 3, 6}};
 
     SECTION("Unit load")
     {
         traction patch(std::make_unique<triangle3>(triangle_quadrature::Rule::OnePoint),
                        nodal_connectivity,
                        dof_list,
-                       material_coordinates,
+                       mesh_coordinates,
                        json::parse("[0.0, 1.0]"),
                        json::parse("[0.0, 1.0]"));
 
@@ -116,7 +116,7 @@ TEST_CASE("Traction test for triangle", "[Traction]")
         traction patch(std::make_unique<triangle3>(triangle_quadrature::Rule::OnePoint),
                        nodal_connectivity,
                        dof_list,
-                       material_coordinates,
+                       mesh_coordinates,
                        json::parse("[0.0, 1.0]"),
                        json::parse("[0.0, 2.0]"));
 
@@ -138,17 +138,17 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
         0.0, 0.0, 1.0,            //
         0.0, 0.0, 0.0;
 
-    auto material_coordinates = std::make_shared<MaterialCoordinates>(coordinates);
+    auto mesh_coordinates = std::make_shared<material_coordinates>(coordinates);
 
-    std::vector<List> nodal_connectivity = {{0, 1, 2}};
-    std::vector<List> dof_list = {{0, 1, 2, 3, 4, 5, 6, 7, 8}};
+    std::vector<local_indices> nodal_connectivity = {{0, 1, 2}};
+    std::vector<local_indices> dof_list = {{0, 1, 2, 3, 4, 5, 6, 7, 8}};
 
     SECTION("Unit load")
     {
         pressure pressure_patch(std::make_unique<triangle3>(triangle_quadrature::Rule::OnePoint),
                                 nodal_connectivity,
                                 dof_list,
-                                material_coordinates,
+                                mesh_coordinates,
                                 json::parse("[0.0, 1.0]"),
                                 json::parse("[0.0, -1.0]"));
 
@@ -167,7 +167,7 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
         pressure pressure_patch(std::make_unique<triangle3>(triangle_quadrature::Rule::OnePoint),
                                 nodal_connectivity,
                                 dof_list,
-                                material_coordinates,
+                                mesh_coordinates,
                                 json::parse("[0.0, 1.0]"),
                                 json::parse("[0.0, -2.0]"));
 
@@ -190,7 +190,7 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
         0.0, 0.0, 1.0, 1.0, 1.0,            //
         0.0, 0.0, 0.0, 0.0, 0.0;            //
 
-    auto material_coordinates = std::make_shared<MaterialCoordinates>(coordinates);
+    auto mesh_coordinates = std::make_shared<material_coordinates>(coordinates);
 
     auto tri_mesh = json::parse("{\"Name\":\"Ysym\",\"NodalConnectivity\":[[1,4,2]],\"Type\":"
                                 "2}");
@@ -213,7 +213,7 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
                                 "1.0],\"Type\":\"Traction\",\"Values\":{\"y\":[0.0, "
                                 "1.0e-3]}}");
 
-    std::vector<Submesh> submeshes = {tri_mesh, quad_mesh};
+    std::vector<basic_submesh> submeshes = {tri_mesh, quad_mesh};
 
     REQUIRE(submeshes.at(0).elements() == 1);
     REQUIRE(submeshes.at(1).elements() == 1);
@@ -226,7 +226,7 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
 
     // Insert this information into the nonfollower load boundary class
     // using the simulation data for the cube
-    NonFollowerLoadBoundary loads(material_coordinates,
+    NonFollowerLoadBoundary loads(mesh_coordinates,
                                   submeshes,
                                   simulation_data,
                                   boundary,
@@ -272,17 +272,17 @@ TEST_CASE("Newton cooling boundary conditions")
         0.0, 0.0, 1.0,            //
         0.0, 0.0, 0.0;
 
-    auto material_coordinates = std::make_shared<MaterialCoordinates>(coordinates);
+    auto mesh_coordinates = std::make_shared<material_coordinates>(coordinates);
 
-    std::vector<List> const nodal_connectivity = {{0, 1, 2}};
-    std::vector<List> const dof_list = {{0, 3, 6}};
+    std::vector<local_indices> const nodal_connectivity = {{0, 1, 2}};
+    std::vector<local_indices> const dof_list = {{0, 3, 6}};
 
     SECTION("Unit load")
     {
         newton_cooling patch(std::make_unique<triangle3>(triangle_quadrature::Rule::OnePoint),
                              nodal_connectivity,
                              dof_list,
-                             material_coordinates,
+                             mesh_coordinates,
                              json::parse("[0.0, 1.0]"),
                              json::parse("[0.0, 1.0]"),
                              json::parse("[300.0, 300.0]"));

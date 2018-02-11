@@ -97,8 +97,8 @@ void FileIO::add_field(std::string const& name, vector const& field, int const c
 
 namespace diffusion
 {
-FileIO::FileIO(std::string file_name, json const& visualisation_data, femMesh const& fem_mesh)
-    : neon::FileIO(file_name, visualisation_data), fem_mesh(fem_mesh)
+FileIO::FileIO(std::string file_name, json const& visualisation_data, fem_mesh const& mesh)
+    : neon::FileIO(file_name, visualisation_data), mesh(mesh)
 {
     // Check the output set against the known values for this module
     for (auto const& output : output_set)
@@ -130,9 +130,9 @@ void FileIO::write(int const time_step, double const total_time, vector const& s
 void FileIO::add_mesh()
 {
     // Populate an unstructured grid object
-    unstructured_mesh->SetPoints(io::vtk_coordinates(fem_mesh.geometry().coordinates()));
+    unstructured_mesh->SetPoints(io::vtk_coordinates(mesh.geometry().coordinates()));
 
-    for (auto const& submesh : fem_mesh.meshes())
+    for (auto const& submesh : mesh.meshes())
     {
         auto const vtk_ordered_connectivity = convert_to_vtk(submesh.connectivities(),
                                                              submesh.topology());

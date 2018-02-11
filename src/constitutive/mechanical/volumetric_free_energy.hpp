@@ -9,9 +9,7 @@ namespace neon
      U' &= \frac{\partial U}{\partial J} = \frac{K}{2}\left(J - \frac{1}{J}\right)
    \f}
  * where
- * \f{align*}{
-     U &= \frac{K}{4}(J^2 - 1) - \frac{K}{2}\ln{J}
-   \f}
+ * \f$ U = \frac{K}{4}(J^2 - 1) - \frac{K}{2}\ln{J} \f$
  */
 inline double volumetric_free_energy_dJ(double const J, double const bulk_modulus)
 {
@@ -21,8 +19,7 @@ inline double volumetric_free_energy_dJ(double const J, double const bulk_modulu
 /**
  * Compute the second derivative of the volumetric free energy function
  * \f{align*}{
-     U'' &= \frac{\partial^2 U}{\partial J^2} = \frac{K}{2} \left(1 +
- \frac{1}{J^2}\right) \f}
+     U^{''} &= \frac{\partial^2 U}{\partial J^2} = \frac{K}{2} \left(1 + \frac{1}{J^2}\right) \f}
  * \sa volumetric_free_energy_dJ
  */
 inline double volumetric_free_energy_second_d2J(double const J, double const bulk_modulus)

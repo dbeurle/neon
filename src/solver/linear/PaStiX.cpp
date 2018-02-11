@@ -1,7 +1,7 @@
 
 #include "PaStiX.hpp"
 
-#include "SimulationControl.hpp"
+#include "simulation_parser.hpp"
 
 #include <chrono>
 #include <termcolor/termcolor.hpp>
@@ -14,7 +14,7 @@ PaStiXLDLT::PaStiXLDLT()
     ldlt.iparm(3) = 0;
 
     // Number of threads
-    ldlt.iparm(34) = SimulationControl::threads;
+    ldlt.iparm(34) = simulation_parser::threads;
 
     // Number of Cuda devices
     // ldlt.iparm(64) = 1;
@@ -46,7 +46,7 @@ PaStiXLU::PaStiXLU()
     lu.iparm(3) = 0;
 
     // Number of threads
-    lu.iparm(34) = SimulationControl::threads;
+    lu.iparm(34) = simulation_parser::threads;
 
     // Number of Cuda devices
     // ldlt.iparm(64) = 1;

@@ -3,23 +3,18 @@
 
 #include "mechanical/solid/small_strain_J2_plasticity.hpp"
 #include "mechanical/solid/small_strain_J2_plasticity_damage.hpp"
-
 #include "mechanical/solid/finite_strain_J2_plasticity.hpp"
 
 #include "mechanical/solid/gaussian_affine_microsphere.hpp"
-
 #include "mechanical/solid/affine_microsphere.hpp"
 #include "mechanical/solid/nonaffine_microsphere.hpp"
-
 #include "mechanical/solid/compressible_neohooke.hpp"
 
-#include "thermal/IsotropicDiffusion.hpp"
-
 #include "mechanical/plane/isotropic_linear_elasticity.hpp"
-
 #include "mechanical/plane/small_strain_J2_plasticity.hpp"
-
 #include "mechanical/plane/finite_strain_J2_plasticity.hpp"
+
+#include "thermal/isotropic_diffusion.hpp"
 
 #include "io/json.hpp"
 
@@ -27,8 +22,8 @@
 
 namespace neon::mechanical::solid
 {
-std::unique_ptr<ConstitutiveModel> make_constitutive_model(
-    std::shared_ptr<InternalVariables>& variables, json const& material_data, json const& mesh_data)
+std::unique_ptr<constitutive_model> make_constitutive_model(
+    std::shared_ptr<internal_variables_t>& variables, json const& material_data, json const& mesh_data)
 {
     if (!mesh_data.count("ConstitutiveModel"))
     {
@@ -138,8 +133,8 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(
 
 namespace neon::mechanical::plane
 {
-std::unique_ptr<ConstitutiveModel> make_constitutive_model(
-    std::shared_ptr<InternalVariables>& variables, json const& material_data, json const& mesh_data)
+std::unique_ptr<constitutive_model> make_constitutive_model(
+    std::shared_ptr<internal_variables_t>& variables, json const& material_data, json const& mesh_data)
 {
     if (!mesh_data.count("ConstitutiveModel"))
     {
@@ -189,8 +184,8 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(
 
 namespace neon::diffusion
 {
-std::unique_ptr<ConstitutiveModel> make_constitutive_model(
-    std::shared_ptr<InternalVariables>& variables, json const& material_data, json const& mesh_data)
+std::unique_ptr<constitutive_model> make_constitutive_model(
+    std::shared_ptr<internal_variables_t>& variables, json const& material_data, json const& mesh_data)
 {
     if (!mesh_data.count("ConstitutiveModel"))
     {
@@ -206,7 +201,7 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(
 
     if (constitutive_model["Name"].get<std::string>() == "IsotropicDiffusion")
     {
-        return std::make_unique<IsotropicDiffusion>(variables, material_data);
+        return std::make_unique<isotropic_diffusion>(variables, material_data);
     }
 
     throw std::domain_error("The model name " + constitutive_model["Name"].get<std::string>()

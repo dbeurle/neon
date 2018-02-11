@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "constitutive/ConstitutiveModel.hpp"
+#include "constitutive/constitutive_model.hpp"
 
 #include "numeric/dense_matrix.hpp"
 
@@ -9,14 +9,14 @@
 
 namespace neon::mechanical::plane
 {
-class isotropic_linear_elasticity : public ConstitutiveModel
+class isotropic_linear_elasticity : public constitutive_model
 {
 public:
     enum class plane { stress, strain };
 
 public:
     /** Provide an internal variable class to be populated by the constitutive model */
-    explicit isotropic_linear_elasticity(std::shared_ptr<InternalVariables>& variables,
+    explicit isotropic_linear_elasticity(std::shared_ptr<internal_variables_t>& variables,
                                          json const& material_data,
                                          plane const state);
 

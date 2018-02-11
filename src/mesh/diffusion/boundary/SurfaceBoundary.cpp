@@ -2,14 +2,14 @@
 #include "SurfaceBoundary.hpp"
 
 #include "interpolations/interpolation_factory.hpp"
-#include "mesh/Submesh.hpp"
+#include "mesh/basic_submesh.hpp"
 
 #include "io/json.hpp"
 
 namespace neon::diffusion
 {
-boundary_mesh::boundary_mesh(std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                             std::vector<Submesh> const& submeshes,
+boundary_mesh::boundary_mesh(std::shared_ptr<material_coordinates>& material_coordinates,
+                             std::vector<basic_submesh> const& submeshes,
                              json const& boundary,
                              json const& mesh_data)
 {

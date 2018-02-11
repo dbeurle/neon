@@ -32,9 +32,9 @@ public:
      * @param external_temperature A list of heat transfer coefficients
      */
     explicit newton_cooling(std::unique_ptr<surface_interpolation>&& sf,
-                            std::vector<List> const& nodal_connectivity,
-                            std::vector<List> const& dof_list,
-                            std::shared_ptr<MaterialCoordinates>& material_coordinates,
+                            std::vector<local_indices> const& nodal_connectivity,
+                            std::vector<local_indices> const& dof_list,
+                            std::shared_ptr<material_coordinates>& mesh_coordinates,
                             json const& times,
                             json const& heat_flux,
                             json const& heat_transfer_coefficient);
@@ -45,8 +45,8 @@ public:
          k_{ab} &= \int_{\Gamma} N_a \lambda N_b d\Gamma
        \f}
      */
-    [[nodiscard]] std::tuple<List const&, matrix> external_stiffness(int const element,
-                                                                     double const load_factor) const;
+    [[nodiscard]] std::pair<local_indices const&, matrix> external_stiffness(
+        int const element, double const load_factor) const;
 
 protected:
     std::vector<std::pair<double, double>> stiffness_time_data;

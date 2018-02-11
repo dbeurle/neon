@@ -1,7 +1,7 @@
 
 #include "nonaffine_microsphere.hpp"
 
-#include "constitutive/InternalVariables.hpp"
+#include "constitutive/internal_variables.hpp"
 #include "numeric/dense_matrix.hpp"
 
 #include "io/json.hpp"
@@ -12,7 +12,7 @@
 
 namespace neon::mechanical::solid
 {
-nonaffine_microsphere::nonaffine_microsphere(std::shared_ptr<InternalVariables>& variables,
+nonaffine_microsphere::nonaffine_microsphere(std::shared_ptr<internal_variables_t>& variables,
                                              json const& material_data,
                                              unit_sphere_quadrature::Rule const rule)
     : affine_microsphere(variables, material_data, rule), material(material_data)
@@ -27,13 +27,13 @@ nonaffine_microsphere::nonaffine_microsphere(std::shared_ptr<InternalVariables>&
 void nonaffine_microsphere::update_internal_variables(double const time_step_size)
 {
     auto const& deformation_gradients = variables->fetch(
-        InternalVariables::Tensor::DeformationGradient);
-    auto& cauchy_stresses = variables->fetch(InternalVariables::Tensor::Cauchy);
+        internal_variables_t::Tensor::DeformationGradient);
+    auto& cauchy_stresses = variables->fetch(internal_variables_t::Tensor::Cauchy);
 
-    auto const& detF_list = variables->fetch(InternalVariables::Scalar::DetF);
+    auto const& detF_list = variables->fetch(internal_variables_t::Scalar::DetF);
 
     // Compute tangent moduli
-    auto& tangent_operators = variables->fetch(InternalVariables::rank4::tangent_operator);
+    auto& tangent_operators = variables->fetch(internal_variables_t::rank4::tangent_operator);
 
     // Material properties
     auto const K_eff = material.bulk_modulus();

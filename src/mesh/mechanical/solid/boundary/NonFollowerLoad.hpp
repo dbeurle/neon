@@ -6,7 +6,7 @@
 #include "traction.hpp"
 
 #include "interpolations/shape_function.hpp"
-#include "mesh/Submesh.hpp"
+#include "mesh/basic_submesh.hpp"
 
 #include <variant>
 
@@ -30,8 +30,8 @@ public:
     using BoundaryMeshes = std::vector<std::variant<traction, pressure, body_force>>;
 
 public:
-    explicit NonFollowerLoadBoundary(std::shared_ptr<MaterialCoordinates>& material_coordinates,
-                                     std::vector<Submesh> const& submeshes,
+    explicit NonFollowerLoadBoundary(std::shared_ptr<material_coordinates>& material_coordinates,
+                                     std::vector<basic_submesh> const& submeshes,
                                      json const& simulation_data,
                                      json const& boundary,
                                      std::unordered_map<std::string, int> const& dof_table);

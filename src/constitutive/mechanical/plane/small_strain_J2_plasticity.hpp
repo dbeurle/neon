@@ -18,7 +18,7 @@ namespace neon::mechanical::plane
 class small_strain_J2_plasticity : public isotropic_linear_elasticity
 {
 public:
-    explicit small_strain_J2_plasticity(std::shared_ptr<InternalVariables>& variables,
+    explicit small_strain_J2_plasticity(std::shared_ptr<internal_variables_t>& variables,
                                         json const& material_data);
 
     virtual ~small_strain_J2_plasticity();

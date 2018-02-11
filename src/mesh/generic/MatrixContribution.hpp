@@ -15,7 +15,7 @@ public:
     using Boundary::Boundary;
 
     /** @return an element external force vector for a given element */
-    [[nodiscard]] virtual std::tuple<List const&, matrix> external_stiffness(
+    [[nodiscard]] virtual std::tuple<local_indices const&, matrix> external_stiffness(
         int const element, double const load_factor) const = 0;
 };
 }

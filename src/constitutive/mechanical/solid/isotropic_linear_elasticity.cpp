@@ -2,7 +2,7 @@
 #include "isotropic_linear_elasticity.hpp"
 
 #include "Exceptions.hpp"
-#include "constitutive/InternalVariables.hpp"
+#include "constitutive/internal_variables.hpp"
 
 #include "numeric/mechanics"
 
@@ -10,15 +10,15 @@
 
 namespace neon::mechanical::solid
 {
-isotropic_linear_elasticity::isotropic_linear_elasticity(std::shared_ptr<InternalVariables>& variables,
+isotropic_linear_elasticity::isotropic_linear_elasticity(std::shared_ptr<internal_variables_t>& variables,
                                                      json const& material_data)
-    : ConstitutiveModel(variables), material(material_data)
+    : constitutive_model(variables), material(material_data)
 {
-    variables->add(InternalVariables::Tensor::LinearisedStrain,
-                   InternalVariables::Scalar::VonMisesStress);
+    variables->add(internal_variables_t::Tensor::LinearisedStrain,
+                   internal_variables_t::Scalar::VonMisesStress);
 
     // Add material tangent with the linear elasticity spatial moduli
-    variables->add(InternalVariables::rank4::tangent_operator, elastic_moduli());
+    variables->add(internal_variables_t::rank4::tangent_operator, elastic_moduli());
 }
 
 isotropic_linear_elasticity::~isotropic_linear_elasticity() = default;
@@ -29,13 +29,13 @@ void isotropic_linear_elasticity::update_internal_variables(double const time_st
 
     // Extract the internal variables
     auto [elastic_strains,
-          cauchy_stresses] = variables->fetch(InternalVariables::Tensor::LinearisedStrain,
-                                              InternalVariables::Tensor::Cauchy);
+          cauchy_stresses] = variables->fetch(internal_variables_t::Tensor::LinearisedStrain,
+                                              internal_variables_t::Tensor::Cauchy);
 
-    auto& von_mises_stresses = variables->fetch(InternalVariables::Scalar::VonMisesStress);
+    auto& von_mises_stresses = variables->fetch(internal_variables_t::Scalar::VonMisesStress);
 
     // Compute the linear strain gradient from the displacement gradient
-    elastic_strains = variables->fetch(InternalVariables::Tensor::DisplacementGradient)
+    elastic_strains = variables->fetch(internal_variables_t::Tensor::DisplacementGradient)
                       | view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
     // Compute Cauchy stress from the linear elastic strains

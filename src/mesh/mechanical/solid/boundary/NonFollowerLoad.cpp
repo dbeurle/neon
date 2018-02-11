@@ -10,8 +10,8 @@
 namespace neon::mechanical::solid
 {
 NonFollowerLoadBoundary::NonFollowerLoadBoundary(
-    std::shared_ptr<MaterialCoordinates>& material_coordinates,
-    std::vector<Submesh> const& submeshes,
+    std::shared_ptr<material_coordinates>& material_coordinates,
+    std::vector<basic_submesh> const& submeshes,
     json const& simulation_data,
     json const& boundary,
     std::unordered_map<std::string, int> const& dof_table)
