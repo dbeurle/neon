@@ -1,8 +1,7 @@
 
 #pragma once
 
-#include "constitutive/ConstitutiveModel.hpp"
-
+#include "constitutive/constitutive_model.hpp"
 #include "material/linear_diffusion.hpp"
 
 namespace neon::diffusion
@@ -11,7 +10,7 @@ namespace neon::diffusion
  * isotropic_diffusion computes the isotropic constitutive matrix for linear
  * and isotropic diffusion problems.
  */
-class isotropic_diffusion : public ConstitutiveModel
+class isotropic_diffusion : public constitutive_model
 {
 public:
     isotropic_diffusion(std::shared_ptr<InternalVariables>& variables, json const& material_data);

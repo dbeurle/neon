@@ -11,7 +11,7 @@ namespace neon::mechanical::solid
 {
 compressible_neohooke::compressible_neohooke(std::shared_ptr<InternalVariables>& variables,
                                              json const& material_data)
-    : ConstitutiveModel(variables), material(material_data)
+    : constitutive_model(variables), material(material_data)
 {
     // The Neo-Hookean model requires the deformation gradient and the Cauchy
     // stress, which are both allocated by default in the mesh object

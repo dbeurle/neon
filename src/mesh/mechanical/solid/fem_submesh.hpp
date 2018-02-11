@@ -3,7 +3,7 @@
 
 #include "mesh/basic_submesh.hpp"
 
-#include "constitutive/ConstitutiveModel.hpp"
+#include "constitutive/constitutive_model.hpp"
 #include "constitutive/InternalVariables.hpp"
 #include "interpolations/shape_function.hpp"
 
@@ -122,7 +122,7 @@ private:
     variable_view view;
     std::shared_ptr<InternalVariables> variables;
 
-    std::unique_ptr<ConstitutiveModel> cm; //!< Constitutive model
+    std::unique_ptr<constitutive_model> cm; //!< Constitutive model
 
     std::vector<local_indices> dof_list; //!< Map for the local to global dofs
 };

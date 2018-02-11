@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "constitutive/ConstitutiveModel.hpp"
+#include "constitutive/constitutive_model.hpp"
 
 #include "material/micromechanical_elastomer.hpp"
 #include "numeric/tensor_operations.hpp"
@@ -25,7 +25,7 @@ namespace neon::mechanical::solid
  * This constitutive model requires the use of a quadrature scheme for the unit
  * sphere and this internal variable update can be computationally expensive.
  */
-class gaussian_affine_microsphere : public ConstitutiveModel
+class gaussian_affine_microsphere : public constitutive_model
 {
 public:
     /**

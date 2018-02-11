@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "InternalVariablesForwards.hpp"
+#include "internal_variables_forward.hpp"
 
 #include "numeric/tensor_operations.hpp"
 
@@ -43,7 +43,6 @@ public:
     /** Voigt dimension for the tensor conversion */
     static auto constexpr v_n = rank4_dimension;
 
-    // Type aliases
     using scalar_type = double;
 
     /** A second order tensor type is a small matrix in tensor notation */

@@ -14,7 +14,7 @@ namespace neon::mechanical::plane
 isotropic_linear_elasticity::isotropic_linear_elasticity(std::shared_ptr<InternalVariables>& variables,
                                                          json const& material_data,
                                                          plane const state)
-    : ConstitutiveModel(variables), material(material_data), state(state)
+    : constitutive_model(variables), material(material_data), state(state)
 {
     variables->add(InternalVariables::Tensor::LinearisedStrain,
                    InternalVariables::Scalar::VonMisesStress);

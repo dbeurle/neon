@@ -3,7 +3,7 @@
 
 #include "mesh/basic_submesh.hpp"
 
-#include "constitutive/ConstitutiveModel.hpp"
+#include "constitutive/constitutive_model.hpp"
 #include "constitutive/InternalVariables.hpp"
 #include "interpolations/shape_function.hpp"
 
@@ -97,7 +97,7 @@ private:
     std::shared_ptr<material_coordinates> mesh_coordinates; /// Nodal coordinates
     std::unique_ptr<volume_interpolation> sf;               /// Shape function
     std::shared_ptr<InternalVariables> variables;
-    std::unique_ptr<ConstitutiveModel> cm; /// Constitutive model
+    std::unique_ptr<constitutive_model> cm; /// Constitutive model
 };
 }
 }

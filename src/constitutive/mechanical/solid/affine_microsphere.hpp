@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "constitutive/ConstitutiveModel.hpp"
+#include "constitutive/constitutive_model.hpp"
 
 #include "material/micromechanical_elastomer.hpp"
 #include "numeric/tensor_operations.hpp"
@@ -25,7 +25,7 @@ namespace neon::mechanical::solid
  * sphere and this internal variable update can be computationally expensive and
  * is therefore multithreaded.
  */
-class affine_microsphere : public ConstitutiveModel
+class affine_microsphere : public constitutive_model
 {
 public:
     /**

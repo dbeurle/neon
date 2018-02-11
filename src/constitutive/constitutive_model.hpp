@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "InternalVariablesForwards.hpp"
+#include "internal_variables_forward.hpp"
 
 #include <memory>
 
@@ -10,20 +10,20 @@ namespace neon
 class material_property;
 
 /**
- * ConstitutiveModel is the templated base class for all constitutive models.
+ * constitutive_model is the templated base class for all constitutive models.
  * The derived classes define their own internal variables, implement an update
  * internal variables routine and update a constitutive model for use in the global
  * assembly routine
  */
 template <int rank2_dimension, int rank4_dimension>
-class ConstitutiveModel
+class constitutive_model
 {
 public:
     using internal_variable_t = InternalVariables<rank2_dimension, rank4_dimension>;
 
 public:
     /** Provide an internal variable class to be populated by the constitutive model */
-    explicit ConstitutiveModel(std::shared_ptr<internal_variable_t>& variables)
+    explicit constitutive_model(std::shared_ptr<internal_variable_t>& variables)
         : variables(variables)
     {
     }
@@ -45,17 +45,6 @@ public:
 protected:
     std::shared_ptr<internal_variable_t> variables;
 };
+}
 
-namespace mechanical::solid
-{
-using ConstitutiveModel = neon::ConstitutiveModel<3, 6>;
-}
-namespace mechanical::plane
-{
-using ConstitutiveModel = neon::ConstitutiveModel<2, 3>;
-}
-namespace diffusion
-{
-using ConstitutiveModel = neon::ConstitutiveModel<3, 3>;
-}
-}
+#include "constitutive/constitutive_model_alias.hpp"

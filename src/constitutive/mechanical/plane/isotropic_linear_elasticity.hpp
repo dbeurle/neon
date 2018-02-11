@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "constitutive/ConstitutiveModel.hpp"
+#include "constitutive/constitutive_model.hpp"
 
 #include "numeric/dense_matrix.hpp"
 
@@ -9,7 +9,7 @@
 
 namespace neon::mechanical::plane
 {
-class isotropic_linear_elasticity : public ConstitutiveModel
+class isotropic_linear_elasticity : public constitutive_model
 {
 public:
     enum class plane { stress, strain };

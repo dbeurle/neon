@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "constitutive/ConstitutiveModel.hpp"
+#include "constitutive/constitutive_model.hpp"
 
 #include <material/isotropic_elastic_property.hpp>
 
@@ -24,7 +24,7 @@ namespace neon::mechanical::solid
  * where \f$ \lambda_0 \f$ and \f$ \mu \f$ are the Lamé parameters.
  *
  */
-class compressible_neohooke : public ConstitutiveModel
+class compressible_neohooke : public constitutive_model
 {
 public:
     /**

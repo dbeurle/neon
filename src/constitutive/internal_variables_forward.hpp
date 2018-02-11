@@ -1,8 +1,6 @@
 
 #pragma once
 
-#include "constitutive/VoigtDimension.hpp"
-
 namespace neon
 {
 template <int rank2_dimension, int rank4_dimension>
