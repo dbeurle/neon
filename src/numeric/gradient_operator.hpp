@@ -3,7 +3,7 @@
 
 #include "numeric/dense_matrix.hpp"
 
-#include "constitutive/VoigtDimension.hpp"
+#include "constitutive/voigt_dimension.hpp"
 
 namespace neon::fem
 {

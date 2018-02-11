@@ -23,7 +23,7 @@
 namespace neon::mechanical::solid
 {
 std::unique_ptr<constitutive_model> make_constitutive_model(
-    std::shared_ptr<InternalVariables>& variables, json const& material_data, json const& mesh_data)
+    std::shared_ptr<internal_variables_t>& variables, json const& material_data, json const& mesh_data)
 {
     if (!mesh_data.count("ConstitutiveModel"))
     {
@@ -134,7 +134,7 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
 namespace neon::mechanical::plane
 {
 std::unique_ptr<constitutive_model> make_constitutive_model(
-    std::shared_ptr<InternalVariables>& variables, json const& material_data, json const& mesh_data)
+    std::shared_ptr<internal_variables_t>& variables, json const& material_data, json const& mesh_data)
 {
     if (!mesh_data.count("ConstitutiveModel"))
     {
@@ -185,7 +185,7 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
 namespace neon::diffusion
 {
 std::unique_ptr<constitutive_model> make_constitutive_model(
-    std::shared_ptr<InternalVariables>& variables, json const& material_data, json const& mesh_data)
+    std::shared_ptr<internal_variables_t>& variables, json const& material_data, json const& mesh_data)
 {
     if (!mesh_data.count("ConstitutiveModel"))
     {

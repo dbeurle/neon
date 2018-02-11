@@ -1,7 +1,7 @@
 
 #include "compressible_neohooke.hpp"
 
-#include "constitutive/InternalVariables.hpp"
+#include "constitutive/internal_variables.hpp"
 
 #include <range/v3/algorithm/for_each.hpp>
 #include <range/v3/view/transform.hpp>
@@ -9,13 +9,13 @@
 
 namespace neon::mechanical::solid
 {
-compressible_neohooke::compressible_neohooke(std::shared_ptr<InternalVariables>& variables,
+compressible_neohooke::compressible_neohooke(std::shared_ptr<internal_variables_t>& variables,
                                              json const& material_data)
     : constitutive_model(variables), material(material_data)
 {
     // The Neo-Hookean model requires the deformation gradient and the Cauchy
     // stress, which are both allocated by default in the mesh object
-    variables->add(InternalVariables::rank4::tangent_operator);
+    variables->add(internal_variables_t::rank4::tangent_operator);
 }
 
 void compressible_neohooke::update_internal_variables(double const time_step_size)
@@ -23,11 +23,12 @@ void compressible_neohooke::update_internal_variables(double const time_step_siz
     using namespace ranges;
 
     // Get references into the hash table
-    auto[F_list, cauchy_stresses] = variables->fetch(InternalVariables::Tensor::DeformationGradient,
-                                                     InternalVariables::Tensor::Cauchy);
+    auto [F_list,
+          cauchy_stresses] = variables->fetch(internal_variables_t::Tensor::DeformationGradient,
+                                              internal_variables_t::Tensor::Cauchy);
 
-    auto& tangent_operators = variables->fetch(InternalVariables::rank4::tangent_operator);
-    auto const& detF_list = variables->fetch(InternalVariables::Scalar::DetF);
+    auto& tangent_operators = variables->fetch(internal_variables_t::rank4::tangent_operator);
+    auto const& detF_list = variables->fetch(internal_variables_t::Scalar::DetF);
 
     auto const I = matrix3::Identity();
 

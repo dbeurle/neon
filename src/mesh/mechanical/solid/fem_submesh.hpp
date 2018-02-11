@@ -4,7 +4,7 @@
 #include "mesh/basic_submesh.hpp"
 
 #include "constitutive/constitutive_model.hpp"
-#include "constitutive/InternalVariables.hpp"
+#include "constitutive/internal_variables.hpp"
 #include "interpolations/shape_function.hpp"
 
 #include <memory>
@@ -24,14 +24,14 @@ class fem_submesh : public basic_submesh
 public:
     using ValueCount = std::pair<vector, vector>;
 
-    using internal_variable_type = InternalVariables;
+    using internal_variable_type = internal_variables_t;
 
 public:
     /** Constructor providing the material coordinates reference */
     explicit fem_submesh(json const& material_data,
-                        json const& mesh_data,
-                        std::shared_ptr<material_coordinates>& material_coordinates,
-                        basic_submesh const& submesh);
+                         json const& mesh_data,
+                         std::shared_ptr<material_coordinates>& material_coordinates,
+                         basic_submesh const& submesh);
 
     /** @return list of global degrees of freedom for an element */
     [[nodiscard]] local_indices const& local_dof_list(int const element) const {
@@ -39,7 +39,7 @@ public:
     }
 
         /** @return The internal variable store */
-        [[nodiscard]] InternalVariables const& internal_variables() const
+        [[nodiscard]] auto const& internal_variables() const
     {
         return *variables;
     }
@@ -71,9 +71,9 @@ public:
      */
     void update_internal_variables(double const time_step_size = 1.0);
 
-    [[nodiscard]] ValueCount nodal_averaged_variable(InternalVariables::Tensor const tensor_name) const;
+    [[nodiscard]] ValueCount nodal_averaged_variable(internal_variables_t::Tensor const tensor_name) const;
 
-    [[nodiscard]] ValueCount nodal_averaged_variable(InternalVariables::Scalar const scalar_name) const;
+    [[nodiscard]] ValueCount nodal_averaged_variable(internal_variables_t::Scalar const scalar_name) const;
 
 protected:
     /** Update the strain measures defined by the constitutive model */
@@ -120,7 +120,7 @@ private:
     std::unique_ptr<volume_interpolation> sf; //!< Shape function
 
     variable_view view;
-    std::shared_ptr<InternalVariables> variables;
+    std::shared_ptr<internal_variables_t> variables;
 
     std::unique_ptr<constitutive_model> cm; //!< Constitutive model
 

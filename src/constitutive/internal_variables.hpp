@@ -29,13 +29,13 @@ private:
 };
 
 /**
- * InternalVariables stores the internal variables associated with the element
+ * internal_variables stores the internal variables associated with the element
  * quadrature points.  These variables are duplicated and commited to memory
  * when the data is converged to avoid polluting the variable history in the
  * Newton-Raphson method.
  */
 template <int rank2_dimension, int rank4_dimension>
-class InternalVariables
+class internal_variables
 {
 public:
     /** Spatial dimension (three, two or one dimension) */
@@ -92,16 +92,16 @@ public:
     };
 
 public:
-    InternalVariables(std::size_t const size) : size(size) {}
+    internal_variables(std::size_t const size) : size(size) {}
 
     /** Delete copy constructor to prevent references moving */
-    InternalVariables(InternalVariables const&) = delete;
+    internal_variables(internal_variables const&) = delete;
 
     /** Delete assignment constructor to prevent references moving */
-    InternalVariables& operator=(InternalVariables const&) = delete;
+    internal_variables& operator=(internal_variables const&) = delete;
 
     /** Implicitly defined move constructor */
-    InternalVariables(InternalVariables&&) = default;
+    internal_variables(internal_variables&&) = default;
 
     /** Add a number of tensor type variables to the object store */
     template <typename... Variables>
@@ -134,7 +134,8 @@ public:
     }
 
     /** Allocate matrix internal variables with provided matrix */
-    void add(InternalVariables::rank4 const name, rank4tensor_type const m = rank4tensor_type::Zero())
+    void add(internal_variables::rank4 const name,
+             rank4tensor_type const m = rank4tensor_type::Zero())
     {
         rank4tensors[name].resize(size, m);
     }

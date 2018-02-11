@@ -18,13 +18,13 @@
 namespace neon::diffusion
 {
 fem_submesh::fem_submesh(json const& material_data,
-                       json const& mesh_data,
-                       std::shared_ptr<material_coordinates>& mesh_coordinates,
-                       basic_submesh const& submesh)
+                         json const& mesh_data,
+                         std::shared_ptr<material_coordinates>& mesh_coordinates,
+                         basic_submesh const& submesh)
     : basic_submesh(submesh),
       mesh_coordinates(mesh_coordinates),
       sf(make_volume_interpolation(topology(), mesh_data)),
-      variables(std::make_shared<InternalVariables>(elements() * sf->quadrature().points())),
+      variables(std::make_shared<internal_variables_t>(elements() * sf->quadrature().points())),
       cm(make_constitutive_model(variables, material_data, mesh_data))
 {
 }
@@ -47,7 +47,7 @@ std::tuple<local_indices const&, matrix> fem_submesh::tangent_stiffness(int cons
 
     auto const n = nodes_per_element();
 
-    auto const& D_Vec = variables->fetch(InternalVariables::Tensor::Conductivity);
+    auto const& D_Vec = variables->fetch(internal_variables_t::Tensor::Conductivity);
 
     matrix const kmat = sf->quadrature()
                             .integrate(matrix::Zero(n, n).eval(),
@@ -115,7 +115,8 @@ int fem_submesh::offset(int const element, int const quadrature_point) const
     return sf->quadrature().points() * element + quadrature_point;
 }
 
-fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(InternalVariables::Scalar const scalar_name) const
+fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
+    internal_variables_t::Scalar const scalar_name) const
 {
     vector count = vector::Zero(mesh_coordinates->size());
     vector value = count;

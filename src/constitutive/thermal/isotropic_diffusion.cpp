@@ -1,16 +1,16 @@
 
 #include "isotropic_diffusion.hpp"
-#include "constitutive/InternalVariables.hpp"
+#include "constitutive/internal_variables.hpp"
 
 namespace neon::diffusion
 {
-isotropic_diffusion::isotropic_diffusion(std::shared_ptr<InternalVariables>& variables,
+isotropic_diffusion::isotropic_diffusion(std::shared_ptr<internal_variables_t>& variables,
                                          json const& material_data)
     : constitutive_model(variables), material(material_data)
 {
-    variables->add(InternalVariables::Tensor::Conductivity);
+    variables->add(internal_variables_t::Tensor::Conductivity);
 
-    for (auto& k : variables->fetch(InternalVariables::Tensor::Conductivity))
+    for (auto& k : variables->fetch(internal_variables_t::Tensor::Conductivity))
     {
         k = material.conductivity_coefficient() * matrix3::Identity();
     }

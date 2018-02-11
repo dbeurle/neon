@@ -1,7 +1,7 @@
 
 #include "affine_microsphere.hpp"
 
-#include "constitutive/InternalVariables.hpp"
+#include "constitutive/internal_variables.hpp"
 #include "numeric/dense_matrix.hpp"
 
 #include <range/v3/view/transform.hpp>
@@ -11,15 +11,15 @@
 
 namespace neon::mechanical::solid
 {
-affine_microsphere::affine_microsphere(std::shared_ptr<InternalVariables>& variables,
+affine_microsphere::affine_microsphere(std::shared_ptr<internal_variables_t>& variables,
                                        json const& material_data,
                                        unit_sphere_quadrature::Rule const rule)
     : constitutive_model(variables), unit_sphere(rule), material(material_data)
 {
-    variables->add(InternalVariables::rank4::tangent_operator);
+    variables->add(internal_variables_t::rank4::tangent_operator);
 
     // Deviatoric stress
-    variables->add(InternalVariables::Tensor::Kirchhoff);
+    variables->add(internal_variables_t::Tensor::Kirchhoff);
 
     // Commit these to history in case of failure on first time step
     variables->commit();
@@ -27,14 +27,14 @@ affine_microsphere::affine_microsphere(std::shared_ptr<InternalVariables>& varia
 
 void affine_microsphere::update_internal_variables(double const time_step_size)
 {
-    auto& tangent_operators = variables->fetch(InternalVariables::rank4::tangent_operator);
+    auto& tangent_operators = variables->fetch(internal_variables_t::rank4::tangent_operator);
 
     auto const& deformation_gradients = variables->fetch(
-        InternalVariables::Tensor::DeformationGradient);
-    auto& cauchy_stresses = variables->fetch(InternalVariables::Tensor::Cauchy);
-    auto& macro_stresses = variables->fetch(InternalVariables::Tensor::Kirchhoff);
+        internal_variables_t::Tensor::DeformationGradient);
+    auto& cauchy_stresses = variables->fetch(internal_variables_t::Tensor::Cauchy);
+    auto& macro_stresses = variables->fetch(internal_variables_t::Tensor::Kirchhoff);
 
-    auto const& det_deformation_gradients = variables->fetch(InternalVariables::Scalar::DetF);
+    auto const& det_deformation_gradients = variables->fetch(internal_variables_t::Scalar::DetF);
 
     auto const K = material.bulk_modulus();
     auto const G = material.shear_modulus();
@@ -135,22 +135,22 @@ matrix6 affine_microsphere::compute_macro_moduli(matrix3 const& F_unimodular,
 }
 
 AffineMicrosphereWithDegradation::AffineMicrosphereWithDegradation(
-    std::shared_ptr<InternalVariables>& variables,
+    std::shared_ptr<internal_variables_t>& variables,
     json const& material_data,
     unit_sphere_quadrature::Rule const rule)
     : affine_microsphere(variables, material_data, rule), material(material_data)
 {
-    variables->add(InternalVariables::Scalar::Chains, InternalVariables::Scalar::ShearModuli);
+    variables->add(internal_variables_t::Scalar::Chains, internal_variables_t::Scalar::ShearModuli);
 
     // Shrink these down to the correct size
-    variables->fetch(InternalVariables::Scalar::Chains).resize(material.groups(), 0.0);
-    variables->fetch(InternalVariables::Scalar::ShearModuli).resize(material.groups(), 0.0);
-    variables->fetch(InternalVariables::Scalar::Chains).shrink_to_fit();
-    variables->fetch(InternalVariables::Scalar::ShearModuli).shrink_to_fit();
+    variables->fetch(internal_variables_t::Scalar::Chains).resize(material.groups(), 0.0);
+    variables->fetch(internal_variables_t::Scalar::ShearModuli).resize(material.groups(), 0.0);
+    variables->fetch(internal_variables_t::Scalar::Chains).shrink_to_fit();
+    variables->fetch(internal_variables_t::Scalar::ShearModuli).shrink_to_fit();
 
     // Fill the data with material properties using the material class
-    variables->fetch(InternalVariables::Scalar::Chains) = material.chain_groups();
-    variables->fetch(InternalVariables::Scalar::ShearModuli) = material.shear_moduli_groups();
+    variables->fetch(internal_variables_t::Scalar::Chains) = material.chain_groups();
+    variables->fetch(internal_variables_t::Scalar::ShearModuli) = material.shear_moduli_groups();
 
     // Commit these to history in case of failure on first time step
     variables->commit();
@@ -161,17 +161,17 @@ void AffineMicrosphereWithDegradation::update_internal_variables(double const ti
     //     using ranges::view::transform;
     //     using ranges::view::zip;
     //
-    //     auto& tangent_operators = variables(InternalVariables::rank4::tangent_operator);
+    //     auto& tangent_operators = variables(internal_variables_t::rank4::tangent_operator);
     //
     //     auto const& deformation_gradients =
-    //     variables(InternalVariables::Tensor::DeformationGradient); auto& cauchy_stresses =
-    //     variables(InternalVariables::Tensor::Cauchy); auto& macro_stresses =
-    //     variables(InternalVariables::Tensor::Kirchhoff);
+    //     variables(internal_variables_t::Tensor::DeformationGradient); auto& cauchy_stresses =
+    //     variables(internal_variables_t::Tensor::Cauchy); auto& macro_stresses =
+    //     variables(internal_variables_t::Tensor::Kirchhoff);
     //
-    //     auto const& det_deformation_gradients = variables(InternalVariables::Scalar::DetF);
+    //     auto const& det_deformation_gradients = variables(internal_variables_t::Scalar::DetF);
     //
-    //     auto& n_list = variables(InternalVariables::Scalar::Chains);
-    //     auto& G_list = variables(InternalVariables::Scalar::ShearModuli);
+    //     auto& n_list = variables(internal_variables_t::Scalar::Chains);
+    //     auto& G_list = variables(internal_variables_t::Scalar::ShearModuli);
     //
     //     // Update the material properties
     //     n_list = material.update_chains(n_list, time_step_size);

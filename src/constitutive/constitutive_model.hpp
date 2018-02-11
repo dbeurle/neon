@@ -19,7 +19,7 @@ template <int rank2_dimension, int rank4_dimension>
 class constitutive_model
 {
 public:
-    using internal_variable_t = InternalVariables<rank2_dimension, rank4_dimension>;
+    using internal_variable_t = internal_variables<rank2_dimension, rank4_dimension>;
 
 public:
     /** Provide an internal variable class to be populated by the constitutive model */

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "constitutive/InternalVariables.hpp"
+#include "constitutive/internal_variables.hpp"
 #include "mesh/node_ordering_adapter.hpp"
 #include "mesh/diffusion/fem_mesh.hpp"
 #include "mesh/mechanical/solid/fem_mesh.hpp"
@@ -222,7 +222,7 @@ namespace diffusion
 class FileIO : public neon::FileIO
 {
 public:
-    using VectorMap = std::map<std::string, InternalVariables::vector>;
+    using VectorMap = std::map<std::string, internal_variables_t::vector>;
 
     std::string const primary_field{"Temperature"};
 
@@ -239,7 +239,7 @@ private:
 private:
     fem_mesh const& mesh;
 
-    VectorMap const vector_map{{"HeatFlux", InternalVariables::vector::HeatFlux}};
+    VectorMap const vector_map{{"HeatFlux", internal_variables_t::vector::HeatFlux}};
 };
 }
 }

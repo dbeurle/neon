@@ -23,7 +23,7 @@ namespace neon::mechanical::plane
 class finite_strain_J2_plasticity : public small_strain_J2_plasticity
 {
 public:
-    finite_strain_J2_plasticity(std::shared_ptr<InternalVariables>& variables,
+    finite_strain_J2_plasticity(std::shared_ptr<internal_variables_t>& variables,
                                 json const& material_data);
 
     ~finite_strain_J2_plasticity();

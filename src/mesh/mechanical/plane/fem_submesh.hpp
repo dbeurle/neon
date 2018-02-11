@@ -4,7 +4,7 @@
 #include "mesh/mechanical/fem_submesh.hpp"
 
 #include "constitutive/constitutive_model.hpp"
-#include "constitutive/InternalVariables.hpp"
+#include "constitutive/internal_variables.hpp"
 #include "interpolations/shape_function.hpp"
 
 #include <memory>
@@ -21,7 +21,7 @@ namespace mechanical::plane
  * components for a generalised plane strain/stress mechanics discretisation.
  * This class conforms to the CRTP interface \sa detail::fem_submesh
  */
-class fem_submesh : public detail::fem_submesh<plane::fem_submesh, plane::InternalVariables>
+class fem_submesh : public detail::fem_submesh<plane::fem_submesh, plane::internal_variables_t>
 {
 public:
     /** Constructor providing the material coordinates reference */
@@ -36,7 +36,7 @@ public:
         return dof_list.at(element);
     }
 
-        [[nodiscard]] InternalVariables const& internal_variables() const
+        [[nodiscard]] auto const& internal_variables() const
     {
         return *variables;
     }
@@ -71,10 +71,10 @@ public:
     void update_internal_variables(double const time_step_size = 1.0);
 
     [[nodiscard]] std::pair<vector, vector> nodal_averaged_variable(
-        InternalVariables::Tensor const tensor_name) const;
+        internal_variables_t::Tensor const tensor_name) const;
 
     [[nodiscard]] std::pair<vector, vector> nodal_averaged_variable(
-        InternalVariables::Scalar const scalar_name) const;
+        internal_variables_t::Scalar const scalar_name) const;
 
 protected:
     /** Update the strain measures defined by the constitutive model */
@@ -121,7 +121,7 @@ private:
     std::unique_ptr<surface_interpolation> sf; //!< Shape function
 
     variable_view view;
-    std::shared_ptr<InternalVariables> variables;
+    std::shared_ptr<internal_variables_t> variables;
 
     std::unique_ptr<constitutive_model> cm; //!< Constitutive model
 

@@ -18,7 +18,7 @@ namespace neon::mechanical::solid
 class small_strain_J2_plasticity_damage : public small_strain_J2_plasticity
 {
 public:
-    small_strain_J2_plasticity_damage(std::shared_ptr<InternalVariables>& variables,
+    small_strain_J2_plasticity_damage(std::shared_ptr<internal_variables_t>& variables,
                        json const& material_data);
 
     ~small_strain_J2_plasticity_damage();

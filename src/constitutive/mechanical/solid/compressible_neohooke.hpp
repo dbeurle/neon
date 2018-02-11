@@ -31,7 +31,7 @@ public:
      * @param variables Reference to internal state variable store
      * @param material_data Json object with material data
      */
-    explicit compressible_neohooke(std::shared_ptr<InternalVariables>& variables,
+    explicit compressible_neohooke(std::shared_ptr<internal_variables_t>& variables,
                                    json const& material_data);
 
     ~compressible_neohooke() = default;

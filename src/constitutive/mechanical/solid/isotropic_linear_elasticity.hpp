@@ -17,7 +17,7 @@ namespace neon::mechanical::solid
 class isotropic_linear_elasticity : public constitutive_model
 {
 public:
-    explicit isotropic_linear_elasticity(std::shared_ptr<InternalVariables>& variables,
+    explicit isotropic_linear_elasticity(std::shared_ptr<internal_variables_t>& variables,
                                          json const& material_data);
 
     virtual ~isotropic_linear_elasticity();

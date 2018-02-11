@@ -1,7 +1,7 @@
 
 #include "gaussian_affine_microsphere.hpp"
 
-#include "constitutive/InternalVariables.hpp"
+#include "constitutive/internal_variables.hpp"
 #include "constitutive/mechanical/volumetric_free_energy.hpp"
 
 #include "numeric/dense_matrix.hpp"
@@ -13,15 +13,15 @@
 
 namespace neon::mechanical::solid
 {
-gaussian_affine_microsphere::gaussian_affine_microsphere(std::shared_ptr<InternalVariables>& variables,
+gaussian_affine_microsphere::gaussian_affine_microsphere(std::shared_ptr<internal_variables_t>& variables,
                                                          json const& material_data,
                                                          unit_sphere_quadrature::Rule const rule)
     : constitutive_model(variables), unit_sphere(rule), material(material_data)
 {
-    variables->add(InternalVariables::rank4::tangent_operator);
+    variables->add(internal_variables_t::rank4::tangent_operator);
 
     // Deviatoric stress
-    variables->add(InternalVariables::Tensor::Kirchhoff);
+    variables->add(internal_variables_t::Tensor::Kirchhoff);
 
     // Commit these to history in case of failure on first time step
     variables->commit();
@@ -29,14 +29,14 @@ gaussian_affine_microsphere::gaussian_affine_microsphere(std::shared_ptr<Interna
 
 void gaussian_affine_microsphere::update_internal_variables(double const time_step_size)
 {
-    auto& tangent_operators = variables->fetch(InternalVariables::rank4::tangent_operator);
+    auto& tangent_operators = variables->fetch(internal_variables_t::rank4::tangent_operator);
 
     auto const& deformation_gradients = variables->fetch(
-        InternalVariables::Tensor::DeformationGradient);
-    auto& cauchy_stresses = variables->fetch(InternalVariables::Tensor::Cauchy);
-    auto& macro_stresses = variables->fetch(InternalVariables::Tensor::Kirchhoff);
+        internal_variables_t::Tensor::DeformationGradient);
+    auto& cauchy_stresses = variables->fetch(internal_variables_t::Tensor::Cauchy);
+    auto& macro_stresses = variables->fetch(internal_variables_t::Tensor::Kirchhoff);
 
-    auto const& det_deformation_gradients = variables->fetch(InternalVariables::Scalar::DetF);
+    auto const& det_deformation_gradients = variables->fetch(internal_variables_t::Scalar::DetF);
 
     auto const K = material.bulk_modulus();
     auto const G = material.shear_modulus();

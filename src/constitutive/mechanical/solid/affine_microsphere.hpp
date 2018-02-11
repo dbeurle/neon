@@ -32,7 +32,7 @@ public:
      * @param variables Reference to internal state variable store
      * @param material_data Json object with input file material data
      */
-    explicit affine_microsphere(std::shared_ptr<InternalVariables>& variables,
+    explicit affine_microsphere(std::shared_ptr<internal_variables_t>& variables,
                                 json const& material_data,
                                 unit_sphere_quadrature::Rule const rule);
 
@@ -201,7 +201,7 @@ public:
      * @param variables Reference to internal state variable store
      * @param material_data Json object with input file material data
      */
-    explicit AffineMicrosphereWithDegradation(std::shared_ptr<InternalVariables>& variables,
+    explicit AffineMicrosphereWithDegradation(std::shared_ptr<internal_variables_t>& variables,
                                               json const& material_data,
                                               unit_sphere_quadrature::Rule const rule);
 

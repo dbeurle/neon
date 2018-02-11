@@ -4,7 +4,8 @@
 #include "mesh/basic_submesh.hpp"
 
 #include "constitutive/constitutive_model.hpp"
-#include "constitutive/InternalVariables.hpp"
+#include "constitutive/internal_variables.hpp"
+#include "constitutive/internal_variables_alias.hpp"
 #include "interpolations/shape_function.hpp"
 
 #include <memory>
@@ -26,9 +27,9 @@ public:
 
 public:
     explicit fem_submesh(json const& material_data,
-                        json const& mesh_data,
-                        std::shared_ptr<material_coordinates>& mesh_coordinates,
-                        basic_submesh const& submesh);
+                         json const& mesh_data,
+                         std::shared_ptr<material_coordinates>& mesh_coordinates,
+                         basic_submesh const& submesh);
 
     /** @return list of global degrees of freedom for an element */
     [[nodiscard]] local_indices const& local_dof_list(int const element) const {
@@ -36,7 +37,7 @@ public:
     }
 
         /** @return The internal variable store */
-        [[nodiscard]] InternalVariables const& internal_variables() const
+        [[nodiscard]] auto const& internal_variables() const
     {
         return *variables;
     }
@@ -45,9 +46,9 @@ public:
 
     [[nodiscard]] auto dofs_per_node() const { return 1; }
 
-    [[nodiscard]] auto const& shape_function() const { return *sf.get(); }
+    [[nodiscard]] auto const& shape_function() const { return *sf; }
 
-    [[nodiscard]] auto const& constitutive() const { return *cm.get(); }
+    [[nodiscard]] auto const& constitutive() const { return *cm; }
 
     /**
      * Compute the stiffness (conductivity) matrix according to
@@ -85,9 +86,9 @@ public:
     }
 
         [[nodiscard]] ValueCount
-        nodal_averaged_variable(InternalVariables::Tensor const tensor_name) const;
+        nodal_averaged_variable(internal_variables_t::Tensor const tensor_name) const;
 
-    [[nodiscard]] ValueCount nodal_averaged_variable(InternalVariables::Scalar const scalar_name) const;
+    [[nodiscard]] ValueCount nodal_averaged_variable(internal_variables_t::Scalar const scalar_name) const;
 
 protected:
     /** @return the index into the internal variable store */
@@ -96,7 +97,7 @@ protected:
 private:
     std::shared_ptr<material_coordinates> mesh_coordinates; /// Nodal coordinates
     std::unique_ptr<volume_interpolation> sf;               /// Shape function
-    std::shared_ptr<InternalVariables> variables;
+    std::shared_ptr<internal_variables_t> variables;
     std::unique_ptr<constitutive_model> cm; /// Constitutive model
 };
 }

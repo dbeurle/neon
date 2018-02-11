@@ -18,7 +18,7 @@ namespace mechanical::plane
 class fem_mesh
 {
 public:
-    using internal_variable_type = InternalVariables;
+    using internal_variable_type = internal_variables_t;
 
 public:
     fem_mesh(basic_mesh const& basic_mesh, json const& material_data, json const& simulation_data);

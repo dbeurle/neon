@@ -13,7 +13,7 @@ namespace neon::diffusion
 class isotropic_diffusion : public constitutive_model
 {
 public:
-    isotropic_diffusion(std::shared_ptr<InternalVariables>& variables, json const& material_data);
+    isotropic_diffusion(std::shared_ptr<internal_variables_t>& variables, json const& material_data);
 
     void update_internal_variables(double const time_step_size) override;
 
