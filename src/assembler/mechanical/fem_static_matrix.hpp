@@ -28,13 +28,13 @@ namespace neon::mechanical::detail
  * residual force vector and solution of the incremental displacement.
  */
 template <class femMeshType>
-class femStaticMatrix
+class fem_static_matrix
 {
 public:
     using fem_mesh_type = femMeshType;
 
 public:
-    explicit femStaticMatrix(fem_mesh_type& fem_mesh, json const& simulation);
+    explicit fem_static_matrix(fem_mesh_type& fem_mesh, json const& simulation);
 
     void internal_restart(json const& solver_data, json const& new_increment_data);
 
@@ -110,7 +110,7 @@ protected:
 };
 
 template <class femMeshType>
-femStaticMatrix<femMeshType>::femStaticMatrix(fem_mesh_type& fem_mesh, json const& simulation)
+fem_static_matrix<femMeshType>::fem_static_matrix(fem_mesh_type& fem_mesh, json const& simulation)
     : fem_mesh(fem_mesh),
       io(simulation["Name"].get<std::string>(), simulation["Visualisation"], fem_mesh),
       adaptive_load(simulation["Time"], fem_mesh.time_history()),
@@ -141,7 +141,7 @@ femStaticMatrix<femMeshType>::femStaticMatrix(fem_mesh_type& fem_mesh, json cons
 }
 
 template <class femMeshType>
-void femStaticMatrix<femMeshType>::internal_restart(json const& solver_data,
+void fem_static_matrix<femMeshType>::internal_restart(json const& solver_data,
                                                     json const& new_increment_data)
 {
     adaptive_load.reset(new_increment_data);
@@ -149,7 +149,7 @@ void femStaticMatrix<femMeshType>::internal_restart(json const& solver_data,
 }
 
 template <class femMeshType>
-void femStaticMatrix<femMeshType>::solve()
+void fem_static_matrix<femMeshType>::solve()
 {
     try
     {
@@ -190,7 +190,7 @@ void femStaticMatrix<femMeshType>::solve()
 }
 
 template <class femMeshType>
-void femStaticMatrix<femMeshType>::compute_sparsity_pattern()
+void fem_static_matrix<femMeshType>::compute_sparsity_pattern()
 {
     std::vector<Doublet<std::int32_t>> doublets;
     doublets.reserve(fem_mesh.active_dofs());
@@ -218,7 +218,7 @@ void femStaticMatrix<femMeshType>::compute_sparsity_pattern()
 }
 
 template <class femMeshType>
-void femStaticMatrix<femMeshType>::compute_internal_force()
+void fem_static_matrix<femMeshType>::compute_internal_force()
 {
     fint.setZero();
 
@@ -237,7 +237,7 @@ void femStaticMatrix<femMeshType>::compute_internal_force()
 }
 
 template <class femMeshType>
-void femStaticMatrix<femMeshType>::compute_external_force()
+void fem_static_matrix<femMeshType>::compute_external_force()
 {
     auto const start = std::chrono::high_resolution_clock::now();
 
@@ -277,7 +277,7 @@ void femStaticMatrix<femMeshType>::compute_external_force()
 }
 
 template <class femMeshType>
-void femStaticMatrix<femMeshType>::assemble_stiffness()
+void fem_static_matrix<femMeshType>::assemble_stiffness()
 {
     if (!is_sparsity_computed) compute_sparsity_pattern();
 
@@ -314,7 +314,7 @@ void femStaticMatrix<femMeshType>::assemble_stiffness()
 }
 
 template <class femMeshType>
-void femStaticMatrix<femMeshType>::enforce_dirichlet_conditions(sparse_matrix& A, vector& b) const
+void fem_static_matrix<femMeshType>::enforce_dirichlet_conditions(sparse_matrix& A, vector& b) const
 {
     for (auto const& [name, boundaries] : fem_mesh.displacement_boundaries())
     {
@@ -352,7 +352,7 @@ void femStaticMatrix<femMeshType>::enforce_dirichlet_conditions(sparse_matrix& A
 }
 
 template <class femMeshType>
-void femStaticMatrix<femMeshType>::apply_displacement_boundaries()
+void fem_static_matrix<femMeshType>::apply_displacement_boundaries()
 {
     Eigen::SparseVector<double> prescribed_increment(displacement.size());
 
@@ -378,14 +378,14 @@ void femStaticMatrix<femMeshType>::apply_displacement_boundaries()
 }
 
 template <class femMeshType>
-bool femStaticMatrix<femMeshType>::is_iteration_converged() const
+bool fem_static_matrix<femMeshType>::is_iteration_converged() const
 {
     return relative_displacement_norm <= displacement_tolerance
            && relative_force_norm <= residual_tolerance;
 }
 
 template <class femMeshType>
-void femStaticMatrix<femMeshType>::print_convergence_progress() const
+void fem_static_matrix<femMeshType>::print_convergence_progress() const
 {
     std::cout << std::string(6, ' ') << termcolor::bold;
     if (relative_displacement_norm <= displacement_tolerance)
@@ -412,7 +412,7 @@ void femStaticMatrix<femMeshType>::print_convergence_progress() const
 }
 
 template <class femMeshType>
-void femStaticMatrix<femMeshType>::update_relative_norms()
+void fem_static_matrix<femMeshType>::update_relative_norms()
 {
     relative_displacement_norm = delta_d.norm() / displacement.norm();
 
@@ -422,7 +422,7 @@ void femStaticMatrix<femMeshType>::update_relative_norms()
 }
 
 template <class femMeshType>
-void femStaticMatrix<femMeshType>::perform_equilibrium_iterations()
+void fem_static_matrix<femMeshType>::perform_equilibrium_iterations()
 {
     displacement = displacement_old;
 

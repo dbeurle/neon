@@ -1,16 +1,16 @@
 
 #pragma once
 
-#include "femStaticMatrix.hpp"
+#include "fem_static_matrix.hpp"
 
 #include "solver/time/trapezoidal_integrator.hpp"
 
 namespace neon::diffusion
 {
-class femDynamicMatrix : public femStaticMatrix
+class fem_dynamic_matrix : public fem_static_matrix
 {
 public:
-    explicit femDynamicMatrix(fem_mesh& fem_mesh, json const& simulation_data);
+    explicit fem_dynamic_matrix(fem_mesh& fem_mesh, json const& simulation_data);
 
     void solve() override final;
 

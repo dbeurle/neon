@@ -1,5 +1,5 @@
 
-#include "femStaticMatrix.hpp"
+#include "fem_static_matrix.hpp"
 
 #include "Exceptions.hpp"
 #include "numeric/float_compare.hpp"
@@ -14,7 +14,7 @@
 
 namespace neon::mechanical::solid
 {
-femStaticMatrix::femStaticMatrix(fem_mesh& mesh, json const& simulation)
+fem_static_matrix::fem_static_matrix(fem_mesh& mesh, json const& simulation)
     : mesh(mesh),
       io(simulation["Name"].get<std::string>(), simulation["Visualisation"], mesh),
       adaptive_load(simulation["Time"], mesh.time_history()),
@@ -44,15 +44,15 @@ femStaticMatrix::femStaticMatrix(fem_mesh& mesh, json const& simulation)
               << " degrees of freedom\n";
 }
 
-femStaticMatrix::~femStaticMatrix() = default;
+fem_static_matrix::~fem_static_matrix() = default;
 
-void femStaticMatrix::internal_restart(json const& solver_data, json const& new_increment_data)
+void fem_static_matrix::internal_restart(json const& solver_data, json const& new_increment_data)
 {
     adaptive_load.reset(new_increment_data);
     linear_solver = make_linear_solver(solver_data);
 }
 
-void femStaticMatrix::compute_sparsity_pattern()
+void fem_static_matrix::compute_sparsity_pattern()
 {
     std::vector<Doublet<std::int32_t>> doublets;
     doublets.reserve(mesh.active_dofs());
@@ -79,7 +79,7 @@ void femStaticMatrix::compute_sparsity_pattern()
     is_sparsity_computed = true;
 }
 
-void femStaticMatrix::compute_internal_force()
+void fem_static_matrix::compute_internal_force()
 {
     fint.setZero();
 
@@ -103,7 +103,7 @@ void femStaticMatrix::compute_internal_force()
     }
 }
 
-void femStaticMatrix::compute_external_force()
+void fem_static_matrix::compute_external_force()
 {
     auto const start = std::chrono::high_resolution_clock::now();
 
@@ -149,7 +149,7 @@ void femStaticMatrix::compute_external_force()
               << "s\n";
 }
 
-void femStaticMatrix::solve()
+void fem_static_matrix::solve()
 {
     try
     {
@@ -189,7 +189,7 @@ void femStaticMatrix::solve()
     }
 }
 
-void femStaticMatrix::assemble_stiffness()
+void fem_static_matrix::assemble_stiffness()
 {
     if (!is_sparsity_computed) compute_sparsity_pattern();
 
@@ -225,7 +225,7 @@ void femStaticMatrix::assemble_stiffness()
               << elapsed_seconds.count() << "s\n";
 }
 
-void femStaticMatrix::enforce_dirichlet_conditions(sparse_matrix& A, vector& b) const
+void fem_static_matrix::enforce_dirichlet_conditions(sparse_matrix& A, vector& b) const
 {
     for (auto const& [name, boundaries] : mesh.displacement_boundaries())
     {
@@ -262,7 +262,7 @@ void femStaticMatrix::enforce_dirichlet_conditions(sparse_matrix& A, vector& b) 
     }
 }
 
-void femStaticMatrix::apply_displacement_boundaries()
+void fem_static_matrix::apply_displacement_boundaries()
 {
     Eigen::SparseVector<double> prescribed_increment(displacement.size());
 
@@ -287,7 +287,7 @@ void femStaticMatrix::apply_displacement_boundaries()
     displacement += prescribed_increment;
 }
 
-void femStaticMatrix::perform_equilibrium_iterations()
+void fem_static_matrix::perform_equilibrium_iterations()
 {
     displacement = displacement_old;
 
@@ -347,7 +347,7 @@ void femStaticMatrix::perform_equilibrium_iterations()
     }
 }
 
-void femStaticMatrix::update_relative_norms()
+void fem_static_matrix::update_relative_norms()
 {
     relative_displacement_norm = delta_d.norm() / displacement.norm();
 
@@ -356,7 +356,7 @@ void femStaticMatrix::update_relative_norms()
                               : minus_residual.norm() / std::max(fext.norm(), fint.norm());
 }
 
-void femStaticMatrix::print_convergence_progress() const
+void fem_static_matrix::print_convergence_progress() const
 {
     std::cout << std::string(6, ' ') << termcolor::bold;
     if (relative_displacement_norm <= displacement_tolerance)

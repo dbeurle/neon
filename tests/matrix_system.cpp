@@ -9,7 +9,7 @@
 #include "mesh/mechanical/solid/fem_mesh.hpp"
 #include "mesh/mechanical/solid/fem_submesh.hpp"
 
-#include "assembler/mechanical/solid/femStaticMatrix.hpp"
+#include "assembler/mechanical/solid/fem_static_matrix.hpp"
 
 #include "solver/time_step_control.hpp"
 
@@ -24,7 +24,7 @@ using namespace neon;
 TEST_CASE("Nonlinear system equilibrium solver test")
 {
     using mechanical::solid::fem_mesh;
-    using mechanical::solid::femStaticMatrix;
+    using mechanical::solid::fem_static_matrix;
 
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh
@@ -39,7 +39,7 @@ TEST_CASE("Nonlinear system equilibrium solver test")
     SECTION("Correct behaviour")
     {
         // Create the system
-        femStaticMatrix fem_matrix(fem_mesh, json::parse(simulation_data_json()));
+        fem_static_matrix fem_matrix(fem_mesh, json::parse(simulation_data_json()));
 
         fem_matrix.solve();
     }

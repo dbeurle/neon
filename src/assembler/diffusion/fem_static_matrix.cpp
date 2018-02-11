@@ -1,5 +1,5 @@
 
-#include "femStaticMatrix.hpp"
+#include "fem_static_matrix.hpp"
 
 #include "Exceptions.hpp"
 #include "solver/linear/LinearSolverFactory.hpp"
@@ -10,7 +10,7 @@
 
 namespace neon::diffusion
 {
-femStaticMatrix::femStaticMatrix(fem_mesh& mesh, json const& simulation_data)
+fem_static_matrix::fem_static_matrix(fem_mesh& mesh, json const& simulation_data)
     : mesh(mesh),
       f(vector::Zero(mesh.active_dofs())),
       d(vector::Zero(mesh.active_dofs())),
@@ -19,9 +19,9 @@ femStaticMatrix::femStaticMatrix(fem_mesh& mesh, json const& simulation_data)
 {
 }
 
-femStaticMatrix::~femStaticMatrix() = default;
+fem_static_matrix::~fem_static_matrix() = default;
 
-void femStaticMatrix::compute_sparsity_pattern()
+void fem_static_matrix::compute_sparsity_pattern()
 {
     std::vector<Doublet<int>> doublets;
     doublets.reserve(mesh.active_dofs());
@@ -46,7 +46,7 @@ void femStaticMatrix::compute_sparsity_pattern()
     is_sparsity_computed = true;
 }
 
-void femStaticMatrix::compute_external_force(double const load_factor)
+void fem_static_matrix::compute_external_force(double const load_factor)
 {
     auto const start = std::chrono::high_resolution_clock::now();
 
@@ -94,7 +94,7 @@ void femStaticMatrix::compute_external_force(double const load_factor)
               << "s\n";
 }
 
-void femStaticMatrix::solve()
+void fem_static_matrix::solve()
 {
     std::cout << std::string(4, ' ') << "Linear equation system has " << mesh.active_dofs()
               << " degrees of freedom\n";
@@ -110,7 +110,7 @@ void femStaticMatrix::solve()
     file_io.write(0, 0.0, d);
 }
 
-void femStaticMatrix::assemble_stiffness()
+void fem_static_matrix::assemble_stiffness()
 {
     if (!is_sparsity_computed) compute_sparsity_pattern();
 
@@ -146,7 +146,7 @@ void femStaticMatrix::assemble_stiffness()
               << "s\n";
 }
 
-void femStaticMatrix::apply_dirichlet_conditions(sparse_matrix& A, vector& x, vector& b)
+void fem_static_matrix::apply_dirichlet_conditions(sparse_matrix& A, vector& x, vector& b)
 {
     for (auto const& [name, dirichlet_boundaries] : mesh.dirichlet_boundaries())
     {

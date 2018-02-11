@@ -1,5 +1,5 @@
 
-#include "femDynamicMatrix.hpp"
+#include "fem_dynamic_matrix.hpp"
 
 #include "io/json.hpp"
 #include "solver/linear/LinearSolver.hpp"
@@ -9,8 +9,8 @@
 
 namespace neon::diffusion
 {
-femDynamicMatrix::femDynamicMatrix(fem_mesh& fem_mesh, json const& simulation_data)
-    : femStaticMatrix(fem_mesh, simulation_data), time_solver(simulation_data["Time"])
+fem_dynamic_matrix::fem_dynamic_matrix(fem_mesh& fem_mesh, json const& simulation_data)
+    : fem_static_matrix(fem_mesh, simulation_data), time_solver(simulation_data["Time"])
 {
     if (simulation_data.count("InitialConditions")
         && simulation_data["InitialConditions"].count("Uniform"))
@@ -20,7 +20,7 @@ femDynamicMatrix::femDynamicMatrix(fem_mesh& fem_mesh, json const& simulation_da
     }
 }
 
-void femDynamicMatrix::solve()
+void fem_dynamic_matrix::solve()
 {
     // Perform time dependent solution
     file_io.write(0, 0.0, d);
@@ -60,7 +60,7 @@ void femDynamicMatrix::solve()
     std::cout << "Solver routine completed\n";
 }
 
-void femDynamicMatrix::assemble_mass()
+void fem_dynamic_matrix::assemble_mass()
 {
     M.resize(mesh.active_dofs(), mesh.active_dofs());
 

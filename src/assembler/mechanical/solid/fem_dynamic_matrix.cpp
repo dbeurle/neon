@@ -1,5 +1,5 @@
 
-#include "femDynamicMatrix.hpp"
+#include "fem_dynamic_matrix.hpp"
 
 #include "solver/linear/LinearSolver.hpp"
 
@@ -9,15 +9,15 @@
 
 namespace neon::mechanical::solid
 {
-femDynamicMatrix::femDynamicMatrix(fem_mesh& fem_mesh, json const& simulation)
-    : femStaticMatrix(fem_mesh, simulation),
+fem_dynamic_matrix::fem_dynamic_matrix(fem_mesh& fem_mesh, json const& simulation)
+    : fem_static_matrix(fem_mesh, simulation),
       a(vector::Zero(fem_mesh.active_dofs())),
       v(vector::Zero(fem_mesh.active_dofs())),
       newmark(simulation["Time"])
 {
 }
 
-void femDynamicMatrix::solve()
+void fem_dynamic_matrix::solve()
 {
     // // Perform Newton-Raphson iterations
     // std::cout << "Solving " << fem_mesh.active_dofs() << " degrees of freedom\n";
@@ -56,7 +56,7 @@ void femDynamicMatrix::solve()
     // std::cout << "Solver routine finished\n";
 }
 
-void femDynamicMatrix::assemble_mass()
+void fem_dynamic_matrix::assemble_mass()
 {
     // auto start = std::chrono::high_resolution_clock::now();
     //
@@ -81,7 +81,7 @@ void femDynamicMatrix::assemble_mass()
     // std::cout << "  Assembly of mass matrix took " << elapsed_seconds.count() << "s\n";
 }
 
-void femDynamicMatrix::perform_equilibrium_iterations()
+void fem_dynamic_matrix::perform_equilibrium_iterations()
 {
     // vector delta_d = vector::Zero(fem_mesh.active_dofs());
     //

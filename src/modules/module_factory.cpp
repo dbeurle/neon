@@ -49,13 +49,13 @@ std::unique_ptr<abstract_module> make_module(
     {
         if (solution_type == "Equilibrium")
         {
-            return std::make_unique<linear_diffusion_module<diffusion::femStaticMatrix>>(mesh,
+            return std::make_unique<linear_diffusion_module<diffusion::fem_static_matrix>>(mesh,
                                                                                          material,
                                                                                          simulation);
         }
         else if (solution_type == "Transient")
         {
-            return std::make_unique<linear_diffusion_module<diffusion::femDynamicMatrix>>(mesh,
+            return std::make_unique<linear_diffusion_module<diffusion::fem_dynamic_matrix>>(mesh,
                                                                                           material,
                                                                                           simulation);
         }

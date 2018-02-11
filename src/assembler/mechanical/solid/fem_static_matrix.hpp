@@ -14,12 +14,12 @@ class LinearSolver;
 
 namespace neon::mechanical::solid
 {
-class femStaticMatrix
+class fem_static_matrix
 {
 public:
-    explicit femStaticMatrix(fem_mesh& mesh, json const& simulation);
+    explicit fem_static_matrix(fem_mesh& mesh, json const& simulation);
 
-    ~femStaticMatrix();
+    ~fem_static_matrix();
 
     void internal_restart(json const& solver_data, json const& new_increment_data);
 
@@ -93,7 +93,7 @@ protected:
     std::unique_ptr<LinearSolver> linear_solver;
 };
 
-inline bool femStaticMatrix::is_iteration_converged() const
+inline bool fem_static_matrix::is_iteration_converged() const
 {
     return relative_displacement_norm <= displacement_tolerance
            && relative_force_norm <= residual_tolerance;

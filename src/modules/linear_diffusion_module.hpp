@@ -3,8 +3,8 @@
 
 #include "abstract_module.hpp"
 
-#include "assembler/diffusion/femDynamicMatrix.hpp"
-#include "assembler/diffusion/femStaticMatrix.hpp"
+#include "assembler/diffusion/fem_dynamic_matrix.hpp"
+#include "assembler/diffusion/fem_static_matrix.hpp"
 #include "mesh/diffusion/fem_mesh.hpp"
 
 namespace neon

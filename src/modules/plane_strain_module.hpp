@@ -3,7 +3,7 @@
 
 #include "abstract_module.hpp"
 
-#include "assembler/mechanical/plane/femStaticMatrix.hpp"
+#include "assembler/mechanical/plane/fem_static_matrix.hpp"
 #include "mesh/mechanical/plane/fem_mesh.hpp"
 
 namespace neon
@@ -33,6 +33,6 @@ public:
 
 protected:
     mechanical::plane::fem_mesh fem_mesh;           //!< Mesh with the solid routines
-    mechanical::plane::femStaticMatrix fem_matrix; //!< Nonlinear solver routines
+    mechanical::plane::fem_static_matrix fem_matrix; //!< Nonlinear solver routines
 };
 }
