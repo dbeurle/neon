@@ -13,7 +13,7 @@
 
 #include "mechanical/solid/compressible_neohooke.hpp"
 
-#include "thermal/IsotropicDiffusion.hpp"
+#include "thermal/isotropic_diffusion.hpp"
 
 #include "mechanical/plane/isotropic_linear_elasticity.hpp"
 
@@ -206,7 +206,7 @@ std::unique_ptr<ConstitutiveModel> make_constitutive_model(
 
     if (constitutive_model["Name"].get<std::string>() == "IsotropicDiffusion")
     {
-        return std::make_unique<IsotropicDiffusion>(variables, material_data);
+        return std::make_unique<isotropic_diffusion>(variables, material_data);
     }
 
     throw std::domain_error("The model name " + constitutive_model["Name"].get<std::string>()

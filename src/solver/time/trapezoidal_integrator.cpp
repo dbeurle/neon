@@ -1,5 +1,5 @@
 
-#include "GeneralisedTrapezoidal.hpp"
+#include "trapezoidal_integrator.hpp"
 
 #include <iostream>
 
@@ -7,7 +7,7 @@
 
 namespace neon
 {
-GeneralisedTrapezoidal::GeneralisedTrapezoidal(json const& time_data)
+trapezoidal_integrator::trapezoidal_integrator(json const& time_data)
 {
     for (auto const f : {"Increments", "Period", "Method"})
     {
@@ -54,7 +54,7 @@ GeneralisedTrapezoidal::GeneralisedTrapezoidal(json const& time_data)
     std::cout << std::string(4, ' ') << "Time step size : " << time_step_size << std::endl;
 }
 
-bool GeneralisedTrapezoidal::loop()
+bool trapezoidal_integrator::loop()
 {
     current_time_step++;
 

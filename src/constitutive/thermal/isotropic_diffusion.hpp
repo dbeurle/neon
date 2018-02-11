@@ -8,14 +8,13 @@
 namespace neon::diffusion
 {
 /**
- * IsotropicDiffusion computes the isotropic constitutive matrix for linear
+ * isotropic_diffusion computes the isotropic constitutive matrix for linear
  * and isotropic diffusion problems.
  */
-class IsotropicDiffusion : public diffusion::ConstitutiveModel
+class isotropic_diffusion : public ConstitutiveModel
 {
 public:
-    IsotropicDiffusion(std::shared_ptr<InternalVariables>& variables,
-                       json const& material_data);
+    isotropic_diffusion(std::shared_ptr<InternalVariables>& variables, json const& material_data);
 
     void update_internal_variables(double const time_step_size) override;
 

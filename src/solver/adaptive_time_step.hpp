@@ -10,7 +10,7 @@
 namespace neon
 {
 /**
- * AdaptiveLoadStep responsibility is to handle the pseudo time step for each
+ * adaptive_time_step responsibility is to handle the pseudo time step for each
  * SimulationCase (see input file).
  *
  * The load factor is always between zero and one for a given load case, which
@@ -68,10 +68,10 @@ namespace neon
  * for the determination of the best next step.
  *
  */
-class AdaptiveLoadStep
+class adaptive_time_step
 {
 public:
-    AdaptiveLoadStep(json const& increment_data, std::vector<double> mandatory_time_history);
+    adaptive_time_step(json const& increment_data, std::vector<double> mandatory_time_history);
 
     /** Check if the load increment is finalised */
     [[nodiscard]] bool is_fully_applied() const { return is_applied; }

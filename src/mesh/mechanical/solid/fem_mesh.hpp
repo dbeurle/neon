@@ -60,7 +60,7 @@ public:
      * Gathers the time history for each boundary condition and
      * returns a sorted vector which may contain traces of duplicates.
      *
-     * \sa AdaptiveLoadStep
+     * \sa adaptive_time_step
      */
     [[nodiscard]] std::vector<double> time_history() const;
 

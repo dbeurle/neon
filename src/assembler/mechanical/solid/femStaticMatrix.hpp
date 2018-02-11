@@ -3,7 +3,7 @@
 
 #include "mesh/mechanical/solid/fem_mesh.hpp"
 #include "numeric/sparse_matrix.hpp"
-#include "solver/AdaptiveLoadStep.hpp"
+#include "solver/adaptive_time_step.hpp"
 
 #include "io/FileIO.hpp"
 
@@ -70,7 +70,7 @@ protected:
 
     FileIO<fem_mesh> io;
 
-    AdaptiveLoadStep adaptive_load;
+    adaptive_time_step adaptive_load;
 
     bool is_sparsity_computed = false;
 

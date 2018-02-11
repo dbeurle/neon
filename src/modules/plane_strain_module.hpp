@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "AbstractModule.hpp"
+#include "abstract_module.hpp"
 
 #include "assembler/mechanical/plane/femStaticMatrix.hpp"
 #include "mesh/mechanical/plane/fem_mesh.hpp"
@@ -18,7 +18,7 @@ namespace plane_strain
 }
 }
 
-class plane_strain_module : public AbstractModule
+class plane_strain_module : public abstract_module
 {
 public:
     plane_strain_module(basic_mesh const& mesh, json const& material, json const& simulation);

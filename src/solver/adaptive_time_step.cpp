@@ -1,5 +1,5 @@
 
-#include "AdaptiveLoadStep.hpp"
+#include "adaptive_time_step.hpp"
 
 #include "numeric/float_compare.hpp"
 
@@ -12,7 +12,7 @@
 
 namespace neon
 {
-AdaptiveLoadStep::AdaptiveLoadStep(json const& increment_data,
+adaptive_time_step::adaptive_time_step(json const& increment_data,
                                    std::vector<double> mandatory_time_history)
 {
     // Set the time history to the input data
@@ -24,7 +24,7 @@ AdaptiveLoadStep::AdaptiveLoadStep(json const& increment_data,
     parse_input(increment_data, *ranges::max_element(mandatory_time_history));
 }
 
-void AdaptiveLoadStep::update_convergence_state(bool const is_converged)
+void adaptive_time_step::update_convergence_state(bool const is_converged)
 {
     auto constexpr cutback_factor = 0.5;
     auto constexpr forward_factor = 2.0;
@@ -94,7 +94,7 @@ void AdaptiveLoadStep::update_convergence_state(bool const is_converged)
     }
 }
 
-void AdaptiveLoadStep::reset(json const& new_increment_data)
+void adaptive_time_step::reset(json const& new_increment_data)
 {
     // Update the history counters
     total_time += current_time;
@@ -107,7 +107,7 @@ void AdaptiveLoadStep::reset(json const& new_increment_data)
     consecutive_unconverged = consecutive_converged = 0;
 }
 
-void AdaptiveLoadStep::parse_input(json const& increment_data, double const maximum_mandatory_time)
+void adaptive_time_step::parse_input(json const& increment_data, double const maximum_mandatory_time)
 {
     check_increment_data(increment_data);
 
@@ -130,7 +130,7 @@ void AdaptiveLoadStep::parse_input(json const& increment_data, double const maxi
     current_time = std::min(time_queue.top(), initial_time);
 }
 
-void AdaptiveLoadStep::check_increment_data(json const& increment_data)
+void adaptive_time_step::check_increment_data(json const& increment_data)
 {
     if (!increment_data.count("Period"))
         throw std::runtime_error("Time data requires a \"Period\" value\n");

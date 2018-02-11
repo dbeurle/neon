@@ -19,9 +19,11 @@ template <int rank2_dimension, int rank4_dimension>
 class ConstitutiveModel
 {
 public:
+    using internal_variable_t = InternalVariables<rank2_dimension, rank4_dimension>;
+
+public:
     /** Provide an internal variable class to be populated by the constitutive model */
-    explicit ConstitutiveModel(
-        std::shared_ptr<InternalVariables<rank2_dimension, rank4_dimension>>& variables)
+    explicit ConstitutiveModel(std::shared_ptr<internal_variable_t>& variables)
         : variables(variables)
     {
     }
@@ -41,7 +43,7 @@ public:
     [[nodiscard]] virtual bool is_symmetric() const { return true; };
 
 protected:
-    std::shared_ptr<InternalVariables<rank2_dimension, rank4_dimension>> variables;
+    std::shared_ptr<internal_variable_t> variables;
 };
 
 namespace mechanical::solid

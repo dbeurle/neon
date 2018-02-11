@@ -1,12 +1,13 @@
 
-#include "TimeControl.hpp"
+#include "time_step_control.hpp"
 
 #include "io/json.hpp"
-#include <exception>
+
+#include <stdexcept>
 
 namespace neon
 {
-TimeControl::TimeControl(json const& time_data)
+time_step_control::time_step_control(json const& time_data)
 {
     if (time_data["Start"].is_null())
     {
@@ -26,6 +27,6 @@ TimeControl::TimeControl(json const& time_data)
 
     time_step_size = time_data["StepSize"];
 
-    time_steps = static_cast<int>(total_time / time_step_size);
+    time_steps = static_cast<std::int64_t>(total_time / time_step_size);
 }
 }

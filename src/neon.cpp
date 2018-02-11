@@ -1,5 +1,5 @@
 
-#include "SimulationControl.hpp"
+#include "simulation_parser.hpp"
 
 #include "Exceptions.hpp"
 
@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
 
     try
     {
-        SimulationControl simulation(argv[1]);
+        simulation_parser simulation(argv[1]);
 
         simulation.start();
     }

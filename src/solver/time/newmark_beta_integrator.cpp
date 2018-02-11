@@ -1,12 +1,13 @@
 
-#include "NewmarkBeta.hpp"
+#include "newmark_beta_integrator.hpp"
 
 #include "io/json.hpp"
 #include <iostream>
 
 namespace neon
 {
-NewmarkBeta::NewmarkBeta(json const& time_solver_data) : time_control(time_solver_data)
+newmark_beta_integrator::newmark_beta_integrator(json const& time_solver_data)
+    : time_control(time_solver_data)
 {
     if (time_solver_data["IntegrationOptions"].empty())
     {
@@ -19,7 +20,7 @@ NewmarkBeta::NewmarkBeta(json const& time_solver_data) : time_control(time_solve
                      "0.25.\nYou can "
                      "suppress this warning by using \"ViscousDamping\" and "
                      "\"BetaParameter\" "
-                     "under the \"Integration Options\" field.";
+                     "under the \"IntegrationOptions\" field.";
     }
     else
     {
@@ -44,13 +45,13 @@ NewmarkBeta::NewmarkBeta(json const& time_solver_data) : time_control(time_solve
     }
 }
 
-bool NewmarkBeta::time_loop()
+bool newmark_beta_integrator::time_loop()
 {
     time_control.increment();
     return !time_control.is_finished();
 }
 
-bool NewmarkBeta::are_parameters_unstable() const
+bool newmark_beta_integrator::are_parameters_unstable() const
 {
     // Unconditional stability condition
     return beta_parameter < artifical_viscosity / 2.0 || artifical_viscosity / 2.0 < 0.25;

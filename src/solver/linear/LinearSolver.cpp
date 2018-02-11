@@ -5,7 +5,7 @@
 #include "LinearSolver.hpp"
 
 #include "Exceptions.hpp"
-#include "SimulationControl.hpp"
+#include "simulation_parser.hpp"
 
 #include <omp.h>
 
@@ -33,7 +33,7 @@ IterativeLinearSolver::IterativeLinearSolver(double const residual_tolerance, in
 void ConjugateGradient::solve(sparse_matrix const& A, vector& x, vector const& b)
 {
 #ifdef ENABLE_OPENMP
-    omp_set_num_threads(SimulationControl::threads);
+    omp_set_num_threads(simulation_parser::threads);
 #endif
 
     std::feclearexcept(FE_ALL_EXCEPT);

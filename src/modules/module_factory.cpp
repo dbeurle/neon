@@ -1,7 +1,7 @@
 
-#include "ModuleFactory.hpp"
+#include "module_factory.hpp"
 
-#include "modules/SolidMechanicsModule.hpp"
+#include "modules/solid_mechanics_module.hpp"
 #include "modules/plane_strain_module.hpp"
 
 #include "modules/linear_diffusion_module.hpp"
@@ -10,7 +10,7 @@
 
 namespace neon
 {
-std::unique_ptr<AbstractModule> make_module(
+std::unique_ptr<abstract_module> make_module(
     json const& simulation, std::map<std::string, std::pair<basic_mesh, json>> const& mesh_store)
 {
     auto const& mesh_data = simulation["Mesh"][0];
@@ -34,7 +34,7 @@ std::unique_ptr<AbstractModule> make_module(
             throw std::domain_error("\"NonlinearOptions\" needs to be present for a "
                                     "SolidMechanics simulation");
         }
-        return std::make_unique<SolidMechanicsModule>(mesh, material, simulation);
+        return std::make_unique<solid_mechanics_module>(mesh, material, simulation);
     }
     else if (module_type == "PlaneStrain")
     {

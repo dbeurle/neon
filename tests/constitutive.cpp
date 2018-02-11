@@ -14,7 +14,7 @@
 
 #include "constitutive/mechanical/plane/isotropic_linear_elasticity.hpp"
 
-#include "constitutive/thermal/IsotropicDiffusion.hpp"
+#include "constitutive/thermal/isotropic_diffusion.hpp"
 
 #include "constitutive/constitutive_model_factory.hpp"
 

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "AbstractModule.hpp"
+#include "abstract_module.hpp"
 
 #include "assembler/mechanical/solid/femStaticMatrix.hpp"
 #include "mesh/mechanical/solid/fem_mesh.hpp"
@@ -22,19 +22,19 @@ namespace solid
 }
 
 /**
- * SolidMechanicsModule is responsible for handling the setup and simulation of the class
+ * solid_mechanics_module is responsible for handling the setup and simulation of the class
  * of three dimensional solid mechanics problems.
  */
-class SolidMechanicsModule : public AbstractModule
+class solid_mechanics_module : public abstract_module
 {
 public:
-    SolidMechanicsModule(basic_mesh const& mesh, json const& material, json const& simulation);
+    solid_mechanics_module(basic_mesh const& mesh, json const& material, json const& simulation);
 
-    virtual ~SolidMechanicsModule() = default;
+    virtual ~solid_mechanics_module() = default;
 
-    SolidMechanicsModule(SolidMechanicsModule const&) = delete;
+    solid_mechanics_module(solid_mechanics_module const&) = delete;
 
-    SolidMechanicsModule(SolidMechanicsModule&&) = default;
+    solid_mechanics_module(solid_mechanics_module&&) = default;
 
     virtual void perform_simulation() override final { fem_matrix.solve(); }
 

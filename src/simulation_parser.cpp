@@ -1,31 +1,29 @@
 
-#include "SimulationControl.hpp"
+#include "simulation_parser.hpp"
 
 #include "Exceptions.hpp"
-#include "mesh/mechanical/solid/fem_mesh.hpp"
-
-#include "modules/ModuleFactory.hpp"
-
-#include "modules/AbstractModule.hpp"
+#include "modules/abstract_module.hpp"
+#include "modules/module_factory.hpp"
 
 #include <iomanip>
 #include <thread>
 
 #include <boost/filesystem.hpp>
-#include <json/reader.h>
 #include <termcolor/termcolor.hpp>
-
 #include <range/v3/algorithm/find.hpp>
 #include <range/v3/algorithm/find_if.hpp>
 
 namespace neon
 {
-int SimulationControl::threads = std::thread::hardware_concurrency();
+int simulation_parser::threads = std::thread::hardware_concurrency();
 
-SimulationControl::SimulationControl(std::string const& input_file_name)
+simulation_parser::simulation_parser(std::string const& input_file_name)
     : input_file_name(input_file_name)
 {
-    if (input_file_name == "" || input_file_name.empty()) throw NoInputException();
+    if (input_file_name == "" || input_file_name.empty())
+    {
+        throw NoInputException();
+    }
 
     boost::filesystem::path input_path(input_file_name);
 
@@ -33,15 +31,16 @@ SimulationControl::SimulationControl(std::string const& input_file_name)
     std::string extension = boost::filesystem::extension(input_path);
     std::string base_name = boost::filesystem::basename(input_path);
 
-    // Attempt to open the json input file
-    if (extension != ".json") throw InvalidExtensionException(extension);
-
+    if (extension != ".json")
+    {
+        throw InvalidExtensionException(extension);
+    }
     this->parse();
 }
 
-SimulationControl::~SimulationControl() = default;
+simulation_parser::~simulation_parser() = default;
 
-void SimulationControl::parse()
+void simulation_parser::parse()
 {
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -127,7 +126,7 @@ void SimulationControl::parse()
               << termcolor::reset << std::endl;
 }
 
-void SimulationControl::start()
+void simulation_parser::start()
 {
     // Allocate the modules storage, which automatically checks for correct input
     // and throws the appropriate exception when an error is detected
@@ -141,7 +140,7 @@ void SimulationControl::start()
     for (auto const& module : modules) module->perform_simulation();
 }
 
-void SimulationControl::build_simulation_tree()
+void simulation_parser::build_simulation_tree()
 {
     // For each simulation step, the total number of subsequent relationships
     // need to be determined, such that an analysis can be performed in order
@@ -165,7 +164,7 @@ void SimulationControl::build_simulation_tree()
     }
 }
 
-void SimulationControl::find_children(std::string const& parent_name,
+void simulation_parser::find_children(std::string const& parent_name,
                                       std::string const& next_parent_name)
 {
     for (auto const& simulation : root["SimulationCases"])
@@ -181,7 +180,7 @@ void SimulationControl::find_children(std::string const& parent_name,
     }
 }
 
-void SimulationControl::print_banner() const
+void simulation_parser::print_banner() const
 {
     std::string const welcome_message("neon - a non-linear finite element code");
 
@@ -192,7 +191,7 @@ void SimulationControl::print_banner() const
     std::cout << termcolor::reset << std::endl << std::setfill(' ');
 }
 
-void SimulationControl::check_input_fields() const
+void simulation_parser::check_input_fields() const
 {
     // Check the important fields exist before anything else is done
     if (!root.count("Part"))
@@ -213,7 +212,7 @@ void SimulationControl::check_input_fields() const
     }
 }
 
-std::unordered_set<std::string> SimulationControl::parse_material_names(json const& materials) const
+std::unordered_set<std::string> simulation_parser::parse_material_names(json const& materials) const
 {
     std::unordered_set<std::string> material_names;
 
@@ -231,7 +230,7 @@ std::unordered_set<std::string> SimulationControl::parse_material_names(json con
     return material_names;
 }
 
-std::unordered_set<std::string> SimulationControl::parse_part_names(
+std::unordered_set<std::string> simulation_parser::parse_part_names(
     json const& parts, std::unordered_set<std::string> const& material_names) const
 {
     std::unordered_set<std::string> part_names;

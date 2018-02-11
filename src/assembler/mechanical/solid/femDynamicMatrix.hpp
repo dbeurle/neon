@@ -3,7 +3,7 @@
 
 #include "femStaticMatrix.hpp"
 
-#include "solver/time/NewmarkBeta.hpp"
+#include "solver/time/newmark_beta_integrator.hpp"
 
 namespace neon::mechanical::solid
 {
@@ -28,6 +28,6 @@ protected:
     vector a; //!< Nodal acceleration
     vector v; //!< Nodal velocity
 
-    NewmarkBeta newmark;
+    newmark_beta_integrator newmark;
 };
 }

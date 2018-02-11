@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "AbstractModule.hpp"
+#include "abstract_module.hpp"
 
 #include "assembler/diffusion/femDynamicMatrix.hpp"
 #include "assembler/diffusion/femStaticMatrix.hpp"
@@ -21,7 +21,7 @@ namespace diffusion
  * of a linear diffusion problem
  */
 template <typename femMatrix_Tp>
-class linear_diffusion_module : public AbstractModule
+class linear_diffusion_module : public abstract_module
 {
 public:
     explicit linear_diffusion_module(basic_mesh const& mesh, json const& material, json const& simulation)

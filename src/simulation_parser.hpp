@@ -14,14 +14,14 @@
 
 namespace neon
 {
-class AbstractModule;
+class abstract_module;
 
-class SimulationControl
+class simulation_parser
 {
 public:
-    explicit SimulationControl(std::string const& input_file_name);
+    explicit simulation_parser(std::string const& input_file_name);
 
-    ~SimulationControl();
+    ~simulation_parser();
 
     void start();
 
@@ -54,7 +54,7 @@ protected:
 
     std::map<std::string, std::list<json>> multistep_simulations;
 
-    std::vector<std::unique_ptr<AbstractModule>> modules;
+    std::vector<std::unique_ptr<abstract_module>> modules;
 
     json root; // The file input
 };

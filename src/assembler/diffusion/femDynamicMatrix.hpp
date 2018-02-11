@@ -3,7 +3,7 @@
 
 #include "femStaticMatrix.hpp"
 
-#include "solver/time/GeneralisedTrapezoidal.hpp"
+#include "solver/time/trapezoidal_integrator.hpp"
 
 namespace neon::diffusion
 {
@@ -21,6 +21,6 @@ protected:
 protected:
     sparse_matrix M; //!< Consistent capacity matrix
 
-    GeneralisedTrapezoidal time_solver;
+    trapezoidal_integrator time_solver;
 };
 }

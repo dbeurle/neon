@@ -40,7 +40,6 @@ class InternalVariables
 public:
     /** Spatial dimension (three, two or one dimension) */
     static auto constexpr r_n = rank2_dimension;
-
     /** Voigt dimension for the tensor conversion */
     static auto constexpr v_n = rank4_dimension;
 
@@ -49,10 +48,8 @@ public:
 
     /** A second order tensor type is a small matrix in tensor notation */
     using rank2tensor_type = Eigen::Matrix<scalar_type, rank2_dimension, rank2_dimension>;
-
     /** A fourth order tensor type is a fixed size matrix in Voigt notation */
     using rank4tensor_type = Eigen::Matrix<scalar_type, rank4_dimension, rank4_dimension>;
-
     static auto constexpr tensor_size = rank2_dimension * rank2_dimension;
 
 public:

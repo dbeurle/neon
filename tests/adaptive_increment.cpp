@@ -3,7 +3,7 @@
 
 #include "catch.hpp"
 
-#include "solver/AdaptiveLoadStep.hpp"
+#include "solver/adaptive_time_step.hpp"
 
 #include "io/json.hpp"
 
@@ -14,7 +14,7 @@ TEST_CASE("adaptive increment")
     json time_data = {{"Period", 1.0},
                       {"Increments", {{"Initial", 1.0}, {"Minimum", 0.1}, {"Maximum", 1.0}}}};
 
-    AdaptiveLoadStep load(time_data, {0.0, 1.0});
+    adaptive_time_step load(time_data, {0.0, 1.0});
 
     SECTION("basic operation")
     {
