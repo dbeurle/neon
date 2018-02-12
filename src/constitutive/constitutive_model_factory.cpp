@@ -39,11 +39,7 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
 
     auto const& model_name = constitutive_model["Name"].get<std::string>();
 
-    if (model_name == "NeoHooke")
-    {
-        return std::make_unique<compressible_neohooke>(variables, material_data);
-    }
-    else if (model_name == "CompressibleNeoHooke")
+    if (model_name == "NeoHooke" || model_name == "CompressibleNeoHooke")
     {
         return std::make_unique<compressible_neohooke>(variables, material_data);
     }
