@@ -62,6 +62,46 @@ TEST_CASE("Line quadrature scheme test", "[line_quadrature]")
         REQUIRE(line.local_quadrature_extrapolation().cols() == 1);
         REQUIRE(line.local_quadrature_extrapolation().allFinite());
     }
+    SECTION("line 2 length")
+    {
+        line2 patch(line_quadrature::Rule::OnePoint);
+
+        matrix x(3, 2);
+        x << 0.0, 1.0, //
+            0.0, 0.0,  //
+            0.0, 0.0;
+
+        REQUIRE(patch.compute_measure(x) == Approx(1.0));
+    }
+    SECTION("line 3 interpolation function - two point")
+    {
+        line3 line(line_quadrature::Rule::TwoPoint);
+
+        REQUIRE(line.nodes() == 3);
+        REQUIRE(line.quadrature().points() == 2);
+
+        line.quadrature().for_each([&](auto const& femval, auto const& l) {
+            auto const& [N, rhea] = femval;
+
+            REQUIRE(N.sum() == Approx(1.0));
+
+            REQUIRE(rhea.sum() == Approx(0.0).margin(ZERO_MARGIN));
+        });
+        REQUIRE(line.local_quadrature_extrapolation().rows() == 3);
+        REQUIRE(line.local_quadrature_extrapolation().cols() == 2);
+        REQUIRE(line.local_quadrature_extrapolation().allFinite());
+    }
+    SECTION("line 3 length")
+    {
+        line3 patch(line_quadrature::Rule::TwoPoint);
+
+        matrix x(3, 3);
+        x << 0.0, 0.5, 1.0, //
+            0.0, 0.0, 0.0,  //
+            0.0, 0.0, 0.0;
+
+        REQUIRE(patch.compute_measure(x) == Approx(1.0));
+    }
 }
 TEST_CASE("Quadrilateral quadrature scheme test", "[quadrilateral_quadrature]")
 {
