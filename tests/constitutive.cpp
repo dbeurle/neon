@@ -146,12 +146,35 @@ TEST_CASE("Microsphere model error test")
 
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
-    REQUIRE_THROWS_AS(make_constitutive_model(variables,
-                                              json::parse("{}"),
-                                              json::parse("{\"ConstitutiveModel\" : {\"Name\": "
-                                                          "\"Microsphere\", \"Type\" "
-                                                          ": \"Afwsfine\"}}")),
-                      std::domain_error);
+    SECTION("Type not specified")
+    {
+        REQUIRE_THROWS_AS(make_constitutive_model(variables,
+                                                  json::parse("{}"),
+                                                  json::parse("{\"ConstitutiveModel\" : {\"Name\": "
+                                                              "\"Microsphere\", \"Tyasdpe\" "
+                                                              ": \"Affine\"}}")),
+                          std::domain_error);
+    }
+
+    SECTION("Type not specified correctly")
+    {
+        REQUIRE_THROWS_AS(make_constitutive_model(variables,
+                                                  json::parse("{}"),
+                                                  json::parse("{\"ConstitutiveModel\" : {\"Name\": "
+                                                              "\"Microsphere\", \"Type\" "
+                                                              ": \"Afwsfine\"}}")),
+                          std::domain_error);
+    }
+
+    SECTION("Exception for quadrature scheme")
+    {
+        REQUIRE_THROWS_AS(make_constitutive_model(variables,
+                                                  json::parse("{}"),
+                                                  json::parse("{\"ConstitutiveModel\" : {\"Name\": "
+                                                              "\"Microsphere\", \"Type\" "
+                                                              ": \"GaussianAffine\"}}")),
+                          std::domain_error);
+    }
 }
 TEST_CASE("Gaussian affine microsphere model", )
 {
@@ -848,11 +871,25 @@ TEST_CASE("Solid mechanics J2 plasticity model factory errors")
 
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
-    REQUIRE_THROWS_AS(make_constitutive_model(variables,
-                                              json::parse("{}"),
-                                              json::parse("{\"ConstitutiveModel\" : {\"Name\" : "
-                                                          "\"J2Plasticity\"}}")),
-                      std::domain_error);
+    SECTION("FiniteStrain not specified")
+    {
+        REQUIRE_THROWS_AS(make_constitutive_model(variables,
+                                                  json::parse("{}"),
+                                                  json::parse("{\"ConstitutiveModel\" : {\"Name\" "
+                                                              ": "
+                                                              "\"J2Plasticity\"}}")),
+                          std::domain_error);
+    }
+    SECTION("Damage model not specified correctly")
+    {
+        REQUIRE_THROWS_AS(make_constitutive_model(variables,
+                                                  json::parse("{}"),
+                                                  json::parse("{\"ConstitutiveModel\" : {\"Name\" "
+                                                              ": "
+                                                              "\"ChabocheDamage\", "
+                                                              "\"FiniteStrain\" : true}}")),
+                          std::domain_error);
+    }
 }
 TEST_CASE("Solid mechanics J2 plasticity model")
 {
@@ -1178,7 +1215,6 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
             REQUIRE(von_mises_stress <= 100);
             REQUIRE(von_mises_stress > 85);
         }
-
         for (auto const& material_tangent : material_tangents)
         {
             eigen_solver.compute(material_tangent);
