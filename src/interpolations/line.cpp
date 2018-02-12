@@ -66,7 +66,7 @@ void line3::precompute_shape_functions()
     using coordinates_type = std::tuple<int, double>;
 
     // Initialize nodal coordinates array as Xi, Eta, Zeta
-    std::array<coordinates_type, 2> constexpr local_coordinates{{{0, -1.0}, {1, 1.0}}};
+    std::array<coordinates_type, 3> constexpr local_coordinates{{{0, -1.0}, {1, 0.0}, {2, 1.0}}};
 
     matrix N_matrix(numerical_quadrature->points(), nodes());
     matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 2);
@@ -93,7 +93,7 @@ void line3::precompute_shape_functions()
     });
 
     // Compute extrapolation algorithm matrices
-    matrix local_nodal_coordinates = matrix::Ones(nodes(), 1);
+    matrix local_nodal_coordinates = matrix::Ones(nodes(), 2);
 
     for (auto const& [a, xi_a] : local_coordinates)
     {
