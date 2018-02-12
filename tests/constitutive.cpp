@@ -75,7 +75,8 @@ TEST_CASE("Neo-Hookean model")
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
     // Add the required variables for an updated Lagrangian formulation
-    variables->add(internal_variables_t::Tensor::DeformationGradient, internal_variables_t::Tensor::Cauchy);
+    variables->add(internal_variables_t::Tensor::DeformationGradient,
+                   internal_variables_t::Tensor::Cauchy);
     variables->add(internal_variables_t::Scalar::DetF);
 
     auto neo_hooke = make_constitutive_model(variables,
@@ -84,8 +85,9 @@ TEST_CASE("Neo-Hookean model")
                                                          "\"NeoHooke\"} }"));
 
     // Get the tensor variables
-    auto [F_list, cauchy_stresses] = variables->fetch(internal_variables_t::Tensor::DeformationGradient,
-                                                      internal_variables_t::Tensor::Cauchy);
+    auto [F_list,
+          cauchy_stresses] = variables->fetch(internal_variables_t::Tensor::DeformationGradient,
+                                              internal_variables_t::Tensor::Cauchy);
 
     auto& J_list = variables->fetch(internal_variables_t::Scalar::DetF);
 
@@ -158,7 +160,8 @@ TEST_CASE("Gaussian affine microsphere model", )
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
     // Add the required variables for an updated Lagrangian formulation
-    variables->add(internal_variables_t::Tensor::DeformationGradient, internal_variables_t::Tensor::Cauchy);
+    variables->add(internal_variables_t::Tensor::DeformationGradient,
+                   internal_variables_t::Tensor::Cauchy);
 
     variables->add(internal_variables_t::Scalar::DetF);
 
@@ -172,8 +175,9 @@ TEST_CASE("Gaussian affine microsphere model", )
                                                       ": \"GaussianAffine\", \"Quadrature\" : "
                                                       "\"BO21\"}}"));
 
-    auto [F_list, cauchy_stresses] = variables->fetch(internal_variables_t::Tensor::DeformationGradient,
-                                                      internal_variables_t::Tensor::Cauchy);
+    auto [F_list,
+          cauchy_stresses] = variables->fetch(internal_variables_t::Tensor::DeformationGradient,
+                                              internal_variables_t::Tensor::Cauchy);
 
     auto& J_list = variables->fetch(internal_variables_t::Scalar::DetF);
 
@@ -243,7 +247,8 @@ TEST_CASE("Affine microsphere model")
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
     // Add the required variables for an updated Lagrangian formulation
-    variables->add(internal_variables_t::Tensor::DeformationGradient, internal_variables_t::Tensor::Cauchy);
+    variables->add(internal_variables_t::Tensor::DeformationGradient,
+                   internal_variables_t::Tensor::Cauchy);
 
     variables->add(internal_variables_t::Scalar::DetF);
 
@@ -256,8 +261,9 @@ TEST_CASE("Affine microsphere model")
                                                       "\"Microsphere\", \"Type\" "
                                                       ": \"Affine\", \"Quadrature\" : \"BO21\"}}"));
 
-    auto [F_list, cauchy_stresses] = variables->fetch(internal_variables_t::Tensor::DeformationGradient,
-                                                      internal_variables_t::Tensor::Cauchy);
+    auto [F_list,
+          cauchy_stresses] = variables->fetch(internal_variables_t::Tensor::DeformationGradient,
+                                              internal_variables_t::Tensor::Cauchy);
 
     auto& J_list = variables->fetch(internal_variables_t::Scalar::DetF);
 
@@ -327,8 +333,8 @@ TEST_CASE("NonAffine microsphere model")
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
     // Add the required variables for an updated Lagrangian formulation
-    variables->add(internal_variables_t::Tensor::DeformationGradient, internal_variables_t::Tensor::Cauchy);
-
+    variables->add(internal_variables_t::Tensor::DeformationGradient,
+                   internal_variables_t::Tensor::Cauchy);
     variables->add(internal_variables_t::Scalar::DetF);
 
     auto affine = make_constitutive_model(variables,
@@ -343,8 +349,9 @@ TEST_CASE("NonAffine microsphere model")
                                                       "\"BO21\"}}"));
 
     // Get the tensor variables
-    auto [F_list, cauchy_stresses] = variables->fetch(internal_variables_t::Tensor::DeformationGradient,
-                                                      internal_variables_t::Tensor::Cauchy);
+    auto [F_list,
+          cauchy_stresses] = variables->fetch(internal_variables_t::Tensor::DeformationGradient,
+                                              internal_variables_t::Tensor::Cauchy);
 
     auto& J_list = variables->fetch(internal_variables_t::Scalar::DetF);
 
@@ -354,6 +361,23 @@ TEST_CASE("NonAffine microsphere model")
 
     Eigen::EigenSolver<Eigen::MatrixXd> eigen_solver;
 
+    SECTION("exception")
+    {
+        REQUIRE_THROWS_AS(make_constitutive_model(variables,
+                                                  json::parse("{\"Name\" : \"rubber\", "
+                                                              "\"ElasticModulus\" : 10.0e6, "
+                                                              "\"PoissonsRatio\" : 0.45, "
+                                                              "\"NonAffineStrearameter\":1."
+                                                              "0, "
+                                                              "\"SegmentsPerChain\" : 50}"),
+                                                  json::parse("{\"ConstitutiveModel\" : "
+                                                              "{\"Name\": "
+                                                              "\"Microsphere\", \"Type\" "
+                                                              ": \"NonAffine\", \"Quadrature\" "
+                                                              ": "
+                                                              "\"BO21\"}}")),
+                          std::domain_error);
+    }
     SECTION("Sanity test")
     {
         REQUIRE(affine->is_symmetric());

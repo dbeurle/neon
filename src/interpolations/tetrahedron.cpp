@@ -11,14 +11,8 @@ tetrahedron4::tetrahedron4(tetrahedron_quadrature::Rule rule)
 
 void tetrahedron4::precompute_shape_functions()
 {
-    // using NodalCoordinate = std::tuple<int, double, double, double>;
-    //
-    // // Initialize nodal coordinates array as r and s
-    // std::array<NodalCoordinate, 4> constexpr local_coordinates{
-    //     {{0, 1.0, 0.0, 0.0}, {1, 0.0, 1.0, 0.0}, {2, 0.0, 0.0, 1.0}, {3, 0.0, 0.0, 0.0}}};
-
     numerical_quadrature->evaluate([&](auto const& coordinate) {
-        auto const & [ l, r, s, t ] = coordinate;
+        auto const& [l, r, s, t] = coordinate;
 
         vector N(4);
         matrix rhea(4, 3);
@@ -75,7 +69,7 @@ void tetrahedron10::precompute_shape_functions()
     matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 4);
 
     numerical_quadrature->evaluate([&](auto const& coordinate) {
-        auto const & [ l, r, s, t ] = coordinate;
+        auto const& [l, r, s, t] = coordinate;
 
         auto const u = 1.0 - r - s - t;
 
@@ -138,7 +132,7 @@ void tetrahedron10::precompute_shape_functions()
     // Compute extrapolation algorithm matrices
     matrix local_nodal_coordinates = matrix::Ones(nodes(), 4);
 
-    for (auto const & [ a, r, s, t ] : local_coordinates)
+    for (auto const& [a, r, s, t] : local_coordinates)
     {
         local_nodal_coordinates(a, 0) = r;
         local_nodal_coordinates(a, 1) = s;

@@ -346,6 +346,21 @@ TEST_CASE("Triangle quadrature scheme test", "[triangle_quadrature]")
 
         REQUIRE(tri3.compute_measure(x) == Approx(0.5));
     }
+    SECTION("triangle6 surface area")
+    {
+        triangle6 patch(triangle_quadrature::Rule::ThreePoint);
+
+        matrix x(6, 3);
+        x << 0.0, 0.0, 0.0, //
+            1.0, 0.0, 0.0,  //
+            0.0, 1.0, 0.0,  //
+            0.5, 0.0, 0.0,  //
+            0.5, 0.5, 0.0,  //
+            0.0, 0.5, 0.0;
+        x.transposeInPlace();
+
+        REQUIRE(patch.compute_measure(x) == Approx(0.5));
+    }
 }
 TEST_CASE("Hexahedron quadrature scheme test", "[hexahedron_quadrature]")
 {

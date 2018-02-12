@@ -59,7 +59,7 @@ void quadrilateral4::precompute_shape_functions()
 double quadrilateral4::compute_measure(matrix const& nodal_coordinates) const
 {
     return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
-        auto const & [ N, dN ] = femval;
+        auto const& [N, dN] = femval;
 
         matrix2 const Jacobian = geometry::project_to_plane(nodal_coordinates) * dN;
 

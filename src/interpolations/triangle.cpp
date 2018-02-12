@@ -1,6 +1,8 @@
 
 #include "triangle.hpp"
 
+#include "geometry/Projection.hpp"
+
 #include <Eigen/Geometry>
 
 namespace neon
@@ -13,17 +15,9 @@ triangle3::triangle3(triangle_quadrature::Rule rule)
 
 void triangle3::precompute_shape_functions()
 {
-    // using NodalCoordinate = std::tuple<int, double, double>;
-
     // Initialize nodal coordinates array as r and s
-    // std::array<NodalCoordinate, 3> constexpr local_coordinates = {{
-    //     {0, 1.0, 0.0},
-    //     {1, 0.0, 1.0},
-    //     {2, 0.0, 0.0},
-    // }};
-
     numerical_quadrature->evaluate([&](auto const& coordinates) {
-        auto const & [ l, r, s ] = coordinates;
+        auto const& [l, r, s] = coordinates;
 
         vector N(3);
         matrix rhea(3, 2);
@@ -81,7 +75,7 @@ void triangle6::precompute_shape_functions()
     matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 3);
 
     numerical_quadrature->evaluate([&](auto const& coordinate) {
-        auto const & [ l, r, s ] = coordinate;
+        auto const& [l, r, s] = coordinate;
 
         auto const t = 1.0 - r - s;
 
@@ -122,7 +116,7 @@ void triangle6::precompute_shape_functions()
     // Compute extrapolation algorithm matkrices
     matrix local_nodal_coordinates = matrix::Ones(nodes(), 3);
 
-    for (auto const & [ a, r, s ] : local_coordinates)
+    for (auto const& [a, r, s] : local_coordinates)
     {
         local_nodal_coordinates(a, 0) = r;
         local_nodal_coordinates(a, 1) = s;
@@ -132,23 +126,12 @@ void triangle6::precompute_shape_functions()
 
 double triangle6::compute_measure(matrix const& nodal_coordinates)
 {
-    // Use numerical quadrature to compute int () dA
-    double face_area = 0.0;
+    return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
+        auto const& [N, dN] = femval;
 
-    // auto const L = numerical_quadrature->points();
-    //
-    // matrix rhea(6, 2);
-    // matrix planarCoordinates = this->projectCoordinatesToPlane(nodal_coordinates);
+        matrix2 const Jacobian = geometry::project_to_plane(nodal_coordinates) * dN;
 
-    // for (int l = 0; l < L; l++)
-    // {
-    //     rhea.col(0) = dN_dXi.col(l);
-    //     rhea.col(1) = dN_dEta.col(l);
-    //
-    //     Eigen::Matrix2d Jacobian = planarCoordinates * rhea;
-    //
-    //     face_area += Jacobian.determinant() * quadratureWeight(l);
-    // }
-    return face_area / 2.0;
+        return Jacobian.determinant();
+    });
 }
 }
