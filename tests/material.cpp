@@ -17,6 +17,22 @@
 
 using namespace neon;
 
+TEST_CASE("Basic material")
+{
+    SECTION("No name on construction")
+    {
+        // json material_data{{"Name", "steel"}, {"ElasticModulus", 200.0e9}, {"PoissonsRatio", 0.3}};
+        REQUIRE_THROWS_AS(material_property(json::parse("{\"Nasame\": \"steel\"}")),
+                          std::domain_error);
+    }
+    SECTION("Density and specific heat exception")
+    {
+        material_property basic_material(json::parse("{\"Name\": \"steel\"}"));
+
+        REQUIRE_THROWS_AS(basic_material.initial_density(), std::domain_error);
+        REQUIRE_THROWS_AS(basic_material.specific_heat(), std::domain_error);
+    }
+}
 TEST_CASE("Linear elastic material", "[isotropic_elastic_property]")
 {
     SECTION("Linear elastic properties")
