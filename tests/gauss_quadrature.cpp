@@ -10,20 +10,26 @@
 #include "quadrature/triangle_quadrature.hpp"
 #include "quadrature/unit_sphere_quadrature.hpp"
 
-#include "interpolations/hexahedron.hpp"
 #include "interpolations/line.hpp"
 #include "interpolations/quadrilateral.hpp"
-
-#include "interpolations/tetrahedron.hpp"
+#include "interpolations/hexahedron.hpp"
 #include "interpolations/tetrahedron.hpp"
 #include "interpolations/triangle.hpp"
-#include "interpolations/triangle.hpp"
-
 #include "interpolations/prism.hpp"
+
+#include "interpolations/interpolation_factory.hpp"
+#include "mesh/element_topology.hpp"
+
+#include "io/json.hpp"
 
 #include <range/v3/numeric/accumulate.hpp>
 
 using namespace neon;
+
+json full() { return json::parse("{\"ElementOptions\" : {\"Quadrature\" : \"Full\"}}"); }
+json reduced() { return json::parse("{\"ElementOptions\" : {\"Quadrature\" : \"Reduced\"}}"); }
+
+// json material_data{{"Name", "steel"}, {"BulkModulus", 200.0e9}, {"ShearModulus", 100.0e6}};
 
 constexpr auto ZERO_MARGIN = 1.0e-5;
 
@@ -101,6 +107,11 @@ TEST_CASE("Line quadrature scheme test", "[line_quadrature]")
             0.0, 0.0, 0.0;
 
         REQUIRE(patch.compute_measure(x) == Approx(1.0));
+    }
+    SECTION("Virtual methods check")
+    {
+        REQUIRE(make_line_interpolation(element_topology::line2, full())->nodes() == 2);
+        REQUIRE(make_line_interpolation(element_topology::line3, full())->nodes() == 3);
     }
 }
 TEST_CASE("Quadrilateral quadrature scheme test", "[quadrilateral_quadrature]")
@@ -303,10 +314,16 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[quadrilateral_quadrature]")
 
         REQUIRE(quad9.compute_measure(x) == Approx(1.0));
     }
+    SECTION("Virtual methods check")
+    {
+        REQUIRE(make_surface_interpolation(element_topology::quadrilateral4, full())->nodes() == 4);
+        REQUIRE(make_surface_interpolation(element_topology::quadrilateral8, full())->nodes() == 8);
+        REQUIRE(make_surface_interpolation(element_topology::quadrilateral9, full())->nodes() == 9);
+    }
 }
 TEST_CASE("Triangle quadrature scheme test", "[triangle_quadrature]")
 {
-    SECTION("Triangle Gauss Quadrature")
+    SECTION("triangle Gauss quadrature")
     {
         // Check 1 and 8 point rule
         triangle_quadrature t1(triangle_quadrature::Rule::OnePoint);
@@ -400,6 +417,11 @@ TEST_CASE("Triangle quadrature scheme test", "[triangle_quadrature]")
         x.transposeInPlace();
 
         REQUIRE(patch.compute_measure(x) == Approx(0.5));
+    }
+    SECTION("Virtual methods check")
+    {
+        REQUIRE(make_surface_interpolation(element_topology::triangle3, full())->nodes() == 3);
+        REQUIRE(make_surface_interpolation(element_topology::triangle6, full())->nodes() == 6);
     }
 }
 TEST_CASE("Hexahedron quadrature scheme test", "[hexahedron_quadrature]")
@@ -728,6 +750,12 @@ TEST_CASE("Hexahedron quadrature scheme test", "[hexahedron_quadrature]")
             REQUIRE(hex27.compute_measure(x) == Approx(8.0));
         }
     }
+    SECTION("Virtual methods check")
+    {
+        REQUIRE(make_volume_interpolation(element_topology::hexahedron8, full())->nodes() == 8);
+        REQUIRE(make_volume_interpolation(element_topology::hexahedron20, full())->nodes() == 20);
+        REQUIRE(make_volume_interpolation(element_topology::hexahedron27, full())->nodes() == 27);
+    }
 }
 TEST_CASE("Tetrahedron quadrature scheme test", "[tetrahedron_quadrature]")
 {
@@ -951,6 +979,11 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[tetrahedron_quadrature]")
             REQUIRE(vol == Approx(1.0 / (6.0 * std::sqrt(2.0))));
         }
     }
+    SECTION("Virtual methods check")
+    {
+        REQUIRE(make_volume_interpolation(element_topology::tetrahedron4, full())->nodes() == 4);
+        REQUIRE(make_volume_interpolation(element_topology::tetrahedron10, full())->nodes() == 10);
+    }
 }
 TEST_CASE("Prism quadrature scheme test", "[prism_quadrature]")
 {
@@ -1025,6 +1058,11 @@ TEST_CASE("Prism quadrature scheme test", "[prism_quadrature]")
         REQUIRE(element.local_quadrature_extrapolation().rows() == 15);
         REQUIRE(element.local_quadrature_extrapolation().cols() == 6);
         REQUIRE(element.local_quadrature_extrapolation().allFinite());
+    }
+    SECTION("Virtual methods check")
+    {
+        REQUIRE(make_volume_interpolation(element_topology::prism6, full())->nodes() == 6);
+        REQUIRE(make_volume_interpolation(element_topology::prism15, full())->nodes() == 15);
     }
 }
 TEST_CASE("Unit sphere quadrature scheme test", "[unit_sphere_quadrature]")
