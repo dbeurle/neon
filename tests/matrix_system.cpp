@@ -31,10 +31,12 @@ TEST_CASE("Nonlinear system equilibrium solver test")
     basic_mesh basic_mesh(json::parse(cube_mesh_json()));
 
     nodal_coordinates nodal_coordinates(json::parse(cube_mesh_json()));
+    auto simulation_data = json::parse(simulation_data_json());
 
     fem_mesh fem_mesh(basic_mesh,
-                     json::parse(material_data_json()),
-                     json::parse(simulation_data_json()));
+                      json::parse(material_data_json()),
+                      simulation_data,
+                      simulation_data["Time"]["Increments"]["Initial"]);
 
     SECTION("Correct behaviour")
     {

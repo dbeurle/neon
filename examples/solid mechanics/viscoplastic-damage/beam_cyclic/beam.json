@@ -1,0 +1,80 @@
+{
+    "Name" : "J2PlasticityDamage",
+    "Cores" : 1,
+    "Part": [{
+        "Name" : "beam",
+        "Material" : "steel"
+    }],
+    "Material" : [{
+        "Name" : "steel",
+        "ElasticModulus": 134.0e3,
+        "YieldStress": 85,
+        "PoissonsRatio": 0.3,
+        "KinematicHardeningModulus": 5500,
+        "IsotropicHardeningModulus": 5500,
+        "SofteningMultiplier" : 250,
+        "PlasticityViscousExponent" : 2.5,
+        "PlasticityViscousMultiplier" : 1.923536463026969e-08,
+        "DamageViscousExponent" : 2,
+        "DamageViscousMultiplier" : 2.777777777777778
+    }],
+    "SimulationCases" : [{
+        "Name" : "Uniaxial",
+		    "Module" : "SolidMechanics",
+        "Solution" : "Equilibrium",
+        "NonlinearOptions" : {
+        "ResidualTolerance" : 1e-3,
+        "DisplacementTolerance" : 1e-3
+        },
+        "Time" : {
+            "Period" : 30,
+            "Increments" : {
+                "Initial" : 0.1,
+                "Minimum" : 0.01,
+                "Maximum" : 0.1,
+                "Adaptive" : "False"
+            }
+    },
+    "Mesh" : [{
+            "Name" : "beam",
+            "ConstitutiveModel" : {
+                "Name" : "ChabocheDamage",
+                "FiniteStrain" : false
+            },
+            "ElementOptions" : {
+                "Quadrature" : "Full"
+            },
+            "BoundaryConditions" : [{
+                "Name" : "Clamped",
+                "Type" : "Displacement",
+                "Time" : [0.0, 30],
+                "Values" : {
+                    "x" : [0.0, 0.0],
+                    "y" : [0.0, 0.0],
+                    "z" : [0.0, 0.0]
+                }
+            },
+            {
+                "Name" : "x-fixed",
+                "Type" : "Displacement",
+                "Time" : [0.0, 30],
+                "Values" : {
+                "x" : [0.12, 0.10]
+                },
+                "GenerateType" : "Sinusoidal",
+                "Period" : [10,10],
+                "Phase" : [0,0],
+                "NumberOfCycles" : [2,1]
+            }
+          ]
+        }],
+		"LinearSolver" : {
+		    "Solver" : "PaStiX"
+        },
+        "Visualisation" : {
+            "Fields" : ["Displacement", "LinearisedStrain", "LinearisedPlasticStrain",
+                        "CauchyStress", "VonMisesStress", "AccumulatedPlasticStrain","DisplacementGradient",
+                        "Damage","EnergyReleaseRate","BackStress","KinematicHardening","DisplacementGradient"]
+        }
+    }]
+}
