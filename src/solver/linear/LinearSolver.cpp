@@ -11,22 +11,22 @@
 
 #include <cfenv>
 #include <chrono>
-#include <thread>
 
 namespace neon
 {
 IterativeLinearSolver::IterativeLinearSolver(double const residual_tolerance)
-    : residual_tolerance(residual_tolerance)
+    : residual_tolerance{residual_tolerance}
 {
 }
 
-IterativeLinearSolver::IterativeLinearSolver(int const max_iterations)
-    : max_iterations(max_iterations)
+IterativeLinearSolver::IterativeLinearSolver(std::int32_t const max_iterations)
+    : max_iterations{max_iterations}
 {
 }
 
-IterativeLinearSolver::IterativeLinearSolver(double const residual_tolerance, int const max_iterations)
-    : residual_tolerance(residual_tolerance), max_iterations(max_iterations)
+IterativeLinearSolver::IterativeLinearSolver(double const residual_tolerance,
+                                             std::int32_t const max_iterations)
+    : residual_tolerance{residual_tolerance}, max_iterations(max_iterations)
 {
 }
 
