@@ -1,6 +1,5 @@
 
 foreach(test
-             adaptive_increment
              boundary
              constitutive
              dof_numbering
@@ -12,6 +11,7 @@ foreach(test
              mesh
              nodal_coordinates
              tensor
+             time_stepping
              )
     add_executable(${test} ${test}.cpp)
     add_dependencies(${test} catch)

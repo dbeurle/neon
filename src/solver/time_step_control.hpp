@@ -17,10 +17,7 @@ public:
 
     [[nodiscard]] double current_time_step_size() const { return time_step_size; }
 
-        [[nodiscard]] int32_t number_of_time_steps() const
-    {
-        return time_steps;
-    }
+    [[nodiscard]] std::int64_t number_of_time_steps() const { return time_steps; }
 
     void increment() { ++current_time_step; }
 
