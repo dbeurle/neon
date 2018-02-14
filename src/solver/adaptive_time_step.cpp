@@ -13,12 +13,12 @@
 namespace neon
 {
 adaptive_time_step::adaptive_time_step(json const& increment_data,
-                                   std::vector<double> mandatory_time_history)
+                                       std::vector<double> mandatory_time_history)
 {
     // Set the time history to the input data
     for (auto const& t : mandatory_time_history) time_queue.push(t);
 
-    // Remove the first entry if it's zero
+    // Remove the first entry if zero
     if (is_approx(time_queue.top(), 0.0)) time_queue.pop();
 
     parse_input(increment_data, *ranges::max_element(mandatory_time_history));
@@ -26,10 +26,10 @@ adaptive_time_step::adaptive_time_step(json const& increment_data,
 
 void adaptive_time_step::update_convergence_state(bool const is_converged)
 {
-    auto constexpr cutback_factor = 0.5;
-    auto constexpr forward_factor = 2.0;
+    auto constexpr cutback_factor{0.5};
+    auto constexpr forward_factor{2.0};
 
-    auto constexpr terminal_indent = 4;
+    auto constexpr terminal_indent{4};
 
     if (is_converged)
     {
