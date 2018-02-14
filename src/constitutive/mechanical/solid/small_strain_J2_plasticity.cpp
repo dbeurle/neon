@@ -1,12 +1,12 @@
 
 #include "small_strain_J2_plasticity.hpp"
 
-#include "Exceptions.hpp"
-
 #include "constitutive/internal_variables.hpp"
 #include "numeric/mechanics"
+#include "Exceptions.hpp"
 
 #include <range/v3/view/transform.hpp>
+#include <tbb/tbb.h>
 
 namespace neon::mechanical::solid
 {
@@ -27,16 +27,16 @@ void small_strain_J2_plasticity::update_internal_variables(double const time_ste
     auto const shear_modulus = material.shear_modulus();
 
     // Extract the internal variables
-    auto [plastic_strains,
-          strains,
-          cauchy_stresses] = variables->fetch(internal_variables_t::Tensor::LinearisedPlasticStrain,
-                                              internal_variables_t::Tensor::LinearisedStrain,
-                                              internal_variables_t::Tensor::Cauchy);
+    auto[plastic_strains,
+         strains,
+         cauchy_stresses] = variables->fetch(internal_variables_t::Tensor::LinearisedPlasticStrain,
+                                             internal_variables_t::Tensor::LinearisedStrain,
+                                             internal_variables_t::Tensor::Cauchy);
 
     // Retrieve the accumulated internal variables
-    auto [accumulated_plastic_strains,
-          von_mises_stresses] = variables->fetch(internal_variables_t::Scalar::EffectivePlasticStrain,
-                                                 internal_variables_t::Scalar::VonMisesStress);
+    auto[accumulated_plastic_strains,
+         von_mises_stresses] = variables->fetch(internal_variables_t::Scalar::EffectivePlasticStrain,
+                                                internal_variables_t::Scalar::VonMisesStress);
 
     auto& tangent_operators = variables->fetch(internal_variables_t::rank4::tangent_operator);
 
@@ -45,9 +45,8 @@ void small_strain_J2_plasticity::update_internal_variables(double const time_ste
               | ranges::view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
     // Perform the update algorithm for each quadrature point
-    // #pragma omp parallel for
-    for (auto l = 0; l < strains.size(); l++)
-    {
+    tbb::parallel_for(std::size_t{0}, strains.size(), [&](auto const l) {
+
         auto const& strain = strains[l];
         auto& plastic_strain = plastic_strains[l];
         auto& cauchy_stress = cauchy_stresses[l];
@@ -67,7 +66,7 @@ void small_strain_J2_plasticity::update_internal_variables(double const time_ste
         if (evaluate_yield_function(von_mises, accumulated_plastic_strain) <= 0.0)
         {
             tangent_operators[l] = C_e;
-            continue;
+            return;
         }
 
         auto const von_mises_trial = von_mises;
@@ -90,7 +89,7 @@ void small_strain_J2_plasticity::update_internal_variables(double const time_ste
                                                    accumulated_plastic_strain,
                                                    von_mises_trial,
                                                    normal);
-    }
+    });
 }
 
 matrix6 small_strain_J2_plasticity::algorithmic_tangent(double const plastic_increment,

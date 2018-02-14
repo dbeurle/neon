@@ -11,10 +11,6 @@
 #include "numeric/gradient_operator.hpp"
 #include "numeric/mechanics"
 
-#include <cfenv>
-#include <chrono>
-#include <omp.h>
-
 #include <range/v3/algorithm/count_if.hpp>
 #include <range/v3/algorithm/fill.hpp>
 #include <range/v3/algorithm/find_if.hpp>
@@ -22,12 +18,17 @@
 
 #include <termcolor/termcolor.hpp>
 
+#include <tbb/tbb.h>
+
+#include <cfenv>
+#include <chrono>
+
 namespace neon::mechanical::solid
 {
 fem_submesh::fem_submesh(json const& material_data,
-                       json const& mesh_data,
-                       std::shared_ptr<material_coordinates>& mesh_coordinates,
-                       basic_submesh const& submesh)
+                         json const& mesh_data,
+                         std::shared_ptr<material_coordinates>& mesh_coordinates,
+                         basic_submesh const& submesh)
     : basic_submesh(submesh),
       mesh_coordinates(mesh_coordinates),
       sf(make_volume_interpolation(topology(), mesh_data)),
@@ -207,9 +208,7 @@ void fem_submesh::update_deformation_measures()
     auto& H_list = variables->fetch(internal_variables_t::Tensor::DisplacementGradient);
     auto& F_list = variables->fetch(internal_variables_t::Tensor::DeformationGradient);
 
-#pragma omp parallel for
-    for (auto element = 0; element < elements(); ++element)
-    {
+    tbb::parallel_for(std::size_t{0}, elements(), [&](auto const element) {
         // Gather the material coordinates
         auto const X = mesh_coordinates->initial_configuration(local_node_list(element));
         auto const x = mesh_coordinates->current_configuration(local_node_list(element));
@@ -222,7 +221,7 @@ void fem_submesh::update_deformation_measures()
             matrix3 const F = local_deformation_gradient(rhea, x);
 
             // Gradient operator in index notation
-            auto const& B_0t = rhea * F_0.inverse();
+            matrix const& B_0t = rhea * F_0.inverse();
 
             // Displacement gradient
             matrix3 const H = (x - X) * B_0t;
@@ -230,7 +229,7 @@ void fem_submesh::update_deformation_measures()
             H_list[view(element, l)] = H;
             F_list[view(element, l)] = F * F_0.inverse();
         });
-    }
+    });
 }
 
 void fem_submesh::update_Jacobian_determinants()
@@ -262,7 +261,8 @@ void fem_submesh::update_Jacobian_determinants()
     }
 }
 
-fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(internal_variables_t::Tensor const tensor_name) const
+fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
+    internal_variables_t::Tensor const tensor_name) const
 {
     vector count = vector::Zero(mesh_coordinates->size() * 9);
     vector value = count;
@@ -303,7 +303,8 @@ fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(internal_variables_
     return {value, count};
 }
 
-fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(internal_variables_t::Scalar const scalar_name) const
+fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
+    internal_variables_t::Scalar const scalar_name) const
 {
     vector count = vector::Zero(mesh_coordinates->size());
     vector value = count;

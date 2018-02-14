@@ -2,11 +2,9 @@
 #include "nonaffine_microsphere.hpp"
 
 #include "constitutive/internal_variables.hpp"
-#include "numeric/dense_matrix.hpp"
-
 #include "io/json.hpp"
 
-#include <omp.h>
+#include <tbb/tbb.h>
 
 #include <stdexcept>
 
@@ -41,15 +39,11 @@ void nonaffine_microsphere::update_internal_variables(double const time_step_siz
     auto const N = material.segments_per_chain();
     auto const p = non_affine_stretch_parameter;
 
-    auto const number_of_internal_variables = deformation_gradients.size();
+    tbb::parallel_for(std::size_t{0}, deformation_gradients.size(), [&](auto const l) {
 
-#pragma omp parallel for
-    for (auto l = 0; l < number_of_internal_variables; ++l)
-    {
-        auto const& F = deformation_gradients[l]; // Deformation gradient
-        auto const& J = detF_list[l];             // Determinant of the deformation gradient
+        auto const& J = detF_list[l]; // Determinant of the deformation gradient
 
-        matrix3 const F_unimodular = unimodular(F);
+        matrix3 const F_unimodular = unimodular(deformation_gradients[l]);
 
         auto const nonaffine_stretch = compute_nonaffine_stretch(F_unimodular);
 
@@ -92,7 +86,7 @@ void nonaffine_microsphere::update_internal_variables(double const time_step_siz
         // Perform the deviatoric projection for the stress and macro moduli
         cauchy_stresses[l] = compute_kirchhoff_stress(pressure, macro_kirchhoff) / J;
         tangent_operators[l] = compute_material_tangent(J, K_eff, macro_moduli, macro_kirchhoff);
-    }
+    });
 }
 
 double nonaffine_microsphere::compute_nonaffine_stretch(matrix3 const& F_unimodular) const
@@ -101,7 +95,7 @@ double nonaffine_microsphere::compute_nonaffine_stretch(matrix3 const& F_unimodu
 
     return std::pow(unit_sphere.integrate(0.0,
                                           [&](auto const& coordinates, auto const& l) {
-                                              auto const& [r, r_outer_r] = coordinates;
+                                              auto const & [ r, r_outer_r ] = coordinates;
 
                                               vector3 const t = deformed_tangent(F_unimodular, r);
 
@@ -115,7 +109,7 @@ matrix3 nonaffine_microsphere::compute_h_tensor(matrix3 const& F_unimodular) con
     auto const p = non_affine_stretch_parameter;
 
     return unit_sphere.integrate(matrix3::Zero().eval(), [&](auto const& xyz, auto const& l) -> matrix3 {
-        auto const& [r, r_o_r] = xyz;
+        auto const & [ r, r_o_r ] = xyz;
 
         vector3 const t = deformed_tangent(F_unimodular, r);
 
