@@ -54,7 +54,7 @@
             },
             {
                 "Name" : "x-fixed",
-                "Type" : "Traction",
+                "Type" : "Displacement",
                 "Time" : [0.0, 30],
                 "x" : [0.12, 0.10],
                 "GenerateType" : "Sinusoidal",
