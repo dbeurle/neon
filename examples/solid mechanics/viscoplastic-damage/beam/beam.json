@@ -37,7 +37,7 @@
     "Mesh" : [{
             "Name" : "beam",
             "ConstitutiveModel" : {
-                "Name" : "ChabocheDamage", //"ChabocheDamage", J2Plasticity
+                "Name" : "ChabocheDamage",
 
                 "FiniteStrain" : false
             },
@@ -48,19 +48,15 @@
                 "Name" : "Clamped",
                 "Type" : "Displacement",
                 "Time" : [0.0, 0.01],
-                "Values" : {
-                    "x" : [0.0, 0.0],
-                    "y" : [0.0, 0.0],
-                    "z" : [0.0, 0.0]
-                }
+                "x" : [0.0, 0.0],
+                "y" : [0.0, 0.0],
+                "z" : [0.0, 0.0]
             },
             {
                 "Name" : "Zsym",
 				"Type" : "Traction",
                 "Time" : [0.0, 0.01],
-                "Values" : {
-                    "x" : [0.0, 2.2] //0.01 //force 1.5 -> 85MPa 1.65
-                }
+                "x" : [0.0, 2.2]
             }]
         }],
 		"LinearSolver" : {

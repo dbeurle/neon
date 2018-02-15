@@ -44,33 +44,25 @@
                 "Name" : "Xsym",
                 "Type" : "Displacement",
                 "Time" : [0.0, 1.0],
-                "Values" : {
-                    "x" : [0.0, 0.0]
-                }
+                "x" : [0.0, 0.0]
             },
             {
                 "Name" : "Ysym",
                 "Type" : "Displacement",
                 "Time" : [0.0, 1.0],
-                "Values" : {
-                    "y" : [0.0, 0.0]
-                }
+                "y" : [0.0, 0.0]
             },
             {
                 "Name" : "Zsym",
                 "Type" : "Displacement",
                 "Time" : [0.0, 1.0],
-                "Values" : {
-                    "z" : [0.0, 0.0]
-                }
+                "z" : [0.0, 0.0]
             },
             {
                 "Name" : "ZLoad",
 				"Type" : "Displacement",
                 "Time" : [0.0, 1.0],
-                "Values" : {
-                    "z" : [0.0, 0.5]
-                }
+                "z" : [0.0, 0.5]
             }]
         }],
 		"LinearSolver" : {

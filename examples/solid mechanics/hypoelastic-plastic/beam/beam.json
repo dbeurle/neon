@@ -41,17 +41,15 @@
                 "Name" : "cantilever",
                 "Type" : "Displacement",
                 "Time" : [0.0, 1.0],
-                "Values" : {
-                    "x" : [0.0, 0.0],
-                    "y" : [0.0, 0.0],
-                    "z" : [0.0, 0.0]
-                }
+                "x" : [0.0, 0.0],
+                "y" : [0.0, 0.0],
+                "z" : [0.0, 0.0]
             },
             {
                 "Name" : "load",
                 "Type" : "Pressure",
                 "Time" : [0.0, 1.0],
-                "Values" : [0.0, 1.0]
+                "Value" : [0.0, 1.0]
             }]
         }],
 		"LinearSolver" :  {
