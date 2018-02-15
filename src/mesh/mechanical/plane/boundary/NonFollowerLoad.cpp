@@ -16,7 +16,8 @@ nonfollower_load_boundary::nonfollower_load_boundary(
     std::vector<basic_submesh> const& submeshes,
     json const& simulation_data,
     json const& boundary,
-    std::unordered_map<std::string, int> const& dof_table)
+    std::unordered_map<std::string, int> const& dof_table,
+    double const generate_time_step)
 {
     for (auto& [is_dof_active, var] : nonfollower_load)
     {
@@ -47,8 +48,9 @@ nonfollower_load_boundary::nonfollower_load_boundary(
                                              mesh.connectivities(),
                                              filter_dof_list(2, dof_offset, mesh.connectivities()),
                                              material_coordinates,
-                                             boundary["Time"],
-                                             it.value());
+                                             boundary,
+                                             it.key(),
+                                             generate_time_step);
             }
         }
     }
@@ -74,8 +76,9 @@ nonfollower_load_boundary::nonfollower_load_boundary(
                                              mesh.connectivities(),
                                              filter_dof_list(2, dof_offset, mesh.connectivities()),
                                              material_coordinates,
-                                             boundary["Time"],
-                                             it.value());
+                                             boundary,
+                                             it.key(),
+                                             generate_time_step);
             }
         }
     }

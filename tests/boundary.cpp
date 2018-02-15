@@ -230,7 +230,8 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
                                   submeshes,
                                   simulation_data,
                                   boundary,
-                                  {{"x", 0}, {"y", 1}, {"z", 2}});
+                                  {{"x", 0}, {"y", 1}, {"z", 2}},
+                                  1.0);
 
     for (auto const& [is_dof_active, meshes] : loads.interface())
     {

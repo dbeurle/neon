@@ -12,6 +12,11 @@ class Dirichlet : public Boundary
 public:
     explicit Dirichlet(local_indices dofs, json const& times, json const& loads);
 
+    explicit Dirichlet(local_indices dofs,
+                       json const& boundary,
+                       std::string const& name,
+                       double const generate_time_step);
+
     [[nodiscard]] auto const& dof_view() const noexcept { return dofs; }
 
     /** Get the value depending on the loading factor */

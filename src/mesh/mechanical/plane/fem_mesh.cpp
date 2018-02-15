@@ -19,8 +19,12 @@
 
 namespace neon::mechanical::plane
 {
-fem_mesh::fem_mesh(basic_mesh const& basic_mesh, json const& material_data, json const& simulation_data)
-    : mesh_coordinates(std::make_shared<material_coordinates>(basic_mesh.coordinates()))
+fem_mesh::fem_mesh(basic_mesh const& basic_mesh,
+                   json const& material_data,
+                   json const& simulation_data,
+                   double const generate_time_step)
+    : mesh_coordinates(std::make_shared<material_coordinates>(basic_mesh.coordinates())),
+      generate_time_step{generate_time_step}
 {
     check_boundary_conditions(simulation_data["BoundaryConditions"]);
 
@@ -88,7 +92,8 @@ void fem_mesh::allocate_boundary_conditions(json const& simulation_data, basic_m
                                                                 basic_mesh.meshes(boundary_name),
                                                                 simulation_data,
                                                                 boundary,
-                                                                dof_table));
+                                                                dof_table,
+                                                                generate_time_step));
         }
         else
         {
@@ -120,7 +125,10 @@ void fem_mesh::allocate_displacement_boundary(json const& boundary, basic_mesh c
             return dof + dof_offset;
         });
 
-        displacement_bcs[boundary_name].emplace_back(boundary_dofs, boundary["Time"], it.value());
+        displacement_bcs[boundary_name].emplace_back(boundary_dofs,
+                                                     boundary,
+                                                     it.key(),
+                                                     generate_time_step);
     }
 }
 
@@ -159,7 +167,7 @@ void fem_mesh::check_boundary_conditions(json const& boundary_data) const
 {
     for (auto const& boundary : boundary_data)
     {
-        for (auto const& mandatory_field : {"Name", "Time", "Type", "Values"})
+        for (auto const& mandatory_field : {"Name", "Time", "Type"})
         {
             if (!boundary.count(mandatory_field))
             {
