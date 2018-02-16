@@ -34,15 +34,13 @@ public:
                          basic_submesh const& submesh);
 
     /** @return list of global degrees of freedom for an element */
-    [[nodiscard]] local_indices const& local_dof_list(int const element) const {
+    [[nodiscard]] local_indices const& local_dof_list(int const element) const
+    {
         return dof_list.at(element);
     }
 
-        /** @return The internal variable store */
-        [[nodiscard]] auto const& internal_variables() const
-    {
-        return *variables;
-    }
+    /** @return The internal variable store */
+    [[nodiscard]] auto const& internal_variables() const { return *variables; }
 
     void save_internal_variables(bool const have_converged);
 

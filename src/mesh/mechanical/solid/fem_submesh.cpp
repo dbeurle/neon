@@ -66,7 +66,7 @@ void fem_submesh::save_internal_variables(bool const have_converged)
 
 std::pair<local_indices const&, matrix> fem_submesh::tangent_stiffness(std::int32_t const element) const
 {
-    auto const& x = mesh_coordinates->current_configuration(local_node_list(element));
+    auto const x = mesh_coordinates->current_configuration(local_node_list(element));
 
     matrix ke = material_tangent_stiffness(x, element);
 
@@ -274,7 +274,7 @@ fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
     // vector format of values
     vector component = vector::Zero(sf->quadrature().points());
 
-    for (auto e = 0; e < elements(); ++e)
+    for (std::size_t e{0}; e < elements(); ++e)
     {
         // Assemble these into the global value vector
         auto const& node_list = local_node_list(e);
@@ -283,7 +283,7 @@ fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
         {
             for (auto cj = 0; cj < 3; ++cj)
             {
-                for (auto l = 0; l < sf->quadrature().points(); ++l)
+                for (std::size_t l{0}; l < sf->quadrature().points(); ++l)
                 {
                     auto const& tensor = tensor_list[view(e, l)];
                     component(l) = tensor(ci, cj);
@@ -316,12 +316,12 @@ fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
     // vector format of values
     vector component = vector::Zero(sf->quadrature().points());
 
-    for (auto e = 0; e < elements(); ++e)
+    for (std::size_t e{0}; e < elements(); ++e)
     {
         // Assemble these into the global value vector
         auto const& node_list = local_node_list(e);
 
-        for (auto l = 0; l < sf->quadrature().points(); ++l)
+        for (std::size_t l{0}; l < sf->quadrature().points(); ++l)
         {
             component(l) = scalar_list[view(e, l)];
         }
