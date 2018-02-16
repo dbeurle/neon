@@ -25,7 +25,7 @@
                 "Maximum" : 0.1
             }
         },
-		"Mesh" :
+        "Mesh" :
         [{
             "Name" : "cube",
             "ConstitutiveModel" : "FiniteJ2",
@@ -51,19 +51,17 @@
             },
             {
                 "Name" : "ZLoad",
-	              "Type" : "Displacement",
+	        "Type" : "Displacement",
                 "z" : 1.0e-6
             }]
         }],
-		"LinearSolver" :
-        {
-		    "Solver" : "PaStiX",
+        "LinearSolver" : {
+            "Solver" : "PaStiX",
             "MaxIterations" : 1000,
             "MaxTolerance"  : 1.0e-10
         },
         "Visualisation" : {
             "Fields" : ["Displacement", "CauchyStress", "VonMisesStress", "AccumulatedPlasticStrain"]
         }
-        }
-    ]
+    }]
 }
