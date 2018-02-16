@@ -41,25 +41,19 @@
                 "Name" : "x-sym",
                 "Type" : "Displacement",
                 "Time" : [0.0, 1.0],
-                "Values" : {
-                    "x" : [0.0, 0.0]
-                }
+                "x" : [0.0, 0.0]
             },
             {
                 "Name" : "y-sym",
                 "Type" : "Displacement",
                 "Time" : [0.0, 1.0],
-                "Values" : {
-                    "y" : [0.0, 0.0]
-                }
+                "y" : [0.0, 0.0]
             },
             {
                 "Name" : "x-disp",
                 "Type" : "Displacement",
                 "Time" : [0.0, 1.0],
-                "Values" : {
-                    "x" : [0.0, 0.01]
-                }
+                "x" : [0.0, 0.01]
             }]
         }],
 		"LinearSolver" :  {
