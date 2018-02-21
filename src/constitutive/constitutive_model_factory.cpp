@@ -111,11 +111,11 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
         }
         return std::make_unique<small_strain_J2_plasticity>(variables, material_data);
     }
-    else if (model_name == "ChabocheDamage")
+    else if (model_name == "J2PlasticityDamage")
     {
         if (mesh_data["ConstitutiveModel"]["FiniteStrain"].get<bool>())
         {
-            throw std::domain_error("\"ChabocheDamage\" is not implemented for "
+            throw std::domain_error("\"J2PlasticityDamage\" is not implemented for "
                                     "\"FiniteStrain\"");
         }
         return std::make_unique<small_strain_J2_plasticity_damage>(variables, material_data);

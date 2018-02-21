@@ -37,7 +37,7 @@
     "Mesh" : [{
             "Name" : "cube",
             "ConstitutiveModel" : {
-                "Name" : "ChabocheDamage",
+                "Name" : "J2PlasticityDamage",
 
                 "FiniteStrain" : false
             },
