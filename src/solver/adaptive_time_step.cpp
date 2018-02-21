@@ -114,8 +114,17 @@ void adaptive_time_step::parse_input(json const& increment_data, double const ma
     // Initial factor determined by input
     initial_time = increment_data["Increments"]["Initial"];
 
-    minimum_increment = increment_data["Increments"]["Minimum"];
-    maximum_increment = increment_data["Increments"]["Maximum"];
+    auto adaptive_increment = increment_data["Increments"]["Adaptive"];
+    if (adaptive_increment == "False")
+    {
+        minimum_increment = initial_time;
+        maximum_increment = initial_time;
+    }
+    else
+    {
+        minimum_increment = increment_data["Increments"]["Minimum"];
+        maximum_increment = increment_data["Increments"]["Maximum"];
+    }
 
     final_time = increment_data["Period"];
 
