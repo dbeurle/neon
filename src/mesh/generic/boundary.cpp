@@ -20,9 +20,12 @@ boundary::boundary(json const& times, json const& loads) { allocate_time_load(ti
 
 boundary::boundary(json const& boundary, std::string const& name, double const generate_time_step)
 {
-    if (boundary.find("Sinusoidal") != boundary.end())
+    if (boundary.find("GenerateType") != boundary.end())
     {
-        generate_sinusoidal(boundary, name, generate_time_step);
+        if (auto const& type = boundary["GenerateType"].get<std::string>(); type == "Sinusoidal")
+        {
+            generate_sinusoidal(boundary, name, generate_time_step);
+        }
     }
     else
     {
@@ -83,12 +86,14 @@ void boundary::generate_sinusoidal(json const& boundary,
         }
     }
 
-    std::vector<double> const amplitude{boundary[name]};
-    std::vector<double> const period{boundary["Period"]};
-    std::vector<double> const number_of_cycles{boundary["NumberOfCycles"]};
-    std::vector<double> const phase{boundary["Phase"]};
+    std::vector<double> const time = boundary["Time"];
+    std::vector<double> const amplitude = boundary[name];
+    std::vector<double> const period = boundary["Period"];
+    std::vector<double> const number_of_cycles = boundary["NumberOfCycles"];
+    std::vector<double> const phase = boundary["Phase"];
 
-    if (!((period.size() == phase.size()) && (phase.size() == number_of_cycles.size())))
+    if (!((amplitude.size() == period.size()) && (period.size() == phase.size())
+          && (phase.size() == number_of_cycles.size())))
     {
         throw std::domain_error("The amplitude, period, number_of_cycles, time_step and phase "
                                 "vectors must be of the same size.");
