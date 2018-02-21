@@ -31,13 +31,13 @@ public:
      * @return The numerically integrated matrix
      */
     template <typename MatrixTp, typename Functor>
-    MatrixTp integrate(MatrixTp integral, Functor&& f) const
+    MatrixTp integrate(MatrixTp operand, Functor&& f) const
     {
-        for (int l = 0; l < points(); ++l)
+        for (std::size_t l{0}; l < points(); ++l)
         {
-            integral.noalias() += f(femvals[l], l) * w[l];
+            operand.noalias() += f(femvals[l], l) * w[l];
         }
-        return integral;
+        return operand;
     }
 
     /**
@@ -49,7 +49,7 @@ public:
     template <typename Functor>
     void integrate_inplace(Eigen::Map<matrix> integral, Functor&& f) const
     {
-        for (int l = 0; l < points(); ++l)
+        for (std::size_t l{0}; l < points(); ++l)
         {
             integral.noalias() += f(femvals[l], l) * w[l];
         }
@@ -64,7 +64,7 @@ public:
     template <typename Functor>
     double integrate(double integral, Functor&& f) const
     {
-        for (int l = 0; l < points(); ++l)
+        for (std::size_t l{0}; l < points(); ++l)
         {
             integral += f(femvals[l], l) * w[l];
         }
@@ -74,7 +74,10 @@ public:
     template <typename Functor>
     void for_each(Functor&& eval_func) const
     {
-        for (auto l = 0; l < points(); ++l) eval_func(femvals[l], l);
+        for (std::size_t l{0}; l < points(); ++l)
+        {
+            eval_func(femvals[l], l);
+        }
     }
 
     /**

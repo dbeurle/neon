@@ -31,7 +31,7 @@ void fem_static_matrix::compute_sparsity_pattern()
     for (auto const& submesh : mesh.meshes())
     {
         // Loop over the elements and add in the non-zero components
-        for (auto element = 0; element < submesh.elements(); element++)
+        for (std::size_t element{0}; element < submesh.elements(); element++)
         {
             for (auto const& p : submesh.local_dof_list(element))
             {
@@ -58,11 +58,11 @@ void fem_static_matrix::compute_external_force(double const load_factor)
         {
             for (auto const& mesh : surface.load_interface())
             {
-                for (auto element = 0; element < mesh.elements(); ++element)
+                for (std::size_t element{0}; element < mesh.elements(); ++element)
                 {
                     auto const& [dofs, fe] = mesh.external_force(element, load_factor);
 
-                    for (auto a = 0; a < fe.size(); ++a)
+                    for (auto a = 0l; a < fe.size(); ++a)
                     {
                         f(dofs[a]) += fe(a);
                     }
@@ -70,16 +70,16 @@ void fem_static_matrix::compute_external_force(double const load_factor)
             }
             for (auto const& mesh : surface.stiffness_load_interface())
             {
-                for (auto element = 0; element < mesh.elements(); ++element)
+                for (std::size_t element{0}; element < mesh.elements(); ++element)
                 {
                     auto const& [dofs, fe] = mesh.external_force(element, load_factor);
                     auto const& [_, ke] = mesh.external_stiffness(element, load_factor);
 
-                    for (auto a = 0; a < fe.size(); ++a)
+                    for (auto a = 0l; a < fe.size(); ++a)
                     {
                         f(dofs[a]) += fe(a);
 
-                        for (auto b = 0; b < fe.size(); ++b)
+                        for (auto b{0l}; b < fe.size(); ++b)
                         {
                             K.coeffRef(dofs[a], dofs[b]) += ke(a, b);
                         }
@@ -121,16 +121,16 @@ void fem_static_matrix::assemble_stiffness()
     for (auto const& submesh : mesh.meshes())
     {
 #pragma omp parallel for
-        for (auto element = 0; element < submesh.elements(); ++element)
+        for (std::size_t element = 0; element < submesh.elements(); ++element)
         {
             // auto const[dofs, ke] = submesh.tangent_stiffness(element);
             auto const& tpl = submesh.tangent_stiffness(element);
             auto const& dofs = std::get<0>(tpl);
             auto const& ke = std::get<1>(tpl);
 
-            for (auto b = 0; b < dofs.size(); b++)
+            for (std::size_t b = 0; b < dofs.size(); b++)
             {
-                for (auto a = 0; a < dofs.size(); a++)
+                for (std::size_t a = 0; a < dofs.size(); a++)
                 {
 #pragma omp atomic
                     K.coeffRef(dofs[a], dofs[b]) += ke(a, b);

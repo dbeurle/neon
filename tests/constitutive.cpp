@@ -3,24 +3,25 @@
 
 #include "catch.hpp"
 
-#include <Eigen/Dense>
-#include <Eigen/Eigenvalues>
-
 #include "constitutive/internal_variables.hpp"
 
 #include "constitutive/mechanical/solid/affine_microsphere.hpp"
 #include "constitutive/mechanical/solid/compressible_neohooke.hpp"
 #include "constitutive/mechanical/solid/small_strain_J2_plasticity.hpp"
-
+#include "constitutive/mechanical/detail/J2_plasticity.hpp"
 #include "constitutive/mechanical/plane/isotropic_linear_elasticity.hpp"
-
 #include "constitutive/thermal/isotropic_diffusion.hpp"
 
 #include "constitutive/constitutive_model_factory.hpp"
 
+#include "material/isotropic_elastic_plastic.hpp"
+
 #include "Exceptions.hpp"
 
 #include "io/json.hpp"
+
+#include <Eigen/Dense>
+#include <Eigen/Eigenvalues>
 
 std::string json_input_file()
 {
@@ -941,6 +942,13 @@ TEST_CASE("Solid mechanics J2 plasticity model")
         REQUIRE(variables->has(internal_variables_t::Tensor::LinearisedStrain));
         REQUIRE(variables->has(internal_variables_t::Tensor::LinearisedPlasticStrain));
         REQUIRE(variables->has(internal_variables_t::rank4::tangent_operator));
+    }
+    SECTION("Helper function")
+    {
+        neon::isotropic_elastic_plastic material{material_data};
+
+        REQUIRE(neon::mechanical::evaluate_J2_yield_function(material, 100.0e6, 0.0) <= 0.0);
+        REQUIRE(neon::mechanical::evaluate_J2_yield_function(material, 300.0e6, 0.0) > 0.0);
     }
     SECTION("No load")
     {
