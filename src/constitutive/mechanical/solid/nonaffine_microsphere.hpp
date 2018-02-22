@@ -105,16 +105,6 @@ protected:
      */
     matrix6 compute_o_dot_product(vector3 const& n) const;
 
-    vector3 deformed_normal(matrix3 const& F_unimodular, vector3 const& surface_vector) const
-    {
-        return F_unimodular.inverse().transpose() * surface_vector;
-    }
-
-    auto compute_area_stretch(vector3 const& deformed_normal) const
-    {
-        return deformed_normal.norm();
-    }
-
 private:
     micromechanical_elastomer material; //!< Material with micromechanical parameters
 

@@ -2,6 +2,8 @@
 #include "nonaffine_microsphere.hpp"
 
 #include "constitutive/internal_variables.hpp"
+#include "constitutive/mechanical/detail/microsphere.hpp"
+#include "constitutive/mechanical/volumetric_free_energy.hpp"
 #include "io/json.hpp"
 
 #include <tbb/parallel_for.h>

@@ -106,23 +106,7 @@ protected:
      * @return Macromoduli from unit sphere homogenisation
      */
     [[nodiscard]] matrix6 compute_macro_moduli(matrix3 const& F_unimodular,
-                                               double const shear_modulus,
-                                               double const N) const;
-
-    /**
-     * Compute the deformed tangent using the unimodular deformation gradient
-     * and the vector associated with the quadrature point on the unit sphere
-     */
-    [[nodiscard]] vector3 deformed_tangent(matrix3 const& F_unimodular,
-                                           vector3 const& surface_vector) const {
-        return F_unimodular * surface_vector;
-    }
-
-        /** Compute the microstretch, which is the norm of the deformed tangent vector */
-        [[nodiscard]] auto compute_microstretch(vector3 const& deformed_tangent) const
-    {
-        return deformed_tangent.norm();
-    }
+                                               double const shear_modulus) const;
 
 protected:
     unit_sphere_quadrature unit_sphere; //!< Unit sphere quadrature rule
