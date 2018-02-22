@@ -38,7 +38,8 @@ public:
 
     virtual void update_internal_variables(double const time_step_size) override;
 
-    [[nodiscard]] material_property const& intrinsic_material() const override final {
+    [[nodiscard]] material_property const& intrinsic_material() const override final
+    {
         return material;
     };
 
