@@ -8,4 +8,4 @@ configure_file("ElastomerTestSpecimen.mesh"
               "${CMAKE_CURRENT_BINARY_DIR}/ElastomerTestSpecimen.mesh"
               COPYONLY)
 
-add_test(NeohookeModel neonfe ElastomerTestSpecimen.json)
+add_test(neohooke_specimen neonfe ElastomerTestSpecimen.json)

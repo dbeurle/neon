@@ -118,7 +118,7 @@ matrix fem_submesh::material_tangent_stiffness(matrix3x const& x, std::int32_t c
     matrix B = matrix::Zero(6, local_dofs);
 
     return sf->quadrature().integrate(kmat, [&](auto const& femval, auto const& l) -> matrix {
-        auto const& [N, rhea] = femval;
+        auto const & [ N, rhea ] = femval;
 
         auto const& D = tangent_operators[view(element, l)];
 
@@ -135,12 +135,12 @@ vector fem_submesh::internal_nodal_force(matrix3x const& x, std::int32_t const e
 {
     auto const& cauchy_stresses = variables->fetch(internal_variables_t::Tensor::Cauchy);
 
-    auto const [m, n] = std::make_pair(nodes_per_element(), dofs_per_node());
+    auto const[m, n] = std::make_pair(nodes_per_element(), dofs_per_node());
 
     matrix fint_matrix = sf->quadrature()
                              .integrate(matrix::Zero(m, n).eval(),
                                         [&](auto const& femval, auto const& l) -> matrix {
-                                            auto const& [N, dN] = femval;
+                                            auto const & [ N, dN ] = femval;
 
                                             matrix3 const Jacobian = local_deformation_gradient(dN,
                                                                                                 x);
@@ -164,7 +164,7 @@ std::pair<local_indices const&, matrix> fem_submesh::consistent_mass(std::int32_
 
     auto m = sf->quadrature().integrate(matrix::Zero(nodes_per_element(), nodes_per_element()).eval(),
                                         [&](auto const& femval, auto const& l) -> matrix {
-                                            auto const& [N, dN] = femval;
+                                            auto const & [ N, dN ] = femval;
 
                                             matrix3 const Jacobian = local_deformation_gradient(dN,
                                                                                                 X);
@@ -177,7 +177,7 @@ std::pair<local_indices const&, matrix> fem_submesh::consistent_mass(std::int32_
 
 std::pair<local_indices const&, vector> fem_submesh::diagonal_mass(std::int32_t const element) const
 {
-    auto const& [dofs, consistent_m] = this->consistent_mass(element);
+    auto const & [ dofs, consistent_m ] = this->consistent_mass(element);
 
     vector diagonal_m(consistent_m.rows());
     for (auto i = 0; i < consistent_m.rows(); ++i)
@@ -214,7 +214,7 @@ void fem_submesh::update_deformation_measures()
         auto const x = mesh_coordinates->current_configuration(local_node_list(element));
 
         sf->quadrature().for_each([&](auto const& femval, const auto& l) {
-            auto const& [N, rhea] = femval;
+            auto const & [ N, rhea ] = femval;
 
             // Local deformation gradient for the initial configuration
             matrix3 const F_0 = local_deformation_gradient(rhea, X);
@@ -252,7 +252,7 @@ void fem_submesh::update_Jacobian_determinants()
 
         auto const i = std::distance(deformation_gradient_determinants.begin(), found);
 
-        auto const [element, quadrature_point] = std::div(i, sf->quadrature().points());
+        auto const[element, quadrature_point] = std::div(i, sf->quadrature().points());
 
         throw computational_error("Positive Jacobian assumption violated at element "
                                   + std::to_string(element) + " and local quadrature point "

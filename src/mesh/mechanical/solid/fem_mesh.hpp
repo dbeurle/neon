@@ -19,7 +19,10 @@ public:
     using internal_variable_type = fem_submesh::internal_variable_type;
 
 public:
-    fem_mesh(basic_mesh const& basic_mesh, json const& material_data, json const& simulation_data);
+    fem_mesh(basic_mesh const& basic_mesh,
+             json const& material_data,
+             json const& simulation_data,
+             double const generate_time_step);
 
     /** The number of active degrees of freedom in this mesh */
     [[nodiscard]] auto active_dofs() const { return 3 * mesh_coordinates->size(); }
@@ -46,11 +49,8 @@ public:
     /** Constant access to the sub-meshes */
     [[nodiscard]] std::vector<fem_submesh> const& meshes() const { return submeshes; }
 
-        /** Non-const access to the sub-meshes */
-        [[nodiscard]] std::vector<fem_submesh>& meshes()
-    {
-        return submeshes;
-    }
+    /** Non-const access to the sub-meshes */
+    [[nodiscard]] std::vector<fem_submesh>& meshes() { return submeshes; }
 
     [[nodiscard]] auto const& displacement_boundaries() const { return displacement_bcs; }
 
@@ -63,8 +63,6 @@ public:
      * \sa adaptive_time_step
      */
     [[nodiscard]] std::vector<double> time_history() const;
-
-    [[deprecated]][[nodiscard]] auto const& coordinates() const { return *mesh_coordinates; }
 
     /** Provide const access to the discretised geometry for this mesh */
     [[nodiscard]] auto const& geometry() const { return *mesh_coordinates; }
@@ -82,6 +80,13 @@ protected:
     [[nodiscard]] local_indices filter_dof_list(std::vector<basic_submesh> const& boundary_mesh) const;
 
 protected:
+    /**
+     * This time step is taken from "Time[Period][Increments][Initial]" in the input file.
+     * It is used in the boundary class to generate cyclic loading for example. This ensures the
+     * compatibility between user defined and sinusoidal boundary conditions.
+     */
+    double generate_time_step;
+
     std::shared_ptr<material_coordinates> mesh_coordinates;
 
     std::vector<fem_submesh> submeshes;

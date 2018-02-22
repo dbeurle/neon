@@ -26,6 +26,13 @@ public:
                      json const& times,
                      json const& loads);
 
+    explicit Neumann(std::vector<local_indices> const& nodal_connectivity,
+                     std::vector<local_indices> const& dof_list,
+                     std::shared_ptr<material_coordinates>& material_coordinates,
+                     json const& boundary,
+                     std::string const& name,
+                     double const generate_time_step);
+
     [[nodiscard]] auto elements() const { return nodal_connectivity.size(); }
 
 protected:
@@ -45,6 +52,18 @@ public:
                          json const& time_history,
                          json const& load_history)
         : Neumann(nodal_connectivity, dof_list, coordinates, time_history, load_history),
+          sf(std::move(sf))
+    {
+    }
+
+    explicit SurfaceLoad(std::unique_ptr<SurfaceInterpolation_Tp>&& sf,
+                         std::vector<local_indices> const& nodal_connectivity,
+                         std::vector<local_indices> const& dof_list,
+                         std::shared_ptr<material_coordinates>& coordinates,
+                         json const& boundary,
+                         std::string const& name,
+                         double const generate_time_step)
+        : Neumann(nodal_connectivity, dof_list, coordinates, boundary, name, generate_time_step),
           sf(std::move(sf))
     {
     }
@@ -86,6 +105,18 @@ public:
                         json const& time_history,
                         json const& load_history)
         : Neumann(nodal_connectivity, dof_list, coordinates, time_history, load_history),
+          sf(std::move(sf))
+    {
+    }
+
+    explicit VolumeLoad(std::unique_ptr<VolumeInterpolation_Tp>&& sf,
+                        std::vector<local_indices> const& nodal_connectivity,
+                        std::vector<local_indices> const& dof_list,
+                        std::shared_ptr<material_coordinates>& coordinates,
+                        json const& boundary,
+                        std::string const& name,
+                        double const generate_time_step)
+        : Neumann(nodal_connectivity, dof_list, coordinates, boundary, name, generate_time_step),
           sf(std::move(sf))
     {
     }

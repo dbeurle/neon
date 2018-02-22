@@ -1,0 +1,53 @@
+{
+    "Name" : "Dirichlet heat",
+    "Cores" : 1,
+    "Part": [{
+        "Name" : "cube",
+        "Material" : "steel"
+    }],
+    "Material" : [{
+        "Name" : "steel",
+        "Conductivity" : 386.0,
+        "SpecificHeat" : 390.0
+    }],
+    "SimulationCases" : [{
+        "Name" : "LinearGradient",
+        "Module" : "HeatDiffusion",
+        "Solution" : "Equilibrium",
+        "Time" : {
+            "Period" : 1.0,
+            "Increments" : {
+                "Initial" : 1.0,
+                "Minimum" : 0.00001,
+                "Maximum" : 1.0
+            }
+        },
+        "Mesh" : [{
+            "Name" : "cube",
+            "ConstitutiveModel" : {
+                "Name" : "IsotropicDiffusion"
+            },
+            "ElementOptions" : {
+                "Quadrature" : "Full"
+            },
+            "BoundaryConditions" : [{
+                "Name" : "cold",
+                "Type" : "Temperature",
+                "Time" : [0.0, 1.0],
+                "Value" : [10.0, 10.0]
+            },
+            {
+                "Name" : "hot",
+                "Type" : "HeatFlux",
+                "Time" : [0.0, 1.0],
+                "Value" : [1500.0, 1500.0]
+            }]
+        }],
+        "LinearSolver" : {
+	    "Solver" : "PaStiX"
+        },
+        "Visualisation" : {
+            "Fields" : ["Temperature"]
+        }
+    }]
+}

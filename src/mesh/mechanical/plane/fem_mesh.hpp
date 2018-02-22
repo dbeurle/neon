@@ -21,7 +21,10 @@ public:
     using internal_variable_type = internal_variables_t;
 
 public:
-    fem_mesh(basic_mesh const& basic_mesh, json const& material_data, json const& simulation_data);
+    fem_mesh(basic_mesh const& basic_mesh,
+             json const& material_data,
+             json const& simulation_data,
+             double const generate_time_step);
 
     /** The number of active degrees of freedom in this mesh */
     [[nodiscard]] auto active_dofs() const { return 2 * mesh_coordinates->size(); }
@@ -82,6 +85,13 @@ protected:
     [[nodiscard]] local_indices filter_dof_list(std::vector<basic_submesh> const& boundary_mesh) const;
 
 protected:
+    /**
+     * This time step is taken from "Time[Period][Increments][Initial]" in the input file.
+     * It is used in the boundary class to generate cyclic loading for example. This ensures the
+     compatibility between user defined and sinusoidal boundary conditions.
+     */
+    double generate_time_step;
+
     std::shared_ptr<material_coordinates> mesh_coordinates;
 
     std::vector<fem_submesh> submeshes;

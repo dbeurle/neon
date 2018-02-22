@@ -204,14 +204,14 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
                                        "{\"Name\" : \"Ysym\", "
                                        "\"Type\" : \"Traction\", "
                                        "\"Time\" : [0.0, 1.0],"
-                                       "\"Values\" : {\"y\" : [0.0, 1.0e-3]}} ], "
+                                       "\"y\" : [0.0, 1.0e-3]} ], "
                                        "\"ConstitutiveModel\" : {\"Name\":\"NeoHooke\"}, "
                                        "\"ElementOptions\" : {\"Quadrature\" : \"Full\"}, "
                                        "\"Name\" : \"cube\"}");
 
     auto boundary = json::parse("{\"Time\":[0.0, "
-                                "1.0],\"Type\":\"Traction\",\"Values\":{\"y\":[0.0, "
-                                "1.0e-3]}}");
+                                "1.0],\"Type\":\"Traction\",\"y\":[0.0, "
+                                "1.0e-3]}");
 
     std::vector<basic_submesh> submeshes = {tri_mesh, quad_mesh};
 
@@ -230,7 +230,8 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
                                   submeshes,
                                   simulation_data,
                                   boundary,
-                                  {{"x", 0}, {"y", 1}, {"z", 2}});
+                                  {{"x", 0}, {"y", 1}, {"z", 2}},
+                                  1.0);
 
     for (auto const& [is_dof_active, meshes] : loads.interface())
     {
