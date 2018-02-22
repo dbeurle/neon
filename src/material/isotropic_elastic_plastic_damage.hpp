@@ -5,13 +5,15 @@
 
 namespace neon
 {
-/** PlasticMaterial is a base class for material exhibiting plastic behavior */
+/**
+ * isotropic_elastic_plastic_damage is responsible for providing an interface
+ * for the parameters required in an isotropic damage model.
+ * \sa small_strain_J2_plasticity_damage
+ */
 class isotropic_elastic_plastic_damage : public isotropic_elastic_plastic
 {
 public:
     isotropic_elastic_plastic_damage(json const& material_data);
-
-    ~isotropic_elastic_plastic_damage() = default;
 
     double softening_multiplier() const { return gamma; }
     double kinematic_hardening_modulus() const { return C; }

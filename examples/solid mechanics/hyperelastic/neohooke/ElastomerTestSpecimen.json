@@ -39,33 +39,25 @@
                 "Name" : "x-sym",
                 "Type" : "Displacement",
                 "Time" : [0.0, 1.0],
-                "Values" : {
-                    "x" : [0.0, 0.0]
-                }
+                "x" : [0.0, 0.0]
             },
             {
                 "Name" : "z-sym",
                 "Type" : "Displacement",
                 "Time" : [0.0, 1.0],
-                "Values" : {
-                    "z" : [0.0, 0.0]
-                }
+                "z" : [0.0, 0.0]
             },
             {
                 "Name" : "base",
                 "Type" : "Displacement",
                 "Time" : [0.0, 1.0],
-                "Values" : {
-                    "y" : [0.0, 0.0]
-                }
+                "y" : [0.0, 0.0]
             },
             {
                 "Name" : "load",
 				"Type" : "Traction",
                 "Time" : [0.0, 1.0],
-                "Values" : {
-                    "y" : [0.0, 5.0e5]
-                }
+                "y" : [0.0, 5.0e5]
             }]
         }],
 		"LinearSolver" : {

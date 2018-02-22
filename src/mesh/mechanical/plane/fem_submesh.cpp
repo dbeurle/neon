@@ -208,7 +208,7 @@ void fem_submesh::update_deformation_measures()
     auto& F_list = variables->fetch(internal_variables_t::Tensor::DeformationGradient);
 
     // #pragma omp parallel for
-    for (auto element = 0; element < elements(); ++element)
+    for (std::size_t element{0}; element < elements(); ++element)
     {
         // Gather the material coordinates
         auto const X = geometry::project_to_plane(
@@ -274,7 +274,7 @@ std::pair<vector, vector> fem_submesh::nodal_averaged_variable(
     // vector format of values
     vector component = vector::Zero(sf->quadrature().points());
 
-    for (auto element = 0; element < elements(); ++element)
+    for (std::size_t element{0}; element < elements(); ++element)
     {
         // Assemble these into the global value vector
         auto const& node_list = local_node_list(element);
@@ -283,7 +283,7 @@ std::pair<vector, vector> fem_submesh::nodal_averaged_variable(
         {
             for (auto cj = 0; cj < 2; ++cj)
             {
-                for (auto l = 0; l < sf->quadrature().points(); ++l)
+                for (std::size_t l{0}; l < sf->quadrature().points(); ++l)
                 {
                     component(l) = tensor_list[view(element, l)](ci, cj);
                 }
@@ -315,9 +315,9 @@ std::pair<vector, vector> fem_submesh::nodal_averaged_variable(
     // vector format of values
     vector component = vector::Zero(sf->quadrature().points());
 
-    for (auto element = 0; element < elements(); ++element)
+    for (std::size_t element{0}; element < elements(); ++element)
     {
-        for (auto l = 0; l < sf->quadrature().points(); ++l)
+        for (std::size_t l{0}; l < sf->quadrature().points(); ++l)
         {
             component(l) = scalar_list[view(element, l)];
         }

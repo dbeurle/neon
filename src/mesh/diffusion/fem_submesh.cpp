@@ -69,7 +69,7 @@ std::tuple<local_indices const&, matrix> fem_submesh::tangent_stiffness(int cons
 
 std::tuple<local_indices const&, matrix> fem_submesh::consistent_mass(int const element) const
 {
-    auto X = mesh_coordinates->current_configuration(local_node_list(element));
+    auto const X = mesh_coordinates->current_configuration(local_node_list(element));
 
     auto const density = cm->intrinsic_material().initial_density();
     auto const specific_heat = cm->intrinsic_material().specific_heat();
@@ -128,12 +128,12 @@ fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
     // vector format of values
     vector component = vector::Zero(sf->quadrature().points());
 
-    for (auto e = 0; e < elements(); ++e)
+    for (std::size_t e{0}; e < elements(); ++e)
     {
         // Assemble these into the global value vector
         auto const& node_list = local_node_list(e);
 
-        for (auto l = 0; l < sf->quadrature().points(); ++l)
+        for (std::size_t l{0}; l < sf->quadrature().points(); ++l)
         {
             component(l) = scalar_list[this->offset(e, l)];
         }
@@ -141,7 +141,7 @@ fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
         // Local extrapolation to the nodes
         vector const nodal_component = E * component;
 
-        for (auto n = 0; n < nodal_component.rows(); n++)
+        for (auto n = 0l; n < nodal_component.rows(); n++)
         {
             value(node_list[n]) += nodal_component(n);
             count(node_list[n]) += 1.0;

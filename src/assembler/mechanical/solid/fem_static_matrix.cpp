@@ -4,13 +4,15 @@
 #include "Exceptions.hpp"
 #include "numeric/float_compare.hpp"
 #include "solver/linear/LinearSolverFactory.hpp"
+#include "io/json.hpp"
+
+#include <termcolor/termcolor.hpp>
+
+#include <tbb/tbb.h>
 
 #include <cfenv>
 #include <chrono>
-
-#include "io/json.hpp"
-#include <omp.h>
-#include <termcolor/termcolor.hpp>
+#include <functional>
 
 namespace neon::mechanical::solid
 {
@@ -62,7 +64,7 @@ void fem_static_matrix::compute_sparsity_pattern()
     for (auto const& submesh : mesh.meshes())
     {
         // Loop over the elements and add in the non-zero components
-        for (auto element = 0; element < submesh.elements(); element++)
+        for (std::size_t element{0}; element < submesh.elements(); element++)
         {
             for (auto const& p : submesh.local_dof_list(element))
             {
@@ -87,7 +89,7 @@ void fem_static_matrix::compute_internal_force()
 
     for (auto const& submesh : mesh.meshes())
     {
-        for (auto element = 0; element < submesh.elements(); ++element)
+        for (std::size_t element{0}; element < submesh.elements(); ++element)
         {
             auto const& [dofs, fe_int] = submesh.internal_force(element);
 
@@ -123,7 +125,7 @@ void fem_static_matrix::compute_external_force()
             {
                 // clang-format off
                 std::visit([&](auto const& mesh) {
-                    for (auto element = 0; element < mesh.elements(); ++element)
+                    for (std::size_t element{0}; element < mesh.elements(); ++element)
                     {
                        auto const & [ dofs, fe_ext ] = mesh.external_force(element, step_time);
 
@@ -199,27 +201,22 @@ void fem_static_matrix::assemble_stiffness()
 
     for (auto const& submesh : mesh.meshes())
     {
-#pragma omp parallel for
-        for (auto element = 0; element < submesh.elements(); ++element)
-        {
-            // auto const[dofs, ke] = submesh.tangent_stiffness(element);
-            auto const& tpl = submesh.tangent_stiffness(element);
-            auto const dofs = std::get<0>(tpl);
-            auto const ke = std::get<1>(tpl);
+        tbb::parallel_for(std::size_t{0}, submesh.elements(), [&](auto const element) {
 
-            for (auto a = 0; a < dofs.size(); a++)
+            auto const[dofs, ke] = submesh.tangent_stiffness(element);
+
+            for (std::size_t a = 0; a < dofs.size(); a++)
             {
-                for (auto b = 0; b < dofs.size(); b++)
+                for (std::size_t b = 0; b < dofs.size(); b++)
                 {
-#pragma omp atomic
-                    Kt.coeffRef(dofs[a], dofs[b]) += ke(a, b);
+                    Kt.coefficient_update(dofs[a], dofs[b], ke(a, b));
                 }
             }
-        }
+        });
     }
 
     auto const end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::chrono::duration<double> const elapsed_seconds = end - start;
 
     std::cout << std::string(6, ' ') << "Tangent stiffness assembly took "
               << elapsed_seconds.count() << "s\n";

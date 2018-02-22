@@ -11,10 +11,6 @@
 #include "numeric/gradient_operator.hpp"
 #include "numeric/mechanics"
 
-#include <cfenv>
-#include <chrono>
-#include <omp.h>
-
 #include <range/v3/algorithm/count_if.hpp>
 #include <range/v3/algorithm/fill.hpp>
 #include <range/v3/algorithm/find_if.hpp>
@@ -22,12 +18,17 @@
 
 #include <termcolor/termcolor.hpp>
 
+#include <tbb/tbb.h>
+
+#include <cfenv>
+#include <chrono>
+
 namespace neon::mechanical::solid
 {
 fem_submesh::fem_submesh(json const& material_data,
-                       json const& mesh_data,
-                       std::shared_ptr<material_coordinates>& mesh_coordinates,
-                       basic_submesh const& submesh)
+                         json const& mesh_data,
+                         std::shared_ptr<material_coordinates>& mesh_coordinates,
+                         basic_submesh const& submesh)
     : basic_submesh(submesh),
       mesh_coordinates(mesh_coordinates),
       sf(make_volume_interpolation(topology(), mesh_data)),
@@ -65,7 +66,7 @@ void fem_submesh::save_internal_variables(bool const have_converged)
 
 std::pair<local_indices const&, matrix> fem_submesh::tangent_stiffness(std::int32_t const element) const
 {
-    auto const& x = mesh_coordinates->current_configuration(local_node_list(element));
+    auto const x = mesh_coordinates->current_configuration(local_node_list(element));
 
     matrix ke = material_tangent_stiffness(x, element);
 
@@ -207,9 +208,7 @@ void fem_submesh::update_deformation_measures()
     auto& H_list = variables->fetch(internal_variables_t::Tensor::DisplacementGradient);
     auto& F_list = variables->fetch(internal_variables_t::Tensor::DeformationGradient);
 
-#pragma omp parallel for
-    for (auto element = 0; element < elements(); ++element)
-    {
+    tbb::parallel_for(std::size_t{0}, elements(), [&](auto const element) {
         // Gather the material coordinates
         auto const X = mesh_coordinates->initial_configuration(local_node_list(element));
         auto const x = mesh_coordinates->current_configuration(local_node_list(element));
@@ -222,7 +221,7 @@ void fem_submesh::update_deformation_measures()
             matrix3 const F = local_deformation_gradient(rhea, x);
 
             // Gradient operator in index notation
-            auto const& B_0t = rhea * F_0.inverse();
+            matrix const& B_0t = rhea * F_0.inverse();
 
             // Displacement gradient
             matrix3 const H = (x - X) * B_0t;
@@ -230,7 +229,7 @@ void fem_submesh::update_deformation_measures()
             H_list[view(element, l)] = H;
             F_list[view(element, l)] = F * F_0.inverse();
         });
-    }
+    });
 }
 
 void fem_submesh::update_Jacobian_determinants()
@@ -262,7 +261,8 @@ void fem_submesh::update_Jacobian_determinants()
     }
 }
 
-fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(internal_variables_t::Tensor const tensor_name) const
+fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
+    internal_variables_t::Tensor const tensor_name) const
 {
     vector count = vector::Zero(mesh_coordinates->size() * 9);
     vector value = count;
@@ -274,7 +274,7 @@ fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(internal_variables_
     // vector format of values
     vector component = vector::Zero(sf->quadrature().points());
 
-    for (auto e = 0; e < elements(); ++e)
+    for (std::size_t e{0}; e < elements(); ++e)
     {
         // Assemble these into the global value vector
         auto const& node_list = local_node_list(e);
@@ -283,7 +283,7 @@ fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(internal_variables_
         {
             for (auto cj = 0; cj < 3; ++cj)
             {
-                for (auto l = 0; l < sf->quadrature().points(); ++l)
+                for (std::size_t l{0}; l < sf->quadrature().points(); ++l)
                 {
                     auto const& tensor = tensor_list[view(e, l)];
                     component(l) = tensor(ci, cj);
@@ -303,7 +303,8 @@ fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(internal_variables_
     return {value, count};
 }
 
-fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(internal_variables_t::Scalar const scalar_name) const
+fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
+    internal_variables_t::Scalar const scalar_name) const
 {
     vector count = vector::Zero(mesh_coordinates->size());
     vector value = count;
@@ -315,12 +316,12 @@ fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(internal_variables_
     // vector format of values
     vector component = vector::Zero(sf->quadrature().points());
 
-    for (auto e = 0; e < elements(); ++e)
+    for (std::size_t e{0}; e < elements(); ++e)
     {
         // Assemble these into the global value vector
         auto const& node_list = local_node_list(e);
 
-        for (auto l = 0; l < sf->quadrature().points(); ++l)
+        for (std::size_t l{0}; l < sf->quadrature().points(); ++l)
         {
             component(l) = scalar_list[view(e, l)];
         }

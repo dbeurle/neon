@@ -26,7 +26,7 @@ Boundary::Boundary(json const& boundary, std::string const& name, double const g
     }
     else
     {
-        allocate_time_load(boundary["Time"], boundary["Values"][name]);
+        allocate_time_load(boundary["Time"], boundary[name]);
     }
 }
 
@@ -83,7 +83,7 @@ void Boundary::generate_sinusoidal(json const& boundary,
         }
     }
 
-    std::vector<double> const amplitude{boundary["Values"][name]};
+    std::vector<double> const amplitude{boundary[name]};
     std::vector<double> const period{boundary["Period"]};
     std::vector<double> const number_of_cycles{boundary["NumberOfCycles"]};
     std::vector<double> const phase{boundary["Phase"]};

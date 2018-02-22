@@ -1,6 +1,9 @@
 
 #pragma once
 
+
+#define EIGEN_SPARSEMATRIX_PLUGIN "numeric/thread_safe_plugin.hpp"
+
 #include <Eigen/Sparse>
 
 namespace neon

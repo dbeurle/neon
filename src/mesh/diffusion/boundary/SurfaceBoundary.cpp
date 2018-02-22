@@ -32,7 +32,7 @@ boundary_mesh::boundary_mesh(std::shared_ptr<material_coordinates>& material_coo
             // Create the heat flux from the heat transfer coefficient and the
             // ambient temperature
             json heat_flux;
-            for (auto i = 0; i < boundary["HeatTransferCoefficient"].size(); ++i)
+            for (std::size_t i{0}; i < boundary["HeatTransferCoefficient"].size(); ++i)
             {
                 heat_flux.emplace_back(boundary["HeatTransferCoefficient"][i].get<double>()
                                        * boundary["AmbientTemperature"][i].get<double>());

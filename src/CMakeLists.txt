@@ -29,6 +29,7 @@ target_link_libraries(neon
                       ${CUDA_LIBRARIES}
                       ${CUDA_CUBLAS_LIBRARIES}
                       ${CUDA_cusparse_LIBRARY}
+                      tbb
                       pastix
                       jsoncpp
                       scotch

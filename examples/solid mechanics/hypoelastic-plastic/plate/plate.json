@@ -41,34 +41,25 @@
                 "Name" : "x-sym",
                 "Type" : "Displacement",
                 "Time" : [0.0, 1.0],
-                "Values" : {
-                    "x" : [0.0, 0.0]
-                }
+                "x" : [0.0, 0.0]
             },
             {
                 "Name" : "y-sym",
                 "Type" : "Displacement",
                 "Time" : [0.0, 1.0],
-                "Values" : {
-                    "y" : [0.0, 0.0]
-                }
+                "y" : [0.0, 0.0]
             },
             {
                 "Name" : "z-sym",
                 "Type" : "Displacement",
                 "Time" : [0.0, 1.0],
-                "Values" : {
-                    "z" : [0.0, 0.0]
-                }
+                "z" : [0.0, 0.0]
             },
             {
                 "Name" : "load",
                 "Type" : "Pressure",
                 "Time" : [0.0, 1.0],
-		        "Values" : [0.0, -1.5e2]
-                //"Values" : {
-                //    "x" : [0.0, -1.5e2]
-                //}
+		            "Value" : [0.0, -1.5e2]
             }]
         }],
 		"LinearSolver" :  {
