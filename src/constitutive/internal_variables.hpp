@@ -8,6 +8,7 @@
 #include <functional>
 #include <unordered_map>
 #include <vector>
+#include <cstdint>
 
 namespace neon
 {
@@ -52,10 +53,10 @@ public:
     static auto constexpr tensor_size = rank2_dimension * rank2_dimension;
 
 public:
-    enum class rank4 { tangent_operator };
+    enum class rank4 : std::uint8_t { tangent_operator };
 
     /** Enumerations for internal variables that are tensor types */
-    enum class Tensor {
+    enum class Tensor : std::uint8_t {
         /* Tensors for solid mechanics applications */
         // Stress measures
         Cauchy,
@@ -77,9 +78,15 @@ public:
         Conductivity
     };
 
-    enum class vector { Chains, Segments, ShearModuli, HeatFlux };
+    enum class vector : std::uint8_t {
+        Chains,
+        Segments,
+        ShearModuli,
+        HeatFlux,
+        deformation_history
+    };
 
-    enum class Scalar {
+    enum class Scalar : std::uint8_t {
         Chains,      // Chains for the micromechanical model
         Segments,    // Segments for the micromechanical model
         ShearModuli, // Shear moduli
