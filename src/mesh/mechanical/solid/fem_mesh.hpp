@@ -49,11 +49,8 @@ public:
     /** Constant access to the sub-meshes */
     [[nodiscard]] std::vector<fem_submesh> const& meshes() const { return submeshes; }
 
-        /** Non-const access to the sub-meshes */
-        [[nodiscard]] std::vector<fem_submesh>& meshes()
-    {
-        return submeshes;
-    }
+    /** Non-const access to the sub-meshes */
+    [[nodiscard]] std::vector<fem_submesh>& meshes() { return submeshes; }
 
     [[nodiscard]] auto const& displacement_boundaries() const { return displacement_bcs; }
 
@@ -86,7 +83,7 @@ protected:
     /**
      * This time step is taken from "Time[Period][Increments][Initial]" in the input file.
      * It is used in the boundary class to generate cyclic loading for example. This ensures the
-     compatibility between user defined and sinusoidal boundary conditions.
+     * compatibility between user defined and sinusoidal boundary conditions.
      */
     double generate_time_step;
 
