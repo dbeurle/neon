@@ -8,45 +8,52 @@
     "Material" : [{
         "Name" : "steel",
         "Conductivity" : 386.0,
-        "SpecificHeat" : 390.0
+        "SpecificHeat" : 390.0,
+        "Density" : 7800.0
     }],
     "SimulationCases" : [{
-        "Name" : "Uniaxial",
+        "Name" : "TransientConstantHeat",
         "Module" : "HeatDiffusion",
-        "Solution" : "Equilibrium",
+        "Solution" : "Transient",
         "Time" : {
-            "Period" : 1.0,
+            "Period" : 1000.0,
+            "Method" : "ImplicitEuler",
             "Increments" : {
-                "Initial" : 1.0,
+                "Initial" : 2.0,
                 "Minimum" : 0.00001,
                 "Maximum" : 1.0
             }
         },
-	    "Mesh" : [{
+        "Mesh" : [{
             "Name" : "cube",
-            "ConstitutiveModel" : "IsotropicDiffusion",
+            "ConstitutiveModel" : {
+                "Name" : "IsotropicDiffusion"
+            },
             "ElementOptions" : {
                 "Quadrature" : "Full"
             },
-            "BoundaryConditions" :
-            [{
+            "InitialConditions" : {
+                "Uniform" : 298.0
+            },
+            "BoundaryConditions" : [{
                 "Name" : "cold",
                 "Type" : "Temperature",
-                "Time" : [0.0, 1.0],
-                "Value" : [10.0, 10.0]
+                "Time" : [0.0, 1000.0],
+                "Value" : [200.0, 200.0]
             },
             {
                 "Name" : "hot",
                 "Type" : "HeatFlux",
-                "Time" : [0.0, 1.0],
-                "Value" : [5.0, 5.0]
+                "Time" : [0.0, 1000.0],
+                "Value" :  [1000.0, 1000.0]
             }]
         }],
-		"LinearSolver" : {
-		    "Solver" : "PaStiX"
+        "LinearSolver" : {
+            "Solver" : "Iterative"
         },
         "Visualisation" : {
-            "Fields" : ["Temperature"]
+            "Fields" : ["Temperature"],
+            "WriteEvery" : 10
         }
     }]
 }
