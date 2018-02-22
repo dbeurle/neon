@@ -16,7 +16,7 @@ add_custom_target(coverage
                   COMMAND lcov --remove coverage.info '/build/eigen3/*' -o coverage.info
                   COMMAND lcov --remove coverage.info '/build/json/*' -o coverage.info
                   COMMAND lcov --remove coverage.info '/build/range-v3/*' -o coverage.info
-                  COMMAND lcov --remove coverage.info '/build/termcolor/*' -o coverage.info
+                  COMMAND lcov --remove coverage.info '/build/termcolor/*' -o coverage.info)
                   # Generate
-                  COMMAND genhtml coverage.info --output-directory coverage_output
-                  COMMAND xdg-open coverage_output/index.html)
+                #   COMMAND genhtml coverage.info --output-directory coverage_output
+                #   COMMAND xdg-open coverage_output/index.html)
