@@ -48,14 +48,14 @@ bool fem_mesh::is_symmetric() const
 
 void fem_mesh::update_internal_variables(vector const& u, double const time_step_size)
 {
-    auto start = std::chrono::high_resolution_clock::now();
+    auto const start = std::chrono::high_resolution_clock::now();
 
     mesh_coordinates->update_current_configuration(u);
 
     for (auto& submesh : submeshes) submesh.update_internal_variables(time_step_size);
 
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
+    auto const end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> const elapsed_seconds = end - start;
 
     std::cout << std::string(6, ' ') << "Internal variable update took " << elapsed_seconds.count()
               << "s\n";
