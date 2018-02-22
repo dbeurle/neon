@@ -18,7 +18,7 @@
 
 #include <termcolor/termcolor.hpp>
 
-#include <tbb/tbb.h>
+#include <tbb/parallel_for.h>
 
 #include <cfenv>
 #include <chrono>

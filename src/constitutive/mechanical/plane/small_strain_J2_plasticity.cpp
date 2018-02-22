@@ -9,7 +9,7 @@
 
 #include <range/v3/view/transform.hpp>
 
-#include <tbb/tbb.h>
+#include <tbb/parallel_for.h>
 
 namespace neon::mechanical::plane
 {

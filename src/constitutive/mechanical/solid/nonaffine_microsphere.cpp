@@ -4,7 +4,7 @@
 #include "constitutive/internal_variables.hpp"
 #include "io/json.hpp"
 
-#include <tbb/tbb.h>
+#include <tbb/parallel_for.h>
 
 #include <stdexcept>
 
