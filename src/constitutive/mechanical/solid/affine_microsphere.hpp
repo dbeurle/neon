@@ -109,49 +109,4 @@ private:
 };
 
 /** \} */
-
-/**
- * \ingroup Hyperelastic
- * \addtogroup Hyperelastic
- * \{
- *
- * AffineMicrosphereWithDegradation is responsible for computing the Cauchy
- * stress and the material tangent in implicit methods when ageing is present.
- * The affine microsphere model is used to model elastomer materials using
- * micromechanical motivations and homogenises the force from a single chain
- * over a unit sphere.
- */
-class AffineMicrosphereWithDegradation : public affine_microsphere
-{
-public:
-    /**
-     * @param variables Reference to internal state variable store
-     * @param material_data Json object with input file material data
-     */
-    explicit AffineMicrosphereWithDegradation(std::shared_ptr<internal_variables_t>& variables,
-                                              json const& material_data,
-                                              unit_sphere_quadrature::Rule const rule);
-
-    virtual void update_internal_variables(double const time_step_size) override;
-
-protected:
-    template <typename MatrixTp, typename Functor>
-    MatrixTp weighting(std::vector<double> const& G, MatrixTp accumulator, Functor&& f) const;
-
-private:
-    stochastic_micromechanical_elastomer material; //!< Material with micromechanical parameters
-};
-/** \} */
-
-template <typename MatrixTp, typename Functor>
-inline MatrixTp AffineMicrosphereWithDegradation::weighting(std::vector<double> const& G,
-                                                            MatrixTp accumulator,
-                                                            Functor&& f) const
-{
-    for (auto i = 0; i < material.segment_groups().size(); i++)
-    {
-        accumulator.noalias() += f(material.segment_groups()[i]) * G[i];
-    }
-    return accumulator;
-}
 }
