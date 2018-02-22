@@ -67,8 +67,6 @@ public:
      */
     [[nodiscard]] std::vector<double> time_history() const;
 
-    [[deprecated]][[nodiscard]] auto const& coordinates() const { return *mesh_coordinates; }
-
     /** Provide const access to the discretised geometry for this mesh */
     [[nodiscard]] auto const& geometry() const { return *mesh_coordinates; }
 
