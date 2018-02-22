@@ -87,8 +87,7 @@ protected:
      * @return Kirchhoff stress tensor
      */
     [[nodiscard]] matrix3 compute_macro_stress(matrix3 const& F_unimodular,
-                                               double const shear_modulus,
-                                               double const N) const;
+                                               double const shear_modulus) const;
 
     /**
      * Compute the material tangent matrix using the unit sphere homogenisation

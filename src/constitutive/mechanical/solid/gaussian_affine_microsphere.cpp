@@ -2,7 +2,6 @@
 #include "gaussian_affine_microsphere.hpp"
 
 #include "constitutive/internal_variables.hpp"
-#include "constitutive/mechanical/detail/microsphere.hpp"
 #include "constitutive/mechanical/volumetric_free_energy.hpp"
 
 #include <range/v3/view/transform.hpp>
