@@ -2,7 +2,7 @@
 #include "fem_dynamic_matrix.hpp"
 
 #include "io/json.hpp"
-#include "solver/linear/LinearSolver.hpp"
+#include "solver/linear/linear_solver.hpp"
 
 #include <chrono>
 #include <termcolor/termcolor.hpp>

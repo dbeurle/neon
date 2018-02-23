@@ -3,7 +3,7 @@
 
 #include <catch.hpp>
 
-#include "solver/linear/LinearSolverFactory.hpp"
+#include "solver/linear/linear_solver_factory.hpp"
 
 #include <stdexcept>
 

@@ -2,7 +2,7 @@
 #include "fem_static_matrix.hpp"
 
 #include "Exceptions.hpp"
-#include "solver/linear/LinearSolverFactory.hpp"
+#include "solver/linear/linear_solver_factory.hpp"
 
 #include "io/json.hpp"
 #include <chrono>

@@ -7,7 +7,7 @@
 
 #include "Exceptions.hpp"
 #include "numeric/float_compare.hpp"
-#include "solver/linear/LinearSolverFactory.hpp"
+#include "solver/linear/linear_solver_factory.hpp"
 #include "io/FileIO.hpp"
 #include "io/json.hpp"
 

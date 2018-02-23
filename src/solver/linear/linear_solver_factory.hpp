@@ -1,11 +1,10 @@
 
 #pragma once
 
-#include "LinearSolver.hpp"
+#include "linear_solver.hpp"
+#include "io/json_forward.hpp"
 
 #include <memory>
-
-#include "io/json_forward.hpp"
 
 namespace neon
 {

@@ -1,16 +1,15 @@
 
-#include "LinearSolverFactory.hpp"
+#include "linear_solver_factory.hpp"
 
 #ifdef ENABLE_CUDA
-#include "ConjugateGradientGPU.hpp"
+#include "conjugate_gradientGPU.hpp"
 #endif
 
 #include "MUMPS.hpp"
 #include "PaStiX.hpp"
+#include "io/json.hpp"
 
 #include <exception>
-
-#include "io/json.hpp"
 
 namespace neon
 {
@@ -40,32 +39,35 @@ std::unique_ptr<LinearSolver> make_linear_solver(json const& solver_data, bool c
         {
             if (is_symmetric)
             {
-                return std::make_unique<ConjugateGradient>(solver_data["Tolerance"].get<double>(),
-                                                           solver_data["MaxIterations"].get<int>());
+                return std::make_unique<conjugate_gradient>(solver_data["Tolerance"].get<double>(),
+                                                            solver_data["MaxIterations"].get<int>());
             }
-            return std::make_unique<BiCGStab>(solver_data["Tolerance"].get<double>(),
-                                              solver_data["MaxIterations"].get<int>());
+            return std::make_unique<
+                biconjugate_gradient_stabilised>(solver_data["Tolerance"].get<double>(),
+                                                 solver_data["MaxIterations"].get<int>());
         }
         else if (solver_data.count("Tolerance"))
         {
             if (is_symmetric)
             {
-                return std::make_unique<ConjugateGradient>(solver_data["Tolerance"].get<double>());
+                return std::make_unique<conjugate_gradient>(solver_data["Tolerance"].get<double>());
             }
-            return std::make_unique<BiCGStab>(solver_data["Tolerance"].get<double>());
+            return std::make_unique<biconjugate_gradient_stabilised>(
+                solver_data["Tolerance"].get<double>());
         }
         else if (solver_data.count("MaxIterations"))
         {
             if (is_symmetric)
             {
-                return std::make_unique<ConjugateGradient>(solver_data["MaxIterations"].get<int>());
+                return std::make_unique<conjugate_gradient>(solver_data["MaxIterations"].get<int>());
             }
-            return std::make_unique<BiCGStab>(solver_data["MaxIterations"].get<int>());
+            return std::make_unique<biconjugate_gradient_stabilised>(
+                solver_data["MaxIterations"].get<int>());
         }
         else
         {
-            if (is_symmetric) return std::make_unique<ConjugateGradient>();
-            return std::make_unique<BiCGStab>();
+            if (is_symmetric) return std::make_unique<conjugate_gradient>();
+            return std::make_unique<biconjugate_gradient_stabilised>();
         }
     }
 
@@ -81,23 +83,23 @@ std::unique_ptr<LinearSolver> make_linear_solver(json const& solver_data, bool c
 
         if (solver_data.count("Tolerance") && solver_data.count("MaxIterations"))
         {
-            return std::make_unique<ConjugateGradientGPU>(solver_data["Tolerance"].get<double>(),
-                                                          solver_data["MaxIterations"].get<int>());
+            return std::make_unique<conjugate_gradientGPU>(solver_data["Tolerance"].get<double>(),
+                                                           solver_data["MaxIterations"].get<int>());
         }
         else if (solver_data.count("Tolerance"))
         {
-            return std::make_unique<ConjugateGradientGPU>(solver_data["Tolerance"].get<double>());
+            return std::make_unique<conjugate_gradientGPU>(solver_data["Tolerance"].get<double>());
         }
         else if (solver_data.count("MaxIterations"))
         {
-            return std::make_unique<ConjugateGradientGPU>(solver_data["MaxIterations"].get<int>());
+            return std::make_unique<conjugate_gradientGPU>(solver_data["MaxIterations"].get<int>());
         }
         else
         {
-            return std::make_unique<ConjugateGradientGPU>();
+            return std::make_unique<conjugate_gradientGPU>();
         }
 #else
-        throw std::runtime_error("ConjugateGradientGPU is only available when neon is "
+        throw std::runtime_error("conjugate_gradientGPU is only available when neon is "
                                  "configured with -DENABLE_CUDA=ON\n");
 #endif
     }
