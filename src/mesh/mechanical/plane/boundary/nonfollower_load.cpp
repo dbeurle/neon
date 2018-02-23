@@ -48,37 +48,39 @@ nonfollower_load_boundary::nonfollower_load_boundary(
                 }
             }
         }
-        else if (type == "BodyForce")
+    }
+    else if (type == "BodyForce")
+    {
+        for (auto it = dof_table.begin(); it != dof_table.end(); ++it)
         {
-            for (auto it = dof_table.begin(); it != dof_table.end(); ++it)
+            if (boundary.count(it->first))
             {
-                if (boundary.count(it->first))
+                auto const& dof_offset = it->second;
+
+                auto& [is_dof_active, boundary_meshes] = nonfollower_load[dof_offset];
+
+                is_dof_active = true;
+
+                for (auto const& mesh : submeshes)
                 {
-                    auto const& dof_offset = it->second;
-
-                    auto& [is_dof_active, boundary_meshes] = nonfollower_load[dof_offset];
-
-                    is_dof_active = true;
-
-                    for (auto const& mesh : submeshes)
-                    {
-                        boundary_meshes.emplace_back(std::in_place_type_t<body_force>{},
-                                                     make_surface_interpolation(mesh.topology(),
-                                                                                simulation_data),
-                                                     mesh.element_connectivity(),
-                                                     2 * mesh.element_connectivity() + dof_offset,
-                                                     material_coordinates,
-                                                     boundary,
-                                                     it->first,
-                                                     generate_time_step);
-                    }
+                    boundary_meshes.emplace_back(std::in_place_type_t<body_force>{},
+                                                 make_surface_interpolation(mesh.topology(),
+                                                                            simulation_data),
+                                                 mesh.element_connectivity(),
+                                                 2 * mesh.element_connectivity() + dof_offset,
+                                                 material_coordinates,
+                                                 boundary,
+                                                 it->first,
+                                                 generate_time_step);
                 }
-            }
-            else
-            {
-                throw std::domain_error("Need to specify a boundary type \"Traction\", "
-                                        "\"Pressure\" or "
-                                        "\"BodyForce\"");
             }
         }
     }
+    else
+    {
+        throw std::domain_error("Need to specify a boundary type \"Traction\", "
+                                "\"Pressure\" or "
+                                "\"BodyForce\"");
+    }
+}
+}
