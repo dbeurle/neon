@@ -80,13 +80,6 @@ protected:
     [[nodiscard]] bool is_nonfollower_load(std::string const& boundary_type) const;
 
 protected:
-    /**
-     * This time step is taken from "Time[Period][Increments][Initial]" in the input file.
-     * It is used in the boundary class to generate cyclic loading for example. This ensures the
-     * compatibility between user defined and sinusoidal boundary conditions.
-     */
-    double generate_time_step;
-
     std::shared_ptr<material_coordinates> mesh_coordinates;
 
     std::vector<fem_submesh> submeshes;

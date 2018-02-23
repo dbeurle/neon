@@ -20,8 +20,6 @@ void coefficient_update(Index const row, Index const col, Scalar const value)
 
     Index const p = m_data.searchLowerIndex(start, end - 1, StorageIndex(inner));
 
-// std::lock_guard<std::mutex> lock(coefficent_update_mutex);
 #pragma omp atomic
     m_data.value(p) += value;
-    // }
 }
