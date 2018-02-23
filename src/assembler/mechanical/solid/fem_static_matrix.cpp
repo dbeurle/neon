@@ -64,7 +64,7 @@ void fem_static_matrix::compute_sparsity_pattern()
     for (auto const& submesh : mesh.meshes())
     {
         // Loop over the elements and add in the non-zero components
-        for (std::size_t element{0}; element < submesh.elements(); element++)
+        for (std::int64_t element{0}; element < submesh.elements(); element++)
         {
             auto const local_dof_view = submesh.local_dof_view(element);
 
@@ -197,12 +197,12 @@ void fem_static_matrix::assemble_stiffness()
 
     for (auto const& submesh : mesh.meshes())
     {
-        tbb::parallel_for(std::size_t{0}, submesh.elements(), [&](auto const element) {
+        tbb::parallel_for(std::int64_t{0}, submesh.elements(), [&](auto const element) {
             auto const [dofs, ke] = submesh.tangent_stiffness(element);
 
-            for (std::size_t a = 0; a < dofs.size(); a++)
+            for (std::int64_t a = 0; a < dofs.size(); a++)
             {
-                for (std::size_t b = 0; b < dofs.size(); b++)
+                for (std::int64_t b = 0; b < dofs.size(); b++)
                 {
                     Kt.coefficient_update(dofs[a], dofs[b], ke(a, b));
                 }

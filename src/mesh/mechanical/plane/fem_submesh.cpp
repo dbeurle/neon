@@ -215,7 +215,7 @@ void fem_submesh::update_deformation_measures()
     auto& F_list = variables->fetch(internal_variables_t::Tensor::DeformationGradient);
 
     // #pragma omp parallel for
-    for (std::size_t element{0}; element < elements(); ++element)
+    for (std::int64_t element{0}; element < elements(); ++element)
     {
         // Gather the material coordinates
         auto const X = geometry::project_to_plane(
@@ -281,7 +281,7 @@ std::pair<vector, vector> fem_submesh::nodal_averaged_variable(
     // vector format of values
     vector component = vector::Zero(sf->quadrature().points());
 
-    for (std::size_t element{0}; element < elements(); ++element)
+    for (std::int64_t element{0}; element < elements(); ++element)
     {
         // Assemble these into the global value vector
         auto const& node_list = local_node_view(element);
@@ -322,7 +322,7 @@ std::pair<vector, vector> fem_submesh::nodal_averaged_variable(
     // vector format of values
     vector component = vector::Zero(sf->quadrature().points());
 
-    for (std::size_t element{0}; element < elements(); ++element)
+    for (std::int64_t element{0}; element < elements(); ++element)
     {
         for (std::size_t l{0}; l < sf->quadrature().points(); ++l)
         {

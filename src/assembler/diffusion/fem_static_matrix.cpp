@@ -31,7 +31,7 @@ void fem_static_matrix::compute_sparsity_pattern()
     for (auto const& submesh : mesh.meshes())
     {
         // Loop over the elements and add in the non-zero components
-        for (std::size_t element{0}; element < submesh.elements(); element++)
+        for (std::int64_t element{0}; element < submesh.elements(); element++)
         {
             auto const local_view = submesh.local_dof_view(element);
 
@@ -61,7 +61,7 @@ void fem_static_matrix::compute_external_force(double const load_factor)
         {
             for (auto const& mesh : surface.load_interface())
             {
-                for (std::size_t element{0}; element < mesh.elements(); ++element)
+                for (std::int64_t element{0}; element < mesh.elements(); ++element)
                 {
                     auto const [dofs, fe] = mesh.external_force(element, load_factor);
 
@@ -73,15 +73,15 @@ void fem_static_matrix::compute_external_force(double const load_factor)
             }
             for (auto const& mesh : surface.stiffness_load_interface())
             {
-                for (std::size_t element{0}; element < mesh.elements(); ++element)
+                for (std::int64_t element{0}; element < mesh.elements(); ++element)
                 {
                     auto const [dofs, fe] = mesh.external_force(element, load_factor);
                     auto const [_, ke] = mesh.external_stiffness(element, load_factor);
 
+                    f(dofs) += fe;
+
                     for (std::int64_t a{0}; a < fe.size(); ++a)
                     {
-                        f(dofs(a)) += fe(a);
-
                         for (std::int64_t b{0}; b < fe.size(); ++b)
                         {
                             K.coeffRef(dofs(a), dofs(b)) += ke(a, b);
@@ -125,20 +125,18 @@ void fem_static_matrix::assemble_stiffness()
 
     for (auto const& submesh : mesh.meshes())
     {
-#pragma omp parallel for
-        for (std::size_t element = 0; element < submesh.elements(); ++element)
+        for (std::int64_t element = 0; element < submesh.elements(); ++element)
         {
             // auto const[dofs, ke] = submesh.tangent_stiffness(element);
             auto const& tpl = submesh.tangent_stiffness(element);
             auto const& dofs = std::get<0>(tpl);
             auto const& ke = std::get<1>(tpl);
 
-            for (std::int64_t b{0}; b < dofs.size(); b++)
+            for (std::int64_t a{0}; a < dofs.size(); a++)
             {
-                for (std::int64_t a{0}; a < dofs.size(); a++)
+                for (std::int64_t b{0}; b < dofs.size(); b++)
                 {
-#pragma omp atomic
-                    K.coeffRef(dofs(a), dofs(b)) += ke(a, b);
+                    K.coefficient_update(dofs(a), dofs(b), ke(a, b));
                 }
             }
         }

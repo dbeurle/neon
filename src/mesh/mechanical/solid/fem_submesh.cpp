@@ -217,7 +217,7 @@ void fem_submesh::update_deformation_measures()
     auto& H_list = variables->fetch(internal_variables_t::Tensor::DisplacementGradient);
     auto& F_list = variables->fetch(internal_variables_t::Tensor::DeformationGradient);
 
-    tbb::parallel_for(std::size_t{0}, elements(), [&](auto const element) {
+    tbb::parallel_for(std::int64_t{0}, elements(), [&](auto const element) {
         // Gather the material coordinates
         auto const X = mesh_coordinates->initial_configuration(local_node_view(element));
         auto const x = mesh_coordinates->current_configuration(local_node_view(element));
@@ -283,7 +283,7 @@ fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
     // vector format of values
     vector component = vector::Zero(sf->quadrature().points());
 
-    for (std::size_t e{0}; e < elements(); ++e)
+    for (std::int64_t e{0}; e < elements(); ++e)
     {
         // Assemble these into the global value vector
         auto const& node_list = local_node_view(e);
@@ -325,7 +325,7 @@ fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
     // vector format of values
     vector component = vector::Zero(sf->quadrature().points());
 
-    for (std::size_t e{0}; e < elements(); ++e)
+    for (std::int64_t e{0}; e < elements(); ++e)
     {
         // Assemble these into the global value vector
         auto const& node_list = local_node_view(e);

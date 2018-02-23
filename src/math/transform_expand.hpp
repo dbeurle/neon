@@ -33,7 +33,7 @@ void transform_expand_view(input_view_type input_view,
                   "The value type for the output range must be greater than or equal to input "
                   "range");
 
-    for (index_type i{0}; i < input_view.size() * order.size(); ++i)
+    for (index_type i{0}; i < input_view.size() * static_cast<index_type>(order.size()); ++i)
     {
         index_type const input_index = i / static_cast<index_type>(order.size());
         index_type const order_index = i % static_cast<index_type>(order.size());

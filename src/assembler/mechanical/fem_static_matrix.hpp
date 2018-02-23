@@ -200,13 +200,13 @@ void fem_static_matrix<femMeshType>::compute_sparsity_pattern()
     for (auto const& submesh : fem_mesh.meshes())
     {
         // Loop over the elements and add in the non-zero components
-        for (std::size_t element = 0; element < submesh.elements(); element++)
+        for (std::int64_t element{0}; element < submesh.elements(); element++)
         {
             auto const local_dof_view = submesh.local_dof_view(element);
 
-            for (auto p = 0; p < local_dof_view.size(); p++)
+            for (std::int64_t p{0}; p < local_dof_view.size(); p++)
             {
-                for (auto q = 0; q < local_dof_view.size(); q++)
+                for (std::int64_t q{0}; q < local_dof_view.size(); q++)
                 {
                     doublets.emplace_back(p, q);
                 }
@@ -226,7 +226,7 @@ void fem_static_matrix<femMeshType>::compute_internal_force()
 
     for (auto const& submesh : fem_mesh.meshes())
     {
-        for (std::size_t element = 0; element < submesh.elements(); ++element)
+        for (std::int64_t element = 0; element < submesh.elements(); ++element)
         {
             auto const [dofs, fe_int] = submesh.internal_force(element);
 
@@ -254,7 +254,7 @@ void fem_static_matrix<femMeshType>::compute_external_force()
             {
                 // clang-format off
                 std::visit([&](auto const& mesh) {
-                    for (std::size_t element {0}; element < mesh.elements(); ++element)
+                    for (std::int64_t element {0}; element < mesh.elements(); ++element)
                     {
                        auto const [ dofs, fe_ext ] = mesh.external_force(element, step_time);
 
@@ -284,16 +284,16 @@ void fem_static_matrix<femMeshType>::assemble_stiffness()
     for (auto const& submesh : fem_mesh.meshes())
     {
 #pragma omp parallel for
-        for (std::size_t element = 0; element < submesh.elements(); ++element)
+        for (std::int64_t element = 0; element < submesh.elements(); ++element)
         {
             // auto const[dofs, ke] = submesh.tangent_stiffness(element);
             auto const& tpl = submesh.tangent_stiffness(element);
             auto const& dofs = std::get<0>(tpl);
             auto const& ke = std::get<1>(tpl);
 
-            for (std::size_t b{0}; b < dofs.size(); b++)
+            for (std::int64_t b{0}; b < dofs.size(); b++)
             {
-                for (std::size_t a{0}; a < dofs.size(); a++)
+                for (std::int64_t a{0}; a < dofs.size(); a++)
                 {
 #pragma omp atomic
                     Kt.coeffRef(dofs(a), dofs(b)) += ke(a, b);
@@ -322,7 +322,7 @@ void fem_static_matrix<femMeshType>::enforce_dirichlet_conditions(sparse_matrix&
 
                 b(fixed_dof) = 0.0;
 
-                std::vector<int> non_zero_visitor;
+                std::vector<std::int32_t> non_zero_visitor;
 
                 // Zero the rows and columns
                 for (sparse_matrix::InnerIterator it(A, fixed_dof); it; ++it)
