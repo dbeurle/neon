@@ -63,28 +63,25 @@ void fem_static_matrix::compute_external_force(double const load_factor)
             {
                 for (std::int64_t element{0}; element < mesh.elements(); ++element)
                 {
-                    auto const [dofs, fe] = mesh.external_force(element, load_factor);
+                    auto const [dof_view, fe] = mesh.external_force(element, load_factor);
 
-                    for (std::int64_t i{0}; i < dofs.size(); ++i)
-                    {
-                        f(dofs(i)) += fe(i);
-                    }
+                    f(dof_view) += fe;
                 }
             }
             for (auto const& mesh : surface.stiffness_load_interface())
             {
                 for (std::int64_t element{0}; element < mesh.elements(); ++element)
                 {
-                    auto const [dofs, fe] = mesh.external_force(element, load_factor);
+                    auto const [dof_view, fe] = mesh.external_force(element, load_factor);
                     auto const [_, ke] = mesh.external_stiffness(element, load_factor);
 
-                    f(dofs) += fe;
+                    f(dof_view) += fe;
 
                     for (std::int64_t a{0}; a < fe.size(); ++a)
                     {
                         for (std::int64_t b{0}; b < fe.size(); ++b)
                         {
-                            K.coeffRef(dofs(a), dofs(b)) += ke(a, b);
+                            K.coefficient_update(dof_view(a), dof_view(b), ke(a, b));
                         }
                     }
                 }
@@ -127,10 +124,7 @@ void fem_static_matrix::assemble_stiffness()
     {
         for (std::int64_t element = 0; element < submesh.elements(); ++element)
         {
-            // auto const[dofs, ke] = submesh.tangent_stiffness(element);
-            auto const& tpl = submesh.tangent_stiffness(element);
-            auto const& dofs = std::get<0>(tpl);
-            auto const& ke = std::get<1>(tpl);
+            auto const [dofs, ke] = submesh.tangent_stiffness(element);
 
             for (std::int64_t a{0}; a < dofs.size(); a++)
             {
