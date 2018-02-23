@@ -20,7 +20,7 @@ class pressure : public traction
 public:
     using traction::traction;
 
-    std::tuple<local_indices const&, vector> external_force(int const element,
-                                                            double const load_factor) const override;
+    std::pair<index_view, vector> external_force(std::int64_t const element,
+                                                 double const load_factor) const override;
 };
 }
