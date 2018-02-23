@@ -1,12 +1,15 @@
 #include "small_strain_J2_plasticity_damage.hpp"
 
-#include "Exceptions.hpp"
 #include "constitutive/internal_variables.hpp"
 #include "numeric/mechanics"
 
 #include "io/json.hpp"
+#include "Exceptions.hpp"
+
+#include <range/v3/view/transform.hpp>
+#include <tbb/tbb.h>
+
 #include <iostream>
-#include <range/v3/view.hpp>
 
 namespace neon::mechanical::solid
 {
@@ -24,41 +27,36 @@ small_strain_J2_plasticity_damage::~small_strain_J2_plasticity_damage() = defaul
 
 void small_strain_J2_plasticity_damage::update_internal_variables(double const time_step_size)
 {
-    using namespace ranges;
-
-    // Extract the internal variables
-    auto [plastic_strains,
-          strains,
-          cauchy_stresses,
-          back_stresses,
-          accumulated_kinematic_stresses] = variables
-                                                ->fetch(internal_variables_t::Tensor::LinearisedPlasticStrain,
-                                                        internal_variables_t::Tensor::LinearisedStrain,
-                                                        internal_variables_t::Tensor::Cauchy,
-                                                        internal_variables_t::Tensor::BackStress,
-                                                        internal_variables_t::Tensor::KinematicHardening);
+    // Retrieve the internal variables
+    auto[plastic_strains,
+         strains,
+         cauchy_stresses,
+         back_stresses,
+         accumulated_kinematic_stresses] = variables
+                                               ->fetch(internal_variables_t::Tensor::LinearisedPlasticStrain,
+                                                       internal_variables_t::Tensor::LinearisedStrain,
+                                                       internal_variables_t::Tensor::Cauchy,
+                                                       internal_variables_t::Tensor::BackStress,
+                                                       internal_variables_t::Tensor::KinematicHardening);
 
     // Retrieve the accumulated internal variables
-    auto [accumulated_plastic_strains,
-          von_mises_stresses,
-          scalar_damages,
-          energy_release_rates] = variables->fetch(internal_variables_t::Scalar::EffectivePlasticStrain,
-                                                   internal_variables_t::Scalar::VonMisesStress,
-                                                   internal_variables_t::Scalar::Damage,
-                                                   internal_variables_t::Scalar::EnergyReleaseRate);
+    auto[accumulated_plastic_strains,
+         von_mises_stresses,
+         scalar_damages,
+         energy_release_rates] = variables->fetch(internal_variables_t::Scalar::EffectivePlasticStrain,
+                                                  internal_variables_t::Scalar::VonMisesStress,
+                                                  internal_variables_t::Scalar::Damage,
+                                                  internal_variables_t::Scalar::EnergyReleaseRate);
 
     auto& tangent_operators = variables->fetch(internal_variables_t::rank4::tangent_operator);
 
     // Compute the linear strain gradient from the displacement gradient
     strains = variables->fetch(internal_variables_t::Tensor::DisplacementGradient)
-              | view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
+              | ranges::view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
     // Perform the update algorithm for each quadrature point
-    auto const internal_variables{strains.size()};
+    tbb::parallel_for(std::size_t{0}, strains.size(), [&](auto const l) {
 
-#pragma omp parallel for
-    for (auto l = 0ul; l < internal_variables; l++)
-    {
         auto const& strain = strains[l];
         auto& plastic_strain = plastic_strains[l];
         auto& cauchy_stress = cauchy_stresses[l];
@@ -88,7 +86,7 @@ void small_strain_J2_plasticity_damage::update_internal_variables(double const t
             && evaluate_damage_yield_function(energy_var) <= 0.0)
         {
             tangent_operators[l] = C_e;
-            continue;
+            return;
         }
 
         auto const plastic_increment = perform_radial_return(cauchy_stress,
@@ -111,7 +109,7 @@ void small_strain_J2_plasticity_damage::update_internal_variables(double const t
         // cauchy_stress, back_stress, scalar_damage, kin_hard, energy_var, C_algorithmic, are
         // updated within the radial_return routine std::cout << "delta_t  " << time_step_size <<
         // "\n";
-    }
+    });
 }
 
 double small_strain_J2_plasticity_damage::perform_radial_return(matrix3& cauchy_stress,

@@ -23,34 +23,30 @@ nonfollower_load_boundary::nonfollower_load_boundary(
         is_dof_active = false;
     }
 
-    auto const& values = boundary["Values"];
-
     if (auto const& type = boundary["Type"].get<std::string>(); type == "Traction")
     {
-        for (json::const_iterator it = values.begin(); it != values.end(); ++it)
+        for (auto it = dof_table.begin(); it != dof_table.end(); ++it)
         {
-            if (dof_table.find(it.key()) == dof_table.end())
+            if (boundary.count(it->first))
             {
-                throw std::domain_error("x, y or z are acceptable coordinates\n");
-            }
+                auto const& dof_offset = it->second;
 
-            auto const dof_offset = dof_table.find(it.key())->second;
+                auto& [is_dof_active, boundary_meshes] = nonfollower_load[dof_offset];
 
-            auto& [is_dof_active, boundary_meshes] = nonfollower_load[dof_offset];
+                is_dof_active = true;
 
-            is_dof_active = true;
-
-            for (auto const& mesh : submeshes)
-            {
-                boundary_meshes.emplace_back(std::in_place_type_t<traction>{},
-                                             make_surface_interpolation(mesh.topology(),
-                                                                        simulation_data),
-                                             mesh.element_connectivity(),
-                                             3 * mesh.element_connectivity() + dof_offset,
-                                             material_coordinates,
-                                             boundary,
-                                             it.key(),
-                                             generate_time_step);
+                for (auto const& mesh : submeshes)
+                {
+                    boundary_meshes.emplace_back(std::in_place_type_t<traction>{},
+                                                 make_surface_interpolation(mesh.topology(),
+                                                                            simulation_data),
+                                                 mesh.element_connectivity(),
+                                                 3 * mesh.element_connectivity() + dof_offset,
+                                                 material_coordinates,
+                                                 boundary,
+                                                 it->first,
+                                                 generate_time_step);
+                }
             }
         }
     }
@@ -79,34 +75,33 @@ nonfollower_load_boundary::nonfollower_load_boundary(
                                          dof_list,
                                          material_coordinates,
                                          boundary["Time"],
-                                         boundary["Values"]);
+                                         boundary["Value"]);
         }
     }
     else if (type == "BodyForce")
     {
-        for (json::const_iterator it = values.begin(); it != values.end(); ++it)
+        for (auto it = dof_table.begin(); it != dof_table.end(); ++it)
         {
-            if (dof_table.find(it.key()) == dof_table.end())
+            if (boundary.count(it->first))
             {
-                throw std::domain_error("x, y or z are acceptable coordinates\n");
-            }
-            auto const dof_offset = dof_table.find(it.key())->second;
+                auto const dof_offset = it->second;
 
-            auto& [is_dof_active, boundary_meshes] = nonfollower_load[dof_offset];
+                auto& [is_dof_active, boundary_meshes] = nonfollower_load[dof_offset];
 
-            is_dof_active = true;
+                is_dof_active = true;
 
-            for (auto const& mesh : submeshes)
-            {
-                boundary_meshes.emplace_back(std::in_place_type_t<body_force>{},
-                                             make_volume_interpolation(mesh.topology(),
-                                                                       simulation_data),
-                                             mesh.element_connectivity(),
-                                             3 * mesh.element_connectivity() + dof_offset,
-                                             material_coordinates,
-                                             boundary,
-                                             it.key(),
-                                             generate_time_step);
+                for (auto const& mesh : submeshes)
+                {
+                    boundary_meshes.emplace_back(std::in_place_type_t<body_force>{},
+                                                 make_volume_interpolation(mesh.topology(),
+                                                                           simulation_data),
+                                                 mesh.element_connectivity(),
+                                                 3 * mesh.element_connectivity() + dof_offset,
+                                                 material_coordinates,
+                                                 boundary,
+                                                 it->first,
+                                                 generate_time_step);
+                }
             }
         }
     }

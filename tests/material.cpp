@@ -151,7 +151,7 @@ TEST_CASE("Micromechanical elastomer", "[stochastic_micromechanical_elastomer]")
         REQUIRE(chain_group.size() == segment_group.size());
 
         // Ensure we have a decrease in the number of chains
-        for (auto i = 0; i < chain_group.size(); i++)
+        for (std::size_t i{0}; i < chain_group.size(); i++)
         {
             REQUIRE(chain_group.at(i) < chain_group_initial.at(i));
             REQUIRE(segment_group.at(i) == segment_group_initial.at(i));

@@ -52,8 +52,10 @@ void shape_function<quadrature_t>::compute_extrapolation_matrix(
     matrix const N, matrix const local_nodal_coordinates, matrix const local_quadrature_coordinates)
 {
     // Take short names for consistency with algorithm
-    auto const n = local_nodal_coordinates.rows();
-    auto const m = numerical_quadrature->points();
+
+    // Narrowing conversion but rows is expected to be greater than zero
+    std::size_t const n = local_nodal_coordinates.rows();
+    auto const m{numerical_quadrature->points()};
 
     assert(m == local_quadrature_coordinates.rows());
 

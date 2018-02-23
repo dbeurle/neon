@@ -7,7 +7,7 @@
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/zip.hpp>
 
-#include <omp.h>
+#include <tbb/tbb.h>
 
 namespace neon::mechanical::solid
 {
@@ -36,40 +36,27 @@ void affine_microsphere::update_internal_variables(double const time_step_size)
 
     auto const& det_deformation_gradients = variables->fetch(internal_variables_t::Scalar::DetF);
 
-    auto const K = material.bulk_modulus();
-    auto const G = material.shear_modulus();
-    auto const N = material.segments_per_chain();
+    auto const K{material.bulk_modulus()};
+    auto const G{material.shear_modulus()};
+    auto const N{material.segments_per_chain()};
 
-// Compute the macrostresses on the unit sphere
-#pragma omp parallel for
-    for (auto l = 0; l < deformation_gradients.size(); ++l)
-    {
-        auto const& F = deformation_gradients[l];
-        macro_stresses[l] = compute_macro_stress(unimodular(F), G, N);
-    }
+    tbb::parallel_for(std::size_t{0}, deformation_gradients.size(), [&](auto const l) {
 
-    // Project the stresses to obtain the Cauchy stress
-    cauchy_stresses = ranges::view::zip(macro_stresses, det_deformation_gradients)
-                      | ranges::view::transform([&](auto const& tpl) -> matrix3 {
-                            auto const& [macro_stress, J] = tpl;
+        auto const J = det_deformation_gradients[l];
 
-                            auto const pressure = J * volumetric_free_energy_dJ(J, K);
+        matrix3 const F_bar = unimodular(deformation_gradients[l]);
 
-                            return compute_kirchhoff_stress(pressure, macro_stress) / J;
-                        });
+        auto const pressure = J * volumetric_free_energy_dJ(J, K);
 
-#pragma omp parallel for
-    for (auto l = 0; l < deformation_gradients.size(); ++l)
-    {
-        auto const& F = deformation_gradients[l];
-        auto const& macro_stress = macro_stresses[l];
-        auto const& J = det_deformation_gradients[l];
+        matrix3 const macro_stress = compute_macro_stress(F_bar, G, N);
+
+        cauchy_stresses[l] = compute_kirchhoff_stress(pressure, macro_stress) / J;
 
         tangent_operators[l] = compute_material_tangent(J,
                                                         K,
-                                                        compute_macro_moduli(unimodular(F), G, N),
+                                                        compute_macro_moduli(F_bar, G, N),
                                                         macro_stress);
-    }
+    });
 }
 
 matrix3 affine_microsphere::compute_kirchhoff_stress(double const pressure,
@@ -105,7 +92,7 @@ matrix3 affine_microsphere::compute_macro_stress(matrix3 const& F_unimodular,
     return bulk_modulus
            * unit_sphere.integrate(matrix3::Zero().eval(),
                                    [&](auto const& coordinates, auto const& l) -> matrix3 {
-                                       auto const& [r, r_outer_r] = coordinates;
+                                       auto const & [ r, r_outer_r ] = coordinates;
 
                                        vector3 const t = deformed_tangent(F_unimodular, r);
 
@@ -180,7 +167,6 @@ void AffineMicrosphereWithDegradation::update_internal_variables(double const ti
     //     auto const K = material.bulk_modulus();
     //
     // // Compute the macrostresses on the unit sphere
-    // #pragma omp parallel for
     //     for (auto l = 0; l < deformation_gradients.size(); ++l)
     //     {
     //         auto const& F = deformation_gradients[l]; // Deformation gradient
@@ -201,7 +187,6 @@ void AffineMicrosphereWithDegradation::update_internal_variables(double const ti
     //                             return compute_kirchhoff_stress(pressure, macro_stress) / J;
     //                         });
     //
-    // #pragma omp parallel for
     //     for (auto l = 0; l < deformation_gradients.size(); ++l)
     //     {
     //         auto const& F = deformation_gradients[l];

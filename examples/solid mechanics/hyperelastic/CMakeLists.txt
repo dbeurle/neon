@@ -1,4 +1,5 @@
 
 add_subdirectory(neohooke)
-add_subdirectory(affine\ microsphere)
-add_subdirectory(non-affine\ microsphere)
+add_subdirectory(gaussian_affine_microsphere)
+add_subdirectory(affine_microsphere)
+add_subdirectory(nonaffine_microsphere)

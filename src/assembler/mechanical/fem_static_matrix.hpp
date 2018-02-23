@@ -200,7 +200,7 @@ void fem_static_matrix<femMeshType>::compute_sparsity_pattern()
     for (auto const& submesh : fem_mesh.meshes())
     {
         // Loop over the elements and add in the non-zero components
-        for (auto element = 0; element < submesh.elements(); element++)
+        for (std::size_t element = 0; element < submesh.elements(); element++)
         {
             auto const local_dof_view = submesh.local_dof_view(element);
 
@@ -226,7 +226,7 @@ void fem_static_matrix<femMeshType>::compute_internal_force()
 
     for (auto const& submesh : fem_mesh.meshes())
     {
-        for (auto element = 0; element < submesh.elements(); ++element)
+        for (std::size_t element = 0; element < submesh.elements(); ++element)
         {
             auto const [dofs, fe_int] = submesh.internal_force(element);
 
@@ -254,7 +254,7 @@ void fem_static_matrix<femMeshType>::compute_external_force()
             {
                 // clang-format off
                 std::visit([&](auto const& mesh) {
-                    for (auto element = 0; element < mesh.elements(); ++element)
+                    for (std::size_t element {0}; element < mesh.elements(); ++element)
                     {
                        auto const [ dofs, fe_ext ] = mesh.external_force(element, step_time);
 
@@ -284,16 +284,16 @@ void fem_static_matrix<femMeshType>::assemble_stiffness()
     for (auto const& submesh : fem_mesh.meshes())
     {
 #pragma omp parallel for
-        for (auto element = 0; element < submesh.elements(); ++element)
+        for (std::size_t element = 0; element < submesh.elements(); ++element)
         {
             // auto const[dofs, ke] = submesh.tangent_stiffness(element);
             auto const& tpl = submesh.tangent_stiffness(element);
             auto const& dofs = std::get<0>(tpl);
             auto const& ke = std::get<1>(tpl);
 
-            for (auto b = 0; b < dofs.size(); b++)
+            for (std::size_t b{0}; b < dofs.size(); b++)
             {
-                for (auto a = 0; a < dofs.size(); a++)
+                for (std::size_t a{0}; a < dofs.size(); a++)
                 {
 #pragma omp atomic
                     Kt.coeffRef(dofs(a), dofs(b)) += ke(a, b);

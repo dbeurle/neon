@@ -6,24 +6,41 @@
 namespace neon::mechanical
 {
 /**
- * Evaluates the yield function of the J2 plasticity surface
- * @return greater than zero if the yield function has been violated
+ * \fn evaluate_J2_yield_function Evaluates the yield function of the J2 plasticity surface
+ *
+ * \param material The material class providing a shear_modulus and yield_stress method
+ * \param von_mises_stress Current von Mises stress
+ * \param accumulated_plastic_strain Current level of accumulated plastic strain
+ * \param plastic_increment The current plastic increment (default 0.0)
+ *
+ * @return Greater than zero if the yield function has been violated
  */
 template <class material_type>
 [[nodiscard]] double evaluate_J2_yield_function(material_type const& material,
                                                 double const von_mises_stress,
                                                 double const accumulated_plastic_strain,
-                                                double const plastic_increment = 0.0) {
+                                                double const plastic_increment = 0.0)
+{
     return von_mises_stress - 3.0 * material.shear_modulus() * plastic_increment
            - material.yield_stress(accumulated_plastic_strain + plastic_increment);
 }
 
 /**
- * algorithm_tangent computes the consistent (algorithmic) tangent material
+ * \fn algorithm_tangent computes the consistent (algorithmic) tangent material
  * operator for the J2 plasticity.  This operator has been linearised
  * consistently with the backward Euler method for the radial return method
  * (backward Euler).  This function is valid for the three-dimensional and the
  * plane strain case.  The plane stress can requires an additional projection.
+ *
+ * \param G Material shear modulus
+ * \param H Material hardening modulus
+ * \param plastic_increment
+ * \param von_mises_stress
+ * \param normal Tensor normal to the surface
+ * \param I_dev Symmetric deviatoric fourth order tensor
+ * \param C_elastic Elastic material tangent operator
+ *
+ * @return Consistently linearised material tangent operator
  */
 template <typename tangent_operator_type, typename tensor_type>
 tangent_operator_type algorithmic_tangent(double const G,
@@ -84,8 +101,8 @@ tangent_operator_type algorithmic_tangent(double const G,
  * This computes the fourth order tensor B in Voigt notation for the plane strain
  * formulation from \cite Neto2011 on page 598.
  * \f{align*}{
-     B_{ijkl} &= \delta_{ik}(\boldsymbol{B}^{e, trial}_{jl}) + \delta_{jk}(\boldsymbol{B}^{e, trial}_{il})
-   \f}
+     B_{ijkl} &= \delta_{ik}(\boldsymbol{B}^{e, trial}_{jl}) + \delta_{jk}(\boldsymbol{B}^{e,
+ trial}_{il}) \f}
  */
 [[nodiscard]] inline matrix3 finite_strain_B_operator(matrix2 const& Be_trial)
 {

@@ -49,14 +49,14 @@ bool fem_mesh::is_symmetric() const
 
 void fem_mesh::update_internal_variables(vector const& u, double const time_step_size)
 {
-    auto start = std::chrono::high_resolution_clock::now();
+    auto const start = std::chrono::high_resolution_clock::now();
 
     mesh_coordinates->update_current_configuration(u);
 
     for (auto& submesh : submeshes) submesh.update_internal_variables(time_step_size);
 
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
+    auto const end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> const elapsed_seconds = end - start;
 
     std::cout << std::string(6, ' ') << "Internal variable update took " << elapsed_seconds.count()
               << "s\n";
@@ -90,11 +90,11 @@ void fem_mesh::allocate_boundary_conditions(json const& simulation_data, basic_m
         {
             nonfollower_loads.emplace(boundary_name,
                                       nonfollower_load_boundary(mesh_coordinates,
-                                                              basic_mesh.meshes(boundary_name),
-                                                              simulation_data,
-                                                              boundary,
-                                                              dof_table,
-                                                              generate_time_step));
+                                                                basic_mesh.meshes(boundary_name),
+                                                                simulation_data,
+                                                                boundary,
+                                                                dof_table,
+                                                                generate_time_step));
         }
         else
         {
@@ -111,26 +111,22 @@ void fem_mesh::allocate_displacement_boundary(json const& boundary, basic_mesh c
 
     auto const dirichlet_dofs = mesh_dof_filter<3>(basic_mesh.meshes(boundary_name));
 
-    auto const& values = boundary["Values"];
-
-    for (json::const_iterator it = values.begin(); it != values.end(); ++it)
+    for (auto it = dof_table.begin(); it != dof_table.end(); ++it)
     {
-        auto const& dof_offset = dof_table.find(it.key())->second;
-
-        if (dof_table.find(it.key()) == dof_table.end())
+        if (boundary.count(it->first))
         {
-            throw std::domain_error("x, y or z are acceptable coordinates\n");
+            auto const& dof_offset = it->second;
+
+            // Offset the degrees of freedom on the boundary
+            auto const boundary_dofs = view::transform(dirichlet_dofs, [&](auto const& dof) {
+                return dof + dof_offset;
+            });
+
+            displacement_bcs[boundary_name].emplace_back(boundary_dofs,
+                                                         boundary,
+                                                         it->first,
+                                                         generate_time_step);
         }
-
-        // Offset the degrees of freedom on the boundary
-        auto const boundary_dofs = view::transform(dirichlet_dofs, [&](auto const& dof) {
-            return dof + dof_offset;
-        });
-
-        displacement_bcs[boundary_name].emplace_back(boundary_dofs,
-                                                     boundary,
-                                                     it.key(),
-                                                     generate_time_step);
     }
 }
 

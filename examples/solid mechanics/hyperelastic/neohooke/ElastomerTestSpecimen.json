@@ -13,7 +13,7 @@
     }],
     "SimulationCases" : [{
         "Name" : "Uniaxial",
-		"Module" : "SolidMechanics",
+        "Module" : "SolidMechanics",
         "Solution" : "Equilibrium",
         "NonlinearOptions" : {
             "DisplacementTolerance" : 1.0e-4,
@@ -27,7 +27,7 @@
                 "Maximum" : 1.0
             }
         },
-		"Mesh" : [{
+        "Mesh" : [{
             "Name" : "ElastomerTestSpecimen",
             "ConstitutiveModel" : {
                 "Name" : "NeoHooke"
@@ -39,37 +39,29 @@
                 "Name" : "x-sym",
                 "Type" : "Displacement",
                 "Time" : [0.0, 1.0],
-                "Values" : {
-                    "x" : [0.0, 0.0]
-                }
+                "x" : [0.0, 0.0]
             },
             {
                 "Name" : "z-sym",
                 "Type" : "Displacement",
                 "Time" : [0.0, 1.0],
-                "Values" : {
-                    "z" : [0.0, 0.0]
-                }
+                "z" : [0.0, 0.0]
             },
             {
                 "Name" : "base",
                 "Type" : "Displacement",
                 "Time" : [0.0, 1.0],
-                "Values" : {
-                    "y" : [0.0, 0.0]
-                }
+                "y" : [0.0, 0.0]
             },
             {
                 "Name" : "load",
-				"Type" : "Traction",
+                "Type" : "Traction",
                 "Time" : [0.0, 1.0],
-                "Values" : {
-                    "y" : [0.0, 5.0e5]
-                }
+                "y" : [0.0, 5.0e5]
             }]
         }],
-		"LinearSolver" : {
-		    "Solver" : "Iterative",
+        "LinearSolver" : {
+            "Solver" : "Iterative",
             "MaxIterations" : 1000,
             "Tolerance"  : 1.0e-6
         },
@@ -78,3 +70,4 @@
         }
     }]
 }
+
