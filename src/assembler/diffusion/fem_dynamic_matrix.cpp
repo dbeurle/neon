@@ -71,11 +71,13 @@ void fem_dynamic_matrix::assemble_mass()
     {
         for (auto element = 0; element < submesh.elements(); element++)
         {
-            for (auto const& p : submesh.local_dof_list(element))
+            auto const dof_view = submesh.local_dof_view(element);
+
+            for (std::int64_t p{0}; p < dof_view.size(); ++p)
             {
-                for (auto const& q : submesh.local_dof_list(element))
+                for (std::int64_t q{0}; q < dof_view.size(); ++q)
                 {
-                    doublets.emplace_back(p, q);
+                    doublets.emplace_back(dof_view(p), dof_view(q));
                 }
             }
         }
@@ -101,7 +103,7 @@ void fem_dynamic_matrix::assemble_mass()
                 for (auto a = 0; a < dofs.size(); a++)
                 {
 #pragma omp atomic
-                    M.coeffRef(dofs[a], dofs[b]) += m(a, b);
+                    M.coeffRef(dofs(a), dofs(b)) += m(a, b);
                 }
             }
         }

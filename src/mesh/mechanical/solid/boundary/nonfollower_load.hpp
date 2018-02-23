@@ -13,7 +13,7 @@
 namespace neon::mechanical::solid
 {
 /**
- * NonFollowerLoadBoundary contains the boundary conditions which contribute to
+ * nonfollower_load_boundary contains the boundary conditions which contribute to
  * the external force vector.  This can include tractions, pressures, nodal
  * forces and volume forces computed in the initial configuration
  *
@@ -21,7 +21,7 @@ namespace neon::mechanical::solid
  * \sa pressure
  * \sa body_force
  */
-class NonFollowerLoadBoundary
+class nonfollower_load_boundary
 {
 public:
     using value_types = std::variant<traction, pressure, body_force>;
@@ -30,7 +30,7 @@ public:
     using BoundaryMeshes = std::vector<std::variant<traction, pressure, body_force>>;
 
 public:
-    explicit NonFollowerLoadBoundary(std::shared_ptr<material_coordinates>& material_coordinates,
+    explicit nonfollower_load_boundary(std::shared_ptr<material_coordinates>& material_coordinates,
                                      std::vector<basic_submesh> const& submeshes,
                                      json const& simulation_data,
                                      json const& boundary,

@@ -32,8 +32,8 @@ public:
                          basic_submesh const& submesh);
 
     /** @return list of global degrees of freedom for an element */
-    [[nodiscard]] local_indices const& local_dof_list(int const element) const {
-        return local_node_list(element);
+    [[nodiscard]] index_view local_dof_view(std::int64_t const element) const {
+        return local_node_view(element);
     }
 
         /** @return The internal variable store */
@@ -58,7 +58,7 @@ public:
      * where \f$ \kappa \f$ is the conductivity
      * @return DoFs and stiffness matrix
      */
-    [[nodiscard]] std::tuple<local_indices const&, matrix> tangent_stiffness(int const element) const;
+    [[nodiscard]] std::pair<index_view, matrix> tangent_stiffness(std::int64_t const element) const;
 
     /**
      * Compute the consistent (full) mass matrix according to
@@ -68,10 +68,10 @@ public:
      * where \f$ \rho \f$ is the density and \f$ c_p \f$ is the specific heat
      * @return DoFs and consistent mass matrix \sa diagonal_mass
      */
-    [[nodiscard]] std::tuple<local_indices const&, matrix> consistent_mass(int const element) const;
+    [[nodiscard]] std::pair<index_view, matrix> consistent_mass(std::int64_t const element) const;
 
     /** @return Diagonal mass matrix using row sum technique \sa consistent_mass */
-    [[nodiscard]] std::tuple<local_indices const&, vector> diagonal_mass(int const element) const;
+    [[nodiscard]] std::pair<index_view, vector> diagonal_mass(std::int64_t const element) const;
 
     /** Update the internal variables for the mesh group */
     void update_internal_variables(double const time_step_size);
@@ -90,14 +90,14 @@ public:
 
     [[nodiscard]] ValueCount nodal_averaged_variable(internal_variables_t::Scalar const scalar_name) const;
 
-protected:
-    /** @return the index into the internal variable store */
-    [[nodiscard]] int offset(int const element, int const quadraturePoint) const;
-
 private:
     std::shared_ptr<material_coordinates> mesh_coordinates; /// Nodal coordinates
-    std::unique_ptr<volume_interpolation> sf;               /// Shape function
+
+    std::unique_ptr<volume_interpolation> sf; /// Shape function
+
+    variable_view view;
     std::shared_ptr<internal_variables_t> variables;
+
     std::unique_ptr<constitutive_model> cm; /// Constitutive model
 };
 }

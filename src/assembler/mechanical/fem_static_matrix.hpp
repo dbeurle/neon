@@ -88,10 +88,10 @@ protected:
 
     adaptive_time_step adaptive_load;
 
-    bool is_sparsity_computed = false;
+    bool is_sparsity_computed{false};
 
-    double residual_tolerance = 1.0e-3;
-    double displacement_tolerance = 1.0e-3;
+    double residual_tolerance{1.0e-3};
+    double displacement_tolerance{1.0e-3};
 
     double relative_displacement_norm;
     double relative_force_norm;
@@ -123,13 +123,13 @@ fem_static_matrix<femMeshType>::fem_static_matrix(fem_mesh_type& fem_mesh, json 
 {
     if (!simulation["NonlinearOptions"].count("DisplacementTolerance"))
     {
-        throw std::runtime_error("DisplacementTolerance not specified in "
-                                 "NonlinearOptions");
+        throw std::domain_error("DisplacementTolerance not specified in "
+                                "NonlinearOptions");
     }
     if (!simulation["NonlinearOptions"].count("ResidualTolerance"))
     {
-        throw std::runtime_error("ResidualTolerance not specified in "
-                                 "NonlinearOptions");
+        throw std::domain_error("ResidualTolerance not specified in "
+                                "NonlinearOptions");
     }
     residual_tolerance = simulation["NonlinearOptions"]["ResidualTolerance"];
     displacement_tolerance = simulation["NonlinearOptions"]["DisplacementTolerance"];
@@ -142,7 +142,7 @@ fem_static_matrix<femMeshType>::fem_static_matrix(fem_mesh_type& fem_mesh, json 
 
 template <class femMeshType>
 void fem_static_matrix<femMeshType>::internal_restart(json const& solver_data,
-                                                    json const& new_increment_data)
+                                                      json const& new_increment_data)
 {
     adaptive_load.reset(new_increment_data);
     linear_solver = make_linear_solver(solver_data);
@@ -202,16 +202,18 @@ void fem_static_matrix<femMeshType>::compute_sparsity_pattern()
         // Loop over the elements and add in the non-zero components
         for (auto element = 0; element < submesh.elements(); element++)
         {
-            for (auto const& p : submesh.local_dof_view(element))
+            auto const local_dof_view = submesh.local_dof_view(element);
+
+            for (auto p = 0; p < local_dof_view.size(); p++)
             {
-                for (auto const& q : submesh.local_dof_view(element))
+                for (auto q = 0; q < local_dof_view.size(); q++)
                 {
                     doublets.emplace_back(p, q);
                 }
             }
         }
     }
-    Kt.setFromTriplets(doublets.begin(), doublets.end());
+    Kt.setFromTriplets(std::begin(doublets), std::end(doublets));
     Kt.finalize();
 
     is_sparsity_computed = true;
@@ -226,12 +228,9 @@ void fem_static_matrix<femMeshType>::compute_internal_force()
     {
         for (auto element = 0; element < submesh.elements(); ++element)
         {
-            auto const& [dofs, fe_int] = submesh.internal_force(element);
+            auto const [dofs, fe_int] = submesh.internal_force(element);
 
-            for (auto a = 0; a < fe_int.size(); ++a)
-            {
-                fint(dofs[a]) += fe_int(a);
-            }
+            fint(dofs) += fe_int;
         }
     }
 }
@@ -257,12 +256,9 @@ void fem_static_matrix<femMeshType>::compute_external_force()
                 std::visit([&](auto const& mesh) {
                     for (auto element = 0; element < mesh.elements(); ++element)
                     {
-                       auto const & [ dofs, fe_ext ] = mesh.external_force(element, step_time);
+                       auto const [ dofs, fe_ext ] = mesh.external_force(element, step_time);
 
-                       for (auto a = 0; a < fe_ext.size(); ++a)
-                       {
-                           fext(dofs[a]) += fe_ext(a);
-                       }
+                       fext(dofs) += fe_ext;
                     }
                 },
                 boundary_condition);
@@ -300,14 +296,14 @@ void fem_static_matrix<femMeshType>::assemble_stiffness()
                 for (auto a = 0; a < dofs.size(); a++)
                 {
 #pragma omp atomic
-                    Kt.coeffRef(dofs[a], dofs[b]) += ke(a, b);
+                    Kt.coeffRef(dofs(a), dofs(b)) += ke(a, b);
                 }
             }
         }
     }
 
     auto const end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::chrono::duration<double> const elapsed_seconds = end - start;
 
     std::cout << std::string(6, ' ') << "Tangent stiffness assembly took "
               << elapsed_seconds.count() << "s\n";

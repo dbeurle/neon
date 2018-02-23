@@ -5,8 +5,6 @@
 
 #include <material/isotropic_elastic_property.hpp>
 
-// #include <json/forwards.h>
-
 namespace neon::mechanical::solid
 {
 /**

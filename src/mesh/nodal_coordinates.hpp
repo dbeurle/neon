@@ -22,10 +22,14 @@ public:
 
     [[nodiscard]] auto size() const { return X.cols(); }
 
-    [[nodiscard]] matrix3x const& coordinates() const;
+    [[nodiscard]] matrix3x const& coordinates() const { return X; }
 
     /** @return the coordinates using fancy indexing */
-    [[nodiscard]] matrix3x coordinates(local_indices const& local_node_list) const;
+    template <typename indices_type>
+    [[nodiscard]] auto coordinates(indices_type const local_node_view) const
+    {
+        return X(Eigen::placeholders::all, local_node_view);
+    }
 
 protected:
     matrix3x X; //!< Reference configuration encoded as (x1, y1, z1, x2, y2, z2)
@@ -54,9 +58,9 @@ public:
     [[nodiscard]] coordinate_t const& coordinates() const { return X; }
 
         /** @return the coordinates using fancy indexing */
-        [[nodiscard]] coordinate_t coordinates(local_indices const& local_node_list) const
+        [[nodiscard]] coordinate_t coordinates(index_view local_node_view) const
     {
-        return X(Eigen::placeholders::all, local_node_list);
+        return X(Eigen::placeholders::all, local_node_view);
     }
 
 protected:
@@ -74,7 +78,7 @@ mesh_coordinates<traits>::mesh_coordinates(json const& mesh_file)
 {
     if (mesh_file["Nodes"].is_null())
     {
-        throw std::runtime_error("The mesh file is missing the \"Nodes\" field");
+        throw std::domain_error("The mesh file is missing the \"Nodes\" field");
     }
 
     auto const& input_coordinates = mesh_file["Nodes"][0]["Coordinates"];
@@ -83,9 +87,9 @@ mesh_coordinates<traits>::mesh_coordinates(json const& mesh_file)
 
     X.resize(fixed_size, nodes);
 
-    for (auto node = 0; node < nodes; ++node)
+    for (std::int64_t node{0}; node < nodes; ++node)
     {
-        for (auto i = 0; i < fixed_size; ++i)
+        for (auto i{0}; i < fixed_size; ++i)
         {
             X(i, node) = input_coordinates[node][i];
         }

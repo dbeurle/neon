@@ -3,18 +3,12 @@
 
 #include <catch.hpp>
 
-#include "mesh/dof_allocator.hpp"
-
 #include "interpolations/triangle.hpp"
 #include "quadrature/triangle_quadrature.hpp"
-
 #include "mesh/basic_submesh.hpp"
-
-#include "mesh/generic/Boundary.hpp"
-#include "mesh/mechanical/solid/boundary/NonFollowerLoad.hpp"
-
-#include "mesh/diffusion/boundary/NewtonConvection.hpp"
-
+#include "mesh/generic/boundary.hpp"
+#include "mesh/mechanical/solid/boundary/nonfollower_load.hpp"
+#include "mesh/diffusion/boundary/newton_convection.hpp"
 #include "io/json.hpp"
 
 #include <range/v3/view/set_algorithm.hpp>
@@ -28,14 +22,14 @@ using namespace ranges;
 
 constexpr auto ZERO_MARGIN = 1.0e-5;
 
-TEST_CASE("Boundary unit test", "[Boundary]")
+TEST_CASE("boundary unit test", "[boundary]")
 {
     std::vector<double> times{0.0, 1.0, 2.0, 3.0};
     SECTION("Check time data saved correctly")
     {
         std::vector<double> loads{0.0, 1.0, 2.0, 3.0};
 
-        Boundary boundary(times, loads);
+        boundary boundary(times, loads);
 
         auto const time_history = boundary.time_history();
 
@@ -48,7 +42,7 @@ TEST_CASE("Boundary unit test", "[Boundary]")
     {
         std::vector<double> loads{0.0, 0.5, 1.0, 1.5};
 
-        Boundary boundary(times, loads);
+        boundary boundary(times, loads);
 
         REQUIRE(boundary.interpolate_prescribed_load(0.75) == Approx(0.375));
         REQUIRE(boundary.interpolate_prescribed_load(0.5) == Approx(0.25));
@@ -63,7 +57,7 @@ TEST_CASE("Boundary unit test", "[Boundary]")
     {
         std::vector<double> loads{0.0, 1.0, 0.0, 3.0};
 
-        Boundary boundary(times, loads);
+        boundary boundary(times, loads);
 
         REQUIRE(boundary.interpolate_prescribed_load(0.0) == Approx(0.0).margin(ZERO_MARGIN));
         REQUIRE(boundary.interpolate_prescribed_load(0.5) == Approx(0.5));
@@ -73,11 +67,11 @@ TEST_CASE("Boundary unit test", "[Boundary]")
     }
     SECTION("Non-matching length error test")
     {
-        REQUIRE_THROWS_AS(Boundary("[0.0, 1.0, 3.0]", "[0.0, 0.5, 1.0, 1.5]"), std::runtime_error);
+        REQUIRE_THROWS_AS(boundary("[0.0, 1.0, 3.0]", "[0.0, 0.5, 1.0, 1.5]"), std::domain_error);
     }
     SECTION("Unordered time error test")
     {
-        REQUIRE_THROWS_AS(Boundary("[0.0, 10.0, 3.0]", "[0.0, 0.5, 1.0]"), std::runtime_error);
+        REQUIRE_THROWS_AS(boundary("[0.0, 10.0, 3.0]", "[0.0, 0.5, 1.0]"), std::domain_error);
     }
 }
 TEST_CASE("Traction test for triangle", "[Traction]")
@@ -92,8 +86,11 @@ TEST_CASE("Traction test for triangle", "[Traction]")
 
     auto mesh_coordinates = std::make_shared<material_coordinates>(coordinates);
 
-    std::vector<local_indices> nodal_connectivity = {{0, 1, 2}};
-    std::vector<local_indices> dof_list = {{0, 3, 6}};
+    indices nodal_connectivity(3, 1);
+    nodal_connectivity << 0, 1, 2;
+
+    indices dof_list(3, 1);
+    dof_list << 0, 3, 6;
 
     SECTION("Unit load")
     {
@@ -109,7 +106,8 @@ TEST_CASE("Traction test for triangle", "[Traction]")
         auto const& [dofs, t] = patch.external_force(0, 1.0);
 
         REQUIRE((t - vector3::Constant(1.0 / 6.0)).norm() == Approx(0.0).margin(ZERO_MARGIN));
-        REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
+
+        REQUIRE((dof_list.col(0) - dofs).sum() == 0);
     }
     SECTION("Twice unit load")
     {
@@ -125,7 +123,7 @@ TEST_CASE("Traction test for triangle", "[Traction]")
         auto const& [dofs, t] = patch.external_force(0, 1.0);
 
         REQUIRE((t - vector3::Constant(2.0 / 6.0)).norm() == Approx(0.0).margin(ZERO_MARGIN));
-        REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
+        REQUIRE((dof_list.col(0) - dofs).sum() == 0);
     }
 }
 TEST_CASE("Pressure test for triangle", "[Pressure]")
@@ -140,8 +138,11 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
 
     auto mesh_coordinates = std::make_shared<material_coordinates>(coordinates);
 
-    std::vector<local_indices> nodal_connectivity = {{0, 1, 2}};
-    std::vector<local_indices> dof_list = {{0, 1, 2, 3, 4, 5, 6, 7, 8}};
+    indices nodal_connectivity(3, 1);
+    nodal_connectivity << 0, 1, 2;
+
+    indices dof_list(3 * 3, 1);
+    dof_list << 0, 1, 2, 3, 4, 5, 6, 7, 8;
 
     SECTION("Unit load")
     {
@@ -156,7 +157,7 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
 
         auto const& [dofs, f_ext] = pressure_patch.external_force(0, 1.0);
 
-        REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
+        REQUIRE((dof_list.col(0) - dofs).sum() == 0);
 
         // Compare the z-component to the analytical solution
         REQUIRE((vector3(f_ext(2), f_ext(5), f_ext(8)) - 1.0 / 6.0 * vector3::Ones()).norm()
@@ -177,10 +178,11 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
 
         REQUIRE((vector3(f_ext(2), f_ext(5), f_ext(8)) - 2.0 / 6.0 * vector3::Ones()).norm()
                 == Approx(0.0).margin(ZERO_MARGIN));
-        REQUIRE(view::set_difference(dof_list.at(0), dofs).empty());
+
+        REQUIRE((dof_list.col(0) - dofs).sum() == 0);
     }
 }
-TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
+TEST_CASE("Traction test for mixed mesh", "[nonfollower_load_boundary]")
 {
     // Test construction of a mixed quadrilateral and triangle mesh
     using namespace neon::mechanical::solid;
@@ -197,8 +199,11 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
     auto quad_mesh = json::parse("{\"Name\":\"Ysym\",\"NodalConnectivity\":[[0,1,2,3]],"
                                  "\"Type\":3}");
 
-    std::array<int, 3> const known_dofs_tri{{4, 13, 7}};
-    std::array<int, 4> const known_dofs_quad{{1, 4, 7, 10}};
+    indices known_dofs_tri(3, 1);
+    known_dofs_tri << 4, 13, 7;
+
+    indices known_dofs_quad(4, 1);
+    known_dofs_quad << 1, 4, 7, 10;
 
     auto simulation_data = json::parse("{\"BoundaryConditions\" : [ "
                                        "{\"Name\" : \"Ysym\", "
@@ -226,12 +231,12 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
 
     // Insert this information into the nonfollower load boundary class
     // using the simulation data for the cube
-    NonFollowerLoadBoundary loads(mesh_coordinates,
-                                  submeshes,
-                                  simulation_data,
-                                  boundary,
-                                  {{"x", 0}, {"y", 1}, {"z", 2}},
-                                  1.0);
+    nonfollower_load_boundary loads(mesh_coordinates,
+                                    submeshes,
+                                    simulation_data,
+                                    boundary,
+                                    {{"x", 0}, {"y", 1}, {"z", 2}},
+                                    1.0);
 
     for (auto const& [is_dof_active, meshes] : loads.interface())
     {
@@ -245,7 +250,7 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
                     REQUIRE(f_tri.rows() == 3);
 
                     // Check dofs are correctly written
-                    REQUIRE(view::set_difference(dofs_tri, known_dofs_tri).empty());
+                    REQUIRE((dofs_tri - known_dofs_tri.col(0)).sum() == 0);
                 },
                 meshes.at(0));
 
@@ -257,7 +262,7 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
                     REQUIRE(f_quad.rows() == 4);
 
                     // Check dofs are correctly written
-                    REQUIRE(view::set_difference(dofs_quad, known_dofs_quad).empty());
+                    REQUIRE((dofs_quad - known_dofs_quad.col(0)).sum() == 0);
                 },
                 meshes.at(1));
         }
@@ -265,7 +270,7 @@ TEST_CASE("Traction test for mixed mesh", "[NonFollowerLoadBoundary]")
 }
 TEST_CASE("Newton cooling boundary conditions")
 {
-    using diffusion::boundary::newton_cooling;
+    using diffusion::boundary::newton_convection;
 
     // Build a right angled triangle
     matrix3x coordinates(3, 3);
@@ -275,18 +280,21 @@ TEST_CASE("Newton cooling boundary conditions")
 
     auto mesh_coordinates = std::make_shared<material_coordinates>(coordinates);
 
-    std::vector<local_indices> const nodal_connectivity = {{0, 1, 2}};
-    std::vector<local_indices> const dof_list = {{0, 3, 6}};
+    indices nodal_connectivity(3, 1);
+    nodal_connectivity << 0, 1, 2;
+
+    indices dof_list(3, 1);
+    dof_list << 0, 3, 6;
 
     SECTION("Unit load")
     {
-        newton_cooling patch(std::make_unique<triangle3>(triangle_quadrature::Rule::OnePoint),
-                             nodal_connectivity,
-                             dof_list,
-                             mesh_coordinates,
-                             json::parse("[0.0, 1.0]"),
-                             json::parse("[0.0, 1.0]"),
-                             json::parse("[300.0, 300.0]"));
+        newton_convection patch(std::make_unique<triangle3>(triangle_quadrature::Rule::OnePoint),
+                                nodal_connectivity,
+                                dof_list,
+                                mesh_coordinates,
+                                json::parse("[0.0, 1.0]"),
+                                json::parse("[0.0, 1.0]"),
+                                json::parse("[300.0, 300.0]"));
 
         REQUIRE(patch.elements() == 1);
 
@@ -297,7 +305,7 @@ TEST_CASE("Newton cooling boundary conditions")
 
         REQUIRE(k.norm() > 0.0);
 
-        REQUIRE(view::set_difference(dof_list.at(0), dofs_0).empty());
-        REQUIRE(view::set_difference(dof_list.at(0), dofs_1).empty());
+        REQUIRE((dof_list - dofs_0).sum() == 0);
+        REQUIRE((dof_list - dofs_1).sum() == 0);
     }
 }

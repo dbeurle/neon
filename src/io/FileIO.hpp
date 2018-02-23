@@ -111,8 +111,8 @@ FileIO<femMeshType>::FileIO(std::string file_name,
         if (scalar_map.find(output) == scalar_map.end()
             && tensor_map.find(output) == tensor_map.end() && output != primary_field)
         {
-            throw std::runtime_error("Output \"" + output
-                                     + "\" is not valid for a solid mechanics simulation\n");
+            throw std::domain_error("Output \"" + output
+                                    + "\" is not valid for a solid mechanics simulation\n");
         }
     }
     add_mesh();
@@ -144,7 +144,7 @@ void FileIO<femMeshType>::write(int const time_step, double const total_time)
             {
                 if (!submesh.internal_variables().has(found->second))
                 {
-                    throw std::runtime_error("Internal variable " + name + " does not exist in mesh");
+                    throw std::domain_error("Internal variable " + name + " does not exist in mesh");
                 }
 
                 auto const [value, count] = submesh.nodal_averaged_variable(found->second);
@@ -185,8 +185,8 @@ void FileIO<femMeshType>::write(int const time_step, double const total_time)
         }
         else
         {
-            throw std::runtime_error("Field \"" + name
-                                     + "\" was not found in mesh internal variables\n");
+            throw std::domain_error("Field \"" + name
+                                    + "\" was not found in mesh internal variables\n");
         }
     }
     write_to_file(time_step, total_time);
@@ -200,15 +200,16 @@ void FileIO<femMeshType>::add_mesh()
 
     for (auto const& submesh : mesh.meshes())
     {
-        auto const vtk_ordered_connectivity = convert_to_vtk(submesh.connectivities(),
+        auto const vtk_ordered_connectivity = convert_to_vtk(submesh.element_connectivity(),
                                                              submesh.topology());
-        for (auto const& node_list : vtk_ordered_connectivity)
+        for (std::int64_t element{0}; element < vtk_ordered_connectivity.cols(); ++element)
         {
             auto vtk_node_list = vtkSmartPointer<vtkIdList>::New();
 
-            for (auto const& node : node_list)
+            for (std::int64_t node{0}; node < vtk_ordered_connectivity.rows(); ++node)
             {
-                vtk_node_list->InsertNextId(static_cast<long>(node));
+                vtk_node_list->InsertNextId(
+                    static_cast<std::int64_t>(vtk_ordered_connectivity(node, element)));
             }
             unstructured_mesh->InsertNextCell(to_vtk(submesh.topology()), vtk_node_list);
         }

@@ -15,8 +15,7 @@ namespace neon
  * \param [in, out] nodal_connectivity Local element nodal connectivity data
  * \param [in] topology The element topology
  */
-void convert_from_gmsh(std::vector<local_indices>& nodal_connectivity,
-                       element_topology const topology);
+void convert_from_gmsh(indices& nodal_connectivity, element_topology const topology);
 
 /**
  * Convert the \p neon element node ordering to the VTK node ordering
@@ -24,11 +23,10 @@ void convert_from_gmsh(std::vector<local_indices>& nodal_connectivity,
  * @param topology Element topology
  * @return Nodal connectivity in VTK format for the given element topology
  */
-[[nodiscard]] std::vector<local_indices> convert_to_vtk(std::vector<local_indices> nodal_connectivity,
-                                                        element_topology const topology);
+[[nodiscard]] indices convert_to_vtk(indices nodal_connectivity, element_topology const topology);
 
 /** Add strong types to gmsh integer element codes */
-[[nodiscard]] element_topology gmsh_type_to_enum(int const element_code);
+[[nodiscard]] element_topology gmsh_type_to_enum(std::int32_t const element_code);
 
 /** Convert the \p neon topology type to the \p VTKCellType */
 [[nodiscard]] VTKCellType to_vtk(element_topology const topology);

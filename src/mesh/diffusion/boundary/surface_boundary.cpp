@@ -1,5 +1,5 @@
 
-#include "SurfaceBoundary.hpp"
+#include "surface_boundary.hpp"
 
 #include "interpolations/interpolation_factory.hpp"
 #include "mesh/basic_submesh.hpp"
@@ -18,8 +18,8 @@ boundary_mesh::boundary_mesh(std::shared_ptr<material_coordinates>& material_coo
         for (auto const& mesh : submeshes)
         {
             load_boundaries.emplace_back(make_surface_interpolation(mesh.topology(), mesh_data),
-                                         mesh.connectivities(),
-                                         mesh.connectivities(),
+                                         mesh.element_connectivity(),
+                                         mesh.element_connectivity(),
                                          material_coordinates,
                                          boundary["Time"],
                                          boundary["Value"]);
@@ -40,8 +40,8 @@ boundary_mesh::boundary_mesh(std::shared_ptr<material_coordinates>& material_coo
 
             stiffness_load_boundaries.emplace_back(make_surface_interpolation(mesh.topology(),
                                                                               mesh_data),
-                                                   mesh.connectivities(),
-                                                   mesh.connectivities(),
+                                                   mesh.element_connectivity(),
+                                                   mesh.element_connectivity(),
                                                    material_coordinates,
                                                    boundary["Time"],
                                                    heat_flux,

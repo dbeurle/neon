@@ -2,6 +2,7 @@
 #include "mesh/mechanical/plane/fem_mesh.hpp"
 
 #include "mesh/basic_mesh.hpp"
+#include "mesh/mesh_dof_filter.hpp"
 
 #include <chrono>
 #include <exception>
@@ -97,7 +98,7 @@ void fem_mesh::allocate_boundary_conditions(json const& simulation_data, basic_m
         }
         else
         {
-            throw std::runtime_error("BoundaryCondition \"" + boundary_type + "\" is not recognised");
+            throw std::domain_error("BoundaryCondition \"" + boundary_type + "\" is not recognised");
         }
     }
 }
@@ -108,7 +109,7 @@ void fem_mesh::allocate_displacement_boundary(json const& boundary, basic_mesh c
 
     auto const& boundary_name = boundary["Name"].get<std::string>();
 
-    auto const dirichlet_dofs = this->filter_dof_list(basic_mesh.meshes(boundary_name));
+    auto const dirichlet_dofs = mesh_dof_filter<2>(basic_mesh.meshes(boundary_name));
 
     for (json::const_iterator it = std::begin(boundary["Values"]); it != std::end(boundary["Values"]);
          ++it)
@@ -117,7 +118,7 @@ void fem_mesh::allocate_displacement_boundary(json const& boundary, basic_mesh c
 
         if (dof_table.find(it.key()) == dof_table.end())
         {
-            throw std::runtime_error("x or y are acceptable coordinates\n");
+            throw std::domain_error("x or y are acceptable coordinates\n");
         }
 
         // Offset the degrees of freedom on the boundary
@@ -171,20 +172,10 @@ void fem_mesh::check_boundary_conditions(json const& boundary_data) const
         {
             if (!boundary.count(mandatory_field))
             {
-                throw std::runtime_error("\"" + std::string(mandatory_field)
-                                         + "\" was not specified in \"BoundaryCondition\".");
+                throw std::domain_error("\"" + std::string(mandatory_field)
+                                        + "\" was not specified in \"BoundaryCondition\".");
             }
         }
     }
-}
-
-local_indices fem_mesh::filter_dof_list(std::vector<basic_submesh> const& boundary_mesh) const
-{
-    using namespace ranges;
-
-    return view::transform(boundary_mesh,
-                           [](auto const& submesh) { return submesh.connectivities(); })
-           | action::join | action::join | action::sort | action::unique
-           | action::transform([=](auto const& i) { return i * 2; });
 }
 }

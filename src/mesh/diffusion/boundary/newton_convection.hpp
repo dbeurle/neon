@@ -1,14 +1,14 @@
 
 #pragma once
 
-#include "mesh/generic/Neumann.hpp"
+#include "mesh/generic/neumann.hpp"
 
 #include "interpolations/shape_function.hpp"
 
 namespace neon::diffusion::boundary
 {
 /**
- * newton_cooling is responsible for computing the additional term to the
+ * newton_convection is responsible for computing the additional term to the
  * stiffness matrix and right hand side for modelling physics such as the Newton's
  * law of cooling given by
  *
@@ -20,7 +20,7 @@ namespace neon::diffusion::boundary
  * leaving the surface.  The surrounding temperature \f$T_\infty\f$ is computed by
  * \f$ T_\infty = h / \lambda \f$
  */
-class newton_cooling : public SurfaceLoad<surface_interpolation>
+class newton_convection : public surface_load<surface_interpolation>
 {
 public:
     /**
@@ -31,13 +31,13 @@ public:
      * @param heat_flux A list of heat fluxes
      * @param external_temperature A list of heat transfer coefficients
      */
-    explicit newton_cooling(std::unique_ptr<surface_interpolation>&& sf,
-                            std::vector<local_indices> const& nodal_connectivity,
-                            std::vector<local_indices> const& dof_list,
-                            std::shared_ptr<material_coordinates>& mesh_coordinates,
-                            json const& times,
-                            json const& heat_flux,
-                            json const& heat_transfer_coefficient);
+    explicit newton_convection(std::unique_ptr<surface_interpolation>&& sf,
+                               indices const& nodal_connectivity,
+                               indices const& dof_list,
+                               std::shared_ptr<material_coordinates>& mesh_coordinates,
+                               json const& times,
+                               json const& heat_flux,
+                               json const& heat_transfer_coefficient);
 
     /**
      * Compute the element stiffness matrix contributing to the mixed boundary condition
@@ -45,8 +45,8 @@ public:
          k_{ab} &= \int_{\Gamma} N_a \lambda N_b d\Gamma
        \f}
      */
-    [[nodiscard]] std::pair<local_indices const&, matrix> external_stiffness(
-        int const element, double const load_factor) const;
+    [[nodiscard]] std::pair<index_view, matrix> external_stiffness(std::int64_t const element,
+                                                                   double const load_factor) const;
 
 protected:
     std::vector<std::pair<double, double>> stiffness_time_data;

@@ -64,11 +64,13 @@ void fem_static_matrix::compute_sparsity_pattern()
         // Loop over the elements and add in the non-zero components
         for (auto element = 0; element < submesh.elements(); element++)
         {
-            for (auto const& p : submesh.local_dof_list(element))
+            auto const local_dof_view = submesh.local_dof_view(element);
+
+            for (std::int64_t p{0}; p < local_dof_view.size(); p++)
             {
-                for (auto const& q : submesh.local_dof_list(element))
+                for (std::int64_t q{0}; q < local_dof_view.size(); q++)
                 {
-                    doublets.emplace_back(p, q);
+                    doublets.emplace_back(local_dof_view(p), local_dof_view(q));
                 }
             }
         }
@@ -87,14 +89,11 @@ void fem_static_matrix::compute_internal_force()
 
     for (auto const& submesh : mesh.meshes())
     {
-        for (auto element = 0; element < submesh.elements(); ++element)
+        for (std::int64_t element{0}; element < submesh.elements(); ++element)
         {
-            auto const& [dofs, fe_int] = submesh.internal_force(element);
+            auto const [dofs, fe_int] = submesh.internal_force(element);
 
-            for (auto a = 0; a < fe_int.size(); ++a)
-            {
-                fint(dofs[a]) += fe_int(a);
-            }
+            fint(dofs) += fe_int;
         }
     }
     if (std::fetestexcept(FE_INVALID))
@@ -123,14 +122,11 @@ void fem_static_matrix::compute_external_force()
             {
                 // clang-format off
                 std::visit([&](auto const& mesh) {
-                    for (auto element = 0; element < mesh.elements(); ++element)
+                    for (std::int64_t element{0}; element < mesh.elements(); ++element)
                     {
-                       auto const & [ dofs, fe_ext ] = mesh.external_force(element, step_time);
+                       auto const [dofs, fe_ext] = mesh.external_force(element, step_time);
 
-                       for (auto a = 0; a < fe_ext.size(); ++a)
-                       {
-                           fext(dofs[a]) += fe_ext(a);
-                       }
+                       fext(dofs) += fe_ext;
                     }
                 },
                 boundary_condition);
@@ -200,7 +196,7 @@ void fem_static_matrix::assemble_stiffness()
     for (auto const& submesh : mesh.meshes())
     {
 #pragma omp parallel for
-        for (auto element = 0; element < submesh.elements(); ++element)
+        for (std::int64_t element = 0; element < submesh.elements(); ++element)
         {
             // auto const[dofs, ke] = submesh.tangent_stiffness(element);
             auto const& tpl = submesh.tangent_stiffness(element);
@@ -219,7 +215,7 @@ void fem_static_matrix::assemble_stiffness()
     }
 
     auto const end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::chrono::duration<double> const elapsed_seconds = end - start;
 
     std::cout << std::string(6, ' ') << "Tangent stiffness assembly took "
               << elapsed_seconds.count() << "s\n";
@@ -231,13 +227,13 @@ void fem_static_matrix::enforce_dirichlet_conditions(sparse_matrix& A, vector& b
     {
         for (auto const& dirichlet_boundary : boundaries)
         {
-            for (auto const& fixed_dof : dirichlet_boundary.dof_view())
+            for (auto const fixed_dof : dirichlet_boundary.dof_view())
             {
                 auto const diagonal_entry = A.coeff(fixed_dof, fixed_dof);
 
                 b(fixed_dof) = 0.0;
 
-                std::vector<int> non_zero_visitor;
+                std::vector<std::int64_t> non_zero_visitor;
 
                 // Zero the rows and columns
                 for (sparse_matrix::InnerIterator it(A, fixed_dof); it; ++it)
@@ -273,9 +269,9 @@ void fem_static_matrix::apply_displacement_boundaries()
             auto const delta_u = boundary.value_view(adaptive_load.step_time())
                                  - boundary.value_view(adaptive_load.last_step_time());
 
-            for (auto const& dof : boundary.dof_view())
+            for (auto const fixed_dof : boundary.dof_view())
             {
-                prescribed_increment.coeffRef(dof) = delta_u;
+                prescribed_increment.coeffRef(fixed_dof) = delta_u;
             }
         }
     }

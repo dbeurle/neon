@@ -1,15 +1,16 @@
 
-#include "NonFollowerLoad.hpp"
+#include "nonfollower_load.hpp"
 
 #include "interpolations/interpolation_factory.hpp"
+#include "io/json.hpp"
+#include "traits/mechanics.hpp"
+#include "math/transform_expand.hpp"
 
 #include <utility>
 
-#include "io/json.hpp"
-
 namespace neon::mechanical::solid
 {
-NonFollowerLoadBoundary::NonFollowerLoadBoundary(
+nonfollower_load_boundary::nonfollower_load_boundary(
     std::shared_ptr<material_coordinates>& material_coordinates,
     std::vector<basic_submesh> const& submeshes,
     json const& simulation_data,
@@ -30,7 +31,7 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
         {
             if (dof_table.find(it.key()) == dof_table.end())
             {
-                throw std::runtime_error("x, y or z are acceptable coordinates\n");
+                throw std::domain_error("x, y or z are acceptable coordinates\n");
             }
 
             auto const dof_offset = dof_table.find(it.key())->second;
@@ -44,8 +45,8 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
                 boundary_meshes.emplace_back(std::in_place_type_t<traction>{},
                                              make_surface_interpolation(mesh.topology(),
                                                                         simulation_data),
-                                             mesh.connectivities(),
-                                             filter_dof_list(3, dof_offset, mesh.connectivities()),
+                                             mesh.element_connectivity(),
+                                             3 * mesh.element_connectivity() + dof_offset,
                                              material_coordinates,
                                              boundary,
                                              it.key(),
@@ -61,10 +62,21 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
 
         for (auto const& mesh : submeshes)
         {
+            auto const& connectivity = mesh.element_connectivity();
+
+            indices dof_list(3 * connectivity.rows(), connectivity.cols());
+
+            for (indices::Index i{0}; i < connectivity.cols(); ++i)
+            {
+                transform_expand_view(connectivity(Eigen::placeholders::all, i),
+                                      dof_list(Eigen::placeholders::all, i),
+                                      traits<type::solid, true>::dof_order);
+            }
+
             boundary_meshes.emplace_back(std::in_place_type_t<pressure>{},
                                          make_surface_interpolation(mesh.topology(), simulation_data),
-                                         mesh.connectivities(),
-                                         allocate_dof_list(3, mesh.connectivities()),
+                                         mesh.element_connectivity(),
+                                         dof_list,
                                          material_coordinates,
                                          boundary["Time"],
                                          boundary["Values"]);
@@ -76,7 +88,7 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
         {
             if (dof_table.find(it.key()) == dof_table.end())
             {
-                throw std::runtime_error("x, y or z are acceptable coordinates\n");
+                throw std::domain_error("x, y or z are acceptable coordinates\n");
             }
             auto const dof_offset = dof_table.find(it.key())->second;
 
@@ -89,8 +101,8 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
                 boundary_meshes.emplace_back(std::in_place_type_t<body_force>{},
                                              make_volume_interpolation(mesh.topology(),
                                                                        simulation_data),
-                                             mesh.connectivities(),
-                                             filter_dof_list(3, dof_offset, mesh.connectivities()),
+                                             mesh.element_connectivity(),
+                                             3 * mesh.element_connectivity() + dof_offset,
                                              material_coordinates,
                                              boundary,
                                              it.key(),
@@ -100,8 +112,8 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
     }
     else
     {
-        throw std::runtime_error("Need to specify a boundary type \"Traction\", \"Pressure\" or "
-                                 "\"BodyForce\"");
+        throw std::domain_error("Need to specify a boundary type \"Traction\", \"Pressure\" or "
+                                "\"BodyForce\"");
     }
 }
 }

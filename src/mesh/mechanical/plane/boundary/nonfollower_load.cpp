@@ -1,10 +1,8 @@
 
-#include "NonFollowerLoad.hpp"
+#include "nonfollower_load.hpp"
 
 #include "geometry/Projection.hpp"
-
-#include <utility>
-
+#include "math/transform_expand.hpp"
 #include "io/json.hpp"
 
 #include <Eigen/Geometry>
@@ -32,7 +30,7 @@ nonfollower_load_boundary::nonfollower_load_boundary(
         {
             if (dof_table.find(it.key()) == dof_table.end())
             {
-                throw std::runtime_error("x, y or z are acceptable coordinates\n");
+                throw std::domain_error("x, y or z are acceptable coordinates\n");
             }
 
             auto const dof_offset = dof_table.find(it.key())->second;
@@ -45,8 +43,8 @@ nonfollower_load_boundary::nonfollower_load_boundary(
             {
                 boundary_meshes.emplace_back(std::in_place_type_t<traction>{},
                                              make_line_interpolation(mesh.topology(), simulation_data),
-                                             mesh.connectivities(),
-                                             filter_dof_list(2, dof_offset, mesh.connectivities()),
+                                             mesh.element_connectivity(),
+                                             2 * mesh.element_connectivity() + dof_offset,
                                              material_coordinates,
                                              boundary,
                                              it.key(),
@@ -60,7 +58,7 @@ nonfollower_load_boundary::nonfollower_load_boundary(
         {
             if (dof_table.find(it.key()) == dof_table.end())
             {
-                throw std::runtime_error("x or y are acceptable coordinates\n");
+                throw std::domain_error("x or y are acceptable coordinates\n");
             }
             auto const dof_offset = dof_table.find(it.key())->second;
 
@@ -73,8 +71,8 @@ nonfollower_load_boundary::nonfollower_load_boundary(
                 boundary_meshes.emplace_back(std::in_place_type_t<body_force>{},
                                              make_surface_interpolation(mesh.topology(),
                                                                         simulation_data),
-                                             mesh.connectivities(),
-                                             filter_dof_list(2, dof_offset, mesh.connectivities()),
+                                             mesh.element_connectivity(),
+                                             2 * mesh.element_connectivity() + dof_offset,
                                              material_coordinates,
                                              boundary,
                                              it.key(),
@@ -84,8 +82,8 @@ nonfollower_load_boundary::nonfollower_load_boundary(
     }
     else
     {
-        throw std::runtime_error("Need to specify a boundary type \"Traction\", \"Pressure\" or "
-                                 "\"BodyForce\"");
+        throw std::domain_error("Need to specify a boundary type \"Traction\", \"Pressure\" or "
+                                "\"BodyForce\"");
     }
 }
 }
