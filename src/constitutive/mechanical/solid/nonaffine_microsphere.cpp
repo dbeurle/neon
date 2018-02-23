@@ -40,7 +40,6 @@ void nonaffine_microsphere::update_internal_variables(double const time_step_siz
     auto const p = non_affine_stretch_parameter;
 
     tbb::parallel_for(std::size_t{0}, deformation_gradients.size(), [&](auto const l) {
-
         auto const& J = detF_list[l]; // Determinant of the deformation gradient
 
         matrix3 const F_unimodular = unimodular(deformation_gradients[l]);
@@ -95,7 +94,7 @@ double nonaffine_microsphere::compute_nonaffine_stretch(matrix3 const& F_unimodu
 
     return std::pow(unit_sphere.integrate(0.0,
                                           [&](auto const& coordinates, auto const& l) {
-                                              auto const & [ r, r_outer_r ] = coordinates;
+                                              auto const& [r, r_outer_r] = coordinates;
 
                                               vector3 const t = deformed_tangent(F_unimodular, r);
 
@@ -109,7 +108,7 @@ matrix3 nonaffine_microsphere::compute_h_tensor(matrix3 const& F_unimodular) con
     auto const p = non_affine_stretch_parameter;
 
     return unit_sphere.integrate(matrix3::Zero().eval(), [&](auto const& xyz, auto const& l) -> matrix3 {
-        auto const & [ r, r_o_r ] = xyz;
+        auto const& [r, r_o_r] = xyz;
 
         vector3 const t = deformed_tangent(F_unimodular, r);
 

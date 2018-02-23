@@ -28,25 +28,25 @@ small_strain_J2_plasticity_damage::~small_strain_J2_plasticity_damage() = defaul
 void small_strain_J2_plasticity_damage::update_internal_variables(double const time_step_size)
 {
     // Retrieve the internal variables
-    auto[plastic_strains,
-         strains,
-         cauchy_stresses,
-         back_stresses,
-         accumulated_kinematic_stresses] = variables
-                                               ->fetch(internal_variables_t::Tensor::LinearisedPlasticStrain,
-                                                       internal_variables_t::Tensor::LinearisedStrain,
-                                                       internal_variables_t::Tensor::Cauchy,
-                                                       internal_variables_t::Tensor::BackStress,
-                                                       internal_variables_t::Tensor::KinematicHardening);
+    auto [plastic_strains,
+          strains,
+          cauchy_stresses,
+          back_stresses,
+          accumulated_kinematic_stresses] = variables
+                                                ->fetch(internal_variables_t::Tensor::LinearisedPlasticStrain,
+                                                        internal_variables_t::Tensor::LinearisedStrain,
+                                                        internal_variables_t::Tensor::Cauchy,
+                                                        internal_variables_t::Tensor::BackStress,
+                                                        internal_variables_t::Tensor::KinematicHardening);
 
     // Retrieve the accumulated internal variables
-    auto[accumulated_plastic_strains,
-         von_mises_stresses,
-         scalar_damages,
-         energy_release_rates] = variables->fetch(internal_variables_t::Scalar::EffectivePlasticStrain,
-                                                  internal_variables_t::Scalar::VonMisesStress,
-                                                  internal_variables_t::Scalar::Damage,
-                                                  internal_variables_t::Scalar::EnergyReleaseRate);
+    auto [accumulated_plastic_strains,
+          von_mises_stresses,
+          scalar_damages,
+          energy_release_rates] = variables->fetch(internal_variables_t::Scalar::EffectivePlasticStrain,
+                                                   internal_variables_t::Scalar::VonMisesStress,
+                                                   internal_variables_t::Scalar::Damage,
+                                                   internal_variables_t::Scalar::EnergyReleaseRate);
 
     auto& tangent_operators = variables->fetch(internal_variables_t::rank4::tangent_operator);
 
@@ -56,7 +56,6 @@ void small_strain_J2_plasticity_damage::update_internal_variables(double const t
 
     // Perform the update algorithm for each quadrature point
     tbb::parallel_for(std::size_t{0}, strains.size(), [&](auto const l) {
-
         auto const& strain = strains[l];
         auto& plastic_strain = plastic_strains[l];
         auto& cauchy_stress = cauchy_stresses[l];
