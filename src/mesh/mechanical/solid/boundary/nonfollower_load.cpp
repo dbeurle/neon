@@ -1,15 +1,16 @@
 
-#include "NonFollowerLoad.hpp"
+#include "nonfollower_load.hpp"
 
 #include "interpolations/interpolation_factory.hpp"
+#include "io/json.hpp"
+#include "traits/mechanics.hpp"
+#include "math/transform_expand.hpp"
 
 #include <utility>
 
-#include "io/json.hpp"
-
 namespace neon::mechanical::solid
 {
-NonFollowerLoadBoundary::NonFollowerLoadBoundary(
+nonfollower_load_boundary::nonfollower_load_boundary(
     std::shared_ptr<material_coordinates>& material_coordinates,
     std::vector<basic_submesh> const& submeshes,
     json const& simulation_data,
@@ -39,8 +40,8 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
                     boundary_meshes.emplace_back(std::in_place_type_t<traction>{},
                                                  make_surface_interpolation(mesh.topology(),
                                                                             simulation_data),
-                                                 mesh.connectivities(),
-                                                 filter_dof_list(3, dof_offset, mesh.connectivities()),
+                                                 mesh.element_connectivity(),
+                                                 3 * mesh.element_connectivity() + dof_offset,
                                                  material_coordinates,
                                                  boundary,
                                                  it->first,
@@ -57,10 +58,21 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
 
         for (auto const& mesh : submeshes)
         {
+            auto const& connectivity = mesh.element_connectivity();
+
+            indices dof_list(3 * connectivity.rows(), connectivity.cols());
+
+            for (indices::Index i{0}; i < connectivity.cols(); ++i)
+            {
+                transform_expand_view(connectivity(Eigen::placeholders::all, i),
+                                      dof_list(Eigen::placeholders::all, i),
+                                      traits<type::solid, true>::dof_order);
+            }
+
             boundary_meshes.emplace_back(std::in_place_type_t<pressure>{},
                                          make_surface_interpolation(mesh.topology(), simulation_data),
-                                         mesh.connectivities(),
-                                         allocate_dof_list(3, mesh.connectivities()),
+                                         mesh.element_connectivity(),
+                                         dof_list,
                                          material_coordinates,
                                          boundary["Time"],
                                          boundary["Value"]);
@@ -72,7 +84,7 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
         {
             if (boundary.count(it->first))
             {
-                auto const& dof_offset = it->second;
+                auto const dof_offset = it->second;
 
                 auto& [is_dof_active, boundary_meshes] = nonfollower_load[dof_offset];
 
@@ -83,8 +95,8 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
                     boundary_meshes.emplace_back(std::in_place_type_t<body_force>{},
                                                  make_volume_interpolation(mesh.topology(),
                                                                            simulation_data),
-                                                 mesh.connectivities(),
-                                                 filter_dof_list(3, dof_offset, mesh.connectivities()),
+                                                 mesh.element_connectivity(),
+                                                 3 * mesh.element_connectivity() + dof_offset,
                                                  material_coordinates,
                                                  boundary,
                                                  it->first,
@@ -95,8 +107,8 @@ NonFollowerLoadBoundary::NonFollowerLoadBoundary(
     }
     else
     {
-        throw std::runtime_error("Need to specify a boundary type \"Traction\", \"Pressure\" or "
-                                 "\"BodyForce\"");
+        throw std::domain_error("Need to specify a boundary type \"Traction\", \"Pressure\" or "
+                                "\"BodyForce\"");
     }
 }
 }

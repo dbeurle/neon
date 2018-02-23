@@ -28,38 +28,35 @@ public:
     explicit fem_submesh(basic_submesh const& submesh) : basic_submesh(submesh) {}
 
     /** @return mapping of the element degrees of freedom to the process matrix */
-    local_indices const& local_dof_view(std::int32_t const element) const
+    index_view local_dof_view(std::int64_t const element) const
     {
         return static_cast<mesh_type*>(this)->local_dof_view(element);
     }
 
     /** @return the tangent consistent stiffness matrix */
-    [[nodiscard]] std::pair<local_indices const&, matrix> tangent_stiffness(
-        std::int32_t const element) const {
+    [[nodiscard]] std::pair<index_view, matrix> tangent_stiffness(std::int64_t const element) const {
         return static_cast<mesh_type*>(this)->tangent_stiffness(element);
     }
 
     /** @return the internal element force */
-    std::pair<local_indices const&, vector> internal_force(std::int32_t const element) const
+    std::pair<index_view, vector> internal_force(std::int64_t const element) const
     {
         return static_cast<mesh_type*>(this)->internal_force(element);
     }
 
     /** @return the consistent mass matrix \sa diagonal_mass */
-    std::pair<local_indices const&, matrix> consistent_mass(std::int32_t const element) const
+    std::pair<index_view, matrix> consistent_mass(std::int64_t const element) const
     {
         return static_cast<mesh_type*>(this)->consistent_mass(element);
     }
 
     /** @return the diagonal mass matrix as a vector \sa consistent_mass */
-    std::pair<local_indices const&, vector> diagonal_mass(std::int32_t const element) const
+    std::pair<index_view, vector> diagonal_mass(std::int64_t const element) const
     {
         return static_cast<mesh_type*>(this)->diagonal_mass(element);
     }
 
     /** @return the number of degrees of freedom per node */
-    std::int32_t dofs_per_node() const { return static_cast<MeshType*>(this)->dofs_per_node(); }
-
-protected:
+    auto dofs_per_node() const { return static_cast<MeshType*>(this)->dofs_per_node(); }
 };
 }

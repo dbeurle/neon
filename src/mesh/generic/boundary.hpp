@@ -9,17 +9,17 @@
 namespace neon
 {
 /**
- * Boundary is a base class for boundary conditions which performs the load
+ * boundary is a base class for boundary conditions which performs the load
  * interpolation logic.
  */
-class Boundary
+class boundary
 {
 public:
-    explicit Boundary(json const& times, json const& loads);
+    explicit boundary(json const& times, json const& loads);
 
-    explicit Boundary(json const& boundary, std::string const& name, double const generate_time_step);
+    explicit boundary(json const& boundary, std::string const& name, double const generate_time_step);
 
-    ~Boundary() = default;
+    ~boundary() = default;
 
     [[nodiscard]] std::vector<double> time_history() const;
 

@@ -12,13 +12,15 @@ public:
     material_coordinates(matrix3x const& initial_coordinates);
 
     /** @return element reference configuration based on the local node numbers*/
-    auto const initial_configuration(local_indices const& local_nodes) const
+    template <typename indices_type>
+    auto const initial_configuration(indices_type const local_nodes) const
     {
         return X(Eigen::placeholders::all, local_nodes);
     }
 
     /** @return element current configuration based on the local node numbers*/
-    auto const current_configuration(local_indices const& local_nodes) const
+    template <typename indices_type>
+    auto const current_configuration(indices_type const local_nodes) const
     {
         return x(Eigen::placeholders::all, local_nodes);
     }
@@ -46,13 +48,13 @@ protected:
 //
 // public:
 //     /** @return element reference configuration based on the local node numbers*/
-//     auto const initial_configuration(local_indices const& local_nodes) const
+//     auto const initial_configuration(index_view local_nodes) const
 //     {
 //         return X(Eigen::placeholders::all, local_nodes);
 //     }
 //
 //     /** @return element current configuration based on the local node numbers*/
-//     auto const current_configuration(local_indices const& local_nodes) const
+//     auto const current_configuration(index_view local_nodes) const
 //     {
 //         return x(Eigen::placeholders::all, local_nodes);
 //     }

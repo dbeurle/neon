@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include "mesh/generic/Dirichlet.hpp"
-#include "mesh/mechanical/solid/boundary/NonFollowerLoad.hpp"
+#include "mesh/generic/dirichlet.hpp"
+#include "mesh/mechanical/solid/boundary/nonfollower_load.hpp"
 #include "mesh/mechanical/solid/fem_submesh.hpp"
 
 #include <map>
@@ -49,8 +49,11 @@ public:
     /** Constant access to the sub-meshes */
     [[nodiscard]] std::vector<fem_submesh> const& meshes() const { return submeshes; }
 
-    /** Non-const access to the sub-meshes */
-    [[nodiscard]] std::vector<fem_submesh>& meshes() { return submeshes; }
+        /** Non-const access to the sub-meshes */
+        [[nodiscard]] std::vector<fem_submesh>& meshes()
+    {
+        return submeshes;
+    }
 
     [[nodiscard]] auto const& displacement_boundaries() const { return displacement_bcs; }
 
@@ -76,26 +79,23 @@ protected:
 
     [[nodiscard]] bool is_nonfollower_load(std::string const& boundary_type) const;
 
-    /** Collapse the nodal connectivity arrays from the submesh for a node list */
-    [[nodiscard]] local_indices filter_dof_list(std::vector<basic_submesh> const& boundary_mesh) const;
-
 protected:
-    /**
-     * This time step is taken from "Time[Period][Increments][Initial]" in the input file.
-     * It is used in the boundary class to generate cyclic loading for example. This ensures the
-     * compatibility between user defined and sinusoidal boundary conditions.
-     */
-    double generate_time_step;
-
     std::shared_ptr<material_coordinates> mesh_coordinates;
 
     std::vector<fem_submesh> submeshes;
 
-    // Boundary conditions for this mesh
-    std::map<std::string, std::vector<Dirichlet>> displacement_bcs;
-    std::map<std::string, NonFollowerLoadBoundary> nonfollower_loads;
+    // boundary conditions for this mesh
+    std::map<std::string, std::vector<dirichlet>> displacement_bcs;
+    std::map<std::string, nonfollower_load_boundary> nonfollower_loads;
 
     std::unordered_map<std::string, int> const dof_table = {{"x", 0}, {"y", 1}, {"z", 2}};
+
+    double generate_time_step; /// This time step is taken from
+                               /// "Time[Period][Increments][Initial]" in the
+                               /// input file.  It is used in the boundary class
+                               /// to generate cyclic loading for example. This
+                               /// ensures the compatibility between user
+                               /// defined and sinusoidal boundary conditions.
 };
 }
 }

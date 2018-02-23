@@ -31,16 +31,16 @@ void small_strain_J2_plasticity::update_internal_variables(double const time_ste
     auto const shear_modulus = material.shear_modulus();
 
     // Extract the internal variables
-    auto[plastic_strains,
-         strains,
-         cauchy_stresses] = variables->fetch(internal_variables_t::Tensor::LinearisedPlasticStrain,
-                                             internal_variables_t::Tensor::LinearisedStrain,
-                                             internal_variables_t::Tensor::Cauchy);
+    auto [plastic_strains,
+          strains,
+          cauchy_stresses] = variables->fetch(internal_variables_t::Tensor::LinearisedPlasticStrain,
+                                              internal_variables_t::Tensor::LinearisedStrain,
+                                              internal_variables_t::Tensor::Cauchy);
 
     // Retrieve the accumulated internal variables
-    auto[accumulated_plastic_strains,
-         von_mises_stresses] = variables->fetch(internal_variables_t::Scalar::EffectivePlasticStrain,
-                                                internal_variables_t::Scalar::VonMisesStress);
+    auto [accumulated_plastic_strains,
+          von_mises_stresses] = variables->fetch(internal_variables_t::Scalar::EffectivePlasticStrain,
+                                                 internal_variables_t::Scalar::VonMisesStress);
 
     auto& tangent_operators = variables->fetch(internal_variables_t::rank4::tangent_operator);
 
@@ -50,7 +50,6 @@ void small_strain_J2_plasticity::update_internal_variables(double const time_ste
 
     // Perform the update algorithm for each quadrature point
     tbb::parallel_for(std::size_t{0}, strains.size(), [&](auto const l) {
-
         auto const& strain = strains[l];
         auto& plastic_strain = plastic_strains[l];
         auto& cauchy_stress = cauchy_stresses[l];

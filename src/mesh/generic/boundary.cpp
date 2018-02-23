@@ -1,24 +1,24 @@
 
-#include "Boundary.hpp"
+#include "boundary.hpp"
 
 #include "numeric/float_compare.hpp"
 
+#include "io/json.hpp"
+
 #include <range/v3/algorithm/adjacent_find.hpp>
 #include <range/v3/algorithm/find_if.hpp>
-
 #include <range/v3/view/map.hpp>
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/zip.hpp>
 
-#include "io/json.hpp"
 #include <cmath>
 #include <numeric>
 
 namespace neon
 {
-Boundary::Boundary(json const& times, json const& loads) { allocate_time_load(times, loads); }
+boundary::boundary(json const& times, json const& loads) { allocate_time_load(times, loads); }
 
-Boundary::Boundary(json const& boundary, std::string const& name, double const generate_time_step)
+boundary::boundary(json const& boundary, std::string const& name, double const generate_time_step)
 {
     if (boundary.find("Sinusoidal") != boundary.end())
     {
@@ -30,14 +30,14 @@ Boundary::Boundary(json const& boundary, std::string const& name, double const g
     }
 }
 
-std::vector<double> Boundary::time_history() const { return time_load | ranges::view::keys; }
+std::vector<double> boundary::time_history() const { return time_load | ranges::view::keys; }
 
-double Boundary::interpolate_prescribed_load(double const step_time) const
+double boundary::interpolate_prescribed_load(double const step_time) const
 {
     return interpolate_prescribed_load(time_load, step_time);
 }
 
-double Boundary::interpolate_prescribed_load(std::vector<std::pair<double, double>> const& time_value,
+double boundary::interpolate_prescribed_load(std::vector<std::pair<double, double>> const& time_value,
                                              double const step_time) const
 {
     using ranges::adjacent_find;
@@ -68,7 +68,7 @@ double Boundary::interpolate_prescribed_load(std::vector<std::pair<double, doubl
     return (1.0 - interpolation_factor) * load_0 + interpolation_factor * load_1;
 }
 
-void Boundary::generate_sinusoidal(json const& boundary,
+void boundary::generate_sinusoidal(json const& boundary,
                                    std::string const& name,
                                    double const generate_time_step)
 {
@@ -78,8 +78,8 @@ void Boundary::generate_sinusoidal(json const& boundary,
     {
         if (!boundary.count(mandatory_field))
         {
-            throw std::runtime_error("\"" + std::string(mandatory_field)
-                                     + "\" was not specified in \"BoundaryCondition\".");
+            throw std::domain_error("\"" + std::string(mandatory_field)
+                                    + "\" was not specified in \"BoundaryCondition\".");
         }
     }
 
@@ -90,62 +90,59 @@ void Boundary::generate_sinusoidal(json const& boundary,
 
     if (!((period.size() == phase.size()) && (phase.size() == number_of_cycles.size())))
     {
-        throw std::runtime_error("The amplitude, period, number_of_cycles, time_step and phase "
-                                 "vectors must be of the same size.");
+        throw std::domain_error("The amplitude, period, number_of_cycles, time_step and phase "
+                                "vectors must be of the same size.");
     }
 
-    std::vector<double> new_times;
-    std::vector<double> new_loads;
-    new_times.push_back(0);
+    std::vector<double> times, loads;
+    times.push_back(0);
 
     // Loop over the blocks
-    for (int i = 0; i < amplitude.size(); ++i)
+    for (std::size_t i = 0; i < amplitude.size(); ++i)
     {
-        double omega = 2.0 * M_PI / period[i];
-        auto number_of_steps = number_of_cycles[i] * period[i] / generate_time_step;
+        auto const omega = 2.0 * M_PI / period[i];
+
+        auto const number_of_steps = number_of_cycles[i] * period[i] / generate_time_step;
 
         std::vector<double> time_block(number_of_steps);
         std::iota(time_block.begin(), time_block.end(), 1);
 
         auto const scale_factor = number_of_cycles[i] * period[i] / time_block.back();
 
-        time_block = time_block | view::transform([scale_factor, new_times](double x) {
-                         return x * scale_factor + new_times.back();
+        time_block = time_block | view::transform([&scale_factor, &times](double x) {
+                         return x * scale_factor + times.back();
                      });
 
-        new_times.insert(new_times.end(), time_block.begin(), time_block.end());
+        times.insert(times.end(), time_block.begin(), time_block.end());
 
-        new_loads = new_times | view::transform([i, amplitude, omega, phase](double x) {
-                        return amplitude[i] * std::sin(omega * x + phase[i]);
-                    });
+        loads = times | view::transform([i, amplitude, omega, phase](double x) {
+                    return amplitude[i] * std::sin(omega * x + phase[i]);
+                });
     }
-
-    json times = new_times;
-    json loads = new_loads;
     allocate_time_load(times, loads);
 }
 
-void Boundary::allocate_time_load(json const& times, json const& loads)
+void boundary::allocate_time_load(json const& times, json const& loads)
 {
     using namespace ranges;
 
     if (times.size() < 2)
     {
-        throw std::runtime_error("\"Time\" is not a vector of at least two elements");
+        throw std::domain_error("\"Time\" is not a vector of at least two elements");
     }
 
     if (loads.size() < 2)
     {
-        throw std::runtime_error("Boundary value is not a vector of at least two elements");
+        throw std::domain_error("boundary value is not a vector of at least two elements");
     }
 
     if (times.size() != loads.size())
     {
-        throw std::runtime_error("The time and load vectors must be of the same size.");
+        throw std::domain_error("The time and load vectors must be of the same size.");
     }
     if (!std::is_sorted(std::begin(times), std::end(times)))
     {
-        throw std::runtime_error("Load times must be monotonically increasing.");
+        throw std::domain_error("Load times must be monotonically increasing.");
     }
 
     time_load = view::zip(times, loads) | view::transform([](auto const time_load) {

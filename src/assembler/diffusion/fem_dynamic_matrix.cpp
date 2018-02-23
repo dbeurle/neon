@@ -69,13 +69,15 @@ void fem_dynamic_matrix::assemble_mass()
 
     for (auto const& submesh : mesh.meshes())
     {
-        for (std::size_t element = 0; element < submesh.elements(); element++)
+        for (std::int64_t element = 0; element < submesh.elements(); element++)
         {
-            for (auto const& p : submesh.local_dof_list(element))
+            auto const dof_view = submesh.local_dof_view(element);
+
+            for (std::int64_t p{0}; p < dof_view.size(); ++p)
             {
-                for (auto const& q : submesh.local_dof_list(element))
+                for (std::int64_t q{0}; q < dof_view.size(); ++q)
                 {
-                    doublets.emplace_back(p, q);
+                    doublets.emplace_back(dof_view(p), dof_view(q));
                 }
             }
         }
@@ -89,19 +91,18 @@ void fem_dynamic_matrix::assemble_mass()
     for (auto const& submesh : mesh.meshes())
     {
 #pragma omp parallel for
-        for (std::size_t element = 0; element < submesh.elements(); ++element)
+        for (std::int64_t element = 0; element < submesh.elements(); ++element)
         {
             // auto const[dofs, m] = submesh.consistent_mass(element);
             auto const& tpl = submesh.consistent_mass(element);
             auto const& dofs = std::get<0>(tpl);
             auto const& m = std::get<1>(tpl);
 
-            for (std::size_t b{0}; b < dofs.size(); b++)
+            for (std::int64_t b{0}; b < dofs.size(); b++)
             {
-                for (std::size_t a{0}; a < dofs.size(); a++)
+                for (std::int64_t a{0}; a < dofs.size(); a++)
                 {
-#pragma omp atomic
-                    M.coeffRef(dofs[a], dofs[b]) += m(a, b);
+                    M.coefficient_update(dofs(a), dofs(b), m(a, b));
                 }
             }
         }

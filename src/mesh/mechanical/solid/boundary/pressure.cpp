@@ -7,10 +7,11 @@
 
 namespace neon::mechanical::solid
 {
-std::tuple<local_indices const&, vector> pressure::external_force(int const element,
-                                                                  double const load_factor) const
+std::pair<index_view, vector> pressure::external_force(std::int64_t const element,
+                                                       double const load_factor) const
 {
-    auto const X = coordinates->initial_configuration(nodal_connectivity[element]);
+    auto const X = coordinates->initial_configuration(
+        nodal_connectivity(Eigen::placeholders::all, element));
 
     auto const X_surface = geometry::project_to_plane(X);
 
@@ -33,6 +34,7 @@ std::tuple<local_indices const&, vector> pressure::external_force(int const elem
                                                 });
 
     // Map the matrix back to a vector for the assembly operator
-    return {dof_list[element], Eigen::Map<matrix>(f_ext.data(), X.cols() * 3, 1)};
+    return {dof_list(Eigen::placeholders::all, element),
+            Eigen::Map<matrix>(f_ext.data(), X.cols() * 3, 1)};
 }
 }

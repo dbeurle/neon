@@ -6,10 +6,11 @@
 #include "constitutive/constitutive_model_factory.hpp"
 #include "interpolations/interpolation_factory.hpp"
 #include "material/material_property.hpp"
-#include "mesh/dof_allocator.hpp"
 #include "mesh/material_coordinates.hpp"
 #include "numeric/gradient_operator.hpp"
 #include "numeric/mechanics"
+#include "math/transform_expand.hpp"
+#include "traits/mechanics.hpp"
 
 #include <range/v3/algorithm/count_if.hpp>
 #include <range/v3/algorithm/fill.hpp>
@@ -49,7 +50,15 @@ fem_submesh::fem_submesh(json const& material_data,
 
     variables->commit();
 
-    dof_list = allocate_dof_list(this->dofs_per_node(), nodal_connectivity);
+    // Allocate the degree of freedom indices
+    dof_list.resize(connectivity.rows() * traits<type::solid>::dof_order.size(), connectivity.cols());
+
+    for (indices::Index i{0}; i < connectivity.cols(); ++i)
+    {
+        transform_expand_view(connectivity(Eigen::placeholders::all, i),
+                              dof_list(Eigen::placeholders::all, i),
+                              traits<type::solid>::dof_order);
+    }
 }
 
 void fem_submesh::save_internal_variables(bool const have_converged)
@@ -64,24 +73,24 @@ void fem_submesh::save_internal_variables(bool const have_converged)
     }
 }
 
-std::pair<local_indices const&, matrix> fem_submesh::tangent_stiffness(std::int32_t const element) const
+std::pair<index_view, matrix> fem_submesh::tangent_stiffness(std::int32_t const element) const
 {
-    auto const x = mesh_coordinates->current_configuration(local_node_list(element));
+    auto const x = mesh_coordinates->current_configuration(local_node_view(element));
 
     matrix ke = material_tangent_stiffness(x, element);
 
-    if (!cm->is_finite_deformation()) return {local_dof_list(element), ke};
+    if (!cm->is_finite_deformation()) return {local_dof_view(element), ke};
 
     ke.noalias() += geometric_tangent_stiffness(x, element);
 
-    return {local_dof_list(element), ke};
+    return {local_dof_view(element), ke};
 }
 
-std::pair<local_indices const&, vector> fem_submesh::internal_force(std::int32_t const element) const
+std::pair<index_view, vector> fem_submesh::internal_force(std::int32_t const element) const
 {
-    auto const& x = mesh_coordinates->current_configuration(local_node_list(element));
+    auto const& x = mesh_coordinates->current_configuration(local_node_view(element));
 
-    return {local_dof_list(element), internal_nodal_force(x, element)};
+    return {local_dof_view(element), internal_nodal_force(x, element)};
 }
 
 matrix fem_submesh::geometric_tangent_stiffness(matrix3x const& x, std::int32_t const element) const
@@ -156,9 +165,9 @@ vector fem_submesh::internal_nodal_force(matrix3x const& x, std::int32_t const e
     return Eigen::Map<vector>(fint_matrix.data(), fint_matrix.size());
 }
 
-std::pair<local_indices const&, matrix> fem_submesh::consistent_mass(std::int32_t const element) const
+std::pair<index_view, matrix> fem_submesh::consistent_mass(std::int32_t const element) const
 {
-    auto const& X = mesh_coordinates->initial_configuration(local_node_list(element));
+    auto const& X = mesh_coordinates->initial_configuration(local_node_view(element));
 
     auto const density_0 = cm->intrinsic_material().initial_density();
 
@@ -172,10 +181,10 @@ std::pair<local_indices const&, matrix> fem_submesh::consistent_mass(std::int32_
                                             return N * density_0 * N.transpose()
                                                    * Jacobian.determinant();
                                         });
-    return {local_dof_list(element), identity_expansion(m, dofs_per_node())};
+    return {local_dof_view(element), identity_expansion(m, dofs_per_node())};
 }
 
-std::pair<local_indices const&, vector> fem_submesh::diagonal_mass(std::int32_t const element) const
+std::pair<index_view, vector> fem_submesh::diagonal_mass(std::int32_t const element) const
 {
     auto const& [dofs, consistent_m] = this->consistent_mass(element);
 
@@ -184,7 +193,7 @@ std::pair<local_indices const&, vector> fem_submesh::diagonal_mass(std::int32_t 
     {
         diagonal_m(i) = consistent_m.row(i).sum();
     }
-    return {local_dof_list(element), diagonal_m};
+    return {local_dof_view(element), diagonal_m};
 }
 
 void fem_submesh::update_internal_variables(double const time_step_size)
@@ -208,10 +217,10 @@ void fem_submesh::update_deformation_measures()
     auto& H_list = variables->fetch(internal_variables_t::Tensor::DisplacementGradient);
     auto& F_list = variables->fetch(internal_variables_t::Tensor::DeformationGradient);
 
-    tbb::parallel_for(std::size_t{0}, elements(), [&](auto const element) {
+    tbb::parallel_for(std::int64_t{0}, elements(), [&](auto const element) {
         // Gather the material coordinates
-        auto const X = mesh_coordinates->initial_configuration(local_node_list(element));
-        auto const x = mesh_coordinates->current_configuration(local_node_list(element));
+        auto const X = mesh_coordinates->initial_configuration(local_node_view(element));
+        auto const x = mesh_coordinates->current_configuration(local_node_view(element));
 
         sf->quadrature().for_each([&](auto const& femval, const auto& l) {
             auto const& [N, rhea] = femval;
@@ -274,10 +283,10 @@ fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
     // vector format of values
     vector component = vector::Zero(sf->quadrature().points());
 
-    for (std::size_t e{0}; e < elements(); ++e)
+    for (std::int64_t e{0}; e < elements(); ++e)
     {
         // Assemble these into the global value vector
-        auto const& node_list = local_node_list(e);
+        auto const& node_list = local_node_view(e);
 
         for (auto ci = 0; ci < 3; ++ci)
         {
@@ -316,10 +325,10 @@ fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
     // vector format of values
     vector component = vector::Zero(sf->quadrature().points());
 
-    for (std::size_t e{0}; e < elements(); ++e)
+    for (std::int64_t e{0}; e < elements(); ++e)
     {
         // Assemble these into the global value vector
-        auto const& node_list = local_node_list(e);
+        auto const& node_list = local_node_view(e);
 
         for (std::size_t l{0}; l < sf->quadrature().points(); ++l)
         {

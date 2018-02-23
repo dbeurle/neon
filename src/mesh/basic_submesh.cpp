@@ -11,6 +11,8 @@
 #include <range/v3/action/sort.hpp>
 #include <range/v3/action/unique.hpp>
 
+#include <set>
+
 namespace neon
 {
 basic_submesh::basic_submesh(json const& mesh)
@@ -18,44 +20,52 @@ basic_submesh::basic_submesh(json const& mesh)
     // Error checking for empty fields
     if (!mesh.count("Name"))
     {
-        throw std::runtime_error("The element group in the mesh file is missing the "
-                                 "\"Name\" field");
+        throw std::domain_error("The element group in the mesh file is missing the "
+                                "\"Name\" field");
     }
     if (!mesh.count("Type"))
     {
-        throw std::runtime_error("The element group in the mesh file is missing the "
-                                 "\"Type\" field");
+        throw std::domain_error("The element group in the mesh file is missing the "
+                                "\"Type\" field");
     }
     if (!mesh.count("NodalConnectivity"))
     {
-        throw std::runtime_error("The element group in the mesh file is missing the "
-                                 "\"NodalConnectivity\" field");
+        throw std::domain_error("The element group in the mesh file is missing the "
+                                "\"NodalConnectivity\" field");
     }
     if (mesh["NodalConnectivity"].size() == 0 || mesh["NodalConnectivity"][0].size() == 0)
     {
-        throw std::runtime_error("The element group in the mesh file is empty");
+        throw std::domain_error("The element group in the mesh file is empty");
     }
 
-    m_topology = gmsh_type_to_enum(mesh["Type"].get<int>());
+    m_topology = gmsh_type_to_enum(mesh["Type"]);
 
-    nodal_connectivity.reserve(mesh["NodalConnectivity"].size());
+    connectivity.resize(mesh["NodalConnectivity"][0].size(), mesh["NodalConnectivity"].size());
 
-    for (auto const& mesh_connectivity : mesh["NodalConnectivity"])
     {
-        nodal_connectivity.push_back(local_indices());
-        nodal_connectivity.back().reserve(mesh_connectivity.size());
+        std::int64_t element_counter{0};
 
-        for (auto const& node : mesh_connectivity)
+        for (auto const& mesh_connectivity : mesh["NodalConnectivity"])
         {
-            nodal_connectivity.back().push_back(node.get<int64_t>());
+            std::int64_t node_counter{0};
+            for (auto const& node : mesh_connectivity)
+            {
+                connectivity(node_counter++, element_counter) = node;
+            }
+            ++element_counter;
         }
     }
-    convert_from_gmsh(nodal_connectivity, m_topology);
+    convert_from_gmsh(connectivity, m_topology);
 }
 
-local_indices basic_submesh::unique_connectivities() const
+std::vector<std::int32_t> basic_submesh::unique_connectivity() const
 {
-    using namespace ranges;
-    return std::ref(nodal_connectivity) | action::join | action::sort | action::unique;
+    std::set<std::int32_t> unique_set;
+
+    std::copy_n(connectivity.data(),
+                connectivity.size(),
+                std::inserter(unique_set, std::end(unique_set)));
+
+    return {std::begin(unique_set), std::end(unique_set)};
 }
 }

@@ -38,13 +38,13 @@ TEST_CASE("Basic mesh test")
 
     SECTION("Test corner vertices")
     {
-        REQUIRE((nodal_coordinates.coordinates({0}) - vector3(0.0, 0.0, 0.0)).norm()
+        REQUIRE((nodal_coordinates.coordinates(0) - vector3(0.0, 0.0, 0.0)).norm()
                 == Approx(0.0).margin(ZERO_MARGIN));
-        REQUIRE((nodal_coordinates.coordinates({1}) - vector3(1.0, 0.0, 0.0)).norm()
+        REQUIRE((nodal_coordinates.coordinates(1) - vector3(1.0, 0.0, 0.0)).norm()
                 == Approx(0.0).margin(ZERO_MARGIN));
-        REQUIRE((nodal_coordinates.coordinates({2}) - vector3(0.0, 1.0, 0.0)).norm()
+        REQUIRE((nodal_coordinates.coordinates(2) - vector3(0.0, 1.0, 0.0)).norm()
                 == Approx(0.0).margin(ZERO_MARGIN));
-        REQUIRE((nodal_coordinates.coordinates({3}) - vector3(1.0, 1.0, 0.0)).norm()
+        REQUIRE((nodal_coordinates.coordinates(3) - vector3(1.0, 1.0, 0.0)).norm()
                 == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Test mesh data for boundary and volume elements")
@@ -78,37 +78,40 @@ TEST_CASE("Basic mesh test")
     {
         for (auto const& mesh : basic_mesh.meshes("bottom"))
         {
-            auto const unique_node_list = mesh.unique_connectivities();
+            auto const unique_node_list = mesh.unique_connectivity();
 
-            local_indices const known_unique{0, 1, 2, 3, 14, 15, 16, 17, 18, 19, 26, 27, 36, 37, 38, 39};
+            std::vector<std::int32_t> const
+                known_unique{0, 1, 2, 3, 14, 15, 16, 17, 18, 19, 26, 27, 36, 37, 38, 39};
 
             REQUIRE(view::set_symmetric_difference(unique_node_list, known_unique).empty());
         }
 
         for (auto const& mesh : basic_mesh.meshes("cube"))
         {
-            auto const unique_node_list = mesh.unique_connectivities();
+            auto const unique_node_list = mesh.unique_connectivity();
 
             REQUIRE(view::set_symmetric_difference(unique_node_list, view::ints(0, 64)).empty());
         }
 
         for (auto const& mesh : basic_mesh.meshes("sides"))
         {
-            auto const unique_node_list = mesh.unique_connectivities();
+            auto const unique_node_list = mesh.unique_connectivity();
 
-            local_indices const known_unique{0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
-                                             12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-                                             24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
-                                             40, 41, 42, 43, 48, 49, 50, 51, 52, 53, 54, 55};
+            std::vector<std::int32_t> const known_unique{0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
+                                                         10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                                                         20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+                                                         30, 31, 32, 33, 34, 35, 40, 41, 42, 43,
+                                                         48, 49, 50, 51, 52, 53, 54, 55};
 
             REQUIRE(view::set_symmetric_difference(unique_node_list, known_unique).empty());
         }
 
         for (auto const& mesh : basic_mesh.meshes("top"))
         {
-            auto const unique_node_list = mesh.unique_connectivities();
+            auto const unique_node_list = mesh.unique_connectivity();
 
-            local_indices const known_unique{4, 5, 6, 7, 10, 11, 22, 23, 28, 29, 30, 31, 44, 45, 46, 47};
+            std::vector<std::int32_t> const
+                known_unique{4, 5, 6, 7, 10, 11, 22, 23, 28, 29, 30, 31, 44, 45, 46, 47};
             REQUIRE(view::set_symmetric_difference(unique_node_list, known_unique).empty());
         }
     }
@@ -158,8 +161,10 @@ TEST_CASE("Solid submesh test")
     SECTION("Default internal variables test")
     {
         // Check the standard ones are used
-        REQUIRE(internal_vars.has(mechanical::solid::internal_variables_t::Tensor::DisplacementGradient));
-        REQUIRE(internal_vars.has(mechanical::solid::internal_variables_t::Tensor::DeformationGradient));
+        REQUIRE(internal_vars.has(
+            mechanical::solid::internal_variables_t::Tensor::DisplacementGradient));
+        REQUIRE(
+            internal_vars.has(mechanical::solid::internal_variables_t::Tensor::DeformationGradient));
         REQUIRE(internal_vars.has(mechanical::solid::internal_variables_t::Tensor::Cauchy));
         REQUIRE(internal_vars.has(mechanical::solid::internal_variables_t::Scalar::DetF));
     }
