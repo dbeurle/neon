@@ -5,8 +5,6 @@
 #include "mesh/diffusion/fem_mesh.hpp"
 #include "numeric/sparse_matrix.hpp"
 
-#include <json/forwards.h>
-
 namespace neon
 {
 class LinearSolver;
