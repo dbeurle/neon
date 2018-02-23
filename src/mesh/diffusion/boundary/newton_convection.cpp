@@ -9,8 +9,8 @@
 namespace neon::diffusion::boundary
 {
 newton_convection::newton_convection(std::unique_ptr<surface_interpolation>&& sf,
-                                     indices const& nodal_connectivity,
-                                     indices const& dof_list,
+                                     indices nodal_connectivity,
+                                     indices dof_list,
                                      std::shared_ptr<material_coordinates>& mesh_coordinates,
                                      json const& times,
                                      json const& heat_flux,
