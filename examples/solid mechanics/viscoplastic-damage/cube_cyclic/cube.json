@@ -31,7 +31,8 @@
             "Increments" : {
                 "Initial" : 0.001,
                 "Minimum" : 0.00001,
-                "Maximum" : 0.001
+                "Maximum" : 0.001,
+                "Adaptive" : true
             }
     },
     "Mesh" : [{
