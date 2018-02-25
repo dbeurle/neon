@@ -38,7 +38,8 @@
     "Mesh" : [{
             "Name" : "beam",
             "ConstitutiveModel" : {
-                "Name" : "J2PlasticityDamage",
+                "Name" : "J2Plasticity",
+                "Damage" : "IsotropicChaboche",
                 "FiniteStrain" : false
             },
             "ElementOptions" : {

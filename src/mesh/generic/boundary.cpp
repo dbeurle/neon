@@ -120,7 +120,7 @@ void boundary::generate_sinusoidal(json const& boundary,
 
         times.insert(times.end(), time_block.begin(), time_block.end());
 
-        loads = times | view::transform([i, amplitude, omega, phase](double x) {
+        loads = times | view::transform([i, &amplitude, omega, &phase](double x) {
                     return amplitude[i] * std::sin(omega * x + phase[i]);
                 });
     }

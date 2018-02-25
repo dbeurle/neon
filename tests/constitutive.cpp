@@ -887,7 +887,8 @@ TEST_CASE("Solid mechanics J2 plasticity model factory errors")
                                                   json::parse("{}"),
                                                   json::parse("{\"ConstitutiveModel\" : {\"Name\" "
                                                               ": "
-                                                              "\"J2PlasticityDamage\", "
+                                                              "\"J2Plasticity\", "
+                                                              "\"Damage\" : \"IsotropicChaboche\", "
                                                               "\"FiniteStrain\" : true}}")),
                           std::domain_error);
     }
@@ -1105,8 +1106,11 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
                                                                      json::parse("{\"ConstitutiveMo"
                                                                                  "del\" : "
                                                                                  "{\"Name\" : "
-                                                                                 "\"J2PlasticityDamage"
+                                                                                 "\"J2Plasticity"
                                                                                  "\", "
+                                                                                 "\"Damage\" : "
+                                                                                 "\"IsotropicChaboc"
+                                                                                 "he\", "
                                                                                  "\"FiniteStrain\" "
                                                                                  ": false}}"));
 
