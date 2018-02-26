@@ -6,22 +6,32 @@
 #include "mesh/diffusion/fem_mesh.hpp"
 #include "mesh/mechanical/solid/fem_mesh.hpp"
 
-#include <map>
-#include <string>
-#include <unordered_set>
+#include "io/json.hpp"
+
+// Clang finds bugs in the VTK code and reports them.  Turn this off until
+// upstream fixes it.
+#if defined __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winconsistent-missing-override"
+#endif
+
+#include "io/vtk_coordinates.hpp"
 
 #include "vtkIdList.h"
 #include "vtkSmartPointer.h"
-
-#include "io/json.hpp"
-
 #include "vtkDoubleArray.h"
 #include "vtkIdTypeArray.h"
 #include "vtkPointData.h"
 #include "vtkUnstructuredGrid.h"
 #include "vtkXMLUnstructuredGridWriter.h"
 
-#include "io/vtk_coordinates.hpp"
+#if defined __clang__
+#pragma clang diagnostic pop
+#endif
+
+#include <map>
+#include <string>
+#include <unordered_set>
 
 namespace neon
 {

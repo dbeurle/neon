@@ -4,14 +4,18 @@
 #include <exception>
 
 #if defined __clang__
+#pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Winconsistent-missing-override"
 #endif
 
 #include "vtkCellData.h"
 #include "vtkCellTypes.h"
 #include "vtkDataObject.h"
-
 #include "vtkInformation.h"
+
+#if defined __clang__
+#pragma clang diagnostic pop
+#endif
 
 #include <boost/filesystem.hpp>
 
