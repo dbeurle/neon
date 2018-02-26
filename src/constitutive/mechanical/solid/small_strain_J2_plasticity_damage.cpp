@@ -104,10 +104,6 @@ void small_strain_J2_plasticity_damage::update_internal_variables(double const t
         plastic_strain += plastic_increment * 3.0 / 2.0 * tau / (von_mises * (1 - scalar_damage));
 
         accumulated_plastic_strains[l] += plastic_increment / (1 - scalar_damage);
-
-        // cauchy_stress, back_stress, scalar_damage, kin_hard, energy_var, C_algorithmic, are
-        // updated within the radial_return routine std::cout << "delta_t  " << time_step_size <<
-        // "\n";
     });
 }
 
