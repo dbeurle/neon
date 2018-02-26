@@ -20,7 +20,7 @@ gaussian_ageing_affine_microsphere::gaussian_ageing_affine_microsphere(
     // Initialise the history variables for the chemical ageing network
     secondary_network.resize(variables->entries(), {1, matrix3::Identity()});
 
-    // segments.resize(variables->entries(), {1, material.segments_per_chain()});
+    segments.resize(variables->entries(), {1, material.segments_per_chain()});
 
     cross_link_density.resize(variables->entries(), {1, material.shear_modulus()});
 }
@@ -44,31 +44,39 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
 
         auto const& F_history = secondary_network[l];
 
-        // Compute the deviatoric (unimodular) deformation gradient
-        matrix3 const F_bar = unimodular(deformation_gradients[l]);
-
         auto const J = det_deformation_gradients[l];
 
         auto const pressure = J * volumetric_free_energy_dJ(J, K);
 
-        // Project the stresses to obtain the Kirchhoff macro-stress
-
         // The stress is a computation over the deformation history
-        matrix3 const macro_stress = std::accumulate(std::begin(F_history),
-                                                     std::end(F_history),
-                                                     matrix3::Zero().eval(),
-                                                     [h = 0ul](matrix3 sum, auto const& F) mutable {
-                                                         ++h;
-                                                         return sum + compute_macro_stress(F_bar, G);
-                                                     });
+        // clang-format off
+        matrix3 const macro_stress = std::accumulate(std::begin(F_history), std::end(F_history), matrix3::Zero().eval(),
+                                                     [&, this, h = 0ul](matrix3 const p, auto const& F) mutable {
 
-        matrix3 const macro_stress = compute_macro_stress(F_bar, G);
+                                                         matrix3 const F_bar = unimodular(F);
+
+                                                         auto const G{cross_link_density[l][h++]};
+
+                                                         return p + compute_macro_stress(F_bar, G);
+                                                     });
+        // clang-format on
 
         cauchy_stresses[l] = compute_kirchhoff_stress(pressure, macro_stress) / J;
 
-        tangent_operators[l] = compute_material_tangent(J,
-                                                        K,
-                                                        compute_macro_moduli(F_bar, G),
-                                                        macro_stress);
+        // Tangent operator computation over the deformation history
+        // clang-format off
+        tangent_operators[l] = std::accumulate(std::begin(F_history), std::end(F_history), matrix6::Zero().eval(),
+                                               [&, this, h = 0ul](matrix6 const p, auto const& F) mutable {
+
+                                                   matrix3 const F_bar = unimodular(F);
+
+                                                   auto const G{cross_link_density[l][h++]};
+
+                                                   return p + compute_material_tangent(J,
+                                                                                       K,
+                                                                                       compute_macro_moduli(F_bar, G),
+                                                                                       compute_macro_stress(F_bar, G));
+                                              });
+        // clang-format on
     });
 }
