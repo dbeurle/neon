@@ -44,8 +44,8 @@ public:
 
     /**
      * Compute the shear modulus assuming the temperature is 298K according to
-     * the formula μ = n / (k * T)
-     * @param n number of chains
+     * \f$ \mu = \frac{n}{kT} \f$ where \f$ n \f$ is the number of chains.
+     *
      * @return the shear modulus from entropy elastic theory
      */
     auto const& shear_moduli_groups() const { return shear_moduli; }
@@ -66,9 +66,9 @@ protected:
     void compute_chains_and_segments(json const& segments_data);
 
 protected:
-    double p_scission = 0.0; //!< Probability that a segment is scissioned
+    double p_scission{0.0}; //!< Segment scission probability
 
-    int number_of_groups = 1;
+    std::int32_t number_of_groups{1};
 
     std::vector<double> segments, chains, shear_moduli;
 
