@@ -3,10 +3,9 @@
 
 #include "Exceptions.hpp"
 #include "solver/linear/linear_solver_factory.hpp"
-
 #include "io/json.hpp"
+
 #include <chrono>
-#include <omp.h>
 
 namespace neon::diffusion
 {
