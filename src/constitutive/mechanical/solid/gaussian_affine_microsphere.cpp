@@ -4,9 +4,6 @@
 #include "constitutive/internal_variables.hpp"
 #include "constitutive/mechanical/volumetric_free_energy.hpp"
 
-#include <range/v3/view/transform.hpp>
-#include <range/v3/view/zip.hpp>
-
 #include <tbb/parallel_for.h>
 
 namespace neon::mechanical::solid
