@@ -59,8 +59,6 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
 
         auto const& model_type = constitutive_model["Type"].get<std::string>();
 
-        // TODO Check for ageing model
-
         std::map<std::string, unit_sphere_quadrature::Rule> const str_to_enum =
             {{"BO21", unit_sphere_quadrature::Rule::BO21},
              {"BO33", unit_sphere_quadrature::Rule::BO33},
@@ -73,16 +71,33 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
             throw std::domain_error("\"Quadrature\" field must be \"BO21\", \"BO33\" or "
                                     "\"FM900\"");
         }
+        if (model_type == "Affine")
+        {
+            if (!constitutive_model.count("Statistics"))
+            {
+                throw std::domain_error("Missing \"Statistics\" as \"Gaussian\" or \"Langevin\" in "
+                                        "the "
+                                        "Microsphere model");
+            }
 
-        if (model_type == "GaussianAffine")
-        {
-            return std::make_unique<gaussian_affine_microsphere>(variables,
-                                                                 material_data,
-                                                                 entry->second);
-        }
-        else if (model_type == "Affine")
-        {
-            return std::make_unique<affine_microsphere>(variables, material_data, entry->second);
+            auto const& chain_type = constitutive_model["Statistics"].get<std::string>();
+
+            if (chain_type != "Gaussian" && chain_type != "Langevin")
+            {
+                throw std::domain_error("\"Statistics\" for the Microsphere model must be either "
+                                        "\"Gaussian\" or \"Langevin\"");
+            }
+
+            if (chain_type == "Gaussian")
+            {
+                return std::make_unique<gaussian_affine_microsphere>(variables,
+                                                                     material_data,
+                                                                     entry->second);
+            }
+            else if (chain_type == "Langevin")
+            {
+                return std::make_unique<affine_microsphere>(variables, material_data, entry->second);
+            }
         }
         else if (model_type == "NonAffine")
         {

@@ -173,7 +173,8 @@ TEST_CASE("Microsphere model error test")
                                                   json::parse("{}"),
                                                   json::parse("{\"ConstitutiveModel\" : {\"Name\": "
                                                               "\"Microsphere\", \"Type\" "
-                                                              ": \"GaussianAffine\"}}")),
+                                                              ": \"Affine\", "
+                                                              "\"Statistics\":\"Gaussian\"}}")),
                           std::domain_error);
     }
 }
@@ -196,7 +197,8 @@ TEST_CASE("Gaussian affine microsphere model", )
                                                       "\"SegmentsPerChain\" : 50}"),
                                           json::parse("{\"ConstitutiveModel\" : {\"Name\": "
                                                       "\"Microsphere\", \"Type\" "
-                                                      ": \"GaussianAffine\", \"Quadrature\" : "
+                                                      ": \"Affine\", \"Statistics\":\"Gaussian\",  "
+                                                      "\"Quadrature\" : "
                                                       "\"BO21\"}}"));
 
     auto [F_list,
@@ -283,7 +285,8 @@ TEST_CASE("Affine microsphere model")
                                                       "\"SegmentsPerChain\" : 50}"),
                                           json::parse("{\"ConstitutiveModel\" : {\"Name\": "
                                                       "\"Microsphere\", \"Type\" "
-                                                      ": \"Affine\", \"Quadrature\" : \"BO21\"}}"));
+                                                      ": \"Affine\", \"Statistics\":\"Langevin\", "
+                                                      "\"Quadrature\" : \"BO21\"}}"));
 
     auto [F_list,
           cauchy_stresses] = variables->fetch(internal_variables_t::Tensor::DeformationGradient,

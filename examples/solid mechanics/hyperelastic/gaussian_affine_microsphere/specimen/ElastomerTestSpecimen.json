@@ -32,7 +32,8 @@
             "Name" : "ElastomerTestSpecimen",
             "ConstitutiveModel" : {
                 "Name" : "Microsphere",
-                "Type" : "GaussianAffine",
+                "Type" : "Affine",
+                "Statistics" : "Gaussian",
                 "Quadrature" : "BO21"
             },
             "ElementOptions" : {

@@ -33,6 +33,7 @@
             "ConstitutiveModel" : {
                 "Name" : "Microsphere",
                 "Type" : "Affine",
+                "Statistics" : "Langevin",
                 "Quadrature" : "BO21"
             },
             "ElementOptions" : {
