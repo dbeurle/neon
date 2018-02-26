@@ -32,10 +32,10 @@ void affine_microsphere::update_internal_variables(double const time_step_size)
 
     auto const& deformation_gradients = variables->fetch(
         internal_variables_t::Tensor::DeformationGradient);
-    auto& cauchy_stresses = variables->fetch(internal_variables_t::Tensor::Cauchy);
-    auto& macro_stresses = variables->fetch(internal_variables_t::Tensor::Kirchhoff);
 
-    auto const& det_deformation_gradients = variables->fetch(internal_variables_t::Scalar::DetF);
+    auto& cauchy_stresses = variables->fetch(internal_variables_t::Tensor::Cauchy);
+
+    auto const& det_deformation_gradients = variables->fetch(internal_variables_t::scalar::DetF);
 
     auto const K{material.bulk_modulus()};
     auto const G{material.shear_modulus()};

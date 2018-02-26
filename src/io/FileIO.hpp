@@ -64,7 +64,7 @@ public:
 
     using variable_type = typename fem_mesh_type::internal_variable_type;
 
-    using scalar_map_t = std::map<std::string, typename variable_type::Scalar>;
+    using scalar_map_t = std::map<std::string, typename variable_type::scalar>;
     using tensor_map_t = std::map<std::string, typename variable_type::Tensor>;
 
 public:
@@ -84,10 +84,10 @@ private:
     fem_mesh_type const& mesh;
 
     // clang-format off
-    scalar_map_t const scalar_map{{"AccumulatedPlasticStrain", variable_type::Scalar::EffectivePlasticStrain},
-                                  {"VonMisesStress", variable_type::Scalar::VonMisesStress},
-                                  {"Damage", variable_type::Scalar::Damage},
-                                  {"EnergyReleaseRate", variable_type::Scalar::EnergyReleaseRate}};
+    scalar_map_t const scalar_map{{"AccumulatedPlasticStrain", variable_type::scalar::EffectivePlasticStrain},
+                                  {"VonMisesStress", variable_type::scalar::VonMisesStress},
+                                  {"Damage", variable_type::scalar::Damage},
+                                  {"EnergyReleaseRate", variable_type::scalar::EnergyReleaseRate}};
 
     tensor_map_t const tensor_map{{"CauchyStress", variable_type::Tensor::Cauchy},
                                   {"LinearisedStrain", variable_type::Tensor::LinearisedStrain},

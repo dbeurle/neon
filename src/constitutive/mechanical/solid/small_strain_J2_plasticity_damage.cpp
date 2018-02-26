@@ -19,8 +19,8 @@ small_strain_J2_plasticity_damage::small_strain_J2_plasticity_damage(
 {
     variables->add(internal_variables_t::Tensor::BackStress,
                    internal_variables_t::Tensor::KinematicHardening,
-                   internal_variables_t::Scalar::Damage,
-                   internal_variables_t::Scalar::EnergyReleaseRate);
+                   internal_variables_t::scalar::Damage,
+                   internal_variables_t::scalar::EnergyReleaseRate);
 }
 
 small_strain_J2_plasticity_damage::~small_strain_J2_plasticity_damage() = default;
@@ -43,10 +43,10 @@ void small_strain_J2_plasticity_damage::update_internal_variables(double const t
     auto [accumulated_plastic_strains,
           von_mises_stresses,
           scalar_damages,
-          energy_release_rates] = variables->fetch(internal_variables_t::Scalar::EffectivePlasticStrain,
-                                                   internal_variables_t::Scalar::VonMisesStress,
-                                                   internal_variables_t::Scalar::Damage,
-                                                   internal_variables_t::Scalar::EnergyReleaseRate);
+          energy_release_rates] = variables->fetch(internal_variables_t::scalar::EffectivePlasticStrain,
+                                                   internal_variables_t::scalar::VonMisesStress,
+                                                   internal_variables_t::scalar::Damage,
+                                                   internal_variables_t::scalar::EnergyReleaseRate);
 
     auto& tangent_operators = variables->fetch(internal_variables_t::rank4::tangent_operator);
 

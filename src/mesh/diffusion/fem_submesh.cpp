@@ -110,7 +110,7 @@ void fem_submesh::update_internal_variables(double const time_step_size)
 }
 
 fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
-    internal_variables_t::Scalar const scalar_name) const
+    internal_variables_t::scalar const scalar_name) const
 {
     vector count = vector::Zero(mesh_coordinates->size());
     vector value = count;

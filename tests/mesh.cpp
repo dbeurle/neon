@@ -166,7 +166,7 @@ TEST_CASE("Solid submesh test")
         REQUIRE(
             internal_vars.has(mechanical::solid::internal_variables_t::Tensor::DeformationGradient));
         REQUIRE(internal_vars.has(mechanical::solid::internal_variables_t::Tensor::Cauchy));
-        REQUIRE(internal_vars.has(mechanical::solid::internal_variables_t::Scalar::DetF));
+        REQUIRE(internal_vars.has(mechanical::solid::internal_variables_t::scalar::DetF));
     }
     SECTION("Tangent stiffness")
     {

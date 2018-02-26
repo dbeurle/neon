@@ -127,14 +127,14 @@ public:
 
     /** Add a number of scalar type variables to the object store */
     template <typename... Variables>
-    void add(Scalar const name, Variables... names)
+    void add(scalar const name, Variables const... names)
     {
         scalars[name].resize(size, 0.0);
         scalars_old[name].resize(size, 0.0);
         add(names...);
     }
 
-    void add(Scalar const name)
+    void add(scalar const name)
     {
         scalars[name].resize(size, 0.0);
         scalars_old[name].resize(size, 0.0);
@@ -147,20 +147,22 @@ public:
         rank4tensors[name].resize(size, m);
     }
 
-    bool has(Scalar const name) const { return scalars.find(name) != scalars.end(); }
+    bool has(scalar const name) const { return scalars.find(name) != scalars.end(); }
+
     bool has(Tensor const name) const { return rank2tensors.find(name) != rank2tensors.end(); }
+
     bool has(rank4 const name) const { return rank4tensors.find(name) != rank4tensors.end(); }
 
     /** Const access to the converged tensor variables */
-    std::vector<rank2tensor_type> const& fetch_old(Tensor const tensorType) const
+    std::vector<rank2tensor_type> const& fetch_old(Tensor const tensor_name) const
     {
-        return rank2tensors_old.find(tensorType)->second;
+        return rank2tensors_old.find(tensor_name)->second;
     }
 
     /** Const access to the converged scalar variables */
-    std::vector<scalar_type> const& fetch_old(Scalar const scalarType) const
+    std::vector<scalar_type> const& fetch_old(scalar const scalar_name) const
     {
-        return scalars_old.find(scalarType)->second;
+        return scalars_old.find(scalar_name)->second;
     }
 
     /*-------------------------------------------------------------*
@@ -168,23 +170,26 @@ public:
      *-------------------------------------------------------------*/
 
     /** Mutable access to the non-converged scalar variables */
-    std::vector<scalar_type>& fetch(Scalar scalarType) { return scalars.find(scalarType)->second; }
+    std::vector<scalar_type>& fetch(scalar const scalar_name)
+    {
+        return scalars.find(scalar_name)->second;
+    }
 
     /** Mutable access to the non-converged tensor variables */
-    std::vector<rank2tensor_type>& fetch(Tensor tensorType)
+    std::vector<rank2tensor_type>& fetch(Tensor tensor_name)
     {
-        return rank2tensors.find(tensorType)->second;
+        return rank2tensors.find(tensor_name)->second;
     }
 
     /** Mutable access to the non-converged matrix variables */
-    std::vector<rank4tensor_type>& fetch(rank4 const matrixType)
+    std::vector<rank4tensor_type>& fetch(rank4 const rank4_name)
     {
-        return rank4tensors.find(matrixType)->second;
+        return rank4tensors.find(rank4_name)->second;
     }
 
     /** Mutable access to the non-converged scalar variables */
-    template <typename... ScalarTps>
-    auto fetch(Scalar var0, Scalar var1, ScalarTps... vars)
+    template <typename... scalar_types>
+    auto fetch(scalar const var0, scalar const var1, scalar_types const... vars)
     {
         return std::make_tuple(std::ref(scalars.find(var0)->second),
                                std::ref(scalars.find(var1)->second),
@@ -201,7 +206,7 @@ public:
     }
 
     template <typename... rank4_types>
-    auto fetch(rank4 var0, rank4 var1, rank4_types... vars)
+    auto fetch(rank4 const var0, rank4 const var1, rank4_types const... vars)
     {
         return std::make_tuple(std::ref(rank4tensors.find(var0)->second),
                                std::ref(rank4tensors.find(var1)->second),
@@ -213,26 +218,26 @@ public:
      *-------------------------------------------------------------*/
 
     /** Constant access to the non-converged scalar variables */
-    std::vector<scalar_type> const& fetch(Scalar const scalarType) const
+    std::vector<scalar_type> const& fetch(scalar const scalar_name) const
     {
-        return scalars.find(scalarType)->second;
+        return scalars.find(scalar_name)->second;
     }
 
     /** Non-mutable access to the non-converged tensor variables */
-    std::vector<rank2tensor_type> const& fetch(Tensor const tensorType) const
+    std::vector<rank2tensor_type> const& fetch(Tensor const tensor_name) const
     {
-        return rank2tensors.find(tensorType)->second;
+        return rank2tensors.find(tensor_name)->second;
     }
 
     /** Non-mutable access to the non-converged matrix variables */
-    std::vector<rank4tensor_type> const& fetch(rank4 const matrixType) const
+    std::vector<rank4tensor_type> const& fetch(rank4 const rank4_name) const
     {
-        return rank4tensors.find(matrixType)->second;
+        return rank4tensors.find(rank4_name)->second;
     }
 
     /** Const access to the non-converged scalar variables */
     template <typename... ScalarTps>
-    auto fetch(Scalar var0, Scalar var1, ScalarTps... vars) const
+    auto fetch(scalar const var0, scalar const var1, ScalarTps const... vars) const
     {
         return std::make_tuple(std::cref(scalars.find(var0)->second),
                                std::cref(scalars.find(var1)->second),
@@ -270,13 +275,16 @@ public:
         scalars = scalars_old;
     }
 
+    auto entries() const { return size; }
+
 protected:
     // These state variables are committed and reverted depending on the outer
     // simulation loop.  If a nonlinear iteration does not converge then revert
     // the state back to the previous state.  The rank2tensors and scalars fields
     // are the 'unstable' variables and the *Old are the stable variants
     std::unordered_map<Tensor, std::vector<rank2tensor_type>> rank2tensors, rank2tensors_old;
-    std::unordered_map<Scalar, std::vector<scalar_type>> scalars, scalars_old;
+
+    std::unordered_map<scalar, std::vector<scalar_type>> scalars, scalars_old;
 
     std::unordered_map<rank4, std::vector<rank4tensor_type>> rank4tensors;
 

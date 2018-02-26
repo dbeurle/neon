@@ -30,7 +30,7 @@ void nonaffine_microsphere::update_internal_variables(double const time_step_siz
         internal_variables_t::Tensor::DeformationGradient);
     auto& cauchy_stresses = variables->fetch(internal_variables_t::Tensor::Cauchy);
 
-    auto const& detF_list = variables->fetch(internal_variables_t::Scalar::DetF);
+    auto const& detF_list = variables->fetch(internal_variables_t::scalar::DetF);
 
     // Compute tangent moduli
     auto& tangent_operators = variables->fetch(internal_variables_t::rank4::tangent_operator);
@@ -42,7 +42,9 @@ void nonaffine_microsphere::update_internal_variables(double const time_step_siz
     auto const p = non_affine_stretch_parameter;
 
     tbb::parallel_for(std::size_t{0}, deformation_gradients.size(), [&](auto const l) {
-        auto const& J = detF_list[l]; // Determinant of the deformation gradient
+
+        // Determinant of the deformation gradient
+        auto const& J = detF_list[l];
 
         matrix3 const F_unimodular = unimodular(deformation_gradients[l]);
 
