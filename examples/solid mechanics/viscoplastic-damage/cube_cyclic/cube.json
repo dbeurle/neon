@@ -65,9 +65,13 @@
             },
             {
                 "Name" : "ZLoad",
-				"Type" : "Displacement",
+				        "Type" : "Displacement",
                 "Time" : [0.0, 0.01],
-                "z" : [0.0, 0.0015]
+                "z" : [0.001],
+                "GenerateType" : "Sinusoidal",
+                "Period" : [0.01],
+                "Phase" : [0],
+                "NumberOfCycles" : [1]
             }]
         }],
 		"LinearSolver" : {

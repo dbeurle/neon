@@ -1,7 +1,7 @@
 
 #include "fem_dynamic_matrix.hpp"
 
-#include "solver/linear/LinearSolver.hpp"
+#include "solver/linear/linear_solver.hpp"
 
 #include <chrono>
 #include "io/json.hpp"

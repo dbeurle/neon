@@ -13,7 +13,8 @@ using namespace neon;
 TEST_CASE("adaptive time control")
 {
     json time_data = {{"Period", 1.0},
-                      {"Increments", {{"Initial", 1.0}, {"Minimum", 0.1}, {"Maximum", 1.0}}}};
+                      {"Increments",
+                       {{"Initial", 1.0}, {"Minimum", 0.1}, {"Maximum", 1.0}, {"Adaptive", true}}}};
 
     adaptive_time_step load(time_data, {0.0, 1.0});
 

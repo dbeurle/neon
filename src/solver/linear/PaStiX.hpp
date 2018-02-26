@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "LinearSolver.hpp"
+#include "linear_solver.hpp"
 
 #include <Eigen/Sparse>
 
@@ -13,7 +13,7 @@ namespace neon
  * PaStiXLDLT is a supernodal direct solver with multithreading support.  This
  * performs the LDLT Cholesky factorisation of a symmetric system
  */
-class PaStiXLDLT : public DirectLinearSolver
+class PaStiXLDLT : public direct_linear_solver
 {
 public:
     PaStiXLDLT();
@@ -28,7 +28,7 @@ private:
  * PaStiXLU is a supernodal direct solver with multithreading support.  This
  * performs the LU factorisation of a square matrix system
  */
-class PaStiXLU : public DirectLinearSolver
+class PaStiXLU : public direct_linear_solver
 {
 public:
     PaStiXLU();

@@ -24,7 +24,7 @@
  * benchmarking purposes.
  */
 
-#include "ConjugateGradientGPU.hpp"
+#include "conjugate_gradientGPU.hpp"
 #include "Exceptions.hpp"
 #include "dmatrix_vector_product.hpp"
 
@@ -39,7 +39,7 @@
 
 namespace neon
 {
-ConjugateGradientGPU::ConjugateGradientGPU() : IterativeLinearSolver()
+conjugate_gradientGPU::conjugate_gradientGPU() : iterative_linear_solver()
 {
     this->find_compute_device();
 
@@ -57,24 +57,24 @@ ConjugateGradientGPU::ConjugateGradientGPU() : IterativeLinearSolver()
     cusparseSetMatIndexBase(descr, CUSPARSE_INDEX_BASE_ZERO);
 }
 
-ConjugateGradientGPU::ConjugateGradientGPU(double const residual_tolerance) : ConjugateGradientGPU()
+conjugate_gradientGPU::conjugate_gradientGPU(double const residual_tolerance) : conjugate_gradientGPU()
 {
     this->residual_tolerance = residual_tolerance;
 }
 
-ConjugateGradientGPU::ConjugateGradientGPU(int const max_iterations) : ConjugateGradientGPU()
+conjugate_gradientGPU::conjugate_gradientGPU(int const max_iterations) : conjugate_gradientGPU()
 {
     this->max_iterations = max_iterations;
 }
 
-ConjugateGradientGPU::ConjugateGradientGPU(double const residual_tolerance, int const max_iterations)
-    : ConjugateGradientGPU()
+conjugate_gradientGPU::conjugate_gradientGPU(double const residual_tolerance, int const max_iterations)
+    : conjugate_gradientGPU()
 {
     this->residual_tolerance = residual_tolerance;
     this->max_iterations = max_iterations;
 }
 
-ConjugateGradientGPU::~ConjugateGradientGPU()
+conjugate_gradientGPU::~conjugate_gradientGPU()
 {
     // Destroy contexts
     cusparseDestroy(cusparseHandle);
@@ -93,7 +93,7 @@ ConjugateGradientGPU::~ConjugateGradientGPU()
     cudaFree(d_M_inv);
 }
 
-void ConjugateGradientGPU::solve(sparse_matrix const& A, vector& x, vector const& b)
+void conjugate_gradientGPU::solve(sparse_matrix const& A, vector& x, vector const& b)
 {
     this->allocate_device_memory(A, x, b);
 
@@ -197,7 +197,7 @@ void ConjugateGradientGPU::solve(sparse_matrix const& A, vector& x, vector const
     cudaMemcpy(x.data(), d_x, N * sizeof(double), cudaMemcpyDeviceToHost);
 }
 
-void ConjugateGradientGPU::allocate_device_memory(sparse_matrix const& A, vector& x, vector const& b)
+void conjugate_gradientGPU::allocate_device_memory(sparse_matrix const& A, vector& x, vector const& b)
 {
     // If this isn't our first time using the compute device or
     // the sparsity pattern hasn't changed, then we save on the allocation
@@ -222,7 +222,7 @@ void ConjugateGradientGPU::allocate_device_memory(sparse_matrix const& A, vector
     build_sparsity_pattern = false;
 }
 
-void ConjugateGradientGPU::find_compute_device()
+void conjugate_gradientGPU::find_compute_device()
 {
     // Pick the best possible CUDA capable device
     int devID = findCudaDevice(0, nullptr);

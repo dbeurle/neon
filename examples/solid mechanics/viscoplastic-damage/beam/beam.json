@@ -31,14 +31,15 @@
             "Increments" : {
                 "Initial" : 0.01,
                 "Minimum" : 0.01,
-                "Maximum" : 0.01
+                "Maximum" : 0.01,
+                "Adaptive" : true
             }
     },
     "Mesh" : [{
             "Name" : "beam",
             "ConstitutiveModel" : {
-                "Name" : "ChabocheDamage",
-
+                "Name" : "J2Plasticity",
+                "Damage" : "IsotropicChaboche",
                 "FiniteStrain" : false
             },
             "ElementOptions" : {

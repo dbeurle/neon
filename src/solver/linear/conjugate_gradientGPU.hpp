@@ -3,7 +3,7 @@
 
 #ifdef ENABLE_CUDA
 
-#include "LinearSolver.hpp"
+#include "linear_solver.hpp"
 
 #include <cuda/cublas_v2.h>
 #include <cuda/cusparse.h>
@@ -11,20 +11,20 @@
 namespace neon
 {
 /**
- * ConjugateGradientGPU is a GPU based solver using the conjugate
+ * conjugate_gradientGPU is a GPU based solver using the conjugate
  * gradient solver from the CUDA examples.
  */
-class ConjugateGradientGPU : public IterativeLinearSolver
+class conjugate_gradientGPU : public iterative_linear_solver
 {
 public:
-    explicit ConjugateGradientGPU();
-    explicit ConjugateGradientGPU(double const residual_tolerance);
-    explicit ConjugateGradientGPU(int const max_iterations);
-    explicit ConjugateGradientGPU(double const residual_tolerance, int const max_iterations);
+    explicit conjugate_gradientGPU();
+    explicit conjugate_gradientGPU(double const residual_tolerance);
+    explicit conjugate_gradientGPU(int const max_iterations);
+    explicit conjugate_gradientGPU(double const residual_tolerance, int const max_iterations);
 
-    using IterativeLinearSolver::IterativeLinearSolver;
+    using iterative_linear_solver::iterative_linear_solver;
 
-    ~ConjugateGradientGPU();
+    ~conjugate_gradientGPU();
 
     void solve(sparse_matrix const& A, vector& x, vector const& b) override final;
 
