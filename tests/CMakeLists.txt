@@ -5,6 +5,7 @@ foreach(test
              dof_numbering
              gauss_quadrature
              linear_solvers
+             eigen_solvers
              material
              material_coordinates
              matrix_system

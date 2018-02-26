@@ -33,4 +33,5 @@ target_link_libraries(neon
                       pastix
                       jsoncpp
                       scotch
-                      scotcherr)
+                      scotcherr
+                      arpack)

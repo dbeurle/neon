@@ -62,6 +62,8 @@ find_package(BLAS REQUIRED)
 
 find_package(HwLoc REQUIRED)
 
+find_package(ARPACK REQUIRED)
+
 add_subdirectory(src)
 
 include(CTest)
