@@ -86,7 +86,7 @@ public:
         deformation_history
     };
 
-    enum class Scalar : std::uint8_t {
+    enum class scalar : std::uint8_t {
         Chains,      // Chains for the micromechanical model
         Segments,    // Segments for the micromechanical model
         ShearModuli, // Shear moduli
