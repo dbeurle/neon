@@ -93,6 +93,11 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
             {
                 if (constitutive_model.count("Ageing"))
                 {
+                    if (constitutive_model["Ageing"].get<std::string>() != "BAND")
+                    {
+                        throw std::domain_error("The only microsphere ageing model supported is "
+                                                "\"BAND\"");
+                    }
                     return std::make_unique<gaussian_ageing_affine_microsphere>(variables,
                                                                                 material_data,
                                                                                 entry->second);
