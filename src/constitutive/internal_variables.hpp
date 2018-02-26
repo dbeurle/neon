@@ -99,7 +99,7 @@ public:
     };
 
 public:
-    internal_variables(std::size_t const size) : size(size) {}
+    internal_variables(std::size_t const size) : size{size} {}
 
     /** Delete copy constructor to prevent references moving */
     internal_variables(internal_variables const&) = delete;
