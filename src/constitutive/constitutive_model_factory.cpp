@@ -6,6 +6,7 @@
 #include "mechanical/solid/finite_strain_J2_plasticity.hpp"
 
 #include "mechanical/solid/gaussian_affine_microsphere.hpp"
+#include "mechanical/solid/gaussian_ageing_affine_microsphere.hpp"
 #include "mechanical/solid/affine_microsphere.hpp"
 #include "mechanical/solid/nonaffine_microsphere.hpp"
 #include "mechanical/solid/compressible_neohooke.hpp"
@@ -90,6 +91,12 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
 
             if (chain_type == "Gaussian")
             {
+                if (constitutive_model.count("Ageing"))
+                {
+                    return std::make_unique<gaussian_ageing_affine_microsphere>(variables,
+                                                                                material_data,
+                                                                                entry->second);
+                }
                 return std::make_unique<gaussian_affine_microsphere>(variables,
                                                                      material_data,
                                                                      entry->second);

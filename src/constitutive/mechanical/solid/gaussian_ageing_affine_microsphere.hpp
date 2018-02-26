@@ -46,6 +46,9 @@ public:
 private:
     micromechanical_elastomer material; //!< Material with micromechanical parameters
 
+    double density_decay_rate{0.0};
+    double segment_decay_rate{0.0};
+
     std::vector<segment_composition> segments;              /// Average segment variables
     std::vector<crosslink_composition> cross_link_density;  /// Cross-link density variables
     std::vector<deformation_composition> secondary_network; /// Secondary network variables

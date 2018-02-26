@@ -37,9 +37,21 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
     auto const& det_deformation_gradients = variables->fetch(internal_variables_t::scalar::DetF);
 
     auto const K{material.bulk_modulus()};
-    auto const G{material.shear_modulus()};
+
+    // Time step the cross-link density
+    for (auto& density : cross_link_density)
+    {
+        density.emplace_back(density.back() - density_decay_rate * time_step_size);
+    }
+
+    // Time step average segments
+    for (auto& segment : segments)
+    {
+        segment.emplace_back(segment.back() - segment_decay_rate * time_step_size);
+    }
 
     tbb::parallel_for(std::size_t{0}, deformation_gradients.size(), [&, this](auto const l) {
+        // Save the current deformation gradient
         secondary_network[l].push_back(deformation_gradients[l]);
 
         auto const& F_history = secondary_network[l];
@@ -48,7 +60,7 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
 
         auto const pressure = J * volumetric_free_energy_dJ(J, K);
 
-        // The stress is a computation over the deformation history
+        // Stress computation over the secondary network deformation history
         // clang-format off
         matrix3 const macro_stress = std::accumulate(std::begin(F_history), std::end(F_history), matrix3::Zero().eval(),
                                                      [&, this, h = 0ul](matrix3 const p, auto const& F) mutable {
@@ -63,7 +75,7 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
 
         cauchy_stresses[l] = compute_kirchhoff_stress(pressure, macro_stress) / J;
 
-        // Tangent operator computation over the deformation history
+        // Tangent operator computation over the secondary network deformation history
         // clang-format off
         tangent_operators[l] = std::accumulate(std::begin(F_history), std::end(F_history), matrix6::Zero().eval(),
                                                [&, this, h = 0ul](matrix6 const p, auto const& F) mutable {
