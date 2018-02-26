@@ -26,16 +26,13 @@
                 "Adaptive" : true
             }
         },
-        "Mesh" :
-        [{
+        "Mesh" : [{
             "Name" : "cube",
             "ConstitutiveModel" : "FiniteJ2",
-            "ElementOptions" :
-            {
+            "ElementOptions" : {
                 "Quadrature" : "Full"
             },
-            "BoundaryConditions" :
-            [{
+            "BoundaryConditions" : [{
                 "Name" : "Xsym",
                 "Type" : "Displacement",
                 "x" : 0.0
@@ -52,7 +49,7 @@
             },
             {
                 "Name" : "ZLoad",
-	        "Type" : "Displacement",
+    	        "Type" : "Displacement",
                 "z" : 1.0e-6
             }]
         }],

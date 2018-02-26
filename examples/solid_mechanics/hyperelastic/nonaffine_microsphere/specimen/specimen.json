@@ -1,39 +1,39 @@
 {
-    "Name" : "SpecimenAgeing",
+    "Name" : "NonaffineSpecimen",
     "Cores" : 2,
     "Part": [{
-        "Name" : "ElastomerTestSpecimen",
+        "Name" : "specimen",
         "Material" : "rubber"
     }],
     "Material" : [{
         "Name" : "rubber",
         "ElasticModulus" : 10.0e6,
         "PoissonsRatio" : 0.4,
-        "SegmentsPerChain" : 45
+        "NonAffineStretchParameter" : 1.0,
+        "SegmentsPerChain" : 50
     }],
     "SimulationCases" : [{
         "Name" : "Load",
-        "Module" : "SolidMechanics",
+		"Module" : "SolidMechanics",
         "Solution" : "Equilibrium",
         "NonlinearOptions" : {
-            "DisplacementTolerance" : 1.0e-5,
-            "ResidualTolerance" : 1.0e-4
+            "DisplacementTolerance" : 1.0e-3,
+            "ResidualTolerance" : 1.0e-3
         },
         "Time" : {
             "Period" : 1.0,
             "Increments" : {
                 "Initial" : 1.0,
                 "Minimum" : 0.1,
-                "Maximum" : 1.0,
+                "Maximum" : 10000.0,
                 "Adaptive" : true
             }
         },
-        "Mesh" : [{
-            "Name" : "ElastomerTestSpecimen",
+		"Mesh" : [{
+            "Name" : "specimen",
             "ConstitutiveModel" : {
                 "Name" : "Microsphere",
-                "Type" : "Affine",
-                "Statistics" : "Gaussian",
+                "Type" : "NonAffine",
                 "Quadrature" : "BO21"
             },
             "ElementOptions" : {
@@ -59,14 +59,14 @@
             },
             {
                 "Name" : "load",
-                "Type" : "Displacement",
+				"Type" : "Displacement",
                 "Time" : [0.0, 1.0],
-                "y" : [0.0, 0.001]
+                "y" : [0.0, 0.01]
             }]
         }],
-        "LinearSolver" : {
-            "Solver" : "Iterative",
-            "MaxIterations" : 2000,
+		"LinearSolver" : {
+		    "Solver" : "Iterative",
+            "MaxIterations" : 3000,
             "Tolerance"  : 1.0e-8
         },
         "Visualisation" : {

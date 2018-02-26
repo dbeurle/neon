@@ -1,40 +1,37 @@
 {
-    "Name" : "SpecimenAgeing",
+    "Name" : "NeoHookeModel",
     "Cores" : 2,
     "Part": [{
-        "Name" : "ElastomerTestSpecimen",
-        "Material" : "rubber"
+        "Name" : "specimen",
+        "Material" : "rubber",
+        "MeshFormat" : "gmsh"
     }],
     "Material" : [{
         "Name" : "rubber",
         "ElasticModulus" : 10.0e6,
-        "PoissonsRatio" : 0.4,
-        "SegmentsPerChain" : 45
+        "PoissonsRatio" : 0.45
     }],
     "SimulationCases" : [{
-        "Name" : "Load",
+        "Name" : "Uniaxial",
         "Module" : "SolidMechanics",
         "Solution" : "Equilibrium",
         "NonlinearOptions" : {
-            "DisplacementTolerance" : 1.0e-5,
+            "DisplacementTolerance" : 1.0e-4,
             "ResidualTolerance" : 1.0e-4
         },
         "Time" : {
             "Period" : 1.0,
             "Increments" : {
                 "Initial" : 1.0,
-                "Minimum" : 0.1,
+                "Minimum" : 0.001,
                 "Maximum" : 1.0,
                 "Adaptive" : true
             }
         },
         "Mesh" : [{
-            "Name" : "ElastomerTestSpecimen",
+            "Name" : "specimen",
             "ConstitutiveModel" : {
-                "Name" : "Microsphere",
-                "Type" : "Affine",
-                "Statistics" : "Langevin",
-                "Quadrature" : "BO21"
+                "Name" : "NeoHooke"
             },
             "ElementOptions" : {
                 "Quadrature" : "Full"
@@ -59,17 +56,18 @@
             },
             {
                 "Name" : "load",
-                "Type" : "Displacement",
+                "Type" : "Traction",
                 "Time" : [0.0, 1.0],
-                "y" : [0.0, 0.001]
+                "y" : [0.0, 5.0e5]
             }]
         }],
         "LinearSolver" : {
-            "Solver" : "Direct"
+            "Solver" : "Iterative",
+            "MaxIterations" : 1000,
+            "Tolerance"  : 1.0e-6
         },
         "Visualisation" : {
-            "Fields" : ["Displacement", "DeformationGradient", "CauchyStress"],
-            "WriteEvery": 1
+            "Fields" : ["Displacement", "DeformationGradient", "CauchyStress"]
         }
     }]
 }

@@ -1,7 +1,7 @@
 {
    "Elements" : [
       {
-         "Name" : "ElastomerTestSpecimen",
+         "Name" : "specimen",
          "NodalConnectivity" : [
             [ 86, 19, 288, 20, 282, 624, 300, 281, 598, 24 ],
             [ 129, 392, 14, 13, 538, 428, 145, 146, 17, 429 ],
