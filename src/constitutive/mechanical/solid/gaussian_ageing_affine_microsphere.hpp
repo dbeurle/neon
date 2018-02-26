@@ -9,9 +9,9 @@
  * \{
  *
  * gaussian_ageing_affine_microsphere is responsible for computing the Cauchy
- * stress and the material tangent in implicit methods when ageing is present.
+ * stress and the material tangent in implicit methods with chemical ageing.
  *
- * The affine microsphere model is used to model elastomer materials using
+ * The affine microsphere model is used to model the mechanical response using
  * micromechanical motivations and homogenises the force from a single chain
  * over a unit sphere using a Gaussian statistical description.
  *
@@ -33,5 +33,7 @@ public:
 
 private:
     stochastic_micromechanical_elastomer material; //!< Material with micromechanical parameters
+
+    std::vector<std::vector<matrix3>> secondary_network; /// Storage for secondary network creation
 };
 /** \} */
