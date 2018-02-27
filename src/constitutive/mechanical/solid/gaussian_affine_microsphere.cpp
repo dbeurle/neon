@@ -2,6 +2,7 @@
 #include "gaussian_affine_microsphere.hpp"
 
 #include "constitutive/internal_variables.hpp"
+#include "constitutive/mechanical/detail/microsphere.hpp"
 #include "constitutive/mechanical/volumetric_free_energy.hpp"
 
 #include <tbb/parallel_for.h>
@@ -45,13 +46,13 @@ void gaussian_affine_microsphere::update_internal_variables(double const time_st
         auto const pressure = J * volumetric_free_energy_dJ(J, K);
 
         // Project the stresses to obtain the Kirchhoff macro-stress
-        matrix3 const macro_stress = compute_macro_stress(F_bar, G, N);
+        matrix3 const macro_stress = compute_macro_stress(F_bar, G);
 
         cauchy_stresses[l] = compute_kirchhoff_stress(pressure, macro_stress) / J;
 
         tangent_operators[l] = compute_material_tangent(J,
                                                         K,
-                                                        compute_macro_moduli(F_bar, G, N),
+                                                        compute_macro_moduli(F_bar, G),
                                                         macro_stress);
     });
 }
@@ -83,10 +84,9 @@ matrix6 gaussian_affine_microsphere::compute_material_tangent(double const J,
 }
 
 matrix3 gaussian_affine_microsphere::compute_macro_stress(matrix3 const& F_unimodular,
-                                                          double const bulk_modulus,
-                                                          double const N) const
+                                                          double const shear_modulus) const
 {
-    return 3.0 * bulk_modulus
+    return 3.0 * shear_modulus
            * unit_sphere.integrate(matrix3::Zero().eval(),
                                    [&](auto const& coordinates, auto const& l) -> matrix3 {
                                        auto const& [r, _] = coordinates;
@@ -98,8 +98,7 @@ matrix3 gaussian_affine_microsphere::compute_macro_stress(matrix3 const& F_unimo
 }
 
 matrix6 gaussian_affine_microsphere::compute_macro_moduli(matrix3 const& F_unimodular,
-                                                          double const bulk_modulus,
-                                                          double const N) const
+                                                          double const shear_modulus) const
 {
     return -3.0 * shear_modulus
            * unit_sphere.integrate(matrix6::Zero().eval(),
