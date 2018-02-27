@@ -32,51 +32,51 @@ protected:
  * stochastic_micromechanical_elastomer is responsible for handling a distribution
  * for the material properties of an elastomer
  */
-class stochastic_micromechanical_elastomer : public isotropic_elastic_property
+class ageing_micromechanical_elastomer : public micromechanical_elastomer
 {
 public:
-    stochastic_micromechanical_elastomer(json const& material_data);
-
-    /** Updates the temperature for the material property */
-    void update_temperature(double const T_new) { temperature = T_new; }
-
-    int const groups() const { return number_of_groups; }
+    ageing_micromechanical_elastomer(json const& material_data);
 
     /**
-     * Compute the shear modulus assuming the temperature is 298K according to
-     * \f$ \mu = \frac{n}{kT} \f$ where \f$ n \f$ is the number of chains.
+     * Update the next number of segments in the history based on the current
+     * number of segments.  This rate is controlled by \p SegmentDecayRate in
+     * the material properties section of the input file.
      *
-     * @return the shear modulus from entropy elastic theory
+     * \param current_segment  Last average number of segments per chain
+     * \param time_step_size Time step size for time discretisation
+     * \return A new segments which is less than current_segment
      */
-    auto const& shear_moduli_groups() const { return shear_moduli; }
+    double compute_new_segment(double const current_segment, double const time_step_size) const;
 
-    /** @return vector of chain groups from initial material properties */
-    auto const& chain_groups() const { return chains; }
+    /**
+     * Update the shear modulus based on the initial shear modulus
+     * so the newly created secondary networks occur uniformly
+     *
+     * \param time_step_size Time step size for time discretisation
+     *
+     * \return A new partial shear modulus
+     */
+    double compute_new_shear_modulus(double const time_step_size) const;
 
-    /** @return vector of segment groups from initial material properties */
-    auto const& segment_groups() const { return segments; }
-
-    /** @return the current number of chains in the network */
-    std::vector<double> update_chains(std::vector<double> const& chains_old,
-                                      double const time_step_size);
-
-    std::vector<double> compute_shear_moduli(std::vector<double> const& chains);
+    /**
+     * Compute the updated shear modulus based on the creation of cross-links
+     * causing additional chains with fewer average segments per chain
+     * and the removal of active chains based on the average segments per group
+     * and the rate at which the removal occurs.
+     *
+     * \param current_shear_moduli
+     * \param current_segments
+     * \param time_step_size Time step size for time discretisation
+     *
+     * \return The new shear modulus based on the average segments per chain
+     */
+    std::vector<double> compute_shear_moduli(std::vector<double> current_shear_moduli,
+                                             std::vector<double> const& current_segments,
+                                             double const time_step_size) const;
 
 protected:
-    void compute_chains_and_segments(json const& segments_data);
-
-protected:
-    double p_scission{0.0}; //!< Segment scission probability
-
-    std::int32_t number_of_groups{1};
-
-    std::vector<double> segments, chains, shear_moduli;
-
-    double const boltzmann_constant{1.38064852e-23};
-    double temperature{298.0}; //!< Temperature of elastomer
-
-    double non_affine_stretch_parameter{1.0}; //!< Three-dimensional locking characteristics (p)
-    double effective_tube_geometry{1.0};      //!< Additional constraint stiffness (U)
-    double non_affine_tube_parameter{1.0};    //!< Shape of constraint stress (q)
+    double scission_probability{0.0};  //!< Segment scission probability
+    double crosslink_growth_rate{0.0}; //!< Rate of new crosslinks
+    double segment_decay_rate{0.0};    //!< Rate of average segments per chain decay
 };
 }

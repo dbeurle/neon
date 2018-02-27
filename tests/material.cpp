@@ -21,7 +21,6 @@ TEST_CASE("Basic material")
 {
     SECTION("No name on construction")
     {
-        // json material_data{{"Name", "steel"}, {"ElasticModulus", 200.0e9}, {"PoissonsRatio", 0.3}};
         REQUIRE_THROWS_AS(material_property(json::parse("{\"Nasame\": \"steel\"}")),
                           std::domain_error);
     }
@@ -33,7 +32,7 @@ TEST_CASE("Basic material")
         REQUIRE_THROWS_AS(basic_material.specific_heat(), std::domain_error);
     }
 }
-TEST_CASE("Linear elastic material", "[isotropic_elastic_property]")
+TEST_CASE("Linear elastic material")
 {
     SECTION("Linear elastic properties")
     {
@@ -74,7 +73,7 @@ TEST_CASE("Linear elastic material", "[isotropic_elastic_property]")
         REQUIRE_THROWS_AS(isotropic_elastic_property(material_data), std::domain_error);
     }
 }
-TEST_CASE("Perfect plastic material", "[PerfectPlasticElastic]")
+TEST_CASE("Perfect plastic material")
 {
     json material_data{{"Name", "steel"},
                        {"ElasticModulus", 200.0e9},
@@ -91,7 +90,7 @@ TEST_CASE("Perfect plastic material", "[PerfectPlasticElastic]")
     REQUIRE(perfect_plastic_elastic.hardening_modulus(0.0) == Approx(0.0));
     REQUIRE(perfect_plastic_elastic.hardening_modulus(1.0) == Approx(0.0));
 }
-TEST_CASE("Isotropic hardening", "[IsotropicPlasticElastic]")
+TEST_CASE("Isotropic hardening")
 {
     json material_data{{"Name", "steel"},
                        {"ElasticModulus", 200.0e9},
@@ -112,7 +111,7 @@ TEST_CASE("Isotropic hardening", "[IsotropicPlasticElastic]")
 
     REQUIRE(iso_plastic_elastic.kinematic_modulus(0.0) == Approx(100.0e6));
 }
-TEST_CASE("Missing yield stress", "[IsotropicPlasticElastic]")
+TEST_CASE("Missing yield stress")
 {
     json material_data{{"Name", "steel"},
                        {"ElasticModulus", 200.0e9},
@@ -123,43 +122,34 @@ TEST_CASE("Missing yield stress", "[IsotropicPlasticElastic]")
 
     REQUIRE_THROWS_AS(isotropic_elastic_plastic(material_data), std::domain_error);
 }
-TEST_CASE("Micromechanical elastomer", "[stochastic_micromechanical_elastomer]")
+TEST_CASE("Micromechanical elastomer")
 {
     json material_data{{"Name", "rubber"},
                        {"ElasticModulus", 10.0e6},
                        {"PoissonsRatio", 0.45},
+                       {"SegmentsPerChain", 70},
                        {"Segments",
-                        {{"Groups", 5},
-                         {"Average", 50},
-                         {"StandardDeviation", 10},
-                         {"ScissionLikelihood", 0.0001}}}};
+                        {{"SegmentDecayRate", 0.97},
+                         {"CrosslinkGrowthRate", 350000.0},
+                         {"ScissionProbability", 0.0001}}}};
 
-    stochastic_micromechanical_elastomer elastomer(material_data);
+    ageing_micromechanical_elastomer elastomer(material_data);
 
-    // Initial chains and segment groups
-    auto const chain_group_initial = elastomer.chain_groups();
-    auto const segment_group_initial = elastomer.segment_groups();
+    REQUIRE(elastomer.compute_new_shear_modulus(0.1) < elastomer.shear_modulus());
+    REQUIRE(elastomer.compute_new_segment(70, 0.1) < 70.0);
 
-    REQUIRE(elastomer.groups() == 5);
+    // Dummy sets of shear modulus histories
+    std::vector<double> shear_modulus{350, 30, 30, 30};
+    std::vector<double> const segments{70, 65, 60, 55};
 
-    SECTION("Perform time step")
-    {
-        auto const chain_group = elastomer.update_chains(elastomer.chain_groups(), 100.0);
-        auto const shear_moduli = elastomer.compute_shear_moduli(chain_group);
-        auto const segment_group = elastomer.segment_groups();
+    shear_modulus = elastomer.compute_shear_moduli(shear_modulus, segments, 0.1);
 
-        REQUIRE(chain_group.size() == segment_group.size());
-
-        // Ensure we have a decrease in the number of chains
-        for (std::size_t i{0}; i < chain_group.size(); i++)
-        {
-            REQUIRE(chain_group.at(i) < chain_group_initial.at(i));
-            REQUIRE(segment_group.at(i) == segment_group_initial.at(i));
-            REQUIRE(shear_moduli.at(i) > 0.0);
-        }
-    }
+    REQUIRE(shear_modulus.at(0) < 350);
+    REQUIRE(shear_modulus.at(1) < 30);
+    REQUIRE(shear_modulus.at(2) < 30);
+    REQUIRE(shear_modulus.at(3) < 30);
 }
-TEST_CASE("Diffusion material", "[linear_diffusion]")
+TEST_CASE("Diffusion material")
 {
     json material_data{{"Name", "steel"},
                        {"Density", 7800.0},
