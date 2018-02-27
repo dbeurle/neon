@@ -46,7 +46,8 @@ public:
      * \param time_step_size Time step size for time discretisation
      * \return A new segments which is less than current_segment
      */
-    double compute_new_segment(double const current_segment, double const time_step_size) const;
+    [[nodiscard]] double compute_new_segment(double const current_segment,
+                                             double const time_step_size) const;
 
     /**
      * Update the shear modulus based on the initial shear modulus
@@ -56,7 +57,7 @@ public:
      *
      * \return A new partial shear modulus
      */
-    double compute_new_shear_modulus(double const time_step_size) const;
+    [[nodiscard]] double compute_new_shear_modulus(double const time_step_size) const;
 
     /**
      * Compute the updated shear modulus based on the creation of cross-links
@@ -70,9 +71,9 @@ public:
      *
      * \return The new shear modulus based on the average segments per chain
      */
-    std::vector<double> compute_shear_moduli(std::vector<double> current_shear_moduli,
-                                             std::vector<double> const& current_segments,
-                                             double const time_step_size) const;
+    [[nodiscard]] std::vector<double> compute_shear_moduli(std::vector<double> current_shear_moduli,
+                                                           std::vector<double> const& current_segments,
+                                                           double const time_step_size) const;
 
 protected:
     double scission_probability{0.0};  //!< Segment scission probability

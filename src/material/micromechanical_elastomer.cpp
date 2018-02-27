@@ -22,33 +22,26 @@ micromechanical_elastomer::micromechanical_elastomer(json const& material_data)
 ageing_micromechanical_elastomer::ageing_micromechanical_elastomer(json const& material_data)
     : micromechanical_elastomer(material_data)
 {
-    if (!material_data.count("Segments"))
-    {
-        throw std::domain_error("Segments not specified in material data\n");
-    }
-
-    auto const& segments_data = material_data["Segments"];
-
     auto exception_string = [](std::string&& field) {
-        return "\"" + field + "\" is not specified in \"Segment\" data";
+        return "\"" + field + "\" is not specified in \"Material\" data";
     };
 
-    if (!segments_data.count("SegmentDecayRate"))
+    if (!material_data.count("SegmentDecayRate"))
     {
         throw std::domain_error(exception_string("SegmentDecayRate"));
     }
-    if (!segments_data.count("ScissionProbability"))
+    if (!material_data.count("ScissionProbability"))
     {
         throw std::domain_error(exception_string("ScissionProbability"));
     }
-    if (!segments_data.count("CrosslinkGrowthRate"))
+    if (!material_data.count("CrosslinkGrowthRate"))
     {
         throw std::domain_error(exception_string("CrosslinkGrowthRate"));
     }
 
-    segment_decay_rate = segments_data["SegmentDecayRate"];
-    scission_probability = segments_data["ScissionProbability"];
-    crosslink_growth_rate = segments_data["CrosslinkGrowthRate"];
+    segment_decay_rate = material_data["SegmentDecayRate"];
+    scission_probability = material_data["ScissionProbability"];
+    crosslink_growth_rate = material_data["CrosslinkGrowthRate"];
 
     if (scission_probability < 0.0 || crosslink_growth_rate < 0.0 || segment_decay_rate < 0.0)
     {

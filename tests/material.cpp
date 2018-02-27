@@ -128,10 +128,9 @@ TEST_CASE("Micromechanical elastomer")
                        {"ElasticModulus", 10.0e6},
                        {"PoissonsRatio", 0.45},
                        {"SegmentsPerChain", 70},
-                       {"Segments",
-                        {{"SegmentDecayRate", 0.97},
-                         {"CrosslinkGrowthRate", 350000.0},
-                         {"ScissionProbability", 0.0001}}}};
+                       {"SegmentDecayRate", 0.97},
+                       {"CrosslinkGrowthRate", 350000.0},
+                       {"ScissionProbability", 0.0001}};
 
     ageing_micromechanical_elastomer elastomer(material_data);
 
