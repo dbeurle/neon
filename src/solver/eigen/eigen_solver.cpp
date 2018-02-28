@@ -1,5 +1,6 @@
 
 #include "eigen_solver.hpp"
+#include "Exceptions.hpp"
 
 #include <iostream>
 #include <unsupported/Eigen/ArpackSupport>
@@ -14,14 +15,25 @@ eigen_solver::eigen_solver(std::int64_t const eigenvalues_to_extract)
 std::pair<vector, matrix> eigen_solver::solve(sparse_matrix const& A, sparse_matrix const& B)
 {
     // using solver_type = Eigen::SimplicialLU<Eigen::SparseMatrix<sparse_matrix::Scalar>>;
-    using solver_type = Eigen::SparseLU<sparse_matrix, Eigen::AMDOrdering<std::int32_t>>;
+    // using solver_type = Eigen::SparseLU<sparse_matrix, Eigen::AMDOrdering<std::int32_t>>;
 
-    Eigen::ArpackGeneralizedSelfAdjointEigenSolver<sparse_matrix, solver_type>
-        arpack(A, B, eigenvalues_to_extract);
+    Eigen::SparseMatrix<double> A_col = A;
 
-    std::cout << "Solved some eigenvalues apparently\n";
+    std::cout << "Different ordering of A\n" << A_col << "\n";
 
-    std::cout << arpack.eigenvectors() << std::endl;
+    Eigen::ArpackGeneralizedSelfAdjointEigenSolver<Eigen::SparseMatrix<double>> arpack;
+
+    arpack.compute(A_col, eigenvalues_to_extract, "SM");
+
+    if (arpack.getNbrConvergedEigenValues() < eigenvalues_to_extract)
+    {
+        throw computational_error("Eigenvalues did not converge");
+    }
+
+    if (arpack.info() != Eigen::Success)
+    {
+        throw computational_error("Numerical issued occurred");
+    }
 
     return {arpack.eigenvectors(), arpack.eigenvalues()};
 }
