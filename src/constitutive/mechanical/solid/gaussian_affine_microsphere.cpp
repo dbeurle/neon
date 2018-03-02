@@ -16,9 +16,6 @@ gaussian_affine_microsphere::gaussian_affine_microsphere(std::shared_ptr<interna
 {
     variables->add(internal_variables_t::rank4::tangent_operator);
 
-    // Deviatoric stress
-    variables->add(internal_variables_t::Tensor::Kirchhoff);
-
     // Commit these to history in case of failure on first time step
     variables->commit();
 }
@@ -88,7 +85,7 @@ matrix3 gaussian_affine_microsphere::compute_macro_stress(matrix3 const& F_unimo
 {
     return 3.0 * shear_modulus
            * unit_sphere.integrate(matrix3::Zero().eval(),
-                                   [&](auto const& coordinates, auto const& l) -> matrix3 {
+                                   [&](auto const& coordinates, auto const l) -> matrix3 {
                                        auto const& [r, _] = coordinates;
 
                                        vector3 const t = deformed_tangent(F_unimodular, r);
@@ -102,7 +99,7 @@ matrix6 gaussian_affine_microsphere::compute_macro_moduli(matrix3 const& F_unimo
 {
     return -3.0 * shear_modulus
            * unit_sphere.integrate(matrix6::Zero().eval(),
-                                   [&](auto const& coordinates, auto const& l) -> matrix6 {
+                                   [&](auto const& coordinates, auto const l) -> matrix6 {
                                        auto const& [r, _] = coordinates;
 
                                        vector3 const t = deformed_tangent(F_unimodular, r);
@@ -111,6 +108,5 @@ matrix6 gaussian_affine_microsphere::compute_macro_moduli(matrix3 const& F_unimo
 
                                        return std::pow(micro_stretch, -2) * outer_product(t, t, t, t);
                                    });
-    // clang-format on
 }
 }

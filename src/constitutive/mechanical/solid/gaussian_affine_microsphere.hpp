@@ -41,9 +41,9 @@ public:
     [[nodiscard]] virtual material_property const& intrinsic_material() const override final
     {
         return material;
-    };
+    }
 
-    [[nodiscard]] virtual bool is_finite_deformation() const override final { return true; };
+    [[nodiscard]] virtual bool is_finite_deformation() const override final { return true; }
 
 protected:
     /**
@@ -66,7 +66,7 @@ protected:
      (\bar{\boldsymbol{\tau}} \otimes \boldsymbol{g}^{-1} + \boldsymbol{g}^{-1} \otimes
      \bar{\boldsymbol{\tau}}) \right] : \mathbb{P} \f}
      * @param J Determinant of deformation gradient
-     * @param K Shear modulus
+     * @param K Bulk modulus
      * @param macro_C Macromoduli from unit sphere
      * @param macro_stress Macrostress from unit sphere
      */
@@ -84,7 +84,6 @@ protected:
          \f}
      * @param F_unimodular Unimodular decomposition of the deformation gradient
      * @param shear_modulus The material shear modulus
-     * @param N number of segments per chain
      * @return Kirchhoff stress tensor
      */
     [[nodiscard]] matrix3 compute_macro_stress(matrix3 const& F_unimodular,
@@ -102,7 +101,6 @@ protected:
          \f}
      * @param F_unimodular Unimodular decomposition of the deformation gradient
      * @param shear_modulus The material shear modulus
-     * @param N number of segments per chain
      * @return Macromoduli from unit sphere homogenisation
      */
     [[nodiscard]] matrix6 compute_macro_moduli(matrix3 const& F_unimodular,

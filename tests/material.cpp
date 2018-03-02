@@ -141,7 +141,7 @@ TEST_CASE("Micromechanical elastomer")
     std::vector<double> shear_modulus{350, 30, 30, 30};
     std::vector<double> const segments{70, 65, 60, 55};
 
-    shear_modulus = elastomer.compute_shear_moduli(shear_modulus, segments, 0.1);
+    shear_modulus = elastomer.scission(shear_modulus, segments, 0.1);
 
     REQUIRE(shear_modulus.at(0) < 350);
     REQUIRE(shear_modulus.at(1) < 30);

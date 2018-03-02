@@ -25,7 +25,7 @@ public:
     auto const segments_per_chain() const { return N; }
 
 protected:
-    double N{25.0}; //!< Number of segment per chain
+    double N{0.0}; //!< Number of segment per chain
 };
 
 /**
@@ -71,9 +71,9 @@ public:
      *
      * \return The new shear modulus based on the average segments per chain
      */
-    [[nodiscard]] std::vector<double> compute_shear_moduli(std::vector<double> current_shear_moduli,
-                                                           std::vector<double> const& current_segments,
-                                                           double const time_step_size) const;
+    [[nodiscard]] std::vector<double> scission(std::vector<double> shear_moduli,
+                                               std::vector<double> const& segments,
+                                               double const time_step_size) const;
 
 protected:
     double scission_probability{0.0};  //!< Segment scission probability

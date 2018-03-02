@@ -10,9 +10,9 @@
         "ElasticModulus" : 10.0e6,
         "PoissonsRatio" : 0.45,
         "SegmentsPerChain" : 70,
-        "ScissionProbability" : 0.1,
-        "CrosslinkGrowthRate" : 35000.0,
-        "SegmentDecayRate" : 0.01
+        "ScissionProbability" : 0.000015,
+        "CrosslinkGrowthRate" : 1000.0,
+        "SegmentDecayRate" : 0.0001
     }],
     "SimulationCases" : [{
         "Name" : "Load",
@@ -23,9 +23,9 @@
             "DisplacementTolerance" : 1.0e-3
         },
         "Time" : {
-            "Period" : 11.0,
+            "Period" : 101.0,
             "Increments" : {
-                "Initial" : 1.0,
+                "Initial" : 0.1,
                 "Minimum" : 0.001,
                 "Maximum" : 1.0,
                 "Adaptive" : true
@@ -46,26 +46,26 @@
             "BoundaryConditions" : [{
                 "Name" : "Xsym",
                 "Type" : "Displacement",
-                "Time" : [0.0, 1.0, 10.0, 11.0],
+                "Time" : [0.0, 1.0, 100.0, 101.0],
                 "x" : [0.0, 0.0, 0.0, 0.0]
             },
             {
                 "Name" : "Ysym",
                 "Type" : "Displacement",
-                "Time" : [0.0, 1.0, 10.0, 11.0],
+                "Time" : [0.0, 1.0, 100.0, 101.0],
                 "y" : [0.0, 0.0, 0.0, 0.0]
             },
             {
                 "Name" : "Zsym",
                 "Type" : "Displacement",
-                "Time" : [0.0, 1.0, 10.0, 11.0],
+                "Time" : [0.0, 1.0, 100.0, 101.0],
                 "z" : [0.0, 0.0, 0.0, 0.0]
             },
             {
                 "Name" : "ZLoad",
                 "Type" : "Displacement",
-                "Time" : [0.0, 1.0, 10.0, 11.0],
-                "z" : [0.0, 0.7, 0.7, 0.0]
+                "Time" : [0.0, 1.0, 100.0, 101.0],
+                "z" : [0.0, 0.2, 0.2, 0.0]
             }]
         }],
         "LinearSolver" : {
