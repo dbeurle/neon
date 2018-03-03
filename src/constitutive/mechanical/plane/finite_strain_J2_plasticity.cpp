@@ -66,7 +66,7 @@ void finite_strain_J2_plasticity::update_internal_variables(double const time_st
                                                      });
 
     // Perform the update algorithm for each quadrature point
-    for (auto l = 0; l < deformation_gradients.size(); l++)
+    for (std::size_t l{}; l < deformation_gradients.size(); l++)
     {
         auto const& F_inc = incremental_deformation_gradients[l];
         auto const J = J_list[l];
