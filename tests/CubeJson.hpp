@@ -139,7 +139,7 @@ inline std::string simulation_data_json()
            "\"ResidualTolerance\" : 0.001},"
            //
            "\"Time\" : {\"Period\" : 1.0, \"Increments\": { "
-           "\"Initial\" : 1.0, \"Minimum\" : 0.001, \"Maximum\" : 10.0 }},"
+           "\"Initial\" : 1.0, \"Minimum\" : 0.001, \"Maximum\" : 10.0, \"Adaptive\" : true }},"
            "\"LinearSolver\" : {\"Solver\" : \"Iterative\"}}";
 }
 

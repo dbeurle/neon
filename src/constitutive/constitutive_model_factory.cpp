@@ -105,20 +105,25 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
                                     "\"FiniteStrain\"");
         }
 
+        if (constitutive_model.count("Damage"))
+        {
+            if (mesh_data["ConstitutiveModel"]["FiniteStrain"].get<bool>())
+            {
+                throw std::domain_error("\"J2PlasticityDamage\" is not implemented for "
+                                        "\"FiniteStrain\"");
+            }
+
+            auto const& damage_type = constitutive_model["Damage"].get<std::string>();
+
+            if (damage_type == "IsotropicChaboche")
+                return std::make_unique<small_strain_J2_plasticity_damage>(variables, material_data);
+        }
+
         if (mesh_data["ConstitutiveModel"]["FiniteStrain"].get<bool>())
         {
             return std::make_unique<finite_strain_J2_plasticity>(variables, material_data);
         }
         return std::make_unique<small_strain_J2_plasticity>(variables, material_data);
-    }
-    else if (model_name == "ChabocheDamage")
-    {
-        if (mesh_data["ConstitutiveModel"]["FiniteStrain"].get<bool>())
-        {
-            throw std::domain_error("\"ChabocheDamage\" is not implemented for "
-                                    "\"FiniteStrain\"");
-        }
-        return std::make_unique<small_strain_J2_plasticity_damage>(variables, material_data);
     }
     throw std::domain_error("The model name " + model_name + " is not recognised\n"
                             + "Supported models are \"NeoHooke\", \"Microsphere\" "
