@@ -3,7 +3,7 @@
 #include "Exceptions.hpp"
 
 #include <iostream>
-#include <unsupported/Eigen/ArpackSupport>
+#include "arpack_ng/ArpackSelfAdjointEigenSolver.h"
 
 namespace neon
 {
@@ -23,7 +23,7 @@ std::pair<vector, matrix> eigen_solver::solve(sparse_matrix const& A, sparse_mat
 
     Eigen::ArpackGeneralizedSelfAdjointEigenSolver<Eigen::SparseMatrix<double>> arpack;
 
-    arpack.compute(A_col, eigenvalues_to_extract, "SM");
+    arpack.compute(A_col, eigenvalues_to_extract, "LM");
 
     if (arpack.getNbrConvergedEigenValues() < eigenvalues_to_extract)
     {
@@ -35,6 +35,6 @@ std::pair<vector, matrix> eigen_solver::solve(sparse_matrix const& A, sparse_mat
         throw computational_error("Numerical issued occurred");
     }
 
-    return {arpack.eigenvectors(), arpack.eigenvalues()};
+    return {arpack.eigenvalues(), arpack.eigenvectors()};
 }
 }

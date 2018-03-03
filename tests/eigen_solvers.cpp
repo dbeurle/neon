@@ -11,48 +11,39 @@ using namespace neon;
 constexpr auto ZERO_MARGIN = 1.0e-5;
 
 /** Create a SPD matrix for solver testing */
-sparse_matrix create_sparse_matrix()
+sparse_matrix create_sparse_matrix(std::int64_t const size)
 {
-    std::vector<Eigen::Triplet<double>> triplets = {{0, 0, 2.0},
-                                                    // {0, 1, -1.0},
-                                                    // {0, 2, 0.0},
-                                                    // {1, 0, -1.0},
-                                                    {1, 1, 3.0},
-                                                    // {1, 2, -1.0},
-                                                    // {2, 0, 0.0},
-                                                    // {2, 1, -1.0},
-                                                    {2, 2, 4.0}};
-
-    sparse_matrix A(3, 3);
-    A.setFromTriplets(std::begin(triplets), std::end(triplets));
+    sparse_matrix A(size, size);
+    for (std::int64_t i{0}; i < size; ++i)
+    {
+        A.insert(i, i) = static_cast<sparse_matrix::value_type>(i + 1);
+    }
     A.finalize();
     return A;
 }
 
-sparse_matrix create_sparse_identity()
+sparse_matrix create_sparse_identity(std::int64_t const size)
 {
-    std::vector<Eigen::Triplet<double>> triplets = {{0, 0, 1.0}, {1, 1, 1.0}, {2, 2, 1.0}};
-
-    sparse_matrix A(3, 3);
-    A.setFromTriplets(std::begin(triplets), std::end(triplets));
+    sparse_matrix A(size, size);
+    for (std::int64_t i{0}; i < size; ++i)
+    {
+        A.insert(i, i) = 1.0;
+    }
     A.finalize();
     return A;
 }
 
 TEST_CASE("Eigen solver test suite")
 {
-    sparse_matrix A = create_sparse_matrix();
-    sparse_matrix I = create_sparse_identity();
+    sparse_matrix const A = create_sparse_matrix(2);
+    sparse_matrix const I = create_sparse_identity(2);
 
-    std::cout << A << std::endl;
-    std::cout << I << std::endl;
-
-    eigen_solver eigen{3};
+    eigen_solver eigen{1};
 
     auto const [values, vectors] = eigen.solve(A, I);
 
-    std::cout << values << std::endl;
-    std::cout << vectors << std::endl;
+    std::cout << "Eigenvalues\n" << values << std::endl;
+    std::cout << "Eigenvectors\n" << vectors << std::endl;
 
     REQUIRE(1 == 1);
 }
