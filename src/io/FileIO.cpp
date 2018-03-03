@@ -3,7 +3,9 @@
 
 #include <exception>
 
+#ifdef __clang__
 #pragma clang diagnostic ignored "-Winconsistent-missing-override"
+#endif
 
 #include "vtkCellData.h"
 #include "vtkCellTypes.h"
