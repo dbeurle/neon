@@ -18,8 +18,8 @@ foreach(test
     add_dependencies(${test} catch neon)
 
     target_link_libraries(${test} LINK_PUBLIC neon)
-    target_include_directories(${test} PUBLIC OpenMP::OpenMP_CXX
-                                              ${CMAKE_SOURCE_DIR}/src
+    target_include_directories(${test} PUBLIC ${CMAKE_SOURCE_DIR}/src
+                                              OpenMP::OpenMP_CXX
                                               ${CATCH_INCLUDE_DIR}
                                               ${EIGEN_INCLUDE_DIR}
                                               ${CATCH_INCLUDE_DIR}

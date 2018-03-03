@@ -20,7 +20,7 @@ if(is_ipo_supported)
 endif()
 
 if (ENABLE_NATIVE)
-   set_target_properties(neon COMPILE_FLAGS "-march=native -mtune=native")
+    target_compile_options(neon PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-march=native -mtune=native>)
 endif()
 
 target_include_directories(neon PUBLIC ${CMAKE_SOURCE_DIR}/src
