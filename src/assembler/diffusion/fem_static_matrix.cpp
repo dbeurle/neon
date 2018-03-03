@@ -2,7 +2,7 @@
 #include "fem_static_matrix.hpp"
 
 #include "Exceptions.hpp"
-#include "solver/linear/LinearSolverFactory.hpp"
+#include "solver/linear/linear_solver_factory.hpp"
 
 #include "io/json.hpp"
 #include <chrono>
@@ -31,18 +31,21 @@ void fem_static_matrix::compute_sparsity_pattern()
     for (auto const& submesh : mesh.meshes())
     {
         // Loop over the elements and add in the non-zero components
-        for (std::size_t element{0}; element < submesh.elements(); element++)
+        for (std::int64_t element{0}; element < submesh.elements(); element++)
         {
-            for (auto const& p : submesh.local_dof_list(element))
+            auto const local_view = submesh.local_dof_view(element);
+
+            for (std::int64_t p{0}; p < local_view.size(); ++p)
             {
-                for (auto const& q : submesh.local_dof_list(element))
+                for (std::int64_t q{0}; q < local_view.size(); ++q)
                 {
                     doublets.emplace_back(p, q);
                 }
             }
         }
     }
-    K.setFromTriplets(doublets.begin(), doublets.end());
+    K.setFromTriplets(std::begin(doublets), std::end(doublets));
+
     is_sparsity_computed = true;
 }
 
@@ -58,30 +61,27 @@ void fem_static_matrix::compute_external_force(double const load_factor)
         {
             for (auto const& mesh : surface.load_interface())
             {
-                for (std::size_t element{0}; element < mesh.elements(); ++element)
+                for (std::int64_t element{0}; element < mesh.elements(); ++element)
                 {
-                    auto const& [dofs, fe] = mesh.external_force(element, load_factor);
+                    auto const [dof_view, fe] = mesh.external_force(element, load_factor);
 
-                    for (auto a = 0l; a < fe.size(); ++a)
-                    {
-                        f(dofs[a]) += fe(a);
-                    }
+                    f(dof_view) += fe;
                 }
             }
             for (auto const& mesh : surface.stiffness_load_interface())
             {
-                for (std::size_t element{0}; element < mesh.elements(); ++element)
+                for (std::int64_t element{0}; element < mesh.elements(); ++element)
                 {
-                    auto const& [dofs, fe] = mesh.external_force(element, load_factor);
-                    auto const& [_, ke] = mesh.external_stiffness(element, load_factor);
+                    auto const [dof_view, fe] = mesh.external_force(element, load_factor);
+                    auto const [_, ke] = mesh.external_stiffness(element, load_factor);
 
-                    for (auto a = 0l; a < fe.size(); ++a)
+                    f(dof_view) += fe;
+
+                    for (std::int64_t a{0}; a < fe.size(); ++a)
                     {
-                        f(dofs[a]) += fe(a);
-
-                        for (auto b{0l}; b < fe.size(); ++b)
+                        for (std::int64_t b{0}; b < fe.size(); ++b)
                         {
-                            K.coeffRef(dofs[a], dofs[b]) += ke(a, b);
+                            K.coefficient_update(dof_view(a), dof_view(b), ke(a, b));
                         }
                     }
                 }
@@ -89,7 +89,9 @@ void fem_static_matrix::compute_external_force(double const load_factor)
         }
     }
     auto const end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
+
+    std::chrono::duration<double> const elapsed_seconds = end - start;
+
     std::cout << std::string(6, ' ') << "External forces assembly took " << elapsed_seconds.count()
               << "s\n";
 }
@@ -120,27 +122,23 @@ void fem_static_matrix::assemble_stiffness()
 
     for (auto const& submesh : mesh.meshes())
     {
-#pragma omp parallel for
-        for (std::size_t element = 0; element < submesh.elements(); ++element)
+        for (std::int64_t element = 0; element < submesh.elements(); ++element)
         {
-            // auto const[dofs, ke] = submesh.tangent_stiffness(element);
-            auto const& tpl = submesh.tangent_stiffness(element);
-            auto const& dofs = std::get<0>(tpl);
-            auto const& ke = std::get<1>(tpl);
+            auto const [dofs, ke] = submesh.tangent_stiffness(element);
 
-            for (std::size_t b = 0; b < dofs.size(); b++)
+            for (std::int64_t a{0}; a < dofs.size(); a++)
             {
-                for (std::size_t a = 0; a < dofs.size(); a++)
+                for (std::int64_t b{0}; b < dofs.size(); b++)
                 {
-#pragma omp atomic
-                    K.coeffRef(dofs[a], dofs[b]) += ke(a, b);
+                    K.coefficient_update(dofs(a), dofs(b), ke(a, b));
                 }
             }
         }
     }
 
     auto const end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
+
+    std::chrono::duration<double> const elapsed_seconds = end - start;
 
     std::cout << std::string(6, ' ') << "Stiffness assembly took " << elapsed_seconds.count()
               << "s\n";
@@ -152,13 +150,13 @@ void fem_static_matrix::apply_dirichlet_conditions(sparse_matrix& A, vector& x, 
     {
         for (auto const& dirichlet_boundary : dirichlet_boundaries)
         {
-            for (auto const& fixed_dof : dirichlet_boundary.dof_view())
+            for (auto const fixed_dof : dirichlet_boundary.dof_view())
             {
-                auto const diagonal_entry = A.coeffRef(fixed_dof, fixed_dof);
-
                 x(fixed_dof) = dirichlet_boundary.value_view();
 
-                std::vector<int> non_zero_visitor;
+                auto const diagonal_entry = A.coeffRef(fixed_dof, fixed_dof);
+
+                std::vector<std::int64_t> non_zero_visitor;
 
                 for (sparse_matrix::InnerIterator it(A, fixed_dof); it; ++it)
                 {

@@ -2,6 +2,7 @@
 #include "fem_mesh.hpp"
 
 #include "mesh/basic_mesh.hpp"
+#include "mesh/mesh_dof_filter.hpp"
 
 #include <chrono>
 #include <exception>
@@ -61,7 +62,7 @@ void fem_mesh::allocate_boundary_conditions(json const& mesh_data, basic_mesh co
 
         if (!boundary.count("Time"))
         {
-            throw std::runtime_error("BoundaryCondition requires a \"Time\" field.");
+            throw std::domain_error("BoundaryCondition requires a \"Time\" field.");
         }
 
         if (auto const& boundary_type = boundary["Type"].get<std::string>();
@@ -69,11 +70,11 @@ void fem_mesh::allocate_boundary_conditions(json const& mesh_data, basic_mesh co
         {
             if (!boundary.count("Value"))
             {
-                throw std::runtime_error("BoundaryCondition \"" + boundary_type
-                                         + "\" requires a \"Value\" field.");
+                throw std::domain_error("BoundaryCondition \"" + boundary_type
+                                        + "\" requires a \"Value\" field.");
             }
 
-            dirichlet_bcs[boundary_name].emplace_back(filter_dof_list(
+            dirichlet_bcs[boundary_name].emplace_back(mesh_dof_filter<1>(
                                                           basic_mesh.meshes(boundary_name)),
                                                       boundary["Time"],
                                                       boundary["Value"]);
@@ -82,17 +83,17 @@ void fem_mesh::allocate_boundary_conditions(json const& mesh_data, basic_mesh co
         {
             if (boundary_type == "HeatFlux" && !boundary.count("Value"))
             {
-                throw std::runtime_error("BoundaryCondition \"" + boundary_type
-                                         + "\" requires a \"Value\" field.");
+                throw std::domain_error("BoundaryCondition \"" + boundary_type
+                                        + "\" requires a \"Value\" field.");
             }
             else if (boundary_type == "NewtonCooling"
                      && (!boundary.count("HeatTransferCoefficient")
                          || !boundary.count("AmbientTemperature")))
             {
-                throw std::runtime_error("BoundaryCondition \"" + boundary_type
-                                         + "\" requires a \"HeatTransferCoefficient\" and "
-                                           "\"AmbientTemperature\" "
-                                           "field.");
+                throw std::domain_error("BoundaryCondition \"" + boundary_type
+                                        + "\" requires a \"HeatTransferCoefficient\" and "
+                                          "\"AmbientTemperature\" "
+                                          "field.");
             }
             boundary_meshes[boundary_name].emplace_back(mesh_coordinates,
                                                         basic_mesh.meshes(boundary_name),
@@ -101,10 +102,10 @@ void fem_mesh::allocate_boundary_conditions(json const& mesh_data, basic_mesh co
         }
         else
         {
-            throw std::runtime_error("BoundaryCondition \"" + boundary_type
-                                     + "\" is not recognised.  For thermal simulations "
-                                       "\"Temperature\", \"HeatFlux\" "
-                                       "and \"NewtonCooling\" are valid.");
+            throw std::domain_error("BoundaryCondition \"" + boundary_type
+                                    + "\" is not recognised.  For thermal simulations "
+                                      "\"Temperature\", \"HeatFlux\" "
+                                      "and \"NewtonCooling\" are valid.");
         }
     }
 }
@@ -117,19 +118,10 @@ void fem_mesh::check_boundary_conditions(json const& boundary_data) const
         {
             if (!boundary.count(required_field))
             {
-                throw std::runtime_error("Missing " + std::string(required_field)
-                                         + " in BoundaryConditions\n");
+                throw std::domain_error("Missing " + std::string(required_field)
+                                        + " in BoundaryConditions\n");
             }
         }
     }
-}
-
-local_indices fem_mesh::filter_dof_list(std::vector<basic_submesh> const& boundary_mesh) const
-{
-    using namespace ranges;
-
-    return view::transform(boundary_mesh,
-                           [](auto const& submesh) { return submesh.connectivities(); })
-           | action::join | action::join | action::sort | action::unique;
 }
 }

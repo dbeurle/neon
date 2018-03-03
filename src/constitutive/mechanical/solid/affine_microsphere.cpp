@@ -7,7 +7,7 @@
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/zip.hpp>
 
-#include <tbb/tbb.h>
+#include <tbb/parallel_for.h>
 
 namespace neon::mechanical::solid
 {
@@ -41,7 +41,6 @@ void affine_microsphere::update_internal_variables(double const time_step_size)
     auto const N{material.segments_per_chain()};
 
     tbb::parallel_for(std::size_t{0}, deformation_gradients.size(), [&](auto const l) {
-
         auto const J = det_deformation_gradients[l];
 
         matrix3 const F_bar = unimodular(deformation_gradients[l]);
@@ -92,7 +91,7 @@ matrix3 affine_microsphere::compute_macro_stress(matrix3 const& F_unimodular,
     return bulk_modulus
            * unit_sphere.integrate(matrix3::Zero().eval(),
                                    [&](auto const& coordinates, auto const& l) -> matrix3 {
-                                       auto const & [ r, r_outer_r ] = coordinates;
+                                       auto const& [r, r_outer_r] = coordinates;
 
                                        vector3 const t = deformed_tangent(F_unimodular, r);
 

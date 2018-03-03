@@ -7,8 +7,6 @@
 #include "numeric/tensor_operations.hpp"
 #include "quadrature/unit_sphere_quadrature.hpp"
 
-#include <json/forwards.h>
-
 namespace neon::mechanical::solid
 {
 /**
@@ -38,7 +36,9 @@ public:
 
     virtual void update_internal_variables(double const time_step_size) override;
 
-    [[nodiscard]] material_property const& intrinsic_material() const override final { return material; };
+    [[nodiscard]] material_property const& intrinsic_material() const override final {
+        return material;
+    };
 
     [[nodiscard]] virtual bool is_finite_deformation() const override final { return true; };
 
@@ -137,13 +137,12 @@ protected:
      * and the vector associated with the quadrature point on the unit sphere
      */
     [[nodiscard]] vector3 deformed_tangent(matrix3 const& F_unimodular,
-                                           vector3 const& surface_vector) const
-    {
+                                           vector3 const& surface_vector) const {
         return F_unimodular * surface_vector;
     }
 
-    /** Compute the microstretch, which is the norm of the deformed tangent vector */
-    [[nodiscard]] auto compute_microstretch(vector3 const& deformed_tangent) const
+        /** Compute the microstretch, which is the norm of the deformed tangent vector */
+        [[nodiscard]] auto compute_microstretch(vector3 const& deformed_tangent) const
     {
         return deformed_tangent.norm();
     }

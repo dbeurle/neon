@@ -6,7 +6,6 @@
 #include "constitutive/constitutive_model_factory.hpp"
 #include "interpolations/interpolation_factory.hpp"
 #include "material/material_property.hpp"
-#include "mesh/dof_allocator.hpp"
 #include "mesh/material_coordinates.hpp"
 #include "numeric/gradient_operator.hpp"
 
@@ -41,9 +40,9 @@ void fem_submesh::save_internal_variables(bool const have_converged)
     }
 }
 
-std::tuple<local_indices const&, matrix> fem_submesh::tangent_stiffness(int const element) const
+std::pair<index_view, matrix> fem_submesh::tangent_stiffness(std::int64_t const element) const
 {
-    auto const X = mesh_coordinates->current_configuration(local_node_list(element));
+    auto const X = mesh_coordinates->current_configuration(local_node_view(element));
 
     auto const n = nodes_per_element();
 
@@ -54,7 +53,7 @@ std::tuple<local_indices const&, matrix> fem_submesh::tangent_stiffness(int cons
                                        [&](auto const& femval, auto const& l) -> matrix {
                                            auto const& [N, rhea] = femval;
 
-                                           auto const& D = D_Vec[offset(element, l)];
+                                           auto const& D = D_Vec[view(element, l)];
 
                                            matrix3 const Jacobian = local_jacobian(rhea, X);
 
@@ -64,12 +63,12 @@ std::tuple<local_indices const&, matrix> fem_submesh::tangent_stiffness(int cons
                                            return B.transpose() * D * B * Jacobian.determinant();
                                        });
 
-    return {local_dof_list(element), kmat};
+    return {local_dof_view(element), kmat};
 }
 
-std::tuple<local_indices const&, matrix> fem_submesh::consistent_mass(int const element) const
+std::pair<index_view, matrix> fem_submesh::consistent_mass(std::int64_t const element) const
 {
-    auto const X = mesh_coordinates->current_configuration(local_node_list(element));
+    auto const X = mesh_coordinates->current_configuration(local_node_view(element));
 
     auto const density = cm->intrinsic_material().initial_density();
     auto const specific_heat = cm->intrinsic_material().specific_heat();
@@ -83,10 +82,10 @@ std::tuple<local_indices const&, matrix> fem_submesh::consistent_mass(int const 
                                             return N * density * specific_heat * N.transpose()
                                                    * Jacobian.determinant();
                                         });
-    return {local_dof_list(element), m};
+    return {local_dof_view(element), m};
 }
 
-std::tuple<local_indices const&, vector> fem_submesh::diagonal_mass(int const element) const
+std::pair<index_view, vector> fem_submesh::diagonal_mass(std::int64_t const element) const
 {
     auto const& [dofs, consistent_m] = this->consistent_mass(element);
 
@@ -95,7 +94,7 @@ std::tuple<local_indices const&, vector> fem_submesh::diagonal_mass(int const el
     {
         diagonal_m(i) = consistent_m.row(i).sum();
     }
-    return {local_dof_list(element), diagonal_m};
+    return {local_dof_view(element), diagonal_m};
 }
 
 void fem_submesh::update_internal_variables(double const time_step_size)
@@ -108,11 +107,6 @@ void fem_submesh::update_internal_variables(double const time_step_size)
     {
         throw computational_error("Floating point error reported\n");
     }
-}
-
-int fem_submesh::offset(int const element, int const quadrature_point) const
-{
-    return sf->quadrature().points() * element + quadrature_point;
 }
 
 fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
@@ -128,14 +122,14 @@ fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
     // vector format of values
     vector component = vector::Zero(sf->quadrature().points());
 
-    for (std::size_t e{0}; e < elements(); ++e)
+    for (std::int64_t element{0}; element < elements(); ++element)
     {
         // Assemble these into the global value vector
-        auto const& node_list = local_node_list(e);
+        auto const& node_list = local_node_view(element);
 
         for (std::size_t l{0}; l < sf->quadrature().points(); ++l)
         {
-            component(l) = scalar_list[this->offset(e, l)];
+            component(l) = scalar_list[view(element, l)];
         }
 
         // Local extrapolation to the nodes

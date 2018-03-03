@@ -3,12 +3,12 @@
 
 #include "Exceptions.hpp"
 #include "numeric/float_compare.hpp"
-#include "solver/linear/LinearSolverFactory.hpp"
+#include "solver/linear/linear_solver_factory.hpp"
 #include "io/json.hpp"
 
 #include <termcolor/termcolor.hpp>
 
-#include <tbb/tbb.h>
+#include <tbb/parallel_for.h>
 
 #include <cfenv>
 #include <chrono>
@@ -64,13 +64,15 @@ void fem_static_matrix::compute_sparsity_pattern()
     for (auto const& submesh : mesh.meshes())
     {
         // Loop over the elements and add in the non-zero components
-        for (std::size_t element{0}; element < submesh.elements(); element++)
+        for (std::int64_t element{0}; element < submesh.elements(); element++)
         {
-            for (auto const& p : submesh.local_dof_list(element))
+            auto const local_dof_view = submesh.local_dof_view(element);
+
+            for (std::int64_t p{0}; p < local_dof_view.size(); p++)
             {
-                for (auto const& q : submesh.local_dof_list(element))
+                for (std::int64_t q{0}; q < local_dof_view.size(); q++)
                 {
-                    doublets.emplace_back(p, q);
+                    doublets.emplace_back(local_dof_view(p), local_dof_view(q));
                 }
             }
         }
@@ -89,14 +91,11 @@ void fem_static_matrix::compute_internal_force()
 
     for (auto const& submesh : mesh.meshes())
     {
-        for (std::size_t element{0}; element < submesh.elements(); ++element)
+        for (std::int64_t element{0}; element < submesh.elements(); ++element)
         {
-            auto const& [dofs, fe_int] = submesh.internal_force(element);
+            auto const [dofs, fe_int] = submesh.internal_force(element);
 
-            for (auto a = 0; a < fe_int.size(); ++a)
-            {
-                fint(dofs[a]) += fe_int(a);
-            }
+            fint(dofs) += fe_int;
         }
     }
     if (std::fetestexcept(FE_INVALID))
@@ -125,14 +124,11 @@ void fem_static_matrix::compute_external_force()
             {
                 // clang-format off
                 std::visit([&](auto const& mesh) {
-                    for (std::size_t element{0}; element < mesh.elements(); ++element)
+                    for (std::int64_t element{0}; element < mesh.elements(); ++element)
                     {
-                       auto const & [ dofs, fe_ext ] = mesh.external_force(element, step_time);
+                       auto const [dofs, fe_ext] = mesh.external_force(element, step_time);
 
-                       for (auto a = 0; a < fe_ext.size(); ++a)
-                       {
-                           fext(dofs[a]) += fe_ext(a);
-                       }
+                       fext(dofs) += fe_ext;
                     }
                 },
                 boundary_condition);
@@ -201,13 +197,12 @@ void fem_static_matrix::assemble_stiffness()
 
     for (auto const& submesh : mesh.meshes())
     {
-        tbb::parallel_for(std::size_t{0}, submesh.elements(), [&](auto const element) {
+        tbb::parallel_for(std::int64_t{0}, submesh.elements(), [&](auto const element) {
+            auto const [dofs, ke] = submesh.tangent_stiffness(element);
 
-            auto const[dofs, ke] = submesh.tangent_stiffness(element);
-
-            for (std::size_t a = 0; a < dofs.size(); a++)
+            for (std::int64_t a = 0; a < dofs.size(); a++)
             {
-                for (std::size_t b = 0; b < dofs.size(); b++)
+                for (std::int64_t b = 0; b < dofs.size(); b++)
                 {
                     Kt.coefficient_update(dofs[a], dofs[b], ke(a, b));
                 }
@@ -228,13 +223,13 @@ void fem_static_matrix::enforce_dirichlet_conditions(sparse_matrix& A, vector& b
     {
         for (auto const& dirichlet_boundary : boundaries)
         {
-            for (auto const& fixed_dof : dirichlet_boundary.dof_view())
+            for (auto const fixed_dof : dirichlet_boundary.dof_view())
             {
                 auto const diagonal_entry = A.coeff(fixed_dof, fixed_dof);
 
                 b(fixed_dof) = 0.0;
 
-                std::vector<int> non_zero_visitor;
+                std::vector<std::int64_t> non_zero_visitor;
 
                 // Zero the rows and columns
                 for (sparse_matrix::InnerIterator it(A, fixed_dof); it; ++it)
@@ -270,9 +265,9 @@ void fem_static_matrix::apply_displacement_boundaries()
             auto const delta_u = boundary.value_view(adaptive_load.step_time())
                                  - boundary.value_view(adaptive_load.last_step_time());
 
-            for (auto const& dof : boundary.dof_view())
+            for (auto const fixed_dof : boundary.dof_view())
             {
-                prescribed_increment.coeffRef(dof) = delta_u;
+                prescribed_increment.coeffRef(fixed_dof) = delta_u;
             }
         }
     }

@@ -25,7 +25,8 @@
             "Increments" : {
                 "Initial" : 1.0,
                 "Minimum" : 0.00001,
-                "Maximum" : 1.0
+                "Maximum" : 1.0,
+                "Adaptive" : true
             }
         },
 		"Mesh" : [{
@@ -59,7 +60,7 @@
                 "Name" : "load",
                 "Type" : "Pressure",
                 "Time" : [0.0, 1.0],
-		        "Value" : [0.0, -1.5e2]
+                "Value" : [0.0, -1.5e2]
             }]
         }],
 		"LinearSolver" :  {

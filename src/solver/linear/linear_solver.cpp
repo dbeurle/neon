@@ -2,7 +2,7 @@
 // Parallelisation of the Conjugate Gradient algorithm is good
 #define NEON_PARALLEL_EIGEN_SOLVERS
 
-#include "LinearSolver.hpp"
+#include "linear_solver.hpp"
 
 #include "Exceptions.hpp"
 #include "simulation_parser.hpp"
@@ -14,23 +14,23 @@
 
 namespace neon
 {
-IterativeLinearSolver::IterativeLinearSolver(double const residual_tolerance)
+iterative_linear_solver::iterative_linear_solver(double const residual_tolerance)
     : residual_tolerance{residual_tolerance}
 {
 }
 
-IterativeLinearSolver::IterativeLinearSolver(std::int32_t const max_iterations)
+iterative_linear_solver::iterative_linear_solver(std::int32_t const max_iterations)
     : max_iterations{max_iterations}
 {
 }
 
-IterativeLinearSolver::IterativeLinearSolver(double const residual_tolerance,
-                                             std::int32_t const max_iterations)
+iterative_linear_solver::iterative_linear_solver(double const residual_tolerance,
+                                                 std::int32_t const max_iterations)
     : residual_tolerance{residual_tolerance}, max_iterations(max_iterations)
 {
 }
 
-void ConjugateGradient::solve(sparse_matrix const& A, vector& x, vector const& b)
+void conjugate_gradient::solve(sparse_matrix const& A, vector& x, vector const& b)
 {
 #ifdef ENABLE_OPENMP
     omp_set_num_threads(simulation_parser::threads);
@@ -63,7 +63,7 @@ void ConjugateGradient::solve(sparse_matrix const& A, vector& x, vector const& b
               << residual_tolerance << ")\n";
 }
 
-void BiCGStab::solve(sparse_matrix const& A, vector& x, vector const& b)
+void biconjugate_gradient_stabilised::solve(sparse_matrix const& A, vector& x, vector const& b)
 {
     std::feclearexcept(FE_ALL_EXCEPT);
 

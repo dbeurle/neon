@@ -30,7 +30,7 @@ FileIO::FileIO(std::string file_name, json const& visualisation_data)
 
     if (!pvd_file.is_open())
     {
-        throw std::runtime_error("Not able to write to disk for visualisation\n");
+        throw std::domain_error("Not able to write to disk for visualisation\n");
     }
 
     pvd_file << "<?xml version=\"1.0\"?>\n";
@@ -105,8 +105,8 @@ FileIO::FileIO(std::string file_name, json const& visualisation_data, fem_mesh c
     {
         if (vector_map.find(output) == vector_map.end() && output != primary_field)
         {
-            throw std::runtime_error("Output \"" + output
-                                     + "\" is not valid for a heat diffusion simulation\n");
+            throw std::domain_error("Output \"" + output
+                                    + "\" is not valid for a heat diffusion simulation\n");
         }
     }
     add_mesh();
@@ -134,15 +134,17 @@ void FileIO::add_mesh()
 
     for (auto const& submesh : mesh.meshes())
     {
-        auto const vtk_ordered_connectivity = convert_to_vtk(submesh.connectivities(),
+        auto const vtk_ordered_connectivity = convert_to_vtk(submesh.element_connectivity(),
                                                              submesh.topology());
-        for (auto const& node_list : vtk_ordered_connectivity)
+
+        for (std::int64_t element{0}; element < vtk_ordered_connectivity.cols(); ++element)
         {
             auto vtk_node_list = vtkSmartPointer<vtkIdList>::New();
 
-            for (auto const& node : node_list)
+            for (std::int64_t node{0}; node < vtk_ordered_connectivity.rows(); ++node)
             {
-                vtk_node_list->InsertNextId(static_cast<long>(node));
+                vtk_node_list->InsertNextId(
+                    static_cast<std::int64_t>(vtk_ordered_connectivity(node, element)));
             }
             unstructured_mesh->InsertNextCell(to_vtk(submesh.topology()), vtk_node_list);
         }

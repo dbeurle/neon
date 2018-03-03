@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "LinearSolver.hpp"
+#include "linear_solver.hpp"
 
 // Mumps includes
 #include <MUMPS/dmumps_c.h>
@@ -32,7 +32,7 @@ struct MUMPSWrapper<double>
  *
  * TODO Put link to the solver website and documentation
  */
-class MUMPS : public DirectLinearSolver
+class MUMPS : public direct_linear_solver
 {
 public:
     enum Ordering { AMD, AMF = 2, Scotch, Pord, Metis, QAMD, Automatic };

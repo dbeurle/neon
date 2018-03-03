@@ -38,7 +38,7 @@ std::unordered_map<element_topology, VTKCellType> const
                   {element_topology::hexahedron20, VTK_QUADRATIC_HEXAHEDRON},
                   {element_topology::hexahedron27, VTK_TRIQUADRATIC_HEXAHEDRON}};
 
-void convert_from_gmsh(std::vector<local_indices>& nodal_connectivity, element_topology const topology)
+void convert_from_gmsh(indices& nodal_connectivity, element_topology const topology)
 {
     // Reorder based on the differences between the local node numbering
     // provided from Section 9.3 Node ordering
@@ -47,52 +47,44 @@ void convert_from_gmsh(std::vector<local_indices>& nodal_connectivity, element_t
     {
         case element_topology::tetrahedron10:
         {
-            for (auto& nodal_list : nodal_connectivity)
-            {
-                std::swap(nodal_list.at(4), nodal_list.at(7));
-                std::swap(nodal_list.at(4), nodal_list.at(5));
-                std::swap(nodal_list.at(5), nodal_list.at(8));
-                std::swap(nodal_list.at(8), nodal_list.at(9));
-                std::swap(nodal_list.at(6), nodal_list.at(9));
-            }
+            nodal_connectivity.row(4).swap(nodal_connectivity.row(7));
+            nodal_connectivity.row(4).swap(nodal_connectivity.row(5));
+            nodal_connectivity.row(5).swap(nodal_connectivity.row(8));
+            nodal_connectivity.row(8).swap(nodal_connectivity.row(9));
+            nodal_connectivity.row(6).swap(nodal_connectivity.row(9));
+            [[fallthrough]];
         }
         case element_topology::tetrahedron4:
         {
-            for (auto& nodal_list : nodal_connectivity)
-            {
-                std::swap(nodal_list.at(0), nodal_list.at(3));
-                std::swap(nodal_list.at(0), nodal_list.at(2));
-                std::swap(nodal_list.at(0), nodal_list.at(1));
-            }
+            nodal_connectivity.row(0).swap(nodal_connectivity.row(3));
+            nodal_connectivity.row(0).swap(nodal_connectivity.row(2));
+            nodal_connectivity.row(0).swap(nodal_connectivity.row(1));
+
             break;
         }
         case element_topology::prism6:
         {
-            for (auto& nodal_list : nodal_connectivity)
-            {
-                std::swap(nodal_list.at(0), nodal_list.at(1));
-                std::swap(nodal_list.at(3), nodal_list.at(4));
-            }
+            nodal_connectivity.row(0).swap(nodal_connectivity.row(1));
+            nodal_connectivity.row(3).swap(nodal_connectivity.row(4));
+
             break;
         }
         case element_topology::prism15:
         {
-            for (auto& nodal_list : nodal_connectivity)
-            {
-                // -1 face
-                std::swap(nodal_list.at(0), nodal_list.at(1));
-                std::swap(nodal_list.at(3), nodal_list.at(6));
-                std::swap(nodal_list.at(7), nodal_list.at(4));
-                std::swap(nodal_list.at(5), nodal_list.at(9));
+            // -1 face
+            nodal_connectivity.row(0).swap(nodal_connectivity.row(1));
+            nodal_connectivity.row(3).swap(nodal_connectivity.row(6));
+            nodal_connectivity.row(7).swap(nodal_connectivity.row(4));
+            nodal_connectivity.row(5).swap(nodal_connectivity.row(9));
 
-                // mid face
-                std::swap(nodal_list.at(8), nodal_list.at(7));
-                std::swap(nodal_list.at(10), nodal_list.at(6));
-                std::swap(nodal_list.at(11), nodal_list.at(8));
+            // mid face
+            nodal_connectivity.row(8).swap(nodal_connectivity.row(7));
+            nodal_connectivity.row(10).swap(nodal_connectivity.row(6));
+            nodal_connectivity.row(11).swap(nodal_connectivity.row(8));
 
-                // +1 face
-                std::swap(nodal_list.at(11), nodal_list.at(9));
-            }
+            // +1 face
+            nodal_connectivity.row(11).swap(nodal_connectivity.row(9));
+
             break;
         }
         case element_topology::hexahedron27:
@@ -127,13 +119,12 @@ void convert_from_gmsh(std::vector<local_indices>& nodal_connectivity, element_t
                     4----12----5
 
             */
-            for (auto& nodal_list : nodal_connectivity)
-            {
-                std::swap(nodal_list.at(21), nodal_list.at(25));
-                std::swap(nodal_list.at(25), nodal_list.at(22));
-                std::swap(nodal_list.at(24), nodal_list.at(25));
-                std::swap(nodal_list.at(23), nodal_list.at(25));
-            }
+
+            nodal_connectivity.row(21).swap(nodal_connectivity.row(25));
+            nodal_connectivity.row(25).swap(nodal_connectivity.row(22));
+            nodal_connectivity.row(24).swap(nodal_connectivity.row(25));
+            nodal_connectivity.row(23).swap(nodal_connectivity.row(25));
+
             [[fallthrough]];
         }
         case element_topology::hexahedron20:
@@ -167,21 +158,20 @@ void convert_from_gmsh(std::vector<local_indices>& nodal_connectivity, element_t
                   \|         \|
                    4----12----5
             */
-            for (auto& nodal_list : nodal_connectivity)
-            {
-                std::swap(nodal_list.at(11), nodal_list.at(9));
-                std::swap(nodal_list.at(13), nodal_list.at(10));
 
-                std::swap(nodal_list.at(12), nodal_list.at(17));
-                std::swap(nodal_list.at(16), nodal_list.at(12));
-                std::swap(nodal_list.at(16), nodal_list.at(13));
+            nodal_connectivity.row(11).swap(nodal_connectivity.row(9));
+            nodal_connectivity.row(13).swap(nodal_connectivity.row(10));
 
-                std::swap(nodal_list.at(13), nodal_list.at(15));
-                std::swap(nodal_list.at(13), nodal_list.at(19));
+            nodal_connectivity.row(12).swap(nodal_connectivity.row(17));
+            nodal_connectivity.row(16).swap(nodal_connectivity.row(12));
+            nodal_connectivity.row(16).swap(nodal_connectivity.row(13));
 
-                std::swap(nodal_list.at(13), nodal_list.at(18));
-                std::swap(nodal_list.at(14), nodal_list.at(18));
-            }
+            nodal_connectivity.row(13).swap(nodal_connectivity.row(15));
+            nodal_connectivity.row(13).swap(nodal_connectivity.row(19));
+
+            nodal_connectivity.row(13).swap(nodal_connectivity.row(18));
+            nodal_connectivity.row(14).swap(nodal_connectivity.row(18));
+
             break;
         }
         default:
@@ -189,25 +179,21 @@ void convert_from_gmsh(std::vector<local_indices>& nodal_connectivity, element_t
     }
 }
 
-std::vector<local_indices> convert_to_vtk(std::vector<local_indices> nodal_connectivity, element_topology const topology)
+indices convert_to_vtk(indices nodal_connectivity, element_topology const topology)
 {
     switch (topology)
     {
         case element_topology::tetrahedron4:
         {
-            for (auto& nodal_list : nodal_connectivity)
-            {
-                std::swap(nodal_list.at(0), nodal_list.at(1));
-            }
+            nodal_connectivity.row(0).swap(nodal_connectivity.row(1));
+
             break;
         }
         case element_topology::tetrahedron10:
         {
-            for (auto& nodal_list : nodal_connectivity)
-            {
-                std::swap(nodal_list.at(6), nodal_list.at(8));
-                std::swap(nodal_list.at(8), nodal_list.at(9));
-            }
+            nodal_connectivity.row(6).swap(nodal_connectivity.row(8));
+            nodal_connectivity.row(8).swap(nodal_connectivity.row(9));
+
             break;
         }
         case element_topology::hexahedron20:
@@ -245,11 +231,9 @@ std::vector<local_indices> convert_to_vtk(std::vector<local_indices> nodal_conne
              *  |      |
              *  0-- 8--1
              */
-            for (auto& nodal_list : nodal_connectivity)
-            {
-                std::swap(nodal_list.at(21), nodal_list.at(25));
-                std::swap(nodal_list.at(20), nodal_list.at(24));
-            }
+            nodal_connectivity.row(21).swap(nodal_connectivity.row(25));
+            nodal_connectivity.row(20).swap(nodal_connectivity.row(24));
+
             break;
         }
         default:
@@ -258,13 +242,13 @@ std::vector<local_indices> convert_to_vtk(std::vector<local_indices> nodal_conne
     return nodal_connectivity;
 }
 
-element_topology gmsh_type_to_enum(int const element_code)
+element_topology gmsh_type_to_enum(std::int32_t const element_code)
 {
     auto const found = gmsh_converter.find(element_code);
     if (found == gmsh_converter.end())
     {
-        throw std::runtime_error("Element code " + std::to_string(element_code)
-                                 + " not implemented for gmsh element type");
+        throw std::domain_error("Element code " + std::to_string(element_code)
+                                + " not implemented for gmsh element type");
     }
     return found->second;
 }
@@ -274,8 +258,8 @@ VTKCellType to_vtk(element_topology const topology)
     auto const found = vtk_converter.find(topology);
     if (found == vtk_converter.end())
     {
-        throw std::runtime_error("Element code " + std::to_string(static_cast<int>(topology))
-                                 + " not implemented for vtk element type");
+        throw std::domain_error("Element code " + std::to_string(static_cast<int>(topology))
+                                + " not implemented for vtk element type");
     }
     return found->second;
 }

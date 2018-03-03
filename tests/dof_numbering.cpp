@@ -3,61 +3,55 @@
 
 #include <catch.hpp>
 
-#include "mesh/dof_allocator.hpp"
+#include "numeric/index_types.hpp"
+#include "math/transform_expand.hpp"
 
 #include <range/v3/view/set_algorithm.hpp>
-
 #include <memory>
 
 using namespace neon;
 
 constexpr auto ZERO_MARGIN = 1.0e-5;
 
-TEST_CASE("Dof local_indices Allocation", "[DofAllocator]")
+std::array<std::int32_t, 3> dof_index = {0, 1, 2};
+
+TEST_CASE("index_view allocation")
 {
     SECTION("One element")
     {
-        std::vector<local_indices> const nodal_connectivity{{0, 1, 2, 3}};
+        indices nodal_connectivity(4, 1);
+        nodal_connectivity << 0, 1, 2, 3;
 
-        std::vector<local_indices> const known_dof_list{{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}};
+        indices known_dof_list(4 * 3, 1);
+        known_dof_list << 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11;
 
-        std::vector<local_indices> const computed_list = allocate_dof_list(3, nodal_connectivity);
+        indices computed_list(4 * 3, 1);
+        transform_expand_view(nodal_connectivity(Eigen::placeholders::all, 0),
+                              computed_list(Eigen::placeholders::all, 0),
+                              dof_index);
 
-        REQUIRE(ranges::view::set_difference(computed_list.at(0), known_dof_list.at(0)).empty());
+        REQUIRE((known_dof_list - computed_list).sum() == 0);
     }
     SECTION("Two elements")
     {
-        std::vector<local_indices> const nodal_connectivity = {{0, 1, 2, 3}, {4, 2, 1, 5}};
+        indices nodal_connectivity(2, 4);
+        nodal_connectivity << 0, 1, 2, 3, 4, 2, 1, 5;
+        nodal_connectivity.transposeInPlace();
 
-        std::vector<local_indices> const known_dof_list{{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
-                                               {12, 13, 14, 6, 7, 8, 3, 4, 5, 15, 16, 17}};
+        indices known_dof_list(2, 4 * 3);
+        known_dof_list << 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, //
+            12, 13, 14, 6, 7, 8, 3, 4, 5, 15, 16, 17;
+        known_dof_list.transposeInPlace();
 
-        std::vector<local_indices> const computed_list = allocate_dof_list(3, nodal_connectivity);
+        indices computed_list(4 * 3, 2);
+        transform_expand_view(nodal_connectivity(Eigen::placeholders::all, 0),
+                              computed_list(Eigen::placeholders::all, 0),
+                              dof_index);
 
-        REQUIRE(ranges::view::set_difference(computed_list.at(0), known_dof_list.at(0)).empty());
-        REQUIRE(ranges::view::set_difference(computed_list.at(1), known_dof_list.at(1)).empty());
-    }
-}
-TEST_CASE("Dof local_indices Filter", "[DofAllocator]")
-{
-    SECTION("One element 0 offset")
-    {
-        std::vector<local_indices> const nodal_connectivity = {{0, 1, 2, 3}};
+        transform_expand_view(nodal_connectivity(Eigen::placeholders::all, 1),
+                              computed_list(Eigen::placeholders::all, 1),
+                              dof_index);
 
-        std::vector<local_indices> const known_dof_list{{0, 3, 6, 9}};
-
-        std::vector<local_indices> const computed_list = filter_dof_list(3, 0, nodal_connectivity);
-
-        REQUIRE(ranges::view::set_difference(computed_list.at(0), known_dof_list.at(0)).empty());
-    }
-    SECTION("One element 1 offset")
-    {
-        std::vector<local_indices> const nodal_connectivity = {{0, 1, 2, 3}};
-
-        std::vector<local_indices> const known_dof_list{{1, 4, 7, 10}};
-
-        std::vector<local_indices> const computed_list = filter_dof_list(3, 1, nodal_connectivity);
-
-        REQUIRE(ranges::view::set_difference(computed_list.at(0), known_dof_list.at(0)).empty());
+        REQUIRE((known_dof_list - computed_list).sum() == 0);
     }
 }

@@ -2,7 +2,7 @@
 #pragma once
 
 #include "interpolations/shape_function.hpp"
-#include "mesh/generic/Neumann.hpp"
+#include "mesh/generic/neumann.hpp"
 
 namespace neon::mechanical::solid
 {
@@ -12,5 +12,5 @@ namespace neon::mechanical::solid
  * equations
  * \sa NonFollowerLoad
  */
-using body_force = VolumeLoad<volume_interpolation>;
+using body_force = volume_load<volume_interpolation>;
 }

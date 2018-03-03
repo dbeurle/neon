@@ -3,8 +3,8 @@
 
 #include "mesh/diffusion/fem_submesh.hpp"
 
-#include "mesh/diffusion/boundary/SurfaceBoundary.hpp"
-#include "mesh/generic/Dirichlet.hpp"
+#include "mesh/diffusion/boundary/surface_boundary.hpp"
+#include "mesh/generic/dirichlet.hpp"
 
 #include <map>
 #include <string>
@@ -54,15 +54,12 @@ protected:
 
     void allocate_boundary_conditions(json const& boundary_data, basic_mesh const& basic_mesh);
 
-    /** Collapse the nodal connectivity arrays from the submesh for a node list */
-    local_indices filter_dof_list(std::vector<basic_submesh> const& boundary_mesh) const;
-
 protected:
     std::shared_ptr<material_coordinates> mesh_coordinates;
 
     std::vector<fem_submesh> submeshes;
 
-    std::map<std::string, std::vector<Dirichlet>> dirichlet_bcs;
+    std::map<std::string, std::vector<dirichlet>> dirichlet_bcs;
     std::map<std::string, std::vector<boundary_mesh>> boundary_meshes;
 
     std::unordered_map<std::string, int> const dof_table = {{"x", 0}, {"y", 1}, {"z", 2}};
