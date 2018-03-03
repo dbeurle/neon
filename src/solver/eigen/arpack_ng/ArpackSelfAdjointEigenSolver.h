@@ -29,6 +29,7 @@
 
 #include <cctype>
 #include <cstdlib>
+#include <string>
 
 namespace Eigen
 {
@@ -45,8 +46,6 @@ template <typename MatrixType, typename MatrixSolver = SimplicialLLT<MatrixType>
 class ArpackGeneralizedSelfAdjointEigenSolver
 {
 public:
-    // typedef typename MatrixSolver::MatrixType MatrixType;
-
     /** \brief Scalar type for matrices of type \p MatrixType. */
     typedef typename MatrixType::Scalar Scalar;
     typedef typename MatrixType::Index Index;
@@ -373,6 +372,12 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
     eigen_assert((options & ~(EigVecMask | GenEigMask)) == 0 && (options & EigVecMask) != EigVecMask
                  && "invalid option parameter");
 
+    static_assert(sizeof(int) < sizeof(typename MatrixType::Index),
+                  "Integer size too large for arpack-ng");
+
+    std::cout << "Size of Index is " << sizeof(typename MatrixType::Index) << std::endl;
+    std::cout << "Size of StorageIndex is " << sizeof(typename MatrixType::StorageIndex) << std::endl;
+
     bool isBempty = (B.rows() == 0) || (B.cols() == 0);
 
     // For clarity, all parameters match their ARPACK name
@@ -383,7 +388,7 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
     int n = static_cast<int>(A.cols());
 
     // User options: "LA", "SA", "SM", "LM", "BE"
-    char whch[3] = "LM";
+    char whch[] = "LM";
 
     // Specifies the shift if iparam[6] = { 3, 4, 5 }, not used if iparam[6] = { 1, 2 }
     RealScalar sigma = 0.0;
@@ -414,7 +419,8 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
     }
 
     // "I" means normal eigenvalue problem, "G" means generalized
-    char bmat[2] = "I";
+    char bmat[] = "I";
+
     if (eigs_sigma.substr(0, 2) == "SM"
         || !(std::isalpha(eigs_sigma[0]) && std::isalpha(eigs_sigma[1])) || (!isBempty && !BisSPD))
     {
@@ -424,7 +430,8 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
     // Now we determine the mode to use
     int mode = (bmat[0] == 'G') + 1;
 
-    if (eigs_sigma.substr(0, 2) == "SM" || !(isalpha(eigs_sigma[0]) && isalpha(eigs_sigma[1])))
+    if (eigs_sigma.substr(0, 2) == "SM"
+        || !(std::isalpha(eigs_sigma[0]) && std::isalpha(eigs_sigma[1])))
     {
         // We're going to use shift-and-invert mode, and basically find
         // the largest eigenvalues of the inverse operator
@@ -458,6 +465,7 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
     Array<int, 11, 1> iparam;
     iparam[0] = 1; // 1 means we let ARPACK perform the shifts, 0 means we'd have to do it
     iparam[2] = std::max(300, (int)std::ceil(2 * n / std::max(ncv, 1)));
+    iparam[3] = 1;
     iparam[6] = mode; // The mode, 1 is standard ev problem, 2 for generalized ev, 3 for shift-and-invert
 
     // Used during reverse communicate to notify where arrays start
@@ -484,12 +492,13 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
         else
         {
             // Note: We will never enter here because sigma must be 0.0
-            //
             if (isBempty)
             {
                 MatrixType AminusSigmaB(A);
-                for (Index i = 0; i < A.rows(); ++i) AminusSigmaB.coeffRef(i, i) -= sigma;
-
+                for (Index i = 0; i < A.rows(); ++i)
+                {
+                    AminusSigmaB.coeffRef(i, i) -= sigma;
+                }
                 OP.compute(AminusSigmaB);
             }
             else
@@ -832,48 +841,48 @@ struct arpack_wrapper
 template <>
 struct arpack_wrapper<float, float>
 {
-    static inline void saupd(int* ido,
-                             char* bmat,
-                             int* n,
-                             char* which,
-                             int* nev,
-                             float* tol,
-                             float* resid,
-                             int* ncv,
-                             float* v,
-                             int* ldv,
-                             int* iparam,
-                             int* ipntr,
-                             float* workd,
-                             float* workl,
-                             int* lworkl,
-                             int* info)
+    static void saupd(int* ido,
+                      char* bmat,
+                      int* n,
+                      char* which,
+                      int* nev,
+                      float* tol,
+                      float* resid,
+                      int* ncv,
+                      float* v,
+                      int* ldv,
+                      int* iparam,
+                      int* ipntr,
+                      float* workd,
+                      float* workl,
+                      int* lworkl,
+                      int* info)
     {
         ssaupd_(ido, bmat, n, which, nev, tol, resid, ncv, v, ldv, iparam, ipntr, workd, workl, lworkl, info);
     }
 
-    static inline void seupd(int* rvec,
-                             char* All,
-                             int* select,
-                             float* d,
-                             float* z,
-                             int* ldz,
-                             float* sigma,
-                             char* bmat,
-                             int* n,
-                             char* which,
-                             int* nev,
-                             float* tol,
-                             float* resid,
-                             int* ncv,
-                             float* v,
-                             int* ldv,
-                             int* iparam,
-                             int* ipntr,
-                             float* workd,
-                             float* workl,
-                             int* lworkl,
-                             int* ierr)
+    static void seupd(int* rvec,
+                      char* All,
+                      int* select,
+                      float* d,
+                      float* z,
+                      int* ldz,
+                      float* sigma,
+                      char* bmat,
+                      int* n,
+                      char* which,
+                      int* nev,
+                      float* tol,
+                      float* resid,
+                      int* ncv,
+                      float* v,
+                      int* ldv,
+                      int* iparam,
+                      int* ipntr,
+                      float* workd,
+                      float* workl,
+                      int* lworkl,
+                      int* ierr)
     {
         sseupd_(rvec,
                 All,

@@ -3,7 +3,7 @@
 #include "Exceptions.hpp"
 
 #include <iostream>
-#include <unsupported/Eigen/ArpackSupport>
+#include "arpack_ng/ArpackSelfAdjointEigenSolver.h"
 
 namespace neon
 {
