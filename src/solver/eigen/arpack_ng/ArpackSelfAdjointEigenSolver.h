@@ -27,9 +27,15 @@
 
 #include <Eigen/Dense>
 
+#include <array>
 #include <cctype>
 #include <cstdlib>
 #include <string>
+
+namespace arpack
+{
+enum mode : int { standard = 1, generalized, shift_invert };
+}
 
 namespace Eigen
 {
@@ -95,7 +101,7 @@ public:
      *    value can contain floating point value in string form, in which case the
      *    eigenvalues closest to this value will be found.
      * \param[in]  options Can be #ComputeEigenvectors (default) or #EigenvaluesOnly.
-     * \param[in] tol What tolerance to find the eigenvalues to. Default is 0, which
+     * \param[in] tolerance What tolerance to find the eigenvalues to. Default is 0, which
      *    means machine precision.
      *
      * This constructor calls compute(const MatrixType&, const MatrixType&, Index, string, int, RealScalar)
@@ -108,7 +114,7 @@ public:
                                             Index nbrEigenvalues,
                                             std::string eigs_sigma = "LM",
                                             int options = ComputeEigenvectors,
-                                            RealScalar tol = 0.0)
+                                            RealScalar tolerance = 0.0)
         : m_eivec(),
           m_eivalues(),
           m_isInitialized(false),
@@ -116,7 +122,7 @@ public:
           m_nbrConverged(0),
           m_nbrIterations(0)
     {
-        compute(A, B, nbrEigenvalues, eigs_sigma, options, tol);
+        compute(A, B, nbrEigenvalues, eigs_sigma, options, tolerance);
     }
 
     /** \brief Constructor; computes eigenvalues of given matrix.
@@ -132,7 +138,7 @@ public:
      *    value can contain floating point value in string form, in which case the
      *    eigenvalues closest to this value will be found.
      * \param[in]  options Can be #ComputeEigenvectors (default) or #EigenvaluesOnly.
-     * \param[in] tol What tolerance to find the eigenvalues to. Default is 0, which
+     * \param[in] tolerance What tolerance to find the eigenvalues to. Default is 0, which
      *    means machine precision.
      *
      * This constructor calls compute(const MatrixType&, Index, string, int, RealScalar)
@@ -145,7 +151,7 @@ public:
                                             Index nbrEigenvalues,
                                             std::string eigs_sigma = "LM",
                                             int options = ComputeEigenvectors,
-                                            RealScalar tol = 0.0)
+                                            RealScalar tolerance = 0.0)
         : m_eivec(),
           m_eivalues(),
           m_isInitialized(false),
@@ -153,7 +159,7 @@ public:
           m_nbrConverged(0),
           m_nbrIterations(0)
     {
-        compute(A, nbrEigenvalues, eigs_sigma, options, tol);
+        compute(A, nbrEigenvalues, eigs_sigma, options, tolerance);
     }
 
     /** \brief Computes generalized eigenvalues / eigenvectors of given matrix using the external ARPACK library.
@@ -168,7 +174,7 @@ public:
      *    value can contain floating point value in string form, in which case the
      *    eigenvalues closest to this value will be found.
      * \param[in]  options Can be #ComputeEigenvectors (default) or #EigenvaluesOnly.
-     * \param[in] tol What tolerance to find the eigenvalues to. Default is 0, which
+     * \param[in] tolerance What tolerance to find the eigenvalues to. Default is 0, which
      *    means machine precision.
      *
      * \returns    Reference to \c *this
@@ -184,7 +190,7 @@ public:
                                                      Index nbrEigenvalues,
                                                      std::string eigs_sigma = "LM",
                                                      int options = ComputeEigenvectors,
-                                                     RealScalar tol = 0.0);
+                                                     RealScalar tolerance = 0.0);
 
     /** \brief Computes eigenvalues / eigenvectors of given matrix using the external ARPACK library.
      *
@@ -197,7 +203,7 @@ public:
      *    value can contain floating point value in string form, in which case the
      *    eigenvalues closest to this value will be found.
      * \param[in]  options Can be #ComputeEigenvectors (default) or #EigenvaluesOnly.
-     * \param[in] tol What tolerance to find the eigenvalues to. Default is 0, which
+     * \param[in] tolerance What tolerance to find the eigenvalues to. Default is 0, which
      *    means machine precision.
      *
      * \returns    Reference to \c *this
@@ -212,7 +218,7 @@ public:
                                                      Index nbrEigenvalues,
                                                      std::string eigs_sigma = "LM",
                                                      int options = ComputeEigenvectors,
-                                                     RealScalar tol = 0.0);
+                                                     RealScalar tolerance = 0.0);
 
     /** \brief Returns the eigenvectors of given matrix.
      *
@@ -347,10 +353,10 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
                      Index nbrEigenvalues,
                      std::string eigs_sigma,
                      int options,
-                     RealScalar tol)
+                     RealScalar tolerance)
 {
     MatrixType B(0, 0);
-    compute(A, B, nbrEigenvalues, eigs_sigma, options, tol);
+    compute(A, B, nbrEigenvalues, eigs_sigma, options, tolerance);
 
     return *this;
 }
@@ -364,7 +370,7 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
                      Index nbrEigenvalues,
                      std::string eigs_sigma,
                      int options,
-                     RealScalar tol)
+                     RealScalar tolerance)
 {
     eigen_assert(A.cols() == A.rows());
     eigen_assert(B.cols() == B.rows());
@@ -381,7 +387,6 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
     bool isBempty = (B.rows() == 0) || (B.cols() == 0);
 
     // For clarity, all parameters match their ARPACK name
-
     int n = static_cast<int>(A.cols());
 
     // User options: "LA", "SA", "SM", "LM", "BE"
@@ -434,7 +439,7 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
     {
         // We're going to use shift-and-invert mode, and basically find
         // the largest eigenvalues of the inverse operator
-        mode = 3;
+        mode = arpack::mode::shift_invert;
     }
 
     // The user-specified number of eigenvalues/vectors to compute
@@ -442,7 +447,7 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
     int nev = static_cast<int>(nbrEigenvalues);
 
     // Allocate space for ARPACK to store the residual
-    Array<Scalar, Dynamic, 1> resid(n);
+    Array<Scalar, Dynamic, 1> residual(n);
 
     // Number of Lanczos vectors, must satisfy nev < ncv <= n
     // Note that this indicates that nev != n, and we cannot compute
@@ -457,30 +462,33 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
 
     int ldv = n;
 
-    // Working space
-    Array<Scalar, Dynamic, 1> workd(3 * n);
+    // Distributed working storage
+    Matrix<Scalar, Dynamic, 3> workd(n, 3);
 
     int lworkl = ncv * ncv + 8 * ncv; // Must be at least this length
 
     Array<Scalar, Dynamic, 1> workl(lworkl);
 
-    Array<int, 11, 1> iparam;
+    std::array<int, 11> iparam{};
     iparam[0] = 1; // 1 means we let ARPACK perform the shifts, 0 means we'd have to do it
     iparam[2] = std::max(300, (int)std::ceil(2 * n / std::max(ncv, 1)));
     iparam[3] = 1;
-    iparam[6] = mode; // The mode, 1 is standard ev problem, 2 for generalized ev, 3 for shift-and-invert
+    iparam[6] = mode;
 
     // Used during reverse communicate to notify where arrays start
-    Array<int, 11, 1> ipntr;
+    std::array<int, 14> ipntr;
 
     Scalar scale = 1.0;
 
     MatrixSolver OP;
-    if (mode == 1 || mode == 2)
+    if (mode == arpack::mode::standard || mode == arpack::mode::generalized)
     {
-        if (!isBempty) OP.compute(B);
+        if (!isBempty)
+        {
+            OP.compute(B);
+        }
     }
-    else if (mode == 3)
+    else if (mode == arpack::mode::shift_invert)
     {
         if (sigma == 0.0)
         {
@@ -506,27 +514,28 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
         }
     }
 
-    if (!(mode == 1 && isBempty) && !(mode == 2 && isBempty) && OP.info() != Success)
+    if (!(mode == arpack::mode::standard && isBempty)
+        && !(mode == arpack::mode::generalized && isBempty) && OP.info() != Success)
     {
         std::cout << "Error factoring matrix" << std::endl;
     }
 
     // Error codes are returned in here, initial value of 0 indicates a random
-    // initial residual vector is used, any other values means resid contains
+    // initial residual vector is used, any other values means residual contains
     // the initial residual vector, possibly from a previous run
     int info = 0;
 
     // Always 0 on the first call
-    int ido = 0;
+    int reverse_communication_flag = 0;
     do
     {
-        internal::arpack_wrapper<Scalar, RealScalar>::saupd(&ido,
+        internal::arpack_wrapper<Scalar, RealScalar>::saupd(&reverse_communication_flag,
                                                             bmat,
                                                             &n,
                                                             whch,
                                                             &nev,
-                                                            &tol,
-                                                            resid.data(),
+                                                            &tolerance,
+                                                            residual.data(),
                                                             &ncv,
                                                             arnoldi_basis_vectors.data(),
                                                             &ldv,
@@ -537,27 +546,25 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
                                                             &lworkl,
                                                             &info);
 
-        if (ido == -1 || ido == 1)
+        if (reverse_communication_flag == -1 || reverse_communication_flag == 1)
         {
-            Scalar* in = workd.data() + ipntr[0] - 1;
-            Scalar* out = workd.data() + ipntr[1] - 1;
+            Scalar* in = workd.data() + (ipntr[0] - 1);
+            Scalar* out = workd.data() + (ipntr[1] - 1);
 
-            if (ido == 1 && mode != 2)
+            if (reverse_communication_flag == 1 && mode != arpack::mode::generalized)
             {
-                Scalar* out2 = workd.data() + ipntr[2] - 1;
-                if (isBempty || mode == 1)
+                if (isBempty || mode == arpack::mode::standard)
                 {
-                    Matrix<Scalar, Dynamic, 1>::Map(out2, n) = Matrix<Scalar, Dynamic, 1>::Map(in, n);
+                    workd.col((ipntr[2] - 1) / n) = workd.col((ipntr[0] - 1) / n);
                 }
                 else
                 {
-                    Matrix<Scalar, Dynamic, 1>::Map(out2,
-                                                    n) = B * Matrix<Scalar, Dynamic, 1>::Map(in, n);
+                    workd.col((ipntr[2] - 1) / n) = B * workd.col((ipntr[0] - 1) / n);
                 }
-                in = workd.data() + ipntr[2] - 1;
+                in = workd.data() + (ipntr[2] - 1);
             }
 
-            if (mode == 1)
+            if (mode == arpack::mode::standard)
             {
                 if (isBempty)
                 {
@@ -571,9 +578,9 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
                     internal::OP<MatrixSolver, MatrixType, Scalar, BisSPD>::applyOP(OP, A, n, in, out);
                 }
             }
-            else if (mode == 2)
+            else if (mode == arpack::mode::generalized)
             {
-                if (ido == 1)
+                if (reverse_communication_flag == 1)
                 {
                     Matrix<Scalar, Dynamic, 1>::Map(in,
                                                     n) = A * Matrix<Scalar, Dynamic, 1>::Map(in, n);
@@ -582,11 +589,11 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
                 Matrix<Scalar, Dynamic, 1>::Map(out, n) = OP.solve(
                     Matrix<Scalar, Dynamic, 1>::Map(in, n));
             }
-            else if (mode == 3)
+            else if (mode == arpack::mode::shift_invert)
             {
                 // OP = (A-\sigmaB)B (\sigma could be 0, and B could be I)
-                // The B * in is already computed and stored at in if ido == 1
-                if (ido == 1 || isBempty)
+                // The B * in is already computed and stored at in if reverse_communication_flag == 1
+                if (reverse_communication_flag == 1 || isBempty)
                 {
                     Matrix<Scalar, Dynamic, 1>::Map(out, n) = OP.solve(
                         Matrix<Scalar, Dynamic, 1>::Map(in, n));
@@ -598,21 +605,23 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
                 }
             }
         }
-        else if (ido == 2)
+        else if (reverse_communication_flag == 2)
         {
-            Scalar* in = workd.data() + ipntr[0] - 1;
-            Scalar* out = workd.data() + ipntr[1] - 1;
+            // Scalar* in = workd.data() + (ipntr[0] - 1);
+            // Scalar* out = workd.data() + (ipntr[1] - 1);
 
-            if (isBempty || mode == 1)
+            if (isBempty || mode == arpack::mode::standard)
             {
-                Matrix<Scalar, Dynamic, 1>::Map(out, n) = Matrix<Scalar, Dynamic, 1>::Map(in, n);
+                workd.col((ipntr[1] - 1) / n) = workd.col((ipntr[0] - 1) / n);
+                // Matrix<Scalar, Dynamic, 1>::Map(out, n) = Matrix<Scalar, Dynamic, 1>::Map(in, n);
             }
             else
             {
-                Matrix<Scalar, Dynamic, 1>::Map(out, n) = B * Matrix<Scalar, Dynamic, 1>::Map(in, n);
+                workd.col((ipntr[1] - 1) / n) = B * workd.col((ipntr[0] - 1) / n);
+                // Matrix<Scalar, Dynamic, 1>::Map(out, n) = B * Matrix<Scalar, Dynamic, 1>::Map(in, n);
             }
         }
-    } while (ido != 99);
+    } while (reverse_communication_flag != 99);
 
     if (info == 1)
     {
@@ -695,8 +704,8 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
                                                             &n,
                                                             whch,
                                                             &nev,
-                                                            &tol,
-                                                            resid.data(),
+                                                            &tolerance,
+                                                            residual.data(),
                                                             &ncv,
                                                             arnoldi_basis_vectors.data(),
                                                             &ldv,
@@ -742,13 +751,13 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
 }
 
 // Single precision
-extern "C" void ssaupd_(int* ido,
+extern "C" void ssaupd_(int* reverse_communication_flag,
                         char* bmat,
                         int* n,
                         char* which,
                         int* nev,
-                        float* tol,
-                        float* resid,
+                        float* tolerance,
+                        float* residual,
                         int* ncv,
                         float* arnoldi_basis_vectors,
                         int* ldv,
@@ -770,8 +779,8 @@ extern "C" void sseupd_(int* rvec,
                         int* n,
                         char* which,
                         int* nev,
-                        float* tol,
-                        float* resid,
+                        float* tolerance,
+                        float* residual,
                         int* ncv,
                         float* arnoldi_basis_vectors,
                         int* ldv,
@@ -783,13 +792,13 @@ extern "C" void sseupd_(int* rvec,
                         int* ierr);
 
 // Double precision
-extern "C" void dsaupd_(int* ido,
+extern "C" void dsaupd_(int* reverse_communication_flag,
                         char* bmat,
                         int* n,
                         char* which,
                         int* nev,
-                        double* tol,
-                        double* resid,
+                        double* tolerance,
+                        double* residual,
                         int* ncv,
                         double* arnoldi_basis_vectors,
                         int* ldv,
@@ -811,8 +820,8 @@ extern "C" void dseupd_(int* rvec,
                         int* n,
                         char* which,
                         int* nev,
-                        double* tol,
-                        double* resid,
+                        double* tolerance,
+                        double* residual,
                         int* ncv,
                         double* arnoldi_basis_vectors,
                         int* ldv,
@@ -828,13 +837,13 @@ namespace internal
 template <typename Scalar, typename RealScalar>
 struct arpack_wrapper
 {
-    static inline void saupd(int* ido,
+    static inline void saupd(int* reverse_communication_flag,
                              char* bmat,
                              int* n,
                              char* which,
                              int* nev,
-                             RealScalar* tol,
-                             Scalar* resid,
+                             RealScalar* tolerance,
+                             Scalar* residual,
                              int* ncv,
                              Scalar* arnoldi_basis_vectors,
                              int* ldv,
@@ -859,8 +868,8 @@ struct arpack_wrapper
                              int* n,
                              char* which,
                              int* nev,
-                             RealScalar* tol,
-                             Scalar* resid,
+                             RealScalar* tolerance,
+                             Scalar* residual,
                              int* ncv,
                              Scalar* arnoldi_basis_vectors,
                              int* ldv,
@@ -878,13 +887,13 @@ struct arpack_wrapper
 template <>
 struct arpack_wrapper<float, float>
 {
-    static inline void saupd(int* ido,
+    static inline void saupd(int* reverse_communication_flag,
                              char* bmat,
                              int* n,
                              char* which,
                              int* nev,
-                             float* tol,
-                             float* resid,
+                             float* tolerance,
+                             float* residual,
                              int* ncv,
                              float* arnoldi_basis_vectors,
                              int* ldv,
@@ -895,13 +904,13 @@ struct arpack_wrapper<float, float>
                              int* lworkl,
                              int* info)
     {
-        ssaupd_(ido,
+        ssaupd_(reverse_communication_flag,
                 bmat,
                 n,
                 which,
                 nev,
-                tol,
-                resid,
+                tolerance,
+                residual,
                 ncv,
                 arnoldi_basis_vectors,
                 ldv,
@@ -924,8 +933,8 @@ struct arpack_wrapper<float, float>
                              int* n,
                              char* which,
                              int* nev,
-                             float* tol,
-                             float* resid,
+                             float* tolerance,
+                             float* residual,
                              int* ncv,
                              float* arnoldi_basis_vectors,
                              int* ldv,
@@ -947,8 +956,8 @@ struct arpack_wrapper<float, float>
                 n,
                 which,
                 nev,
-                tol,
-                resid,
+                tolerance,
+                residual,
                 ncv,
                 arnoldi_basis_vectors,
                 ldv,
@@ -964,13 +973,13 @@ struct arpack_wrapper<float, float>
 template <>
 struct arpack_wrapper<double, double>
 {
-    static inline void saupd(int* ido,
+    static inline void saupd(int* reverse_communication_flag,
                              char* bmat,
                              int* n,
                              char* which,
                              int* nev,
-                             double* tol,
-                             double* resid,
+                             double* tolerance,
+                             double* residual,
                              int* ncv,
                              double* arnoldi_basis_vectors,
                              int* ldv,
@@ -981,13 +990,13 @@ struct arpack_wrapper<double, double>
                              int* lworkl,
                              int* info)
     {
-        dsaupd_(ido,
+        dsaupd_(reverse_communication_flag,
                 bmat,
                 n,
                 which,
                 nev,
-                tol,
-                resid,
+                tolerance,
+                residual,
                 ncv,
                 arnoldi_basis_vectors,
                 ldv,
@@ -1010,8 +1019,8 @@ struct arpack_wrapper<double, double>
                              int* n,
                              char* which,
                              int* nev,
-                             double* tol,
-                             double* resid,
+                             double* tolerance,
+                             double* residual,
                              int* ncv,
                              double* arnoldi_basis_vectors,
                              int* ldv,
@@ -1033,8 +1042,8 @@ struct arpack_wrapper<double, double>
                 n,
                 which,
                 nev,
-                tol,
-                resid,
+                tolerance,
+                residual,
                 ncv,
                 arnoldi_basis_vectors,
                 ldv,
