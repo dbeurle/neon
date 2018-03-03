@@ -11,48 +11,45 @@ using namespace neon;
 constexpr auto ZERO_MARGIN = 1.0e-5;
 
 /** Create a SPD matrix for solver testing */
-sparse_matrix create_sparse_matrix()
+sparse_matrix create_diagonal_sparse_matrix(int const N)
 {
-    std::vector<Eigen::Triplet<double>> triplets = {{0, 0, 2.0},
-                                                    // {0, 1, -1.0},
-                                                    // {0, 2, 0.0},
-                                                    // {1, 0, -1.0},
-                                                    {1, 1, 3.0},
-                                                    // {1, 2, -1.0},
-                                                    // {2, 0, 0.0},
-                                                    // {2, 1, -1.0},
-                                                    {2, 2, 4.0}};
+    sparse_matrix A(N, N);
 
-    sparse_matrix A(3, 3);
-    A.setFromTriplets(std::begin(triplets), std::end(triplets));
+    for (int i = 0; i < N; ++i)
+    {
+        A.insert(i, i) = static_cast<double>(i + 1);
+    }
     A.finalize();
+
     return A;
 }
 
-sparse_matrix create_sparse_identity()
+sparse_matrix create_sparse_identity(int const N)
 {
-    std::vector<Eigen::Triplet<double>> triplets = {{0, 0, 1.0}, {1, 1, 1.0}, {2, 2, 1.0}};
+    sparse_matrix A(N, N);
 
-    sparse_matrix A(3, 3);
-    A.setFromTriplets(std::begin(triplets), std::end(triplets));
+    for (int i = 0; i < N; ++i)
+    {
+        A.insert(i, i) = 1.0;
+    }
     A.finalize();
+
     return A;
 }
 
 TEST_CASE("Eigen solver test suite")
 {
-    sparse_matrix A = create_sparse_matrix();
-    sparse_matrix I = create_sparse_identity();
+    sparse_matrix A = create_diagonal_sparse_matrix(100);
+    sparse_matrix I = create_sparse_identity(100);
 
-    std::cout << A << std::endl;
-    std::cout << I << std::endl;
-
-    eigen_solver eigen{3};
+    eigen_solver eigen{10};
 
     auto const [values, vectors] = eigen.solve(A, I);
 
-    std::cout << values << std::endl;
-    std::cout << vectors << std::endl;
+    REQUIRE(values.size() == 10);
 
-    REQUIRE(1 == 1);
+    // for (auto i = 0; i < 10; ++i)
+    // {
+    //     REQUIRE(values[i] == 100 - i);
+    // }
 }
