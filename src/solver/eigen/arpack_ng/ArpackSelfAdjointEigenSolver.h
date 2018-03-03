@@ -382,9 +382,6 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
 
     // For clarity, all parameters match their ARPACK name
 
-    // Always 0 on the first call
-    int ido = 0;
-
     int n = static_cast<int>(A.cols());
 
     // User options: "LA", "SA", "SM", "LM", "BE"
@@ -430,6 +427,8 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
     // Now we determine the mode to use
     int mode = (bmat[0] == 'G') + 1;
 
+    std::cout << "Mode = " << mode << "\n";
+
     if (eigs_sigma.substr(0, 2) == "SM"
         || !(std::isalpha(eigs_sigma[0]) && std::isalpha(eigs_sigma[1])))
     {
@@ -447,11 +446,14 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
 
     // Number of Lanczos vectors, must satisfy nev < ncv <= n
     // Note that this indicates that nev != n, and we cannot compute
-    // all eigenvalues of a mtrix
+    // all eigenvalues of a matrix
     int ncv = std::min(std::max(2 * nev, 20), n);
 
+    std::cout << "ncv = " << ncv << "\n";
+    std::cout << "nev = " << nev << "\n";
+
     // The working n x ncv matrix, also store the final eigenvectors (if computed)
-    Array<Scalar, Dynamic, 1> v(n * ncv);
+    Array<Scalar, Dynamic, Dynamic> arnoldi_basis_vectors(n, ncv);
 
     int ldv = n;
 
@@ -470,11 +472,6 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
 
     // Used during reverse communicate to notify where arrays start
     Array<int, 11, 1> ipntr;
-
-    // Error codes are returned in here, initial value of 0 indicates a random initial
-    // residual vector is used, any other values means resid contains the initial residual
-    // vector, possibly from a previous run
-    int info = 0;
 
     Scalar scale = 1.0;
 
@@ -514,6 +511,13 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
         std::cout << "Error factoring matrix" << std::endl;
     }
 
+    // Error codes are returned in here, initial value of 0 indicates a random
+    // initial residual vector is used, any other values means resid contains
+    // the initial residual vector, possibly from a previous run
+    int info = 0;
+
+    // Always 0 on the first call
+    int ido = 0;
     do
     {
         internal::arpack_wrapper<Scalar, RealScalar>::saupd(&ido,
@@ -524,7 +528,7 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
                                                             &tol,
                                                             resid.data(),
                                                             &ncv,
-                                                            v.data(),
+                                                            arnoldi_basis_vectors.data(),
                                                             &ldv,
                                                             iparam.data(),
                                                             ipntr.data(),
@@ -612,14 +616,54 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
 
     if (info == 1)
     {
+        std::cout << "Number of converged values = " << iparam[4] << "\n";
         m_info = NoConvergence;
     }
     else if (info == 3)
     {
+        std::cout << "Info = 3.  No shifts could be applied during a cycle.  Increase NCV relative "
+                     "to NEV\n";
         m_info = NumericalIssue;
+    }
+    else if (info == -1)
+    {
+        std::cout << "Info = -1.  N must be positive\n";
+        m_info = InvalidInput;
+    }
+    else if (info == -2)
+    {
+        std::cout << "Info = -2.  NEV must be positive\n";
+        m_info = InvalidInput;
+    }
+    else if (info == -3)
+    {
+        std::cout << "Info = -3.  NCV-NEV >= 2 and less than or equal to N\n";
+        m_info = InvalidInput;
+    }
+    else if (info == -4)
+    {
+        std::cout << "Info = -4.  The maximum number of Arnoldi update iteration must be greater "
+                     "than zero\n";
+        m_info = InvalidInput;
+    }
+    else if (info == -5)
+    {
+        std::cout << "Info = -5.  WHICH must be one of 'LM', 'SM', 'LR', 'SR', 'LI', 'SI'\n";
+        m_info = InvalidInput;
+    }
+    else if (info == -6)
+    {
+        std::cout << "Info = -6.  BMAT must be one of 'I' or 'G'\n";
+        m_info = InvalidInput;
+    }
+    else if (info == -7)
+    {
+        std::cout << "Info = -7: Length of private work array is not sufficient.\n";
+        m_info = InvalidInput;
     }
     else if (info < 0)
     {
+        std::cout << "Info = " << info << ".  Bad inputs\n";
         m_info = InvalidInput;
     }
     else if (info != 0)
@@ -632,7 +676,7 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
         int rvec = (options & ComputeEigenvectors) == ComputeEigenvectors;
 
         // "A" means "All", use "S" to choose specific eigenvalues (not yet supported in ARPACK))
-        char howmny[2] = "A";
+        char howmny[] = "A";
 
         // if howmny == "S", specifies the eigenvalues to compute (not implemented in ARPACK)
         Array<int, Dynamic, 1> select(ncv);
@@ -644,7 +688,7 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
                                                             howmny,
                                                             select.data(),
                                                             m_eivalues.data(),
-                                                            v.data(),
+                                                            arnoldi_basis_vectors.data(),
                                                             &ldv,
                                                             &sigma,
                                                             bmat,
@@ -654,7 +698,7 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
                                                             &tol,
                                                             resid.data(),
                                                             &ncv,
-                                                            v.data(),
+                                                            arnoldi_basis_vectors.data(),
                                                             &ldv,
                                                             iparam.data(),
                                                             ipntr.data(),
@@ -675,14 +719,7 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
         {
             if (rvec)
             {
-                m_eivec.resize(A.rows(), nev);
-                for (int i = 0; i < nev; i++)
-                {
-                    for (int j = 0; j < n; j++)
-                    {
-                        m_eivec(j, i) = v[i * n + j] / scale;
-                    }
-                }
+                m_eivec = arnoldi_basis_vectors.leftCols(nev) / scale;
 
                 if (mode == 1 && !isBempty && BisSPD)
                 {
@@ -713,7 +750,7 @@ extern "C" void ssaupd_(int* ido,
                         float* tol,
                         float* resid,
                         int* ncv,
-                        float* v,
+                        float* arnoldi_basis_vectors,
                         int* ldv,
                         int* iparam,
                         int* ipntr,
@@ -736,7 +773,7 @@ extern "C" void sseupd_(int* rvec,
                         float* tol,
                         float* resid,
                         int* ncv,
-                        float* v,
+                        float* arnoldi_basis_vectors,
                         int* ldv,
                         int* iparam,
                         int* ipntr,
@@ -754,7 +791,7 @@ extern "C" void dsaupd_(int* ido,
                         double* tol,
                         double* resid,
                         int* ncv,
-                        double* v,
+                        double* arnoldi_basis_vectors,
                         int* ldv,
                         int* iparam,
                         int* ipntr,
@@ -777,7 +814,7 @@ extern "C" void dseupd_(int* rvec,
                         double* tol,
                         double* resid,
                         int* ncv,
-                        double* v,
+                        double* arnoldi_basis_vectors,
                         int* ldv,
                         int* iparam,
                         int* ipntr,
@@ -799,7 +836,7 @@ struct arpack_wrapper
                              RealScalar* tol,
                              Scalar* resid,
                              int* ncv,
-                             Scalar* v,
+                             Scalar* arnoldi_basis_vectors,
                              int* ldv,
                              int* iparam,
                              int* ipntr,
@@ -825,7 +862,7 @@ struct arpack_wrapper
                              RealScalar* tol,
                              Scalar* resid,
                              int* ncv,
-                             Scalar* v,
+                             Scalar* arnoldi_basis_vectors,
                              int* ldv,
                              int* iparam,
                              int* ipntr,
@@ -841,48 +878,63 @@ struct arpack_wrapper
 template <>
 struct arpack_wrapper<float, float>
 {
-    static void saupd(int* ido,
-                      char* bmat,
-                      int* n,
-                      char* which,
-                      int* nev,
-                      float* tol,
-                      float* resid,
-                      int* ncv,
-                      float* v,
-                      int* ldv,
-                      int* iparam,
-                      int* ipntr,
-                      float* workd,
-                      float* workl,
-                      int* lworkl,
-                      int* info)
+    static inline void saupd(int* ido,
+                             char* bmat,
+                             int* n,
+                             char* which,
+                             int* nev,
+                             float* tol,
+                             float* resid,
+                             int* ncv,
+                             float* arnoldi_basis_vectors,
+                             int* ldv,
+                             int* iparam,
+                             int* ipntr,
+                             float* workd,
+                             float* workl,
+                             int* lworkl,
+                             int* info)
     {
-        ssaupd_(ido, bmat, n, which, nev, tol, resid, ncv, v, ldv, iparam, ipntr, workd, workl, lworkl, info);
+        ssaupd_(ido,
+                bmat,
+                n,
+                which,
+                nev,
+                tol,
+                resid,
+                ncv,
+                arnoldi_basis_vectors,
+                ldv,
+                iparam,
+                ipntr,
+                workd,
+                workl,
+                lworkl,
+                info);
     }
 
-    static void seupd(int* rvec,
-                      char* All,
-                      int* select,
-                      float* d,
-                      float* z,
-                      int* ldz,
-                      float* sigma,
-                      char* bmat,
-                      int* n,
-                      char* which,
-                      int* nev,
-                      float* tol,
-                      float* resid,
-                      int* ncv,
-                      float* v,
-                      int* ldv,
-                      int* iparam,
-                      int* ipntr,
-                      float* workd,
-                      float* workl,
-                      int* lworkl,
-                      int* ierr)
+    static inline void seupd(int* rvec,
+                             char* All,
+                             int* select,
+                             float* d,
+                             float* z,
+                             int* ldz,
+                             float* sigma,
+                             char* bmat,
+                             int* n,
+                             char* which,
+                             int* nev,
+                             float* tol,
+                             float* resid,
+                             int* ncv,
+                             float* arnoldi_basis_vectors,
+                             int* ldv,
+                             int* iparam,
+                             int* ipntr,
+                             float* workd,
+                             float* workl,
+                             int* lworkl,
+                             int* ierr)
     {
         sseupd_(rvec,
                 All,
@@ -898,7 +950,7 @@ struct arpack_wrapper<float, float>
                 tol,
                 resid,
                 ncv,
-                v,
+                arnoldi_basis_vectors,
                 ldv,
                 iparam,
                 ipntr,
@@ -920,7 +972,7 @@ struct arpack_wrapper<double, double>
                              double* tol,
                              double* resid,
                              int* ncv,
-                             double* v,
+                             double* arnoldi_basis_vectors,
                              int* ldv,
                              int* iparam,
                              int* ipntr,
@@ -929,7 +981,22 @@ struct arpack_wrapper<double, double>
                              int* lworkl,
                              int* info)
     {
-        dsaupd_(ido, bmat, n, which, nev, tol, resid, ncv, v, ldv, iparam, ipntr, workd, workl, lworkl, info);
+        dsaupd_(ido,
+                bmat,
+                n,
+                which,
+                nev,
+                tol,
+                resid,
+                ncv,
+                arnoldi_basis_vectors,
+                ldv,
+                iparam,
+                ipntr,
+                workd,
+                workl,
+                lworkl,
+                info);
     }
 
     static inline void seupd(int* rvec,
@@ -946,7 +1013,7 @@ struct arpack_wrapper<double, double>
                              double* tol,
                              double* resid,
                              int* ncv,
-                             double* v,
+                             double* arnoldi_basis_vectors,
                              int* ldv,
                              int* iparam,
                              int* ipntr,
@@ -959,7 +1026,7 @@ struct arpack_wrapper<double, double>
                 All,
                 select,
                 d,
-                v,
+                arnoldi_basis_vectors,
                 ldv,
                 sigma,
                 bmat,
@@ -969,7 +1036,7 @@ struct arpack_wrapper<double, double>
                 tol,
                 resid,
                 ncv,
-                v,
+                arnoldi_basis_vectors,
                 ldv,
                 iparam,
                 ipntr,

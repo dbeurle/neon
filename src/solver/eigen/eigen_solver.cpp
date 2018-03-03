@@ -52,6 +52,6 @@ std::pair<vector, matrix> eigen_solver::solve(sparse_matrix const& A, sparse_mat
         throw computational_error("Numerical issued occurred");
     }
 
-    return {arpack.eigenvectors(), arpack.eigenvalues()};
+    return {arpack.eigenvalues(), arpack.eigenvectors()};
 }
 }
