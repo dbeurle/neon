@@ -1,72 +1,46 @@
-cmake_minimum_required(VERSION 3.8)
 
-project(neonfe CXX)
+cmake_minimum_required(VERSION 3.9)
 
-set(CMAKE_CXX_STANDARD 17)
-add_definitions("-Wall -Wno-unused-variable")
+project(neonfe VERSION 0.1 LANGUAGES CXX)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 option(ENABLE_CUDA "Enable CUDA linear solver" OFF)
+option(ENABLE_TESTS "Enable the test suite of the unit tests examples" ON)
 option(ENABLE_NATIVE "Optimise for current architecture" OFF)
 option(ENABLE_COVERAGE "Set compiler flag for coverage analysis" OFF)
 
-if (ENABLE_CUDA)
-    find_package(CUDA REQUIRED)
-    add_definitions(-DENABLE_CUDA)
-    include_directories(${CUDA_INCLUDE_DIRS})
-endif()
+set(EXTERNAL_PROJECTS_DIR "${PROJECT_SOURCE_DIR}/external")
+add_subdirectory(${EXTERNAL_PROJECTS_DIR}/json)
+add_subdirectory(${EXTERNAL_PROJECTS_DIR}/catch)
+add_subdirectory(${EXTERNAL_PROJECTS_DIR}/eigen3)
+add_subdirectory(${EXTERNAL_PROJECTS_DIR}/range-v3)
+add_subdirectory(${EXTERNAL_PROJECTS_DIR}/termcolor)
 
-if (ENABLE_NATIVE)
-    add_definitions("-march=native -mtune=native")
+if (ENABLE_CUDA)
+    enable_language(CUDA)
 endif()
 
 if (ENABLE_COVERAGE)
     include(Coverage)
 endif()
 
-set(EXTERNAL_PROJECTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external")
-
-add_subdirectory(${EXTERNAL_PROJECTS_DIR}/json)
-add_subdirectory(${EXTERNAL_PROJECTS_DIR}/catch)
-add_subdirectory(${EXTERNAL_PROJECTS_DIR}/blaze)
-add_subdirectory(${EXTERNAL_PROJECTS_DIR}/eigen3)
-add_subdirectory(${EXTERNAL_PROJECTS_DIR}/range-v3)
-add_subdirectory(${EXTERNAL_PROJECTS_DIR}/termcolor)
-
-include_directories(${CATCH_INCLUDE_DIR}
-                    ${BLAZE_INCLUDE_DIR}
-                    ${RV3_INCLUDE_DIR}
-                    ${EIGEN_INCLUDE_DIR}
-                    ${TERMCOLOR_INCLUDE_DIR}
-                    ${COMMON_INCLUDES})
-
-find_package(VTK COMPONENTS vtkIOXML REQUIRED)
-include(${VTK_USE_FILE})
-
-find_package(Boost 1.40 COMPONENTS filesystem REQUIRED)
-include_directories(${Boost_INCLUDE_DIR})
-
-find_package(OpenMP)
-if (OPENMP_FOUND)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+if (ENABLE_TESTS)
+    include(CTest)
+    add_subdirectory(tests)
+    add_subdirectory(examples)
 endif()
 
+find_package(VTK COMPONENTS vtkIOXML REQUIRED)
+find_package(Boost 1.40 COMPONENTS filesystem REQUIRED)
+find_package(OpenMP REQUIRED)
 find_package(TBB REQUIRED)
-
 find_package(MUMPS REQUIRED)
-include_directories(${MUMPS_INCLUDE_DIR})
-
 find_package(BLAS REQUIRED)
-
 find_package(HwLoc REQUIRED)
+find_package(ARPACK REQUIRED)
 
 add_subdirectory(src)
-
-include(CTest)
-add_subdirectory(tests)
-add_subdirectory(examples)
 
 add_executable(neonfe src/neon.cpp)
 

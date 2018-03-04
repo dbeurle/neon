@@ -8,29 +8,49 @@ add_library(neon ${NEON_SOURCES})
 
 target_compile_options(neon PUBLIC $<$<CONFIG:RELEASE>:-O3 -DNDEBUG>)
 
-target_include_directories(neon PUBLIC ${CMAKE_SOURCE_DIR}/src)
+set_target_properties(neon PROPERTIES CXX_STANDARD 17
+                                      CXX_STANDARD_REQUIRED YES
+                                      CXX_EXTENSIONS NO
+                           COMPILE_FLAGS "-Wall -Wno-unused-variable ${OpenMP_CXX_FLAGS}")
 
-target_include_directories(neon PUBLIC ${JSON_INCLUDE_DIR})
+include(CheckIPOSupported)
+check_ipo_supported(RESULT is_ipo_supported)
+if(is_ipo_supported)
+   set_target_properties(neon PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
 
-add_dependencies(neon eigen3 range-v3 termcolor blaze json)
+if (ENABLE_NATIVE)
+    target_compile_options(neon PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-march=native -mtune=native>)
+endif()
+
+target_include_directories(neon PUBLIC ${CMAKE_SOURCE_DIR}/src
+                                       ${Boost_INCLUDE_DIR}
+                                       ${JSON_INCLUDE_DIR}
+                                       ${MUMPS_INCLUDE_DIR}
+                                       ${EIGEN_INCLUDE_DIR}
+                                       ${BLAZE_INCLUDE_DIR}
+                                       ${VTK_INCLUDE_DIRS}
+                                       ${RV3_INCLUDE_DIR}
+                                       ${TERMCOLOR_INCLUDE_DIR})
+
+add_dependencies(neon eigen3 range-v3 termcolor json)
 
 if (ENABLE_CUDA)
-    cuda_add_library(dmatvec solver/linear/dmatrix_vector_product.cu STATIC)
+    add_library(dmatvec STATIC ${CMAKE_SOURCE_DIR}/src/solver/linear/dmatrix_vector_product.cu)
+    target_link_libraries(neon dmatvec)
     add_dependencies(neon dmatvec)
-    target_link_libraries(neon dmatvec ${CUDA_LIBRARIES})
 endif()
 
 target_link_libraries(neon
+                      OpenMP::OpenMP_CXX
                       ${Boost_LIBRARIES}
                       ${MUMPS_LIBRARY}
                       ${BLAS_LIBRARIES}
                       ${VTK_LIBRARIES}
                       ${Hwloc_LIBRARIES}
-                      ${CUDA_LIBRARIES}
-                      ${CUDA_CUBLAS_LIBRARIES}
-                      ${CUDA_cusparse_LIBRARY}
-                      tbb
+                      ${TBB_LIBRARIES}
                       pastix
                       jsoncpp
                       scotch
-                      scotcherr)
+                      scotcherr
+                      ${ARPACK_LIBRARY})

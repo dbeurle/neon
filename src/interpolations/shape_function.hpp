@@ -57,7 +57,7 @@ void shape_function<quadrature_t>::compute_extrapolation_matrix(
     std::size_t const n = local_nodal_coordinates.rows();
     auto const m{numerical_quadrature->points()};
 
-    assert(m == local_quadrature_coordinates.rows());
+    assert(m == static_cast<std::size_t>(local_quadrature_coordinates.rows()));
 
     auto const& xi = local_nodal_coordinates;
     auto const& xi_hat = local_quadrature_coordinates;

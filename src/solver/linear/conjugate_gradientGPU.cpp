@@ -25,17 +25,20 @@
  */
 
 #include "conjugate_gradientGPU.hpp"
-#include "Exceptions.hpp"
-#include "dmatrix_vector_product.hpp"
 
 #ifdef ENABLE_CUDA
 
+#include "Exceptions.hpp"
+#include "dmatrix_vector_product.hpp"
+
 #include <cmath>
+#include <cuda_runtime.h>
 
-#include <cuda/cuda_runtime.h>
-
-#include "helper_cuda.h"
-#include "helper_functions.h"
+/** Exception for bad computation in CUDA kernel */
+class gpu_kernel_error : public std::domain_error
+{
+    using std::domain_error::domain_error;
+};
 
 namespace neon
 {
@@ -44,20 +47,21 @@ conjugate_gradientGPU::conjugate_gradientGPU() : iterative_linear_solver()
     this->find_compute_device();
 
     // Create CUBLAS context
-    checkCudaErrors(cublasCreate(&cublasHandle));
+    (cublasCreate(&cublasHandle));
 
     // Create CUSPARSE context
-    checkCudaErrors(cusparseCreate(&cusparseHandle));
+    (cusparseCreate(&cusparseHandle));
 
     // Description of the A matrix
-    checkCudaErrors(cusparseCreateMatDescr(&descr));
+    (cusparseCreateMatDescr(&descr));
 
     // Define the properties of the matrix
     cusparseSetMatType(descr, CUSPARSE_MATRIX_TYPE_GENERAL);
     cusparseSetMatIndexBase(descr, CUSPARSE_INDEX_BASE_ZERO);
 }
 
-conjugate_gradientGPU::conjugate_gradientGPU(double const residual_tolerance) : conjugate_gradientGPU()
+conjugate_gradientGPU::conjugate_gradientGPU(double const residual_tolerance)
+    : conjugate_gradientGPU()
 {
     this->residual_tolerance = residual_tolerance;
 }
@@ -205,16 +209,16 @@ void conjugate_gradientGPU::allocate_device_memory(sparse_matrix const& A, vecto
 
     auto const N = A.cols();
 
-    checkCudaErrors(cudaMalloc((void**)&d_col, A.nonZeros() * sizeof(int)));
-    checkCudaErrors(cudaMalloc((void**)&d_row, (N + 1) * sizeof(int)));
-    checkCudaErrors(cudaMalloc((void**)&d_val, A.nonZeros() * sizeof(double)));
-    checkCudaErrors(cudaMalloc((void**)&d_x, N * sizeof(double)));
-    checkCudaErrors(cudaMalloc((void**)&d_y, N * sizeof(double)));
-    checkCudaErrors(cudaMalloc((void**)&d_r, N * sizeof(double)));
-    checkCudaErrors(cudaMalloc((void**)&d_p, N * sizeof(double)));
-    checkCudaErrors(cudaMalloc((void**)&d_Ap, N * sizeof(double)));
-    checkCudaErrors(cudaMalloc((void**)&d_z, N * sizeof(double)));
-    checkCudaErrors(cudaMalloc((void**)&d_M_inv, N * sizeof(double)));
+    (cudaMalloc((void**)&d_col, A.nonZeros() * sizeof(int)));
+    (cudaMalloc((void**)&d_row, (N + 1) * sizeof(int)));
+    (cudaMalloc((void**)&d_val, A.nonZeros() * sizeof(double)));
+    (cudaMalloc((void**)&d_x, N * sizeof(double)));
+    (cudaMalloc((void**)&d_y, N * sizeof(double)));
+    (cudaMalloc((void**)&d_r, N * sizeof(double)));
+    (cudaMalloc((void**)&d_p, N * sizeof(double)));
+    (cudaMalloc((void**)&d_Ap, N * sizeof(double)));
+    (cudaMalloc((void**)&d_z, N * sizeof(double)));
+    (cudaMalloc((void**)&d_M_inv, N * sizeof(double)));
 
     cudaMemcpy(d_row, A.outerIndexPtr(), (N + 1) * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_col, A.innerIndexPtr(), A.nonZeros() * sizeof(int), cudaMemcpyHostToDevice);
@@ -224,25 +228,31 @@ void conjugate_gradientGPU::allocate_device_memory(sparse_matrix const& A, vecto
 
 void conjugate_gradientGPU::find_compute_device()
 {
-    // Pick the best possible CUDA capable device
-    int devID = findCudaDevice(0, nullptr);
+    cudaDeviceProp device_properties;
 
-    std::cout << "GPU selected Device ID = " << devID << " \n";
+    std::memset(&device_properties, 0, sizeof(device_properties));
 
-    if (devID < 0)
+    // NOTE Here you can set the required properties of the device.  These
+    // will then be chosen based on the preferences in cudaDeviceProp
+
+    int device_number;
+    cudaChooseDevice(&device_number, &device_properties);
+
+    if (device_number < 0)
     {
-        throw std::runtime_error("Invalid GPU device " + std::to_string(devID)
-                                 + " selected,  exiting...\n");
+        throw std::domain_error("No CUDA device found.");
     }
 
-    cudaDeviceProp deviceProp;
-    checkCudaErrors(cudaGetDeviceProperties(&deviceProp, devID));
+    cudaSetDevice(device_number);
+
+    cudaGetDeviceProperties(&device_properties, device_number);
 
     // Statistics about the GPU device
-    std::cout << "> GPU device has " << deviceProp.multiProcessorCount << " Multi-Processors, SM "
-              << deviceProp.major << "." << deviceProp.minor << " compute capabilities\n\n";
+    std::cout << std::string(' ', 4) << "GPU device has " << device_properties.multiProcessorCount
+              << " Multi-Processors, SM " << device_properties.major << "."
+              << device_properties.minor << " compute capabilities\n\n";
 
-    if (deviceProp.major * 0x10 + deviceProp.minor < 0x11)
+    if (device_properties.major * 0x10 + device_properties.minor < 0x11)
     {
         throw std::runtime_error("Linear solver requires a minimum CUDA compute 1.1 "
                                  "capability\n");

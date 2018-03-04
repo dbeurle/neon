@@ -35,8 +35,8 @@ protected:
 
 protected:
     // Device side pointers
-    int32_t* d_col{nullptr};
-    int32_t* d_row{nullptr};
+    std::int32_t* d_col{nullptr};
+    std::int32_t* d_row{nullptr};
     double* d_val{nullptr};
 
     double* d_x{nullptr};
