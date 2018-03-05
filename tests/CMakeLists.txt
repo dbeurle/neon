@@ -12,7 +12,8 @@ foreach(test
              mesh
              nodal_coordinates
              tensor
-             time_stepping)
+             time_stepping
+             time_integrators)
 
     add_executable(${test} ${test}.cpp)
     add_dependencies(${test} catch neon)
