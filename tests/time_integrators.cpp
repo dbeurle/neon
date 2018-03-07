@@ -64,4 +64,11 @@ TEST_CASE("dy/dt = 2t integration")
                               return 2.0 * t;
                           }))
         == Approx(25.0).margin(ZERO_MARGIN));
+
+    REQUIRE(generic_integrate(0.0,
+                              5.0,
+                              0.1,
+                              neon::runge_kutta_fourth_fifth_order(
+                                  [](auto const t, auto const y) { return 2.0 * t; }))
+            == Approx(25.0).margin(ZERO_MARGIN));
 }
