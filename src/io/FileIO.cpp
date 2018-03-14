@@ -3,8 +3,7 @@
 
 #include <exception>
 
-#if defined __clang__
-#pragma clang diagnostic push
+#ifdef __clang__
 #pragma clang diagnostic ignored "-Winconsistent-missing-override"
 #endif
 

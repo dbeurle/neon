@@ -76,20 +76,29 @@ public:
     /** Check if the load increment is finalised */
     [[nodiscard]] bool is_fully_applied() const { return is_applied; }
 
-    /** Get the global time (including past load cases) */
-    [[nodiscard]] double time() const { return total_time + last_converged_time; }
+        /** Get the global time (including past load cases) */
+        [[nodiscard]] double time() const
+    {
+        return total_time + last_converged_time;
+    }
 
     /** Get the time only for the current load case */
     [[nodiscard]] double step_time() const { return current_time; }
 
-    /** Get the time only for the last converged load case */
-    [[nodiscard]] double last_step_time() const { return last_converged_time; }
+        /** Get the time only for the last converged load case */
+        [[nodiscard]] double last_step_time() const
+    {
+        return last_converged_time;
+    }
 
     /** Get the pseudo time step size */
     [[nodiscard]] double increment() const { return current_time - last_converged_time; }
 
-    /** The number of steps taken for all time */
-    [[nodiscard]] auto step() const { return successful_increments; }
+        /** The number of steps taken for all time */
+        [[nodiscard]] auto step() const
+    {
+        return successful_increments;
+    }
 
     /** Update the convergence state to determine the next increment */
     void update_convergence_state(bool const is_converged);
@@ -101,14 +110,12 @@ protected:
 
     void check_increment_data(json const& increment_data);
 
-    [[nodiscard]] bool is_highly_nonlinear() const
-    {
+    [[nodiscard]] bool is_highly_nonlinear() const {
         return consecutive_unconverged > 0 || consecutive_converged < 4;
     }
 
-protected:
-    std::int32_t const increment_limit{10}; //!< Maximum allowable increments
-    std::int32_t successful_increments{0};  //!< Number of converged steps
+    protected : std::int32_t const increment_limit{10}; //!< Maximum allowable increments
+    std::int32_t successful_increments{0};              //!< Number of converged steps
 
     std::int32_t consecutive_converged{0};   //!< Number of consecutive successful attempts
     std::int32_t consecutive_unconverged{0}; //!< Number of consecutive unsuccessful attempts
