@@ -38,11 +38,12 @@ public:
 
     virtual void update_internal_variables(double const time_step_size) override;
 
-    [[nodiscard]] material_property const& intrinsic_material() const override final {
+    [[nodiscard]] virtual material_property const& intrinsic_material() const override final
+    {
         return material;
-    };
+    }
 
-    [[nodiscard]] virtual bool is_finite_deformation() const override final { return true; };
+    [[nodiscard]] virtual bool is_finite_deformation() const override final { return true; }
 
 protected:
     /**
@@ -65,7 +66,7 @@ protected:
      (\bar{\boldsymbol{\tau}} \otimes \boldsymbol{g}^{-1} + \boldsymbol{g}^{-1} \otimes
      \bar{\boldsymbol{\tau}}) \right] : \mathbb{P} \f}
      * @param J Determinant of deformation gradient
-     * @param K Shear modulus
+     * @param K Bulk modulus
      * @param macro_C Macromoduli from unit sphere
      * @param macro_stress Macrostress from unit sphere
      */
@@ -83,12 +84,10 @@ protected:
          \f}
      * @param F_unimodular Unimodular decomposition of the deformation gradient
      * @param shear_modulus The material shear modulus
-     * @param N number of segments per chain
      * @return Kirchhoff stress tensor
      */
     [[nodiscard]] matrix3 compute_macro_stress(matrix3 const& F_unimodular,
-                                               double const shear_modulus,
-                                               double const N) const;
+                                               double const shear_modulus) const;
 
     /**
      * Compute the material tangent matrix using the unit sphere homogenisation
@@ -102,27 +101,10 @@ protected:
          \f}
      * @param F_unimodular Unimodular decomposition of the deformation gradient
      * @param shear_modulus The material shear modulus
-     * @param N number of segments per chain
      * @return Macromoduli from unit sphere homogenisation
      */
     [[nodiscard]] matrix6 compute_macro_moduli(matrix3 const& F_unimodular,
-                                               double const shear_modulus,
-                                               double const N) const;
-
-    /**
-     * Compute the deformed tangent using the unimodular deformation gradient
-     * and the vector associated with the quadrature point on the unit sphere
-     */
-    [[nodiscard]] vector3 deformed_tangent(matrix3 const& F_unimodular,
-                                           vector3 const& surface_vector) const {
-        return F_unimodular * surface_vector;
-    }
-
-        /** Compute the microstretch, which is the norm of the deformed tangent vector */
-        [[nodiscard]] auto compute_microstretch(vector3 const& deformed_tangent) const
-    {
-        return deformed_tangent.norm();
-    }
+                                               double const shear_modulus) const;
 
 protected:
     unit_sphere_quadrature unit_sphere; //!< Unit sphere quadrature rule

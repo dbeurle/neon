@@ -6,22 +6,32 @@
 #include "mesh/diffusion/fem_mesh.hpp"
 #include "mesh/mechanical/solid/fem_mesh.hpp"
 
-#include <map>
-#include <string>
-#include <unordered_set>
+#include "io/json.hpp"
+
+// Clang finds bugs in the VTK code and reports them.  Turn this off until
+// upstream fixes it.
+#if defined __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winconsistent-missing-override"
+#endif
+
+#include "io/vtk_coordinates.hpp"
 
 #include "vtkIdList.h"
 #include "vtkSmartPointer.h"
-
-#include "io/json.hpp"
-
 #include "vtkDoubleArray.h"
 #include "vtkIdTypeArray.h"
 #include "vtkPointData.h"
 #include "vtkUnstructuredGrid.h"
 #include "vtkXMLUnstructuredGridWriter.h"
 
-#include "io/vtk_coordinates.hpp"
+#if defined __clang__
+#pragma clang diagnostic pop
+#endif
+
+#include <map>
+#include <string>
+#include <unordered_set>
 
 namespace neon
 {
@@ -64,7 +74,7 @@ public:
 
     using variable_type = typename fem_mesh_type::internal_variable_type;
 
-    using scalar_map_t = std::map<std::string, typename variable_type::Scalar>;
+    using scalar_map_t = std::map<std::string, typename variable_type::scalar>;
     using tensor_map_t = std::map<std::string, typename variable_type::Tensor>;
 
 public:
@@ -84,10 +94,10 @@ private:
     fem_mesh_type const& mesh;
 
     // clang-format off
-    scalar_map_t const scalar_map{{"AccumulatedPlasticStrain", variable_type::Scalar::EffectivePlasticStrain},
-                                  {"VonMisesStress", variable_type::Scalar::VonMisesStress},
-                                  {"Damage", variable_type::Scalar::Damage},
-                                  {"EnergyReleaseRate", variable_type::Scalar::EnergyReleaseRate}};
+    scalar_map_t const scalar_map{{"AccumulatedPlasticStrain", variable_type::scalar::EffectivePlasticStrain},
+                                  {"VonMisesStress", variable_type::scalar::VonMisesStress},
+                                  {"Damage", variable_type::scalar::Damage},
+                                  {"EnergyReleaseRate", variable_type::scalar::EnergyReleaseRate}};
 
     tensor_map_t const tensor_map{{"CauchyStress", variable_type::Tensor::Cauchy},
                                   {"LinearisedStrain", variable_type::Tensor::LinearisedStrain},

@@ -16,7 +16,7 @@ isotropic_linear_elasticity::isotropic_linear_elasticity(
     : constitutive_model(variables), material(material_data), state(state)
 {
     variables->add(internal_variables_t::Tensor::LinearisedStrain,
-                   internal_variables_t::Scalar::VonMisesStress);
+                   internal_variables_t::scalar::VonMisesStress);
 
     // Add material tangent with the linear elasticity spatial moduli
     variables->add(internal_variables_t::rank4::tangent_operator, elastic_moduli());
@@ -35,7 +35,7 @@ void isotropic_linear_elasticity::update_internal_variables(double const time_st
           cauchy_stresses] = variables->fetch(internal_variables_t::Tensor::LinearisedStrain,
                                               internal_variables_t::Tensor::Cauchy);
 
-    auto& von_mises_stresses = variables->fetch(internal_variables_t::Scalar::VonMisesStress);
+    auto& von_mises_stresses = variables->fetch(internal_variables_t::scalar::VonMisesStress);
 
     auto const& tangents = variables->fetch(internal_variables_t::rank4::tangent_operator);
 

@@ -72,7 +72,7 @@ public:
         internal_variables_t::Tensor const tensor_name) const;
 
     [[nodiscard]] std::pair<vector, vector> nodal_averaged_variable(
-        internal_variables_t::Scalar const scalar_name) const;
+        internal_variables_t::scalar const scalar_name) const;
 
 protected:
     /** Update the strain measures defined by the constitutive model */

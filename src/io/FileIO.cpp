@@ -10,8 +10,11 @@
 #include "vtkCellData.h"
 #include "vtkCellTypes.h"
 #include "vtkDataObject.h"
-
 #include "vtkInformation.h"
+
+#if defined __clang__
+#pragma clang diagnostic pop
+#endif
 
 #include <boost/filesystem.hpp>
 

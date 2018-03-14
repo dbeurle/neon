@@ -38,7 +38,7 @@ fem_submesh::fem_submesh(json const& material_data,
     variables->add(internal_variables_t::Tensor::DisplacementGradient,
                    internal_variables_t::Tensor::DeformationGradient,
                    internal_variables_t::Tensor::Cauchy,
-                   internal_variables_t::Scalar::DetF);
+                   internal_variables_t::scalar::DetF);
 
     // Get the old data to the undeformed configuration
     for (auto& F : variables->fetch(internal_variables_t::Tensor::DeformationGradient))
@@ -246,7 +246,7 @@ void fem_submesh::update_Jacobian_determinants()
 {
     auto const& deformation_gradients = variables->fetch(
         internal_variables_t::Tensor::DeformationGradient);
-    auto& deformation_gradient_determinants = variables->fetch(internal_variables_t::Scalar::DetF);
+    auto& deformation_gradient_determinants = variables->fetch(internal_variables_t::scalar::DetF);
 
     deformation_gradient_determinants = deformation_gradients
                                         | ranges::view::transform(
@@ -310,7 +310,7 @@ std::pair<vector, vector> fem_submesh::nodal_averaged_variable(
 }
 
 std::pair<vector, vector> fem_submesh::nodal_averaged_variable(
-    internal_variables_t::Scalar const scalar_name) const
+    internal_variables_t::scalar const scalar_name) const
 {
     vector count = vector::Zero(mesh_coordinates->size());
     vector value = count;

@@ -88,7 +88,7 @@ public:
         [[nodiscard]] ValueCount
         nodal_averaged_variable(internal_variables_t::Tensor const tensor_name) const;
 
-    [[nodiscard]] ValueCount nodal_averaged_variable(internal_variables_t::Scalar const scalar_name) const;
+    [[nodiscard]] ValueCount nodal_averaged_variable(internal_variables_t::scalar const scalar_name) const;
 
 private:
     std::shared_ptr<material_coordinates> mesh_coordinates; /// Nodal coordinates

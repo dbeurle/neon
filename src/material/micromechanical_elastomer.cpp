@@ -7,28 +7,8 @@
 #include "io/json.hpp"
 
 #include <cmath>
-#include <random>
 
-#include <range/v3/action/sort.hpp>
-#include <range/v3/algorithm/stable_partition.hpp>
-#include <range/v3/numeric/accumulate.hpp>
-#include <range/v3/view/transform.hpp>
-#include <range/v3/view/zip.hpp>
-
-namespace neon
-{
-/**
- * Computes the probability mass function of the Binomial distribution
- * @param n - The number of trials
- * @param k - Number of successes
- * @param p - Probability of success
- * @return The probabilty Pr(k;n,p)
- */
-double binomial_pmf(int const n, int const k, double const p = 0.5)
-{
-    return std::exp(std::lgamma(n + 1) - std::lgamma(k + 1) - std::lgamma(n - k + 1))
-           * std::pow(p, k) * std::pow(1.0 - p, n - k);
-}
+using namespace neon;
 
 micromechanical_elastomer::micromechanical_elastomer(json const& material_data)
     : isotropic_elastic_property(material_data)
@@ -37,88 +17,63 @@ micromechanical_elastomer::micromechanical_elastomer(json const& material_data)
     {
         throw std::domain_error("SegmentsPerChain not specified in material data\n");
     }
+    N = material_data["SegmentsPerChain"];
 }
 
-stochastic_micromechanical_elastomer::stochastic_micromechanical_elastomer(json const& material_data)
-    : isotropic_elastic_property(material_data)
+ageing_micromechanical_elastomer::ageing_micromechanical_elastomer(json const& material_data)
+    : micromechanical_elastomer(material_data)
 {
-    if (!material_data.count("Segments"))
+    auto exception_string = [](std::string&& field) {
+        return "\"" + field + "\" is not specified in \"Material\" data";
+    };
+
+    if (!material_data.count("SegmentDecayRate"))
     {
-        throw std::domain_error("Segments not specified in material data\n");
+        throw std::domain_error(exception_string("SegmentDecayRate"));
     }
-    compute_chains_and_segments(material_data["Segments"]);
+    if (!material_data.count("ScissionProbability"))
+    {
+        throw std::domain_error(exception_string("ScissionProbability"));
+    }
+    if (!material_data.count("CrosslinkGrowthRate"))
+    {
+        throw std::domain_error(exception_string("CrosslinkGrowthRate"));
+    }
+
+    segment_decay_rate = material_data["SegmentDecayRate"];
+    scission_probability = material_data["ScissionProbability"];
+    crosslink_growth_rate = material_data["CrosslinkGrowthRate"];
+
+    if (scission_probability < 0.0 || crosslink_growth_rate < 0.0 || segment_decay_rate < 0.0)
+    {
+        throw std::domain_error("Material properties for the segments must be positive");
+    }
 }
 
-void stochastic_micromechanical_elastomer::compute_chains_and_segments(json const& segments_data)
+double ageing_micromechanical_elastomer::compute_new_segment(double const current_segment,
+                                                             double const time_step_size) const
 {
-    // Basic error checking
-    if (!segments_data.count("Groups"))
-    {
-        throw std::domain_error("Groups not specified in \"Segment\" data\n");
-    }
-    if (!segments_data.count("Average"))
-    {
-        throw std::domain_error("Average not specified in \"Segment\" data\n");
-    }
-    if (!segments_data.count("StandardDeviation"))
-    {
-        throw std::domain_error("StandardDeviation not specified in \"Segment\" data\n");
-    }
-    if (!segments_data.count("ScissionLikelihood"))
-    {
-        throw std::domain_error("ScissionLikelihood not specified in \"Segment\" "
-                                "data\n");
-    }
-
-    number_of_groups = segments_data["Groups"];
-    p_scission = segments_data["ScissionLikelihood"];
-
-    auto const N_avg = segments_data["Average"].get<int64_t>();
-    auto const N_std = segments_data["StandardDeviation"].get<int64_t>();
-
-    auto const n0 = isotropic_elastic_property::shear_modulus() / (boltzmann_constant * temperature);
-
-    // Create a normal distribution generator and sample the same number
-    // with the segments per chain as the mean value
-    std::random_device random_dev;
-    std::mt19937 generator(random_dev());
-
-    // values near the mean are the most likely
-    // standard deviation affects the dispersion of generated values from the mean
-    std::normal_distribution<> normal_dist(N_avg, N_std);
-
-    for (auto k = 0; k < number_of_groups; ++k)
-    {
-        segments.push_back(std::round(normal_dist(generator)));
-        chains.push_back(n0 * binomial_pmf(number_of_groups - 1, k));
-    }
-
-    if (!is_approx(n0, ranges::accumulate(chains, 0.0)))
-    {
-        throw std::domain_error("Material property error in stochastic_micromechanical_elastomer");
-    }
-
-    // Partition the range based on the average segments in order
-    ranges::stable_partition(ranges::action::sort(segments),
-                             [&](auto const N) { return N <= N_avg; });
+    return current_segment / (1.0 + segment_decay_rate * time_step_size);
 }
 
-std::vector<double> stochastic_micromechanical_elastomer::update_chains(
-    std::vector<double> const& chains_old, double const time_step_size)
+double ageing_micromechanical_elastomer::compute_new_shear_modulus(double const time_step_size) const
 {
-    using namespace ranges;
-
-    return view::zip(segments, chains_old) | view::transform([&](auto const tpl) {
-               auto const& [N, n] = tpl;
-               return n / (1.0 + time_step_size * (1.0 - std::pow(1.0 - p_scission, N)));
-           });
+    return crosslink_growth_rate * time_step_size;
 }
 
-std::vector<double> stochastic_micromechanical_elastomer::compute_shear_moduli(
-    std::vector<double> const& chains_new)
+std::vector<double> ageing_micromechanical_elastomer::scission(std::vector<double> shear_moduli,
+                                                               std::vector<double> const& segments,
+                                                               double const time_step_size) const
 {
-    return chains_new | ranges::view::transform([&](auto const& n) {
-               return n * boltzmann_constant * temperature;
-           });
-}
+    std::transform(std::begin(shear_moduli),
+                   std::end(shear_moduli),
+                   std::begin(segments),
+                   std::begin(shear_moduli),
+                   [this, time_step_size](auto const G, auto const N) {
+                       return G
+                              / (1.0
+                                 + time_step_size * (1.0 - std::pow(1.0 - scission_probability, N)));
+                   });
+
+    return shear_moduli;
 }

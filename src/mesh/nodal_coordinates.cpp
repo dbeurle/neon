@@ -2,7 +2,6 @@
 #include "nodal_coordinates.hpp"
 
 #include "Exceptions.hpp"
-
 #include "io/json.hpp"
 
 namespace neon

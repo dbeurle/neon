@@ -22,8 +22,8 @@ finite_strain_J2_plasticity::finite_strain_J2_plasticity(
     std::shared_ptr<internal_variables_t>& variables, json const& material_data)
     : small_strain_J2_plasticity(variables, material_data)
 {
-    variables->add(internal_variables_t::Scalar::VonMisesStress,
-                   internal_variables_t::Scalar::EffectivePlasticStrain,
+    variables->add(internal_variables_t::scalar::VonMisesStress,
+                   internal_variables_t::scalar::EffectivePlasticStrain,
                    internal_variables_t::Tensor::HenckyStrainElastic);
 
     // Add material tangent with the linear elasticity moduli
@@ -49,12 +49,12 @@ void finite_strain_J2_plasticity::update_internal_variables(double const time_st
     auto const old_deformation_gradients = variables->fetch_old(
         internal_variables_t::Tensor::DeformationGradient);
 
-    auto const J_list = variables->fetch(internal_variables_t::Scalar::DetF);
+    auto const J_list = variables->fetch(internal_variables_t::scalar::DetF);
 
     // Retrieve the accumulated internal variables
     auto [accumulated_plastic_strains,
-          von_mises_stresses] = variables->fetch(internal_variables_t::Scalar::EffectivePlasticStrain,
-                                                 internal_variables_t::Scalar::VonMisesStress);
+          von_mises_stresses] = variables->fetch(internal_variables_t::scalar::EffectivePlasticStrain,
+                                                 internal_variables_t::scalar::VonMisesStress);
 
     auto& tangent_operators = variables->fetch(internal_variables_t::rank4::tangent_operator);
 
@@ -66,7 +66,7 @@ void finite_strain_J2_plasticity::update_internal_variables(double const time_st
                                                      });
 
     // Perform the update algorithm for each quadrature point
-    for (std::size_t l{}; l < deformation_gradients.size(); l++)
+    for (std::size_t l{0}; l < deformation_gradients.size(); l++)
     {
         auto const& F_inc = incremental_deformation_gradients[l];
         auto const J = J_list[l];

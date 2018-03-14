@@ -2,10 +2,8 @@
 #include "gaussian_affine_microsphere.hpp"
 
 #include "constitutive/internal_variables.hpp"
+#include "constitutive/mechanical/detail/microsphere.hpp"
 #include "constitutive/mechanical/volumetric_free_energy.hpp"
-
-#include <range/v3/view/transform.hpp>
-#include <range/v3/view/zip.hpp>
 
 #include <tbb/parallel_for.h>
 
@@ -17,9 +15,6 @@ gaussian_affine_microsphere::gaussian_affine_microsphere(std::shared_ptr<interna
     : constitutive_model(variables), unit_sphere(rule), material(material_data)
 {
     variables->add(internal_variables_t::rank4::tangent_operator);
-
-    // Deviatoric stress
-    variables->add(internal_variables_t::Tensor::Kirchhoff);
 
     // Commit these to history in case of failure on first time step
     variables->commit();
@@ -33,7 +28,7 @@ void gaussian_affine_microsphere::update_internal_variables(double const time_st
         internal_variables_t::Tensor::DeformationGradient);
     auto& cauchy_stresses = variables->fetch(internal_variables_t::Tensor::Cauchy);
 
-    auto const& det_deformation_gradients = variables->fetch(internal_variables_t::Scalar::DetF);
+    auto const& det_deformation_gradients = variables->fetch(internal_variables_t::scalar::DetF);
 
     auto const K = material.bulk_modulus();
     auto const G = material.shear_modulus();
@@ -48,13 +43,13 @@ void gaussian_affine_microsphere::update_internal_variables(double const time_st
         auto const pressure = J * volumetric_free_energy_dJ(J, K);
 
         // Project the stresses to obtain the Kirchhoff macro-stress
-        matrix3 const macro_stress = compute_macro_stress(F_bar, G, N);
+        matrix3 const macro_stress = compute_macro_stress(F_bar, G);
 
         cauchy_stresses[l] = compute_kirchhoff_stress(pressure, macro_stress) / J;
 
         tangent_operators[l] = compute_material_tangent(J,
                                                         K,
-                                                        compute_macro_moduli(F_bar, G, N),
+                                                        compute_macro_moduli(F_bar, G),
                                                         macro_stress);
     });
 }
@@ -86,13 +81,12 @@ matrix6 gaussian_affine_microsphere::compute_material_tangent(double const J,
 }
 
 matrix3 gaussian_affine_microsphere::compute_macro_stress(matrix3 const& F_unimodular,
-                                                          double const bulk_modulus,
-                                                          double const N) const
+                                                          double const shear_modulus) const
 {
-    return 3.0 * bulk_modulus
+    return 3.0 * shear_modulus
            * unit_sphere.integrate(matrix3::Zero().eval(),
-                                   [&](auto const& coordinates, auto const& l) -> matrix3 {
-                                       auto const& [r, r_outer_r] = coordinates;
+                                   [&](auto const& coordinates, auto const l) -> matrix3 {
+                                       auto const& [r, _] = coordinates;
 
                                        vector3 const t = deformed_tangent(F_unimodular, r);
 
@@ -101,20 +95,18 @@ matrix3 gaussian_affine_microsphere::compute_macro_stress(matrix3 const& F_unimo
 }
 
 matrix6 gaussian_affine_microsphere::compute_macro_moduli(matrix3 const& F_unimodular,
-                                                          double const bulk_modulus,
-                                                          double const N) const
+                                                          double const shear_modulus) const
 {
-    // clang-format off
-    return -3.0 * bulk_modulus * unit_sphere.integrate(matrix6::Zero().eval(),
-                                                      [&](auto const& coordinates, auto const& l) -> matrix6 {
-                                                          auto const & [ r, r_outer_r ] = coordinates;
+    return -3.0 * shear_modulus
+           * unit_sphere.integrate(matrix6::Zero().eval(),
+                                   [&](auto const& coordinates, auto const l) -> matrix6 {
+                                       auto const& [r, _] = coordinates;
 
-                                                          vector3 const t = deformed_tangent(F_unimodular, r);
+                                       vector3 const t = deformed_tangent(F_unimodular, r);
 
-                                                          auto const micro_stretch = compute_microstretch(t);
+                                       auto const micro_stretch = compute_microstretch(t);
 
-                                                          return std::pow(micro_stretch, -2) * outer_product(t, t, t, t);
-                                                      });
-    // clang-format on
+                                       return std::pow(micro_stretch, -2) * outer_product(t, t, t, t);
+                                   });
 }
 }
