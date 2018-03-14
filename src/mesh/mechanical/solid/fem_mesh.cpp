@@ -12,10 +12,6 @@
 #include "io/json.hpp"
 #include <termcolor/termcolor.hpp>
 
-#include <range/v3/action/join.hpp>
-#include <range/v3/action/sort.hpp>
-#include <range/v3/action/transform.hpp>
-#include <range/v3/action/unique.hpp>
 #include <range/v3/view/transform.hpp>
 
 namespace neon::mechanical::solid
@@ -40,11 +36,9 @@ fem_mesh::fem_mesh(basic_mesh const& basic_mesh,
 
 bool fem_mesh::is_symmetric() const
 {
-    for (auto const& submesh : submeshes)
-    {
-        if (!submesh.constitutive().is_symmetric()) return false;
-    }
-    return true;
+    return std::all_of(std::begin(submeshes), std::end(submeshes), [](auto const& submesh) {
+        return submesh.constitutive().is_symmetric();
+    });
 }
 
 void fem_mesh::update_internal_variables(vector const& u, double const time_step_size)
@@ -132,14 +126,17 @@ void fem_mesh::allocate_displacement_boundary(json const& boundary, basic_mesh c
 
 std::vector<double> fem_mesh::time_history() const
 {
-    std::vector<double> history;
+    std::set<double> history;
 
     // Append time history from each boundary condition
     for (auto const& [key, boundaries] : displacement_bcs)
     {
         for (auto const& boundary : boundaries)
         {
-            history |= ranges::action::push_back(boundary.time_history());
+            for (auto t : boundary.time_history())
+            {
+                history.insert(t);
+            }
         }
     }
     for (auto const& [key, nonfollower_load] : nonfollower_loads)
@@ -152,13 +149,16 @@ std::vector<double> fem_mesh::time_history() const
             {
                 std::visit(
                     [&](auto const& surface_mesh) {
-                        history |= ranges::action::push_back(surface_mesh.time_history());
+                        for (auto t : surface_mesh.time_history())
+                        {
+                            history.insert(t);
+                        }
                     },
                     boundary_variant);
             }
         }
     }
-    return std::move(history) | ranges::action::sort | ranges::action::unique;
+    return std::vector<double>{std::begin(history), std::end(history)};
 }
 
 void fem_mesh::check_boundary_conditions(json const& boundary_data) const
