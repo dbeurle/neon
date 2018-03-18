@@ -294,10 +294,8 @@ namespace d2
     // clang-format on
 }
 
-/**
- * Compute the fourth order symmetric identity tensor in Voigt notation according to
- * \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
- */
+/// Compute the fourth order symmetric identity tensor in Voigt notation according to
+/// \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
 [[nodiscard]] inline matrix6 identity()
 {
     // clang-format off
