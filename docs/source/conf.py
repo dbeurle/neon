@@ -144,7 +144,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'neon_user.tex', u'mpi\\_api\\_wrapper Documentation',
+    (master_doc, 'neon_user.tex', u'neon\\ user\\ documentation',
      u'Darcy Beurle', 'manual'),
 ]
 
