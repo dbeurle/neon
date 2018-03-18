@@ -3,15 +3,16 @@
 
 #include "numeric/tensor_operations.hpp"
 
+/// \file tensor_squared_derivative.hpp
+/// \brief Routines for computing the derivative of a tensor squared
+
 namespace neon
 {
-/**
- * Computes the derivative of the tensor squared with respect to the
- * same tensor
-   \f{align*}{
-    \mathbf{D}(\mathbf{X}) &= \frac{\partial \mathbf{X}^2}{\partial \mathbf{X}}
-   \f}
- */
+/// Computes the derivative of the tensor squared with respect to the
+/// same tensor
+/// \f{align*}{
+///   \mathbf{D}(\mathbf{X}) &= \frac{\partial \mathbf{X}^2}{\partial \mathbf{X}}
+/// \f}
 inline matrix6 tensor_squared_derivative(matrix3 const& X)
 {
     matrix6 dx2_dx;
