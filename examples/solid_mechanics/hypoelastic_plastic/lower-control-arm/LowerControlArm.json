@@ -58,7 +58,7 @@
         }],
 		"LinearSolver" :
         {
-		    "Solver" : "PaStiX"
+		    "Type" : "PaStiX"
         },
         "Visualisation" :
         {

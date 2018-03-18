@@ -50,7 +50,7 @@
             }]
         }],
         "LinearSolver" : {
-            "Solver" : "Iterative"
+            "Type" : "Iterative"
         },
         "Visualisation" : {
             "Fields" : ["Temperature"],

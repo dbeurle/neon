@@ -15,7 +15,7 @@ namespace neon
 {
 std::unique_ptr<LinearSolver> make_linear_solver(json const& solver_data, bool const is_symmetric)
 {
-    std::string const& solver_name = solver_data["Solver"].get<std::string>();
+    std::string const& solver_name = solver_data["Type"].get<std::string>();
 
     if (solver_name == "PaStiX")
     {
@@ -77,8 +77,8 @@ std::unique_ptr<LinearSolver> make_linear_solver(json const& solver_data, bool c
 
         if (!is_symmetric)
         {
-            throw std::runtime_error("A non-symmetric iterative solver for GPU has not yet been "
-                                     "implemented\n");
+            throw std::domain_error("A non-symmetric iterative solver for GPU has not yet been "
+                                    "implemented\n");
         }
 
         if (solver_data.count("Tolerance") && solver_data.count("MaxIterations"))
@@ -99,13 +99,14 @@ std::unique_ptr<LinearSolver> make_linear_solver(json const& solver_data, bool c
             return std::make_unique<conjugate_gradientGPU>();
         }
 #else
-        throw std::runtime_error("conjugate_gradientGPU is only available when neon is "
-                                 "configured with -DENABLE_CUDA=ON\n");
+        throw std::domain_error("conjugate_gradientGPU is only available when neon is "
+                                "configured with -DENABLE_CUDA=ON\n");
 #endif
     }
     else
     {
-        throw std::runtime_error("Did not find a linear solver\n");
+        throw std::domain_error("Did not find a linear solver type.  Did you try specifying "
+                                "\"Type\" for the linear solver name?\n");
     }
     return nullptr;
 }

@@ -5,11 +5,11 @@ Linear solvers make up the largest part of the solution time in the finite eleme
 
 Neon uses a selection of linear solvers, most of which are multithreaded.  Direct solvers require no options apart from the solver name.
 
-.. table:: Direct solvers available ``"Name" : "keyword"``
+.. table:: Direct solvers available ``"Type" : "keyword"``
    :widths: auto
 
    ============ ============================================
-   Name keyword Details
+   Type keyword Details
    ============ ============================================
    Direct       Inbuilt from the Eigen library (LLT or LU)
    PaStiX       Interfaces to the PaStiX library (LLT or LU)
@@ -19,16 +19,16 @@ Neon uses a selection of linear solvers, most of which are multithreaded.  Direc
 On the other hand iterative solvers require the maximum number of iterations and the maximum tolerance.  If these are not set, then defaults will be chosen for you.  Iterative methods specify the following fields ::
 
     "LinearSolver" {
-        "Name" : "Iterative",
+        "Type" : "Iterative",
         "Tolerance" : 1.0e-6,
         "MaxIterations" : 1500
     }
 
-.. table:: Iterative solvers available ``"Name" : "keyword"``
+.. table:: Iterative solvers available ``"Type" : "keyword"``
    :widths: auto
 
    ============ ============================================
-   Name keyword Details
+   Type keyword Details
    ============ ============================================
    Iterative    Inbuilt from the Eigen library (Diagonal preconditioned CG or BiCGStab)
    IterativeGPU GPU accelerated diagonal preconditioned CG

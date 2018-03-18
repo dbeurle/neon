@@ -62,7 +62,7 @@
             }]
         }],
         "LinearSolver" : {
-            "Solver" : "Iterative",
+            "Type" : "Iterative",
             "MaxIterations" : 1000,
             "Tolerance"  : 1.0e-6
         },

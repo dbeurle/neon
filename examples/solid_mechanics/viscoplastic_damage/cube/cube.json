@@ -71,7 +71,7 @@
             }]
         }],
 		"LinearSolver" : {
-		    "Solver" : "PaStiX"
+		    "Type" : "PaStiX"
         },
         "Visualisation" : {
             "Fields" : ["Displacement", "LinearisedStrain", "LinearisedPlasticStrain",
