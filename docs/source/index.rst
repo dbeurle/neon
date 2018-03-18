@@ -10,6 +10,7 @@ Contents
    introduction
    meshing
    material
+   constitutive
    linear_solvers
    license
    contact

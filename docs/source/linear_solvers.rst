@@ -31,5 +31,5 @@ On the other hand iterative solvers require the maximum number of iterations and
    Type keyword Details
    ============ ============================================
    Iterative    Inbuilt from the Eigen library (Diagonal preconditioned CG or BiCGStab)
-   IterativeGPU GPU accelerated diagonal preconditioned CG
+   IterativeGPU GPU accelerated diagonal preconditioned CG (requires -DENABLE_CUDA=1 in build)
    ============ ============================================
