@@ -20,7 +20,7 @@
     }],
     "SimulationCases" : [{
         "Name" : "Uniaxial",
-		    "Module" : "SolidMechanics",
+        "Module" : "SolidMechanics",
         "Solution" : "Equilibrium",
         "NonlinearOptions" : {
           "ResidualTolerance" : 1e-3,
@@ -34,8 +34,8 @@
                 "Maximum" : 0.001,
                 "Adaptive" : true
             }
-    },
-    "Mesh" : [{
+        },
+        "Mesh" : [{
             "Name" : "cube",
             "ConstitutiveModel" : {
                 "Name" : "J2Plasticity",
