@@ -1,12 +1,13 @@
+*******************
 Constitutive models
-===================
+*******************
 
 Constitutive models play an important role in the solution of the equations of motion.  They are required to close the system such that the system is solvable.  These models relate quantities of displacement to the stress in the body.  Each model of material deformation requires some material properties and can effect the solution time, stability and accuracy of the overall finite element simulation.
 
 All of the units are assumed to be consistent and it is the user's responsibility to make sure this happens.
 
 Isotropic linear elasticity
----------------------------
+===========================
 
 The simplest form of constitutive model for linear materials is the isotropic linear elasticity model.  This is specified using the ``"IsotropicLinearElasticity"``.  The required parameters are
 
@@ -22,7 +23,7 @@ This model can be used by specifying ::
     }
 
 Small strain J2 plasticity
---------------------------
+==========================
 
 The small strain J2 plasticity model introduces material non-linearity into the finite element formulation.  This model extends the ``"IsotropicLinearElasticity"`` model to include:
 
