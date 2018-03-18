@@ -58,7 +58,7 @@ TEST_CASE("Linear solver test suite")
 
     SECTION("Preconditioned Conjugate Gradient Default")
     {
-        json solver_data{{"Solver", "Iterative"}};
+        json solver_data{{"Type", "Iterative"}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -69,7 +69,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Conjugate Gradient Tolerance")
     {
-        json solver_data{{"Solver", "Iterative"}, {"Tolerance", 1.0e-8}};
+        json solver_data{{"Type", "Iterative"}, {"Tolerance", 1.0e-8}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -80,7 +80,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Conjugate Gradient Iterations")
     {
-        json solver_data{{"Solver", "Iterative"}, {"MaxIterations", 100}};
+        json solver_data{{"Type", "Iterative"}, {"MaxIterations", 100}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -91,7 +91,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Conjugate Gradient Iterations and Tolerance")
     {
-        json solver_data{{"Solver", "Iterative"}, {"MaxIterations", 100}, {"Tolerance", 1.0e-8}};
+        json solver_data{{"Type", "Iterative"}, {"MaxIterations", 100}, {"Tolerance", 1.0e-8}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -102,7 +102,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Bi-conjugate Gradient Stab Default")
     {
-        json solver_data{{"Solver", "Iterative"}};
+        json solver_data{{"Type", "Iterative"}};
 
         auto linear_solver = make_linear_solver(solver_data, false);
 
@@ -113,7 +113,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Bi-conjugate Gradient Stab Tolerance")
     {
-        json solver_data{{"Solver", "Iterative"}, {"Tolerance", 1.0e-8}};
+        json solver_data{{"Type", "Iterative"}, {"Tolerance", 1.0e-8}};
 
         auto linear_solver = make_linear_solver(solver_data, false);
 
@@ -124,7 +124,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Bi-conjugate Gradient Stab Iterations")
     {
-        json solver_data{{"Solver", "Iterative"}, {"MaxIterations", 100}};
+        json solver_data{{"Type", "Iterative"}, {"MaxIterations", 100}};
 
         auto linear_solver = make_linear_solver(solver_data, false);
 
@@ -135,7 +135,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("Preconditioned Bi-conjugate Gradient Stab Iterations and Tolerance")
     {
-        json solver_data{{"Solver", "Iterative"}, {"MaxIterations", 100}, {"Tolerance", 1.0e-8}};
+        json solver_data{{"Type", "Iterative"}, {"MaxIterations", 100}, {"Tolerance", 1.0e-8}};
 
         auto linear_solver = make_linear_solver(solver_data, false);
 
@@ -146,7 +146,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("PaStiX SPD")
     {
-        json solver_data{{"Solver", "PaStiX"}};
+        json solver_data{{"Type", "PaStiX"}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -157,7 +157,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("PaStiX LU")
     {
-        json solver_data{{"Solver", "PaStiX"}};
+        json solver_data{{"Type", "PaStiX"}};
 
         auto linear_solver = make_linear_solver(solver_data, false);
 
@@ -168,7 +168,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("MUMPS SPD")
     {
-        json solver_data{{"Solver", "MUMPS"}};
+        json solver_data{{"Type", "MUMPS"}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -179,7 +179,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("MUMPS LU")
     {
-        json solver_data{{"Solver", "MUMPS"}};
+        json solver_data{{"Type", "MUMPS"}};
 
         auto linear_solver = make_linear_solver(solver_data, false);
 
@@ -190,7 +190,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("SparseLU")
     {
-        json solver_data{{"Solver", "Direct"}};
+        json solver_data{{"Type", "Direct"}};
 
         auto linear_solver = make_linear_solver(solver_data, false);
 
@@ -201,7 +201,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("SparseLDLT")
     {
-        json solver_data{{"Solver", "Direct"}};
+        json solver_data{{"Type", "Direct"}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -213,7 +213,7 @@ TEST_CASE("Linear solver test suite")
 #ifdef ENABLE_CUDA
     SECTION("GPU Preconditioned Conjugate Gradient Default")
     {
-        json solver_data{{"Solver", "IterativeGPU"}};
+        json solver_data{{"Type", "IterativeGPU"}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -224,7 +224,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("GPU Preconditioned Conjugate Gradient Tolerance")
     {
-        json solver_data{{"Solver", "Iterative"}, {"Tolerance", 1.0e-8}};
+        json solver_data{{"Type", "Iterative"}, {"Tolerance", 1.0e-8}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -235,7 +235,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("GPU Preconditioned Conjugate Gradient Iterations")
     {
-        json solver_data{{"Solver", "Iterative"}, {"MaxIterations", 100}};
+        json solver_data{{"Type", "Iterative"}, {"MaxIterations", 100}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -246,7 +246,7 @@ TEST_CASE("Linear solver test suite")
     }
     SECTION("GPU Preconditioned Conjugate Gradient Iterations and Tolerance")
     {
-        json solver_data{{"Solver", "Iterative"}, {"MaxIterations", 100}, {"Tolerance", 1.0e-8}};
+        json solver_data{{"Type", "Iterative"}, {"MaxIterations", 100}, {"Tolerance", 1.0e-8}};
 
         auto linear_solver = make_linear_solver(solver_data);
 
@@ -258,8 +258,8 @@ TEST_CASE("Linear solver test suite")
 #endif
     SECTION("Error")
     {
-        json solver_data{{"Solver", "PurpleMonkey"}};
+        json solver_data{{"Type", "PurpleMonkey"}};
 
-        REQUIRE_THROWS_AS(make_linear_solver(solver_data), std::runtime_error);
+        REQUIRE_THROWS_AS(make_linear_solver(solver_data), std::domain_error);
     }
 }
