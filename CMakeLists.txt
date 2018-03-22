@@ -3,8 +3,6 @@ cmake_minimum_required(VERSION 3.9)
 
 project(neonfe VERSION 0.1 LANGUAGES CXX)
 
-message(STATUS "Build type is: " ${CMAKE_BUILD_TYPE})
-
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 option(ENABLE_CUDA "Enable CUDA linear solver" OFF)
