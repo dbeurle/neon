@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.0)
-project(termcolor_builder CXX)
+
 include(ExternalProject)
+
 find_package(Git REQUIRED)
 
 ExternalProject_Add(

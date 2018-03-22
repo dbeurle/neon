@@ -3,12 +3,13 @@
 
 #include <type_traits>
 
+/// \file runge_kutta_integration.hpp
+/// \brief Second, fourth and fifth order explicit methods for time integration
+
 namespace neon
 {
-/**
- * Perform a second order Runge-Kutta step for the given type.
- * The type \p functor must accept time and the value.
- */
+/// Perform a second order Runge-Kutta step for the given type.
+/// The type \p functor must accept time and the value.
 template <typename functor>
 auto runge_kutta_second_order(functor&& f)
 {
@@ -22,10 +23,8 @@ auto runge_kutta_second_order(functor&& f)
     };
 }
 
-/**
- * Perform a fourth order Runge-Kutta step for the given type.
- * The type \p functor must accept time and the value.
- */
+/// Perform a fourth order Runge-Kutta step for the given type.
+/// The type \p functor must accept time and the value.
 template <typename functor>
 auto runge_kutta_fourth_order(functor&& f)
 {
