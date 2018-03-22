@@ -20,7 +20,7 @@ foreach(test
              time_integrators)
 
     add_executable(${test}_test ${test}.cpp)
-    add_dependencies(${test}_test catch neon catch_main)
+    add_dependencies(${test}_test neon catch_main)
 
     target_link_libraries(${test}_test PRIVATE catch_main neon)
     target_include_directories(${test}_test PUBLIC ${CMAKE_SOURCE_DIR}/src
@@ -34,7 +34,7 @@ foreach(test
     set_target_properties(${test}_test PROPERTIES CXX_STANDARD 17
                                                   CXX_STANDARD_REQUIRED YES
                                                   CXX_EXTENSIONS NO
-                                       COMPILE_FLAGS "-Wall")
+                                       COMPILE_FLAGS "-Wall ${OpenMP_CXX_FLAGS}")
 
     add_test(${test}_test ${CMAKE_CURRENT_BINARY_DIR}/${test}_test)
 endforeach()
