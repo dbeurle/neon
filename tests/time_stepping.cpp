@@ -1,7 +1,5 @@
 
-#define CATCH_CONFIG_MAIN
-
-#include "catch.hpp"
+#include <catch.hpp>
 
 #include "solver/adaptive_time_step.hpp"
 #include "solver/time_step_control.hpp"

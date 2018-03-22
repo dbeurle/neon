@@ -9,32 +9,33 @@
 
 namespace neon::fem
 {
-/// sym_gradient signals the use of
-/// \f{align*}{
-/// a(w,u) &= (\nabla_S N_a^T) \hspace{0.1cm} (\nabla_S N_a)
-/// \f}
-/// where in a vector case the symmetric gradient operator
-/// takes on a form depending on the number of dimensions.
-///
-/// For two dimensions:
-/// \f{align*}{
-/// \nabla_S &= \begin{bmatrix} N_{a,1} & 0       \\
-///                             0       & N_{a,2} \\
-///                             N_{a,2} & N_{a,1} \\
-/// \end{bmatrix}
-/// \f}
-/// For three dimensions:
-/// \f{align*}{
-/// \nabla_S &= \begin{bmatrix} N_{a,1} & 0       & 0       \\
-///                             0       & N_{a,2} & 0       \\
-///                             0       &  0      & N_{a,3} \\
-///                             0       & N_{a,3} & N_{a,2} \\
-///                             N_{a,3} & 0       & N_{a,1} \\
-///                             N_{a,2} & N_{a,1} & 0       \\
-/// \end{bmatrix}
-/// \f}
-/// Where \f$ N_{a,i} \f$ represents the partial derivative with respect
-/// to the \f$ i \f$th dimension of the shape function in the parent domain
+/** sym_gradient signals the use of
+ * \f{align*}{
+ * a(w,u) &= (\nabla_S N_a^T) \hspace{0.1cm} (\nabla_S N_a)
+ * \f}
+ * where in a vector case the symmetric gradient operator
+ * takes on a form depending on the number of dimensions.
+ *
+ * For two dimensions:
+ * \f{align*}{
+ * \nabla_S &= \begin{bmatrix} N_{a,1} & 0       \\
+ *                             0       & N_{a,2} \\
+ *                             N_{a,2} & N_{a,1} \\
+ * \end{bmatrix}
+ * \f}
+ * For three dimensions:
+ * \f{align*}{
+ * \nabla_S &= \begin{bmatrix} N_{a,1} & 0       & 0       \\
+ *                             0       & N_{a,2} & 0       \\
+ *                             0       &  0      & N_{a,3} \\
+ *                             0       & N_{a,3} & N_{a,2} \\
+ *                             N_{a,3} & 0       & N_{a,1} \\
+ *                             N_{a,2} & N_{a,1} & 0       \\
+ * \end{bmatrix}
+ * \f}
+ * Where \f$ N_{a,i} \f$ represents the partial derivative with respect
+ * to the \f$ i \f$th dimension of the shape function in the parent domain
+ */
 template <int spatial_dimension>
 inline void sym_gradient(matrix& B, matrix const& L)
 {
@@ -71,32 +72,33 @@ inline void sym_gradient(matrix& B, matrix const& L)
     }
 }
 
-/// sym_gradient signals the use of
-/// \f{align*}{
-/// a(w,u) &= (\nabla_S N_a^T) \hspace{0.1cm} (\nabla_S N_a)
-/// \f}
-/// where in a vector case the symmetric gradient operator
-/// takes on a form depending on the number of dimensions.
-///
-/// For two dimensions:
-/// \f{align*}{
-/// \nabla_S &= \begin{bmatrix} N_{a,1} & 0       \\
-///                             0       & N_{a,2} \\
-///                             N_{a,2} & N_{a,1} \\
-/// \end{bmatrix}
-/// \f}
-/// For three dimensions:
-/// \f{align*}{
-/// \nabla_S &= \begin{bmatrix} N_{a,1} & 0       & 0       \\
-///                             0       & N_{a,2} & 0       \\
-///                             0       &  0      & N_{a,3} \\
-///                             0       & N_{a,3} & N_{a,2} \\
-///                             N_{a,3} & 0       & N_{a,1} \\
-///                             N_{a,2} & N_{a,1} & 0       \\
-/// \end{bmatrix}
-/// \f}
-/// Where \f$ N_{a,i} \f$ represents the partial derivative with respect
-/// to the \f$ i \f$th dimension of the shape function in the parent domain
+/** sym_gradient signals the use of
+ * \f{align*}{
+ * a(w,u) &= (\nabla_S N_a^T) \hspace{0.1cm} (\nabla_S N_a)
+ * \f}
+ * where in a vector case the symmetric gradient operator
+ * takes on a form depending on the number of dimensions.
+ *
+ * For two dimensions:
+ * \f{align*}{
+ * \nabla_S &= \begin{bmatrix} N_{a,1} & 0       \\
+ *                             0       & N_{a,2} \\
+ *                             N_{a,2} & N_{a,1} \\
+ * \end{bmatrix}
+ * \f}
+ * For three dimensions:
+ * \f{align*}{
+ * \nabla_S &= \begin{bmatrix} N_{a,1} & 0       & 0       \\
+ *                             0       & N_{a,2} & 0       \\
+ *                             0       &  0      & N_{a,3} \\
+ *                             0       & N_{a,3} & N_{a,2} \\
+ *                             N_{a,3} & 0       & N_{a,1} \\
+ *                             N_{a,2} & N_{a,1} & 0       \\
+ * \end{bmatrix}
+ * \f}
+ * Where \f$ N_{a,i} \f$ represents the partial derivative with respect
+ * to the \f$ i \f$th dimension of the shape function in the parent domain
+ */
 template <int spatial_dimension>
 inline matrix sym_gradient(matrix const& L)
 {

@@ -2,7 +2,7 @@
 #include "linear_solver_factory.hpp"
 
 #ifdef ENABLE_CUDA
-#include "conjugate_gradientGPU.hpp"
+#include "conjugate_gradient_cuda.hpp"
 #endif
 
 #include "MUMPS.hpp"
@@ -77,29 +77,47 @@ std::unique_ptr<LinearSolver> make_linear_solver(json const& solver_data, bool c
 
         if (!is_symmetric)
         {
-            throw std::domain_error("A non-symmetric iterative solver for GPU has not yet been "
-                                    "implemented\n");
-        }
-
-        if (solver_data.count("Tolerance") && solver_data.count("MaxIterations"))
-        {
-            return std::make_unique<conjugate_gradientGPU>(solver_data["Tolerance"].get<double>(),
-                                                           solver_data["MaxIterations"].get<int>());
-        }
-        else if (solver_data.count("Tolerance"))
-        {
-            return std::make_unique<conjugate_gradientGPU>(solver_data["Tolerance"].get<double>());
-        }
-        else if (solver_data.count("MaxIterations"))
-        {
-            return std::make_unique<conjugate_gradientGPU>(solver_data["MaxIterations"].get<int>());
+            if (solver_data.count("Tolerance") && solver_data.count("MaxIterations"))
+            {
+                return std::make_unique<
+                    biconjugate_gradient_stabilised_cuda>(solver_data["Tolerance"].get<double>(),
+                                                          solver_data["MaxIterations"].get<int>());
+            }
+            else if (solver_data.count("Tolerance"))
+            {
+                return std::make_unique<biconjugate_gradient_stabilised_cuda>(
+                    solver_data["Tolerance"].get<double>());
+            }
+            else if (solver_data.count("MaxIterations"))
+            {
+                return std::make_unique<biconjugate_gradient_stabilised_cuda>(
+                    solver_data["MaxIterations"].get<int>());
+            }
+            return std::make_unique<biconjugate_gradient_stabilised_cuda>();
         }
         else
         {
-            return std::make_unique<conjugate_gradientGPU>();
+            if (solver_data.count("Tolerance") && solver_data.count("MaxIterations"))
+            {
+                return std::make_unique<conjugate_gradient_cuda>(solver_data["Tolerance"].get<double>(),
+                                                                 solver_data["MaxIterations"]
+                                                                     .get<int>());
+            }
+            else if (solver_data.count("Tolerance"))
+            {
+                return std::make_unique<conjugate_gradient_cuda>(
+                    solver_data["Tolerance"].get<double>());
+            }
+            else if (solver_data.count("MaxIterations"))
+            {
+                return std::make_unique<conjugate_gradient_cuda>(
+                    solver_data["MaxIterations"].get<int>());
+            }
+            return std::make_unique<conjugate_gradient_cuda>();
         }
+
 #else
-        throw std::domain_error("conjugate_gradientGPU is only available when neon is "
+        throw std::domain_error("conjugate_gradient_cuda is only available when neon is "
                                 "configured with -DENABLE_CUDA=ON\n");
 #endif
     }

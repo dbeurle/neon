@@ -28,8 +28,8 @@ target_include_directories(neon PUBLIC ${CMAKE_SOURCE_DIR}/src
                                        ${JSON_INCLUDE_DIR}
                                        ${MUMPS_INCLUDE_DIR}
                                        ${EIGEN_INCLUDE_DIR}
-                                       ${BLAZE_INCLUDE_DIR}
                                        ${VTK_INCLUDE_DIRS}
+                                       ${CUDA_INCLUDE_DIRS}
                                        ${RV3_INCLUDE_DIR}
                                        ${TERMCOLOR_INCLUDE_DIR})
 
@@ -37,11 +37,13 @@ add_dependencies(neon eigen3 range-v3 termcolor json)
 
 if (ENABLE_CUDA)
     add_library(dmatvec STATIC ${CMAKE_SOURCE_DIR}/src/solver/linear/dmatrix_vector_product.cu)
-    target_link_libraries(neon dmatvec)
+    target_link_libraries(neon PRIVATE dmatvec)
+    set_target_properties(neon PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
     add_dependencies(neon dmatvec)
 endif()
 
 target_link_libraries(neon
+                      PRIVATE
                       OpenMP::OpenMP_CXX
                       ${Boost_LIBRARIES}
                       ${MUMPS_LIBRARY}

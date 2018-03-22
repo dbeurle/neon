@@ -351,12 +351,13 @@ namespace detail
     return (vector6() << a(0, 0), a(1, 1), a(2, 2), a(1, 2), a(0, 2), a(0, 1)).finished();
 }
 
-/// Convert Voigt notation to second order tensor according to
-/// \f$ \begin{bmatrix} \sigma_{11} & \sigma_{12} & \sigma_{13} \\
-/// \sigma_{21} & \sigma_{22} & \sigma_{23} \\ \sigma_{31} & \sigma_{32} & \sigma_{33} \end{bmatrix}
-/// = \begin{bmatrix} \sigma_{11} \\ \sigma_{22} \\ \sigma_{33} \\ \sigma_{23} \\ \sigma_{13} \\
-/// \sigma_{12} \end{bmatrix}
-/// \f$
+/** Convert Voigt notation to second order tensor according to
+ * \f$ \begin{bmatrix} \sigma_{11} & \sigma_{12} & \sigma_{13} \\
+ * \sigma_{21} & \sigma_{22} & \sigma_{23} \\ \sigma_{31} & \sigma_{32} & \sigma_{33} \end{bmatrix}
+ * = \begin{bmatrix} \sigma_{11} \\ \sigma_{22} \\ \sigma_{33} \\ \sigma_{23} \\ \sigma_{13} \\
+ * \sigma_{12} \end{bmatrix}
+ * \f$
+ */
 [[nodiscard]] inline matrix2 from(vector3 const& a)
 {
     // clang-format off
@@ -365,12 +366,13 @@ namespace detail
     // clang-format on
 }
 
-/// Convert Voigt notation to second order tensor according to
-/// \f$ \begin{bmatrix} \sigma_{11} & \sigma_{12} & \sigma_{13} \\
-/// \sigma_{21} & \sigma_{22} & \sigma_{23} \\ \sigma_{31} & \sigma_{32} & \sigma_{33} \end{bmatrix}
-/// = \begin{bmatrix} \sigma_{11} \\ \sigma_{22} \\ \sigma_{33} \\ \sigma_{23} \\ \sigma_{13} \\
-/// \sigma_{12} \end{bmatrix}
-/// \f$
+/** Convert Voigt notation to second order tensor according to
+ * \f$ \begin{bmatrix} \sigma_{11} & \sigma_{12} & \sigma_{13} \\
+ * \sigma_{21} & \sigma_{22} & \sigma_{23} \\ \sigma_{31} & \sigma_{32} & \sigma_{33} \end{bmatrix}
+ * = \begin{bmatrix} \sigma_{11} \\ \sigma_{22} \\ \sigma_{33} \\ \sigma_{23} \\ \sigma_{13} \\
+ * \sigma_{12} \end{bmatrix}
+ * \f$
+ */
 [[nodiscard]] inline matrix3 from(vector6 const& a)
 {
     // clang-format off

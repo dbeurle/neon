@@ -1,6 +1,4 @@
 
-#define CATCH_CONFIG_MAIN
-
 #include <catch.hpp>
 
 #include "numeric/index_types.hpp"
