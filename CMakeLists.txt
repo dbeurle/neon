@@ -19,7 +19,7 @@ add_subdirectory(${EXTERNAL_PROJECTS_DIR}/termcolor)
 
 if (ENABLE_CUDA)
     enable_language(CUDA)
-    find_package(CUDA REQUIRED)    
+    find_package(CUDA REQUIRED)
     add_definitions(-DENABLE_CUDA)
 endif()
 
