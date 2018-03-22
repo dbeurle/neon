@@ -1,6 +1,4 @@
 
-#define CATCH_CONFIG_MAIN
-
 #include <catch.hpp>
 
 #include "numeric/tensor_operations.hpp"
@@ -61,9 +59,9 @@ TEST_CASE("Spectral decomposition")
     {
         matrix2 A = matrix2::Identity();
 
-        auto const[is_unique, eigenvalues, eigenprojections] = spectral_decomposition(A);
+        auto const [is_unique, eigenvalues, eigenprojections] = spectral_decomposition(A);
 
-        auto const[x1, x2] = eigenvalues;
+        auto const [x1, x2] = eigenvalues;
 
         REQUIRE(is_unique == false);
         REQUIRE(x1 == Approx(1.0).margin(ZERO_MARGIN));
@@ -73,9 +71,9 @@ TEST_CASE("Spectral decomposition")
     {
         matrix2 A = matrix2::Ones();
 
-        auto const[is_unique, eigenvalues, eigenprojections] = spectral_decomposition(A);
+        auto const [is_unique, eigenvalues, eigenprojections] = spectral_decomposition(A);
 
-        auto const[x1, x2] = eigenvalues;
+        auto const [x1, x2] = eigenvalues;
 
         REQUIRE(is_unique == true);
         REQUIRE(x1 == Approx(2.0).margin(ZERO_MARGIN));

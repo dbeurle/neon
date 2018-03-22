@@ -1,6 +1,4 @@
 
-#define CATCH_CONFIG_MAIN
-
 #include <catch.hpp>
 
 #include "interpolations/triangle.hpp"
@@ -11,14 +9,11 @@
 #include "mesh/diffusion/boundary/newton_convection.hpp"
 #include "io/json.hpp"
 
-#include <range/v3/view/set_algorithm.hpp>
-
 #include <memory>
 
 #include "CubeJson.hpp"
 
 using namespace neon;
-using namespace ranges;
 
 constexpr auto ZERO_MARGIN = 1.0e-5;
 

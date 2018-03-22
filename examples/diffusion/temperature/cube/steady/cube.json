@@ -45,7 +45,7 @@
             }]
         }],
         "LinearSolver" : {
-	    "Solver" : "PaStiX"
+	    "Type" : "PaStiX"
         },
         "Visualisation" : {
             "Fields" : ["Temperature"]

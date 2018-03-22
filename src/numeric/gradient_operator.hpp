@@ -5,10 +5,11 @@
 
 #include "constitutive/voigt_dimension.hpp"
 
+/// \file gradient_operator.hpp
+
 namespace neon::fem
 {
-/**
- * sym_gradient signals the use of
+/** sym_gradient signals the use of
  * \f{align*}{
  * a(w,u) &= (\nabla_S N_a^T) \hspace{0.1cm} (\nabla_S N_a)
  * \f}
@@ -71,8 +72,7 @@ inline void sym_gradient(matrix& B, matrix const& L)
     }
 }
 
-/**
- * sym_gradient signals the use of
+/** sym_gradient signals the use of
  * \f{align*}{
  * a(w,u) &= (\nabla_S N_a^T) \hspace{0.1cm} (\nabla_S N_a)
  * \f}

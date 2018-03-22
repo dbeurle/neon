@@ -1,7 +1,4 @@
 
-
-#define CATCH_CONFIG_MAIN
-
 #include <catch.hpp>
 
 #include "solver/time/runge_kutta_integration.hpp"

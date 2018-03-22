@@ -1,6 +1,4 @@
 
-#define CATCH_CONFIG_MAIN
-
 #include <catch.hpp>
 
 #include "mesh/basic_mesh.hpp"

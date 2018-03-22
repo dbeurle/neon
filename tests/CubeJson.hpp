@@ -140,7 +140,7 @@ inline std::string simulation_data_json()
            //
            "\"Time\" : {\"Period\" : 1.0, \"Increments\": { "
            "\"Initial\" : 1.0, \"Minimum\" : 0.001, \"Maximum\" : 10.0, \"Adaptive\" : true }},"
-           "\"LinearSolver\" : {\"Solver\" : \"Iterative\"}}";
+           "\"LinearSolver\" : {\"Type\" : \"Iterative\"}}";
 }
 
 std::string const nonlinear_options_disp_broken_json("{\"NonlinearOptions\" : { "
@@ -168,6 +168,6 @@ inline std::string simulation_data_traction_json()
 
 inline std::string solver_data_json()
 {
-    return "{\"Solver\" : \"Iterative\", \"MaxIterations\" : 1000, "
+    return "{\"Type\" : \"Iterative\", \"MaxIterations\" : 1000, "
            " \"Tolerance\" : 1e-6 }";
 }

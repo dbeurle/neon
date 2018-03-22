@@ -65,7 +65,7 @@
             }]
         }],
         "LinearSolver" : {
-            "Solver" : "Direct"
+            "Type" : "Direct"
         },
         "Visualisation" : {
             "Fields" : ["Displacement", "DeformationGradient", "CauchyStress"],

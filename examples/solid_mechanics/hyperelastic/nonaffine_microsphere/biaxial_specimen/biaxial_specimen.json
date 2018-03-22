@@ -72,7 +72,7 @@
             }]
         }],
         "LinearSolver" : {
-            "Solver" : "Iterative"
+            "Type" : "Iterative"
         },
         "Visualisation" : {
             "Fields" : ["Displacement", "DeformationGradient", "CauchyStress"],

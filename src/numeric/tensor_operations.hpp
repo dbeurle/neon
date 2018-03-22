@@ -3,46 +3,46 @@
 
 #include "dense_matrix.hpp"
 
+/// \file tensor_operations.hpp
+/// \brief Collection of tensor operations
+
 namespace neon
 {
-/**
- * Performs the tensor dot product on two second order tensors in three dimensions.
- */
+/// Performs the tensor dot product on two second order tensors in three dimensions.
 template <class MatrixLeft, class MatrixRight>
-[[nodiscard]] double double_dot(MatrixLeft const& a, MatrixRight const& b)
-{
+[[nodiscard]] double double_dot(MatrixLeft const& a, MatrixRight const& b) {
     return (a.array() * b.array()).sum();
 }
 
 namespace detail
 {
-/** @return the volumetric part of the tensor */
-[[nodiscard]] inline matrix2 volumetric(matrix2 const& a)
-{
-    return matrix2::Identity() * a.trace() / 3.0;
+    /// \return the volumetric part of the tensor
+    [[nodiscard]] inline matrix2 volumetric(matrix2 const& a)
+    {
+        return matrix2::Identity() * a.trace() / 3.0;
+    }
+
+    /// \return the volumetric part of the tensor
+    [[nodiscard]] inline matrix3 volumetric(matrix3 const& a)
+    {
+        return matrix3::Identity() * a.trace() / 3.0;
+    }
+
+    /// \return the deviatoric part of the tensor
+    [[nodiscard]] inline matrix2 deviatoric(matrix2 const& a) { return a - volumetric(a); }
+
+    /// \return the deviatoric part of the tensor
+    [[nodiscard]] inline matrix3 deviatoric(matrix3 const& a) { return a - volumetric(a); }
 }
 
-/** @return the volumetric part of the tensor */
-[[nodiscard]] inline matrix3 volumetric(matrix3 const& a)
-{
-    return matrix3::Identity() * a.trace() / 3.0;
-}
-
-/** @return the deviatoric part of the tensor */
-[[nodiscard]] inline matrix2 deviatoric(matrix2 const& a) { return a - volumetric(a); }
-
-/** @return the deviatoric part of the tensor */
-[[nodiscard]] inline matrix3 deviatoric(matrix3 const& a) { return a - volumetric(a); }
-}
-
-/** @return the volumetric part of the tensor */
+/// \return the volumetric part of the tensor
 template <typename MatrixExpression>
 [[nodiscard]] auto volumetric(MatrixExpression const& a)
 {
     return detail::volumetric(a.eval());
 }
 
-/** @return the deviatoric part of the tensor */
+/// \return the deviatoric part of the tensor
 template <typename MatrixExpression>
 [[nodiscard]] auto deviatoric(MatrixExpression const& a)
 {
@@ -61,10 +61,10 @@ template <typename MatrixExpression>
     return std::pow(a.determinant(), -1.0 / 3.0) * a;
 }
 
-/** @return The symmetric part of the tensor */
+/// \return The symmetric part of the tensor
 [[nodiscard]] inline matrix2 symmetric(matrix2 const& a) { return 0.5 * (a.transpose() + a); }
 
-/** @return The symmetric part of the tensor */
+/// \return The symmetric part of the tensor
 [[nodiscard]] inline matrix3 symmetric(matrix3 const& a) { return 0.5 * (a.transpose() + a); }
 
 /**
@@ -87,7 +87,7 @@ template <typename MatrixExpression>
     return 0.5 * (std::pow(a.trace(), 2) - (a * a).trace());
 }
 
-/** @return Third invariant, which is the determinant of the tensor */
+/// \return Third invariant, which is the determinant of the tensor
 [[nodiscard]] inline double I3(matrix3 const& a) { return a.determinant(); }
 
 [[nodiscard]] inline matrix identity_expansion(matrix const& H, int const nodal_dofs)
@@ -294,10 +294,8 @@ namespace d2
     // clang-format on
 }
 
-/**
- * Compute the fourth order symmetric identity tensor in Voigt notation according to
- * \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
- */
+/// Compute the fourth order symmetric identity tensor in Voigt notation according to
+/// \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
 [[nodiscard]] inline matrix6 identity()
 {
     // clang-format off
@@ -312,10 +310,8 @@ namespace d2
 
 namespace d2
 {
-/**
- * Compute the fourth order symmetric identity tensor in Voigt notation according to
- * \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
- */
+/// Compute the fourth order symmetric identity tensor in Voigt notation according to
+/// \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
 [[nodiscard]] inline matrix3 identity()
 {
     // clang-format off
@@ -327,8 +323,8 @@ namespace d2
 }
 }
 
-//! Kinetic description of tensor to voigt notation where off diagonal components
-//! are not multiplied by a factor of two
+/// Kinetic description of tensor to voigt notation where off diagonal components
+/// are not multiplied by a factor of two
 namespace kinetic
 {
 namespace detail
@@ -355,8 +351,7 @@ namespace detail
     return (vector6() << a(0, 0), a(1, 1), a(2, 2), a(1, 2), a(0, 2), a(0, 1)).finished();
 }
 
-/**
- * Convert Voigt notation to second order tensor according to
+/** Convert Voigt notation to second order tensor according to
  * \f$ \begin{bmatrix} \sigma_{11} & \sigma_{12} & \sigma_{13} \\
  * \sigma_{21} & \sigma_{22} & \sigma_{23} \\ \sigma_{31} & \sigma_{32} & \sigma_{33} \end{bmatrix}
  * = \begin{bmatrix} \sigma_{11} \\ \sigma_{22} \\ \sigma_{33} \\ \sigma_{23} \\ \sigma_{13} \\
@@ -371,8 +366,7 @@ namespace detail
     // clang-format on
 }
 
-/**
- * Convert Voigt notation to second order tensor according to
+/** Convert Voigt notation to second order tensor according to
  * \f$ \begin{bmatrix} \sigma_{11} & \sigma_{12} & \sigma_{13} \\
  * \sigma_{21} & \sigma_{22} & \sigma_{23} \\ \sigma_{31} & \sigma_{32} & \sigma_{33} \end{bmatrix}
  * = \begin{bmatrix} \sigma_{11} \\ \sigma_{22} \\ \sigma_{33} \\ \sigma_{23} \\ \sigma_{13} \\
@@ -401,11 +395,9 @@ template <typename matrix_expression>
     return detail::to(a.eval());
 }
 
-/**
- * Compute the deviatoric tensor in Voigt notation according to
- * \f$ \mathbb{P} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) -
- * \frac{1}{3}\delta_{ij} \delta_{kl} \f$
- */
+/// Compute the deviatoric tensor in Voigt notation according to
+/// \f$ \mathbb{P} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) -
+/// \frac{1}{3}\delta_{ij} \delta_{kl} \f$
 [[nodiscard]] inline matrix6 deviatoric()
 {
     // clang-format off
@@ -418,10 +410,8 @@ template <typename matrix_expression>
     // clang-format on
 }
 
-/**
- * Compute the fourth order symmetric identity tensor in Voigt notation according to
- * \f$ \mathbb{I} = \delta_{ijkl} \f$
- */
+/// Compute the fourth order symmetric identity tensor in Voigt notation according to
+/// \f$ \mathbb{I} = \delta_{ijkl} \f$
 [[nodiscard]] inline matrix6 fourth_order_identity() { return matrix6::Identity(); }
 }
 }
@@ -457,7 +447,7 @@ template <typename matrix_expression>
     \f{align*}{
         & \mathbf{a} \otimes \mathbf{b} \otimes
     \f}
- * @return fourth order tensor in Voigt notation
+ * \return fourth order tensor in Voigt notation
  */
 [[nodiscard]] inline matrix6 outer_product(matrix3 const& a, matrix3 const& b)
 {
@@ -478,12 +468,10 @@ template <typename matrix_expression>
     return outer_product(outer_product(a, b), outer_product(c, d));
 }
 
-/**
- * Computes the outer product of two second order tensors in three dimensions
-    \f{align*}{
-        & \mathbf{a} \otimes \mathbf{b}
-    \f}
-*/
+/// Computes the outer product of two second order tensors in three dimensions
+/// \f{align*}{
+///    & \mathbf{a} \otimes \mathbf{b}
+/// \f}
 [[nodiscard]] inline matrix6 outer_product(matrix3 const& h) { return outer_product(h, h); }
 
 namespace detail

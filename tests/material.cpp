@@ -1,7 +1,5 @@
 
-#define CATCH_CONFIG_MAIN
-
-#include "catch.hpp"
+#include <catch.hpp>
 
 #include <range/v3/numeric.hpp>
 

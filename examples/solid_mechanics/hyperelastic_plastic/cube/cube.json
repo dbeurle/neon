@@ -54,7 +54,7 @@
             }]
         }],
         "LinearSolver" : {
-            "Solver" : "PaStiX",
+            "Type" : "PaStiX",
             "MaxIterations" : 1000,
             "MaxTolerance"  : 1.0e-10
         },

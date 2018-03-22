@@ -5,8 +5,16 @@
 #include <limits>
 #include <type_traits>
 
+/// \file float_compare.hpp
+
 namespace neon
 {
+/// Perform a floating point comparison using a specified number of units
+/// in the last place
+/// \tparam Floating point type
+/// \param x Value 1
+/// \param y Value 2
+/// \param ulp Number of units in last place
 template <class T>
 std::enable_if_t<std::is_floating_point<T>::value, bool> is_approx(T const x,
                                                                    T const y,

@@ -12,11 +12,6 @@
 #include "math/transform_expand.hpp"
 #include "traits/mechanics.hpp"
 
-#include <range/v3/algorithm/count_if.hpp>
-#include <range/v3/algorithm/fill.hpp>
-#include <range/v3/algorithm/find_if.hpp>
-#include <range/v3/view/transform.hpp>
-
 #include <termcolor/termcolor.hpp>
 
 #include <tbb/parallel_for.h>
@@ -45,8 +40,9 @@ fem_submesh::fem_submesh(json const& material_data,
     variables->add(internal_variables_t::scalar::DetF);
 
     // Get the old data to the undeformed configuration
-    ranges::fill(variables->fetch(internal_variables_t::Tensor::DeformationGradient),
-                 matrix3::Identity());
+    auto& deformation_gradients = variables->fetch(internal_variables_t::Tensor::DeformationGradient);
+
+    std::fill(std::begin(deformation_gradients), std::end(deformation_gradients), matrix3::Identity());
 
     variables->commit();
 
@@ -245,21 +241,25 @@ void fem_submesh::update_Jacobian_determinants()
 {
     auto const& deformation_gradients = variables->fetch(
         internal_variables_t::Tensor::DeformationGradient);
-    auto& deformation_gradient_determinants = variables->fetch(internal_variables_t::scalar::DetF);
 
-    deformation_gradient_determinants = deformation_gradients
-                                        | ranges::view::transform(
-                                              [](auto const& F) { return F.determinant(); });
+    auto& F_determinants = variables->fetch(internal_variables_t::scalar::DetF);
 
-    auto const found = ranges::find_if(deformation_gradient_determinants,
-                                       [](auto detF) { return detF <= 0.0; });
+    std::transform(std::begin(deformation_gradients),
+                   std::end(deformation_gradients),
+                   std::begin(F_determinants),
+                   [](matrix3 const& F) { return F.determinant(); });
 
-    if (found != std::end(deformation_gradient_determinants))
+    auto const found = std::find_if(std::begin(F_determinants),
+                                    std::end(F_determinants),
+                                    [](auto const detF) { return detF <= 0.0; });
+
+    if (found != std::end(F_determinants))
     {
-        auto const count = ranges::count_if(deformation_gradient_determinants,
-                                            [](auto detF) { return detF <= 0.0; });
+        auto const count = std::count_if(std::begin(F_determinants),
+                                         std::end(F_determinants),
+                                         [](auto const detF) { return detF <= 0.0; });
 
-        auto const i = std::distance(deformation_gradient_determinants.begin(), found);
+        auto const i = std::distance(F_determinants.begin(), found);
 
         auto const [element, quadrature_point] = std::div(i, sf->quadrature().points());
 
