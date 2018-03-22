@@ -9,6 +9,7 @@ neon user documentation
    meshing
    material
    constitutive
+   boundary_conditions
    linear_solvers
    license
    contact
