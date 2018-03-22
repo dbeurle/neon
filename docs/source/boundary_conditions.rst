@@ -44,7 +44,28 @@ Solid mechanics
 =============== ============================================
 Keyword         Specification
 =============== ============================================
-``"Traction"``  Specified with degree of freedom ``"x"``, ``"y"`` or ``"z"``
-``"BodyForce"`` Specified with degree of freedom ``"x"``, ``"y"`` or ``"z"``
+``"Traction"``  Specified with degree of freedom ``"x"``, ``"y"`` and/or ``"z"``
+``"BodyForce"`` Specified with degree of freedom ``"x"``, ``"y"`` and/or ``"z"``
 ``"Pressure"``  Specified by ``"Value" : []``
 =============== ============================================
+
+Thermal
+~~~~~~~
+
+Thermal analysis specifies a heat flux which is defined to the normal of the surface.  In this case only a scalar value needs to be specified.
+
+=============== ============================================
+Keyword         Specification
+=============== ============================================
+``"HeatFlux"``  Specified by ``"Value" : []``
+=============== ============================================
+
+A special case occurs for the thermal analysis as a mixed (or Robin type) boundary condition.  This type is a combination of a Neumann and a Dirichlet condition and is used to model natural convection and is known as Newton Cooling.  This is specified by ::
+
+    {
+        "Name" : "fins",
+        "Type" : "NewtonCooling",
+        "Time" : [0.0, 5000.0],
+        "HeatTransferCoefficient" : [50.0, 50.0],
+        "AmbientTemperature" : [323.0, 323.0]
+    }

@@ -37,10 +37,10 @@ This model is used by specifying ::
         "FiniteStrain" : false
     }
 
-where the finite strain version of the J2 model is not required.
+where the finite strain version of the J2 model is not required.  Further modifications to the J2 model are given in subsequent subsections.
 
-Small strain J2 plasticity with isotropic Chaboche damage
-=========================================================
+Isotropic Chaboche damage
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 TODO Fill out model details.
 
