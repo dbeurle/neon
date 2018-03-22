@@ -10,6 +10,7 @@ neon user documentation
    material
    constitutive
    boundary_conditions
+   solution_methods
    linear_solvers
    license
    contact

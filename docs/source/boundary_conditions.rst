@@ -49,6 +49,8 @@ Keyword         Specification
 ``"Pressure"``  Specified by ``"Value" : []``
 =============== ============================================
 
+Note here, that ``"Pressure"`` is a non-follower load and does not rotate with the deformation of the body.
+
 Thermal
 ~~~~~~~
 
