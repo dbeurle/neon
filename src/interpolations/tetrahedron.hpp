@@ -27,7 +27,8 @@ protected:
     void precompute_shape_functions();
 };
 
-/** Isoparametric quadratric tetrahedral element (10 nodes) */
+/// Isoparametric quadratric tetrahedral element (10 nodes)
+/// with node ordering from \cite{Hughes2012}
 class tetrahedron10 : public volume_interpolation
 {
 public:
