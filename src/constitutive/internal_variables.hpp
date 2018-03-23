@@ -21,6 +21,7 @@ public:
 
     /** @return view index into the vector */
     std::size_t operator()(std::size_t const element, std::size_t const quadrature_point) const
+        noexcept
     {
         return quadrature_points * element + quadrature_point;
     }
@@ -55,7 +56,7 @@ public:
 public:
     enum class rank4 : std::uint8_t { tangent_operator };
 
-    /** Enumerations for internal variables that are tensor types */
+    /// Enumerations for internal variables that are tensor types
     enum class Tensor : std::uint8_t {
         /* Tensors for solid mechanics applications */
         // Stress measures
@@ -78,18 +79,20 @@ public:
         Conductivity
     };
 
+    /// Names for vector values
     enum class vector : std::uint8_t {
-        Chains,
-        Segments,
-        ShearModuli,
         HeatFlux,
-        deformation_history
+        deformation_history,
+        active_set,  /// The active number of chains in the network
+        inactive_set /// The inactive number of chains in the network
     };
 
+    /// Names for scalar values
     enum class scalar : std::uint8_t {
-        Chains,      // Chains for the micromechanical model
-        Segments,    // Segments for the micromechanical model
-        ShearModuli, // Shear moduli
+        active_chains,            /// Active chains for micromechanical ageing models
+        inactive_chains,          /// Inactive chains for micromechanical ageing models
+        active_segment_average,   /// Average number of active segments per chain
+        inactive_segment_average, /// Average number of inactive segments per chain
         VonMisesStress,
         EffectivePlasticStrain,
         DetF0, // Reference Jacobian determinant
@@ -261,14 +264,14 @@ public:
                                std::cref(rank4tensors.find(vars)->second)...);
     }
 
-    /** Commit to history when iteration converges */
+    /// Commit to history when iteration converges
     void commit()
     {
         rank2tensors_old = rank2tensors;
         scalars_old = scalars;
     }
 
-    /** Revert to the old state when iteration doesn't converge */
+    /// Revert to the old state when iteration doesn't converge
     void revert()
     {
         rank2tensors = rank2tensors_old;

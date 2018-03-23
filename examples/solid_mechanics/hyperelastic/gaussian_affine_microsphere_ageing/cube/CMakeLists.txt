@@ -8,4 +8,4 @@ configure_file("cube.mesh"
                "${CMAKE_CURRENT_BINARY_DIR}/cube.mesh"
                COPYONLY)
 
-add_test(gaussian_affine_microsphere_cube neonfe cube.json)
+add_test(gaussian_affine_microsphere_ageing_cube neonfe cube.json)
