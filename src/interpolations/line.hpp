@@ -6,7 +6,7 @@
 
 namespace neon
 {
-/** Line 2 node element with Gaussian integration */
+/// Line element with two nodes with Gaussian integration
 class line2 : public line_interpolation
 {
 public:
@@ -14,6 +14,7 @@ public:
 
     virtual int nodes() const override final { return 2; }
 
+    /// \return Element length
     double compute_measure(matrix const& nodal_coordinates) const;
 
 protected:
@@ -27,7 +28,7 @@ protected:
     void precompute_shape_functions();
 };
 
-/** Line 3 node element with Gaussian integration */
+/// Isoparameteric line element with three nodes using Gaussian quadrature
 class line3 : public line_interpolation
 {
 public:
@@ -35,6 +36,7 @@ public:
 
     virtual int nodes() const override final { return 3; }
 
+    /// \return Element length
     double compute_measure(matrix const& nodal_coordinates) const;
 
 protected:

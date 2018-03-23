@@ -6,12 +6,9 @@
 
 namespace neon
 {
-/**
- * hexahedron8 is responsible for computing the tri-linear shape functions for an
- * eight noded hexahedron element.
- * The shape functions and ordering is taken from Hughes 1986 - Linear static and dynamic finite
- * elements.
- */
+/// hexahedron8 is responsible for computing the tri-linear shape functions for an
+/// eight noded hexahedron element.
+/// The shape functions and ordering is from \cite{Hughes2012}
 class hexahedron8 : public volume_interpolation
 {
 public:
@@ -19,6 +16,7 @@ public:
 
     virtual int nodes() const override final { return 8; }
 
+    /// \return The element volume
     double compute_measure(matrix const& nodal_coordinates) const;
 
 protected:
@@ -38,11 +36,9 @@ protected:
     void precompute_shape_functions();
 };
 
-/**
- * hexahedron20 is responsible for computing the quadratic shape functions for an
- * twenty noded hexahedron element.  Nodes are only defined on the midside
- * and corner nodes.  The node ordering is from Hughes.
- */
+/// hexahedron20 is responsible for computing the quadratic shape functions for an
+/// twenty noded hexahedron element.  Nodes are only defined on the midside
+/// and corner nodes.  The node ordering is from \cite{Hughes2012}.
 class hexahedron20 : public volume_interpolation
 {
 public:
@@ -50,17 +46,16 @@ public:
 
     int nodes() const override final { return 20; }
 
+    /// \return The element volume
     double compute_measure(matrix const& nodal_coordinates) const;
 
 protected:
     void precompute_shape_functions();
 };
 
-/**
- * hexahedron27 is responsible for computing the quadratic shape functions for an
- * twenty-nine noded hexahedron element.  Nodes are also on the faces and the centre
- * of the reference cube.  The node ordering is from Hughes.
- */
+/// hexahedron27 is responsible for computing the quadratic shape functions for an
+/// twenty-nine noded hexahedron element.  Nodes are also on the faces and the centre
+/// of the reference cube.  The node ordering is from \cite{Hughes2012}.
 class hexahedron27 : public volume_interpolation
 {
 public:
@@ -68,6 +63,7 @@ public:
 
     int nodes() const override final { return 27; }
 
+    /// \return The element volume
     double compute_measure(matrix const& nodal_coordinates) const;
 
 protected:

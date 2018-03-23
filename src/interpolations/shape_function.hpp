@@ -10,6 +10,8 @@
 
 namespace neon
 {
+/// Base class for a shape function.  This manages a pointer to the underlying
+/// interpolation for a given quadrature type.
 template <typename QuadratureType>
 class shape_function
 {
@@ -17,12 +19,13 @@ public:
     using quadrature_type = QuadratureType;
 
 public:
-    /** Construct the shape function by consuming a quadrature implementation */
+    /// Construct the shape function by consuming a quadrature implementation
     shape_function(std::unique_ptr<quadrature_type>&& quadrature_impl)
         : numerical_quadrature(std::move(quadrature_impl))
     {
     }
 
+    /// \return Number of nodes in the interpolation function
     virtual int nodes() const = 0;
 
     quadrature_type const& quadrature() const { return *numerical_quadrature; };
@@ -31,12 +34,10 @@ public:
     matrix const& local_quadrature_extrapolation() const { return extrapolation; }
 
 protected:
-    /**
-     * Compute the extrapolation matrix to allow for quadrature valued variables
-     * to be averaged to the nodal points without ill-effects when using a
-     * least squares (for example with quadratric tetrahedron elements)
-     * developed in \cite Durand2014
-     */
+    /// Compute the extrapolation matrix to allow for quadrature valued variables
+    /// to be averaged to the nodal points without ill-effects when using a
+    /// least squares (for example with quadratric tetrahedron elements)
+    /// developed in \cite Durand2014
     void compute_extrapolation_matrix(matrix const N,
                                       matrix const local_nodal_coordinates,
                                       matrix const local_quadrature_coordinates);
