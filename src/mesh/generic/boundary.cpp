@@ -7,7 +7,6 @@
 
 #include <range/v3/algorithm/adjacent_find.hpp>
 #include <range/v3/algorithm/find_if.hpp>
-#include <range/v3/view/map.hpp>
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/zip.hpp>
 
