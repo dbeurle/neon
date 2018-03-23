@@ -40,10 +40,8 @@ auto runge_kutta_fourth_order(functor&& f)
     };
 }
 
-/**
- * Perform the Dorman-Prince 4th order embedded Runge-Kutta time discretisation
- * \cite DormandPrince1980
- */
+/// Perform the Dorman-Prince 4th order embedded Runge-Kutta time discretisation
+/// \cite DormandPrince1980
 template <typename functor>
 auto runge_kutta_fourth_fifth_order(functor&& f, double const error_tolerance = 1.0e-5)
 {

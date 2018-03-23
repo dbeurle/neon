@@ -23,6 +23,17 @@ gaussian_ageing_affine_microsphere::gaussian_ageing_affine_microsphere(
       shear_moduli{variables->entries(), {material.shear_modulus()}},
       intermediate_deformations{variables->entries(), {matrix3::Identity()}}
 {
+    variables->add(internal_variables_t::scalar::active_chains);
+    variables->add(internal_variables_t::scalar::inactive_chains);
+
+    variables->add(internal_variables_t::scalar::active_segment_average);
+    variables->add(internal_variables_t::scalar::inactive_segment_average);
+
+    auto& active_chains = variables->fetch(internal_variables_t::scalar::active_chains);
+
+    std::fill(begin(active_chains), end(active_chains), material.shear_modulus());
+
+    variables->commit();
 }
 
 void gaussian_ageing_affine_microsphere::update_internal_variables(double const time_step_size)
@@ -36,6 +47,8 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
 
     auto const& det_deformation_gradients = variables->fetch(internal_variables_t::scalar::DetF);
 
+    auto& active_chains = variables->fetch(internal_variables_t::scalar::active_chains);
+
     auto const K{material.bulk_modulus()};
 
     tbb::parallel_for(std::size_t{0}, deformation_gradients.size(), [&, this](auto const l) {
@@ -48,6 +61,10 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
 
             // Add a new entry at the for the newly formed secondary network
             shear_moduli[l].emplace_back(material.compute_new_shear_modulus(time_step_size));
+
+            std::cout << "Shear modulus: " << shear_moduli[l].back() << "\n";
+
+            active_chains[l] = shear_moduli[l].back();
 
             segments[l].emplace_back(material.compute_new_segment(segments[l].back(), time_step_size));
 

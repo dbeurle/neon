@@ -47,20 +47,20 @@ public:
 protected:
     virtual void write_to_file(int const time_step, double const total_time);
 
-    /** Write out the field to a vtk file */
+    /// Write out the field to a vtk file
     void add_field(std::string const& name, vector const& data, int const components);
 
 protected:
     std::string const directory_name = "visualisation";
     std::string file_name;
 
-    vtkSmartPointer<vtkUnstructuredGrid> unstructured_mesh;
+    vtkSmartPointer<vtkUnstructuredGrid> unstructured_mesh; /// VTK representation of mesh
 
-    std::ofstream pvd_file; //!< Stream for writing time history
+    std::ofstream pvd_file; /// Stream for writing time history
 
     std::unordered_set<std::string> output_set;
 
-    int write_every = 1; //!< Time steps to write out (e.g. two is every second time step)
+    int write_every = 1; /// Time steps to write out (e.g. two is every second time step)
     bool use_binary_format = true;
 };
 
@@ -97,6 +97,8 @@ private:
     scalar_map_t const scalar_map{{"AccumulatedPlasticStrain", variable_type::scalar::EffectivePlasticStrain},
                                   {"VonMisesStress", variable_type::scalar::VonMisesStress},
                                   {"Damage", variable_type::scalar::Damage},
+                                  {"ActiveChains", variable_type::scalar::active_chains},
+                                  {"InactiveChains", variable_type::scalar::inactive_chains},
                                   {"EnergyReleaseRate", variable_type::scalar::EnergyReleaseRate}};
 
     tensor_map_t const tensor_map{{"CauchyStress", variable_type::Tensor::Cauchy},
@@ -212,6 +214,7 @@ void FileIO<femMeshType>::add_mesh()
     {
         auto const vtk_ordered_connectivity = convert_to_vtk(submesh.element_connectivity(),
                                                              submesh.topology());
+
         for (std::int64_t element{0}; element < vtk_ordered_connectivity.cols(); ++element)
         {
             auto vtk_node_list = vtkSmartPointer<vtkIdList>::New();

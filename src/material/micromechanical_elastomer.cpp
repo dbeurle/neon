@@ -27,24 +27,33 @@ ageing_micromechanical_elastomer::ageing_micromechanical_elastomer(json const& m
         return "\"" + field + "\" is not specified in \"Material\" data";
     };
 
-    if (!material_data.count("SegmentDecayRate"))
-    {
-        throw std::domain_error(exception_string("SegmentDecayRate"));
-    }
     if (!material_data.count("ScissionProbability"))
     {
         throw std::domain_error(exception_string("ScissionProbability"));
     }
+
+    // if (!material_data.count("RecombinationProbability"))
+    // {
+    //     throw std::domain_error(exception_string("RecombinationProbability"));
+    // }
+
+    if (!material_data.count("SegmentDecayRate"))
+    {
+        throw std::domain_error(exception_string("SegmentDecayRate"));
+    }
+
     if (!material_data.count("CrosslinkGrowthRate"))
     {
         throw std::domain_error(exception_string("CrosslinkGrowthRate"));
     }
 
+    pr_scission = material_data["ScissionProbability"];
+    // pr_recombination = material_data["RecombinationProbability"];
+
     segment_decay_rate = material_data["SegmentDecayRate"];
-    scission_probability = material_data["ScissionProbability"];
     crosslink_growth_rate = material_data["CrosslinkGrowthRate"];
 
-    if (scission_probability < 0.0 || crosslink_growth_rate < 0.0 || segment_decay_rate < 0.0)
+    if (pr_scission < 0.0 || crosslink_growth_rate < 0.0 || segment_decay_rate < 0.0)
     {
         throw std::domain_error("Material properties for the segments must be positive");
     }
@@ -70,9 +79,7 @@ std::vector<double> ageing_micromechanical_elastomer::scission(std::vector<doubl
                    std::begin(segments),
                    std::begin(shear_moduli),
                    [this, time_step_size](auto const G, auto const N) {
-                       return G
-                              / (1.0
-                                 + time_step_size * (1.0 - std::pow(1.0 - scission_probability, N)));
+                       return G / (1.0 + time_step_size * (1.0 - std::pow(1.0 - pr_scission, N)));
                    });
 
     return shear_moduli;

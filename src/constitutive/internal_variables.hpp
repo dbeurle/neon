@@ -54,11 +54,14 @@ public:
     static auto constexpr tensor_size = rank2_dimension * rank2_dimension;
 
 public:
-    enum class rank4 : std::uint8_t { tangent_operator };
+    /// Fourth order tensor names
+    enum class rank4 : std::uint8_t {
+        /// Tangent operator for building the tangent (stiffness) matrix
+        tangent_operator
+    };
 
-    /// Enumerations for internal variables that are tensor types
+    /// Names for tensor values
     enum class Tensor : std::uint8_t {
-        /* Tensors for solid mechanics applications */
         // Stress measures
         Cauchy,
         Kirchhoff,
@@ -83,20 +86,30 @@ public:
     enum class vector : std::uint8_t {
         HeatFlux,
         deformation_history,
-        active_set,  /// The active number of chains in the network
-        inactive_set /// The inactive number of chains in the network
+        /// The active number of chains in the network
+        active_set,
+        /// The inactive number of chains in the network
+        inactive_set
     };
 
     /// Names for scalar values
     enum class scalar : std::uint8_t {
-        active_chains,            /// Active chains for micromechanical ageing models
-        inactive_chains,          /// Inactive chains for micromechanical ageing models
-        active_segment_average,   /// Average number of active segments per chain
-        inactive_segment_average, /// Average number of inactive segments per chain
+        /// Active chains for micromechanical ageing models
+        active_chains,
+        /// Inactive chains for micromechanical ageing models
+        inactive_chains,
+        /// Average number of active segments per chain
+        active_segment_average,
+        /// Average number of inactive segments per chain
+        inactive_segment_average,
+        /// Von Mises stress for continuum models
         VonMisesStress,
+        /// Accumulated equivalent plastic strain
         EffectivePlasticStrain,
-        DetF0, // Reference Jacobian determinant
-        DetF,  // Updated Jacobian determinant
+        /// Reference Jacobian determinant
+        DetF0,
+        /// Updated Jacobian determinant
+        DetF,
         Damage,
         EnergyReleaseRate
     };
