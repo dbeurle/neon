@@ -25,9 +25,16 @@ namespace neon::mechanical::solid
 class gaussian_ageing_affine_microsphere : public gaussian_affine_microsphere
 {
 public:
-    /** Type for the composition of the evolving network at each time point */
-    using segment_composition = std::vector<double>;
-    using shear_modulus_composition = std::vector<double>;
+    /// Store the active and inactive value
+    using value_pair = std::pair<double, double>;
+
+    /// Type for the composition of the active/inactive segment history
+    using segment_composition = std::vector<value_pair>;
+
+    /// Type for the composition of the active/inactive shear modulus history
+    using shear_modulus_composition = std::vector<value_pair>;
+
+    /// Type for the deformation history
     using deformation_composition = std::vector<matrix3>;
 
 public:
@@ -40,11 +47,13 @@ public:
     virtual void update_internal_variables(double const time_step_size) override;
 
 private:
-    ageing_micromechanical_elastomer material; //!< Material with micromechanical parameters
+    ageing_micromechanical_elastomer material; /// Material with micromechanical parameters
 
-    std::vector<segment_composition> segments;                      //!< Average segment variables
-    std::vector<shear_modulus_composition> shear_moduli;            //!< Shear moduli variables
-    std::vector<deformation_composition> intermediate_deformations; //!< Secondary network variables
+    std::vector<shear_modulus_composition> shear_moduli; /// Quadrature point shear moduli
+
+    std::vector<segment_composition> segments; /// Quadrature point average segment
+
+    std::vector<deformation_composition> intermediate_deformations; /// Secondary network variables
 };
 /** \} */
 }
