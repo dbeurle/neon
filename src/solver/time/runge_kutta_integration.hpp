@@ -40,6 +40,24 @@ auto runge_kutta_fourth_order(functor&& f)
     };
 }
 
+namespace detail
+{
+/// Helper function
+template <typename left_expression, typename right_expression>
+auto residual(left_expression const& left, right_expression const& right)
+{
+    if constexpr (!std::is_floating_point<left_expression>::value
+                  && !std::is_floating_point<right_expression>::value)
+    {
+        return (left - right).norm();
+    }
+    else
+    {
+        return std::abs(left - right);
+    }
+}
+}
+
 /// Perform the Dorman-Prince 4th order embedded Runge-Kutta time discretisation
 /// \cite DormandPrince1980
 template <typename functor>
@@ -72,7 +90,7 @@ auto runge_kutta_fourth_fifth_order(functor&& f, double const error_tolerance = 
             auto const dy_error = 5179.0 / 57600.0 * k1 + 7571.0 / 16695.0 * k3 + 393.0 / 640.0 * k4 - 92097.0 / 339200.0 * k5 + 187.0 / 2100.0 * k6 + 1.0 / 40.0 * k7;
             // clang-format on
 
-            auto const R = std::abs(dy_error - dy_trial) / dt;
+            auto const R = detail::residual(dy_error, dy_trial) / dt;
 
             if (R <= error_tolerance)
             {
