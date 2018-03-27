@@ -7,15 +7,13 @@
 
 namespace neon
 {
-/**
- * micromechanical_elastomer exposes an interface that returns the fundamental
- * material properties from a micromechanical point of view, including the
- * physical constants which make up the shear modulus for an entropy elastic
- * model.
- *
- * These additional parameters are associated with the evolution of the segments per
- * chain in the network.
- */
+/// micromechanical_elastomer exposes an interface that returns the fundamental
+/// material properties from a micromechanical point of view, including the
+/// physical constants which make up the shear modulus for an entropy elastic
+/// model.
+///
+/// These additional parameters are associated with the evolution of the segments per
+/// chain in the network.
 class micromechanical_elastomer : public isotropic_elastic_property
 {
 public:
