@@ -83,14 +83,7 @@ public:
     };
 
     /// Names for vector values
-    enum class vector : std::uint8_t {
-        HeatFlux,
-        deformation_history,
-        /// The active number of chains in the network
-        active_set,
-        /// The inactive number of chains in the network
-        inactive_set
-    };
+    enum class vector : std::uint8_t { HeatFlux, deformation_history };
 
     /// Names for scalar values
     enum class scalar : std::uint8_t {

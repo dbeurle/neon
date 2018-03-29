@@ -9,10 +9,9 @@
         "Name" : "rubber",
         "ElasticModulus" : 10.0e6,
         "PoissonsRatio" : 0.45,
-        "SegmentsPerChain" : 70,
-        "ScissionProbability" : 0.000015,
-        "CrosslinkGrowthRate" : 1000.0,
-        "SegmentDecayRate" : 0.0001
+        "SegmentsPerChain" : 60,
+        "ScissionProbability" : 5.2e-5,
+        "RecombinationProbability" : 5.3e-5
     }],
     "SimulationCases" : [{
         "Name" : "Load",
@@ -23,11 +22,11 @@
             "DisplacementTolerance" : 1.0e-3
         },
         "Time" : {
-            "Period" : 101.0,
+            "Period" : 102.0,
             "Increments" : {
-                "Initial" : 0.1,
+                "Initial" : 0.05,
                 "Minimum" : 0.001,
-                "Maximum" : 1.0,
+                "Maximum" : 0.5,
                 "Adaptive" : true
             }
         },
@@ -46,35 +45,35 @@
             "BoundaryConditions" : [{
                 "Name" : "Xsym",
                 "Type" : "Displacement",
-                "Time" : [0.0, 1.0, 100.0, 101.0],
+                "Time" : [0.0, 1.0, 100, 101],
                 "x" : [0.0, 0.0, 0.0, 0.0]
             },
             {
                 "Name" : "Ysym",
                 "Type" : "Displacement",
-                "Time" : [0.0, 1.0, 100.0, 101.0],
+                "Time" : [0.0, 1.0, 100, 101],
                 "y" : [0.0, 0.0, 0.0, 0.0]
             },
             {
                 "Name" : "Zsym",
                 "Type" : "Displacement",
-                "Time" : [0.0, 1.0, 100.0, 101.0],
+                "Time" : [0.0, 1.0, 100, 101],
                 "z" : [0.0, 0.0, 0.0, 0.0]
             },
             {
                 "Name" : "ZLoad",
                 "Type" : "Displacement",
-                "Time" : [0.0, 1.0, 100.0, 101.0],
+                "Time" : [0.0, 1.0, 100, 101],
                 "z" : [0.0, 0.2, 0.2, 0.0]
             }]
         }],
         "LinearSolver" : {
-            "Type" : "Iterative",
+            "Type" : "PaStiX",
             "MaxIterations" : 2000,
             "Tolerance"  : 1.0e-8
         },
         "Visualisation" : {
-            "Fields" : ["Displacement", "DeformationGradient", "CauchyStress", "ActiveChains"]
+            "Fields" : ["Displacement", "DeformationGradient", "CauchyStress", "ActiveChains", "InactiveChains", "ActiveSegments", "InactiveSegments"]
         }
     }]
 }

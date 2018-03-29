@@ -13,10 +13,12 @@ set_target_properties(neon PROPERTIES CXX_STANDARD 17
                                       CXX_EXTENSIONS NO
                            COMPILE_FLAGS "-Wall -Wno-unused-variable")
 
-include(CheckIPOSupported)
-check_ipo_supported(RESULT is_ipo_supported)
-if(is_ipo_supported)
-   set_target_properties(neon PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
+if (ENABLE_LTO)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT is_ipo_supported)
+    if(is_ipo_supported)
+       set_target_properties(neon PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
+    endif()
 endif()
 
 if (ENABLE_NATIVE)

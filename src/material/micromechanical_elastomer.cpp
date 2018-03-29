@@ -32,30 +32,17 @@ ageing_micromechanical_elastomer::ageing_micromechanical_elastomer(json const& m
         throw std::domain_error(exception_string("ScissionProbability"));
     }
 
-    // if (!material_data.count("RecombinationProbability"))
-    // {
-    //     throw std::domain_error(exception_string("RecombinationProbability"));
-    // }
-
-    if (!material_data.count("SegmentDecayRate"))
+    if (!material_data.count("RecombinationProbability"))
     {
-        throw std::domain_error(exception_string("SegmentDecayRate"));
-    }
-
-    if (!material_data.count("CrosslinkGrowthRate"))
-    {
-        throw std::domain_error(exception_string("CrosslinkGrowthRate"));
+        throw std::domain_error(exception_string("RecombinationProbability"));
     }
 
     pr_scission = material_data["ScissionProbability"];
-    // pr_recombination = material_data["RecombinationProbability"];
+    pr_recombination = material_data["RecombinationProbability"];
 
-    segment_decay_rate = material_data["SegmentDecayRate"];
-    crosslink_growth_rate = material_data["CrosslinkGrowthRate"];
-
-    if (pr_scission < 0.0 || crosslink_growth_rate < 0.0 || segment_decay_rate < 0.0)
+    if (pr_scission < 0.0 || pr_recombination < 0.0)
     {
-        throw std::domain_error("Material properties for the segments must be positive");
+        throw std::domain_error("Material properties (probabilities) must be positive");
     }
 }
 

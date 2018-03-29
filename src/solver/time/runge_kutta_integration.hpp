@@ -42,14 +42,15 @@ auto runge_kutta_fourth_order(functor&& f)
 
 namespace detail
 {
-/// Helper function
+/// Abstraction to compute the residual or the absolution value depending on
+/// the expression type (scalar or vector).
 template <typename left_expression, typename right_expression>
 auto residual(left_expression const& left, right_expression const& right)
 {
     if constexpr (!std::is_floating_point<left_expression>::value
                   && !std::is_floating_point<right_expression>::value)
     {
-        return (left - right).norm();
+        return (left - right).sum();
     }
     else
     {
@@ -59,9 +60,12 @@ auto residual(left_expression const& left, right_expression const& right)
 }
 
 /// Perform the Dorman-Prince 4th order embedded Runge-Kutta time discretisation
-/// \cite DormandPrince1980
+/// using the specified error tolerance \cite DormandPrince1980
+/// \tparam Lambda that returns the right hand side of the ODE
+/// \param f Function object
+/// \param error_tolerance Error tolerance for adaptive method
 template <typename functor>
-auto runge_kutta_fourth_fifth_order(functor&& f, double const error_tolerance = 1.0e-5)
+auto runge_kutta_fourth_fifth_order(functor&& f, double const error_tolerance = 1.0e-8)
 {
     return [f, error_tolerance](auto t, auto const y0, auto dt) {
         static_assert(std::is_floating_point<decltype(t)>::value);
@@ -98,7 +102,8 @@ auto runge_kutta_fourth_fifth_order(functor&& f, double const error_tolerance = 
                 t += dt;
             }
             dt *= 0.84
-                  * std::pow(error_tolerance / (R + std::numeric_limits<double>::epsilon()), 0.25);
+                  * std::pow(error_tolerance / (R + 4.0 * std::numeric_limits<double>::epsilon()),
+                             0.25);
         }
         return y - y0;
     };

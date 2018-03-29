@@ -28,11 +28,8 @@ public:
     /// Store the active and inactive value
     using value_pair = std::pair<double, double>;
 
-    /// Type for the composition of the active/inactive segment history
-    using segment_composition = std::vector<value_pair>;
-
     /// Type for the composition of the active/inactive shear modulus history
-    using shear_modulus_composition = std::vector<value_pair>;
+    using shear_modulus_composition = std::vector<double>;
 
     /// Type for the deformation history
     using deformation_composition = std::vector<matrix3>;
@@ -49,9 +46,10 @@ public:
 private:
     ageing_micromechanical_elastomer material; /// Material with micromechanical parameters
 
-    std::vector<shear_modulus_composition> shear_moduli; /// Quadrature point shear moduli
+    std::vector<shear_modulus_composition> shear_moduli; /// Quadrature point active shear moduli
+    std::vector<double> inactive_shear_moduli;           /// Quadrature point inactive shear moduli
 
-    std::vector<segment_composition> segments; /// Quadrature point average segment
+    std::vector<value_pair> segments; /// Quadrature point average segment
 
     std::vector<deformation_composition> intermediate_deformations; /// Secondary network variables
 };
