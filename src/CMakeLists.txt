@@ -54,6 +54,8 @@ target_link_libraries(neon
                       ${VTK_LIBRARIES}
                       ${Hwloc_LIBRARIES}
                       ${TBB_LIBRARIES}
+                      ${CUDA_cusparse_LIBRARY}
+                      ${CUDA_CUBLAS_LIBRARIES}
                       pastix
                       jsoncpp
                       scotch

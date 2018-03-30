@@ -5,6 +5,7 @@ project(neonfe VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
+option(ENABLE_LTO "Enable link time optimisations" OFF)
 option(ENABLE_CUDA "Enable CUDA linear solver" OFF)
 option(ENABLE_TESTS "Enable the test suite of the unit tests examples" ON)
 option(ENABLE_NATIVE "Optimise for current architecture" OFF)
