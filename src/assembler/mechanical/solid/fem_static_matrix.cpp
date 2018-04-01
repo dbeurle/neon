@@ -221,9 +221,14 @@ void fem_static_matrix::enforce_dirichlet_conditions(sparse_matrix& A, vector& b
 {
     for (auto const& [name, boundaries] : mesh.displacement_boundaries())
     {
-        for (auto const& dirichlet_boundary : boundaries)
+        for (auto const& boundary : boundaries)
         {
-            for (auto const fixed_dof : dirichlet_boundary.dof_view())
+            if (!boundary.is_active(adaptive_load.step_time()))
+            {
+                continue;
+            }
+
+            for (auto const fixed_dof : boundary.dof_view())
             {
                 auto const diagonal_entry = A.coeff(fixed_dof, fixed_dof);
 
@@ -262,6 +267,11 @@ void fem_static_matrix::apply_displacement_boundaries()
     {
         for (auto const& boundary : boundaries)
         {
+            if (!boundary.is_active(adaptive_load.step_time()))
+            {
+                continue;
+            }
+
             auto const delta_u = boundary.value_view(adaptive_load.step_time())
                                  - boundary.value_view(adaptive_load.last_step_time());
 

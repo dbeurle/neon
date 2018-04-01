@@ -21,14 +21,14 @@ public:
 
     ~boundary() = default;
 
+    [[nodiscard]] bool is_active(double const time) const;
+
     [[nodiscard]] std::vector<double> time_history() const;
 
-    /**
-     * Interpolates linearly between the old prescribed boundary value and
-     * the newly prescribed boundary value.  This takes into account if the
-     * load is ramped or propogated from the previous load/time step
-     * @return an interpolated value
-     */
+    /// Interpolates linearly between the old prescribed boundary value and
+    /// the newly prescribed boundary value.  This takes into account if the
+    /// load is ramped or propogated from the previous load/time step
+    /// \return an interpolated value
     [[nodiscard]] double interpolate_prescribed_load(double const step_time) const;
 
 protected:
