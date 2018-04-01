@@ -8,13 +8,10 @@
 #include "numeric/float_compare.hpp"
 
 #include <tbb/parallel_for.h>
-#include <tbb/spin_mutex.h>
 
 #include <cassert>
 #include <numeric>
 #include <iostream>
-
-tbb::spin_mutex mutex;
 
 using neon::mechanical::solid::gaussian_ageing_affine_microsphere;
 
@@ -57,16 +54,12 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
 
     auto const K{material.bulk_modulus()};
 
-    // tbb::parallel_for(std::size_t{0}, deformation_gradients.size(), [&, this](auto const l) {
-    for (std::size_t l{}; l < deformation_gradients.size(); ++l)
-    {
+    tbb::parallel_for(std::size_t{0}, deformation_gradients.size(), [&, this](auto const l) {
         matrix3 const& F = deformation_gradients[l];
 
         if (!is_approx(time_step_size, 0.0))
         {
             // Perform the updates
-            // auto const p_s = 5.2e-5;
-            // auto const p_c = 5.3e-5;
             auto const p_s = material.scission_probability();
             auto const p_c = material.recombination_probability();
 
@@ -96,20 +89,6 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
                 // Average number of segments in inactive set
                 auto const N_ia = y(active_set_count + 2);
 
-                // {
-                //     tbb::spin_mutex::scoped_lock lock(mutex);
-                //
-                //     std::cout << "Quadrature point data\n================\nActive chains\n"
-                //               << n_a << "\n";
-                //
-                //     std::cout << "Active segment count " << active_set_count << "\n";
-                //     // std::cout << y << "\n";
-                //
-                //     std::cout << "Inactive chains: " << n_ia << "\n";
-                //     std::cout << "Active segments: " << N_a << "\n";
-                //     std::cout << "Inactive segments: " << N_ia << "\n--------------" << std::endl;
-                // }
-
                 // Inactive set recombination
                 auto const alpha = 1.0 - std::pow(1.0 - p_c, N_ia + 1.0);
                 // Active set scission
@@ -118,11 +97,6 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
                 auto const eta = 1.0 - std::pow(1.0 - p_c, N_a + 1.0);
                 // Inactive set generation
                 auto const nu = 1.0 - std::pow(1.0 - p_s, N_ia);
-
-                // std::cout << "alpha: " << alpha << "\n";
-                // std::cout << "beta: " << beta << "\n";
-                // std::cout << "eta: " << eta << "\n";
-                // std::cout << "nu: " << nu << "\n";
 
                 vector const f1 = -n_a * (beta + 2.0 * eta);
 
@@ -153,22 +127,6 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
                 // Segments
                 y(f1.size() + 2) = g1;
                 y(f1.size() + 3) = g2;
-
-                // {
-                //     // tbb::spin_mutex::scoped_lock lock(mutex);
-                //
-                //     std::cout << "Before returning\n================\n";
-                //     //
-                //     // std::cout << "f1:\n" << f1 << std::endl;
-                //     // std::cout << "f2: " << f2 << std::endl;
-                //     // std::cout << "f3: " << f3 << std::endl;
-                //     // std::cout << "g1: " << g1 << std::endl;
-                //     // std::cout << "g2: " << g2 << std::endl;
-                //
-                //     std::cout << "Rate vector:\n" << y << std::endl;
-                //
-                //     std::abort();
-                // }
 
                 return y;
             });
@@ -243,5 +201,5 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
         cauchy_stresses[l] = compute_kirchhoff_stress(pressure, macro_stress) / J;
 
         tangent_operators[l] = compute_material_tangent(J, K, macro_moduli, macro_stress);
-    } //);
+    });
 }
