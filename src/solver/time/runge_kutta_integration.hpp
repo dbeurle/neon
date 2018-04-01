@@ -65,7 +65,7 @@ auto residual(left_expression const& left, right_expression const& right)
 /// \param f Function object
 /// \param error_tolerance Error tolerance for adaptive method
 template <typename functor>
-auto runge_kutta_fourth_fifth_order(functor&& f, double const error_tolerance = 1.0e-8)
+auto runge_kutta_fourth_fifth_order(functor&& f, double const error_tolerance = 1.0e-5)
 {
     return [f, error_tolerance](auto t, auto const y0, auto dt) {
         static_assert(std::is_floating_point<decltype(t)>::value);
@@ -83,14 +83,14 @@ auto runge_kutta_fourth_fifth_order(functor&& f, double const error_tolerance = 
 
             // clang-format off
             auto const k1 = dt * f(t, y);
-            auto const k2 = dt * f(t + 1.0 / 5.0 * dt,  y + 1.0 / 5.0 * k1);
-            auto const k3 = dt * f(t + 3.0 / 10.0 * dt, y + 3.0 / 40.0 * k1 + 9.0 / 40.0 * k2);
-            auto const k4 = dt * f(t + 4.0 / 5.0 * dt,  y + 44.0 / 45.0 * k1 - 56.0 / 15.0 * k2 + 32.0 / 9.0 * k3);
+            auto const k2 = dt * f(t + 1.0 / 5.0 * dt,  y +        1.0 / 5.0 * k1);
+            auto const k3 = dt * f(t + 3.0 / 10.0 * dt, y +       3.0 / 40.0 * k1 +       9.0 / 40.0 * k2);
+            auto const k4 = dt * f(t + 4.0 / 5.0 * dt,  y +      44.0 / 45.0 * k1 -      56.0 / 15.0 * k2 +       32.0 / 9.0 * k3);
             auto const k5 = dt * f(t + 8.0 / 9.0 * dt,  y + 19372.0 / 6561.0 * k1 - 25360.0 / 2187.0 * k2 + 64448.0 / 6561.0 * k3 - 212.0 / 729.0 * k4);
-            auto const k6 = dt * f(t + dt,              y + 9017.0 / 3168.0 * k1 - 355.0 / 33.0 * k2 + 46732.0 / 5247.0 * k3 + 49.0 / 176.0 * k4 - 5103.0 / 18656.0 * k5);
-            auto const k7 = dt * f(t + dt,              y + 35.0 / 384.0 * k1 + 500.0 / 1113.0 * k3 + 125.0 / 192.0 * k4 - 2187.0 / 6784.0 * k5 + 11.0 / 84.0 * k6);
+            auto const k6 = dt * f(t + dt,              y +  9017.0 / 3168.0 * k1 -     355.0 / 33.0 * k2 + 46732.0 / 5247.0 * k3 +  49.0 / 176.0 * k4 - 5103.0 / 18656.0 * k5);
+            auto const k7 = dt * f(t + dt,              y +     35.0 / 384.0 * k1                         +   500.0 / 1113.0 * k3 + 125.0 / 192.0 * k4 -  2187.0 / 6784.0 * k5 + 11.0 / 84.0 * k6);
 
-            auto const dy_trial = 35.0 / 384.0 * k1 + 500.0 / 1113.0 * k3 + 125.0 / 192.0 * k4 - 2187.0 / 6784.0 * k5 + 11.0 / 84.0 * k6;
+            auto const dy_trial =     35.0 / 384.0 * k1 +   500.0 / 1113.0 * k3 + 125.0 / 192.0 * k4 -    2187.0 / 6784.0 * k5 +    11.0 / 84.0 * k6;
             auto const dy_error = 5179.0 / 57600.0 * k1 + 7571.0 / 16695.0 * k3 + 393.0 / 640.0 * k4 - 92097.0 / 339200.0 * k5 + 187.0 / 2100.0 * k6 + 1.0 / 40.0 * k7;
             // clang-format on
 
