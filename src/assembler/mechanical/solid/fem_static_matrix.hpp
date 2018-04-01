@@ -77,6 +77,8 @@ protected:
     double residual_tolerance = 1.0e-3;
     double displacement_tolerance = 1.0e-3;
 
+    int maximum_iterations = 10;
+
     double relative_displacement_norm;
     double relative_force_norm;
 
