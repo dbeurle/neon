@@ -22,7 +22,7 @@ fem_static_matrix::~fem_static_matrix() = default;
 
 void fem_static_matrix::compute_sparsity_pattern()
 {
-    std::vector<Doublet<int>> doublets;
+    std::vector<doublet<int>> doublets;
     doublets.reserve(mesh.active_dofs());
 
     K.resize(mesh.active_dofs(), mesh.active_dofs());

@@ -80,15 +80,15 @@ protected:
     double relative_displacement_norm;
     double relative_force_norm;
 
-    sparse_matrix Kt; //!< Tangent matrix stiffness
-    vector fint;      //!< Internal force vector
-    vector fext;      //!< External force vector
+    sparse_matrix Kt; /// Tangent matrix stiffness
+    vector fint;      /// Internal force vector
+    vector fext;      /// External force vector
 
-    vector displacement;     //!< Displacement vector
-    vector displacement_old; //!< Last displacement vector
-    vector delta_d;          //!< Incremental displacement vector
+    vector displacement;     /// Displacement vector
+    vector displacement_old; /// Last displacement vector
+    vector delta_d;          /// Incremental displacement vector
 
-    vector minus_residual; //!< Minus residual vector
+    vector minus_residual; /// Minus residual vector
 
     std::unique_ptr<LinearSolver> linear_solver;
 };

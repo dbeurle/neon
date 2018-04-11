@@ -56,7 +56,7 @@ void fem_static_matrix::internal_restart(json const& solver_data, json const& ne
 
 void fem_static_matrix::compute_sparsity_pattern()
 {
-    std::vector<Doublet<std::int32_t>> doublets;
+    std::vector<doublet<std::int32_t>> doublets;
     doublets.reserve(mesh.active_dofs());
 
     Kt.resize(mesh.active_dofs(), mesh.active_dofs());
@@ -219,7 +219,7 @@ void fem_static_matrix::assemble_stiffness()
 
 void fem_static_matrix::enforce_dirichlet_conditions(sparse_matrix& A, vector& b) const
 {
-    for (auto const& [name, boundaries] : mesh.displacement_boundaries())
+    for (auto const& [name, boundaries] : mesh.dirichlet_boundaries())
     {
         for (auto const& dirichlet_boundary : boundaries)
         {
@@ -258,7 +258,7 @@ void fem_static_matrix::apply_displacement_boundaries()
 {
     Eigen::SparseVector<double> prescribed_increment(displacement.size());
 
-    for (auto const& [name, boundaries] : mesh.displacement_boundaries())
+    for (auto const& [name, boundaries] : mesh.dirichlet_boundaries())
     {
         for (auto const& boundary : boundaries)
         {

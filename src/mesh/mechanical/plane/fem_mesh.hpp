@@ -57,7 +57,7 @@ public:
         return submeshes;
     }
 
-    [[nodiscard]] auto const& displacement_boundaries() const { return displacement_bcs; }
+    [[nodiscard]] auto const& dirichlet_boundaries() const { return displacement_bcs; }
 
     [[nodiscard]] auto const& nonfollower_load_boundaries() const { return nonfollower_loads; }
 

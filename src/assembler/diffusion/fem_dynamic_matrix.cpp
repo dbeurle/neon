@@ -64,7 +64,7 @@ void fem_dynamic_matrix::assemble_mass()
 {
     M.resize(mesh.active_dofs(), mesh.active_dofs());
 
-    std::vector<Doublet<int>> doublets;
+    std::vector<doublet<int>> doublets;
     doublets.reserve(mesh.active_dofs());
 
     for (auto const& submesh : mesh.meshes())
