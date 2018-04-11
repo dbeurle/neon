@@ -27,21 +27,23 @@ namespace neon::mechanical::solid
 class affine_microsphere : public constitutive_model
 {
 public:
-    /**
-     * @param variables Reference to internal state variable store
-     * @param material_data Json object with input file material data
-     */
+    /// \param variables Reference to internal state variable store
+    /// \param material_data Json object with input file material data
     explicit affine_microsphere(std::shared_ptr<internal_variables_t>& variables,
                                 json const& material_data,
                                 unit_sphere_quadrature::Rule const rule);
 
     virtual void update_internal_variables(double const time_step_size) override;
 
-    [[nodiscard]] material_property const& intrinsic_material() const override final {
+    [[nodiscard]] virtual material_property const& intrinsic_material() const noexcept override final
+    {
         return material;
-    };
+    }
 
-    [[nodiscard]] virtual bool is_finite_deformation() const override final { return true; };
+    [[nodiscard]] virtual bool is_finite_deformation() const noexcept override final
+    {
+        return true;
+    }
 
 protected:
     /**
@@ -98,11 +100,11 @@ protected:
                                                double const N) const;
 
 protected:
-    unit_sphere_quadrature unit_sphere; //!< Unit sphere quadrature rule
+    unit_sphere_quadrature unit_sphere; /// Unit sphere quadrature rule
 
-    matrix6 const IoI = voigt::I_outer_I();                      //!< Outer product
-    matrix6 const I = voigt::kinematic::fourth_order_identity(); //!< Fourth order identity
-    matrix6 const P = voigt::kinetic::deviatoric();              //!< Deviatoric fourth order tensor
+    matrix6 const IoI = voigt::I_outer_I();                      /// Outer product
+    matrix6 const I = voigt::kinematic::fourth_order_identity(); /// Fourth order identity
+    matrix6 const P = voigt::kinetic::deviatoric();              /// Deviatoric fourth order tensor
 
 private:
     micromechanical_elastomer material; //!< Material with micromechanical parameters
