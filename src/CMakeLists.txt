@@ -13,10 +13,12 @@ set_target_properties(neon PROPERTIES CXX_STANDARD 17
                                       CXX_EXTENSIONS NO
                            COMPILE_FLAGS "-Wall -Wno-unused-variable ${OpenMP_CXX_FLAGS}")
 
-include(CheckIPOSupported)
-check_ipo_supported(RESULT is_ipo_supported)
-if(is_ipo_supported)
-   set_target_properties(neon PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
+if (ENABLE_LTO)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT is_ipo_supported)
+    if(is_ipo_supported)
+       set_target_properties(neon PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
+    endif()
 endif()
 
 if (ENABLE_NATIVE)
@@ -51,6 +53,8 @@ target_link_libraries(neon
                       ${VTK_LIBRARIES}
                       ${Hwloc_LIBRARIES}
                       ${TBB_LIBRARIES}
+                      ${CUDA_cusparse_LIBRARY}
+                      ${CUDA_CUBLAS_LIBRARIES}
                       pastix
                       jsoncpp
                       scotch
