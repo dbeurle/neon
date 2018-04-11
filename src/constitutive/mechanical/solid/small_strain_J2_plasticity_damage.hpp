@@ -9,17 +9,17 @@
 
 namespace neon::mechanical::solid
 {
-/**
- * small_strain_J2_plasticity_damage is responsible for computing the constitutive model of a standard ductile
- * Chaboche damage model without microdefects closure effects. Theoritical details can be found in
- * \cite Neto2011 (Lemaitre’s elastoplastic damage theory), \cite Ladeveze1999 (chapter 2) and \cite
- * Lemaitre2005 (Isotropic Damage without Microdefects Closure).
- */
+/// small_strain_J2_plasticity_damage is responsible for computing the
+/// constitutive model of a standard ductile Chaboche damage model without
+/// microdefects closure effects. Theoritical details can be found in
+/// \cite Neto2011 (Lemaitre’s elastoplastic damage theory),
+/// \cite Ladeveze1999 (chapter 2) and
+/// \cite Lemaitre2005 (Isotropic Damage without Microdefects Closure).
 class small_strain_J2_plasticity_damage : public small_strain_J2_plasticity
 {
 public:
     small_strain_J2_plasticity_damage(std::shared_ptr<internal_variables_t>& variables,
-                       json const& material_data);
+                                      json const& material_data);
 
     ~small_strain_J2_plasticity_damage();
 
@@ -70,10 +70,9 @@ protected:
                                                matrix6& C_list,
                                                double const& delta_t,
                                                matrix3 const& eps_e_t);
-    /**
-     * Evaluates the yield function and returns greater than zero if
-     * the yield function has been violated
-     */
+
+    /// Evaluates the yield function and returns greater than zero if
+    /// the yield function has been violated
     [[nodiscard]] double evaluate_yield_function(double const von_mises,
                                                  matrix3 const& back_stress) const;
 
