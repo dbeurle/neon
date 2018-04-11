@@ -28,7 +28,7 @@ protected:
 };
 
 /// Isoparametric quadratric tetrahedral element (10 nodes)
-/// with node ordering from \cite{Hughes2012}
+/// with node ordering from \cite Hughes2012
 class tetrahedron10 : public volume_interpolation
 {
 public:

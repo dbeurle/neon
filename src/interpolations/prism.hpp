@@ -6,11 +6,9 @@
 
 namespace neon
 {
-/**
- * prism6 is responsible for computing the shape functions for an prism or
- * wedge shaped six noded element.
- * The shape functions and nodal orderings are taken from \cite{Hughes2012}
- */
+/// prism6 is responsible for computing the shape functions for an prism or
+/// wedge shaped six noded element.
+/// The shape functions and nodal orderings are taken from \cite Hughes2012
 class prism6 : public volume_interpolation
 {
 public:
@@ -35,11 +33,9 @@ protected:
     void precompute_shape_functions();
 };
 
-/**
- * prism15 is responsible for computing the shape functions for an prism or
- * wedge shaped six noded element.
- * The shape functions and nodal orderings are taken from \cite{Hughes2012}
- */
+/// prism15 is responsible for computing the shape functions for an prism or
+/// wedge shaped six noded element.
+/// The shape functions and nodal orderings are taken from \cite Hughes2012
 class prism15 : public volume_interpolation
 {
 public:
