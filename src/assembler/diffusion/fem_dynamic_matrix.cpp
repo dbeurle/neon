@@ -1,6 +1,7 @@
 
 #include "fem_dynamic_matrix.hpp"
 
+#include "assembler/homogeneous_dirichlet.hpp"
 #include "io/json.hpp"
 #include "solver/linear/linear_solver.hpp"
 
@@ -47,7 +48,7 @@ void fem_dynamic_matrix::solve()
 
         vector b = M * d + time_solver.current_time_step_size() * f;
 
-        apply_dirichlet_conditions(A, d, b);
+        fem::apply_dirichlet_conditions(A, d, b, mesh);
 
         linear_solver->solve(A, d, b);
 

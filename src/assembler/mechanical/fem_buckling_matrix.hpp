@@ -44,7 +44,7 @@ void fem_buckling_matrix<fem_mesh_type>::solve()
     // Solve the eigenvalue problem for the first eigenvalue only
     assemble_stiffness();
 
-    fem::apply_dirichlet_conditions(K, mesh);
+    // fem::apply_dirichlet_conditions(K, mesh);
 
     auto [values, vectors] = eigenvalues.solve(K);
 

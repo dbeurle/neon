@@ -48,14 +48,15 @@ fem_submesh::fem_submesh(json const& material_data,
 
     variables->commit();
 
-    dof_list.resize(connectivity.rows() * traits<type::plane_strain>::dof_order.size(),
+    dof_list.resize(connectivity.rows()
+                        * traits<theory::plane_strain, discretisation::linear>::dof_order.size(),
                     connectivity.cols());
 
     for (indices::Index i{0}; i < connectivity.cols(); ++i)
     {
         transform_expand_view(connectivity(Eigen::placeholders::all, i),
                               dof_list(Eigen::placeholders::all, i),
-                              traits<type::plane_strain, true>::dof_order);
+                              traits<theory::plane_strain, discretisation::linear>::dof_order);
     }
 }
 

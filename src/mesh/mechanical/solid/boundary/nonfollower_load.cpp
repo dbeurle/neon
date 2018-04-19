@@ -66,7 +66,7 @@ nonfollower_load_boundary::nonfollower_load_boundary(
             {
                 transform_expand_view(connectivity(Eigen::placeholders::all, i),
                                       dof_list(Eigen::placeholders::all, i),
-                                      traits<type::solid, true>::dof_order);
+                                      traits<theory::solid, discretisation::linear, true>::dof_order);
             }
 
             boundary_meshes.emplace_back(std::in_place_type_t<pressure>{},

@@ -6,6 +6,7 @@
 #include "constitutive/constitutive_model.hpp"
 #include "constitutive/internal_variables.hpp"
 #include "interpolations/shape_function.hpp"
+#include "traits/mechanics.hpp"
 
 #include <memory>
 
@@ -15,16 +16,16 @@ class material_coordinates;
 
 namespace mechanical::solid
 {
-/**
- * fem_submesh provides the element local routines for computing the system
- * components for a three-dimensional continuum mechanics discretisation.
- */
+/// fem_submesh provides the element local routines for computing the system
+/// components for a three-dimensional continuum mechanics discretisation.
 class fem_submesh : public basic_submesh
 {
 public:
     using ValueCount = std::pair<vector, vector>;
 
     using internal_variable_type = internal_variables_t;
+
+    using trait_type = traits<theory::solid, discretisation::finite_strain>;
 
 public:
     /** Constructor providing the material coordinates reference */
@@ -44,7 +45,7 @@ public:
 
     void save_internal_variables(bool const have_converged);
 
-    [[nodiscard]] auto dofs_per_node() const { return 3; }
+    [[nodiscard]] auto dofs_per_node() const noexcept { return 3; }
 
     [[nodiscard]] auto const& shape_function() const { return *sf; }
 

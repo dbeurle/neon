@@ -24,36 +24,27 @@ public:
              json const& simulation_data,
              double const generate_time_step);
 
-    /** The number of active degrees of freedom in this mesh */
+    /// The number of active degrees of freedom in this mesh
     [[nodiscard]] auto active_dofs() const { return 3 * mesh_coordinates->size(); }
 
-    /**
-     * Checks the boundary conditions and constitutive model to ensure
-     * resulting matrix from this mesh is symmetric.  \sa LinearSolver
-     */
+    /// Checks the boundary conditions and constitutive model to ensure
+    /// resulting matrix from this mesh is symmetric.  \sa LinearSolver
     [[nodiscard]] bool is_symmetric() const;
 
-    /**
-     * Deform the body by updating the displacement x = X + u
-     * and update the internal variables with the new deformation and the
-     * time step increment
-     */
+    /// Deform the body by updating the displacement x = X + u
+    /// and update the internal variables with the new deformation and the
+    /// time step increment
     void update_internal_variables(vector const& u, double const time_step_size = 0.0);
 
-    /**
-     * Update the internal variables if converged, otherwise revert back
-     * for next attempted load increment
-     */
+    /// Update the internal variables if converged, otherwise revert back
+    /// for next attempted load increment
     void save_internal_variables(bool const have_converged);
 
-    /** Constant access to the sub-meshes */
-    [[nodiscard]] std::vector<fem_submesh> const& meshes() const { return submeshes; }
+    /// Constant access to the sub-meshes
+    [[nodiscard]] std::vector<fem_submesh> const& meshes() const noexcept { return submeshes; }
 
-        /** Non-const access to the sub-meshes */
-        [[nodiscard]] std::vector<fem_submesh>& meshes()
-    {
-        return submeshes;
-    }
+    /// Non-const access to the sub-meshes
+    [[nodiscard]] auto& meshes() noexcept { return submeshes; }
 
     [[nodiscard]] auto const& dirichlet_boundaries() const { return displacement_bcs; }
 
