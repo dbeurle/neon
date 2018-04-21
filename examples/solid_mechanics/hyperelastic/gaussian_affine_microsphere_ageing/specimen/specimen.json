@@ -8,23 +8,24 @@
     "Material" : [{
         "Name" : "rubber",
         "ElasticModulus" : 10.0e6,
-        "PoissonsRatio" : 0.4,
-        "SegmentsPerChain" : 70,
-        "ScissionProbability" : 0.0001,
-        "RecombinationProbability" : 0.0001
+        "PoissonsRatio" : 0.45,
+        "SegmentsPerChain" : 60,
+        "ScissionProbability" : 5.2e-5,
+        "RecombinationProbability" : 5.3e-5
     }],
     "SimulationCases" : [{
         "Name" : "Load",
         "Module" : "SolidMechanics",
         "Solution" : "Equilibrium",
         "NonlinearOptions" : {
-            "DisplacementTolerance" : 1.0e-5,
-            "ResidualTolerance" : 1.0e-4
+            "DisplacementTolerance" : 1.0e-4,
+            "ResidualTolerance" : 1.0e-4,
+            "NewtonRaphsonIterations" : 15
         },
         "Time" : {
             "Period" : 101.0,
             "Increments" : {
-                "Initial" : 1.0,
+                "Initial" : 0.05,
                 "Minimum" : 0.1,
                 "Maximum" : 1.0,
                 "Adaptive" : true
