@@ -1,6 +1,6 @@
-Merge "ElastomerTestSpecimen.igs";
+Merge "specimen.igs";
 //+
-Physical Volume("ElastomerTestSpecimen") = {1};
+Physical Volume("specimen") = {1};
 //+
 Physical Surface("load") = {4};
 //+

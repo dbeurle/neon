@@ -9,7 +9,9 @@
         "Name" : "rubber",
         "ElasticModulus" : 10.0e6,
         "PoissonsRatio" : 0.4,
-        "SegmentsPerChain" : 45
+        "SegmentsPerChain" : 70,
+        "ScissionProbability" : 0.0001,
+        "RecombinationProbability" : 0.0001
     }],
     "SimulationCases" : [{
         "Name" : "Load",
@@ -20,7 +22,7 @@
             "ResidualTolerance" : 1.0e-4
         },
         "Time" : {
-            "Period" : 1.0,
+            "Period" : 101.0,
             "Increments" : {
                 "Initial" : 1.0,
                 "Minimum" : 0.1,
@@ -34,7 +36,8 @@
                 "Name" : "Microsphere",
                 "Type" : "Affine",
                 "Statistics" : "Gaussian",
-                "Quadrature" : "BO21"
+                "Quadrature" : "BO21",
+                "Ageing" : "BAND"
             },
             "ElementOptions" : {
                 "Quadrature" : "Full"
@@ -42,26 +45,26 @@
             "BoundaryConditions" : [{
                 "Name" : "x-sym",
                 "Type" : "Displacement",
-                "Time" : [0.0, 1.0],
+                "Time" : [0.0, 101.0],
                 "x" : [0.0, 0.0]
             },
             {
                 "Name" : "z-sym",
                 "Type" : "Displacement",
-                "Time" : [0.0, 1.0],
+                "Time" : [0.0, 101.0],
                 "z" : [0.0, 0.0]
             },
             {
                 "Name" : "base",
                 "Type" : "Displacement",
-                "Time" : [0.0, 1.0],
+                "Time" : [0.0, 101.0],
                 "y" : [0.0, 0.0]
             },
             {
                 "Name" : "load",
-                "Type" : "Displacement",
-                "Time" : [0.0, 1.0],
-                "y" : [0.0, 0.001]
+                "Type" : "Traction",
+                "Time" : [0.0, 1.0, 100.0, 101.0],
+                "y" : [0.0, 10.0, 10.0, 0.0]
             }]
         }],
         "LinearSolver" : {
@@ -70,7 +73,9 @@
             "Tolerance"  : 1.0e-8
         },
         "Visualisation" : {
-            "Fields" : ["Displacement", "DeformationGradient", "CauchyStress"],
+            "Fields" : ["Displacement", "DeformationGradient", "CauchyStress",
+                        "ActiveChains", "InactiveChains", "ActiveSegments",
+                        "InactiveSegments"],
             "WriteEvery": 1
         }
     }]
