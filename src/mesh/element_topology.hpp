@@ -22,7 +22,7 @@ enum class element_topology {
     hexahedron27,
     prism18,
     pyramid14,
-    Point = 15,
+    point = 15,
     quadrilateral8,
     hexahedron20,
     prism15,

@@ -19,6 +19,7 @@ std::unordered_map<int, element_topology> const gmsh_converter{{1, element_topol
                                                                {10, element_topology::quadrilateral9},
                                                                {12, element_topology::hexahedron27},
                                                                {13, element_topology::prism18},
+                                                               {15, element_topology::point},
                                                                {16, element_topology::quadrilateral8},
                                                                {18, element_topology::prism15},
                                                                {17, element_topology::hexahedron20}};
