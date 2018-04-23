@@ -24,6 +24,9 @@ using matrix16 = Eigen::Matrix<double, 16, 16>;
 template <int geometric_dimension>
 using matrixxd = Eigen::Matrix<double, Eigen::Dynamic, geometric_dimension>;
 
+template <int geometric_dimension>
+using matrixdx = Eigen::Matrix<double, geometric_dimension, Eigen::Dynamic>;
+
 /** Compile time fixed rows for nodal coordinates in two dimensions */
 using matrix2x = Eigen::Matrix<double, 2, Eigen::Dynamic>;
 /** Compile time fixed rows for nodal coordinates in three dimensions */
