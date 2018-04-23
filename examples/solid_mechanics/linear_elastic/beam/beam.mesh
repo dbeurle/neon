@@ -1,0 +1,35 @@
+{
+   "Elements" : [
+      {
+         "Name" : "beam",
+         "NodalConnectivity" : [
+            [ 0, 2 ],
+            [ 2, 1 ]
+         ],
+         "Type" : 1
+      },
+      {
+         "Name" : "fix",
+         "NodalConnectivity" : [
+            [ 0 ]
+         ],
+         "Type" : 15
+      },
+      {
+         "Name" : "load",
+         "NodalConnectivity" : [
+            [ 1 ]
+         ],
+         "Type" : 15
+      }
+   ],
+   "Nodes" : [
+      {
+         "Coordinates" : [
+            [ 0, 0, 0 ],
+            [ 1, 0, 0 ],
+            [ 0.49999999999867178, 0, 0 ]
+         ]
+      }
+   ]
+}
