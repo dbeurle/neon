@@ -29,12 +29,10 @@ private:
     std::size_t quadrature_points{0};
 };
 
-/**
- * internal_variables stores the internal variables associated with the element
- * quadrature points.  These variables are duplicated and commited to memory
- * when the data is converged to avoid polluting the variable history in the
- * Newton-Raphson method.
- */
+/// internal_variables stores the internal variables associated with the element
+/// quadrature points.  These variables are duplicated and commited to memory
+/// when the data is converged to avoid polluting the variable history in the
+/// Newton-Raphson method.
 template <int rank2_dimension, int rank4_dimension>
 class internal_variables
 {

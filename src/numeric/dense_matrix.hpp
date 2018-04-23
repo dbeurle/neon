@@ -1,7 +1,7 @@
 
 #pragma once
 
-// Do not parallelise the GEMM routines as this is called by mulitple threads
+// Do not parallelise the GEMM routines as this is called by multiple threads
 #ifndef NEON_PARALLEL_EIGEN_SOLVERS
 #define EIGEN_DONT_PARALLELIZE
 #endif
@@ -12,7 +12,7 @@
 namespace neon
 {
 using matrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-using row_matrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+using row_matrix = matrix;
 using col_matrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>;
 
 using matrix2 = Eigen::Matrix<double, 2, 2>;

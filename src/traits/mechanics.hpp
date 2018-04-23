@@ -20,12 +20,8 @@ struct traits<theory::beam, D, is_symmetric_>
     static auto constexpr is_symmetric{is_symmetric_};
     static auto constexpr dofs_per_node{6};
 
-    static std::array<int, dofs_per_node> constexpr dof_order{0,
-                                                              1,
-                                                              2,
-                                                              3,
-                                                              4,
-                                                              5}; /// Three dimensional beams have six unknowns
+    /// Three dimensional beams have three displacements followed by three rotations
+    static std::array<int, dofs_per_node> constexpr dof_order{0, 1, 2, 3, 4, 5};
 
     using rank_two_tensor = matrix2;
 };
