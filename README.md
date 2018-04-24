@@ -71,7 +71,13 @@ For checking the successful compilation of the program, invoke the test suite by
 
 in the build directory.
 
+#### Ubuntu 16.04
 
+Install dependencies through the package manager:
+
+`$ sudo apt install cmake git mercurical libz-dev libcurl3-dev libvtk6-dev libtbb-dev libboost-filesystem-dev libmumps-seq-dev libopenblas-dev libarpack2-dev`
+
+Update to compatible CMake (https://cmake.org/download/).
 
 ## Licensing
 
