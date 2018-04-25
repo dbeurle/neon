@@ -4,9 +4,8 @@
 #include "vector_contribution.hpp"
 
 #include "geometry/Projection.hpp"
+#include "math/jacobian_determinant.hpp"
 #include "mesh/material_coordinates.hpp"
-
-#include <Eigen/Geometry>
 
 #include <memory>
 
@@ -96,17 +95,16 @@ public:
     virtual std::pair<index_view, vector> external_force(std::int64_t const element,
                                                          double const load_factor) const override
     {
-        auto const X = geometry::project_to_plane(coordinates->initial_configuration(
-            nodal_connectivity(Eigen::placeholders::all, element)));
+        auto const node_view = nodal_connectivity(Eigen::placeholders::all, element);
+
+        auto const X = coordinates->initial_configuration(node_view);
 
         // Perform the computation of the external load vector
         auto const f_ext = sf->quadrature().integrate(vector::Zero(X.cols()).eval(),
                                                       [&](auto const& femval, auto const l) -> vector {
                                                           auto const& [N, dN] = femval;
 
-                                                          auto const j = (X * dN).determinant();
-
-                                                          return N * j;
+                                                          return N * jacobian_determinant(X * dN);
                                                       });
 
         return {dof_list(Eigen::placeholders::all, element),
@@ -118,11 +116,17 @@ protected:
     std::unique_ptr<surface_interpolation> sf;
 };
 
-template <typename VolumeInterpolation_Tp>
+/// volume_load provides an interface for computing the contribution to the
+/// load vector from a volume load boundary.
+template <typename volume_interpolation_type>
 class volume_load : public neumann
 {
 public:
-    explicit volume_load(std::unique_ptr<VolumeInterpolation_Tp>&& sf,
+    /// Type alias for the volume interpolation type
+    using volume_interpolation = volume_interpolation_type;
+
+public:
+    explicit volume_load(std::unique_ptr<volume_interpolation>&& sf,
                          indices nodal_connectivity,
                          indices dof_list,
                          std::shared_ptr<material_coordinates>& coordinates,
@@ -133,7 +137,7 @@ public:
     {
     }
 
-    explicit volume_load(std::unique_ptr<VolumeInterpolation_Tp>&& sf,
+    explicit volume_load(std::unique_ptr<volume_interpolation>&& sf,
                          indices nodal_connectivity,
                          indices dof_list,
                          std::shared_ptr<material_coordinates>& coordinates,
@@ -145,20 +149,19 @@ public:
     {
     }
 
-    std::pair<index_view, vector> external_force(std::int64_t const element,
-                                                 double const load_factor) const override
+    virtual std::pair<index_view, vector> external_force(std::int64_t const element,
+                                                         double const load_factor) const override
     {
-        auto const X = coordinates->initial_configuration(
-            nodal_connectivity(Eigen::placeholders::all, element));
+        auto const node_view = nodal_connectivity(Eigen::placeholders::all, element);
+
+        auto const X = coordinates->initial_configuration(node_view);
 
         // Perform the computation of the external load vector
         auto const f_ext = sf->quadrature().integrate(vector::Zero(X.cols()).eval(),
-                                                      [&](auto const& femval, auto const& l) -> vector {
+                                                      [&](auto const& femval, auto const l) -> vector {
                                                           auto const& [N, dN] = femval;
 
-                                                          auto const j = (X * dN).determinant();
-
-                                                          return N * j;
+                                                          return N * jacobian_determinant(X * dN);
                                                       });
 
         return {dof_list(Eigen::placeholders::all, element),
@@ -166,6 +169,6 @@ public:
     }
 
 protected:
-    std::unique_ptr<VolumeInterpolation_Tp> sf;
+    std::unique_ptr<volume_interpolation> sf;
 };
 }
