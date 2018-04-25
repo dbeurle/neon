@@ -8,6 +8,20 @@
 
 namespace neon
 {
+namespace detail
+{
+template <typename matrix_type>
+[[nodiscard]] auto jacobian_determinant(matrix_type const& jacobian)
+{
+    return jacobian.determinant();
+}
+
+[[nodiscard]] inline auto jacobian_determinant(matrix32 const& jacobian)
+{
+    return jacobian.col(0).cross(jacobian.col(1)).norm();
+}
+}
+
 /**
  * Compute the Jacobian determinant for a volume or surface mapping.  In three
  * dimensions it performs the following operation:
@@ -18,16 +32,10 @@ namespace neon
  *             \frac{\partial z}{\partial \xi} & \frac{\partial z}{\partial \eta} & \frac{\partial z}{\partial \zeta}
  *          \end{bmatrix}
  * \f}
- */
-template <typename matrix_type>
-[[nodiscard]] auto jacobian_determinant(matrix_type const& jacobian)
-{
-    return jacobian.determinant();
-}
-
-/**
- * Compute the Jacobian determinant for non-square \f$ \mathbb{R}^3 \f$ to \f$ \mathbb{R}^2 \f$ Jacobian
- * using the result from calculus
+ *
+ * However the determinant for non-square Jacobian is not defined.  When there
+ * is a mapping from \f$ \mathbb{R}^3 \f$ to \f$ \mathbb{R}^2 \f$ the Jacobian
+ * `determinant' can be computed by
  * \f{align*}{
  *     j &= || \mathbf{x}_{,\mathbf{\xi}} \times \mathbf{x}_{,\mathbf{\eta}} ||
  * \f}
@@ -39,11 +47,12 @@ template <typename matrix_type>
  *          \frac{\partial z}{\partial \xi} & \frac{\partial z}{\partial \eta}
  *      \end{bmatrix}
  * \f}
- * This routine is useful when the surface is described by a two dimensional
+ * This is useful when the surface is described by a two dimensional
  * element but there are only three dimensional coordinates \cite Anton1998.
  */
-[[nodiscard]] inline auto jacobian_determinant(matrix32 const& jacobian)
+template <typename matrix_expression>
+[[nodiscard]] inline auto jacobian_determinant(matrix_expression const& jacobian)
 {
-    return jacobian.col(0).cross(jacobian.col(1)).norm();
+    return detail::jacobian_determinant(jacobian.eval());
 }
 }
