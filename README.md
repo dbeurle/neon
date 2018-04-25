@@ -9,7 +9,7 @@ A non-linear finite element code.  This project is still under development and i
 
 ## Building
 
-### Docker build
+### Docker
 
 Go to the top level directory in the git repository and enter
 
@@ -45,16 +45,16 @@ Other dependencies are pulled in during build time with `CMake` and include
 For best performance build with native optimisations on for the machine you are using.  This will automatically trigger Eigen to use wider SIMD instruction when available on native architecture at the expense of portability.
 
 The build instructions for debug are
-- `mkdir build && cd build/`
-- `cmake ..`
-- `make all`
+- `$ mkdir build && cd build/`
+- `$ cmake ..`
+- `$ make all`
 
 and for release mode with optimisations
 
-- `mkdir build && cd build/`
-- `cmake -DCMAKE_BUILD_TYPE=Release ..`
-- `make all -j<# cpus>`
-- `make install`
+- `$ mkdir build && cd build/`
+- `$ cmake -DCMAKE_BUILD_TYPE=Release ..`
+- `$ make all -j<# cpus>`
+- `$ sudo make install`
 
 If the code is only used on a particular machine, then machine specification optimisations can be invoked by specifying the `CMake` symbol
 - `-DENABLE_NATIVE=1`
@@ -75,9 +75,14 @@ in the build directory.
 
 Install dependencies through the package manager:
 
-`$ sudo apt install cmake git mercurical libz-dev libcurl3-dev libvtk6-dev libtbb-dev libboost-filesystem-dev libmumps-seq-dev libopenblas-dev libarpack2-dev`
+`$ sudo apt install cmake git mercurical libz-dev libcurl3-dev libvtk6-dev libtbb-dev libboost-filesystem-dev libmumps-seq-dev libopenblas-dev libarpack2-dev, libscotch-dev, hwloc libhwloc-dev`
 
 Update to compatible CMake (https://cmake.org/download/).
+
+On 16.04 you need a C++17 compatible compiler:
+
+`$ sudo add-apt-repository ppa:ubuntu-toolchain-r/test`
+`$ sudo apt install g++-7`
 
 ## Licensing
 
