@@ -6,6 +6,7 @@
 #include "modules/module_factory.hpp"
 
 #include <iomanip>
+#include <fstream>
 #include <thread>
 
 #include <boost/filesystem.hpp>
