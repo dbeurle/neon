@@ -32,11 +32,7 @@ using body_force = volume_load<surface_interpolation>;
 class nonfollower_load_boundary
 {
 public:
-<<<<<<< HEAD
-    /// Specify the allowable nonfollower loads
-=======
     /// Specifying allowable nonfollower loads types
->>>>>>> 3827a3fbd98c45ebe38532028944988f58b9737d
     using boundary_type = std::vector<std::variant<traction, body_force>>;
 
 public:
