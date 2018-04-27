@@ -224,7 +224,7 @@ std::unordered_set<std::string> simulation_parser::parse_material_names(json con
             throw std::runtime_error("Material: Name is missing");
         }
 
-        auto const [it, inserted] = material_names.emplace(material["Name"]);
+        auto const [it, inserted] = material_names.emplace(material["Name"].get<std::string>());
 
         if (!inserted) throw std::domain_error("Material");
     }
@@ -250,7 +250,7 @@ std::unordered_set<std::string> simulation_parser::parse_part_names(
                                     "materials\n");
         }
 
-        auto const [it, inserted] = part_names.emplace(part["Name"]);
+        auto const [it, inserted] = part_names.emplace(part["Name"].get<std::string>());
 
         if (!inserted) throw std::domain_error("Part is defined more than once");
     }
