@@ -1,0 +1,10 @@
+--- a/src/cmake_modules/PastixLib.cmake	2016-09-23 14:25:52.000000000 +0200
++++ a/src/cmake_modules/PastixLib.cmake	2018-04-26 21:57:06.000000000 +0200
+@@ -16,6 +16,7 @@
+ ### Lib Pastix
+ if (NOT PASTIX_WITH_STARPU_CUDA)
+   add_library(pastix ${PASTIX_LIB_SRC})
++  target_link_libraries(pastix ${PASTIX_EXTRA_LIBS})
+ else()
+   cuda_add_library(pastix ${PASTIX_LIB_SRC})
+ endif()
