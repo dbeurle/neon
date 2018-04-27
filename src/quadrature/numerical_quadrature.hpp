@@ -20,16 +20,14 @@ class numerical_quadrature
 public:
     using coordinate_type = std::tuple<int, Xi...>;
 
-    /** Fix the size of the shape function derivative to the size of the quadrature points */
+    /// Fix the size of the shape function derivative to the size of the quadrature points
     using fem_value_type = std::tuple<vector, matrixxd<sizeof...(Xi)>>;
 
 public:
-    /**
-     * Perform the numerical integration of a lambda function.
-     * @param integral - Initial value for the numerical integration
-     * @param f - A lambda function that accepts an femValue and quadrature point
-     * @return The numerically integrated matrix
-     */
+    /// Perform the numerical integration of a lambda function.
+    /// \param integral - Initial value for the numerical integration
+    /// \param f - A lambda function that accepts an femValue and quadrature point
+    /// \return The numerically integrated matrix
     template <typename MatrixTp, typename Functor>
     MatrixTp integrate(MatrixTp operand, Functor&& f) const
     {

@@ -5,8 +5,6 @@
 #include "math/transform_expand.hpp"
 #include "io/json.hpp"
 
-#include <Eigen/Geometry>
-
 namespace neon::mechanical::plane
 {
 nonfollower_load_boundary::nonfollower_load_boundary(
