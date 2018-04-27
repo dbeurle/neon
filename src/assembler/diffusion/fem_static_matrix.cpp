@@ -15,7 +15,7 @@ fem_static_matrix::fem_static_matrix(fem_mesh& mesh, json const& simulation_data
       f(vector::Zero(mesh.active_dofs())),
       d(vector::Zero(mesh.active_dofs())),
       file_io(simulation_data["Name"].get<std::string>(), simulation_data["Visualisation"], mesh),
-      linear_solver(make_linear_solver(simulation_data["LinearSolver"]))
+      solver(make_linear_solver(simulation_data["LinearSolver"]))
 {
 }
 
@@ -44,7 +44,7 @@ void fem_static_matrix::compute_sparsity_pattern()
             }
         }
     }
-    K.setFromTriplets(std::begin(doublets), std::end(doublets));
+    K.setFromTriplets(begin(doublets), end(doublets));
 
     is_sparsity_computed = true;
 }
@@ -107,7 +107,7 @@ void fem_static_matrix::solve()
 
     fem::apply_dirichlet_conditions(K, d, f, mesh);
 
-    linear_solver->solve(K, d, f);
+    solver->solve(K, d, f);
 
     file_io.write(0, 0.0, d);
 }

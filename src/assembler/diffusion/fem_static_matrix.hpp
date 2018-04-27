@@ -7,7 +7,7 @@
 
 namespace neon
 {
-class LinearSolver;
+class linear_solver;
 }
 
 namespace neon::diffusion
@@ -55,6 +55,6 @@ protected:
 
     FileIO file_io;
 
-    std::unique_ptr<LinearSolver> linear_solver;
+    std::unique_ptr<linear_solver> solver;
 };
 }

@@ -50,7 +50,7 @@ void fem_dynamic_matrix::solve()
 
         fem::apply_dirichlet_conditions(A, d, b, mesh);
 
-        linear_solver->solve(A, d, b);
+        solver->solve(A, d, b);
 
         auto const end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> const elapsed_seconds = end - start;

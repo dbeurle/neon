@@ -98,7 +98,7 @@ protected:
 
     vector minus_residual; //!< Minus residual vector
 
-    std::unique_ptr<LinearSolver> linear_solver;
+    std::unique_ptr<linear_solver> solver;
 };
 
 template <class fem_mesh_type>
@@ -111,7 +111,7 @@ fem_static_matrix<fem_mesh_type>::fem_static_matrix(mesh_type& fem_mesh, json co
       displacement(vector::Zero(fem_mesh.active_dofs())),
       displacement_old(vector::Zero(fem_mesh.active_dofs())),
       delta_d(vector::Zero(fem_mesh.active_dofs())),
-      linear_solver(make_linear_solver(simulation["LinearSolver"], fem_mesh.is_symmetric()))
+      solver(make_linear_solver(simulation["LinearSolver"], fem_mesh.is_symmetric()))
 {
     if (!simulation["NonlinearOptions"].count("DisplacementTolerance"))
     {
@@ -137,7 +137,7 @@ void fem_static_matrix<fem_mesh_type>::internal_restart(json const& solver_data,
                                                         json const& new_increment_data)
 {
     adaptive_load.reset(new_increment_data);
-    linear_solver = make_linear_solver(solver_data);
+    solver = make_linear_solver(solver_data);
 }
 
 template <class fem_mesh_type>
@@ -436,7 +436,7 @@ void fem_static_matrix<fem_mesh_type>::perform_equilibrium_iterations()
 
         enforce_dirichlet_conditions(Kt, minus_residual);
 
-        linear_solver->solve(Kt, delta_d, minus_residual);
+        solver->solve(Kt, delta_d, minus_residual);
 
         displacement += delta_d;
 

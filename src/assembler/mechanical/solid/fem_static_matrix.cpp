@@ -25,7 +25,7 @@ fem_static_matrix::fem_static_matrix(fem_mesh& mesh, json const& simulation)
       displacement(vector::Zero(mesh.active_dofs())),
       displacement_old(vector::Zero(mesh.active_dofs())),
       delta_d(vector::Zero(mesh.active_dofs())),
-      linear_solver(make_linear_solver(simulation["LinearSolver"], mesh.is_symmetric()))
+      solver(make_linear_solver(simulation["LinearSolver"], mesh.is_symmetric()))
 {
     if (!simulation["NonlinearOptions"].count("DisplacementTolerance"))
     {
@@ -51,7 +51,7 @@ fem_static_matrix::~fem_static_matrix() = default;
 void fem_static_matrix::internal_restart(json const& solver_data, json const& new_increment_data)
 {
     adaptive_load.reset(new_increment_data);
-    linear_solver = make_linear_solver(solver_data);
+    solver = make_linear_solver(solver_data);
 }
 
 void fem_static_matrix::compute_sparsity_pattern()
@@ -305,7 +305,7 @@ void fem_static_matrix::perform_equilibrium_iterations()
 
         enforce_dirichlet_conditions(Kt, minus_residual);
 
-        linear_solver->solve(Kt, delta_d, minus_residual);
+        solver->solve(Kt, delta_d, minus_residual);
 
         displacement += delta_d;
 

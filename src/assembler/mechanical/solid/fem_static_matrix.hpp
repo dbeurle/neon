@@ -9,7 +9,7 @@
 
 namespace neon
 {
-class LinearSolver;
+class linear_solver;
 }
 
 namespace neon::mechanical::solid
@@ -90,7 +90,7 @@ protected:
 
     vector minus_residual; /// Minus residual vector
 
-    std::unique_ptr<LinearSolver> linear_solver;
+    std::unique_ptr<linear_solver> solver;
 };
 
 inline bool fem_static_matrix::is_iteration_converged() const
