@@ -20,7 +20,7 @@ find_path(
 
 find_library(
 	MUMPS_LIBRARY
-	NAMES dmumps
+	NAMES dmumps dmumps_seq
 	DOC "MUMPS library"
 )
 
@@ -49,7 +49,7 @@ find_path(
 )
 
 if (${MUMPS_INCLUDE_PREFIX} MATCHES "MUMPS")
-	set(MUMPS_INCLUDE_DIR "${MUMPS_INCLUDE_DIR}/MUMPS")
+	set(MUMPS_INCLUDE_DIR "${MUMPS_INCLUDE_DIR}/${MUMPS_INCLUDE_PREFIX}")
 endif()
 
 # handle the QUIETLY and REQUIRED arguments and set MUMPS_FOUND to TRUE
