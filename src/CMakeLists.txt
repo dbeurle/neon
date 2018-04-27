@@ -51,12 +51,8 @@ target_link_libraries(neon
                       ${MUMPS_LIBRARY}
                       ${BLAS_LIBRARIES}
                       ${VTK_LIBRARIES}
-                      ${Hwloc_LIBRARIES}
                       ${TBB_LIBRARIES}
                       ${CUDA_cusparse_LIBRARY}
                       ${CUDA_CUBLAS_LIBRARIES}
                       pastix
-                      jsoncpp
-                      scotch
-                      scotcherr
                       ${ARPACK_LIBRARY})
