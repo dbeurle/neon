@@ -8,7 +8,7 @@
 #include "Exceptions.hpp"
 #include "numeric/float_compare.hpp"
 #include "solver/linear/linear_solver_factory.hpp"
-#include "io/FileIO.hpp"
+#include "io/file_output.hpp"
 #include "io/json.hpp"
 
 #include <chrono>
@@ -76,7 +76,7 @@ private:
 protected:
     mesh_type& fem_mesh;
 
-    FileIO<mesh_type> io;
+    file_output<mesh_type> io;
 
     adaptive_time_step adaptive_load;
 
