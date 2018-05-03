@@ -24,10 +24,10 @@ finite_strain_J2_plasticity::finite_strain_J2_plasticity(
 {
     variables->add(internal_variables_t::scalar::VonMisesStress,
                    internal_variables_t::scalar::EffectivePlasticStrain,
-                   internal_variables_t::Tensor::HenckyStrainElastic);
+                   internal_variables_t::second::HenckyStrainElastic);
 
     // Add material tangent with the linear elasticity moduli
-    variables->add(internal_variables_t::rank4::tangent_operator,
+    variables->add(internal_variables_t::fourth::tangent_operator,
                    consistent_tangent(1.0, matrix2::Zero(), matrix2::Zero(), C_e));
 }
 
@@ -42,12 +42,12 @@ void finite_strain_J2_plasticity::update_internal_variables(double const time_st
     // Extract the internal variables
     auto [deformation_gradients,
           log_strain_e_list,
-          cauchy_stresses] = variables->fetch(internal_variables_t::Tensor::DeformationGradient,
-                                              internal_variables_t::Tensor::HenckyStrainElastic,
-                                              internal_variables_t::Tensor::CauchyStress);
+          cauchy_stresses] = variables->fetch(internal_variables_t::second::DeformationGradient,
+                                              internal_variables_t::second::HenckyStrainElastic,
+                                              internal_variables_t::second::CauchyStress);
 
     auto const old_deformation_gradients = variables->fetch_old(
-        internal_variables_t::Tensor::DeformationGradient);
+        internal_variables_t::second::DeformationGradient);
 
     auto const J_list = variables->fetch(internal_variables_t::scalar::DetF);
 
@@ -56,7 +56,7 @@ void finite_strain_J2_plasticity::update_internal_variables(double const time_st
           von_mises_stresses] = variables->fetch(internal_variables_t::scalar::EffectivePlasticStrain,
                                                  internal_variables_t::scalar::VonMisesStress);
 
-    auto& tangent_operators = variables->fetch(internal_variables_t::rank4::tangent_operator);
+    auto& tangent_operators = variables->fetch(internal_variables_t::fourth::tangent_operator);
 
     auto const incremental_deformation_gradients = view::zip(deformation_gradients,
                                                              old_deformation_gradients)

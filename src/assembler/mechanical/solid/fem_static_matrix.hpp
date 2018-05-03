@@ -5,7 +5,7 @@
 #include "numeric/sparse_matrix.hpp"
 #include "solver/adaptive_time_step.hpp"
 
-#include "io/FileIO.hpp"
+#include "io/file_output.hpp"
 
 namespace neon
 {
@@ -68,7 +68,7 @@ private:
 protected:
     fem_mesh& mesh;
 
-    FileIO<fem_mesh> io;
+    file_output<fem_mesh> io;
 
     adaptive_time_step adaptive_load;
 

@@ -58,16 +58,15 @@ public:
 
 public:
     /// Fourth order tensor types
-    enum class rank4 : std::uint8_t {
+    enum class fourth : std::uint8_t {
         /// Material tangent operator
         tangent_operator
     };
 
-    /// Tensor internal variables types
-    enum class Tensor : std::uint8_t {
+    /// Second order tensor internal variables types
+    enum class second : std::uint8_t {
         /// Cauchy stress
         CauchyStress,
-        /// Kirchhoff stress
         Kirchhoff,
         /// First Piola-Kirchhoff stress (PK1)
         PiolaKirchhoff1,
@@ -156,14 +155,14 @@ public:
 
     /// Add a number of tensor type variables to the object store
     template <typename... Variables>
-    void add(Tensor const name, Variables... names)
+    void add(second const name, Variables... names)
     {
         rank2tensors[name].resize(size, rank2tensor_type::Zero());
         rank2tensors_old[name].resize(size, rank2tensor_type::Zero());
         add(names...);
     }
 
-    void add(Tensor const name)
+    void add(second const name)
     {
         rank2tensors[name].resize(size, rank2tensor_type::Zero());
         rank2tensors_old[name].resize(size, rank2tensor_type::Zero());
@@ -185,7 +184,7 @@ public:
     }
 
     /// Allocate matrix internal variables with provided matrix
-    void add(internal_variables::rank4 const name,
+    void add(internal_variables::fourth const name,
              rank4tensor_type const m = rank4tensor_type::Zero())
     {
         rank4tensors[name].resize(size, m);
@@ -193,12 +192,12 @@ public:
 
     bool has(scalar const name) const { return scalars.find(name) != scalars.end(); }
 
-    bool has(Tensor const name) const { return rank2tensors.find(name) != rank2tensors.end(); }
+    bool has(second const name) const { return rank2tensors.find(name) != rank2tensors.end(); }
 
-    bool has(rank4 const name) const { return rank4tensors.find(name) != rank4tensors.end(); }
+    bool has(fourth const name) const { return rank4tensors.find(name) != rank4tensors.end(); }
 
     /// Const access to the converged tensor variables
-    std::vector<rank2tensor_type> const& fetch_old(Tensor const tensor_name) const
+    std::vector<rank2tensor_type> const& fetch_old(second const tensor_name) const
     {
         return rank2tensors_old.find(tensor_name)->second;
     }
@@ -220,13 +219,13 @@ public:
     }
 
     /// Mutable access to the non-converged tensor variables
-    std::vector<rank2tensor_type>& fetch(Tensor tensor_name)
+    std::vector<rank2tensor_type>& fetch(second const tensor_name)
     {
         return rank2tensors.find(tensor_name)->second;
     }
 
     /// Mutable access to the non-converged matrix variables
-    std::vector<rank4tensor_type>& fetch(rank4 const rank4_name)
+    std::vector<rank4tensor_type>& fetch(fourth const rank4_name)
     {
         return rank4tensors.find(rank4_name)->second;
     }
@@ -242,7 +241,7 @@ public:
 
     /// Mutable access to the non-converged tensor variables
     template <typename... TensorTps>
-    auto fetch(Tensor var0, Tensor var1, TensorTps... vars)
+    auto fetch(second var0, second var1, TensorTps... vars)
     {
         return std::make_tuple(std::ref(rank2tensors.find(var0)->second),
                                std::ref(rank2tensors.find(var1)->second),
@@ -250,7 +249,7 @@ public:
     }
 
     template <typename... rank4_types>
-    auto fetch(rank4 const var0, rank4 const var1, rank4_types const... vars)
+    auto fetch(fourth const var0, fourth const var1, rank4_types const... vars)
     {
         return std::make_tuple(std::ref(rank4tensors.find(var0)->second),
                                std::ref(rank4tensors.find(var1)->second),
@@ -268,13 +267,13 @@ public:
     }
 
     /// Non-mutable access to the non-converged tensor variables
-    std::vector<rank2tensor_type> const& fetch(Tensor const tensor_name) const
+    std::vector<rank2tensor_type> const& fetch(second const tensor_name) const
     {
         return rank2tensors.find(tensor_name)->second;
     }
 
     /// Non-mutable access to the non-converged matrix variables
-    std::vector<rank4tensor_type> const& fetch(rank4 const rank4_name) const
+    std::vector<rank4tensor_type> const& fetch(fourth const rank4_name) const
     {
         return rank4tensors.find(rank4_name)->second;
     }
@@ -290,7 +289,7 @@ public:
 
     /// Const access to the non-converged tensor variables
     template <typename... TensorTps>
-    auto fetch(Tensor var0, Tensor var1, TensorTps... vars) const
+    auto fetch(second var0, second var1, TensorTps... vars) const
     {
         return std::make_tuple(std::cref(rank2tensors.find(var0)->second),
                                std::cref(rank2tensors.find(var1)->second),
@@ -298,7 +297,7 @@ public:
     }
 
     template <typename... rank4_types>
-    auto fetch(rank4 const var0, rank4 const var1, rank4_types... vars) const
+    auto fetch(fourth const var0, fourth const var1, rank4_types... vars) const
     {
         return std::make_tuple(std::cref(rank4tensors.find(var0)->second),
                                std::cref(rank4tensors.find(var1)->second),
@@ -326,11 +325,11 @@ protected:
     // simulation loop.  If a nonlinear iteration does not converge then revert
     // the state back to the previous state.  The rank2tensors and scalars fields
     // are the 'unstable' variables and the *Old are the stable variants
-    std::unordered_map<Tensor, std::vector<rank2tensor_type>> rank2tensors, rank2tensors_old;
+    std::unordered_map<second, std::vector<rank2tensor_type>> rank2tensors, rank2tensors_old;
 
     std::unordered_map<scalar, std::vector<scalar_type>> scalars, scalars_old;
 
-    std::unordered_map<rank4, std::vector<rank4tensor_type>> rank4tensors;
+    std::unordered_map<fourth, std::vector<rank4tensor_type>> rank4tensors;
 
     std::size_t size;
 };

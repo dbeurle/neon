@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "io/FileIO.hpp"
+#include "io/file_output.hpp"
 #include "mesh/diffusion/fem_mesh.hpp"
 #include "numeric/sparse_matrix.hpp"
 
@@ -53,7 +53,7 @@ protected:
     vector f;        /// Heat vector
     vector d;        /// Temperature vector
 
-    FileIO file_io;
+    file_output file_io;
 
     std::unique_ptr<linear_solver> solver;
 };

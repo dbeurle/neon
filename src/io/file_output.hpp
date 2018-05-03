@@ -35,55 +35,68 @@
 
 namespace neon
 {
-class FileIO
+namespace io
+{
+class file_output
 {
 public:
-    explicit FileIO(std::string file_name, json const& visualisation_data);
+    explicit file_output(std::string file_name, json const& visualisation_data);
 
-    virtual ~FileIO();
+    /// Virtual destructor to finish writing out the time step mapping
+    virtual ~file_output();
 
-    FileIO(FileIO&&) = default;
+    file_output(file_output&&) = default;
 
 protected:
     virtual void write_to_file(int const time_step, double const total_time);
 
-    /** Write out the field to a vtk file */
+    /// Write out the field to a vtk file
     void add_field(std::string const& name, vector const& data, int const components);
 
 protected:
-    std::string const directory_name = "visualisation";
+    /// Directory to store visualisation output
+    std::string const directory_name{"visualisation"};
+
     std::string file_name;
 
     vtkSmartPointer<vtkUnstructuredGrid> unstructured_mesh;
 
-    std::ofstream pvd_file; //!< Stream for writing time history
+    /// Stream for writing time history
+    std::ofstream pvd_file;
 
     std::unordered_set<std::string> output_set;
 
-    int write_every = 1; //!< Time steps to write out (e.g. two is every second time step)
+    /// Time steps to write out (e.g. two is every second time step)
+    int write_every = 1;
+
+    /// Default to using binary VTK output for efficiency
     bool use_binary_format = true;
 };
+}
 
 namespace mechanical
 {
-template <class femMeshType>
-class FileIO : public neon::FileIO
+template <typename fem_mesh>
+class file_output : public io::file_output
 {
 public:
-    using fem_mesh_type = femMeshType;
+    /// Mechanical mesh type
+    using fem_mesh_type = fem_mesh;
 
     using variable_type = typename fem_mesh_type::internal_variable_type;
 
     using scalar_map_t = std::map<std::string, typename variable_type::scalar>;
-    using tensor_map_t = std::map<std::string, typename variable_type::Tensor>;
+    using tensor_map_t = std::map<std::string, typename variable_type::second>;
 
 public:
     std::string const primary_field{"Displacement"};
 
 public:
-    explicit FileIO(std::string file_name, json const& visualisation_data, fem_mesh_type const& mesh);
+    explicit file_output(std::string file_name,
+                         json const& visualisation_data,
+                         fem_mesh_type const& mesh);
 
-    FileIO(FileIO&&) = default;
+    file_output(file_output&&) = default;
 
     void write(int const time_step, double const total_time);
 
@@ -99,21 +112,21 @@ private:
                                   {"Damage", variable_type::scalar::Damage},
                                   {"EnergyReleaseRate", variable_type::scalar::EnergyReleaseRate}};
 
-    tensor_map_t const tensor_map{{"CauchyStress", variable_type::Tensor::CauchyStress},
-                                  {"LinearisedStrain", variable_type::Tensor::LinearisedStrain},
-                                  {"LinearisedPlasticStrain", variable_type::Tensor::LinearisedPlasticStrain},
-                                  {"DeformationGradient", variable_type::Tensor::DeformationGradient},
-                                  {"DisplacementGradient", variable_type::Tensor::DisplacementGradient},
-                                  {"KinematicHardening", variable_type::Tensor::KinematicHardening},
-                                  {"BackStress", variable_type::Tensor::BackStress}};
+    tensor_map_t const tensor_map{{"CauchyStress", variable_type::second::CauchyStress},
+                                  {"LinearisedStrain", variable_type::second::LinearisedStrain},
+                                  {"LinearisedPlasticStrain", variable_type::second::LinearisedPlasticStrain},
+                                  {"DeformationGradient", variable_type::second::DeformationGradient},
+                                  {"DisplacementGradient", variable_type::second::DisplacementGradient},
+                                  {"KinematicHardening", variable_type::second::KinematicHardening},
+                                  {"BackStress", variable_type::second::BackStress}};
     // clang-format on
 };
 
-template <class femMeshType>
-FileIO<femMeshType>::FileIO(std::string file_name,
-                            json const& visualisation_data,
-                            femMeshType const& mesh)
-    : neon::FileIO(file_name, visualisation_data), mesh(mesh)
+template <class fem_mesh>
+file_output<fem_mesh>::file_output(std::string file_name,
+                                   json const& visualisation_data,
+                                   fem_mesh const& mesh)
+    : io::file_output(file_name, visualisation_data), mesh(mesh)
 {
     // Check the output set against the known values for this module
     for (auto const& output : output_set)
@@ -128,8 +141,8 @@ FileIO<femMeshType>::FileIO(std::string file_name,
     add_mesh();
 }
 
-template <class femMeshType>
-void FileIO<femMeshType>::write(int const time_step, double const total_time)
+template <class fem_mesh>
+void file_output<fem_mesh>::write(int const time_step, double const total_time)
 {
     if (time_step % write_every != 0) return;
 
@@ -140,10 +153,11 @@ void FileIO<femMeshType>::write(int const time_step, double const total_time)
     {
         if (auto found = tensor_map.find(name); found != tensor_map.end())
         {
-            auto const tensor_size = femMeshType::internal_variable_type::tensor_size;
+            auto const& [name_str, name_enum] = *found;
+
+            auto const tensor_size = fem_mesh::internal_variable_type::tensor_size;
 
             nodal_averaged_value.resize(mesh.geometry().size() * tensor_size);
-
             insertions.resize(mesh.geometry().size() * tensor_size);
 
             nodal_averaged_value.setZero();
@@ -152,12 +166,12 @@ void FileIO<femMeshType>::write(int const time_step, double const total_time)
             // Add internal variables
             for (auto const& submesh : mesh.meshes())
             {
-                if (!submesh.internal_variables().has(found->second))
+                if (!submesh.internal_variables().has(name_enum))
                 {
                     throw std::domain_error("Internal variable " + name + " does not exist in mesh");
                 }
 
-                auto const [value, count] = submesh.nodal_averaged_variable(found->second);
+                auto const [value, count] = submesh.nodal_averaged_variable(name_enum);
 
                 nodal_averaged_value += value;
 
@@ -165,16 +179,14 @@ void FileIO<femMeshType>::write(int const time_step, double const total_time)
             }
             nodal_averaged_value = nodal_averaged_value.cwiseQuotient(insertions);
 
-            add_field(found->first, nodal_averaged_value, tensor_size);
+            add_field(name_str, nodal_averaged_value, tensor_size);
         }
         else if (auto found = scalar_map.find(name); found != scalar_map.end())
         {
             nodal_averaged_value.resize(mesh.geometry().size());
-
             insertions.resize(mesh.geometry().size());
 
             nodal_averaged_value.setZero();
-
             insertions.setZero();
 
             for (auto const& submesh : mesh.meshes())
@@ -202,8 +214,8 @@ void FileIO<femMeshType>::write(int const time_step, double const total_time)
     write_to_file(time_step, total_time);
 }
 
-template <class femMeshType>
-void FileIO<femMeshType>::add_mesh()
+template <class fem_mesh>
+void file_output<fem_mesh>::add_mesh()
 {
     // Populate an unstructured grid object
     unstructured_mesh->SetPoints(io::vtk_coordinates(mesh.geometry().coordinates()));
@@ -230,7 +242,7 @@ void FileIO<femMeshType>::add_mesh()
 
 namespace diffusion
 {
-class FileIO : public neon::FileIO
+class file_output : public neon::io::file_output
 {
 public:
     using VectorMap = std::map<std::string, internal_variables_t::vector>;
@@ -238,9 +250,9 @@ public:
     std::string const primary_field{"Temperature"};
 
 public:
-    explicit FileIO(std::string file_name, json const& visualisation_data, fem_mesh const& mesh);
+    explicit file_output(std::string file_name, json const& visualisation_data, fem_mesh const& mesh);
 
-    FileIO(FileIO&&) = default;
+    file_output(file_output&&) = default;
 
     void write(int const time_step, double const total_time, vector const& temperature);
 
