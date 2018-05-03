@@ -106,11 +106,6 @@ fem_static_matrix<fem_mesh_type>::fem_static_matrix(mesh_type& fem_mesh, json co
     : fem_mesh(fem_mesh),
       io(simulation["Name"].get<std::string>(), simulation["Visualisation"], fem_mesh),
       adaptive_load(simulation["Time"], fem_mesh.time_history()),
-      fint(vector::Zero(fem_mesh.active_dofs())),
-      fext(vector::Zero(fem_mesh.active_dofs())),
-      displacement(vector::Zero(fem_mesh.active_dofs())),
-      displacement_old(vector::Zero(fem_mesh.active_dofs())),
-      delta_d(vector::Zero(fem_mesh.active_dofs())),
       solver(make_linear_solver(simulation["LinearSolver"], fem_mesh.is_symmetric()))
 {
     if (!simulation["NonlinearOptions"].count("DisplacementTolerance"))
@@ -125,6 +120,8 @@ fem_static_matrix<fem_mesh_type>::fem_static_matrix(mesh_type& fem_mesh, json co
     }
     residual_tolerance = simulation["NonlinearOptions"]["ResidualTolerance"];
     displacement_tolerance = simulation["NonlinearOptions"]["DisplacementTolerance"];
+
+    fint = fext = displacement = displacement_old = delta_d = vector::Zero(fem_mesh.active_dofs());
 
     // Perform Newton-Raphson iterations
     std::cout << "\n"
