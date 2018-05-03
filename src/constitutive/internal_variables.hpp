@@ -12,20 +12,25 @@
 
 namespace neon
 {
+/// variable_view is a tiny wrapper around the linear indexing into the
+/// internal variable storage given an element quadrature point and an element
+/// number.  \sa internal_variables
 class variable_view
 {
 public:
     variable_view() = default;
 
+    /// Construct with number of quadrature points per element
     variable_view(std::size_t const quadrature_points) : quadrature_points(quadrature_points) {}
 
-    /** @return view index into the vector */
+    /// \return view index into the vector
     std::size_t operator()(std::size_t const element, std::size_t const quadrature_point) const
     {
         return quadrature_points * element + quadrature_point;
     }
 
 private:
+    /// Quadrature points per element
     std::size_t quadrature_points{0};
 };
 
@@ -37,43 +42,61 @@ template <int rank2_dimension, int rank4_dimension>
 class internal_variables
 {
 public:
-    /** Spatial dimension (three, two or one dimension) */
+    /// Spatial dimension (three, two or one dimension)
     static auto constexpr r_n = rank2_dimension;
-    /** Voigt dimension for the tensor conversion */
+    /// Voigt dimension for the tensor conversion
     static auto constexpr v_n = rank4_dimension;
 
     using scalar_type = double;
 
-    /** A second order tensor type is a small matrix in tensor notation */
+    /// A second order tensor type is a small matrix in tensor notation
     using rank2tensor_type = Eigen::Matrix<scalar_type, rank2_dimension, rank2_dimension>;
-    /** A fourth order tensor type is a fixed size matrix in Voigt notation */
+    /// A fourth order tensor type is a fixed size matrix in Voigt notation
     using rank4tensor_type = Eigen::Matrix<scalar_type, rank4_dimension, rank4_dimension>;
+
     static auto constexpr tensor_size = rank2_dimension * rank2_dimension;
 
 public:
-    enum class rank4 : std::uint8_t { tangent_operator };
+    /// Fourth order tensor types
+    enum class rank4 : std::uint8_t {
+        /// Material tangent operator
+        tangent_operator
+    };
 
-    /** Enumerations for internal variables that are tensor types */
+    /// Tensor internal variables types
     enum class Tensor : std::uint8_t {
-        /* Tensors for solid mechanics applications */
-        // Stress measures
-        Cauchy,
+        /// Cauchy stress
+        CauchyStress,
+        /// Kirchhoff stress
         Kirchhoff,
+        /// First Piola-Kirchhoff stress (PK1)
         PiolaKirchhoff1,
+        /// Second Piola-Kirchhoff stress (PK2)
         PiolaKirchhoff2,
-        // Deformation measures
+        /// Linearised (infinitesimal) total strain
         LinearisedStrain,
+        /// Linearised (infinitesimal) plastic strain
         LinearisedPlasticStrain,
+        /// Hencky elastic strain
         HenckyStrainElastic,
+        /// Deformation gradient (F)
         DeformationGradient,
+        /// Plastic deformation gradient (Fp)
         DeformationGradientPlastic,
+        /// Displacement gradient (H)
         DisplacementGradient,
+        /// Green-Lagrange strain (E)
         GreenLagrange,
-        //  small_strain_J2_plasticity internal variables
+        /// Back stress (for hardening)
         BackStress,
+        /// Kinematic hardening
         KinematicHardening,
-        /* Tensors for diffusion applications */
-        Conductivity
+        /// Conductivity tensor
+        Conductivity,
+        /// Beam bending stiffness
+        bending_stiffness,
+        /// Beam shear stiffness
+        shear_stiffness
     };
 
     enum class vector : std::uint8_t {
@@ -85,30 +108,53 @@ public:
     };
 
     enum class scalar : std::uint8_t {
-        Chains,      // Chains for the micromechanical model
-        Segments,    // Segments for the micromechanical model
-        ShearModuli, // Shear moduli
+        /// Chains for the micromechanical model
+        Chains,
+        /// Segments for the micromechanical model
+        Segments,
+        /// Shear moduli
+        ShearModuli,
+        /// Von Mises equivalent stress
         VonMisesStress,
+        /// Accumulated (effective) plastic strain
         EffectivePlasticStrain,
-        DetF0, // Reference Jacobian determinant
-        DetF,  // Updated Jacobian determinant
+        /// Reference Jacobian determinant
+        DetF0,
+        /// Updated Jacobian determinant
+        DetF,
+        /// Scalar damage variable
         Damage,
-        EnergyReleaseRate
+        /// Scalar energy release rate
+        EnergyReleaseRate,
+        /// Beam torsional stiffness
+        torsional_stiffness,
+        /// Beam axial stiffness
+        axial_stiffness,
+        /// Beam section shear area (one)
+        shear_area_1,
+        /// Beam section shear area (two)
+        shear_area_2,
+        /// Section cross sectional area
+        cross_sectional_area,
+        /// Beam second moment of area (one)
+        second_moment_area_1,
+        /// Beam second moment of area (two)
+        second_moment_area_2
     };
 
 public:
     internal_variables(std::size_t const size) : size{size} {}
 
-    /** Delete copy constructor to prevent references moving */
+    /// Delete copy constructor to prevent references moving
     internal_variables(internal_variables const&) = delete;
 
-    /** Delete assignment constructor to prevent references moving */
+    /// Delete assignment constructor to prevent references moving
     internal_variables& operator=(internal_variables const&) = delete;
 
-    /** Implicitly defined move constructor */
+    /// Implicitly defined move constructor
     internal_variables(internal_variables&&) = default;
 
-    /** Add a number of tensor type variables to the object store */
+    /// Add a number of tensor type variables to the object store
     template <typename... Variables>
     void add(Tensor const name, Variables... names)
     {
@@ -123,7 +169,7 @@ public:
         rank2tensors_old[name].resize(size, rank2tensor_type::Zero());
     }
 
-    /** Add a number of scalar type variables to the object store */
+    /// Add a number of scalar type variables to the object store
     template <typename... Variables>
     void add(scalar const name, Variables const... names)
     {
@@ -138,7 +184,7 @@ public:
         scalars_old[name].resize(size, 0.0);
     }
 
-    /** Allocate matrix internal variables with provided matrix */
+    /// Allocate matrix internal variables with provided matrix
     void add(internal_variables::rank4 const name,
              rank4tensor_type const m = rank4tensor_type::Zero())
     {
@@ -151,13 +197,13 @@ public:
 
     bool has(rank4 const name) const { return rank4tensors.find(name) != rank4tensors.end(); }
 
-    /** Const access to the converged tensor variables */
+    /// Const access to the converged tensor variables
     std::vector<rank2tensor_type> const& fetch_old(Tensor const tensor_name) const
     {
         return rank2tensors_old.find(tensor_name)->second;
     }
 
-    /** Const access to the converged scalar variables */
+    /// Const access to the converged scalar variables
     std::vector<scalar_type> const& fetch_old(scalar const scalar_name) const
     {
         return scalars_old.find(scalar_name)->second;
@@ -167,25 +213,25 @@ public:
      *  Mutable access methods for unconverged internal variables  *
      *-------------------------------------------------------------*/
 
-    /** Mutable access to the non-converged scalar variables */
+    /// Mutable access to the non-converged scalar variables
     std::vector<scalar_type>& fetch(scalar const scalar_name)
     {
         return scalars.find(scalar_name)->second;
     }
 
-    /** Mutable access to the non-converged tensor variables */
+    /// Mutable access to the non-converged tensor variables
     std::vector<rank2tensor_type>& fetch(Tensor tensor_name)
     {
         return rank2tensors.find(tensor_name)->second;
     }
 
-    /** Mutable access to the non-converged matrix variables */
+    /// Mutable access to the non-converged matrix variables
     std::vector<rank4tensor_type>& fetch(rank4 const rank4_name)
     {
         return rank4tensors.find(rank4_name)->second;
     }
 
-    /** Mutable access to the non-converged scalar variables */
+    /// Mutable access to the non-converged scalar variables
     template <typename... scalar_types>
     auto fetch(scalar const var0, scalar const var1, scalar_types const... vars)
     {
@@ -194,7 +240,7 @@ public:
                                std::ref(scalars.find(vars)->second)...);
     }
 
-    /** Mutable access to the non-converged tensor variables */
+    /// Mutable access to the non-converged tensor variables
     template <typename... TensorTps>
     auto fetch(Tensor var0, Tensor var1, TensorTps... vars)
     {
@@ -215,25 +261,25 @@ public:
      * Constant access methods for unconverged internal variables  *
      *-------------------------------------------------------------*/
 
-    /** Constant access to the non-converged scalar variables */
+    /// Constant access to the non-converged scalar variables
     std::vector<scalar_type> const& fetch(scalar const scalar_name) const
     {
         return scalars.find(scalar_name)->second;
     }
 
-    /** Non-mutable access to the non-converged tensor variables */
+    /// Non-mutable access to the non-converged tensor variables
     std::vector<rank2tensor_type> const& fetch(Tensor const tensor_name) const
     {
         return rank2tensors.find(tensor_name)->second;
     }
 
-    /** Non-mutable access to the non-converged matrix variables */
+    /// Non-mutable access to the non-converged matrix variables
     std::vector<rank4tensor_type> const& fetch(rank4 const rank4_name) const
     {
         return rank4tensors.find(rank4_name)->second;
     }
 
-    /** Const access to the non-converged scalar variables */
+    /// Const access to the non-converged scalar variables
     template <typename... ScalarTps>
     auto fetch(scalar const var0, scalar const var1, ScalarTps const... vars) const
     {
@@ -242,7 +288,7 @@ public:
                                std::cref(scalars.find(vars)->second)...);
     }
 
-    /** Const access to the non-converged tensor variables */
+    /// Const access to the non-converged tensor variables
     template <typename... TensorTps>
     auto fetch(Tensor var0, Tensor var1, TensorTps... vars) const
     {
@@ -259,14 +305,14 @@ public:
                                std::cref(rank4tensors.find(vars)->second)...);
     }
 
-    /** Commit to history when iteration converges */
+    /// Commit to history when iteration converges
     void commit()
     {
         rank2tensors_old = rank2tensors;
         scalars_old = scalars;
     }
 
-    /** Revert to the old state when iteration doesn't converge */
+    /// Revert to the old state when iteration doesn't converge
     void revert()
     {
         rank2tensors = rank2tensors_old;

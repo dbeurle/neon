@@ -4,8 +4,6 @@
 #include "interpolations/interpolation_factory.hpp"
 #include "math/transform_expand.hpp"
 
-#include <iostream>
-
 namespace neon::mechanical::beam
 {
 fem_submesh::fem_submesh(json const& material_data,
@@ -13,10 +11,12 @@ fem_submesh::fem_submesh(json const& material_data,
                          std::shared_ptr<material_coordinates>& material_coordinates,
                          basic_submesh const& submesh)
     : basic_submesh(submesh),
+      profiles(elements()),
       material(material_data),
       sf(make_line_interpolation(topology(), simulation_data)),
       mesh_coordinates(material_coordinates),
-      u(mesh_coordinates->size())
+      iv(std::make_shared<internal_variables_type>(elements() * sf->quadrature().points())),
+      nodal_variables(mesh_coordinates->size())
 {
     dof_list.resize(connectivity.rows() * traits::dofs_per_node, connectivity.cols());
 
@@ -26,17 +26,40 @@ fem_submesh::fem_submesh(json const& material_data,
                               dof_list(Eigen::placeholders::all, i),
                               traits::dof_order);
     }
+    iv->add(internal_variables_type::Tensor::CauchyStress);
 
-    profile = std::make_unique<geometry::rectangular_bar>(1.0, 1.0);
+    iv->add(internal_variables_type::scalar::shear_area_1,
+            internal_variables_type::scalar::shear_area_2,
+            internal_variables_type::scalar::cross_sectional_area,
+            internal_variables_type::scalar::second_moment_area_1,
+            internal_variables_type::scalar::second_moment_area_2);
+}
 
-    double A_1 = 1.0, A_2 = 1.0;
-    D_s << A_1, 0.0, 0.0, A_2;
-    D_s *= material.shear_modulus();
+void fem_submesh::update_internal_variables(double const time_step_size = 1.0)
+{
+    for (auto& profile : profiles)
+    {
+        profile = std::make_unique<geometry::rectangular_bar>(1.0, 1.0);
+    }
 
-    auto const [I_1, I_2] = profile->second_moment_area();
+    auto& [A, As1, As2] = iv->fetch(internal_variables_type::scalar::cross_sectional_area,
+                                    internal_variables_type::scalar::shear_area_1,
+                                    internal_variables_type::scalar::shear_area_1);
 
-    D_b << I_1, 0.0, 0.0, I_2;
-    D_b *= material.elastic_modulus();
+    // Loop over all elements and quadrature points to compute the profile
+    // properties for each quadrature point in the beam
+    tbb::parallel_for(std::int64_t{}, elements(), [](auto const element) {
+        sf->quadrature().for_each([&, this](auto const& femval, auto const l) {
+            auto const& [N, dN] = femval;
+
+            A[view(element, l)] = profile[element]->area();
+
+            auto const [shear_area_1, shear_area_2] = profile[element]->shear_area();
+
+            As1[view(element, l)] = shear_area_1;
+            As2[view(element, l)] = shear_area_2;
+        });
+    });
 }
 
 std::pair<index_view, matrix> fem_submesh::tangent_stiffness(std::int32_t const element) const
@@ -136,7 +159,7 @@ matrix const& fem_submesh::torsional_stiffness(matrix const& configuration,
     B_t.setZero();
     k_t.setZero();
 
-    auto const [I_1, I_2] = profile->second_moment_area();
+    auto const [I_1, I_2] = profiles[0]->second_moment_area();
 
     auto const J = I_1 + I_2;
 

@@ -2,18 +2,14 @@
 #pragma once
 
 #include "interpolations/shape_function.hpp"
-
+#include "constitutive/internal_variables.hpp"
 #include "material/isotropic_elastic_property.hpp"
-
 #include "mesh/basic_submesh.hpp"
 #include "mesh/material_coordinates.hpp"
 #include "mesh/nodal_variables.hpp"
-
 #include "numeric/dense_matrix.hpp"
 #include "numeric/index_types.hpp"
-
 #include "geometry/profile.hpp"
-
 #include "traits/mechanics.hpp"
 
 #include <memory>
@@ -35,6 +31,9 @@ public:
     // Type aliases
     using traits = mechanical::traits<theory::beam, discretisation::linear>;
 
+    using internal_variables_type = internal_variables<traits::rank_two_tensor::RowsAtCompileTime,
+                                                       traits::rank_four_tensor::RowsAtCompileTime>;
+
 public:
     /// Constructor providing the material coordinates reference
     explicit fem_submesh(json const& material_data,
@@ -44,6 +43,12 @@ public:
 
     /// \return degrees of freedom and the linear element stiffness matrix
     [[nodiscard]] std::pair<index_view, matrix> tangent_stiffness(std::int32_t const element) const;
+
+    /// Update the internal variables for the mesh group
+    /// \sa update_deformation_measures()
+    /// \sa update_Jacobian_determinants()
+    /// \sa check_element_distortion()
+    void update_internal_variables(double const time_step_size = 1.0);
 
 protected:
     /**
@@ -106,16 +111,19 @@ protected:
     matrix const& torsional_stiffness(matrix const& configuration, std::int32_t const element) const;
 
 protected:
-    /// Bending constitutive matrix
-    matrix2 D_b;
-    /// Shear constitutive matrix
-    matrix2 D_s;
+    /// Element profiles
+    std::vector<std::unique_ptr<geometry::profile>> profiles;
 
     /// Material properties
     isotropic_elastic_property material;
 
     /// Line shape function (linear, quadratic, cubic)
     std::unique_ptr<line_interpolation> sf;
+
+    /// View wrapper into internal variables
+    variable_view view;
+    /// Internal variables (geometry and constitutive)
+    std::shared_ptr<internal_variables_type> iv;
 
     /// Local-global element indices map
     indices dof_list;
@@ -124,15 +132,11 @@ protected:
     std::shared_ptr<material_coordinates> mesh_coordinates;
 
     /// u1, u2, u3, theta1, theta2, theta3
-    nodal_variables<traits::dofs_per_node> u;
+    nodal_variables<traits::dofs_per_node> nodal_variables;
 
-    /// Element profiles
-    std::unique_ptr<geometry::profile> profile;
-
+    /// Element tangent vectors
+    std::vector<vector3> tangents;
     /// Element orientiations
     std::vector<vector3> orientations;
-
-    /// Element cross-section areas
-    std::vector<double> areas;
 };
 }
