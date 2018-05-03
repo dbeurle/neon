@@ -3,7 +3,7 @@
 
 #include "abstract_module.hpp"
 
-#include "assembler/mechanical/solid/fem_static_matrix.hpp"
+#include "assembler/mechanical/fem_static_matrix.hpp"
 #include "assembler/mechanical/fem_buckling_matrix.hpp"
 
 #include "mesh/mechanical/solid/fem_mesh.hpp"
@@ -39,8 +39,11 @@ public:
     virtual void perform_simulation() override final { fem_matrix.solve(); }
 
 protected:
-    mechanical::solid::fem_mesh fem_mesh;            //!< Mesh with the solid routines
-    mechanical::solid::fem_static_matrix fem_matrix; //!< Nonlinear solver routines
+    /// Mesh with the solid routines
+    mechanical::solid::fem_mesh fem_mesh;
+
+    /// Nonlinear solver routines
+    mechanical::detail::fem_static_matrix<decltype(fem_mesh)> fem_matrix;
 };
 
 /// solid_mechanics_linear_buckling_module is responsible for handling the setup

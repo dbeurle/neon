@@ -1,12 +1,11 @@
 
 #pragma once
 
-#include "numeric/sparse_matrix.hpp"
-
-#include "solver/adaptive_time_step.hpp"
-
-#include "Exceptions.hpp"
+#include "assembler/sparsity_pattern.hpp"
 #include "numeric/float_compare.hpp"
+#include "Exceptions.hpp"
+#include "numeric/sparse_matrix.hpp"
+#include "solver/adaptive_time_step.hpp"
 #include "solver/linear/linear_solver_factory.hpp"
 #include "io/FileIO.hpp"
 #include "io/json.hpp"
@@ -15,9 +14,9 @@
 #include <memory>
 #include <string>
 #include <iostream>
-#include <termcolor/termcolor.hpp>
 
-#include <omp.h>
+#include <termcolor/termcolor.hpp>
+#include <tbb/parallel_for.h>
 
 namespace neon::mechanical::detail
 {
@@ -39,11 +38,6 @@ public:
     void solve();
 
 protected:
-    /// Compute the sparse pattern of the coefficient matrix but use the doublet
-    /// list as a means of forming the sparsity pattern.  This is a memory
-    /// intensive operation and should be replaced in the future
-    void compute_sparsity_pattern();
-
     /// Gathers the internal force vector using the Cauchy stress
     void compute_internal_force();
 
@@ -88,15 +82,15 @@ protected:
     double relative_displacement_norm;
     double relative_force_norm;
 
-    sparse_matrix Kt; //!< Tangent matrix stiffness
-    vector fint;      //!< Internal force vector
-    vector fext;      //!< External force vector
+    sparse_matrix Kt; /// Tangent sparse stiffness matrix
+    vector fint;      /// Internal force vector
+    vector fext;      /// External force vector
 
-    vector displacement;     //!< Displacement vector
-    vector displacement_old; //!< Last displacement vector
-    vector delta_d;          //!< Incremental displacement vector
+    vector displacement;     /// Displacement vector
+    vector displacement_old; /// Last displacement vector
+    vector delta_d;          /// Incremental displacement vector
 
-    vector minus_residual; //!< Minus residual vector
+    vector minus_residual; /// Minus residual vector
 
     std::unique_ptr<linear_solver> solver;
 };
@@ -182,36 +176,6 @@ void fem_static_matrix<fem_mesh_type>::solve()
 }
 
 template <class fem_mesh_type>
-void fem_static_matrix<fem_mesh_type>::compute_sparsity_pattern()
-{
-    std::vector<doublet<std::int32_t>> ij;
-    ij.reserve(fem_mesh.active_dofs());
-
-    Kt.resize(fem_mesh.active_dofs(), fem_mesh.active_dofs());
-
-    for (auto const& submesh : fem_mesh.meshes())
-    {
-        // Loop over the elements and add in the non-zero components
-        for (std::int64_t element{0}; element < submesh.elements(); element++)
-        {
-            auto const local_dof_view = submesh.local_dof_view(element);
-
-            for (std::int64_t p{0}; p < local_dof_view.size(); p++)
-            {
-                for (std::int64_t q{0}; q < local_dof_view.size(); q++)
-                {
-                    ij.emplace_back(p, q);
-                }
-            }
-        }
-    }
-    Kt.setFromTriplets(begin(ij), end(ij));
-    Kt.finalize();
-
-    is_sparsity_computed = true;
-}
-
-template <class fem_mesh_type>
 void fem_static_matrix<fem_mesh_type>::compute_internal_force()
 {
     fint.setZero();
@@ -267,7 +231,11 @@ void fem_static_matrix<fem_mesh_type>::compute_external_force()
 template <class fem_mesh_type>
 void fem_static_matrix<fem_mesh_type>::assemble_stiffness()
 {
-    if (!is_sparsity_computed) compute_sparsity_pattern();
+    if (!is_sparsity_computed)
+    {
+        fem::compute_sparsity_pattern(Kt, fem_mesh);
+        is_sparsity_computed = true;
+    }
 
     auto const start = std::chrono::high_resolution_clock::now();
 
@@ -275,23 +243,17 @@ void fem_static_matrix<fem_mesh_type>::assemble_stiffness()
 
     for (auto const& submesh : fem_mesh.meshes())
     {
-#pragma omp parallel for
-        for (std::int64_t element = 0; element < submesh.elements(); ++element)
-        {
-            // auto const[dofs, ke] = submesh.tangent_stiffness(element);
-            auto const& tpl = submesh.tangent_stiffness(element);
-            auto const& dofs = std::get<0>(tpl);
-            auto const& ke = std::get<1>(tpl);
+        tbb::parallel_for(std::int64_t{0}, submesh.elements(), [&](auto const element) {
+            auto const [dofs, ke] = submesh.tangent_stiffness(element);
 
             for (std::int64_t b{0}; b < dofs.size(); b++)
             {
                 for (std::int64_t a{0}; a < dofs.size(); a++)
                 {
-#pragma omp atomic
-                    Kt.coeffRef(dofs(a), dofs(b)) += ke(a, b);
+                    Kt.coefficient_update(dofs(a), dofs(b), ke(a, b));
                 }
             }
-        }
+        });
     }
 
     auto const end = std::chrono::high_resolution_clock::now();

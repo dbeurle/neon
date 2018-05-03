@@ -15,11 +15,11 @@ namespace neon::mechanical::detail
 {
 /// fem_submesh is a Curiously Recurring Template Pattern class for enforcing
 /// a minumum interface for all solid mechanics meshes at compile time.
-template <class MeshType, class InternalVariableType>
+template <class fem_mesh_type, class InternalVariableType>
 class fem_submesh : public basic_submesh
 {
 public:
-    using mesh_type = MeshType;
+    using mesh_type = fem_mesh_type;
     using internal_variable_type = InternalVariableType;
 
 public:
@@ -31,8 +31,11 @@ public:
         return static_cast<mesh_type*>(this)->local_dof_view(element);
     }
 
+    /// Assemble the element stiffness matrix for a given \p element
+    /// \param element The element number to assemble.
     /// \return the tangent consistent stiffness matrix
-    [[nodiscard]] std::pair<index_view, matrix> tangent_stiffness(std::int64_t const element) const {
+    std::pair<index_view, matrix> tangent_stiffness(std::int64_t const element) const
+    {
         return static_cast<mesh_type*>(this)->tangent_stiffness(element);
     }
 
@@ -55,6 +58,6 @@ public:
     }
 
     /// \return the number of degrees of freedom per node
-    auto dofs_per_node() const { return static_cast<mesh_type*>(this)->dofs_per_node(); }
+    auto dofs_per_node() const noexcept { return static_cast<mesh_type*>(this)->dofs_per_node(); }
 };
 }
