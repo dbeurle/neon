@@ -35,13 +35,13 @@ fem_submesh::fem_submesh(json const& material_data,
       cm(make_constitutive_model(variables, material_data, simulation_data))
 {
     // Allocate storage for the displacement gradient
-    variables->add(internal_variables_t::Tensor::DisplacementGradient,
-                   internal_variables_t::Tensor::DeformationGradient,
-                   internal_variables_t::Tensor::Cauchy,
+    variables->add(internal_variables_t::second::DisplacementGradient,
+                   internal_variables_t::second::DeformationGradient,
+                   internal_variables_t::second::Cauchy,
                    internal_variables_t::scalar::DetF);
 
     // Get the old data to the undeformed configuration
-    for (auto& F : variables->fetch(internal_variables_t::Tensor::DeformationGradient))
+    for (auto& F : variables->fetch(internal_variables_t::second::DeformationGradient))
     {
         F = matrix2::Identity();
     }
@@ -96,7 +96,7 @@ std::pair<index_view, vector> fem_submesh::internal_force(std::int64_t const ele
 
 matrix fem_submesh::geometric_tangent_stiffness(matrix2x const& x, std::int64_t const element) const
 {
-    auto const& cauchy_stresses = variables->fetch(internal_variables_t::Tensor::Cauchy);
+    auto const& cauchy_stresses = variables->fetch(internal_variables_t::second::Cauchy);
 
     auto const n = nodes_per_element();
 
@@ -123,7 +123,7 @@ matrix fem_submesh::material_tangent_stiffness(matrix2x const& x, std::int64_t c
 {
     auto const local_dofs = nodes_per_element() * dofs_per_node();
 
-    auto const& tangent_operators = variables->fetch(internal_variables_t::rank4::tangent_operator);
+    auto const& tangent_operators = variables->fetch(internal_variables_t::fourth::tangent_operator);
 
     return sf->quadrature().integrate(matrix::Zero(local_dofs, local_dofs).eval(),
                                       [&](auto const& femval, auto const& l) -> matrix {
@@ -142,7 +142,7 @@ matrix fem_submesh::material_tangent_stiffness(matrix2x const& x, std::int64_t c
 
 vector fem_submesh::internal_nodal_force(matrix2x const& x, std::int64_t const element) const
 {
-    auto const& cauchy_stresses = variables->fetch(internal_variables_t::Tensor::Cauchy);
+    auto const& cauchy_stresses = variables->fetch(internal_variables_t::second::Cauchy);
 
     auto const [m, n] = std::make_tuple(nodes_per_element(), dofs_per_node());
 
@@ -212,8 +212,8 @@ void fem_submesh::update_internal_variables(double const time_step_size)
 
 void fem_submesh::update_deformation_measures()
 {
-    auto& H_list = variables->fetch(internal_variables_t::Tensor::DisplacementGradient);
-    auto& F_list = variables->fetch(internal_variables_t::Tensor::DeformationGradient);
+    auto& H_list = variables->fetch(internal_variables_t::second::DisplacementGradient);
+    auto& F_list = variables->fetch(internal_variables_t::second::DeformationGradient);
 
     // #pragma omp parallel for
     for (std::int64_t element{0}; element < elements(); ++element)
@@ -246,7 +246,7 @@ void fem_submesh::update_deformation_measures()
 void fem_submesh::update_Jacobian_determinants()
 {
     auto const& deformation_gradients = variables->fetch(
-        internal_variables_t::Tensor::DeformationGradient);
+        internal_variables_t::second::DeformationGradient);
     auto& deformation_gradient_determinants = variables->fetch(internal_variables_t::scalar::DetF);
 
     deformation_gradient_determinants = deformation_gradients
@@ -270,7 +270,7 @@ void fem_submesh::update_Jacobian_determinants()
 }
 
 std::pair<vector, vector> fem_submesh::nodal_averaged_variable(
-    internal_variables_t::Tensor const tensor_name) const
+    internal_variables_t::second const tensor_name) const
 {
     vector count = vector::Zero(mesh_coordinates->size() * 4);
     vector value = count;

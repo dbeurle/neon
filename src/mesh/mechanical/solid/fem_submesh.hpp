@@ -70,7 +70,7 @@ public:
      */
     void update_internal_variables(double const time_step_size = 1.0);
 
-    [[nodiscard]] ValueCount nodal_averaged_variable(internal_variables_t::Tensor const tensor_name) const;
+    [[nodiscard]] ValueCount nodal_averaged_variable(internal_variables_t::second const tensor_name) const;
 
     [[nodiscard]] ValueCount nodal_averaged_variable(internal_variables_t::scalar const scalar_name) const;
 

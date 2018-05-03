@@ -18,7 +18,7 @@ small_strain_J2_plasticity::small_strain_J2_plasticity(std::shared_ptr<internal_
     : isotropic_linear_elasticity(variables, material_data, isotropic_linear_elasticity::plane::strain),
       material(material_data)
 {
-    variables->add(internal_variables_t::Tensor::LinearisedPlasticStrain);
+    variables->add(internal_variables_t::second::LinearisedPlasticStrain);
     variables->add(internal_variables_t::scalar::EffectivePlasticStrain);
 
     variables->commit();
@@ -33,19 +33,19 @@ void small_strain_J2_plasticity::update_internal_variables(double const time_ste
     // Extract the internal variables
     auto [plastic_strains,
           strains,
-          cauchy_stresses] = variables->fetch(internal_variables_t::Tensor::LinearisedPlasticStrain,
-                                              internal_variables_t::Tensor::LinearisedStrain,
-                                              internal_variables_t::Tensor::Cauchy);
+          cauchy_stresses] = variables->fetch(internal_variables_t::second::LinearisedPlasticStrain,
+                                              internal_variables_t::second::LinearisedStrain,
+                                              internal_variables_t::second::Cauchy);
 
     // Retrieve the accumulated internal variables
     auto [accumulated_plastic_strains,
           von_mises_stresses] = variables->fetch(internal_variables_t::scalar::EffectivePlasticStrain,
                                                  internal_variables_t::scalar::VonMisesStress);
 
-    auto& tangent_operators = variables->fetch(internal_variables_t::rank4::tangent_operator);
+    auto& tangent_operators = variables->fetch(internal_variables_t::fourth::tangent_operator);
 
     // Compute the linear strain gradient from the displacement gradient
-    strains = variables->fetch(internal_variables_t::Tensor::DisplacementGradient)
+    strains = variables->fetch(internal_variables_t::second::DisplacementGradient)
               | ranges::view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
     // Perform the update algorithm for each quadrature point

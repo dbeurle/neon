@@ -17,10 +17,10 @@ affine_microsphere::affine_microsphere(std::shared_ptr<internal_variables_t>& va
                                        unit_sphere_quadrature::Rule const rule)
     : constitutive_model(variables), unit_sphere(rule), material(material_data)
 {
-    variables->add(internal_variables_t::rank4::tangent_operator);
+    variables->add(internal_variables_t::fourth::tangent_operator);
 
     // Deviatoric stress
-    variables->add(internal_variables_t::Tensor::Kirchhoff);
+    variables->add(internal_variables_t::second::Kirchhoff);
 
     // Commit these to history in case of failure on first time step
     variables->commit();
@@ -28,12 +28,12 @@ affine_microsphere::affine_microsphere(std::shared_ptr<internal_variables_t>& va
 
 void affine_microsphere::update_internal_variables(double const time_step_size)
 {
-    auto& tangent_operators = variables->fetch(internal_variables_t::rank4::tangent_operator);
+    auto& tangent_operators = variables->fetch(internal_variables_t::fourth::tangent_operator);
 
     auto const& deformation_gradients = variables->fetch(
-        internal_variables_t::Tensor::DeformationGradient);
+        internal_variables_t::second::DeformationGradient);
 
-    auto& cauchy_stresses = variables->fetch(internal_variables_t::Tensor::Cauchy);
+    auto& cauchy_stresses = variables->fetch(internal_variables_t::second::Cauchy);
 
     auto const& det_deformation_gradients = variables->fetch(internal_variables_t::scalar::DetF);
 

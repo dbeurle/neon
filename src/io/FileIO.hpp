@@ -75,7 +75,7 @@ public:
     using variable_type = typename fem_mesh_type::internal_variable_type;
 
     using scalar_map_t = std::map<std::string, typename variable_type::scalar>;
-    using tensor_map_t = std::map<std::string, typename variable_type::Tensor>;
+    using tensor_map_t = std::map<std::string, typename variable_type::second>;
 
 public:
     std::string const primary_field{"Displacement"};
@@ -99,13 +99,13 @@ private:
                                   {"Damage", variable_type::scalar::Damage},
                                   {"EnergyReleaseRate", variable_type::scalar::EnergyReleaseRate}};
 
-    tensor_map_t const tensor_map{{"CauchyStress", variable_type::Tensor::Cauchy},
-                                  {"LinearisedStrain", variable_type::Tensor::LinearisedStrain},
-                                  {"LinearisedPlasticStrain", variable_type::Tensor::LinearisedPlasticStrain},
-                                  {"DeformationGradient", variable_type::Tensor::DeformationGradient},
-                                  {"DisplacementGradient", variable_type::Tensor::DisplacementGradient},
-                                  {"KinematicHardening", variable_type::Tensor::KinematicHardening},
-                                  {"BackStress", variable_type::Tensor::BackStress}};
+    tensor_map_t const tensor_map{{"CauchyStress", variable_type::second::Cauchy},
+                                  {"LinearisedStrain", variable_type::second::LinearisedStrain},
+                                  {"LinearisedPlasticStrain", variable_type::second::LinearisedPlasticStrain},
+                                  {"DeformationGradient", variable_type::second::DeformationGradient},
+                                  {"DisplacementGradient", variable_type::second::DisplacementGradient},
+                                  {"KinematicHardening", variable_type::second::KinematicHardening},
+                                  {"BackStress", variable_type::second::BackStress}};
     // clang-format on
 };
 
