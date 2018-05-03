@@ -33,7 +33,7 @@ void isotropic_linear_elasticity::update_internal_variables(double const time_st
     // Extract the internal variables
     auto [elastic_strains,
           cauchy_stresses] = variables->fetch(internal_variables_t::Tensor::LinearisedStrain,
-                                              internal_variables_t::Tensor::Cauchy);
+                                              internal_variables_t::Tensor::CauchyStress);
 
     auto& von_mises_stresses = variables->fetch(internal_variables_t::scalar::VonMisesStress);
 

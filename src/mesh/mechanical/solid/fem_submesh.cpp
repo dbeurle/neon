@@ -35,14 +35,14 @@ fem_submesh::fem_submesh(json const& material_data,
     // Allocate storage for the displacement gradient
     variables->add(internal_variables_t::Tensor::DisplacementGradient,
                    internal_variables_t::Tensor::DeformationGradient,
-                   internal_variables_t::Tensor::Cauchy);
+                   internal_variables_t::Tensor::CauchyStress);
 
     variables->add(internal_variables_t::scalar::DetF);
 
     // Get the old data to the undeformed configuration
     auto& deformation_gradients = variables->fetch(internal_variables_t::Tensor::DeformationGradient);
 
-    std::fill(std::begin(deformation_gradients), std::end(deformation_gradients), matrix3::Identity());
+    std::fill(begin(deformation_gradients), end(deformation_gradients), matrix3::Identity());
 
     variables->commit();
 
@@ -91,7 +91,7 @@ std::pair<index_view, vector> fem_submesh::internal_force(std::int32_t const ele
 
 matrix fem_submesh::geometric_tangent_stiffness(matrix3x const& x, std::int32_t const element) const
 {
-    auto const& cauchy_stresses = variables->fetch(internal_variables_t::Tensor::Cauchy);
+    auto const& cauchy_stresses = variables->fetch(internal_variables_t::Tensor::CauchyStress);
 
     auto n = nodes_per_element();
 
@@ -138,7 +138,7 @@ matrix fem_submesh::material_tangent_stiffness(matrix3x const& x, std::int32_t c
 
 vector fem_submesh::internal_nodal_force(matrix3x const& x, std::int32_t const element) const
 {
-    auto const& cauchy_stresses = variables->fetch(internal_variables_t::Tensor::Cauchy);
+    auto const& cauchy_stresses = variables->fetch(internal_variables_t::Tensor::CauchyStress);
 
     auto const [m, n] = std::make_pair(nodes_per_element(), dofs_per_node());
 
@@ -218,7 +218,7 @@ void fem_submesh::update_deformation_measures()
         auto const X = mesh_coordinates->initial_configuration(local_node_view(element));
         auto const x = mesh_coordinates->current_configuration(local_node_view(element));
 
-        sf->quadrature().for_each([&](auto const& femval, const auto& l) {
+        sf->quadrature().for_each([&](auto const& femval, auto const l) {
             auto const& [N, rhea] = femval;
 
             // Local deformation gradient for the initial configuration

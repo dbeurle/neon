@@ -99,7 +99,7 @@ private:
                                   {"Damage", variable_type::scalar::Damage},
                                   {"EnergyReleaseRate", variable_type::scalar::EnergyReleaseRate}};
 
-    tensor_map_t const tensor_map{{"CauchyStress", variable_type::Tensor::Cauchy},
+    tensor_map_t const tensor_map{{"CauchyStress", variable_type::Tensor::CauchyStress},
                                   {"LinearisedStrain", variable_type::Tensor::LinearisedStrain},
                                   {"LinearisedPlasticStrain", variable_type::Tensor::LinearisedPlasticStrain},
                                   {"DeformationGradient", variable_type::Tensor::DeformationGradient},
