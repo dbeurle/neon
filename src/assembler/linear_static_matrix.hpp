@@ -41,7 +41,8 @@ protected:
 protected:
     mesh_type& mesh;
 
-    std::unique_ptr<LinearSolver> linear_solver;
+    /// Linear solver used to solve the system of equations
+    std::unique_ptr<linear_solver> solver;
 
     /// Stiffness matrix
     sparse_matrix K;
