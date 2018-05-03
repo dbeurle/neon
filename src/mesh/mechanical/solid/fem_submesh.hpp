@@ -34,13 +34,13 @@ public:
                          std::shared_ptr<material_coordinates>& material_coordinates,
                          basic_submesh const& submesh);
 
-    /** @return list of global degrees of freedom for an element */
+    /// \return list of global degrees of freedom for an element
     [[nodiscard]] auto const local_dof_view(std::int64_t const element) const
     {
         return dof_list(Eigen::placeholders::all, element);
     }
 
-    /** @return The internal variable store */
+    /// \return The internal variable store
     [[nodiscard]] auto const& internal_variables() const { return *variables; }
 
     void save_internal_variables(bool const have_converged);
@@ -63,11 +63,10 @@ public:
     /** @return the consistent mass matrix \sa diagonal_mass */
     [[nodiscard]] std::pair<index_view, vector> diagonal_mass(std::int32_t const element) const;
 
-    /** Update the internal variables for the mesh group
-     *  \sa update_deformation_measures()
-     *  \sa update_Jacobian_determinants()
-     *  \sa check_element_distortion()
-     */
+    /// Update the internal variables for the mesh group
+    /// \sa update_deformation_measures()
+    /// \sa update_Jacobian_determinants()
+    /// \sa check_element_distortion()
     void update_internal_variables(double const time_step_size = 1.0);
 
     [[nodiscard]] ValueCount nodal_averaged_variable(internal_variables_t::Tensor const tensor_name) const;
