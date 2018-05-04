@@ -1,11 +1,9 @@
 
 #pragma once
 
-#include <cstdint>
-
 namespace neon
 {
-/** Enumeration for the element shapes and follows the enumeration by GMSH */
+/// Enumeration for the element shapes and follows the enumeration by GMSH
 enum class element_topology {
     invalid = 0,
     line2,
@@ -17,7 +15,8 @@ enum class element_topology {
     pyramid5,
     line3,
     triangle6,
-    quadrilateral9, // 4 vertex, 4 edges and 1 face node
+    /// 4 vertex, 4 edges and 1 face node
+    quadrilateral9,
     tetrahedron10,
     hexahedron27,
     prism18,
@@ -31,7 +30,8 @@ enum class element_topology {
     triangle10,
     triangle12,
     triangle15,
-    triangle15_IC, // Incomplete 15 node triangle
+    /// Incomplete 15 node triangle
+    triangle15_IC,
     triangle21 = 25,
     edge4,
     edge5,
