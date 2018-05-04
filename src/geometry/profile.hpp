@@ -2,6 +2,7 @@
 #pragma once
 
 #include <cmath>
+#include <utility>
 
 namespace neon::geometry
 {
@@ -12,32 +13,29 @@ class profile
 {
 public:
     explicit profile(
-        double const I_1, double const I_2, double const A, double const A_1, double const A_2)
-        : I_1{I_1}, I_2{I_2}, m_area{A}, A_1{A_1}, A_2{A_2}
-    {
-    }
+        double const I_1, double const I_2, double const A, double const A_1, double const A_2);
 
-    /// \return First and second moment of inertia
-    auto second_moment_area() const noexcept { return std::pair{I_1, I_2}; }
+    std::pair<double, double> second_moment_area() const noexcept;
 
     /// \return First and second shear area
-    auto shear_area() const noexcept { return std::pair{A_1, A_2}; }
+    std::pair<double, double> shear_area() const noexcept;
 
     /// \return Cross-section area
-    auto area() const noexcept { return m_area; }
+    double area() const noexcept;
 
 protected:
     /// Area moment of inertia (first coordinate)
-    double I_1{0.0};
+    double I_1;
     /// Area moment of inertia (second coordinate)
-    double I_2{0.0};
+    double I_2;
 
     /// Section area
     double m_area;
+
     /// Shear area (first coordinate)
-    double A_1{0.0};
+    double A_1;
     /// Shear area (first coordinate)
-    double A_2{0.0};
+    double A_2;
 };
 
 /// rectangular_bar computes the second moment of area for a rectangular bar
@@ -45,14 +43,7 @@ protected:
 class rectangular_bar : public profile
 {
 public:
-    explicit rectangular_bar(double const width, double const height)
-        : profile(width * std::pow(height, 3) / 12.0,
-                  std::pow(width, 3) * height / 12.0,
-                  width * height,
-                  width * height,
-                  width * height)
-    {
-    }
+    explicit rectangular_bar(double const width, double const height);
 };
 
 /// hollow_rectangular_bar computes the second moment of area for a rectangular bar
@@ -60,14 +51,7 @@ public:
 class hollow_rectangular_bar : public profile
 {
 public:
-    hollow_rectangular_bar(double const width, double const height)
-        : profile(width * std::pow(height, 3) / 12.0,
-                  std::pow(width, 3) * height / 12.0,
-                  width * height,
-                  width * height,
-                  width * height)
-    {
-    }
+    hollow_rectangular_bar(double const width, double const height);
 };
 
 class section

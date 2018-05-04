@@ -1,6 +1,4 @@
 
-#pragma once
-
 #include "geometry/profile_factory.hpp"
 #include "io/json.hpp"
 
