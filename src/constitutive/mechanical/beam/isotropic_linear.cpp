@@ -7,19 +7,21 @@
 
 namespace neon::mechanical::beam
 {
-isotropic_linear::isotropic_linear(json const& material_data) : material(material_data)
+isotropic_linear::isotropic_linear(std::shared_ptr<internal_variable_type>& variables,
+                                   json const& material_data)
+    : variables(variables), material(material_data)
 {
     // Allocate the four constitutive values for axial, bending, shear and torsion.
     variables->add(internal_variable_type::scalar::torsional_stiffness,
                    internal_variable_type::scalar::axial_stiffness,
-                   internal_variable_type::Tensor::bending_stiffness,
-                   internal_variable_type::Tensor::shear_stiffness);
+                   internal_variable_type::second::bending_stiffness,
+                   internal_variable_type::second::shear_stiffness);
 }
 
 void isotropic_linear::update_internal_variables()
 {
-    auto [D_b, D_s] = variables->fetch(internal_variable_type::Tensor::bending_stiffness,
-                                       internal_variable_type::Tensor::shear_stiffness);
+    auto [D_b, D_s] = variables->fetch(internal_variable_type::second::bending_stiffness,
+                                       internal_variable_type::second::shear_stiffness);
 
     auto [D_a, D_t] = variables->fetch(internal_variable_type::scalar::axial_stiffness,
                                        internal_variable_type::scalar::torsional_stiffness);
@@ -36,7 +38,7 @@ void isotropic_linear::update_internal_variables()
                                             ->fetch(internal_variable_type::scalar::second_moment_area_1,
                                                     internal_variable_type::scalar::second_moment_area_2);
 
-    tbb::parallel_for(std::size_t{}, D_b.size(), [&](auto const l) {
+    tbb::parallel_for(std::size_t{0}, D_b.size(), [&](auto const l) {
         // Section areas
         auto const A_1 = shear_area_1[l];
         auto const A_2 = shear_area_2[l];

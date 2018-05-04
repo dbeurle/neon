@@ -3,6 +3,7 @@
 
 #include "interpolations/shape_function.hpp"
 #include "constitutive/internal_variables.hpp"
+#include "constitutive/mechanical/beam/isotropic_linear.hpp"
 #include "material/isotropic_elastic_property.hpp"
 #include "mesh/basic_submesh.hpp"
 #include "mesh/material_coordinates.hpp"
@@ -31,14 +32,14 @@ public:
     // Type aliases
     using traits = mechanical::traits<theory::beam, discretisation::linear>;
 
-    using internal_variables_type = internal_variables<traits::rank_two_tensor::RowsAtCompileTime,
-                                                       traits::rank_four_tensor::RowsAtCompileTime>;
+    using internal_variable_type = internal_variables<traits::rank_two_tensor::RowsAtCompileTime,
+                                                      traits::rank_four_tensor::RowsAtCompileTime>;
 
 public:
     /// Constructor providing the material coordinates reference
     explicit fem_submesh(json const& material_data,
                          json const& simulation_data,
-                         std::shared_ptr<material_coordinates>& mesh_coordinates,
+                         std::shared_ptr<material_coordinates>& coordinates,
                          basic_submesh const& submesh);
 
     /// \return degrees of freedom and the linear element stiffness matrix
@@ -111,28 +112,30 @@ protected:
     matrix const& torsional_stiffness(matrix const& configuration, std::int32_t const element) const;
 
 protected:
-    /// Element profiles
-    std::vector<std::unique_ptr<geometry::profile>> profiles;
-
     /// Material properties
     isotropic_elastic_property material;
 
     /// Line shape function (linear, quadratic, cubic)
     std::unique_ptr<line_interpolation> sf;
 
+    /// Coordinates of each mesh
+    std::shared_ptr<material_coordinates> coordinates;
+
+    /// u1, u2, u3, theta1, theta2, theta3
+    nodal_variables<traits::dofs_per_node> displacement_rotation;
+
+    /// Element profiles
+    std::vector<std::unique_ptr<geometry::profile>> profiles;
+
     /// View wrapper into internal variables
     variable_view view;
     /// Internal variables (geometry and constitutive)
-    std::shared_ptr<internal_variables_type> iv;
+    std::shared_ptr<internal_variable_type> variables;
+
+    std::unique_ptr<isotropic_linear> cm;
 
     /// Local-global element indices map
     indices dof_list;
-
-    /// Coordinates of each mesh
-    std::shared_ptr<material_coordinates> mesh_coordinates;
-
-    /// u1, u2, u3, theta1, theta2, theta3
-    nodal_variables<traits::dofs_per_node> nodal_variables;
 
     /// Element tangent vectors
     std::vector<vector3> tangents;

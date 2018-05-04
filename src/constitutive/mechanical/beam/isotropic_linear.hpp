@@ -15,7 +15,7 @@ namespace neon::mechanical::beam
 class isotropic_linear
 {
 public:
-    /// Traits
+    /// Trait for beam
     using traits = mechanical::traits<theory::beam, discretisation::linear, true>;
 
     /// Type alias for internal variables
@@ -23,7 +23,7 @@ public:
                                                       traits::rank_four_tensor::RowsAtCompileTime>;
 
 public:
-    isotropic_linear(json const& material_data);
+    isotropic_linear(std::shared_ptr<internal_variable_type>& variables, json const& material_data);
 
     void update_internal_variables();
 
