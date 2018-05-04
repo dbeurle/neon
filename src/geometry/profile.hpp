@@ -12,8 +12,17 @@ namespace neon::geometry
 class profile
 {
 public:
-    explicit profile(
-        double const I_1, double const I_2, double const A, double const A_1, double const A_2);
+    /// Construct using base parameters
+    /// \param I_1 Second moment of area (1)
+    /// \param I_2 Second moment of area (2)
+    /// \param A Cross-sectional area
+    /// \param A_1 Shear area (1)
+    /// \param A_2 Shear area (2)
+    explicit profile(double const I_1,
+                     double const I_2,
+                     double const A,
+                     double const A_1,
+                     double const A_2);
 
     std::pair<double, double> second_moment_area() const noexcept;
 
