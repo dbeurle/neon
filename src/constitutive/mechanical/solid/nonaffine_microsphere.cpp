@@ -28,7 +28,7 @@ void nonaffine_microsphere::update_internal_variables(double const time_step_siz
 {
     auto const& deformation_gradients = variables->fetch(
         internal_variables_t::second::DeformationGradient);
-    auto& cauchy_stresses = variables->fetch(internal_variables_t::second::Cauchy);
+    auto& cauchy_stresses = variables->fetch(internal_variables_t::second::CauchyStress);
 
     auto const& detF_list = variables->fetch(internal_variables_t::scalar::DetF);
 
@@ -42,7 +42,6 @@ void nonaffine_microsphere::update_internal_variables(double const time_step_siz
     auto const p = non_affine_stretch_parameter;
 
     tbb::parallel_for(std::size_t{0}, deformation_gradients.size(), [&](auto const l) {
-
         // Determinant of the deformation gradient
         auto const& J = detF_list[l];
 

@@ -37,7 +37,7 @@ fem_submesh::fem_submesh(json const& material_data,
     // Allocate storage for the displacement gradient
     variables->add(internal_variables_t::second::DisplacementGradient,
                    internal_variables_t::second::DeformationGradient,
-                   internal_variables_t::second::Cauchy,
+                   internal_variables_t::second::CauchyStress,
                    internal_variables_t::scalar::DetF);
 
     // Get the old data to the undeformed configuration
@@ -96,7 +96,7 @@ std::pair<index_view, vector> fem_submesh::internal_force(std::int64_t const ele
 
 matrix fem_submesh::geometric_tangent_stiffness(matrix2x const& x, std::int64_t const element) const
 {
-    auto const& cauchy_stresses = variables->fetch(internal_variables_t::second::Cauchy);
+    auto const& cauchy_stresses = variables->fetch(internal_variables_t::second::CauchyStress);
 
     auto const n = nodes_per_element();
 
@@ -142,7 +142,7 @@ matrix fem_submesh::material_tangent_stiffness(matrix2x const& x, std::int64_t c
 
 vector fem_submesh::internal_nodal_force(matrix2x const& x, std::int64_t const element) const
 {
-    auto const& cauchy_stresses = variables->fetch(internal_variables_t::second::Cauchy);
+    auto const& cauchy_stresses = variables->fetch(internal_variables_t::second::CauchyStress);
 
     auto const [m, n] = std::make_tuple(nodes_per_element(), dofs_per_node());
 

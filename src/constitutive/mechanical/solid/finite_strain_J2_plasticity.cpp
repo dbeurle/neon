@@ -39,7 +39,7 @@ void finite_strain_J2_plasticity::update_internal_variables(double const time_st
           log_strain_e_list,
           cauchy_stresses] = variables->fetch(internal_variables_t::second::DeformationGradient,
                                               internal_variables_t::second::HenckyStrainElastic,
-                                              internal_variables_t::second::Cauchy);
+                                              internal_variables_t::second::CauchyStress);
 
     auto const old_deformation_gradients = variables->fetch_old(
         internal_variables_t::second::DeformationGradient);

@@ -10,8 +10,8 @@
 
 namespace neon::mechanical::solid
 {
-isotropic_linear_elasticity::isotropic_linear_elasticity(std::shared_ptr<internal_variables_t>& variables,
-                                                     json const& material_data)
+isotropic_linear_elasticity::isotropic_linear_elasticity(
+    std::shared_ptr<internal_variables_t>& variables, json const& material_data)
     : constitutive_model(variables), material(material_data)
 {
     variables->add(internal_variables_t::second::LinearisedStrain,
@@ -30,7 +30,7 @@ void isotropic_linear_elasticity::update_internal_variables(double const time_st
     // Extract the internal variables
     auto [elastic_strains,
           cauchy_stresses] = variables->fetch(internal_variables_t::second::LinearisedStrain,
-                                              internal_variables_t::second::Cauchy);
+                                              internal_variables_t::second::CauchyStress);
 
     auto& von_mises_stresses = variables->fetch(internal_variables_t::scalar::VonMisesStress);
 

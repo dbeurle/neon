@@ -149,9 +149,9 @@ TEST_CASE("Reduced integration linear element")
     neon::basic_mesh beam_mesh(json::parse(simple_beam_element()));
     neon::nodal_coordinates beam_nodes(json::parse(simple_beam_element()));
 
-    auto mesh_coordinates = std::make_shared<neon::material_coordinates>(beam_nodes.coordinates());
+    auto coordinates = std::make_shared<neon::material_coordinates>(beam_nodes.coordinates());
 
-    REQUIRE(mesh_coordinates->size() == 3);
+    REQUIRE(coordinates->size() == 3);
 
     for (auto const& submesh : beam_mesh.meshes("beam"))
     {
@@ -162,8 +162,10 @@ TEST_CASE("Reduced integration linear element")
                                                  json::parse("{\"ElementOptions\" : { \
                                                                  \"Quadrature\" : \"Full\"} \
                                                              }"),
-                                                 mesh_coordinates,
+                                                 coordinates,
                                                  submesh);
+
+        mesh.update_internal_variables();
 
         auto const [dofs, k_e] = mesh.tangent_stiffness(0);
 

@@ -3,7 +3,7 @@
 
 #include "numeric/sparse_matrix.hpp"
 
-#include "assembler/fill_sparse_pattern.hpp"
+#include "assembler/sparsity_pattern.hpp"
 #include "assembler/homogeneous_dirichlet.hpp"
 #include "solver/eigen/eigen_solver.hpp"
 
@@ -54,7 +54,7 @@ void fem_buckling_matrix<fem_mesh_type>::solve()
 template <typename fem_mesh_type>
 void fem_buckling_matrix<fem_mesh_type>::assemble_stiffness()
 {
-    fem::fill_sparse_pattern(K, mesh);
+    fem::compute_sparsity_pattern(K, mesh);
 
     auto const start = std::chrono::high_resolution_clock::now();
 

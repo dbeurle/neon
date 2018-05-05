@@ -35,7 +35,7 @@ void small_strain_J2_plasticity_damage::update_internal_variables(double const t
           accumulated_kinematic_stresses] = variables
                                                 ->fetch(internal_variables_t::second::LinearisedPlasticStrain,
                                                         internal_variables_t::second::LinearisedStrain,
-                                                        internal_variables_t::second::Cauchy,
+                                                        internal_variables_t::second::CauchyStress,
                                                         internal_variables_t::second::BackStress,
                                                         internal_variables_t::second::KinematicHardening);
 

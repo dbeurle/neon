@@ -14,7 +14,7 @@ namespace neon::fem
 /// with the \p mesh
 /// This results in the non-zero entries in A set to zero.
 template <typename sparse_matrix_type, typename mesh_type>
-void fill_sparse_pattern(sparse_matrix_type& A, mesh_type const& mesh)
+void compute_sparsity_pattern(sparse_matrix_type& A, mesh_type const& mesh)
 {
     using integer_type = typename sparse_matrix_type::Index;
 
@@ -36,7 +36,7 @@ void fill_sparse_pattern(sparse_matrix_type& A, mesh_type const& mesh)
             {
                 for (std::int64_t q{0}; q < local_dof_view.size(); q++)
                 {
-                    ij.emplace_back(p, q);
+                    ij.emplace_back(local_dof_view(p), local_dof_view(q));
                 }
             }
         }

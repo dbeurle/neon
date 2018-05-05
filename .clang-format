@@ -8,7 +8,7 @@ AlignConsecutiveDeclarations: false
 AlignEscapedNewlinesLeft: false
 AlignOperands: true
 AlignTrailingComments: true
-AllowAllParametersOfDeclarationOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: All
@@ -59,7 +59,7 @@ PenaltyBreakAssignment: 100000
 PenaltyBreakBeforeFirstCallParameter: 1000000
 PenaltyBreakComment: 300
 PenaltyBreakFirstLessLess: 120
-PenaltyBreakString: 10
+PenaltyBreakString: 50
 PenaltyExcessCharacter: 10
 PenaltyReturnTypeOnItsOwnLine: 1000000
 PointerAlignment: Left
