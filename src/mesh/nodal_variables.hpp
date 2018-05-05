@@ -5,21 +5,21 @@
 
 namespace neon
 {
-template <int variables>
+template <int component_count>
 class nodal_variables
 {
 public:
-    static_assert(variables > 0, "Number of variables for the node must be greater than zero.");
+    static_assert(component_count > 0, "Number of variables for the node must be greater than zero.");
 
-    /// Storage type of the nodal variables (variables * number_of_nodes)
-    using storage_type = matrixdx<variables>;
+    /// Storage type of the nodal variables (component_count * number_of_nodes)
+    using storage_type = matrixdx<component_count>;
 
-    static auto constexpr variables_per_node = variables;
+    static auto constexpr components = component_count;
 
 public:
-    /// Allocate storage for \p number_of_nodes
+    /// Allocate zeroed storage for \p number_of_nodes
     explicit nodal_variables(std::int64_t const number_of_nodes)
-        : u{storage_type::Zero(variables, number_of_nodes)}
+        : u{storage_type::Zero(components, number_of_nodes)}
     {
     }
 
@@ -30,11 +30,17 @@ public:
         return u(Eigen::placeholders::all, local_indices);
     }
 
+    /// Obtain the underlying storage
+    auto const& data() const noexcept { return u; }
+
     /// \return The total number of variables
-    auto size() const noexcept { return u.size(); }
+    auto size() const noexcept { return u.cols(); }
 
     /// Overwrite the nodal variables from a linear array
     void update(vector const& u_new) { vector::Map(u.data(), u.size()) = u_new; }
+
+    /// Overwrite the nodal variables from a two-dimensional array
+    void update(storage_type const& u_new) { u = u_new; }
 
 protected:
     /// Nodal variable storage
