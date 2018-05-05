@@ -64,8 +64,8 @@ std::vector<std::int32_t> basic_submesh::unique_connectivity() const
 
     std::copy_n(connectivity.data(),
                 connectivity.size(),
-                std::inserter(unique_set, std::end(unique_set)));
+                std::inserter(unique_set, end(unique_set)));
 
-    return {std::begin(unique_set), std::end(unique_set)};
+    return {begin(unique_set), end(unique_set)};
 }
 }

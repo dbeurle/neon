@@ -55,8 +55,8 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
         }
         // Stress computation over the secondary network deformation history
         // clang-format off
-        matrix3 const macro_stress = std::accumulate(std::begin(intermediate_deformations[l]),
-                                                     std::end(intermediate_deformations[l]),
+        matrix3 const macro_stress = std::accumulate(begin(intermediate_deformations[l]),
+                                                     end(intermediate_deformations[l]),
                                                      matrix3::Zero().eval(),
                                                      [&, this, time_index = 0ul](matrix3 const p, auto const& F_0) mutable {
 
@@ -68,8 +68,8 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
                                                      });
 
         // Tangent operator computation over the secondary network deformation history
-        matrix6 const macro_moduli = std::accumulate(std::begin(intermediate_deformations[l]),
-                                                     std::end(intermediate_deformations[l]),
+        matrix6 const macro_moduli = std::accumulate(begin(intermediate_deformations[l]),
+                                                     end(intermediate_deformations[l]),
                                                      matrix6::Zero().eval(),
                                                      [&, this, time_index = 0ul](matrix6 const p, auto const& F_0) mutable {
 

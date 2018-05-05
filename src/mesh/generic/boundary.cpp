@@ -146,7 +146,7 @@ void boundary::allocate_time_load(json const& times, json const& loads)
     {
         throw std::domain_error("The time and load vectors must be of the same size.");
     }
-    if (!std::is_sorted(std::begin(times), std::end(times)))
+    if (!std::is_sorted(begin(times), end(times)))
     {
         throw std::domain_error("Load times must be monotonically increasing.");
     }

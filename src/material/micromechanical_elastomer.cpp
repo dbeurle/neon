@@ -65,10 +65,10 @@ std::vector<double> ageing_micromechanical_elastomer::scission(std::vector<doubl
                                                                std::vector<double> const& segments,
                                                                double const time_step_size) const
 {
-    std::transform(std::begin(shear_moduli),
-                   std::end(shear_moduli),
-                   std::begin(segments),
-                   std::begin(shear_moduli),
+    std::transform(begin(shear_moduli),
+                   end(shear_moduli),
+                   begin(segments),
+                   begin(shear_moduli),
                    [this, time_step_size](auto const G, auto const N) {
                        return G
                               / (1.0

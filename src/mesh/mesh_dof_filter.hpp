@@ -17,12 +17,12 @@ template <std::int8_t dof_size, typename boundary_mesh_type>
     {
         auto const unique_view = boundary_mesh.unique_connectivity();
 
-        std::copy(std::begin(unique_view),
-                  std::end(unique_view),
-                  std::inserter(dof_set, std::end(dof_set)));
+        std::copy(begin(unique_view),
+                  end(unique_view),
+                  std::inserter(dof_set, end(dof_set)));
     }
 
-    std::vector<std::int32_t> dof_unique_view(std::begin(dof_set), std::end(dof_set));
+    std::vector<std::int32_t> dof_unique_view(begin(dof_set), end(dof_set));
 
     for (auto& i : dof_unique_view) i *= dof_size;
 

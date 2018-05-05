@@ -36,7 +36,7 @@ fem_mesh::fem_mesh(basic_mesh const& basic_mesh,
 
 bool fem_mesh::is_symmetric() const
 {
-    return std::all_of(std::begin(submeshes), std::end(submeshes), [](auto const& submesh) {
+    return std::all_of(begin(submeshes), end(submeshes), [](auto const& submesh) {
         return submesh.constitutive().is_symmetric();
     });
 }
@@ -158,7 +158,7 @@ std::vector<double> fem_mesh::time_history() const
             }
         }
     }
-    return std::vector<double>{std::begin(history), std::end(history)};
+    return std::vector<double>{begin(history), end(history)};
 }
 
 void fem_mesh::check_boundary_conditions(json const& boundary_data) const

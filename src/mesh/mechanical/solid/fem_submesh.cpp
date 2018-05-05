@@ -42,7 +42,7 @@ fem_submesh::fem_submesh(json const& material_data,
     // Get the old data to the undeformed configuration
     auto& deformation_gradients = variables->fetch(internal_variables_t::second::DeformationGradient);
 
-    std::fill(std::begin(deformation_gradients), std::end(deformation_gradients), matrix3::Identity());
+    std::fill(begin(deformation_gradients), end(deformation_gradients), matrix3::Identity());
 
     variables->commit();
 
@@ -244,19 +244,19 @@ void fem_submesh::update_Jacobian_determinants()
 
     auto& F_determinants = variables->fetch(internal_variables_t::scalar::DetF);
 
-    std::transform(std::begin(deformation_gradients),
-                   std::end(deformation_gradients),
-                   std::begin(F_determinants),
+    std::transform(begin(deformation_gradients),
+                   end(deformation_gradients),
+                   begin(F_determinants),
                    [](matrix3 const& F) { return F.determinant(); });
 
-    auto const found = std::find_if(std::begin(F_determinants),
-                                    std::end(F_determinants),
+    auto const found = std::find_if(begin(F_determinants),
+                                    end(F_determinants),
                                     [](auto const detF) { return detF <= 0.0; });
 
-    if (found != std::end(F_determinants))
+    if (found != end(F_determinants))
     {
-        auto const count = std::count_if(std::begin(F_determinants),
-                                         std::end(F_determinants),
+        auto const count = std::count_if(begin(F_determinants),
+                                         end(F_determinants),
                                          [](auto const detF) { return detF <= 0.0; });
 
         auto const i = std::distance(F_determinants.begin(), found);
