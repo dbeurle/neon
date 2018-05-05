@@ -21,6 +21,7 @@ fem_mesh::fem_mesh(basic_mesh const& basic_mesh,
                    json const& simulation_data,
                    double const generate_time_step)
     : mesh_coordinates(std::make_shared<material_coordinates>(basic_mesh.coordinates())),
+      internal_forces{mesh_coordinates->size()},
       generate_time_step{generate_time_step}
 {
     check_boundary_conditions(simulation_data["BoundaryConditions"]);

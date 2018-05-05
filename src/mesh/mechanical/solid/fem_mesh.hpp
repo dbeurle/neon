@@ -4,6 +4,7 @@
 #include "mesh/generic/dirichlet.hpp"
 #include "mesh/mechanical/solid/boundary/nonfollower_load.hpp"
 #include "mesh/mechanical/solid/fem_submesh.hpp"
+#include "mesh/nodal_variables.hpp"
 
 #include <map>
 
@@ -17,6 +18,9 @@ class fem_mesh
 {
 public:
     using internal_variable_type = fem_submesh::internal_variable_type;
+
+    /// Alias traits to submesh
+    using traits = fem_submesh::trait_type;
 
 public:
     fem_mesh(basic_mesh const& basic_mesh,
@@ -75,18 +79,24 @@ protected:
 
     std::vector<fem_submesh> submeshes;
 
-    // boundary conditions for this mesh
+    /// Displacement boundary conditions
     std::map<std::string, std::vector<dirichlet>> displacement_bcs;
+
+    /// Nonfollower (force) boundary conditions
     std::map<std::string, nonfollower_load_boundary> nonfollower_loads;
+
+    /// Internal nodal forces for reaction forces
+    nodal_variables<traits::dofs_per_node> internal_forces;
 
     std::unordered_map<std::string, int> const dof_table = {{"x", 0}, {"y", 1}, {"z", 2}};
 
-    double generate_time_step; /// This time step is taken from
-                               /// "Time[Period][Increments][Initial]" in the
-                               /// input file.  It is used in the boundary class
-                               /// to generate cyclic loading for example. This
-                               /// ensures the compatibility between user
-                               /// defined and sinusoidal boundary conditions.
+    /// This time step is taken from
+    /// "Time[Period][Increments][Initial]" in the
+    /// input file.  It is used in the boundary class
+    /// to generate cyclic loading for example. This
+    /// ensures the compatibility between user
+    /// defined and sinusoidal boundary conditions.
+    double generate_time_step;
 };
 }
 }
