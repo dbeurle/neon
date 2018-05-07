@@ -3,7 +3,6 @@
 
 #include "vector_contribution.hpp"
 
-#include "geometry/Projection.hpp"
 #include "math/jacobian_determinant.hpp"
 #include "mesh/material_coordinates.hpp"
 
@@ -41,7 +40,7 @@ public:
                      std::string const& name,
                      double const generate_time_step);
 
-    [[nodiscard]] auto elements() const { return nodal_connectivity.cols(); }
+    [[nodiscard]] auto elements() const noexcept { return nodal_connectivity.cols(); }
 
 protected:
     /// Indices for the nodal coordinates
