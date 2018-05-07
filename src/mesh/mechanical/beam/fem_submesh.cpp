@@ -5,8 +5,7 @@
 #include "math/transform_expand.hpp"
 
 #include <tbb/parallel_for.h>
-
-#include <iostream>
+#include <Eigen/Geometry>
 
 namespace neon::mechanical::beam
 {
@@ -15,7 +14,6 @@ fem_submesh::fem_submesh(json const& material_data,
                          std::shared_ptr<material_coordinates>& coordinates,
                          basic_submesh const& submesh)
     : basic_submesh(submesh),
-      material(material_data),
       sf(make_line_interpolation(topology(), simulation_data)),
       coordinates(coordinates),
       displacement_rotation(coordinates->size()),
@@ -198,5 +196,28 @@ matrix const& fem_submesh::torsional_stiffness(matrix const& configuration,
         return B_t * D_t.at(view(element, l)) * B_t.transpose() * jacobian;
     });
     return k_t;
+}
+
+matrix12 fem_submesh::rotation_matrix(std::int32_t const element) const
+{
+    matrix3 rotation;
+
+    // Local coordinate (x1)
+    rotation.col(0) = orientations.at(element).normalized();
+
+    // Local coordinate (x3)
+    rotation.col(2) = tangents.at(element).normalized();
+
+    // Local coordinate (x2)
+    rotation.col(1) = rotation.col(0).cross(rotation.col(2)).normalized();
+
+    matrix12 element_rotation = matrix12::Zero();
+
+    element_rotation.block<3, 3>(0, 0) = rotation;
+    element_rotation.block<3, 3>(3, 3) = rotation;
+    element_rotation.block<3, 3>(6, 6) = rotation;
+    element_rotation.block<3, 3>(9, 9) = rotation;
+
+    return element_rotation;
 }
 }

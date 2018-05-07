@@ -67,7 +67,8 @@ protected:
      * \f{align*}{
      * \mathbf{D}_b &= \begin{bmatrix} E I_1 & 0 \\ 0 & E I_2 \end{bmatrix} \f}
      */
-    matrix const& bending_stiffness(matrix const& configuration, std::int32_t const element) const;
+    [[nodiscard]] matrix const& bending_stiffness(matrix const& configuration,
+                                                  std::int32_t const element) const;
 
     /**
      * Compute the shear contribution to the beam stiffness for an \p element
@@ -85,7 +86,8 @@ protected:
      *     \mathbf{D}_s &= \begin{bmatrix} \mu A_1 & 0 \\ 0 & \mu A_1 \end{bmatrix}
      * \f}
      */
-    matrix const& shear_stiffness(matrix const& configuration, std::int32_t const element) const;
+    [[nodiscard]] matrix const& shear_stiffness(matrix const& configuration,
+                                                std::int32_t const element) const;
 
     /**
      * Compute the shear contribution to the beam stiffness for an \p element
@@ -98,7 +100,8 @@ protected:
      *     \mathbf{B}_a &= \begin{bmatrix} 0 & 0 & N_c^{'} & 0 & 0 & 0 \end{bmatrix}
      * \f}
      */
-    matrix const& axial_stiffness(matrix const& configuration, std::int32_t const element) const;
+    [[nodiscard]] matrix const& axial_stiffness(matrix const& configuration,
+                                                std::int32_t const element) const;
 
     /**
      * Compute the shear contribution to the beam stiffness for an \p element
@@ -109,12 +112,15 @@ protected:
      *
      * \f{align*}{\mathbf{B}_t &= \begin{bmatrix} 0 & 0 & 0 & 0 & 0 & N_c^{'} \end{bmatrix} \f}
      */
-    matrix const& torsional_stiffness(matrix const& configuration, std::int32_t const element) const;
+    [[nodiscard]] matrix const& torsional_stiffness(matrix const& configuration,
+                                                    std::int32_t const element) const;
+
+    /// Compute the rotation matrix for a specified element
+    /// \param element
+    /// \return The 12x12 element rotation matrix
+    [[nodiscard]] matrix12 rotation_matrix(std::int32_t const element) const;
 
 protected:
-    /// Material properties
-    isotropic_elastic_property material;
-
     /// Line shape function (linear, quadratic, cubic)
     std::unique_ptr<line_interpolation> sf;
 
@@ -124,7 +130,7 @@ protected:
     /// u1, u2, u3, theta1, theta2, theta3
     nodal_variables<traits::dofs_per_node> displacement_rotation;
 
-    /// Element profiles
+    /// Element geometry profiles
     std::vector<std::unique_ptr<geometry::profile>> profiles;
 
     /// View wrapper into internal variables
