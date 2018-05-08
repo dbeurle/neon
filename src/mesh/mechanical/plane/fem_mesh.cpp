@@ -40,11 +40,9 @@ fem_mesh::fem_mesh(basic_mesh const& basic_mesh,
 
 bool fem_mesh::is_symmetric() const
 {
-    for (auto const& submesh : submeshes)
-    {
-        if (!submesh.constitutive().is_symmetric()) return false;
-    }
-    return true;
+    return std::all_of(begin(submeshes), end(submeshes), [](auto const& submesh) {
+        return submesh.constitutive().is_symmetric();
+    });
 }
 
 void fem_mesh::update_internal_variables(vector const& u, double const time_step_size)

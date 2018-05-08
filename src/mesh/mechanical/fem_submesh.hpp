@@ -19,7 +19,10 @@ template <class fem_mesh_type, class InternalVariableType>
 class fem_submesh : public basic_submesh
 {
 public:
+    /// Alias to the fem mesh type
     using mesh_type = fem_mesh_type;
+
+    /// Alias to the internal variable type
     using internal_variable_type = InternalVariableType;
 
 public:
