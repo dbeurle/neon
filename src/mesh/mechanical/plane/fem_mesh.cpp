@@ -2,7 +2,7 @@
 #include "mesh/mechanical/plane/fem_mesh.hpp"
 
 #include "mesh/basic_mesh.hpp"
-#include "mesh/mesh_dof_filter.hpp"
+#include "mesh/unique_dof_allocator.hpp"
 
 #include <chrono>
 #include <exception>
@@ -109,7 +109,7 @@ void fem_mesh::allocate_displacement_boundary(json const& boundary, basic_mesh c
 
     auto const& boundary_name = boundary["Name"].get<std::string>();
 
-    auto const dirichlet_dofs = mesh_dof_filter<2>(basic_mesh.meshes(boundary_name));
+    auto const dirichlet_dofs = unique_dof_allocator<2>(basic_mesh.meshes(boundary_name));
 
     for (auto it = dof_table.begin(); it != dof_table.end(); ++it)
     {

@@ -2,7 +2,7 @@
 #include "fem_mesh.hpp"
 
 #include "mesh/basic_mesh.hpp"
-#include "mesh/mesh_dof_filter.hpp"
+#include "mesh/unique_dof_allocator.hpp"
 
 #include <chrono>
 #include <exception>
@@ -74,7 +74,7 @@ void fem_mesh::allocate_boundary_conditions(json const& mesh_data, basic_mesh co
                                         + "\" requires a \"Value\" field.");
             }
 
-            dirichlet_bcs[boundary_name].emplace_back(mesh_dof_filter<1>(
+            dirichlet_bcs[boundary_name].emplace_back(unique_dof_allocator<1>(
                                                           basic_mesh.meshes(boundary_name)),
                                                       boundary["Time"],
                                                       boundary["Value"]);
