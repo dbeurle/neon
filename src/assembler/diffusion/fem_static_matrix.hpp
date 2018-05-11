@@ -12,16 +12,14 @@ class linear_solver;
 
 namespace neon::diffusion
 {
-/**
- * fem_static_matrix is responsible for formulating and solving the steady state
- * scalar diffusion equation.
-   \f{align*}{
-    \mathbf{K} \mathbf{d} &= \mathbf{f}
-   \f}
- * This performs the gather operations for the boundary
- * conditions and applies the Dirichlet conditions to the matrix.  For dynamic
- * problems see fem_dynamic_matrix.
- */
+/// fem_static_matrix is responsible for formulating and solving the steady state
+/// scalar diffusion equation.
+///   \f{align*}{
+///    \mathbf{K} \mathbf{d} &= \mathbf{f}
+///   \f}
+/// This performs the gather operations for the boundary
+/// conditions and applies the Dirichlet conditions to the matrix.  For dynamic
+/// problems see fem_dynamic_matrix.
 class fem_static_matrix
 {
 public:
