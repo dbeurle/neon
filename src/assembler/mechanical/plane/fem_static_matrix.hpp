@@ -2,7 +2,6 @@
 #pragma once
 
 #include "assembler/mechanical/fem_static_matrix.hpp"
-
 #include "mesh/mechanical/plane/fem_mesh.hpp"
 
 namespace neon::mechanical::plane
