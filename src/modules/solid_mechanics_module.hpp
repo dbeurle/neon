@@ -28,6 +28,10 @@ namespace solid
 class solid_mechanics_module : public abstract_module
 {
 public:
+    using mesh_type = mechanical::solid::fem_mesh;
+    using matrix_type = mechanical::fem_static_matrix<mesh_type>;
+
+public:
     solid_mechanics_module(basic_mesh const& mesh, json const& material, json const& simulation);
 
     virtual ~solid_mechanics_module() = default;
@@ -39,11 +43,10 @@ public:
     virtual void perform_simulation() override final { fem_matrix.solve(); }
 
 protected:
-    /// Mesh with the solid routines
+    /// Mesh for solid types
     mechanical::solid::fem_mesh fem_mesh;
-
     /// Nonlinear solver routines
-    mechanical::detail::fem_static_matrix<decltype(fem_mesh)> fem_matrix;
+    matrix_type fem_matrix;
 };
 
 /// solid_mechanics_linear_buckling_module is responsible for handling the setup
@@ -69,8 +72,9 @@ public:
     virtual void perform_simulation() override final { fem_matrix.solve(); }
 
 protected:
-    mesh_type fem_mesh; /// Mesh with the solid routines
-
-    matrix_type fem_matrix; /// Linear eigenvalue buckling solver
+    /// Mesh with the solid routines
+    mesh_type fem_mesh;
+    /// Linear eigenvalue buckling solver
+    matrix_type fem_matrix;
 };
 }

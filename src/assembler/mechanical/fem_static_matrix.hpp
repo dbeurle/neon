@@ -18,7 +18,7 @@
 #include <termcolor/termcolor.hpp>
 #include <tbb/parallel_for.h>
 
-namespace neon::mechanical::detail
+namespace neon::mechanical
 {
 /// Generic static matrix designed for solid mechanics problems using the
 /// Newton-Raphson method for the solution of nonlinear equations.
