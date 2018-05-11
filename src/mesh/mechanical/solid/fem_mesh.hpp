@@ -29,7 +29,7 @@ public:
              double const generate_time_step);
 
     /// The number of active degrees of freedom in this mesh
-    [[nodiscard]] auto active_dofs() const { return 3 * mesh_coordinates->size(); }
+    [[nodiscard]] auto active_dofs() const { return 3 * coordinates->size(); }
 
     /// Checks the boundary conditions and constitutive model to ensure
     /// resulting matrix from this mesh is symmetric.  \sa LinearSolver
@@ -62,8 +62,8 @@ public:
      */
     [[nodiscard]] std::vector<double> time_history() const;
 
-    /** Provide const access to the discretised geometry for this mesh */
-    [[nodiscard]] auto const& geometry() const { return *mesh_coordinates; }
+    /// Provide const access to the discretised geometry for this mesh
+    [[nodiscard]] auto const& geometry() const { return *coordinates; }
 
 protected:
     void check_boundary_conditions(json const& boundary_data) const;
@@ -75,7 +75,7 @@ protected:
     [[nodiscard]] bool is_nonfollower_load(std::string const& boundary_type) const;
 
 protected:
-    std::shared_ptr<material_coordinates> mesh_coordinates;
+    std::shared_ptr<material_coordinates> coordinates;
 
     std::vector<fem_submesh> submeshes;
 
