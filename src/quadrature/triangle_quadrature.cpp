@@ -1,7 +1,7 @@
 
 #include "triangle_quadrature.hpp"
 
-#include <range/v3/action/transform.hpp>
+#include <algorithm>
 
 namespace neon
 {
@@ -28,6 +28,6 @@ triangle_quadrature::triangle_quadrature(Rule rule)
             break;
         }
     }
-    w |= ranges::action::transform([](auto const& i) { return 0.5 * i; });
+    std::transform(begin(w), end(w), begin(w), [](auto const i) { return 0.5 * i; });
 }
 }
