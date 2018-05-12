@@ -29,13 +29,13 @@ void isotropic_linear_elasticity::update_internal_variables(double const time_st
 
     // Extract the internal variables
     auto [elastic_strains,
-          cauchy_stresses] = variables->fetch(internal_variables_t::second::LinearisedStrain,
+          cauchy_stresses] = variables->get(internal_variables_t::second::LinearisedStrain,
                                               internal_variables_t::second::CauchyStress);
 
-    auto& von_mises_stresses = variables->fetch(internal_variables_t::scalar::VonMisesStress);
+    auto& von_mises_stresses = variables->get(internal_variables_t::scalar::VonMisesStress);
 
     // Compute the linear strain gradient from the displacement gradient
-    elastic_strains = variables->fetch(internal_variables_t::second::DisplacementGradient)
+    elastic_strains = variables->get(internal_variables_t::second::DisplacementGradient)
                       | view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
     // Compute Cauchy stress from the linear elastic strains

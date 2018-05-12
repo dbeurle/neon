@@ -18,6 +18,7 @@ public:
 
     /// \return an element external force vector for a given element
     [[nodiscard]] virtual std::pair<index_view, vector> external_force(
-        std::int64_t const element, double const load_factor) const = 0;
+        std::int64_t const element,
+        double const load_factor) const = 0;
 };
 }

@@ -46,7 +46,7 @@ double triangle3::compute_measure(matrix const& nodal_coordinates) const
     vector3 const direction0 = nodal_coordinates.col(0) - nodal_coordinates.col(2);
     vector3 const direction1 = nodal_coordinates.col(1) - nodal_coordinates.col(2);
 
-    vector3 normal = direction0.cross(direction1);
+    vector3 const normal = direction0.cross(direction1);
 
     return normal.norm() / 2.0;
 }
