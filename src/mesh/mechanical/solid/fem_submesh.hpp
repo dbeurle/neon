@@ -25,7 +25,7 @@ public:
 
     using internal_variable_type = internal_variables_t;
 
-    using trait_type = traits<theory::solid, discretisation::finite_strain>;
+    using traits = mechanical::traits<theory::solid, discretisation::finite_strain>;
 
 public:
     /** Constructor providing the material coordinates reference */

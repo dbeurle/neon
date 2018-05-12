@@ -20,14 +20,16 @@ class fem_mesh
 public:
     using internal_variable_type = internal_variables_t;
 
+    using traits = fem_submesh::traits;
+
 public:
     fem_mesh(basic_mesh const& basic_mesh,
              json const& material_data,
              json const& simulation_data,
              double const generate_time_step);
 
-    /** The number of active degrees of freedom in this mesh */
-    [[nodiscard]] auto active_dofs() const { return 2 * mesh_coordinates->size(); }
+    /// The number of active degrees of freedom in this mesh
+    [[nodiscard]] auto active_dofs() const { return traits::dofs_per_node * coordinates->size(); }
 
     /**
      * Checks the boundary conditions and constitutive model to ensure

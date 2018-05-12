@@ -47,13 +47,13 @@ fem_submesh::fem_submesh(json const& material_data,
     variables->commit();
 
     // Allocate the degree of freedom indices
-    dof_list.resize(connectivity.rows() * trait_type::dof_order.size(), connectivity.cols());
+    dof_list.resize(connectivity.rows() * traits::dof_order.size(), connectivity.cols());
 
     for (indices::Index i{0}; i < connectivity.cols(); ++i)
     {
         transform_expand_view(connectivity(Eigen::placeholders::all, i),
                               dof_list(Eigen::placeholders::all, i),
-                              trait_type::dof_order);
+                              traits::dof_order);
     }
 }
 

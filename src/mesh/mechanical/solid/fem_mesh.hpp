@@ -20,7 +20,7 @@ public:
     using internal_variable_type = fem_submesh::internal_variable_type;
 
     /// Alias traits to submesh
-    using traits = fem_submesh::trait_type;
+    using traits = fem_submesh::traits;
 
 public:
     fem_mesh(basic_mesh const& basic_mesh,

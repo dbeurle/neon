@@ -3,13 +3,13 @@
 
 #include "mesh/basic_mesh.hpp"
 #include "mesh/unique_dof_allocator.hpp"
+#include "io/json.hpp"
 
 #include <chrono>
 #include <exception>
 #include <memory>
 #include <numeric>
 
-#include "io/json.hpp"
 #include <termcolor/termcolor.hpp>
 
 namespace neon::mechanical::solid
@@ -19,7 +19,7 @@ fem_mesh::fem_mesh(basic_mesh const& basic_mesh,
                    json const& simulation_data,
                    double const generate_time_step)
     : coordinates(std::make_shared<material_coordinates>(basic_mesh.coordinates())),
-      internal_forces{coordinates->size()},
+      internal_forces{coordinates->size() * traits::dofs_per_node},
       generate_time_step{generate_time_step}
 {
     check_boundary_conditions(simulation_data["BoundaryConditions"]);
