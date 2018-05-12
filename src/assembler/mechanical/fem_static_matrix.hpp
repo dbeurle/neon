@@ -429,10 +429,13 @@ void fem_static_matrix<fem_mesh_type>::perform_equilibrium_iterations()
 
     if (current_iteration != max_iterations)
     {
+        displacement_old = displacement;
+
         adaptive_load.update_convergence_state(current_iteration != max_iterations);
         fem_mesh.save_internal_variables(current_iteration != max_iterations);
 
-        displacement_old = displacement;
+        fem_mesh.update_internal_forces(fint);
+
         io.write(adaptive_load.step(), adaptive_load.time());
     }
 }
