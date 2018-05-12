@@ -18,8 +18,7 @@ void material_coordinates::update_current_xy_configuration(vector const& u)
 
 void material_coordinates::update_current_configuration(vector const& u)
 {
-    x.row(0) = X.row(0) + u.transpose()(Eigen::seq(0, u.size() - 1, 3));
-    x.row(1) = X.row(1) + u.transpose()(Eigen::seq(1, u.size() - 1, 3));
-    x.row(2) = X.row(2) + u.transpose()(Eigen::seq(2, u.size() - 1, 3));
+    std::copy_n(u.data(), u.size(), x.data());
+    x.noalias() += X;
 }
 }
