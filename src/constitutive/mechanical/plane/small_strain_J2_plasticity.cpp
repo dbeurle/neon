@@ -1,7 +1,7 @@
 
 #include "constitutive/mechanical/plane/small_strain_J2_plasticity.hpp"
 
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 
 #include "constitutive/internal_variables.hpp"
 #include "constitutive/mechanical/detail/J2_plasticity.hpp"

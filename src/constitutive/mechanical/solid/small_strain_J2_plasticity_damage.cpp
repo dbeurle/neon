@@ -4,7 +4,7 @@
 #include "numeric/mechanics"
 
 #include "io/json.hpp"
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 
 #include <range/v3/view/transform.hpp>
 #include <tbb/parallel_for.h>

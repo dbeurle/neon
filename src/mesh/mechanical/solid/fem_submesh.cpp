@@ -1,7 +1,7 @@
 
 #include "fem_submesh.hpp"
 
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 
 #include "constitutive/constitutive_model_factory.hpp"
 #include "interpolations/interpolation_factory.hpp"

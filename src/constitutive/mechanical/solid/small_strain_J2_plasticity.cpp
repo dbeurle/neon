@@ -3,7 +3,7 @@
 
 #include "constitutive/internal_variables.hpp"
 #include "numeric/mechanics"
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 
 #include <range/v3/view/transform.hpp>
 #include <tbb/parallel_for.h>

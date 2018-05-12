@@ -1,7 +1,7 @@
 
 #include "triangle.hpp"
 
-#include "geometry/Projection.hpp"
+#include "geometry/projection.hpp"
 
 #include <Eigen/Geometry>
 

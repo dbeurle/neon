@@ -3,7 +3,7 @@
 
 #include "assembler/sparsity_pattern.hpp"
 #include "numeric/float_compare.hpp"
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 #include "numeric/sparse_matrix.hpp"
 #include "solver/adaptive_time_step.hpp"
 #include "solver/linear/linear_solver_factory.hpp"

@@ -14,7 +14,7 @@
 
 #include "material/isotropic_elastic_plastic.hpp"
 
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 
 #include "io/json.hpp"
 

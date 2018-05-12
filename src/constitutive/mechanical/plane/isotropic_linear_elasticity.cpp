@@ -1,7 +1,7 @@
 
 #include "isotropic_linear_elasticity.hpp"
 
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 #include "constitutive/internal_variables.hpp"
 
 #include "numeric/mechanics"

@@ -31,7 +31,6 @@ void check_element_options(json const& mesh_data)
     }
 }
 
-/** Factory method for the three dimensional shape functions */
 std::unique_ptr<volume_interpolation> make_volume_interpolation(element_topology const topology,
                                                                 json const& mesh_data)
 {

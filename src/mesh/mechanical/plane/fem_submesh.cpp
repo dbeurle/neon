@@ -1,10 +1,10 @@
 
 #include "fem_submesh.hpp"
 
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 
 #include "constitutive/constitutive_model_factory.hpp"
-#include "geometry/Projection.hpp"
+#include "geometry/projection.hpp"
 #include "interpolations/interpolation_factory.hpp"
 #include "material/material_property.hpp"
 #include "mesh/material_coordinates.hpp"

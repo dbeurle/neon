@@ -1,6 +1,6 @@
 
 #include "basic_mesh.hpp"
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 #include "io/json.hpp"
 
 namespace neon

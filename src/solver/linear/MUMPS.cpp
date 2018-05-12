@@ -1,6 +1,6 @@
 
 #include "MUMPS.hpp"
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 
 #include <Eigen/Sparse>
 

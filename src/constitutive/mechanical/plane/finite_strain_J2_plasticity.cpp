@@ -1,7 +1,7 @@
 
 #include "constitutive/mechanical/plane/finite_strain_J2_plasticity.hpp"
 
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 #include "constitutive/internal_variables.hpp"
 
 #include "numeric/float_compare.hpp"
