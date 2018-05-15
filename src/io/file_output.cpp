@@ -77,7 +77,7 @@ void file_output::write_to_file(int const time_step, double const total_time)
     unstructured_mesh_writer->SetFileName(vtk_filename.c_str());
     unstructured_mesh_writer->SetInputData(unstructured_mesh);
 
-    if (use_binary_format == false) unstructured_mesh_writer->SetDataModeToAscii();
+    if (!use_binary_format) unstructured_mesh_writer->SetDataModeToAscii();
 
     unstructured_mesh_writer->Write();
 
