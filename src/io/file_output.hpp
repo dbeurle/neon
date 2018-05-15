@@ -183,6 +183,8 @@ void file_output<fem_mesh>::write(int const time_step, double const total_time)
         }
         else if (auto found = scalar_map.find(name); found != scalar_map.end())
         {
+            auto const& [name_str, name_enum] = *found;
+
             nodal_averaged_value.resize(mesh.geometry().size());
             insertions.resize(mesh.geometry().size());
 
@@ -191,14 +193,14 @@ void file_output<fem_mesh>::write(int const time_step, double const total_time)
 
             for (auto const& submesh : mesh.meshes())
             {
-                auto const [value, count] = submesh.nodal_averaged_variable(found->second);
+                auto const [value, count] = submesh.nodal_averaged_variable(name_enum);
                 nodal_averaged_value += value;
                 insertions += count;
             }
 
             nodal_averaged_value = nodal_averaged_value.cwiseQuotient(insertions);
 
-            add_field(found->first, nodal_averaged_value, 1);
+            add_field(name_str, nodal_averaged_value, 1);
         }
         else if (name == primary_field)
         {
@@ -242,7 +244,7 @@ void file_output<fem_mesh>::add_mesh()
 
 namespace diffusion
 {
-class file_output : public neon::io::file_output
+class file_output : public io::file_output
 {
 public:
     using VectorMap = std::map<std::string, internal_variables_t::vector>;
