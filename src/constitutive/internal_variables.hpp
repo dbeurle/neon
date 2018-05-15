@@ -3,6 +3,8 @@
 
 #include "internal_variables_forward.hpp"
 
+#include "numeric/dense_types.hpp"
+
 #include <functional>
 #include <unordered_map>
 #include <vector>
