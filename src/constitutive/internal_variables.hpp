@@ -3,7 +3,7 @@
 
 #include "internal_variables_forward.hpp"
 
-#include "numeric/dense_types.hpp"
+#include "numeric/dense_matrix.hpp"
 
 #include <functional>
 #include <unordered_map>
