@@ -13,8 +13,11 @@
 
 namespace neon
 {
+/// Matrix in row major layout
 using matrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+/// Alias to row major layout matrix
 using row_matrix = matrix;
+/// Matrix in column major layout
 using col_matrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>;
 
 /// 2x2 fixed size matrix
@@ -38,9 +41,9 @@ using matrixxd = Eigen::Matrix<double, Eigen::Dynamic, geometric_dimension>;
 template <int geometric_dimension>
 using matrixdx = Eigen::Matrix<double, geometric_dimension, Eigen::Dynamic>;
 
-/** Compile time fixed rows for nodal coordinates in two dimensions */
+/// Compile time fixed rows for nodal coordinates in two dimensions
 using matrix2x = Eigen::Matrix<double, 2, Eigen::Dynamic>;
-/** Compile time fixed rows for nodal coordinates in three dimensions */
+/// Compile time fixed rows for nodal coordinates in three dimensions
 using matrix3x = Eigen::Matrix<double, 3, Eigen::Dynamic>;
 
 using vector = Eigen::Matrix<double, Eigen::Dynamic, 1>;
