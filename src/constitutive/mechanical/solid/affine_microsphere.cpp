@@ -5,9 +5,6 @@
 #include "constitutive/mechanical/volumetric_free_energy.hpp"
 #include "constitutive/mechanical/detail/microsphere.hpp"
 
-#include <range/v3/view/transform.hpp>
-#include <range/v3/view/zip.hpp>
-
 #include <tbb/parallel_for.h>
 
 namespace neon::mechanical::solid
