@@ -25,7 +25,7 @@ public:
 
     using internal_variable_type = internal_variables_t;
 
-    using trait_type = traits<theory::solid, discretisation::finite_strain>;
+    using traits = mechanical::traits<theory::solid, discretisation::finite_strain>;
 
 public:
     /** Constructor providing the material coordinates reference */
@@ -34,7 +34,7 @@ public:
                          std::shared_ptr<material_coordinates>& material_coordinates,
                          basic_submesh const& submesh);
 
-    /// \return list of global degrees of freedom for an element
+    /// \return A view of degrees of freedom for an element
     [[nodiscard]] auto const local_dof_view(std::int64_t const element) const
     {
         return dof_list(Eigen::placeholders::all, element);
@@ -45,22 +45,22 @@ public:
 
     void save_internal_variables(bool const have_converged);
 
-    [[nodiscard]] auto dofs_per_node() const noexcept { return 3; }
+    [[nodiscard]] auto dofs_per_node() const noexcept { return traits::dofs_per_node; }
 
     [[nodiscard]] auto const& shape_function() const { return *sf; }
 
     [[nodiscard]] auto const& constitutive() const { return *cm; }
 
-    /** @return the tangent consistent stiffness matrix */
+    /// \return the tangent consistent stiffness matrix
     [[nodiscard]] std::pair<index_view, matrix> tangent_stiffness(std::int32_t const element) const;
 
-    /** @return the internal element force */
+    /// \return the internal element force
     [[nodiscard]] std::pair<index_view, vector> internal_force(std::int32_t const element) const;
 
-    /** @return the consistent mass matrix \sa diagonal_mass */
+    /// \return the consistent mass matrix \sa diagonal_mass
     [[nodiscard]] std::pair<index_view, matrix> consistent_mass(std::int32_t const element) const;
 
-    /** @return the consistent mass matrix \sa diagonal_mass */
+    /// \return the consistent mass matrix \sa diagonal_mass
     [[nodiscard]] std::pair<index_view, vector> diagonal_mass(std::int32_t const element) const;
 
     /// Update the internal variables for the mesh group
