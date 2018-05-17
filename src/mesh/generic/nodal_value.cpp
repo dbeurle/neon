@@ -15,4 +15,11 @@ nodal_value::nodal_value(std::vector<std::int32_t> unique_dofs,
     : boundary{boundary_data, name, generate_time_step}, unique_dofs{unique_dofs}
 {
 }
+
+std::vector<std::int32_t> const& nodal_value::dof_view() const noexcept { return unique_dofs; }
+
+double nodal_value::value_view(double const load_factor) const
+{
+    return interpolate_prescribed_load(load_factor);
+}
 }

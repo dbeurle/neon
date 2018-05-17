@@ -21,13 +21,10 @@ public:
                          double const generate_time_step);
 
     /// \return View of the unique dof indices for this boundary
-    [[nodiscard]] auto const& dof_view() const noexcept { return unique_dofs; }
+    [[nodiscard]] std::vector<std::int32_t> const& dof_view() const noexcept;
 
     /// Get the value depending on the loading factor
-    [[nodiscard]] auto value_view(double const load_factor = 1.0) const
-    {
-        return interpolate_prescribed_load(load_factor);
-    }
+    [[nodiscard]] double value_view(double const load_factor = 1.0) const;
 
 protected:
     /// Unique dof indices to apply the value
