@@ -77,12 +77,18 @@ void fem_submesh::update_internal_variables(double const time_step_size)
 
 std::pair<index_view, matrix> fem_submesh::tangent_stiffness(std::int32_t const element) const
 {
+    static thread_local matrix ke(12, 12);
+
     auto const& configuration = coordinates->initial_configuration(local_node_view(element));
 
-    return {dof_list(Eigen::placeholders::all, element),
-            bending_stiffness(configuration, element) + shear_stiffness(configuration, element)
-                + axial_stiffness(configuration, element)
-                + torsional_stiffness(configuration, element)};
+    matrix12 const T = rotation_matrix(element);
+
+    ke = T
+         * (bending_stiffness(configuration, element) + shear_stiffness(configuration, element)
+            + axial_stiffness(configuration, element) + torsional_stiffness(configuration, element))
+         * T.transpose();
+
+    return {dof_list(Eigen::placeholders::all, element), ke};
 }
 
 matrix const& fem_submesh::bending_stiffness(matrix const& configuration,
@@ -108,7 +114,7 @@ matrix const& fem_submesh::bending_stiffness(matrix const& configuration,
             B_b(0, 3 + offset) = B_b(1, 4 + offset) = dN(i, l) / jacobian;
         }
 
-        return B_b.transpose() * D_b[view(element, l)] * B_b * jacobian;
+        return B_b.transpose() * D_b.at(view(element, l)) * B_b * jacobian;
     });
     return k_b;
 }
