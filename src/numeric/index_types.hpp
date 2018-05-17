@@ -9,6 +9,6 @@ namespace neon
 {
 using indices = Eigen::Array<std::int32_t, Eigen::Dynamic, Eigen::Dynamic>;
 
-/** Template alias for whatever type comes from these views */
+/// Type alias for whatever type is returned from these views
 using index_view = decltype(std::declval<const indices>()(Eigen::placeholders::all, 0l));
 }
