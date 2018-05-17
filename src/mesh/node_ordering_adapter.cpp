@@ -63,28 +63,63 @@ void convert_from_gmsh(indices& node_indices, element_topology const topology)
 
             break;
         }
-        case element_topology::prism6:
-        {
-            node_indices.row(0).swap(node_indices.row(1));
-            node_indices.row(3).swap(node_indices.row(4));
-
-            break;
-        }
         case element_topology::prism15:
         {
+            /*
+               neon ordering
+                                  9   @
+                                   *  |  *
+                                *     |   *
+                          6  @    12  @     @  14
+                          *           |      *
+                       *              |        *
+                 0  @             10  @----@----@  11
+                    | *              /    13   /
+                    |   *         /          /
+                    |     *    @  7    8   @
+                 3  @    5 @ /           /
+                    |     /   *        /
+                    |  /        *    /
+                    @------@------@
+                    1      4      2
+
+               gmsh ordering
+
+                           w
+                           ^
+                           |
+                           3
+                         ,/|`\
+                       12  |  13
+                     ,/    |    `\
+                    4------14-----5
+                    |      8      |
+                    |    ,/|`\    |
+                    |  ,/  |  `\  |
+                    |,/    |    `\|
+                   10      |      11
+                 ,/ |      0      | `\
+                u   |    ,/ `\    |    v
+                    |  ,6     `7  |
+                    |,/         `\|
+                    1------9------2
+
+            */
+
             // -1 face
-            node_indices.row(0).swap(node_indices.row(1));
             node_indices.row(3).swap(node_indices.row(6));
-            node_indices.row(7).swap(node_indices.row(4));
-            node_indices.row(5).swap(node_indices.row(9));
+            node_indices.row(4).swap(node_indices.row(9));
+            node_indices.row(5).swap(node_indices.row(7));
 
             // mid face
-            node_indices.row(8).swap(node_indices.row(7));
-            node_indices.row(10).swap(node_indices.row(6));
-            node_indices.row(11).swap(node_indices.row(8));
+            node_indices.row(6).swap(node_indices.row(8));
+            node_indices.row(8).swap(node_indices.row(11));
+            node_indices.row(10).swap(node_indices.row(7));
 
             // +1 face
-            node_indices.row(11).swap(node_indices.row(9));
+            node_indices.row(13).swap(node_indices.row(14));
+            node_indices.row(10).swap(node_indices.row(11));
+            node_indices.row(10).swap(node_indices.row(9));
 
             break;
         }
@@ -200,21 +235,19 @@ indices convert_to_vtk(indices node_indices, element_topology const topology)
         case element_topology::prism15:
         {
             // -1 face
-            node_indices.row(3).swap(node_indices.row(8));
-            node_indices.row(4).swap(node_indices.row(6));
-            node_indices.row(5).swap(node_indices.row(7));
+            node_indices.row(3).swap(node_indices.row(6));
+            node_indices.row(4).swap(node_indices.row(7));
+            node_indices.row(5).swap(node_indices.row(8));
 
             // mid face
-            node_indices.row(6).swap(node_indices.row(12));
-            node_indices.row(7).swap(node_indices.row(13));
-            node_indices.row(8).swap(node_indices.row(14));
+            node_indices.row(3).swap(node_indices.row(12));
+            node_indices.row(4).swap(node_indices.row(13));
+            node_indices.row(5).swap(node_indices.row(14));
 
             // +1 face
-            node_indices.row(9).swap(node_indices.row(14));
-            node_indices.row(10).swap(node_indices.row(12));
-            node_indices.row(13).swap(node_indices.row(11));
-            node_indices.row(13).swap(node_indices.row(14));
-            node_indices.row(11).swap(node_indices.row(12));
+            node_indices.row(3).swap(node_indices.row(9));
+            node_indices.row(4).swap(node_indices.row(10));
+            node_indices.row(5).swap(node_indices.row(11));
 
             break;
         }
