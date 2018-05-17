@@ -11,8 +11,8 @@ prism_quadrature::prism_quadrature(Rule rule)
         {
             // One single point in the middle of the triangle and linear line
             // interpolation also in the middle
-            w = {2.0};
-            clist = {{0, -1.0 / 3.0, -1.0 / 3.0, 0.0}};
+            w = {1.0 * 2.0};
+            clist = {{0, 1.0 / 3.0, 1.0 / 3.0, 0.0}};
             break;
         }
         case Rule::SixPoint:
