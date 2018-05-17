@@ -34,7 +34,7 @@ protected:
 };
 
 /// prism15 is responsible for computing the shape functions for an prism or
-/// wedge shaped six noded element.
+/// wedge shaped fifteen noded element.
 /// The shape functions and nodal orderings are taken from \cite Hughes2012
 class prism15 : public volume_interpolation
 {
