@@ -1,7 +1,8 @@
 
 #include "nonfollower_load.hpp"
 
-#include "geometry/projection.hpp"
+#include "interpolations/interpolation_factory.hpp"
+
 #include "math/transform_expand.hpp"
 #include "io/json.hpp"
 
@@ -15,22 +16,13 @@ nonfollower_load_boundary::nonfollower_load_boundary(
     std::unordered_map<std::string, int> const& dof_table,
     double const generate_time_step)
 {
-    for (auto& [is_dof_active, var] : nonfollower_load)
-    {
-        is_dof_active = false;
-    }
-
-    if (auto const& type = boundary["Type"].get<std::string>(); type == "Traction")
+    if (std::string const& type = boundary["Type"]; type == "Traction")
     {
         for (auto it = dof_table.begin(); it != dof_table.end(); ++it)
         {
             if (boundary.count(it->first))
             {
-                auto const& dof_offset = it->second;
-
-                auto& [is_dof_active, boundary_meshes] = nonfollower_load[dof_offset];
-
-                is_dof_active = true;
+                auto const dof_offset = it->second;
 
                 for (auto const& mesh : submeshes)
                 {
@@ -53,11 +45,7 @@ nonfollower_load_boundary::nonfollower_load_boundary(
         {
             if (boundary.count(it->first))
             {
-                auto const& dof_offset = it->second;
-
-                auto& [is_dof_active, boundary_meshes] = nonfollower_load[dof_offset];
-
-                is_dof_active = true;
+                auto const dof_offset = it->second;
 
                 for (auto const& mesh : submeshes)
                 {

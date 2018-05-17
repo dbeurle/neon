@@ -133,20 +133,15 @@ std::vector<double> fem_mesh::time_history() const
     }
     for (auto const& [key, nonfollower_load] : nonfollower_loads)
     {
-        for (auto const& [is_dof_active, boundaries] : nonfollower_load.interface())
+        for (auto const& boundary_variant : nonfollower_load.natural_interface())
         {
-            if (!is_dof_active) continue;
+            std::visit(
+                [&](auto const& boundary_mesh) {
+                    auto const& times = boundary_mesh.time_history();
 
-            for (auto const& boundary_variant : boundaries)
-            {
-                std::visit(
-                    [&](auto const& surface_mesh) {
-                        auto const& times = surface_mesh.time_history();
-
-                        history.insert(begin(times), end(times));
-                    },
-                    boundary_variant);
-            }
+                    history.insert(begin(times), end(times));
+                },
+                boundary_variant);
         }
     }
     return {begin(history), end(history)};

@@ -1,39 +1,27 @@
 
 #pragma once
 
-#include "mesh/generic/neumann.hpp"
+#include "mesh/generic/nodal_value.hpp"
+#include "mesh/mechanical/plane/boundary/traction.hpp"
+#include "mesh/mechanical/plane/boundary/body_force.hpp"
 
-#include "interpolations/interpolation_factory.hpp"
+#include "interpolations/shape_function.hpp"
 #include "mesh/basic_submesh.hpp"
 
 #include <variant>
 
 namespace neon::mechanical::plane
 {
-/// traction is a non-follower load that has a surface interpolation and
-/// computes the element external load vector contribution to the system of
-/// equations
-/// \sa NonFollowerLoad
-using traction = surface_load<line_interpolation>;
-
-/// body_force is a non-follower load that has a volume interpolation and
-/// computes the element external load vector contribution to the system of
-/// equations
-/// \sa NonFollowerLoad
-using body_force = volume_load<surface_interpolation>;
-
 /// nonfollower_load_boundary contains the boundary conditions which contribute to
 /// the external force vector.  This can include tractions, pressures, nodal
 /// forces and volume forces computed in the initial configuration
-///
 /// \sa traction
-/// \sa Pressure
 /// \sa body_force
 class nonfollower_load_boundary
 {
 public:
     /// Specifying allowable nonfollower loads types
-    using boundary_type = std::vector<std::variant<traction, body_force>>;
+    using value_types = std::variant<traction, body_force>;
 
 public:
     explicit nonfollower_load_boundary(std::shared_ptr<material_coordinates>& material_coordinates,
@@ -43,31 +31,15 @@ public:
                                        std::unordered_map<std::string, int> const& dof_table,
                                        double const generate_time_step);
 
-    /**
-     * Provides access to an array with three elements.  Each element is a pair,
-     * with the first corresponds to an active DoF flag and the second is a
-     * variant type of the allowable boundary conditions.  This can be accessed
-     * using
+    /// Provides const access to a vector of variants containing the types
+    /// that represent natural boundary conditions on the surface of the object
+    auto const& natural_interface() const noexcept { return boundary_meshes; }
 
-           for (auto const& [name, nonfollower_load] : mesh.nonfollower_loads())
-           {
-               for (auto const& [is_dof_active, boundary_condition] : nonfollower_load.interface())
-               {
-                   if (!is_dof_active) continue;
-
-                   std::visit([](auto const& mesh) {
-                       for (auto element = 0; element < mesh.elements(); ++element)
-                       {
-                            External force assembly
-                       }
-                   }, boundary_condition);
-               }
-           }
-
-     */
-    auto const& interface() const { return nonfollower_load; }
+    auto const& nodal_interface() const noexcept { return nodal_values; }
 
 protected:
-    std::array<std::pair<bool, boundary_type>, 2> nonfollower_load;
+    std::vector<value_types> boundary_meshes;
+
+    std::vector<nodal_value> nodal_values;
 };
 }

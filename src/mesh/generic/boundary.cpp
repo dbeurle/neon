@@ -23,7 +23,7 @@ boundary::boundary(json const& boundary, std::string const& name, double const g
 {
     if (boundary.find("GenerateType") != boundary.end())
     {
-        if (auto const& type = boundary["GenerateType"].get<std::string>(); type == "Sinusoidal")
+        if (std::string const& type = boundary["GenerateType"]; type == "Sinusoidal")
         {
             generate_sinusoidal(boundary, name, generate_time_step);
         }
@@ -46,7 +46,6 @@ double boundary::interpolate_prescribed_load(std::vector<std::pair<double, doubl
 {
     using ranges::adjacent_find;
     using ranges::find_if;
-    using ranges::next;
 
     // Find if we have a time that matches exactly to a load
     if (auto match = find_if(time_value,
@@ -57,9 +56,11 @@ double boundary::interpolate_prescribed_load(std::vector<std::pair<double, doubl
     }
 
     // Otherwise we need to interpolate between the values
-    auto const lower_position = adjacent_find(time_value, [&](auto const& left, auto const& right) {
-        return left.first < step_time && step_time < right.first;
-    });
+    auto const lower_position = adjacent_find(time_value,
+                                              [&step_time](auto const& left, auto const& right) {
+                                                  return left.first < step_time
+                                                         && step_time < right.first;
+                                              });
 
     auto const lower_pair = *lower_position;
     auto const upper_pair = *(ranges::next(lower_position));

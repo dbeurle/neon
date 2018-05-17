@@ -60,7 +60,8 @@ void fem_mesh::save_internal_variables(bool const have_converged)
 
 bool fem_mesh::is_nonfollower_load(std::string const& boundary_type) const
 {
-    return boundary_type == "Traction" || boundary_type == "Pressure" || boundary_type == "BodyForce";
+    return boundary_type == "Traction" || boundary_type == "Pressure"
+           || boundary_type == "BodyForce" || boundary_type == "NodalForce";
 }
 
 void fem_mesh::allocate_boundary_conditions(json const& simulation_data, basic_mesh const& basic_mesh)
@@ -68,8 +69,8 @@ void fem_mesh::allocate_boundary_conditions(json const& simulation_data, basic_m
     // Populate the boundary conditions and their corresponding mesh
     for (auto const& boundary : simulation_data["BoundaryConditions"])
     {
-        auto const& boundary_name = boundary["Name"].get<std::string>();
-        auto const& boundary_type = boundary["Type"].get<std::string>();
+        std::string const& boundary_name = boundary["Name"];
+        std::string const& boundary_type = boundary["Type"];
 
         if (boundary_type == "Displacement")
         {
@@ -126,29 +127,20 @@ std::vector<double> fem_mesh::time_history() const
     {
         for (auto const& boundary : boundaries)
         {
-            for (auto t : boundary.time_history())
-            {
-                history.insert(t);
-            }
+            auto const times = boundary.time_history();
+            history.insert(begin(times), end(times));
         }
     }
     for (auto const& [key, nonfollower_load] : nonfollower_loads)
     {
-        for (auto const& [is_dof_active, boundaries] : nonfollower_load.interface())
+        for (auto const& boundary_variant : nonfollower_load.natural_interface())
         {
-            if (!is_dof_active) continue;
-
-            for (auto const& boundary_variant : boundaries)
-            {
-                std::visit(
-                    [&](auto const& surface_mesh) {
-                        for (auto t : surface_mesh.time_history())
-                        {
-                            history.insert(t);
-                        }
-                    },
-                    boundary_variant);
-            }
+            std::visit(
+                [&](auto const& boundary_mesh) {
+                    auto const times = boundary_mesh.time_history();
+                    history.insert(begin(times), end(times));
+                },
+                boundary_variant);
         }
     }
     return {begin(history), end(history)};

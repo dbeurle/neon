@@ -204,25 +204,26 @@ void fem_static_matrix<fem_mesh_type>::compute_external_force()
 
     fext.setZero();
 
-    for (auto const& [name, nf_loads] : fem_mesh.nonfollower_load_boundaries())
+    for (auto const& [name, boundaries] : fem_mesh.nonfollower_load_boundaries())
     {
-        for (auto const& [is_dof_active, boundary_conditions] : nf_loads.interface())
+        for (auto const& boundary : boundaries.natural_interface())
         {
-            if (!is_dof_active) continue;
-
-            for (auto const& boundary_condition : boundary_conditions)
-            {
-                // clang-format off
-                std::visit([&](auto const& mesh) {
-                    for (std::int64_t element {0}; element < mesh.elements(); ++element)
+            std::visit(
+                [&](auto const& boundary_mesh) {
+                    for (std::int64_t element{0}; element < boundary_mesh.elements(); ++element)
                     {
-                       auto const [ dofs, fe_ext ] = mesh.external_force(element, step_time);
+                        auto const [dofs, fe_ext] = boundary_mesh.external_force(element, step_time);
 
-                       fext(dofs) += fe_ext;
+                        fext(dofs) += fe_ext;
                     }
                 },
-                boundary_condition);
-                // clang-format on
+                boundary);
+        }
+        for (auto const& boundary : boundaries.nodal_interface())
+        {
+            for (auto dof_index : boundary.dof_view())
+            {
+                fext(dof_index) += boundary.value_view();
             }
         }
     }
