@@ -15,11 +15,12 @@ public:
     void solve() override final;
 
 protected:
-    /** Assembles the consistent (full) mass matrix */
+    /// Assembles the consistent (full) mass matrix
     void assemble_mass();
 
 protected:
-    sparse_matrix M; //!< Consistent capacity matrix
+    /// Consistent capacity matrix
+    sparse_matrix M;
 
     trapezoidal_integrator time_solver;
 };

@@ -30,8 +30,9 @@
 #endif
 
 #include <map>
+#include <set>
 #include <string>
-#include <unordered_set>
+#include <algorithm>
 
 namespace neon
 {
@@ -64,7 +65,7 @@ protected:
     /// Stream for writing time history
     std::ofstream pvd_file;
 
-    std::unordered_set<std::string> output_set;
+    std::set<std::string> output_set;
 
     /// Time steps to write out (e.g. two is every second time step)
     int write_every = 1;
@@ -106,6 +107,20 @@ private:
 private:
     fem_mesh_type const& mesh;
 
+    std::set<std::string> allowable_fields{{"AccumulatedPlasticStrain",
+                                            "VonMisesStress",
+                                            "Damage",
+                                            "EnergyReleaseRate",
+                                            "CauchyStress",
+                                            "LinearisedStrain",
+                                            "LinearisedPlasticStrain",
+                                            "DeformationGradient",
+                                            "DisplacementGradient",
+                                            "KinematicHardening",
+                                            "BackStress",
+                                            "Displacement",
+                                            "ReactionForce"}};
+
     // clang-format off
     scalar_map_t const scalar_map{{"AccumulatedPlasticStrain", variable_type::scalar::EffectivePlasticStrain},
                                   {"VonMisesStress", variable_type::scalar::VonMisesStress},
@@ -129,14 +144,12 @@ file_output<fem_mesh>::file_output(std::string file_name,
     : io::file_output(file_name, visualisation_data), mesh(mesh)
 {
     // Check the output set against the known values for this module
-    for (auto const& output : output_set)
+    if (!std::includes(begin(allowable_fields),
+                       end(allowable_fields),
+                       begin(output_set),
+                       end(output_set)))
     {
-        if (scalar_map.find(output) == scalar_map.end()
-            && tensor_map.find(output) == tensor_map.end() && output != primary_field)
-        {
-            throw std::domain_error("Output \"" + output
-                                    + "\" is not valid for a solid mechanics simulation\n");
-        }
+        throw std::domain_error("Requested output is not valid for a solid mechanics simulation\n");
     }
     add_mesh();
 }
@@ -206,6 +219,10 @@ void file_output<fem_mesh>::write(int const time_step, double const total_time)
         {
             unstructured_mesh->GetPointData()->AddArray(
                 io::vtk_displacement(mesh.geometry().displacement()));
+        }
+        else if (name == "ReactionForce")
+        {
+            add_field("reaction forces", mesh.nodal_reaction_forces(), fem_mesh::traits::size);
         }
         else
         {

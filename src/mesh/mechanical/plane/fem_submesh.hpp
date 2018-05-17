@@ -6,6 +6,7 @@
 #include "constitutive/constitutive_model.hpp"
 #include "constitutive/internal_variables.hpp"
 #include "interpolations/shape_function.hpp"
+#include "traits/mechanics.hpp"
 
 #include <memory>
 #include <utility>
@@ -21,6 +22,9 @@ namespace mechanical::plane
 /// This class conforms to the CRTP interface \sa detail::fem_submesh
 class fem_submesh : public detail::fem_submesh<plane::fem_submesh, plane::internal_variables_t>
 {
+public:
+    using traits = mechanical::traits<theory::plane_strain, discretisation::linear>;
+
 public:
     /// Constructor providing the material coordinates reference
     explicit fem_submesh(json const& material_data,

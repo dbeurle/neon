@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <vector>
 
+/// \file sparsity_pattern.hpp
+
 namespace neon::fem
 {
 /// Compute the sparsity (nonzero) pattern of a sparse matrix and compress

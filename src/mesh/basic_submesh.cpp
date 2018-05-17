@@ -3,7 +3,7 @@
 
 #include "mesh/node_ordering_adapter.hpp"
 
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 
 #include "io/json.hpp"
 

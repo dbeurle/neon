@@ -19,7 +19,7 @@ class fem_mesh
 public:
     using internal_variable_type = fem_submesh::internal_variable_type;
 
-    /// Alias traits to submesh traits type
+    /// Alias traits to submesh
     using traits = fem_submesh::traits;
 
 public:
@@ -29,11 +29,16 @@ public:
              double const generate_time_step);
 
     /// The number of active degrees of freedom in this mesh
-    [[nodiscard]] auto active_dofs() const { return 3 * coordinates->size(); }
+    [[nodiscard]] auto active_dofs() const { return traits::dofs_per_node * coordinates->size(); }
 
     /// Checks the boundary conditions and constitutive model to ensure
     /// resulting matrix from this mesh is symmetric.  \sa LinearSolver
     [[nodiscard]] bool is_symmetric() const;
+
+    /// Update the internal forces for printing out reaction forces
+    void update_internal_forces(vector const& fint) { internal_forces = fint; }
+
+    vector nodal_reaction_forces() const { return -internal_forces; }
 
     /// Deform the body by updating the displacement x = X + u
     /// and update the internal variables with the new deformation and the
@@ -81,6 +86,9 @@ protected:
 
     /// Nonfollower (force) boundary conditions
     std::map<std::string, nonfollower_load_boundary> nonfollower_loads;
+
+    /// Internal nodal forces for reaction forces
+    vector internal_forces;
 
     std::unordered_map<std::string, int> const dof_table = {{"x", 0}, {"y", 1}, {"z", 2}};
 

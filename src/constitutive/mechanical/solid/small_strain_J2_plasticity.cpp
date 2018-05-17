@@ -3,7 +3,7 @@
 
 #include "constitutive/internal_variables.hpp"
 #include "numeric/mechanics"
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 
 #include <range/v3/view/transform.hpp>
 #include <tbb/parallel_for.h>
@@ -29,19 +29,19 @@ void small_strain_J2_plasticity::update_internal_variables(double const time_ste
     // Extract the internal variables
     auto [plastic_strains,
           strains,
-          cauchy_stresses] = variables->fetch(internal_variables_t::second::LinearisedPlasticStrain,
+          cauchy_stresses] = variables->get(internal_variables_t::second::LinearisedPlasticStrain,
                                               internal_variables_t::second::LinearisedStrain,
                                               internal_variables_t::second::CauchyStress);
 
     // Retrieve the accumulated internal variables
     auto [accumulated_plastic_strains,
-          von_mises_stresses] = variables->fetch(internal_variables_t::scalar::EffectivePlasticStrain,
+          von_mises_stresses] = variables->get(internal_variables_t::scalar::EffectivePlasticStrain,
                                                  internal_variables_t::scalar::VonMisesStress);
 
-    auto& tangent_operators = variables->fetch(internal_variables_t::fourth::tangent_operator);
+    auto& tangent_operators = variables->get(internal_variables_t::fourth::tangent_operator);
 
     // Compute the linear strain gradient from the displacement gradient
-    strains = variables->fetch(internal_variables_t::second::DisplacementGradient)
+    strains = variables->get(internal_variables_t::second::DisplacementGradient)
               | ranges::view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
     // Perform the update algorithm for each quadrature point

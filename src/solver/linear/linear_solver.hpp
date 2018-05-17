@@ -11,9 +11,11 @@ namespace neon
 class linear_solver
 {
 public:
+    virtual ~linear_solver() = default;
+
     virtual void solve(sparse_matrix const& A, vector& x, vector const& b) = 0;
 
-    /** Notifies the linear solvers of a change in sparsity structure of A */
+    /// Notifies the linear solvers of a change in sparsity structure of A
     void update_sparsity_pattern() { build_sparsity_pattern = true; }
 
 protected:

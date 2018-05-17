@@ -1,10 +1,12 @@
 
 #include "fem_static_matrix.hpp"
 
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 #include "solver/linear/linear_solver_factory.hpp"
 #include "assembler/homogeneous_dirichlet.hpp"
 #include "io/json.hpp"
+
+#include <tbb/parallel_for.h>
 
 #include <chrono>
 
@@ -23,7 +25,7 @@ fem_static_matrix::~fem_static_matrix() = default;
 
 void fem_static_matrix::compute_sparsity_pattern()
 {
-    std::vector<doublet<int>> doublets;
+    std::vector<doublet<std::int32_t>> doublets;
     doublets.reserve(mesh.active_dofs());
 
     K.resize(mesh.active_dofs(), mesh.active_dofs());
@@ -33,11 +35,11 @@ void fem_static_matrix::compute_sparsity_pattern()
         // Loop over the elements and add in the non-zero components
         for (std::int64_t element{0}; element < submesh.elements(); element++)
         {
-            auto const local_view = submesh.local_dof_view(element);
+            auto const dof_view = submesh.local_dof_view(element);
 
-            for (std::int64_t p{0}; p < local_view.size(); ++p)
+            for (std::int64_t p{0}; p < dof_view.size(); ++p)
             {
-                for (std::int64_t q{0}; q < local_view.size(); ++q)
+                for (std::int64_t q{0}; q < dof_view.size(); ++q)
                 {
                     doublets.emplace_back(p, q);
                 }
@@ -122,8 +124,7 @@ void fem_static_matrix::assemble_stiffness()
 
     for (auto const& submesh : mesh.meshes())
     {
-        for (std::int64_t element = 0; element < submesh.elements(); ++element)
-        {
+        tbb::parallel_for(std::int64_t{0}, submesh.elements(), [&](auto const element) {
             auto const [dofs, ke] = submesh.tangent_stiffness(element);
 
             for (std::int64_t a{0}; a < dofs.size(); a++)
@@ -133,7 +134,7 @@ void fem_static_matrix::assemble_stiffness()
                     K.coefficient_update(dofs(a), dofs(b), ke(a, b));
                 }
             }
-        }
+        });
     }
 
     auto const end = std::chrono::high_resolution_clock::now();

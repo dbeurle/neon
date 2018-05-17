@@ -3,7 +3,7 @@
 
 #include "assembler/sparsity_pattern.hpp"
 #include "numeric/float_compare.hpp"
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 #include "numeric/sparse_matrix.hpp"
 #include "solver/adaptive_time_step.hpp"
 #include "solver/linear/linear_solver_factory.hpp"
@@ -18,7 +18,7 @@
 #include <termcolor/termcolor.hpp>
 #include <tbb/parallel_for.h>
 
-namespace neon::mechanical::detail
+namespace neon::mechanical
 {
 /// Generic static matrix designed for solid mechanics problems using the
 /// Newton-Raphson method for the solution of nonlinear equations.
@@ -82,15 +82,22 @@ protected:
     double relative_displacement_norm;
     double relative_force_norm;
 
-    sparse_matrix Kt; /// Tangent sparse stiffness matrix
-    vector fint;      /// Internal force vector
-    vector fext;      /// External force vector
+    /// Tangent sparse stiffness matrix
+    sparse_matrix Kt;
+    /// Internal force vector
+    vector fint;
+    /// External force vector
+    vector fext;
 
-    vector displacement;     /// Displacement vector
-    vector displacement_old; /// Last displacement vector
-    vector delta_d;          /// Incremental displacement vector
+    /// Displacement vector
+    vector displacement;
+    /// Last displacement vector
+    vector displacement_old;
+    /// Incremental displacement vector
+    vector delta_d;
 
-    vector minus_residual; /// Minus residual vector
+    /// Minus residual vector
+    vector minus_residual;
 
     std::unique_ptr<linear_solver> solver;
 };
@@ -197,25 +204,26 @@ void fem_static_matrix<fem_mesh_type>::compute_external_force()
 
     fext.setZero();
 
-    for (auto const& [name, nf_loads] : fem_mesh.nonfollower_load_boundaries())
+    for (auto const& [name, boundaries] : fem_mesh.nonfollower_load_boundaries())
     {
-        for (auto const& [is_dof_active, boundary_conditions] : nf_loads.interface())
+        for (auto const& boundary : boundaries.natural_interface())
         {
-            if (!is_dof_active) continue;
-
-            for (auto const& boundary_condition : boundary_conditions)
-            {
-                // clang-format off
-                std::visit([&](auto const& mesh) {
-                    for (std::int64_t element {0}; element < mesh.elements(); ++element)
+            std::visit(
+                [&](auto const& boundary_mesh) {
+                    for (std::int64_t element{0}; element < boundary_mesh.elements(); ++element)
                     {
-                       auto const [ dofs, fe_ext ] = mesh.external_force(element, step_time);
+                        auto const [dofs, fe_ext] = boundary_mesh.external_force(element, step_time);
 
-                       fext(dofs) += fe_ext;
+                        fext(dofs) += fe_ext;
                     }
                 },
-                boundary_condition);
-                // clang-format on
+                boundary);
+        }
+        for (auto const& boundary : boundaries.nodal_interface())
+        {
+            for (auto dof_index : boundary.dof_view())
+            {
+                fext(dof_index) += boundary.value_view();
             }
         }
     }
@@ -422,10 +430,13 @@ void fem_static_matrix<fem_mesh_type>::perform_equilibrium_iterations()
 
     if (current_iteration != max_iterations)
     {
+        displacement_old = displacement;
+
         adaptive_load.update_convergence_state(current_iteration != max_iterations);
         fem_mesh.save_internal_variables(current_iteration != max_iterations);
 
-        displacement_old = displacement;
+        fem_mesh.update_internal_forces(fint);
+
         io.write(adaptive_load.step(), adaptive_load.time());
     }
 }

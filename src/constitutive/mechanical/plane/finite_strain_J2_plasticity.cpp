@@ -1,7 +1,7 @@
 
 #include "constitutive/mechanical/plane/finite_strain_J2_plasticity.hpp"
 
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 #include "constitutive/internal_variables.hpp"
 
 #include "numeric/float_compare.hpp"
@@ -42,21 +42,21 @@ void finite_strain_J2_plasticity::update_internal_variables(double const time_st
     // Extract the internal variables
     auto [deformation_gradients,
           log_strain_e_list,
-          cauchy_stresses] = variables->fetch(internal_variables_t::second::DeformationGradient,
+          cauchy_stresses] = variables->get(internal_variables_t::second::DeformationGradient,
                                               internal_variables_t::second::HenckyStrainElastic,
                                               internal_variables_t::second::CauchyStress);
 
-    auto const old_deformation_gradients = variables->fetch_old(
+    auto const old_deformation_gradients = variables->get_old(
         internal_variables_t::second::DeformationGradient);
 
-    auto const J_list = variables->fetch(internal_variables_t::scalar::DetF);
+    auto const J_list = variables->get(internal_variables_t::scalar::DetF);
 
     // Retrieve the accumulated internal variables
     auto [accumulated_plastic_strains,
-          von_mises_stresses] = variables->fetch(internal_variables_t::scalar::EffectivePlasticStrain,
+          von_mises_stresses] = variables->get(internal_variables_t::scalar::EffectivePlasticStrain,
                                                  internal_variables_t::scalar::VonMisesStress);
 
-    auto& tangent_operators = variables->fetch(internal_variables_t::fourth::tangent_operator);
+    auto& tangent_operators = variables->get(internal_variables_t::fourth::tangent_operator);
 
     auto const incremental_deformation_gradients = view::zip(deformation_gradients,
                                                              old_deformation_gradients)

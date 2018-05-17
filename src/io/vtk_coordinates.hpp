@@ -62,24 +62,19 @@ vtkSmartPointer<vtkDoubleArray> vtk_displacement(matrixdx<rows> const& input_dat
 /// \param stride Size of the components
 /// \param array_name Pretty name to appear in ParaView
 /// \return vtkSmartPointer containing a vtkDoubleArray
-template <typename nodal_variable_type>
-vtkSmartPointer<vtkDoubleArray> vtk_array(nodal_variable_type const& nodal_variable,
-                                          std::int64_t const start_index,
-                                          std::int64_t const stride,
-                                          std::string const array_name)
+inline vtkSmartPointer<vtkDoubleArray> vtk_array(vector const& vectorised_tuples,
+                                                 std::int32_t const tuple_size,
+                                                 std::string const array_name)
 {
-    static_assert(std::is_same<typename nodal_variable_type::value_type, double>::value,
-                  "Input data must be doubles");
-
     auto vtk_double_array = vtkSmartPointer<vtkDoubleArray>::New();
 
-    vtk_double_array->Allocate(nodal_variable.size());
-    vtk_double_array->SetNumberOfComponents(stride);
+    vtk_double_array->Allocate(vectorised_tuples.size());
+    vtk_double_array->SetNumberOfComponents(tuple_size);
     vtk_double_array->SetName(array_name.c_str());
 
-    for (std::int64_t i{0}; i < nodal_variable.size() * nodal_variable.components; i += stride)
+    for (std::int64_t i{0}; i < vectorised_tuples.size() * tuple_size; i += tuple_size)
     {
-        vtk_double_array->InsertNextTuple(nodal_variable.data().col(i).data() + start_index);
+        vtk_double_array->InsertNextTuple(vectorised_tuples.data() + i);
     }
     return vtk_double_array;
 }

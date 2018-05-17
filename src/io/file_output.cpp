@@ -49,9 +49,9 @@ file_output::file_output(std::string file_name, json const& visualisation_data)
 
     if (visualisation_data.count("Fields"))
     {
-        for (auto const& field : visualisation_data["Fields"])
+        for (std::string const& field : visualisation_data["Fields"])
         {
-            output_set.insert(field.get<std::string>());
+            output_set.insert(field);
         }
     }
 }
@@ -94,11 +94,10 @@ void file_output::add_field(std::string const& name, vector const& field, int co
 
     scalar_value->SetName(name.c_str());
     scalar_value->SetNumberOfComponents(components);
-    // scalar_value->SetNumberOfTuples(field.size() / components);
 
-    for (auto i = 0; i < field.size(); i += components)
+    for (std::int64_t i{0}; i < field.size(); i += components)
     {
-        scalar_value->InsertNextTuple(&field(i));
+        scalar_value->InsertNextTuple(field.data() + i);
     }
     unstructured_mesh->GetPointData()->AddArray(scalar_value);
 }

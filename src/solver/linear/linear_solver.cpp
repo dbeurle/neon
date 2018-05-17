@@ -4,7 +4,7 @@
 
 #include "linear_solver.hpp"
 
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 #include "simulation_parser.hpp"
 
 #include <omp.h>

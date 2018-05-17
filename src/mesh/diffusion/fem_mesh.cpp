@@ -58,7 +58,7 @@ void fem_mesh::allocate_boundary_conditions(json const& mesh_data, basic_mesh co
     // Populate the boundary meshes
     for (auto const& boundary : boundary_data)
     {
-        auto const& boundary_name = boundary["Name"].get<std::string>();
+        std::string const& boundary_name = boundary["Name"];
 
         if (!boundary.count("Time"))
         {

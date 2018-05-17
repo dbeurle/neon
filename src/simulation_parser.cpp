@@ -1,7 +1,7 @@
 
 #include "simulation_parser.hpp"
 
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 #include "modules/abstract_module.hpp"
 #include "modules/module_factory.hpp"
 

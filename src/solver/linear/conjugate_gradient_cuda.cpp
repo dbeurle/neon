@@ -3,7 +3,7 @@
 
 #ifdef ENABLE_CUDA
 
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 #include "dmatrix_vector_product.hpp"
 #include "numeric/float_compare.hpp"
 
