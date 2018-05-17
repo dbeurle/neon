@@ -218,7 +218,7 @@ void fem_submesh::update_deformation_measures()
             matrix3 const F = local_deformation_gradient(rhea, x);
 
             // Gradient operator in index notation
-            matrix const& B_0t = rhea * F_0.inverse();
+            matrixxd<3> const B_0t = rhea * F_0.inverse();
 
             // Displacement gradient
             matrix3 const H = (x - X) * B_0t;
@@ -241,9 +241,9 @@ void fem_submesh::update_Jacobian_determinants()
                    begin(F_determinants),
                    [](matrix3 const& F) { return F.determinant(); });
 
-    auto const found = std::find_if(begin(F_determinants),
-                                    end(F_determinants),
-                                    [](auto const detF) { return detF <= 0.0; });
+    auto const found = std::find_if(begin(F_determinants), end(F_determinants), [](auto const detF) {
+        return detF <= 0.0;
+    });
 
     if (found != end(F_determinants))
     {
@@ -251,7 +251,7 @@ void fem_submesh::update_Jacobian_determinants()
                                          end(F_determinants),
                                          [](auto const detF) { return detF <= 0.0; });
 
-        auto const i = std::distance(F_determinants.begin(), found);
+        auto const i = std::distance(begin(F_determinants), found);
 
         auto const [element, quadrature_point] = std::div(i, sf->quadrature().points());
 
