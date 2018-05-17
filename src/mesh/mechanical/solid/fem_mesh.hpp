@@ -19,8 +19,8 @@ class fem_mesh
 public:
     using internal_variable_type = fem_submesh::internal_variable_type;
 
-    /// Alias traits to submesh
-    using traits = fem_submesh::trait_type;
+    /// Alias traits to submesh traits type
+    using traits = fem_submesh::traits;
 
 public:
     fem_mesh(basic_mesh const& basic_mesh,
@@ -54,12 +54,9 @@ public:
 
     [[nodiscard]] auto const& nonfollower_load_boundaries() const { return nonfollower_loads; }
 
-    /**
-     * Gathers the time history for each boundary condition and
-     * returns a sorted vector which may contain traces of duplicates.
-     *
-     * \sa adaptive_time_step
-     */
+    /// Gathers the time history for each boundary condition and
+    /// returns a sorted vector which may contain traces of duplicates.
+    /// \sa adaptive_time_step
     [[nodiscard]] std::vector<double> time_history() const;
 
     /// Provide const access to the discretised geometry for this mesh

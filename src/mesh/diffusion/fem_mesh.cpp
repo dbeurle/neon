@@ -2,7 +2,7 @@
 #include "fem_mesh.hpp"
 
 #include "mesh/basic_mesh.hpp"
-#include "mesh/unique_dof_allocator.hpp"
+#include "mesh/dof_allocator.hpp"
 
 #include <chrono>
 #include <exception>

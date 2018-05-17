@@ -2,12 +2,13 @@
 #pragma once
 
 #include "numeric/index_types.hpp"
+#include "math/transform_expand.hpp"
 
 #include <algorithm>
 #include <set>
 #include <vector>
 
-/// \file unique_dof_allocator.hpp
+/// \file dof_allocator.hpp
 
 namespace neon
 {
@@ -23,8 +24,7 @@ template <int dof_size, typename boundary_mesh_type, class index_type = std::int
     for (auto const& boundary_mesh : boundary_meshes)
     {
         auto const unique_view = boundary_mesh.unique_connectivity();
-
-        std::copy(begin(unique_view), end(unique_view), std::inserter(dof_set, end(dof_set)));
+        dof_set.insert(begin(unique_view), end(unique_view));
     }
 
     std::vector<index_type> dof_unique_view(begin(dof_set), end(dof_set));
@@ -32,5 +32,21 @@ template <int dof_size, typename boundary_mesh_type, class index_type = std::int
     for (auto& i : dof_unique_view) i *= dof_size;
 
     return dof_unique_view;
+}
+
+template <typename indices_type, typename dof_order_type>
+void dof_allocator(indices_type const& node_indices,
+                   indices_type& dof_indices,
+                   dof_order_type const dof_order)
+{
+    // Allocate the degree of freedom indices
+    dof_indices.resize(node_indices.rows() * dof_order.size(), node_indices.cols());
+
+    for (typename indices_type::Index i{0}; i < node_indices.cols(); ++i)
+    {
+        transform_expand_view(node_indices(Eigen::placeholders::all, i),
+                              dof_indices(Eigen::placeholders::all, i),
+                              dof_order);
+    }
 }
 }

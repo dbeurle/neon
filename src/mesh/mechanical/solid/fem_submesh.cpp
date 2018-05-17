@@ -9,7 +9,7 @@
 #include "mesh/material_coordinates.hpp"
 #include "numeric/gradient_operator.hpp"
 #include "numeric/mechanics"
-#include "math/transform_expand.hpp"
+#include "mesh/dof_allocator.hpp"
 #include "traits/mechanics.hpp"
 
 #include <termcolor/termcolor.hpp>
@@ -46,15 +46,7 @@ fem_submesh::fem_submesh(json const& material_data,
 
     variables->commit();
 
-    // Allocate the degree of freedom indices
-    dof_list.resize(connectivity.rows() * trait_type::dof_order.size(), connectivity.cols());
-
-    for (indices::Index i{0}; i < connectivity.cols(); ++i)
-    {
-        transform_expand_view(connectivity(Eigen::placeholders::all, i),
-                              dof_list(Eigen::placeholders::all, i),
-                              trait_type::dof_order);
-    }
+    dof_allocator(connectivity, dof_list, traits::dof_order);
 }
 
 void fem_submesh::save_internal_variables(bool const have_converged)
