@@ -82,9 +82,6 @@ protected:
     /// Nonfollower (force) boundary conditions
     std::map<std::string, nonfollower_load_boundary> nonfollower_loads;
 
-    /// Internal nodal forces for reaction forces
-    nodal_variables<traits::dofs_per_node> internal_forces;
-
     std::unordered_map<std::string, int> const dof_table = {{"x", 0}, {"y", 1}, {"z", 2}};
 
     /// This time step is taken from
