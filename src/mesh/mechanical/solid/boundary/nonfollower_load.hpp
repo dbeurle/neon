@@ -31,11 +31,11 @@ public:
 
 public:
     explicit nonfollower_load_boundary(std::shared_ptr<material_coordinates>& material_coordinates,
-                                     std::vector<basic_submesh> const& submeshes,
-                                     json const& simulation_data,
-                                     json const& boundary,
-                                     std::unordered_map<std::string, int> const& dof_table,
-                                     double const generate_time_step);
+                                       std::vector<basic_submesh> const& submeshes,
+                                       json const& simulation_data,
+                                       json const& boundary,
+                                       std::unordered_map<std::string, int> const& dof_table,
+                                       double const generate_time_step);
 
     /**
      * Provides access to an array with three elements.  Each element is a pair,
