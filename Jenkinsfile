@@ -19,7 +19,28 @@ pipeline {
                         cd build
                         rm -rf *
                         cmake -DCMAKE_BUILD_TYPE=Debug ..
-                        make all -j4
+                        make all
+                        export PATH=$PATH:$(pwd)
+                        ctest
+                        '''
+                    }
+                }
+                stage('gcc release with debug') {
+                    agent {
+                        dockerfile {
+                            filename 'docker/Dockerfile'
+                            additionalBuildArgs '--pull'
+                        }
+                    }
+                    steps {
+                        sh '''
+                        if [ ! -d "build" ]; then
+                            mkdir build;
+                        fi
+                        cd build
+                        rm -rf *
+                        cmake -DCMAKE_BUILD_TYPE=RelWithDebug ..
+                        make all
                         export PATH=$PATH:$(pwd)
                         ctest
                         '''
@@ -40,7 +61,7 @@ pipeline {
                         cd build
                         rm -rf *
                         cmake -DCMAKE_BUILD_TYPE=Release ..
-                        make all -j4
+                        make all
                         export PATH=$PATH:$(pwd)
                         ctest
                         '''
@@ -61,7 +82,7 @@ pipeline {
                         cd build
                         rm -rf *
                         cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_NATIVE=1 ..
-                        make all -j4
+                        make all
                         export PATH=$PATH:$(pwd)
                         ctest
                         '''
