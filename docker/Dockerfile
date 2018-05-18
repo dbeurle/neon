@@ -12,6 +12,4 @@ RUN dnf install -y  wget bzip2 patch lcov git mercurial cmake \
 # Copy the current directory contents into the container at /
 COPY docker/add_libraries.diff docker/cmake_patch.diff docker/install_pastix.sh /
 
-RUN ls; pwd
-
 RUN sh install_pastix.sh
