@@ -31,6 +31,9 @@ fem_submesh::fem_submesh(json const& material_data,
                               traits::dof_order);
     }
 
+    orientations.resize(elements(), vector3::UnitX());
+    tangents.resize(elements(), vector3::UnitZ());
+
     variables->add(internal_variable_type::second::CauchyStress,
                    internal_variable_type::scalar::shear_area_1,
                    internal_variable_type::scalar::shear_area_2,
@@ -47,12 +50,12 @@ void fem_submesh::update_internal_variables(double const time_step_size)
     }
 
     auto [A, As1, As2] = variables->get(internal_variable_type::scalar::cross_sectional_area,
-                                          internal_variable_type::scalar::shear_area_1,
-                                          internal_variable_type::scalar::shear_area_2);
+                                        internal_variable_type::scalar::shear_area_1,
+                                        internal_variable_type::scalar::shear_area_2);
 
     auto [area_moment_1,
           area_moment_2] = variables->get(internal_variable_type::scalar::second_moment_area_1,
-                                            internal_variable_type::scalar::second_moment_area_2);
+                                          internal_variable_type::scalar::second_moment_area_2);
 
     // Loop over all elements and quadrature points to compute the profile
     // properties for each quadrature point in the beam
@@ -209,13 +212,13 @@ matrix12 fem_submesh::rotation_matrix(std::int32_t const element) const
     matrix3 rotation;
 
     // Local coordinate (x1)
-    rotation.col(0) = orientations.at(element).normalized();
+    rotation.col(0) = orientations.at(element);
 
     // Local coordinate (x3)
-    rotation.col(2) = tangents.at(element).normalized();
+    rotation.col(2) = tangents.at(element);
 
     // Local coordinate (x2)
-    rotation.col(1) = rotation.col(0).cross(rotation.col(2)).normalized();
+    rotation.col(1) = rotation.col(0).cross(rotation.col(2)).normalized().cwiseAbs();
 
     matrix12 element_rotation = matrix12::Zero();
 
