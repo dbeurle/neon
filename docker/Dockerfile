@@ -9,6 +9,8 @@ RUN dnf install -y  wget bzip2 patch lcov git mercurial cmake \
                     boost-devel vtk-devel hwloc-devel scotch-devel \
                     tbb-devel arpack-devel
 
+RUN ls; pwd
+
 # Copy the current directory contents into the container at /
 ADD neon/docker/add_libraries.diff neon/docker/cmake_path.diff neon/docker/install_pastix.sh /
 
