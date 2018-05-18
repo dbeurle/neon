@@ -17,8 +17,8 @@ pipeline {
              cd build
              rm -rf *
              cmake -DCMAKE_BUILD_TYPE=Debug ..
-             make all
-             make install
+             make all -j4
+             export PATH=$PATH:$(pwd)
              ctest
            '''
       }
@@ -32,8 +32,8 @@ pipeline {
              cd build
              rm -rf *
              cmake -DCMAKE_BUILD_TYPE=Release ..
-             make all
-             make install
+             make all -j4
+             export PATH=$PATH:$(pwd)
              ctest
            '''
       }
@@ -47,8 +47,8 @@ pipeline {
              cd build
              rm -rf *
              cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_NATIVE=1 ..
-             make all
-             make install
+             make all -j4
+             export PATH=$PATH:$(pwd)
              ctest
            '''
       }
