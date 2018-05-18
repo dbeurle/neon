@@ -9,10 +9,7 @@ RUN dnf install -y  wget bzip2 patch lcov git mercurial cmake \
                     boost-devel vtk-devel hwloc-devel scotch-devel \
                     tbb-devel arpack-devel
 
-# Set the working directory to /
-WORKDIR /
-
 # Copy the current directory contents into the container at /
-ADD . /
+ADD docker/add_libraries docker/cmake_path docker/install_pastix.sh /
 
 RUN sh install_pastix.sh
