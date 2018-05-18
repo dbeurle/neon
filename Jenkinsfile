@@ -1,15 +1,15 @@
 pipeline {
+    agent {
+        dockerfile {
+            filename 'docker/Dockerfile'
+            additionalBuildArgs '--pull'
+        }
+    }
   stages {
     stage('configure and build') {
       failFast true
       parallel {
         stage('gcc debug') {
-          agent {
-            dockerfile {
-              filename 'docker/Dockerfile'
-              additionalBuildArgs '--pull'
-            }
-          }
           steps {
             sh '''
                if [ ! -d "build" ]; then
@@ -25,12 +25,6 @@ pipeline {
           }
         }
         stage('gcc release') {
-          agent {
-            dockerfile {
-              filename 'docker/Dockerfile'
-              additionalBuildArgs '--pull'
-            }
-          }
           steps {
             sh '''
                  if [ ! -d "build" ]; then
@@ -46,12 +40,6 @@ pipeline {
           }
         }
         stage('gcc native') {
-          agent {
-            dockerfile {
-              filename 'docker/Dockerfile'
-              additionalBuildArgs '--pull'
-            }
-          }
           steps {
             sh '''
                if [ ! -d "build" ]; then
