@@ -12,6 +12,6 @@ patch -p1 < ../add_libraries.diff
 # Build
 mkdir build; cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DPASTIX_WITH_MPI=OFF -DPASTIX_INT64=OFF -DBUILD_SHARED_LIBS=ON ../src
-make all && make install
+make all -j4 && make install
 
 ln -s /usr/local/lib/libpastix.so /usr/lib64/libpastix.so
