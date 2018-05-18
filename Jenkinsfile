@@ -1,7 +1,7 @@
 pipeline {
     agent any
     stages {
-        stage('configure and build') {
+        stage('build') {
             failFast true
             parallel {
                 stage('gcc debug') {
