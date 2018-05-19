@@ -66,7 +66,7 @@ public:
     /// Second order tensor internal variables types
     enum class second : std::uint8_t {
         /// Cauchy stress
-        CauchyStress,
+        cauchy_stress,
         /// Kirchhoff stress
         Kirchhoff,
         /// First Piola-Kirchhoff stress (PK1)

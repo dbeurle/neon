@@ -56,7 +56,7 @@ public:
 
     [[nodiscard]] auto const& dirichlet_boundaries() const { return displacement_bcs; }
 
-    [[nodiscard]] auto const& nonfollower_load_boundaries() const { return nonfollower_loads; }
+    [[nodiscard]] auto const& nonfollower_boundaries() const { return nonfollower_loads; }
 
     /// Gathers the time history for each boundary condition and
     /// returns a sorted vector which may contain duplicated entries.

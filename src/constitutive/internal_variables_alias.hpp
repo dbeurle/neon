@@ -13,6 +13,10 @@ namespace plane
 {
 using internal_variables_t = neon::internal_variables<2, 3>;
 }
+namespace beam
+{
+using internal_variables_t = neon::internal_variables<2, 2>;
+}
 }
 
 namespace diffusion

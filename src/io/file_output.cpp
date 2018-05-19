@@ -142,7 +142,7 @@ void file_output::add_mesh()
 
     for (auto const& submesh : mesh.meshes())
     {
-        auto const vtk_ordered_connectivity = convert_to_vtk(submesh.element_connectivity(),
+        auto const vtk_ordered_connectivity = convert_to_vtk(submesh.all_node_indices(),
                                                              submesh.topology());
 
         for (std::int64_t element{0}; element < vtk_ordered_connectivity.cols(); ++element)

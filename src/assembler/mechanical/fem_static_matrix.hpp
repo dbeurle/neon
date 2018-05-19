@@ -33,8 +33,7 @@ public:
 public:
     explicit fem_static_matrix(mesh_type& fem_mesh, json const& simulation);
 
-    void internal_restart(json const& solver_data, json const& new_increment_data);
-
+    /// Solve the nonlinear system of equations
     void solve();
 
 protected:
@@ -74,6 +73,7 @@ protected:
 
     adaptive_time_step adaptive_load;
 
+    /// Cache the sparsity pattern
     bool is_sparsity_computed{false};
 
     double residual_tolerance{1.0e-3};
@@ -85,9 +85,9 @@ protected:
     /// Tangent sparse stiffness matrix
     sparse_matrix Kt;
     /// Internal force vector
-    vector fint;
+    vector f_int;
     /// External force vector
-    vector fext;
+    vector f_ext;
 
     /// Displacement vector
     vector displacement;
@@ -105,7 +105,7 @@ protected:
 template <class fem_mesh_type>
 fem_static_matrix<fem_mesh_type>::fem_static_matrix(mesh_type& fem_mesh, json const& simulation)
     : fem_mesh(fem_mesh),
-      io(simulation["Name"].get<std::string>(), simulation["Visualisation"], fem_mesh),
+      io(simulation["Name"], simulation["Visualisation"], fem_mesh),
       adaptive_load(simulation["Time"], fem_mesh.time_history()),
       solver(make_linear_solver(simulation["LinearSolver"], fem_mesh.is_symmetric()))
 {
@@ -122,20 +122,12 @@ fem_static_matrix<fem_mesh_type>::fem_static_matrix(mesh_type& fem_mesh, json co
     residual_tolerance = simulation["NonlinearOptions"]["ResidualTolerance"];
     displacement_tolerance = simulation["NonlinearOptions"]["DisplacementTolerance"];
 
-    fint = fext = displacement = displacement_old = delta_d = vector::Zero(fem_mesh.active_dofs());
+    f_int = f_ext = displacement = displacement_old = delta_d = vector::Zero(fem_mesh.active_dofs());
 
     // Perform Newton-Raphson iterations
     std::cout << "\n"
               << std::string(4, ' ') << "Non-linear equation system has " << fem_mesh.active_dofs()
               << " degrees of freedom\n";
-}
-
-template <class fem_mesh_type>
-void fem_static_matrix<fem_mesh_type>::internal_restart(json const& solver_data,
-                                                        json const& new_increment_data)
-{
-    adaptive_load.reset(new_increment_data);
-    solver = make_linear_solver(solver_data);
 }
 
 template <class fem_mesh_type>
@@ -182,7 +174,7 @@ void fem_static_matrix<fem_mesh_type>::solve()
 template <class fem_mesh_type>
 void fem_static_matrix<fem_mesh_type>::compute_internal_force()
 {
-    fint.setZero();
+    f_int.setZero();
 
     for (auto const& submesh : fem_mesh.meshes())
     {
@@ -190,7 +182,7 @@ void fem_static_matrix<fem_mesh_type>::compute_internal_force()
         {
             auto const [dofs, fe_int] = submesh.internal_force(element);
 
-            fint(dofs) += fe_int;
+            f_int(dofs) += fe_int;
         }
     }
 }
@@ -202,9 +194,9 @@ void fem_static_matrix<fem_mesh_type>::compute_external_force()
 
     auto const step_time = adaptive_load.step_time();
 
-    fext.setZero();
+    f_ext.setZero();
 
-    for (auto const& [name, boundaries] : fem_mesh.nonfollower_load_boundaries())
+    for (auto const& [name, boundaries] : fem_mesh.nonfollower_boundaries())
     {
         for (auto const& boundary : boundaries.natural_interface())
         {
@@ -214,7 +206,7 @@ void fem_static_matrix<fem_mesh_type>::compute_external_force()
                     {
                         auto const [dofs, fe_ext] = boundary_mesh.external_force(element, step_time);
 
-                        fext(dofs) += fe_ext;
+                        f_ext(dofs) += fe_ext;
                     }
                 },
                 boundary);
@@ -223,7 +215,7 @@ void fem_static_matrix<fem_mesh_type>::compute_external_force()
         {
             for (auto dof_index : boundary.dof_view())
             {
-                fext(dof_index) += boundary.value_view();
+                f_ext(dof_index) += boundary.value_view();
             }
         }
     }
@@ -371,9 +363,9 @@ void fem_static_matrix<fem_mesh_type>::update_relative_norms()
 {
     relative_displacement_norm = delta_d.norm() / displacement.norm();
 
-    relative_force_norm = is_approx(std::max(fext.norm(), fint.norm()), 0.0)
+    relative_force_norm = is_approx(std::max(f_ext.norm(), f_int.norm()), 0.0)
                               ? 1.0
-                              : minus_residual.norm() / std::max(fext.norm(), fint.norm());
+                              : minus_residual.norm() / std::max(f_ext.norm(), f_int.norm());
 }
 
 template <class fem_mesh_type>
@@ -397,7 +389,7 @@ void fem_static_matrix<fem_mesh_type>::perform_equilibrium_iterations()
 
         compute_internal_force();
 
-        minus_residual = fext - fint;
+        minus_residual = f_ext - f_int;
 
         if (current_iteration == 0) apply_displacement_boundaries();
 
@@ -435,7 +427,7 @@ void fem_static_matrix<fem_mesh_type>::perform_equilibrium_iterations()
         adaptive_load.update_convergence_state(current_iteration != max_iterations);
         fem_mesh.save_internal_variables(current_iteration != max_iterations);
 
-        fem_mesh.update_internal_forces(fint);
+        fem_mesh.update_internal_forces(f_int);
 
         io.write(adaptive_load.step(), adaptive_load.time());
     }

@@ -75,7 +75,7 @@ TEST_CASE("Neo-Hookean model")
 
     // Add the required variables for an updated Lagrangian formulation
     variables->add(internal_variables_t::second::DeformationGradient,
-                   internal_variables_t::second::CauchyStress);
+                   internal_variables_t::second::cauchy_stress);
     variables->add(internal_variables_t::scalar::DetF);
 
     auto neo_hooke = make_constitutive_model(variables,
@@ -85,7 +85,7 @@ TEST_CASE("Neo-Hookean model")
 
     // Get the tensor variables
     auto [F_list, cauchy_stresses] = variables->get(internal_variables_t::second::DeformationGradient,
-                                                    internal_variables_t::second::CauchyStress);
+                                                    internal_variables_t::second::cauchy_stress);
 
     auto& J_list = variables->get(internal_variables_t::scalar::DetF);
 
@@ -183,7 +183,7 @@ TEST_CASE("Gaussian affine microsphere model", )
 
     // Add the required variables for an updated Lagrangian formulation
     variables->add(internal_variables_t::second::DeformationGradient,
-                   internal_variables_t::second::CauchyStress);
+                   internal_variables_t::second::cauchy_stress);
 
     variables->add(internal_variables_t::scalar::DetF);
 
@@ -199,7 +199,7 @@ TEST_CASE("Gaussian affine microsphere model", )
                                                       "\"BO21\"}}"));
 
     auto [F_list, cauchy_stresses] = variables->get(internal_variables_t::second::DeformationGradient,
-                                                    internal_variables_t::second::CauchyStress);
+                                                    internal_variables_t::second::cauchy_stress);
 
     auto& J_list = variables->get(internal_variables_t::scalar::DetF);
 
@@ -270,7 +270,7 @@ TEST_CASE("Affine microsphere model")
 
     // Add the required variables for an updated Lagrangian formulation
     variables->add(internal_variables_t::second::DeformationGradient,
-                   internal_variables_t::second::CauchyStress);
+                   internal_variables_t::second::cauchy_stress);
 
     variables->add(internal_variables_t::scalar::DetF);
 
@@ -285,7 +285,7 @@ TEST_CASE("Affine microsphere model")
                                                       "\"Quadrature\" : \"BO21\"}}"));
 
     auto [F_list, cauchy_stresses] = variables->get(internal_variables_t::second::DeformationGradient,
-                                                    internal_variables_t::second::CauchyStress);
+                                                    internal_variables_t::second::cauchy_stress);
 
     auto& J_list = variables->get(internal_variables_t::scalar::DetF);
 
@@ -356,7 +356,7 @@ TEST_CASE("NonAffine microsphere model")
 
     // Add the required variables for an updated Lagrangian formulation
     variables->add(internal_variables_t::second::DeformationGradient,
-                   internal_variables_t::second::CauchyStress);
+                   internal_variables_t::second::cauchy_stress);
     variables->add(internal_variables_t::scalar::DetF);
 
     auto affine = make_constitutive_model(variables,
@@ -372,7 +372,7 @@ TEST_CASE("NonAffine microsphere model")
 
     // Get the tensor variables
     auto [F_list, cauchy_stresses] = variables->get(internal_variables_t::second::DeformationGradient,
-                                                    internal_variables_t::second::CauchyStress);
+                                                    internal_variables_t::second::cauchy_stress);
 
     auto& J_list = variables->get(internal_variables_t::scalar::DetF);
 
@@ -474,7 +474,7 @@ TEST_CASE("Plane stress elasticity model")
 
     // Add the required variables for an updated Lagrangian formulation
     variables->add(internal_variables_t::second::DisplacementGradient,
-                   internal_variables_t::second::CauchyStress,
+                   internal_variables_t::second::cauchy_stress,
                    internal_variables_t::scalar::DetF);
 
     auto elastic_model = make_constitutive_model(variables,
@@ -487,7 +487,7 @@ TEST_CASE("Plane stress elasticity model")
     // Get the tensor variables
     auto [displacement_gradients,
           cauchy_stresses] = variables->get(internal_variables_t::second::DisplacementGradient,
-                                            internal_variables_t::second::CauchyStress);
+                                            internal_variables_t::second::cauchy_stress);
 
     auto& J_list = variables->get(internal_variables_t::scalar::DetF);
 
@@ -505,7 +505,7 @@ TEST_CASE("Plane stress elasticity model")
         REQUIRE(elastic_model->intrinsic_material().name() == "steel");
 
         REQUIRE(variables->has(internal_variables_t::scalar::VonMisesStress));
-        REQUIRE(variables->has(internal_variables_t::second::CauchyStress));
+        REQUIRE(variables->has(internal_variables_t::second::cauchy_stress));
         REQUIRE(variables->has(internal_variables_t::second::LinearisedStrain));
         REQUIRE(variables->has(internal_variables_t::fourth::tangent_operator));
     }
@@ -595,7 +595,7 @@ TEST_CASE("Plane strain elasticity model")
 
     // Add the required variables for an updated Lagrangian formulation
     variables->add(internal_variables_t::second::DisplacementGradient,
-                   internal_variables_t::second::CauchyStress,
+                   internal_variables_t::second::cauchy_stress,
                    internal_variables_t::scalar::DetF);
 
     auto elastic_model = make_constitutive_model(variables,
@@ -608,7 +608,7 @@ TEST_CASE("Plane strain elasticity model")
     // Get the tensor variables
     auto [displacement_gradients,
           cauchy_stresses] = variables->get(internal_variables_t::second::DisplacementGradient,
-                                            internal_variables_t::second::CauchyStress);
+                                            internal_variables_t::second::cauchy_stress);
 
     auto& J_list = variables->get(internal_variables_t::scalar::DetF);
 
@@ -626,7 +626,7 @@ TEST_CASE("Plane strain elasticity model")
         REQUIRE(elastic_model->intrinsic_material().name() == "steel");
 
         REQUIRE(variables->has(internal_variables_t::scalar::VonMisesStress));
-        REQUIRE(variables->has(internal_variables_t::second::CauchyStress));
+        REQUIRE(variables->has(internal_variables_t::second::cauchy_stress));
         REQUIRE(variables->has(internal_variables_t::second::LinearisedStrain));
         REQUIRE(variables->has(internal_variables_t::fourth::tangent_operator));
     }
@@ -714,7 +714,7 @@ TEST_CASE("Solid mechanics elasticity model")
 
     // Add the required variables for an updated Lagrangian formulation
     variables->add(internal_variables_t::second::DisplacementGradient,
-                   internal_variables_t::second::CauchyStress,
+                   internal_variables_t::second::cauchy_stress,
                    internal_variables_t::scalar::DetF);
 
     auto elastic_model = make_constitutive_model(variables,
@@ -727,7 +727,7 @@ TEST_CASE("Solid mechanics elasticity model")
     // Get the tensor variables
     auto [displacement_gradients,
           cauchy_stresses] = variables->get(internal_variables_t::second::DisplacementGradient,
-                                            internal_variables_t::second::CauchyStress);
+                                            internal_variables_t::second::cauchy_stress);
 
     auto& J_list = variables->get(internal_variables_t::scalar::DetF);
 
@@ -745,7 +745,7 @@ TEST_CASE("Solid mechanics elasticity model")
         REQUIRE(elastic_model->intrinsic_material().name() == "steel");
 
         REQUIRE(variables->has(internal_variables_t::scalar::VonMisesStress));
-        REQUIRE(variables->has(internal_variables_t::second::CauchyStress));
+        REQUIRE(variables->has(internal_variables_t::second::cauchy_stress));
         REQUIRE(variables->has(internal_variables_t::second::LinearisedStrain));
         REQUIRE(variables->has(internal_variables_t::fourth::tangent_operator));
     }
@@ -898,7 +898,7 @@ TEST_CASE("Solid mechanics J2 plasticity model")
 
     // Add the required variables for an updated Lagrangian formulation
     variables->add(internal_variables_t::second::DisplacementGradient,
-                   internal_variables_t::second::CauchyStress);
+                   internal_variables_t::second::cauchy_stress);
     variables->add(internal_variables_t::scalar::DetF);
 
     auto const material_data = json::parse("{\"Name\": \"steel\", "
@@ -918,7 +918,7 @@ TEST_CASE("Solid mechanics J2 plasticity model")
     // Get the tensor variables
     auto [displacement_gradients,
           cauchy_stresses] = variables->get(internal_variables_t::second::DisplacementGradient,
-                                            internal_variables_t::second::CauchyStress);
+                                            internal_variables_t::second::cauchy_stress);
 
     auto& J_list = variables->get(internal_variables_t::scalar::DetF);
 
@@ -1065,7 +1065,7 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
     variables->add(internal_variables_t::second::DisplacementGradient,
-                   internal_variables_t::second::CauchyStress);
+                   internal_variables_t::second::cauchy_stress);
     variables->add(internal_variables_t::scalar::DetF);
 
     auto small_strain_J2_plasticity_damage = make_constitutive_model(variables,
@@ -1114,7 +1114,7 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
     // Get the tensor variables
     auto [displacement_gradients,
           cauchy_stresses] = variables->get(internal_variables_t::second::DisplacementGradient,
-                                            internal_variables_t::second::CauchyStress);
+                                            internal_variables_t::second::cauchy_stress);
 
     auto [J_list, damage_list] = variables->get(internal_variables_t::scalar::DetF,
                                                 internal_variables_t::scalar::Damage);
@@ -1280,14 +1280,14 @@ TEST_CASE("Thermal isotropic model")
 //
 //     // Add the required variables for an updated Lagrangian formulation
 //     variables->add(internal_variables_t::second::DeformationGradient,
-//     internal_variables_t::second::CauchyStress); variables->add(internal_variables_t::scalar::DetF);
+//     internal_variables_t::second::cauchy_stress); variables->add(internal_variables_t::scalar::DetF);
 //
 //     auto small_strain_J2_plasticity = make_constitutive_model(variables, material_data, simulation_data);
 //
 //     // Get the tensor variables
 //     auto[F_list, cauchy_stresses] =
 //     variables->get(internal_variables_t::second::DeformationGradient,
-//                                               internal_variables_t::second::CauchyStress);
+//                                               internal_variables_t::second::cauchy_stress);
 //
 //     auto& J_list = variables->get(internal_variables_t::scalar::DetF);
 //

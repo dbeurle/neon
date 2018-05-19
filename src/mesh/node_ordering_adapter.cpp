@@ -25,7 +25,8 @@ std::unordered_map<int, element_topology> const gmsh_converter{{1, element_topol
                                                                {17, element_topology::hexahedron20}};
 
 std::unordered_map<element_topology, VTKCellType> const
-    vtk_converter{{element_topology::triangle3, VTK_TRIANGLE},
+    vtk_converter{{element_topology::line2, VTK_LINE},
+                  {element_topology::triangle3, VTK_TRIANGLE},
                   {element_topology::quadrilateral4, VTK_QUAD},
                   {element_topology::quadrilateral8, VTK_QUADRATIC_QUAD},
                   {element_topology::quadrilateral9, VTK_BIQUADRATIC_QUAD},

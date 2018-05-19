@@ -26,7 +26,7 @@ void gaussian_affine_microsphere::update_internal_variables(double const time_st
 
     auto const& deformation_gradients = variables->get(
         internal_variables_t::second::DeformationGradient);
-    auto& cauchy_stresses = variables->get(internal_variables_t::second::CauchyStress);
+    auto& cauchy_stresses = variables->get(internal_variables_t::second::cauchy_stress);
 
     auto const& det_deformation_gradients = variables->get(internal_variables_t::scalar::DetF);
 

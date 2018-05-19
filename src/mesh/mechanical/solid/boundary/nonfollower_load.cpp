@@ -29,8 +29,8 @@ nonfollower_load_boundary::nonfollower_load_boundary(
                     boundary_meshes.emplace_back(std::in_place_type_t<traction>{},
                                                  make_surface_interpolation(mesh.topology(),
                                                                             simulation_data),
-                                                 mesh.element_connectivity(),
-                                                 3 * mesh.element_connectivity() + dof_offset,
+                                                 mesh.all_node_indices(),
+                                                 3 * mesh.all_node_indices() + dof_offset,
                                                  material_coordinates,
                                                  boundary_data,
                                                  dof_name,
@@ -43,7 +43,7 @@ nonfollower_load_boundary::nonfollower_load_boundary(
     {
         for (auto const& mesh : submeshes)
         {
-            auto const& node_indices = mesh.element_connectivity();
+            auto const& node_indices = mesh.all_node_indices();
 
             indices dof_indices(3 * node_indices.rows(), node_indices.cols());
 
@@ -74,8 +74,8 @@ nonfollower_load_boundary::nonfollower_load_boundary(
                     boundary_meshes.emplace_back(std::in_place_type_t<body_force>{},
                                                  make_volume_interpolation(mesh.topology(),
                                                                            simulation_data),
-                                                 mesh.element_connectivity(),
-                                                 3 * mesh.element_connectivity() + dof_offset,
+                                                 mesh.all_node_indices(),
+                                                 3 * mesh.all_node_indices() + dof_offset,
                                                  material_coordinates,
                                                  boundary_data,
                                                  dof_name,
@@ -93,7 +93,7 @@ nonfollower_load_boundary::nonfollower_load_boundary(
                 for (auto const& mesh : submeshes)
                 {
                     // create linear dof indices
-                    auto node_indices = mesh.unique_connectivity();
+                    auto node_indices = mesh.unique_node_indices();
 
                     // Offset the degrees of freedom on the boundary
                     std::transform(begin(node_indices),

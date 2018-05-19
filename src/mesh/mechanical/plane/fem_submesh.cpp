@@ -8,16 +8,12 @@
 #include "interpolations/interpolation_factory.hpp"
 #include "material/material_property.hpp"
 #include "mesh/material_coordinates.hpp"
-#include "math/transform_expand.hpp"
-
+#include "mesh/dof_allocator.hpp"
 #include "numeric/mechanics"
 #include "traits/mechanics.hpp"
 
 #include <cfenv>
 #include <chrono>
-
-#include <range/v3/algorithm/find_if.hpp>
-#include <range/v3/view/transform.hpp>
 
 #include <termcolor/termcolor.hpp>
 
@@ -37,7 +33,7 @@ fem_submesh::fem_submesh(json const& material_data,
     // Allocate storage for the displacement gradient
     variables->add(internal_variables_t::second::DisplacementGradient,
                    internal_variables_t::second::DeformationGradient,
-                   internal_variables_t::second::CauchyStress,
+                   internal_variables_t::second::cauchy_stress,
                    internal_variables_t::scalar::DetF);
 
     // Get the old data to the undeformed configuration
@@ -48,14 +44,7 @@ fem_submesh::fem_submesh(json const& material_data,
 
     variables->commit();
 
-    dof_list.resize(connectivity.rows() * traits::dof_order.size(), connectivity.cols());
-
-    for (indices::Index i{0}; i < connectivity.cols(); ++i)
-    {
-        transform_expand_view(connectivity(Eigen::placeholders::all, i),
-                              dof_list(Eigen::placeholders::all, i),
-                              traits::dof_order);
-    }
+    dof_allocator(node_indices, dof_list, traits::dof_order);
 }
 
 void fem_submesh::save_internal_variables(bool const have_converged)
@@ -94,7 +83,7 @@ std::pair<index_view, vector> fem_submesh::internal_force(std::int64_t const ele
 
 matrix fem_submesh::geometric_tangent_stiffness(matrix2x const& x, std::int64_t const element) const
 {
-    auto const& cauchy_stresses = variables->get(internal_variables_t::second::CauchyStress);
+    auto const& cauchy_stresses = variables->get(internal_variables_t::second::cauchy_stress);
 
     auto const n = nodes_per_element();
 
@@ -140,7 +129,7 @@ matrix fem_submesh::material_tangent_stiffness(matrix2x const& x, std::int64_t c
 
 vector fem_submesh::internal_nodal_force(matrix2x const& x, std::int64_t const element) const
 {
-    auto const& cauchy_stresses = variables->get(internal_variables_t::second::CauchyStress);
+    auto const& cauchy_stresses = variables->get(internal_variables_t::second::cauchy_stress);
 
     auto const [m, n] = std::make_tuple(nodes_per_element(), dofs_per_node());
 
@@ -242,20 +231,18 @@ void fem_submesh::update_deformation_measures()
 
 void fem_submesh::update_Jacobian_determinants()
 {
-    auto const& deformation_gradients = variables->get(
-        internal_variables_t::second::DeformationGradient);
-    auto& deformation_gradient_determinants = variables->get(internal_variables_t::scalar::DetF);
+    auto const& F = variables->get(internal_variables_t::second::DeformationGradient);
+    auto& F_det = variables->get(internal_variables_t::scalar::DetF);
 
-    deformation_gradient_determinants = deformation_gradients
-                                        | ranges::view::transform(
-                                              [](auto const& F) { return F.determinant(); });
+    std::transform(begin(F), end(F), begin(F_det), [](auto const& F) { return F.determinant(); });
 
-    auto const found = ranges::find_if(deformation_gradient_determinants,
-                                       [](auto const& detF) { return detF <= 0.0; });
+    auto const found = std::find_if(begin(F_det), end(F_det), [](auto const value) {
+        return value <= 0.0;
+    });
 
-    if (found != deformation_gradient_determinants.end())
+    if (found != F_det.end())
     {
-        auto const i = std::distance(deformation_gradient_determinants.begin(), found);
+        auto const i = std::distance(begin(F_det), found);
 
         auto const [element, quadrature_point] = std::div(i, sf->quadrature().points());
 

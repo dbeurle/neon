@@ -1,15 +1,15 @@
 
 #pragma once
 
+#include "mesh/basic_submesh.hpp"
+
+#include "mesh/material_coordinates.hpp"
 #include "interpolations/shape_function.hpp"
 #include "constitutive/internal_variables.hpp"
+
 #include "constitutive/mechanical/beam/isotropic_linear.hpp"
 #include "material/isotropic_elastic_property.hpp"
-#include "mesh/basic_submesh.hpp"
-#include "mesh/material_coordinates.hpp"
-#include "mesh/nodal_variables.hpp"
-#include "numeric/dense_matrix.hpp"
-#include "numeric/index_types.hpp"
+
 #include "geometry/profile.hpp"
 #include "traits/mechanics.hpp"
 
@@ -32,8 +32,7 @@ public:
     // Type aliases
     using traits = mechanical::traits<theory::beam, discretisation::linear>;
 
-    using internal_variable_type = internal_variables<traits::rank_two_tensor::RowsAtCompileTime,
-                                                      traits::rank_four_tensor::RowsAtCompileTime>;
+    using internal_variable_type = internal_variables_t;
 
 public:
     /// Constructor providing the material coordinates reference
@@ -43,13 +42,28 @@ public:
                          basic_submesh const& submesh);
 
     /// \return degrees of freedom and the linear element stiffness matrix
-    [[nodiscard]] std::pair<index_view, matrix> tangent_stiffness(std::int32_t const element) const;
+    [[nodiscard]] std::pair<index_view, matrix const&> tangent_stiffness(std::int32_t const element) const;
 
     /// Update the internal variables for the mesh group
     /// \sa update_deformation_measures()
     /// \sa update_Jacobian_determinants()
     /// \sa check_element_distortion()
     void update_internal_variables(double const time_step_size = 1.0);
+
+    /// \return A view of degrees of freedom for an element
+    [[nodiscard]] auto const local_dof_view(std::int64_t const element) const
+    {
+        return dof_indices(Eigen::placeholders::all, element);
+    }
+
+    /// \return The internal variable store
+    [[nodiscard]] auto const& internal_variables() const { return *variables; }
+
+    template <typename name_type>
+    std::pair<vector, vector> nodal_averaged_variable(name_type const name) const
+    {
+        return std::make_pair(vector(), vector());
+    }
 
 protected:
     /**
@@ -127,9 +141,6 @@ protected:
     /// Coordinates of each mesh
     std::shared_ptr<material_coordinates> coordinates;
 
-    /// u1, u2, u3, theta1, theta2, theta3
-    nodal_variables<traits::dofs_per_node> displacement_rotation;
-
     /// Element geometry profiles
     std::vector<std::unique_ptr<geometry::profile>> profiles;
 
@@ -141,7 +152,7 @@ protected:
     std::unique_ptr<isotropic_linear> cm;
 
     /// Local-global element indices map
-    indices dof_list;
+    indices dof_indices;
 
     /// Element tangent vectors
     std::vector<vector3> tangents;

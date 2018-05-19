@@ -31,7 +31,7 @@ void small_strain_J2_plasticity::update_internal_variables(double const time_ste
           strains,
           cauchy_stresses] = variables->get(internal_variables_t::second::LinearisedPlasticStrain,
                                               internal_variables_t::second::LinearisedStrain,
-                                              internal_variables_t::second::CauchyStress);
+                                              internal_variables_t::second::cauchy_stress);
 
     // Retrieve the accumulated internal variables
     auto [accumulated_plastic_strains,

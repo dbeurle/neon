@@ -127,7 +127,7 @@ private:
                                   {"Damage", variable_type::scalar::Damage},
                                   {"EnergyReleaseRate", variable_type::scalar::EnergyReleaseRate}};
 
-    tensor_map_t const tensor_map{{"CauchyStress", variable_type::second::CauchyStress},
+    tensor_map_t const tensor_map{{"CauchyStress", variable_type::second::cauchy_stress},
                                   {"LinearisedStrain", variable_type::second::LinearisedStrain},
                                   {"LinearisedPlasticStrain", variable_type::second::LinearisedPlasticStrain},
                                   {"DeformationGradient", variable_type::second::DeformationGradient},
@@ -241,7 +241,7 @@ void file_output<fem_mesh>::add_mesh()
 
     for (auto const& submesh : mesh.meshes())
     {
-        auto const vtk_ordered_connectivity = convert_to_vtk(submesh.element_connectivity(),
+        auto const vtk_ordered_connectivity = convert_to_vtk(submesh.all_node_indices(),
                                                              submesh.topology());
         for (std::int64_t element{0}; element < vtk_ordered_connectivity.cols(); ++element)
         {

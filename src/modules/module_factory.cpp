@@ -3,6 +3,7 @@
 
 #include "modules/solid_mechanics_module.hpp"
 #include "modules/plane_strain_module.hpp"
+#include "modules/beam_module.hpp"
 
 #include "modules/linear_diffusion_module.hpp"
 
@@ -11,7 +12,8 @@
 namespace neon
 {
 std::unique_ptr<abstract_module> make_module(
-    json const& simulation, std::map<std::string, std::pair<basic_mesh, json>> const& mesh_store)
+    json const& simulation,
+    std::map<std::string, std::pair<basic_mesh, json>> const& mesh_store)
 {
     auto const& mesh_data = simulation["Mesh"][0];
 
@@ -44,6 +46,10 @@ std::unique_ptr<abstract_module> make_module(
                                     "PlaneStrain simulation");
         }
         return std::make_unique<plane_strain_module>(mesh, material, simulation);
+    }
+    else if (module_type == "Beam")
+    {
+        return std::make_unique<beam_module>(mesh, material, simulation);
     }
     else if (module_type == "HeatDiffusion")
     {

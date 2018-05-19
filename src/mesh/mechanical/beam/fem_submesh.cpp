@@ -1,6 +1,7 @@
 
 #include "mesh/mechanical/beam/fem_submesh.hpp"
 
+#include "mesh/dof_allocator.hpp"
 #include "interpolations/interpolation_factory.hpp"
 #include "math/transform_expand.hpp"
 
@@ -16,25 +17,17 @@ fem_submesh::fem_submesh(json const& material_data,
     : basic_submesh(submesh),
       sf(make_line_interpolation(topology(), simulation_data)),
       coordinates(coordinates),
-      displacement_rotation(coordinates->size()),
       profiles(elements() * sf->quadrature().points()),
       view(sf->quadrature().points()),
       variables(std::make_shared<internal_variable_type>(elements() * sf->quadrature().points())),
       cm(std::make_unique<isotropic_linear>(variables, material_data))
 {
-    dof_list.resize(connectivity.rows() * traits::dofs_per_node, connectivity.cols());
-
-    for (std::int64_t element{0}; element < connectivity.cols(); ++element)
-    {
-        transform_expand_view(connectivity(Eigen::placeholders::all, element),
-                              dof_list(Eigen::placeholders::all, element),
-                              traits::dof_order);
-    }
+    dof_allocator(node_indices, dof_indices, traits::dof_order);
 
     orientations.resize(elements(), vector3::UnitX());
     tangents.resize(elements(), vector3::UnitZ());
 
-    variables->add(internal_variable_type::second::CauchyStress,
+    variables->add(internal_variable_type::second::cauchy_stress,
                    internal_variable_type::scalar::shear_area_1,
                    internal_variable_type::scalar::shear_area_2,
                    internal_variable_type::scalar::cross_sectional_area,
@@ -78,7 +71,7 @@ void fem_submesh::update_internal_variables(double const time_step_size)
     cm->update_internal_variables();
 }
 
-std::pair<index_view, matrix> fem_submesh::tangent_stiffness(std::int32_t const element) const
+std::pair<index_view, matrix const&> fem_submesh::tangent_stiffness(std::int32_t const element) const
 {
     static thread_local matrix ke(12, 12);
 
@@ -91,7 +84,7 @@ std::pair<index_view, matrix> fem_submesh::tangent_stiffness(std::int32_t const 
             + axial_stiffness(configuration, element) + torsional_stiffness(configuration, element))
          * T.transpose();
 
-    return {dof_list(Eigen::placeholders::all, element), ke};
+    return {local_dof_view(element), ke};
 }
 
 matrix const& fem_submesh::bending_stiffness(matrix const& configuration,

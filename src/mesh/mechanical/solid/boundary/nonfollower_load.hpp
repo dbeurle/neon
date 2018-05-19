@@ -2,13 +2,12 @@
 #pragma once
 
 #include "interpolations/shape_function.hpp"
+#include "mesh/basic_submesh.hpp"
 
 #include "mesh/generic/nodal_value.hpp"
 #include "body_force.hpp"
 #include "pressure.hpp"
 #include "traction.hpp"
-
-#include "mesh/basic_submesh.hpp"
 
 #include <variant>
 

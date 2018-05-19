@@ -35,7 +35,7 @@ fem_submesh::fem_submesh(json const& material_data,
     // Allocate storage for the displacement gradient
     variables->add(internal_variables_t::second::DisplacementGradient,
                    internal_variables_t::second::DeformationGradient,
-                   internal_variables_t::second::CauchyStress);
+                   internal_variables_t::second::cauchy_stress);
 
     variables->add(internal_variables_t::scalar::DetF);
 
@@ -46,7 +46,7 @@ fem_submesh::fem_submesh(json const& material_data,
 
     variables->commit();
 
-    dof_allocator(connectivity, dof_list, traits::dof_order);
+    dof_allocator(node_indices, dof_list, traits::dof_order);
 }
 
 void fem_submesh::save_internal_variables(bool const have_converged)
@@ -83,7 +83,7 @@ std::pair<index_view, vector> fem_submesh::internal_force(std::int32_t const ele
 
 matrix fem_submesh::geometric_tangent_stiffness(matrix3x const& x, std::int32_t const element) const
 {
-    auto const& cauchy_stresses = variables->get(internal_variables_t::second::CauchyStress);
+    auto const& cauchy_stresses = variables->get(internal_variables_t::second::cauchy_stress);
 
     auto n = nodes_per_element();
 
@@ -130,7 +130,7 @@ matrix fem_submesh::material_tangent_stiffness(matrix3x const& x, std::int32_t c
 
 vector fem_submesh::internal_nodal_force(matrix3x const& x, std::int32_t const element) const
 {
-    auto const& cauchy_stresses = variables->get(internal_variables_t::second::CauchyStress);
+    auto const& cauchy_stresses = variables->get(internal_variables_t::second::cauchy_stress);
 
     auto const [m, n] = std::make_pair(nodes_per_element(), dofs_per_node());
 
@@ -262,7 +262,7 @@ void fem_submesh::update_Jacobian_determinants()
     }
 }
 
-fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
+std::pair<vector, vector> fem_submesh::nodal_averaged_variable(
     internal_variables_t::second const tensor_name) const
 {
     vector count = vector::Zero(mesh_coordinates->size() * 9);
@@ -304,7 +304,7 @@ fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
     return {value, count};
 }
 
-fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
+std::pair<vector, vector> fem_submesh::nodal_averaged_variable(
     internal_variables_t::scalar const scalar_name) const
 {
     vector count = vector::Zero(mesh_coordinates->size());

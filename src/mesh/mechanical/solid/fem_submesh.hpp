@@ -21,8 +21,6 @@ namespace mechanical::solid
 class fem_submesh : public basic_submesh
 {
 public:
-    using ValueCount = std::pair<vector, vector>;
-
     using internal_variable_type = internal_variables_t;
 
     using traits = mechanical::traits<theory::solid, discretisation::finite_strain>;
@@ -69,9 +67,11 @@ public:
     /// \sa check_element_distortion()
     void update_internal_variables(double const time_step_size = 1.0);
 
-    [[nodiscard]] ValueCount nodal_averaged_variable(internal_variables_t::second const tensor_name) const;
+    [[nodiscard]] std::pair<vector, vector> nodal_averaged_variable(
+        internal_variables_t::second const tensor_name) const;
 
-    [[nodiscard]] ValueCount nodal_averaged_variable(internal_variables_t::scalar const scalar_name) const;
+    [[nodiscard]] std::pair<vector, vector> nodal_averaged_variable(
+        internal_variables_t::scalar const scalar_name) const;
 
 protected:
     /** Update the strain measures defined by the constitutive model */

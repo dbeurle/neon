@@ -1,4 +1,6 @@
 
+#pragma once
+
 #include <type_traits>
 
 /// \file transform_expand.hpp

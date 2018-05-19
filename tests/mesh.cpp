@@ -76,7 +76,7 @@ TEST_CASE("Basic mesh test")
     {
         for (auto const& mesh : basic_mesh.meshes("bottom"))
         {
-            auto const unique_node_list = mesh.unique_connectivity();
+            auto const unique_node_list = mesh.unique_node_indices();
 
             std::vector<std::int32_t> const
                 known_unique{0, 1, 2, 3, 14, 15, 16, 17, 18, 19, 26, 27, 36, 37, 38, 39};
@@ -86,14 +86,14 @@ TEST_CASE("Basic mesh test")
 
         for (auto const& mesh : basic_mesh.meshes("cube"))
         {
-            auto const unique_node_list = mesh.unique_connectivity();
+            auto const unique_node_list = mesh.unique_node_indices();
 
             REQUIRE(view::set_symmetric_difference(unique_node_list, view::ints(0, 64)).empty());
         }
 
         for (auto const& mesh : basic_mesh.meshes("sides"))
         {
-            auto const unique_node_list = mesh.unique_connectivity();
+            auto const unique_node_list = mesh.unique_node_indices();
 
             std::vector<std::int32_t> const known_unique{0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
                                                          10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
@@ -106,7 +106,7 @@ TEST_CASE("Basic mesh test")
 
         for (auto const& mesh : basic_mesh.meshes("top"))
         {
-            auto const unique_node_list = mesh.unique_connectivity();
+            auto const unique_node_list = mesh.unique_node_indices();
 
             std::vector<std::int32_t> const
                 known_unique{4, 5, 6, 7, 10, 11, 22, 23, 28, 29, 30, 31, 44, 45, 46, 47};
@@ -163,7 +163,7 @@ TEST_CASE("Solid submesh test")
             mechanical::solid::internal_variables_t::second::DisplacementGradient));
         REQUIRE(
             internal_vars.has(mechanical::solid::internal_variables_t::second::DeformationGradient));
-        REQUIRE(internal_vars.has(mechanical::solid::internal_variables_t::second::CauchyStress));
+        REQUIRE(internal_vars.has(mechanical::solid::internal_variables_t::second::cauchy_stress));
         REQUIRE(internal_vars.has(mechanical::solid::internal_variables_t::scalar::DetF));
     }
     SECTION("Tangent stiffness")

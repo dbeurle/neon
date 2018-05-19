@@ -28,7 +28,7 @@ void nonaffine_microsphere::update_internal_variables(double const time_step_siz
 {
     auto const& deformation_gradients = variables->get(
         internal_variables_t::second::DeformationGradient);
-    auto& cauchy_stresses = variables->get(internal_variables_t::second::CauchyStress);
+    auto& cauchy_stresses = variables->get(internal_variables_t::second::cauchy_stress);
 
     auto const& detF_list = variables->get(internal_variables_t::scalar::DetF);
 

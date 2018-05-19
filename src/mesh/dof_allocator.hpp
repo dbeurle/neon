@@ -23,7 +23,7 @@ template <int dof_size, typename boundary_mesh_type, class index_type = std::int
 
     for (auto const& boundary_mesh : boundary_meshes)
     {
-        auto const unique_view = boundary_mesh.unique_connectivity();
+        auto const unique_view = boundary_mesh.unique_node_indices();
         dof_set.insert(begin(unique_view), end(unique_view));
     }
 

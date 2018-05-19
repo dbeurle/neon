@@ -27,8 +27,7 @@ void apply_dirichlet_conditions(sparse_matrix_type& A,
                                 vector_type& b,
                                 mesh_type const& mesh)
 {
-    // Keep track of entries we have visited as we walk to the
-    // sparse matrix A
+    // Keep track of entries we have visited as we walk to the sparse matrix A
     std::vector<std::int32_t> non_zero_visitor;
     non_zero_visitor.reserve(A.nonZeros() / A.rows());
 
