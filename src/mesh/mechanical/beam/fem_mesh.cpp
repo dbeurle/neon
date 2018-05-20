@@ -40,8 +40,8 @@ void fem_mesh::update_internal_variables(vector const& displacement_rotation,
 {
     auto const start = std::chrono::high_resolution_clock::now();
 
-    displacement = displacement_rotation(block_sequence<6, 3>{0, displacement.size()});
-    rotation = displacement_rotation(block_sequence<6, 3>{3, rotation.size()});
+    displacement = displacement_rotation(block_sequence<3, 6>{0, displacement.size()});
+    rotation = displacement_rotation(block_sequence<3, 6>{3, rotation.size()});
 
     coordinates->update_current_configuration(displacement);
 
