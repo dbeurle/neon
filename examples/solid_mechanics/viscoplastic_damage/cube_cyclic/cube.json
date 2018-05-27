@@ -14,9 +14,9 @@
         "KinematicHardeningModulus": 5500,
         "SofteningMultiplier" : 250,
         "PlasticityViscousExponent" : 2.5,
-        "PlasticityViscousMultiplier" : 1.923536463026969e-08,
+        "PlasticityViscousDenominator" : 1220,
         "DamageViscousExponent" : 2,
-        "DamageViscousMultiplier" : 2.777777777777778
+        "DamageViscousDenominator" : 0.6
     }],
     "SimulationCases" : [{
         "Name" : "Uniaxial",
