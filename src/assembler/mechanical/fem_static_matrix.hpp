@@ -374,7 +374,7 @@ void fem_static_matrix<fem_mesh_type>::perform_equilibrium_iterations()
     displacement = displacement_old;
 
     // Full Newton-Raphson iteration to solve nonlinear equations
-    auto constexpr max_iterations{10};
+    auto constexpr max_iterations{30};
     auto current_iteration{0};
 
     while (current_iteration < max_iterations)
