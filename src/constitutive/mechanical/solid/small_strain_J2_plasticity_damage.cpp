@@ -135,10 +135,12 @@ double small_strain_J2_plasticity_damage::perform_radial_return(matrix3& cauchy_
     // TODO: double check kinetic kinematic
     M.block<6, 6>(2, 2) = voigt::kinetic::fourth_order_identity();
 
-    auto const kp = material.plasticity_viscous_multiplier();
+    auto const sp = material.plasticity_viscous_denominator();
     auto const np = material.plasticity_viscous_exponent();
-    auto const kd = material.damage_viscous_multiplier();
+    auto const kp = std::pow(sp, -np); // plasticity viscous multiplier
+    auto const sd = material.damage_viscous_denominator();
     auto const nd = material.damage_viscous_exponent();
+    auto const kd = std::pow(sd, -nd); // damage viscous multiplier
     auto const C = material.kinematic_hardening_modulus();
     auto const gamma = material.softening_multiplier();
 
