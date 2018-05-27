@@ -208,6 +208,14 @@ double small_strain_J2_plasticity_damage::perform_radial_return(matrix3& cauchy_
         iterations++;
     }
 
+    // ensure that the damage does not exceed one
+    if (y(14) > 1)
+    {
+        std::cout << "Damage is higher than one\n";
+        std::cout << "Cosider decreaing the load\n";
+        throw computational_error("Radial return failure\n");
+    }
+
     if (iterations == max_iterations)
     {
         std::cout << "MAXIMUM NUMBER OF ITERATIONS IN RADIAL RETURN REACHED\n";
