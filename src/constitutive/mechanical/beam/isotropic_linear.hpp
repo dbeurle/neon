@@ -19,18 +19,18 @@ public:
     using traits = mechanical::traits<theory::beam, discretisation::linear, true>;
 
     /// Type alias for internal variables
-    using internal_variable_type = internal_variables<traits::rank_two_tensor::RowsAtCompileTime,
-                                                      traits::rank_four_tensor::RowsAtCompileTime>;
+    using variable_type = internal_variables<traits::rank_two_tensor::RowsAtCompileTime,
+                                             traits::rank_four_tensor::RowsAtCompileTime>;
 
 public:
-    isotropic_linear(std::shared_ptr<internal_variable_type>& variables, json const& material_data);
+    isotropic_linear(std::shared_ptr<variable_type>& variables, json const& material_data);
 
     void update_internal_variables();
 
     void update_stress();
 
 protected:
-    std::shared_ptr<internal_variable_type> variables;
+    std::shared_ptr<variable_type> variables;
 
     isotropic_elastic_property material;
 };
