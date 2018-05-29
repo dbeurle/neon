@@ -46,7 +46,7 @@ fem_submesh::fem_submesh(json const& material_data,
 
     variables->commit();
 
-    dof_allocator(node_indices, dof_list, traits::dof_order);
+    dof_allocator(node_indices, dof_indices, traits::dof_order);
 }
 
 void fem_submesh::save_internal_variables(bool const have_converged)

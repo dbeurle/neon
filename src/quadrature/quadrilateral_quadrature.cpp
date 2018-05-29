@@ -3,17 +3,17 @@
 
 namespace neon
 {
-quadrilateral_quadrature::quadrilateral_quadrature(Rule rule)
+quadrilateral_quadrature::quadrilateral_quadrature(point const p)
 {
-    switch (rule)
+    switch (p)
     {
-        case Rule::OnePoint:
+        case point::one:
         {
             w = {4.0};
             clist = {{0, 0.0, 0.0}};
             break;
         }
-        case Rule::FourPoint:
+        case point::four:
         {
             w = {1.0, 1.0, 1.0, 1.0};
 
@@ -23,7 +23,7 @@ quadrilateral_quadrature::quadrilateral_quadrature(Rule rule)
                      {3, -1.0 / std::sqrt(3.0), 1.0 / std::sqrt(3.0)}};
             break;
         }
-        case Rule::NinePoint:
+        case point::nine:
         {
             w = {25.0 / 81.0,
                  25.0 / 81.0,

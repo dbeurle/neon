@@ -8,8 +8,8 @@
 
 namespace neon
 {
-quadrilateral4::quadrilateral4(quadrilateral_quadrature::Rule rule)
-    : surface_interpolation(std::make_unique<quadrilateral_quadrature>(rule))
+quadrilateral4::quadrilateral4(quadrilateral_quadrature::point const p)
+    : surface_interpolation(std::make_unique<quadrilateral_quadrature>(p))
 {
     this->precompute_shape_functions();
 }
@@ -67,8 +67,8 @@ double quadrilateral4::compute_measure(matrix const& nodal_coordinates) const
     });
 }
 
-quadrilateral8::quadrilateral8(quadrilateral_quadrature::Rule rule)
-    : surface_interpolation(std::make_unique<quadrilateral_quadrature>(rule))
+quadrilateral8::quadrilateral8(quadrilateral_quadrature::point const p)
+    : surface_interpolation(std::make_unique<quadrilateral_quadrature>(p))
 {
     this->precompute_shape_functions();
 }
@@ -152,8 +152,8 @@ double quadrilateral8::compute_measure(matrix const& nodal_coordinates) const
     });
 }
 
-quadrilateral9::quadrilateral9(quadrilateral_quadrature::Rule rule)
-    : surface_interpolation(std::make_unique<quadrilateral_quadrature>(rule))
+quadrilateral9::quadrilateral9(quadrilateral_quadrature::point const p)
+    : surface_interpolation(std::make_unique<quadrilateral_quadrature>(p))
 {
     this->precompute_shape_functions();
 }

@@ -7,8 +7,8 @@
 
 namespace neon
 {
-triangle3::triangle3(triangle_quadrature::Rule rule)
-    : surface_interpolation(std::make_unique<triangle_quadrature>(rule))
+triangle3::triangle3(triangle_quadrature::point const p)
+    : surface_interpolation(std::make_unique<triangle_quadrature>(p))
 {
     this->precompute_shape_functions();
 }
@@ -51,8 +51,8 @@ double triangle3::compute_measure(matrix const& nodal_coordinates) const
     return normal.norm() / 2.0;
 }
 
-triangle6::triangle6(triangle_quadrature::Rule rule)
-    : surface_interpolation(std::make_unique<surface_quadrature>(triangle_quadrature(rule)))
+triangle6::triangle6(triangle_quadrature::point const p)
+    : surface_interpolation(std::make_unique<surface_quadrature>(triangle_quadrature(p)))
 {
     this->precompute_shape_functions();
 }

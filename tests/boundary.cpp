@@ -89,7 +89,7 @@ TEST_CASE("Traction test for triangle", "[Traction]")
 
     SECTION("Unit load")
     {
-        traction patch(std::make_unique<triangle3>(triangle_quadrature::Rule::OnePoint),
+        traction patch(std::make_unique<triangle3>(triangle_quadrature::point::one),
                        nodal_connectivity,
                        dof_list,
                        mesh_coordinates,
@@ -106,7 +106,7 @@ TEST_CASE("Traction test for triangle", "[Traction]")
     }
     SECTION("Twice unit load")
     {
-        traction patch(std::make_unique<triangle3>(triangle_quadrature::Rule::OnePoint),
+        traction patch(std::make_unique<triangle3>(triangle_quadrature::point::one),
                        nodal_connectivity,
                        dof_list,
                        mesh_coordinates,
@@ -141,7 +141,7 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
 
     SECTION("Unit load")
     {
-        pressure pressure_patch(std::make_unique<triangle3>(triangle_quadrature::Rule::OnePoint),
+        pressure pressure_patch(std::make_unique<triangle3>(triangle_quadrature::point::one),
                                 nodal_connectivity,
                                 dof_list,
                                 mesh_coordinates,
@@ -160,7 +160,7 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
     }
     SECTION("Twice unit load")
     {
-        pressure pressure_patch(std::make_unique<triangle3>(triangle_quadrature::Rule::OnePoint),
+        pressure pressure_patch(std::make_unique<triangle3>(triangle_quadrature::point::one),
                                 nodal_connectivity,
                                 dof_list,
                                 mesh_coordinates,
@@ -278,7 +278,7 @@ TEST_CASE("Newton cooling boundary conditions")
 
     SECTION("Unit load")
     {
-        newton_convection patch(std::make_unique<triangle3>(triangle_quadrature::Rule::OnePoint),
+        newton_convection patch(std::make_unique<triangle3>(triangle_quadrature::point::one),
                                 nodal_connectivity,
                                 dof_list,
                                 mesh_coordinates,

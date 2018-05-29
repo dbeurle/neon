@@ -10,7 +10,7 @@ namespace neon
 class triangle3 : public surface_interpolation
 {
 public:
-    triangle3(triangle_quadrature::Rule rule);
+    triangle3(triangle_quadrature::point const p);
 
     virtual int nodes() const override final { return 3; }
 
@@ -31,7 +31,7 @@ protected:
 class triangle6 : public surface_interpolation
 {
 public:
-    triangle6(triangle_quadrature::Rule rule);
+    triangle6(triangle_quadrature::point const p);
 
     virtual int nodes() const override final { return 6; }
 

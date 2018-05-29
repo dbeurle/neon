@@ -11,8 +11,8 @@ namespace neon::mechanical::solid
 {
 gaussian_affine_microsphere::gaussian_affine_microsphere(std::shared_ptr<internal_variables_t>& variables,
                                                          json const& material_data,
-                                                         unit_sphere_quadrature::Rule const rule)
-    : constitutive_model(variables), unit_sphere(rule), material(material_data)
+                                                         unit_sphere_quadrature::point const p)
+    : constitutive_model(variables), unit_sphere(p), material(material_data)
 {
     variables->add(internal_variables_t::fourth::tangent_operator);
 

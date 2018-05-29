@@ -5,17 +5,17 @@
 
 namespace neon
 {
-tetrahedron_quadrature::tetrahedron_quadrature(Rule rule)
+tetrahedron_quadrature::tetrahedron_quadrature(point const p)
 {
-    switch (rule)
+    switch (p)
     {
-        case Rule::OnePoint:
+        case point::one:
         {
             w = {1.0};
             clist = {{0, 0.25, 0.25, 0.25}};
             break;
         }
-        case Rule::FourPoint:
+        case point::four:
         {
             w = {0.25, 0.25, 0.25, 0.25};
             constexpr auto c0 = 0.585410196624969;
@@ -23,7 +23,7 @@ tetrahedron_quadrature::tetrahedron_quadrature(Rule rule)
             clist = {{0, c0, c1, c1}, {1, c1, c0, c1}, {2, c1, c1, c0}, {3, c1, c1, c1}};
             break;
         }
-        case Rule::FivePoint:
+        case point::five:
         {
             w = {-4.0 / 5.0, 9.0 / 20.0, 9.0 / 20.0, 9.0 / 20.0, 9.0 / 20.0};
             clist = {{0, 0.25, 0.25, 0.25},

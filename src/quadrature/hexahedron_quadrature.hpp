@@ -8,15 +8,19 @@ namespace neon
 class hexahedron_quadrature : public volume_quadrature
 {
 public:
-    /** Available quadrature rules for this element type */
-    enum class Rule {
-        OnePoint,
-        SixPoint,        // Fourth order accuracy
-        EightPoint,      // Fourth order accuracy
-        TwentySevenPoint // Six order accuracy
+    /// Available quadrature rules for this element type
+    enum class point {
+        /// Centroid first order
+        one,
+        /// Fourth order accuracy
+        six,
+        /// Fourth order accuracy (recommended over six)
+        eight,
+        /// Sixth order accuracy
+        twentyseven
     };
 
 public:
-    hexahedron_quadrature(Rule const rule);
+    hexahedron_quadrature(point const p);
 };
 }

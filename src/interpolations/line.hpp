@@ -10,7 +10,7 @@ namespace neon
 class line2 : public line_interpolation
 {
 public:
-    line2(line_quadrature::Rule rule);
+    line2(line_quadrature::point const p);
 
     virtual int nodes() const override final { return 2; }
 
@@ -32,7 +32,7 @@ protected:
 class line3 : public line_interpolation
 {
 public:
-    line3(line_quadrature::Rule rule);
+    line3(line_quadrature::point const p);
 
     virtual int nodes() const override final { return 3; }
 

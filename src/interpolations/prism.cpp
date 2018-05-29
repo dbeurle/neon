@@ -7,8 +7,8 @@
 
 namespace neon
 {
-prism6::prism6(prism_quadrature::Rule rule)
-    : volume_interpolation(std::make_unique<prism_quadrature>(rule))
+prism6::prism6(prism_quadrature::point const p)
+    : volume_interpolation(std::make_unique<prism_quadrature>(p))
 {
     this->precompute_shape_functions();
 }
@@ -96,8 +96,8 @@ double prism6::compute_measure(matrix3x const& nodal_coordinates) const
     });
 }
 
-prism15::prism15(prism_quadrature::Rule rule)
-    : volume_interpolation(std::make_unique<prism_quadrature>(rule))
+prism15::prism15(prism_quadrature::point const p)
+    : volume_interpolation(std::make_unique<prism_quadrature>(p))
 {
     this->precompute_shape_functions();
 }
@@ -224,9 +224,9 @@ double prism15::compute_measure(matrix3x const& nodal_coordinates) const
     return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
         auto const& [N, dN] = femval;
 
-        matrix3 const Jacobian = nodal_coordinates * dN;
+        matrix3 const jacobian = nodal_coordinates * dN;
 
-        return Jacobian.determinant();
+        return jacobian.determinant();
     });
 }
 }

@@ -10,7 +10,7 @@ namespace neon
 class quadrilateral4 : public surface_interpolation
 {
 public:
-    quadrilateral4(quadrilateral_quadrature::Rule rule);
+    quadrilateral4(quadrilateral_quadrature::point const p);
 
     virtual int nodes() const override final { return 4; }
 
@@ -35,7 +35,7 @@ protected:
 class quadrilateral8 : public surface_interpolation
 {
 public:
-    quadrilateral8(quadrilateral_quadrature::Rule rule);
+    quadrilateral8(quadrilateral_quadrature::point const p);
 
     int nodes() const override final { return 8; }
 
@@ -49,7 +49,7 @@ protected:
 class quadrilateral9 : public surface_interpolation
 {
 public:
-    quadrilateral9(quadrilateral_quadrature::Rule rule);
+    quadrilateral9(quadrilateral_quadrature::point const p);
 
     int nodes() const override final { return 9; }
 

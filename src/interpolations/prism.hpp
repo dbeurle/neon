@@ -9,10 +9,11 @@ namespace neon
 /// prism6 is responsible for computing the shape functions for an prism or
 /// wedge shaped six noded element.
 /// The shape functions and nodal orderings are taken from \cite Hughes2012
+/// with a volume of the unit element of one
 class prism6 : public volume_interpolation
 {
 public:
-    explicit prism6(prism_quadrature::Rule rule);
+    explicit prism6(prism_quadrature::point const p);
 
     virtual int nodes() const override final { return 6; }
 
@@ -36,10 +37,11 @@ protected:
 /// prism15 is responsible for computing the shape functions for an prism or
 /// wedge shaped fifteen noded element.
 /// The shape functions and nodal orderings are taken from \cite Hughes2012
+/// with a volume of the unit element of one
 class prism15 : public volume_interpolation
 {
 public:
-    explicit prism15(prism_quadrature::Rule rule);
+    explicit prism15(prism_quadrature::point const p);
 
     virtual int nodes() const override final { return 15; }
 

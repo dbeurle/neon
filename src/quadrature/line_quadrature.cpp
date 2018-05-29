@@ -3,24 +3,24 @@
 
 namespace neon
 {
-line_quadrature::line_quadrature(Rule rule)
+line_quadrature::line_quadrature(point const p)
 {
-    switch (rule)
+    switch (p)
     {
-        case Rule::OnePoint:
+        case point::one:
         {
             w = {2.0};
             clist = {{0, 0.0}};
             break;
         }
-        case Rule::TwoPoint:
+        case point::two:
         {
             w = {1.0, 1.0};
 
             clist = {{0, -1.0 / std::sqrt(3.0)}, {1, 1.0 / std::sqrt(3.0)}};
             break;
         }
-        case Rule::ThreePoint:
+        case point::three:
         {
             w = {5.0 / 9.0, 8.0 / 9.0, 5.0 / 9.0};
 

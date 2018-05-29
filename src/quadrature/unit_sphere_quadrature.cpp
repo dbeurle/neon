@@ -3,11 +3,11 @@
 
 namespace neon
 {
-unit_sphere_quadrature::unit_sphere_quadrature(Rule const rule)
+unit_sphere_quadrature::unit_sphere_quadrature(point const p)
 {
-    switch (rule)
+    switch (p)
     {
-        case Rule::BO21:
+        case point::BO21:
         {
             // 21 point unit sphere Gaussian quadrature scheme assuming orthogonal
             // symmetry see Bazant and Oh (1986) Table 1 on Page 43
@@ -30,7 +30,7 @@ unit_sphere_quadrature::unit_sphere_quadrature(Rule const rule)
 
             break;
         }
-        case Rule::BO33:
+        case point::BO33:
         {
             // 21 point unit sphere Gaussian quadrature scheme assuming orthogonal
             // symmetry see Bazant and Oh (1986) Table 1 on Page 43
@@ -90,7 +90,7 @@ unit_sphere_quadrature::unit_sphere_quadrature(Rule const rule)
 
             break;
         }
-        case Rule::FM900:
+        case point::FM900:
         {
             // 900 quadrature point scheme on the unit sphere.  This should only
             // be used for model verification or validation due to the computational

@@ -28,8 +28,6 @@ using namespace neon;
 json full() { return json::parse("{\"ElementOptions\" : {\"Quadrature\" : \"Full\"}}"); }
 json reduced() { return json::parse("{\"ElementOptions\" : {\"Quadrature\" : \"Reduced\"}}"); }
 
-// json material_data{{"Name", "steel"}, {"BulkModulus", 200.0e9}, {"ShearModulus", 100.0e6}};
-
 constexpr auto ZERO_MARGIN = 1.0e-5;
 
 TEST_CASE("Line quadrature scheme test", "[line_quadrature]")
@@ -37,9 +35,9 @@ TEST_CASE("Line quadrature scheme test", "[line_quadrature]")
     SECTION("Line Gauss Quadrature")
     {
         // Check 1 and 8 point rule
-        line_quadrature l1(line_quadrature::Rule::OnePoint);
-        line_quadrature l2(line_quadrature::Rule::TwoPoint);
-        line_quadrature l3(line_quadrature::Rule::ThreePoint);
+        line_quadrature l1(line_quadrature::point::one);
+        line_quadrature l2(line_quadrature::point::two);
+        line_quadrature l3(line_quadrature::point::three);
 
         REQUIRE(l1.points() == 1);
         REQUIRE(l2.points() == 2);
@@ -51,7 +49,7 @@ TEST_CASE("Line quadrature scheme test", "[line_quadrature]")
     }
     SECTION("line 2 interpolation function - one point")
     {
-        line2 line(line_quadrature::Rule::OnePoint);
+        line2 line(line_quadrature::point::one);
 
         REQUIRE(line.nodes() == 2);
         REQUIRE(line.quadrature().points() == 1);
@@ -69,7 +67,7 @@ TEST_CASE("Line quadrature scheme test", "[line_quadrature]")
     }
     SECTION("line 2 length")
     {
-        line2 patch(line_quadrature::Rule::OnePoint);
+        line2 patch(line_quadrature::point::one);
 
         matrix x(3, 2);
         x << 0.0, 1.0, //
@@ -80,7 +78,7 @@ TEST_CASE("Line quadrature scheme test", "[line_quadrature]")
     }
     SECTION("line 3 interpolation function - two point")
     {
-        line3 line(line_quadrature::Rule::TwoPoint);
+        line3 line(line_quadrature::point::two);
 
         REQUIRE(line.nodes() == 3);
         REQUIRE(line.quadrature().points() == 2);
@@ -98,7 +96,7 @@ TEST_CASE("Line quadrature scheme test", "[line_quadrature]")
     }
     SECTION("line 3 length")
     {
-        line3 patch(line_quadrature::Rule::TwoPoint);
+        line3 patch(line_quadrature::point::two);
 
         matrix x(3, 3);
         x << 0.0, 0.5, 1.0, //
@@ -118,9 +116,9 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[quadrilateral_quadrature]")
     SECTION("Quadrilateral Gauss Quadrature")
     {
         // Check 1 and 8 point rule
-        quadrilateral_quadrature q1(quadrilateral_quadrature::Rule::OnePoint);
-        quadrilateral_quadrature q4(quadrilateral_quadrature::Rule::FourPoint);
-        quadrilateral_quadrature q9(quadrilateral_quadrature::Rule::NinePoint);
+        quadrilateral_quadrature q1(quadrilateral_quadrature::point::one);
+        quadrilateral_quadrature q4(quadrilateral_quadrature::point::four);
+        quadrilateral_quadrature q9(quadrilateral_quadrature::point::nine);
 
         REQUIRE(q1.points() == 1);
         REQUIRE(q4.points() == 4);
@@ -132,7 +130,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[quadrilateral_quadrature]")
     }
     SECTION("quadrilateral4 interpolation function - one point")
     {
-        quadrilateral4 quad4(quadrilateral_quadrature::Rule::OnePoint);
+        quadrilateral4 quad4(quadrilateral_quadrature::point::one);
 
         REQUIRE(quad4.nodes() == 4);
         REQUIRE(quad4.quadrature().points() == 1);
@@ -152,7 +150,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[quadrilateral_quadrature]")
     }
     SECTION("quadrilateral4 surface area - one point")
     {
-        quadrilateral4 quad4(quadrilateral_quadrature::Rule::OnePoint);
+        quadrilateral4 quad4(quadrilateral_quadrature::point::one);
 
         matrix x(3, 4);
         x << 0.0, 1.0, 1.0, 0.0, //
@@ -163,7 +161,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[quadrilateral_quadrature]")
     }
     SECTION("quadrilateral4 interpolation function - four point")
     {
-        quadrilateral4 quad4(quadrilateral_quadrature::Rule::FourPoint);
+        quadrilateral4 quad4(quadrilateral_quadrature::point::four);
 
         REQUIRE(quad4.nodes() == 4);
         REQUIRE(quad4.quadrature().points() == 4);
@@ -183,7 +181,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[quadrilateral_quadrature]")
     }
     SECTION("quadrilateral4 surface area - four point")
     {
-        quadrilateral4 quad4(quadrilateral_quadrature::Rule::FourPoint);
+        quadrilateral4 quad4(quadrilateral_quadrature::point::four);
 
         matrix x(3, 4);
         x << 0.0, 1.0, 1.0, 0.0, //
@@ -194,7 +192,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[quadrilateral_quadrature]")
     }
     SECTION("quadrilateral8 interpolation function - four point")
     {
-        quadrilateral8 quad8(quadrilateral_quadrature::Rule::FourPoint);
+        quadrilateral8 quad8(quadrilateral_quadrature::point::four);
 
         REQUIRE(quad8.nodes() == 8);
         REQUIRE(quad8.quadrature().points() == 4);
@@ -214,7 +212,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[quadrilateral_quadrature]")
     }
     SECTION("quadrilateral8 surface area - four point")
     {
-        quadrilateral8 quad8(quadrilateral_quadrature::Rule::FourPoint);
+        quadrilateral8 quad8(quadrilateral_quadrature::point::four);
 
         matrix x(3, 8);
         x << 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5, 0.0, //
@@ -225,7 +223,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[quadrilateral_quadrature]")
     }
     SECTION("quadrilateral8 interpolation function - nine point")
     {
-        quadrilateral8 quad8(quadrilateral_quadrature::Rule::NinePoint);
+        quadrilateral8 quad8(quadrilateral_quadrature::point::nine);
 
         REQUIRE(quad8.nodes() == 8);
         REQUIRE(quad8.quadrature().points() == 9);
@@ -244,7 +242,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[quadrilateral_quadrature]")
     }
     SECTION("quadrilateral8 interpolation function - nine point")
     {
-        quadrilateral8 quad8(quadrilateral_quadrature::Rule::NinePoint);
+        quadrilateral8 quad8(quadrilateral_quadrature::point::nine);
 
         matrix x(3, 8);
         x << 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5, 0.0, //
@@ -255,7 +253,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[quadrilateral_quadrature]")
     }
     SECTION("quadrilateral9 interpolation function - four point")
     {
-        quadrilateral9 quad9(quadrilateral_quadrature::Rule::FourPoint);
+        quadrilateral9 quad9(quadrilateral_quadrature::point::four);
 
         REQUIRE(quad9.nodes() == 9);
         REQUIRE(quad9.quadrature().points() == 4);
@@ -274,7 +272,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[quadrilateral_quadrature]")
     }
     SECTION("quadrilateral9 surface area - four point")
     {
-        quadrilateral9 quad9(quadrilateral_quadrature::Rule::FourPoint);
+        quadrilateral9 quad9(quadrilateral_quadrature::point::four);
 
         matrix x(3, 9);
         x << 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5, 0.0, 0.5, //
@@ -285,7 +283,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[quadrilateral_quadrature]")
     }
     SECTION("quadrilateral9 interpolation function - nine point")
     {
-        quadrilateral9 quad9(quadrilateral_quadrature::Rule::NinePoint);
+        quadrilateral9 quad9(quadrilateral_quadrature::point::nine);
 
         REQUIRE(quad9.nodes() == 9);
         REQUIRE(quad9.quadrature().points() == 9);
@@ -304,7 +302,7 @@ TEST_CASE("Quadrilateral quadrature scheme test", "[quadrilateral_quadrature]")
     }
     SECTION("quadrilateral9 interpolation function - nine point")
     {
-        quadrilateral9 quad9(quadrilateral_quadrature::Rule::NinePoint);
+        quadrilateral9 quad9(quadrilateral_quadrature::point::nine);
 
         matrix x(3, 9);
         x << 0.0, 1.0, 1.0, 0.0, 0.5, 1.0, 0.5, 0.0, 0.5, //
@@ -325,9 +323,9 @@ TEST_CASE("Triangle quadrature scheme test", "[triangle_quadrature]")
     SECTION("triangle Gauss quadrature")
     {
         // Check 1 and 8 point rule
-        triangle_quadrature t1(triangle_quadrature::Rule::OnePoint);
-        triangle_quadrature t3(triangle_quadrature::Rule::ThreePoint);
-        triangle_quadrature t4(triangle_quadrature::Rule::FourPoint);
+        triangle_quadrature t1(triangle_quadrature::point::one);
+        triangle_quadrature t3(triangle_quadrature::point::three);
+        triangle_quadrature t4(triangle_quadrature::point::four);
 
         REQUIRE(t1.points() == 1);
         REQUIRE(t3.points() == 3);
@@ -339,7 +337,7 @@ TEST_CASE("Triangle quadrature scheme test", "[triangle_quadrature]")
     }
     SECTION("triangle3 interpolation function - one point")
     {
-        triangle3 tri3(triangle_quadrature::Rule::OnePoint);
+        triangle3 tri3(triangle_quadrature::point::one);
 
         REQUIRE(tri3.nodes() == 3);
         REQUIRE(tri3.quadrature().points() == 1);
@@ -358,7 +356,7 @@ TEST_CASE("Triangle quadrature scheme test", "[triangle_quadrature]")
     }
     SECTION("triangle6 interpolation function - three point")
     {
-        triangle6 tri6(triangle_quadrature::Rule::ThreePoint);
+        triangle6 tri6(triangle_quadrature::point::three);
 
         REQUIRE(tri6.nodes() == 6);
         REQUIRE(tri6.quadrature().points() == 3);
@@ -375,7 +373,7 @@ TEST_CASE("Triangle quadrature scheme test", "[triangle_quadrature]")
     }
     SECTION("triangle6 interpolation function - four point")
     {
-        triangle6 tri6(triangle_quadrature::Rule::FourPoint);
+        triangle6 tri6(triangle_quadrature::point::four);
 
         REQUIRE(tri6.nodes() == 6);
         REQUIRE(tri6.quadrature().points() == 4);
@@ -392,7 +390,7 @@ TEST_CASE("Triangle quadrature scheme test", "[triangle_quadrature]")
     }
     SECTION("triangle3 surface area")
     {
-        triangle3 tri3(triangle_quadrature::Rule::OnePoint);
+        triangle3 tri3(triangle_quadrature::point::one);
 
         matrix x(3, 3);
         x << 0.0, 0.0, 0.0, //
@@ -404,7 +402,7 @@ TEST_CASE("Triangle quadrature scheme test", "[triangle_quadrature]")
     }
     SECTION("triangle6 surface area")
     {
-        triangle6 patch(triangle_quadrature::Rule::ThreePoint);
+        triangle6 patch(triangle_quadrature::point::three);
 
         matrix x(6, 3);
         x << 0.0, 0.0, 0.0, //
@@ -428,10 +426,10 @@ TEST_CASE("Hexahedron quadrature scheme test", "[hexahedron_quadrature]")
     SECTION("Hexahedron Gauss Quadrature")
     {
         // Check 1 and 8 point rule
-        hexahedron_quadrature One(hexahedron_quadrature::Rule::OnePoint);
-        hexahedron_quadrature Six(hexahedron_quadrature::Rule::SixPoint);
-        hexahedron_quadrature Eight(hexahedron_quadrature::Rule::EightPoint);
-        hexahedron_quadrature TwentySeven(hexahedron_quadrature::Rule::TwentySevenPoint);
+        hexahedron_quadrature One(hexahedron_quadrature::point::one);
+        hexahedron_quadrature Six(hexahedron_quadrature::point::six);
+        hexahedron_quadrature Eight(hexahedron_quadrature::point::eight);
+        hexahedron_quadrature TwentySeven(hexahedron_quadrature::point::twentyseven);
 
         REQUIRE(One.points() == 1);
         REQUIRE(Six.points() == 6);
@@ -443,9 +441,9 @@ TEST_CASE("Hexahedron quadrature scheme test", "[hexahedron_quadrature]")
         REQUIRE(ranges::accumulate(Eight.weights(), 0.0) == Approx(8.0));
         REQUIRE(ranges::accumulate(TwentySeven.weights(), 0.0) == Approx(8.0));
     }
-    SECTION("hexahedron8 OnePoint Evaluation")
+    SECTION("hexahedron8 one Evaluation")
     {
-        hexahedron8 hex8(hexahedron_quadrature::Rule::OnePoint);
+        hexahedron8 hex8(hexahedron_quadrature::point::one);
 
         REQUIRE(hex8.nodes() == 8);
 
@@ -469,9 +467,9 @@ TEST_CASE("Hexahedron quadrature scheme test", "[hexahedron_quadrature]")
         REQUIRE(hex8.local_quadrature_extrapolation().cols() == 1);
         REQUIRE(hex8.local_quadrature_extrapolation().allFinite());
     }
-    SECTION("hexahedron8 EightPoint Evaluation")
+    SECTION("hexahedron8 eight Evaluation")
     {
-        hexahedron8 hex8(hexahedron_quadrature::Rule::EightPoint);
+        hexahedron8 hex8(hexahedron_quadrature::point::eight);
 
         // Check the nodes are correct
         REQUIRE(hex8.nodes() == 8);
@@ -495,7 +493,7 @@ TEST_CASE("Hexahedron quadrature scheme test", "[hexahedron_quadrature]")
     }
     SECTION("hexahedron8 volume evaluation")
     {
-        hexahedron8 hex8(hexahedron_quadrature::Rule::EightPoint);
+        hexahedron8 hex8(hexahedron_quadrature::point::eight);
 
         matrix x(3, 8);
         x << 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, //
@@ -504,9 +502,9 @@ TEST_CASE("Hexahedron quadrature scheme test", "[hexahedron_quadrature]")
 
         REQUIRE(hex8.compute_measure(x) == Approx(1.0));
     }
-    SECTION("hexahedron20 OnePoint Evaluation")
+    SECTION("hexahedron20 one Evaluation")
     {
-        hexahedron20 hex20(hexahedron_quadrature::Rule::OnePoint);
+        hexahedron20 hex20(hexahedron_quadrature::point::one);
 
         // Check the nodes are correct
         REQUIRE(hex20.nodes() == 20);
@@ -528,9 +526,9 @@ TEST_CASE("Hexahedron quadrature scheme test", "[hexahedron_quadrature]")
         REQUIRE(hex20.local_quadrature_extrapolation().cols() == 1);
         REQUIRE(hex20.local_quadrature_extrapolation().allFinite());
     }
-    SECTION("hexahedron20 SixPoint Evaluation")
+    SECTION("hexahedron20 six Evaluation")
     {
-        hexahedron20 hex20(hexahedron_quadrature::Rule::SixPoint);
+        hexahedron20 hex20(hexahedron_quadrature::point::six);
 
         // Check the nodes are correct
         REQUIRE(hex20.nodes() == 20);
@@ -553,7 +551,7 @@ TEST_CASE("Hexahedron quadrature scheme test", "[hexahedron_quadrature]")
     }
     SECTION("hexahedron20 volume evaluation")
     {
-        hexahedron20 hex20(hexahedron_quadrature::Rule::EightPoint);
+        hexahedron20 hex20(hexahedron_quadrature::point::eight);
 
         // xyz coordinates of the unit cube
         matrix x(3, 20);
@@ -566,9 +564,9 @@ TEST_CASE("Hexahedron quadrature scheme test", "[hexahedron_quadrature]")
 
         REQUIRE(hex20.compute_measure(x) == Approx(1.0));
     }
-    SECTION("hexahedron20 EightPoint Evaluation")
+    SECTION("hexahedron20 eight Evaluation")
     {
-        hexahedron20 hex20(hexahedron_quadrature::Rule::EightPoint);
+        hexahedron20 hex20(hexahedron_quadrature::point::eight);
 
         // Check the nodes are correct
         REQUIRE(hex20.nodes() == 20);
@@ -592,7 +590,7 @@ TEST_CASE("Hexahedron quadrature scheme test", "[hexahedron_quadrature]")
     }
     SECTION("hexahedron20 TwentySevenPoint Evaluation")
     {
-        hexahedron20 hex20(hexahedron_quadrature::Rule::TwentySevenPoint);
+        hexahedron20 hex20(hexahedron_quadrature::point::twentyseven);
 
         // Check the nodes are correct
         REQUIRE(hex20.nodes() == 20);
@@ -614,9 +612,9 @@ TEST_CASE("Hexahedron quadrature scheme test", "[hexahedron_quadrature]")
         REQUIRE(hex20.local_quadrature_extrapolation().cols() == 27);
         REQUIRE(hex20.local_quadrature_extrapolation().allFinite());
     }
-    SECTION("hexahedron27 OnePoint Evaluation")
+    SECTION("hexahedron27 one Evaluation")
     {
-        hexahedron27 hex27(hexahedron_quadrature::Rule::OnePoint);
+        hexahedron27 hex27(hexahedron_quadrature::point::one);
 
         // Check the nodes are correct
         REQUIRE(hex27.nodes() == 27);
@@ -638,9 +636,9 @@ TEST_CASE("Hexahedron quadrature scheme test", "[hexahedron_quadrature]")
         REQUIRE(hex27.local_quadrature_extrapolation().cols() == 1);
         REQUIRE(hex27.local_quadrature_extrapolation().allFinite());
     }
-    SECTION("hexahedron27 SixPoint Evaluation")
+    SECTION("hexahedron27 six Evaluation")
     {
-        hexahedron27 hex27(hexahedron_quadrature::Rule::SixPoint);
+        hexahedron27 hex27(hexahedron_quadrature::point::six);
 
         // Check the nodes are correct
         REQUIRE(hex27.nodes() == 27);
@@ -661,9 +659,9 @@ TEST_CASE("Hexahedron quadrature scheme test", "[hexahedron_quadrature]")
         REQUIRE(hex27.local_quadrature_extrapolation().rows() == 27);
         REQUIRE(hex27.local_quadrature_extrapolation().cols() == 6);
     }
-    SECTION("hexahedron27 EightPoint Evaluation")
+    SECTION("hexahedron27 eight Evaluation")
     {
-        hexahedron27 hex27(hexahedron_quadrature::Rule::EightPoint);
+        hexahedron27 hex27(hexahedron_quadrature::point::eight);
 
         // Check the nodes are correct
         REQUIRE(hex27.nodes() == 27);
@@ -687,7 +685,7 @@ TEST_CASE("Hexahedron quadrature scheme test", "[hexahedron_quadrature]")
     }
     SECTION("hexahedron27 TwentySevenPoint Evaluation")
     {
-        hexahedron27 hex27(hexahedron_quadrature::Rule::TwentySevenPoint);
+        hexahedron27 hex27(hexahedron_quadrature::point::twentyseven);
 
         // Check the nodes are correct
         REQUIRE(hex27.nodes() == 27);
@@ -712,7 +710,7 @@ TEST_CASE("Hexahedron quadrature scheme test", "[hexahedron_quadrature]")
     {
         SECTION("Six point rule")
         {
-            hexahedron27 hex27(hexahedron_quadrature::Rule::SixPoint);
+            hexahedron27 hex27(hexahedron_quadrature::point::six);
 
             // xyz coordinates of the unit cube
             matrix x(3, 27);
@@ -731,7 +729,7 @@ TEST_CASE("Hexahedron quadrature scheme test", "[hexahedron_quadrature]")
         }
         SECTION("Eight point rule")
         {
-            hexahedron27 hex27(hexahedron_quadrature::Rule::EightPoint);
+            hexahedron27 hex27(hexahedron_quadrature::point::eight);
 
             // xyz coordinates of the unit cube
             matrix x(3, 27);
@@ -760,9 +758,9 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[tetrahedron_quadrature]")
 {
     SECTION("Tetrahedron Gauss Quadrature")
     {
-        tetrahedron_quadrature One(tetrahedron_quadrature::Rule::OnePoint);
-        tetrahedron_quadrature Four(tetrahedron_quadrature::Rule::FourPoint);
-        tetrahedron_quadrature Five(tetrahedron_quadrature::Rule::FivePoint);
+        tetrahedron_quadrature One(tetrahedron_quadrature::point::one);
+        tetrahedron_quadrature Four(tetrahedron_quadrature::point::four);
+        tetrahedron_quadrature Five(tetrahedron_quadrature::point::five);
 
         // Check the number of quadrature points are correctly set
         REQUIRE(One.points() == 1);
@@ -774,9 +772,9 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[tetrahedron_quadrature]")
         REQUIRE(ranges::accumulate(Four.weights(), 0.0) == Approx(1.0 / 6.0));
         REQUIRE(ranges::accumulate(Five.weights(), 0.0) == Approx(1.0 / 6.0));
     }
-    SECTION("tetrahedron4 OnePoint Evaluation")
+    SECTION("tetrahedron4 one Evaluation")
     {
-        tetrahedron4 tet4(tetrahedron_quadrature::Rule::OnePoint);
+        tetrahedron4 tet4(tetrahedron_quadrature::point::one);
 
         REQUIRE(tet4.nodes() == 4);
         REQUIRE(tet4.quadrature().points() == 1);
@@ -795,9 +793,9 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[tetrahedron_quadrature]")
         REQUIRE(tet4.local_quadrature_extrapolation().cols() == 1);
         REQUIRE(tet4.local_quadrature_extrapolation().allFinite());
     }
-    SECTION("tetrahedron10 OnePoint Evaluation")
+    SECTION("tetrahedron10 one Evaluation")
     {
-        tetrahedron10 tet10(tetrahedron_quadrature::Rule::OnePoint);
+        tetrahedron10 tet10(tetrahedron_quadrature::point::one);
 
         REQUIRE(tet10.nodes() == 10);
 
@@ -817,9 +815,9 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[tetrahedron_quadrature]")
         REQUIRE(tet10.local_quadrature_extrapolation().cols() == 1);
         REQUIRE(tet10.local_quadrature_extrapolation().allFinite());
     }
-    SECTION("tetrahedron10 FourPoint Evaluation")
+    SECTION("tetrahedron10 four Evaluation")
     {
-        tetrahedron10 tet10(tetrahedron_quadrature::Rule::FourPoint);
+        tetrahedron10 tet10(tetrahedron_quadrature::point::four);
 
         REQUIRE(tet10.nodes() == 10);
 
@@ -839,9 +837,9 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[tetrahedron_quadrature]")
         REQUIRE(tet10.local_quadrature_extrapolation().cols() == 4);
         REQUIRE(tet10.local_quadrature_extrapolation().allFinite());
     }
-    SECTION("tetrahedron10 FivePoint Evaluation")
+    SECTION("tetrahedron10 five Evaluation")
     {
-        tetrahedron10 tet10(tetrahedron_quadrature::Rule::FivePoint);
+        tetrahedron10 tet10(tetrahedron_quadrature::point::five);
 
         REQUIRE(tet10.nodes() == 10);
 
@@ -881,7 +879,7 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[tetrahedron_quadrature]")
 
             SECTION("One point")
             {
-                tetrahedron10 tet10(tetrahedron_quadrature::Rule::OnePoint);
+                tetrahedron10 tet10(tetrahedron_quadrature::point::one);
 
                 tet10.quadrature().for_each([&](auto const& femval, auto const& l) {
                     auto const& [N, rhea] = femval;
@@ -901,7 +899,7 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[tetrahedron_quadrature]")
             }
             SECTION("Four point")
             {
-                tetrahedron10 tet10(tetrahedron_quadrature::Rule::FourPoint);
+                tetrahedron10 tet10(tetrahedron_quadrature::point::four);
 
                 tet10.quadrature().for_each([&](auto const& femval, auto const& l) {
                     auto const& [N, rhea] = femval;
@@ -922,7 +920,7 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[tetrahedron_quadrature]")
             }
             SECTION("Five point")
             {
-                tetrahedron10 tet10(tetrahedron_quadrature::Rule::FivePoint);
+                tetrahedron10 tet10(tetrahedron_quadrature::point::five);
 
                 tet10.quadrature().for_each([&](auto const& femval, auto const& l) {
                     auto const& [N, rhea] = femval;
@@ -944,7 +942,7 @@ TEST_CASE("Tetrahedron quadrature scheme test", "[tetrahedron_quadrature]")
         }
         SECTION("Volume of tetrahedron with unit length sides")
         {
-            tetrahedron10 tet10(tetrahedron_quadrature::Rule::FourPoint);
+            tetrahedron10 tet10(tetrahedron_quadrature::point::four);
 
             matrix x_vertices(4, 3);
             x_vertices << 1.0, 0.0, 0.0,                          // Node 0
@@ -989,18 +987,21 @@ TEST_CASE("Prism quadrature scheme test", "[prism_quadrature]")
     SECTION("Prism Gauss Quadrature")
     {
         // Check 1 and 6 point rule
-        prism_quadrature p1(prism_quadrature::Rule::OnePoint);
-        prism_quadrature p6(prism_quadrature::Rule::SixPoint);
+        prism_quadrature p1(prism_quadrature::point::one);
+        prism_quadrature p6(prism_quadrature::point::six);
+        prism_quadrature p9(prism_quadrature::point::nine);
 
         REQUIRE(p1.points() == 1);
         REQUIRE(p6.points() == 6);
+        REQUIRE(p9.points() == 9);
 
-        REQUIRE(ranges::accumulate(p1.weights(), 0.0) == Approx(2.0));
-        REQUIRE(ranges::accumulate(p6.weights(), 0.0) == Approx(2.0));
+        REQUIRE(ranges::accumulate(p1.weights(), 0.0) == Approx(1.0));
+        REQUIRE(ranges::accumulate(p6.weights(), 0.0) == Approx(1.0));
+        REQUIRE(ranges::accumulate(p9.weights(), 0.0) == Approx(1.0));
     }
     SECTION("Six node - one point evaluation")
     {
-        prism6 element(prism_quadrature::Rule::OnePoint);
+        prism6 element(prism_quadrature::point::one);
 
         REQUIRE(element.nodes() == 6);
         REQUIRE(element.quadrature().points() == 1);
@@ -1020,7 +1021,7 @@ TEST_CASE("Prism quadrature scheme test", "[prism_quadrature]")
     }
     SECTION("Six node - six point evaluation")
     {
-        prism6 element(prism_quadrature::Rule::SixPoint);
+        prism6 element(prism_quadrature::point::six);
 
         REQUIRE(element.nodes() == 6);
         REQUIRE(element.quadrature().points() == 6);
@@ -1038,9 +1039,20 @@ TEST_CASE("Prism quadrature scheme test", "[prism_quadrature]")
         REQUIRE(element.local_quadrature_extrapolation().cols() == 6);
         REQUIRE(element.local_quadrature_extrapolation().allFinite());
     }
+    SECTION("Six node - six point area")
+    {
+        prism6 pri6(prism_quadrature::point::six);
+
+        matrix3x x(3, 6);
+        x << 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, //
+            0.0, 1.0, 0.0, 0.0, 1.0, 0.0,  //
+            -1.0, -1.0, -1.0, 1.0, 1.0, 1.0;
+
+        REQUIRE(pri6.compute_measure(x) == Approx(1.0));
+    }
     SECTION("Fifteen node - six point evaluation")
     {
-        prism15 element(prism_quadrature::Rule::SixPoint);
+        prism15 element(prism_quadrature::point::six);
 
         REQUIRE(element.nodes() == 15);
         REQUIRE(element.quadrature().points() == 6);
@@ -1058,6 +1070,17 @@ TEST_CASE("Prism quadrature scheme test", "[prism_quadrature]")
         REQUIRE(element.local_quadrature_extrapolation().cols() == 6);
         REQUIRE(element.local_quadrature_extrapolation().allFinite());
     }
+    SECTION("Fifteen node - nine point area")
+    {
+        prism15 pri15(prism_quadrature::point::nine);
+
+        matrix3x x(3, 15);
+        x << 1.0, 0.0, 0.0, 0.5, 0.0, 0.5, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.5, 0.0, 0.5, //
+            0.0, 1.0, 0.0, 0.5, 0.5, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.5, 0.5, 0.0,  //
+            -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0;
+
+        REQUIRE(pri15.compute_measure(x) == Approx(1.0));
+    }
     SECTION("Virtual methods check")
     {
         REQUIRE(make_volume_interpolation(element_topology::prism6, full())->nodes() == 6);
@@ -1068,7 +1091,7 @@ TEST_CASE("Unit sphere quadrature scheme test", "[unit_sphere_quadrature]")
 {
     SECTION("BO21 rule test")
     {
-        unit_sphere_quadrature unit_sphere(unit_sphere_quadrature::Rule::BO21);
+        unit_sphere_quadrature unit_sphere(unit_sphere_quadrature::point::BO21);
 
         REQUIRE(unit_sphere.points() == 21);
         REQUIRE(ranges::accumulate(unit_sphere.weights(), 0.0) == Approx(1.0));
@@ -1082,7 +1105,7 @@ TEST_CASE("Unit sphere quadrature scheme test", "[unit_sphere_quadrature]")
     }
     SECTION("BO33 rule test")
     {
-        unit_sphere_quadrature unit_sphere(unit_sphere_quadrature::Rule::BO33);
+        unit_sphere_quadrature unit_sphere(unit_sphere_quadrature::point::BO33);
 
         REQUIRE(unit_sphere.points() == 33);
         REQUIRE(ranges::accumulate(unit_sphere.weights(), 0.0) == Approx(1.0));
@@ -1096,7 +1119,7 @@ TEST_CASE("Unit sphere quadrature scheme test", "[unit_sphere_quadrature]")
     }
     SECTION("FM900 rule test")
     {
-        unit_sphere_quadrature unit_sphere(unit_sphere_quadrature::Rule::FM900);
+        unit_sphere_quadrature unit_sphere(unit_sphere_quadrature::point::FM900);
 
         REQUIRE(unit_sphere.points() == 900);
         REQUIRE(ranges::accumulate(unit_sphere.weights(), 0.0) == Approx(12.5663706143));

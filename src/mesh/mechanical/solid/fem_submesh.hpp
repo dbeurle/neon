@@ -35,7 +35,7 @@ public:
     /// \return A view of degrees of freedom for an element
     [[nodiscard]] auto const local_dof_view(std::int64_t const element) const
     {
-        return dof_list(Eigen::placeholders::all, element);
+        return dof_indices(Eigen::placeholders::all, element);
     }
 
     /// \return The internal variable store
@@ -68,10 +68,10 @@ public:
     void update_internal_variables(double const time_step_size = 1.0);
 
     [[nodiscard]] std::pair<vector, vector> nodal_averaged_variable(
-        internal_variables_t::second const tensor_name) const;
+        internal_variable_type::second const tensor_name) const;
 
     [[nodiscard]] std::pair<vector, vector> nodal_averaged_variable(
-        internal_variables_t::scalar const scalar_name) const;
+        internal_variable_type::scalar const scalar_name) const;
 
 protected:
     /** Update the strain measures defined by the constitutive model */
@@ -115,14 +115,16 @@ protected:
 private:
     std::shared_ptr<material_coordinates> mesh_coordinates;
 
-    std::unique_ptr<volume_interpolation> sf; //!< Shape function
+    /// Shape function (volume interpolation)
+    std::unique_ptr<volume_interpolation> sf;
 
     variable_view view;
-    std::shared_ptr<internal_variables_t> variables;
+    std::shared_ptr<internal_variable_type> variables;
 
     std::unique_ptr<constitutive_model> cm; //!< Constitutive model
 
-    indices dof_list; //!< Map for the local to global dofs
+    /// Map for the local to global dofs
+    indices dof_indices;
 };
 }
 }

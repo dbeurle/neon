@@ -31,7 +31,7 @@ public:
     /// \param material_data Json object with input file material data
     explicit affine_microsphere(std::shared_ptr<internal_variables_t>& variables,
                                 json const& material_data,
-                                unit_sphere_quadrature::Rule const rule);
+                                unit_sphere_quadrature::point const p);
 
     virtual void update_internal_variables(double const time_step_size) override;
 

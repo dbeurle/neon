@@ -8,10 +8,10 @@ namespace neon
 class line_quadrature : public numerical_quadrature<double>
 {
 public:
-    /** Available quadrature rules for this element type */
-    enum class Rule { OnePoint, TwoPoint, ThreePoint };
+    /// Available quadrature rules for this element type
+    enum class point { one, two, three };
 
 public:
-    explicit line_quadrature(Rule rule);
+    explicit line_quadrature(point const p);
 };
 }

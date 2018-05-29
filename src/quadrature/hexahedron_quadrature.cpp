@@ -3,17 +3,17 @@
 
 namespace neon
 {
-hexahedron_quadrature::hexahedron_quadrature(Rule const rule)
+hexahedron_quadrature::hexahedron_quadrature(point const p)
 {
-    switch (rule)
+    switch (p)
     {
-        case Rule::OnePoint:
+        case point::one:
         {
             w = {8.0};
             clist = {{0, 0.0, 0.0, 0.0}};
             break;
         }
-        case Rule::SixPoint:
+        case point::six:
         {
             w.resize(6, 4.0 / 3.0);
             clist = {{0, 1.0, 0.0, 0.0},
@@ -24,7 +24,7 @@ hexahedron_quadrature::hexahedron_quadrature(Rule const rule)
                      {5, 0.0, 0.0, -1.0}};
             break;
         }
-        case Rule::EightPoint:
+        case point::eight:
         {
             w.resize(8, 1.0);
             auto const qp = 1.0 / std::sqrt(3.0);
@@ -38,7 +38,7 @@ hexahedron_quadrature::hexahedron_quadrature(Rule const rule)
                      {7, -qp, qp, qp}};
             break;
         }
-        case Rule::TwentySevenPoint:
+        case point::twentyseven:
         {
             w = {125.0 / 729.0, 125.0 / 729.0, 125.0 / 729.0, 125.0 / 729.0, 200.0 / 729.0,
                  200.0 / 729.0, 200.0 / 729.0, 200.0 / 729.0, 320.0 / 729.0, 200.0 / 729.0,

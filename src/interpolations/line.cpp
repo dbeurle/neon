@@ -5,8 +5,8 @@
 
 namespace neon
 {
-line2::line2(line_quadrature::Rule rule)
-    : line_interpolation(std::make_unique<line_quadrature>(rule))
+line2::line2(line_quadrature::point const p)
+    : line_interpolation(std::make_unique<line_quadrature>(p))
 {
     this->precompute_shape_functions();
 }
@@ -55,8 +55,8 @@ double line2::compute_measure(matrix const& nodal_coordinates) const
     return (nodal_coordinates.col(0) - nodal_coordinates.col(1)).norm();
 }
 
-line3::line3(line_quadrature::Rule rule)
-    : line_interpolation(std::make_unique<line_quadrature>(rule))
+line3::line3(line_quadrature::point const p)
+    : line_interpolation(std::make_unique<line_quadrature>(p))
 {
     this->precompute_shape_functions();
 }

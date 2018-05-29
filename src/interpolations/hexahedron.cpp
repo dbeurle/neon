@@ -7,8 +7,8 @@
 
 namespace neon
 {
-hexahedron8::hexahedron8(hexahedron_quadrature::Rule rule)
-    : volume_interpolation(std::make_unique<hexahedron_quadrature>(rule))
+hexahedron8::hexahedron8(hexahedron_quadrature::point const p)
+    : volume_interpolation(std::make_unique<hexahedron_quadrature>(p))
 {
     this->precompute_shape_functions();
 }
@@ -77,8 +77,8 @@ double hexahedron8::compute_measure(matrix const& nodal_coordinates) const
     });
 }
 
-hexahedron20::hexahedron20(hexahedron_quadrature::Rule rule)
-    : volume_interpolation(std::make_unique<hexahedron_quadrature>(rule))
+hexahedron20::hexahedron20(hexahedron_quadrature::point const p)
+    : volume_interpolation(std::make_unique<hexahedron_quadrature>(p))
 {
     this->precompute_shape_functions();
 }
@@ -220,8 +220,8 @@ double hexahedron20::compute_measure(matrix const& nodal_coordinates) const
     });
 }
 
-hexahedron27::hexahedron27(hexahedron_quadrature::Rule rule)
-    : volume_interpolation(std::make_unique<hexahedron_quadrature>(rule))
+hexahedron27::hexahedron27(hexahedron_quadrature::point const p)
+    : volume_interpolation(std::make_unique<hexahedron_quadrature>(p))
 {
     this->precompute_shape_functions();
 }

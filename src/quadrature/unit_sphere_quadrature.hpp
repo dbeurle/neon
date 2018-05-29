@@ -10,11 +10,11 @@ class unit_sphere_quadrature : public volume_quadrature
 {
 public:
     /** Quadrature nomenclature from \cite Ehret2010 */
-    enum class Rule { BO21, BO33, FM900 };
+    enum class point { BO21, BO33, FM900 };
 
 public:
     /** Fill the quadrature coordinates and weightings */
-    unit_sphere_quadrature(Rule const rule);
+    unit_sphere_quadrature(point const p);
 
 protected:
     void precompute_coordinates();

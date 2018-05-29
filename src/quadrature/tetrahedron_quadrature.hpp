@@ -8,9 +8,9 @@ namespace neon
 class tetrahedron_quadrature : public volume_quadrature
 {
 public:
-    /** Available quadrature rules for this element type */
-    enum class Rule { OnePoint, FourPoint, FivePoint };
+    /// Available quadrature rules for this element type
+    enum class point { one, four, five };
 
-    explicit tetrahedron_quadrature(Rule rule);
+    explicit tetrahedron_quadrature(point const p);
 };
 }

@@ -10,7 +10,7 @@ namespace neon
 class tetrahedron4 : public volume_interpolation
 {
 public:
-    tetrahedron4(tetrahedron_quadrature::Rule rule = tetrahedron_quadrature::Rule::OnePoint);
+    tetrahedron4(tetrahedron_quadrature::point const p = tetrahedron_quadrature::point::one);
 
     virtual int nodes() const override final { return 4; }
 
@@ -32,7 +32,7 @@ protected:
 class tetrahedron10 : public volume_interpolation
 {
 public:
-    tetrahedron10(tetrahedron_quadrature::Rule rule);
+    tetrahedron10(tetrahedron_quadrature::point const p);
 
     virtual int nodes() const override final { return 10; }
 
