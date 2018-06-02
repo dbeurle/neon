@@ -46,10 +46,18 @@ using matrix2x = Eigen::Matrix<double, 2, Eigen::Dynamic>;
 /// Compile time fixed rows for nodal coordinates in three dimensions
 using matrix3x = Eigen::Matrix<double, 3, Eigen::Dynamic>;
 
+/// Fixed size vector of variable length
 using vector = Eigen::Matrix<double, Eigen::Dynamic, 1>;
+/// Fixed size vector of length two
 using vector2 = Eigen::Vector2d;
+/// Fixed size vector of length three
 using vector3 = Eigen::Vector3d;
+/// Fixed size vector of length four
 using vector4 = Eigen::Vector4d;
+/// Fixed size vector of length five
+using vector5 = Eigen::Matrix<double, 5, 1>;
+/// Fixed size vector of length six
 using vector6 = Eigen::Matrix<double, 6, 1>;
+/// Fixed size vector of length sixteen
 using vector16 = Eigen::Matrix<double, 16, 1>;
 }
