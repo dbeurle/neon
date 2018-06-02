@@ -14,7 +14,7 @@ namespace neon::mechanical::solid
 {
 nonaffine_microsphere::nonaffine_microsphere(std::shared_ptr<internal_variables_t>& variables,
                                              json const& material_data,
-                                             unit_sphere_quadrature::Rule const rule)
+                                             unit_sphere_quadrature::point const rule)
     : affine_microsphere(variables, material_data, rule), material(material_data)
 {
     if (!material_data.count("NonAffineStretchParameter"))

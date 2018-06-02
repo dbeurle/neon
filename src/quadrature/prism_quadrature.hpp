@@ -8,10 +8,10 @@ namespace neon
 class prism_quadrature : public volume_quadrature
 {
 public:
-    /** Available quadrature rules for this element type */
-    enum class Rule { OnePoint, SixPoint };
+    /// Available quadrature rules for this element type
+    enum class point { one, six, nine };
 
 public:
-    explicit prism_quadrature(Rule rule);
+    explicit prism_quadrature(point const p);
 };
 }

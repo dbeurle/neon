@@ -12,7 +12,7 @@ namespace neon
 class hexahedron8 : public volume_interpolation
 {
 public:
-    explicit hexahedron8(hexahedron_quadrature::Rule rule);
+    explicit hexahedron8(hexahedron_quadrature::point const p);
 
     virtual int nodes() const override final { return 8; }
 
@@ -42,7 +42,7 @@ protected:
 class hexahedron20 : public volume_interpolation
 {
 public:
-    explicit hexahedron20(hexahedron_quadrature::Rule rule);
+    explicit hexahedron20(hexahedron_quadrature::point const p);
 
     int nodes() const override final { return 20; }
 
@@ -59,7 +59,7 @@ protected:
 class hexahedron27 : public volume_interpolation
 {
 public:
-    explicit hexahedron27(hexahedron_quadrature::Rule rule);
+    explicit hexahedron27(hexahedron_quadrature::point const p);
 
     int nodes() const override final { return 27; }
 

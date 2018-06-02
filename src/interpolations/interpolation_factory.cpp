@@ -42,40 +42,39 @@ std::unique_ptr<volume_interpolation> make_volume_interpolation(element_topology
     {
         case element_topology::hexahedron8:
         {
-            return std::make_unique<hexahedron8>(is_reduced
-                                                     ? hexahedron_quadrature::Rule::OnePoint
-                                                     : hexahedron_quadrature::Rule::EightPoint);
+            return std::make_unique<hexahedron8>(is_reduced ? hexahedron_quadrature::point::one
+                                                            : hexahedron_quadrature::point::eight);
         }
         case element_topology::hexahedron20:
         {
-            return std::make_unique<hexahedron20>(
-                is_reduced ? hexahedron_quadrature::Rule::EightPoint
-                           : hexahedron_quadrature::Rule::TwentySevenPoint);
+            return std::make_unique<hexahedron20>(is_reduced
+                                                      ? hexahedron_quadrature::point::eight
+                                                      : hexahedron_quadrature::point::twentyseven);
         }
         case element_topology::hexahedron27:
         {
-            return std::make_unique<hexahedron27>(
-                is_reduced ? hexahedron_quadrature::Rule::EightPoint
-                           : hexahedron_quadrature::Rule::TwentySevenPoint);
+            return std::make_unique<hexahedron27>(is_reduced
+                                                      ? hexahedron_quadrature::point::eight
+                                                      : hexahedron_quadrature::point::twentyseven);
         }
         case element_topology::tetrahedron4:
         {
-            return std::make_unique<tetrahedron4>(tetrahedron_quadrature::Rule::OnePoint);
+            return std::make_unique<tetrahedron4>(tetrahedron_quadrature::point::one);
         }
         case element_topology::tetrahedron10:
         {
-            return std::make_unique<tetrahedron10>(is_reduced
-                                                       ? tetrahedron_quadrature::Rule::OnePoint
-                                                       : tetrahedron_quadrature::Rule::FourPoint);
+            return std::make_unique<tetrahedron10>(is_reduced ? tetrahedron_quadrature::point::one
+                                                              : tetrahedron_quadrature::point::four);
         }
         case element_topology::prism6:
         {
-            return std::make_unique<prism6>(prism_quadrature::Rule::OnePoint);
+            return std::make_unique<prism6>(is_reduced ? prism_quadrature::point::one
+                                                       : prism_quadrature::point::six);
         }
         case element_topology::prism15:
         {
-            return std::make_unique<prism15>(is_reduced ? prism_quadrature::Rule::OnePoint
-                                                        : prism_quadrature::Rule::SixPoint);
+            return std::make_unique<prism15>(is_reduced ? prism_quadrature::point::six
+                                                        : prism_quadrature::point::nine);
         }
         case element_topology::prism18:
         case element_topology::pyramid5:
@@ -107,29 +106,29 @@ std::unique_ptr<surface_interpolation> make_surface_interpolation(element_topolo
         case element_topology::quadrilateral4:
         {
             return std::make_unique<quadrilateral4>(is_reduced
-                                                        ? quadrilateral_quadrature::Rule::OnePoint
-                                                        : quadrilateral_quadrature::Rule::FourPoint);
+                                                        ? quadrilateral_quadrature::point::one
+                                                        : quadrilateral_quadrature::point::four);
         }
         case element_topology::triangle3:
         {
-            return std::make_unique<triangle3>(triangle_quadrature::Rule::OnePoint);
+            return std::make_unique<triangle3>(triangle_quadrature::point::one);
         }
         case element_topology::triangle6:
         {
-            return std::make_unique<triangle6>(is_reduced ? triangle_quadrature::Rule::OnePoint
-                                                          : triangle_quadrature::Rule::ThreePoint);
+            return std::make_unique<triangle6>(is_reduced ? triangle_quadrature::point::one
+                                                          : triangle_quadrature::point::three);
         }
         case element_topology::quadrilateral8:
         {
             return std::make_unique<quadrilateral8>(is_reduced
-                                                        ? quadrilateral_quadrature::Rule::FourPoint
-                                                        : quadrilateral_quadrature::Rule::NinePoint);
+                                                        ? quadrilateral_quadrature::point::four
+                                                        : quadrilateral_quadrature::point::nine);
         }
         case element_topology::quadrilateral9:
         {
             return std::make_unique<quadrilateral9>(is_reduced
-                                                        ? quadrilateral_quadrature::Rule::FourPoint
-                                                        : quadrilateral_quadrature::Rule::NinePoint);
+                                                        ? quadrilateral_quadrature::point::four
+                                                        : quadrilateral_quadrature::point::nine);
         }
         default:
         {
@@ -151,12 +150,12 @@ std::unique_ptr<line_interpolation> make_line_interpolation(element_topology con
     {
         case element_topology::line2:
         {
-            return std::make_unique<line2>(line_quadrature::Rule::OnePoint);
+            return std::make_unique<line2>(line_quadrature::point::one);
         }
         case element_topology::line3:
         {
-            return std::make_unique<line3>(is_reduced ? line_quadrature::Rule::OnePoint
-                                                      : line_quadrature::Rule::TwoPoint);
+            return std::make_unique<line3>(is_reduced ? line_quadrature::point::one
+                                                      : line_quadrature::point::two);
         }
         default:
             throw std::runtime_error("Line element shape not implemented");

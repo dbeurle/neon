@@ -3,8 +3,8 @@
 
 namespace neon
 {
-tetrahedron4::tetrahedron4(tetrahedron_quadrature::Rule rule)
-    : volume_interpolation(std::make_unique<tetrahedron_quadrature>(rule))
+tetrahedron4::tetrahedron4(tetrahedron_quadrature::point const p)
+    : volume_interpolation(std::make_unique<tetrahedron_quadrature>(p))
 {
     this->precompute_shape_functions();
 }
@@ -44,8 +44,8 @@ void tetrahedron4::precompute_shape_functions()
     extrapolation = matrix::Ones(nodes(), 1);
 }
 
-tetrahedron10::tetrahedron10(tetrahedron_quadrature::Rule rule)
-    : volume_interpolation(std::make_unique<volume_quadrature>(tetrahedron_quadrature(rule)))
+tetrahedron10::tetrahedron10(tetrahedron_quadrature::point const p)
+    : volume_interpolation(std::make_unique<volume_quadrature>(tetrahedron_quadrature(p)))
 {
     this->precompute_shape_functions();
 }

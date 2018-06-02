@@ -17,7 +17,7 @@ using neon::mechanical::solid::gaussian_ageing_affine_microsphere;
 gaussian_ageing_affine_microsphere::gaussian_ageing_affine_microsphere(
     std::shared_ptr<internal_variables_t>& variables,
     json const& material_data,
-    unit_sphere_quadrature::Rule const rule)
+    unit_sphere_quadrature::point const rule)
     : gaussian_affine_microsphere{variables, material_data, rule},
       material{material_data},
       shear_moduli{variables->entries(), {material.shear_modulus()}},
