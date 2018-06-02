@@ -44,14 +44,16 @@ public:
     virtual void update_internal_variables(double const time_step_size) override;
 
 private:
-    ageing_micromechanical_elastomer material; /// Material with micromechanical parameters
-
-    std::vector<shear_modulus_composition> shear_moduli; /// Quadrature point active shear moduli
-    std::vector<double> inactive_shear_moduli;           /// Quadrature point inactive shear moduli
-
-    std::vector<value_pair> segments; /// Quadrature point average segment
-
-    std::vector<deformation_composition> intermediate_deformations; /// Secondary network variables
+    /// Material with micromechanical parameters
+    ageing_micromechanical_elastomer material;
+    /// Quadrature point active shear moduli
+    std::vector<shear_modulus_composition> shear_moduli;
+    /// Quadrature point inactive shear moduli
+    std::vector<double> inactive_shear_moduli;
+    /// Quadrature point average segment
+    std::vector<value_pair> segments;
+    /// Secondary network variables
+    std::vector<deformation_composition> intermediate_deformations;
 };
 /** \} */
 }

@@ -11,7 +11,6 @@
 
 #include <cassert>
 #include <numeric>
-#include <iostream>
 
 using neon::mechanical::solid::gaussian_ageing_affine_microsphere;
 
@@ -22,7 +21,7 @@ gaussian_ageing_affine_microsphere::gaussian_ageing_affine_microsphere(
     : gaussian_affine_microsphere{variables, material_data, rule},
       material{material_data},
       shear_moduli{variables->entries(), {material.shear_modulus()}},
-      inactive_shear_moduli{variables->entries(), 0.0},
+      inactive_shear_moduli(variables->entries(), 0.0),
       segments{variables->entries(), {material.segments_per_chain(), 0.0}},
       intermediate_deformations{variables->entries(), {matrix3::Identity()}}
 {
@@ -71,20 +70,13 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
             auto& [N_a, N_ia] = segments[l];
 
             // Define the right hand side of the ageing evolution equations
-            auto integrator = runge_kutta_fourth_order([&](auto const t, vector y) -> vector {
-                assert(y.size() >= 5);
-
-                auto const active_set_count = y.size() - 3;
-
-                // Extract the previous active sets
-                vector const n_a = y.head(active_set_count - 1);
-
-                // Inactive set
-                double const n_ia = y(active_set_count);
-                // Average number of segments in active set
-                auto const N_a = y(active_set_count + 1);
-                // Average number of segments in inactive set
-                auto const N_ia = y(active_set_count + 2);
+            auto integrator = runge_kutta_fourth_order([&](auto const t, vector5 y) -> vector5 {
+                // Unpack the vector
+                auto const active_chains = y(0);
+                auto const inactive_chains = y(1);
+                auto const reduction = y(2);
+                auto const active_segments = y(3);
+                auto const inactive_segments = y(4);
 
                 // Inactive set recombination
                 auto const alpha = 1.0 - std::pow(1.0 - p_c, N_ia + 1.0);
@@ -95,36 +87,39 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
                 // Inactive set generation
                 auto const nu = 1.0 - std::pow(1.0 - p_s, N_ia);
 
-                vector const f1 = -n_a * (beta + 2.0 * eta);
-                // Latest active set created
-                auto const f2 = alpha * n_ia + 4.0 * eta * n_a.sum();
+                auto const chain_formation_rate = alpha * inactive_chains + 4 * eta * active_chains;
+
+                // Active set rate of change
+                auto const f1 = chain_formation_rate - active_chains * (beta + 2 * eta);
                 // Inactive set rate of change
-                auto const f3 = 2.0 * (beta * n_a.sum() + n_ia * (nu - alpha));
-                // Total rate of change for the active sets (d (n_a) / dt)
-                auto const f4 = (2.0 * eta - beta) * n_a.sum() + alpha * n_ia;
+                auto const f2 = 2 * (beta * active_chains + inactive_chains * (nu - alpha));
+                // Reduction factor rate of change
+                auto const f3 = -reduction * (beta + 2 * eta);
                 // Active set average segments per chain rate
-                auto const g1 = (-N_a * beta * n_a.sum() + 2.0 * alpha * n_ia * N_ia - N_a * f4)
-                                / n_a.sum();
+                auto const f4 = (-active_segments * beta * active_chains
+                                 + 2 * alpha * inactive_chains * inactive_segments
+                                 - active_segments * f1)
+                                / active_chains;
                 // Inactive set average segments per chain rate
-                auto const g2 = n_ia > 1.0e-8
-                                    ? (beta * N_a * n_a.sum() - 2.0 * alpha * N_ia * n_ia - N_ia * f3)
-                                          / n_ia
+                auto const f5 = inactive_chains > 1.0e-8
+                                    ? (beta * active_segments * active_chains
+                                       - 2.0 * alpha * inactive_segments * inactive_chains
+                                       - inactive_segments * f2)
+                                          / inactive_chains
                                     : 0.0;
 
                 // Repack the data into y and return this as the update
-                y.head(f1.size()) = f1;
-                y(f1.size()) = f2;
-                // Inactive set
-                y(f1.size() + 1) = f3;
-                // Segments
-                y(f1.size() + 2) = g1;
-                y(f1.size() + 3) = g2;
+                y(0) = f1;
+                y(1) = f2;
+                y(2) = f3;
+                y(3) = f4;
+                y(4) = f5;
 
                 return y;
             });
 
             // Fill a Eigen vector (active sets, inactive set, segments (active and inactive))
-            vector z(shear_moduli_history.size() + 3);
+            vector5 z;
 
             std::copy(begin(shear_moduli_history), end(shear_moduli_history), z.data());
 
