@@ -22,17 +22,16 @@ gaussian_ageing_affine_microsphere::gaussian_ageing_affine_microsphere(
     : gaussian_affine_microsphere{variables, material_data, rule},
       material{material_data},
       shear_moduli{variables->entries(), {material.shear_modulus()}},
-      inactive_shear_moduli(variables->entries(), 0.0),
+      inactive_shear_moduli{variables->entries(), 0.0},
       segments{variables->entries(), {material.segments_per_chain(), 0.0}},
       intermediate_deformations{variables->entries(), {matrix3::Identity()}}
 {
-    variables->add(internal_variables_t::scalar::active_chains);
-    variables->add(internal_variables_t::scalar::inactive_chains);
+    variables->add(internal_variables_t::scalar::active_chains,
+                   internal_variables_t::scalar::inactive_chains,
+                   internal_variables_t::scalar::active_segments,
+                   internal_variables_t::scalar::inactive_segments);
 
-    variables->add(internal_variables_t::scalar::active_segment_average);
-    variables->add(internal_variables_t::scalar::inactive_segment_average);
-
-    auto& active_chains = variables->fetch(internal_variables_t::scalar::active_chains);
+    auto& active_chains = variables->get(internal_variables_t::scalar::active_chains);
 
     std::fill(begin(active_chains), end(active_chains), material.shear_modulus());
 
@@ -50,7 +49,7 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
 
     auto const& det_deformation_gradients = variables->get(internal_variables_t::scalar::DetF);
 
-    auto& active_chains = variables->fetch(internal_variables_t::scalar::active_chains);
+    auto& active_chains = variables->get(internal_variables_t::scalar::active_chains);
 
     auto const K{material.bulk_modulus()};
 
@@ -82,10 +81,8 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
 
                 // Inactive set
                 double const n_ia = y(active_set_count);
-
                 // Average number of segments in active set
                 auto const N_a = y(active_set_count + 1);
-
                 // Average number of segments in inactive set
                 auto const N_ia = y(active_set_count + 2);
 
@@ -99,20 +96,15 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
                 auto const nu = 1.0 - std::pow(1.0 - p_s, N_ia);
 
                 vector const f1 = -n_a * (beta + 2.0 * eta);
-
                 // Latest active set created
                 auto const f2 = alpha * n_ia + 4.0 * eta * n_a.sum();
-
                 // Inactive set rate of change
                 auto const f3 = 2.0 * (beta * n_a.sum() + n_ia * (nu - alpha));
-
                 // Total rate of change for the active sets (d (n_a) / dt)
                 auto const f4 = (2.0 * eta - beta) * n_a.sum() + alpha * n_ia;
-
                 // Active set average segments per chain rate
                 auto const g1 = (-N_a * beta * n_a.sum() + 2.0 * alpha * n_ia * N_ia - N_a * f4)
                                 / n_a.sum();
-
                 // Inactive set average segments per chain rate
                 auto const g2 = n_ia > 1.0e-8
                                     ? (beta * N_a * n_a.sum() - 2.0 * alpha * N_ia * n_ia - N_ia * f3)
@@ -161,11 +153,11 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
             intermediate_deformations[l].push_back(F);
 
             // Update the history variables for plotting
-            variables->fetch(internal_variables_t::scalar::active_chains)[l] = std::
+            variables->get(internal_variables_t::scalar::active_chains)[l] = std::
                 accumulate(begin(shear_moduli_history), end(shear_moduli_history), 0.0);
-            variables->fetch(internal_variables_t::scalar::inactive_chains)[l] = z(z.size() - 3);
-            variables->fetch(internal_variables_t::scalar::active_segment_average)[l] = N_a;
-            variables->fetch(internal_variables_t::scalar::inactive_segment_average)[l] = N_ia;
+            variables->get(internal_variables_t::scalar::inactive_chains)[l] = z(z.size() - 3);
+            variables->get(internal_variables_t::scalar::active_segments)[l] = N_a;
+            variables->get(internal_variables_t::scalar::inactive_segments)[l] = N_ia;
         }
         // Stress computation over the secondary network deformation history
         // clang-format off

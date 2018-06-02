@@ -127,8 +127,8 @@ private:
                                   {"Damage", variable_type::scalar::Damage},
                                   {"ActiveChains", variable_type::scalar::active_chains},
                                   {"InactiveChains", variable_type::scalar::inactive_chains},
-                                  {"ActiveSegments", variable_type::scalar::active_segment_average},
-                                  {"InactiveSegments", variable_type::scalar::inactive_segment_average},
+                                  {"ActiveSegments", variable_type::scalar::active_segments},
+                                  {"InactiveSegments", variable_type::scalar::inactive_segments},
                                   {"EnergyReleaseRate", variable_type::scalar::EnergyReleaseRate}};
 
     tensor_map_t const tensor_map{{"CauchyStress", variable_type::second::cauchy_stress},
