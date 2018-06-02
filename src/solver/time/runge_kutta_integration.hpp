@@ -9,9 +9,9 @@
 namespace neon
 {
 /// Perform a second order Runge-Kutta step for the given type.
-/// The type \p functor must accept time and the value.
-template <typename functor>
-auto runge_kutta_second_order(functor&& f)
+/// The type \p function must accept time and the value.
+template <typename function>
+auto runge_kutta_second_order(function&& f)
 {
     return [f](auto const t, auto const y, auto const dt) {
         static_assert(std::is_floating_point<decltype(t)>::value);
@@ -24,9 +24,9 @@ auto runge_kutta_second_order(functor&& f)
 }
 
 /// Perform a fourth order Runge-Kutta step for the given type.
-/// The type \p functor must accept time and the value.
-template <typename functor>
-auto runge_kutta_fourth_order(functor&& f)
+/// The type \p function must accept time and the value.
+template <typename function>
+auto runge_kutta_fourth_order(function&& f)
 {
     return [f](auto const t, auto const y, auto const dt) {
         static_assert(std::is_floating_point<decltype(t)>::value);
@@ -40,12 +40,10 @@ auto runge_kutta_fourth_order(functor&& f)
     };
 }
 
-/**
- * Perform the Dorman-Prince 4th order embedded Runge-Kutta time discretisation
- * \cite DormandPrince1980
- */
-template <typename functor>
-auto runge_kutta_fourth_fifth_order(functor&& f, double const error_tolerance = 1.0e-5)
+/// Perform the Dorman-Prince 4th order embedded Runge-Kutta time discretisation
+/// \cite DormandPrince1980
+template <typename function>
+auto runge_kutta_fourth_fifth_order(function&& f, double const error_tolerance = 1.0e-5)
 {
     return [f, error_tolerance](auto t, auto const y0, auto dt) {
         static_assert(std::is_floating_point<decltype(t)>::value);
