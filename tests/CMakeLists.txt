@@ -20,7 +20,8 @@ foreach(test
              nodal_variables
              tensor
              time_stepping
-             time_integrators)
+             time_integrators
+             trapezoidal)
 
     add_executable(${test}_test ${test}.cpp)
     add_dependencies(${test}_test neon catch_main)
