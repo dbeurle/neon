@@ -12,8 +12,8 @@ namespace neon::mechanical
 /// \param rhea Shape function gradients at quadrature point
 /// \param configuration Configuration of the element (coordinates)
 template <typename ShapeFunctionDerivatives, typename Configuration>
-[[nodiscard]] inline auto local_deformation_gradient(ShapeFunctionDerivatives const& rhea,
-                                                     Configuration const& configuration)
+[[nodiscard]] auto local_deformation_gradient(ShapeFunctionDerivatives const& rhea,
+                                              Configuration const& configuration)
 {
     return configuration * rhea;
 }

@@ -1,7 +1,7 @@
 
 #include "mesh/node_ordering_adapter.hpp"
 
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 
 #include <unordered_map>
 
@@ -19,12 +19,14 @@ std::unordered_map<int, element_topology> const gmsh_converter{{1, element_topol
                                                                {10, element_topology::quadrilateral9},
                                                                {12, element_topology::hexahedron27},
                                                                {13, element_topology::prism18},
+                                                               {15, element_topology::point},
                                                                {16, element_topology::quadrilateral8},
                                                                {18, element_topology::prism15},
                                                                {17, element_topology::hexahedron20}};
 
 std::unordered_map<element_topology, VTKCellType> const
-    vtk_converter{{element_topology::triangle3, VTK_TRIANGLE},
+    vtk_converter{{element_topology::line2, VTK_LINE},
+                  {element_topology::triangle3, VTK_TRIANGLE},
                   {element_topology::quadrilateral4, VTK_QUAD},
                   {element_topology::quadrilateral8, VTK_QUADRATIC_QUAD},
                   {element_topology::quadrilateral9, VTK_BIQUADRATIC_QUAD},
@@ -38,7 +40,7 @@ std::unordered_map<element_topology, VTKCellType> const
                   {element_topology::hexahedron20, VTK_QUADRATIC_HEXAHEDRON},
                   {element_topology::hexahedron27, VTK_TRIQUADRATIC_HEXAHEDRON}};
 
-void convert_from_gmsh(indices& nodal_connectivity, element_topology const topology)
+void convert_from_gmsh(indices& node_indices, element_topology const topology)
 {
     // Reorder based on the differences between the local node numbering
     // provided from Section 9.3 Node ordering
@@ -47,43 +49,78 @@ void convert_from_gmsh(indices& nodal_connectivity, element_topology const topol
     {
         case element_topology::tetrahedron10:
         {
-            nodal_connectivity.row(4).swap(nodal_connectivity.row(7));
-            nodal_connectivity.row(4).swap(nodal_connectivity.row(5));
-            nodal_connectivity.row(5).swap(nodal_connectivity.row(8));
-            nodal_connectivity.row(8).swap(nodal_connectivity.row(9));
-            nodal_connectivity.row(6).swap(nodal_connectivity.row(9));
+            node_indices.row(4).swap(node_indices.row(7));
+            node_indices.row(4).swap(node_indices.row(5));
+            node_indices.row(5).swap(node_indices.row(8));
+            node_indices.row(8).swap(node_indices.row(9));
+            node_indices.row(6).swap(node_indices.row(9));
             [[fallthrough]];
         }
         case element_topology::tetrahedron4:
         {
-            nodal_connectivity.row(0).swap(nodal_connectivity.row(3));
-            nodal_connectivity.row(0).swap(nodal_connectivity.row(2));
-            nodal_connectivity.row(0).swap(nodal_connectivity.row(1));
-
-            break;
-        }
-        case element_topology::prism6:
-        {
-            nodal_connectivity.row(0).swap(nodal_connectivity.row(1));
-            nodal_connectivity.row(3).swap(nodal_connectivity.row(4));
+            node_indices.row(0).swap(node_indices.row(3));
+            node_indices.row(0).swap(node_indices.row(2));
+            node_indices.row(0).swap(node_indices.row(1));
 
             break;
         }
         case element_topology::prism15:
         {
+            /*
+               neon ordering
+                                  9   @
+                                   *  |  *
+                                *     |   *
+                          6  @    12  @     @  14
+                          *           |      *
+                       *              |        *
+                 0  @             10  @----@----@  11
+                    | *              /    13   /
+                    |   *         /          /
+                    |     *    @  7    8   @
+                 3  @    5 @ /           /
+                    |     /   *        /
+                    |  /        *    /
+                    @------@------@
+                    1      4      2
+
+               gmsh ordering
+
+                           w
+                           ^
+                           |
+                           3
+                         ,/|`\
+                       12  |  13
+                     ,/    |    `\
+                    4------14-----5
+                    |      8      |
+                    |    ,/|`\    |
+                    |  ,/  |  `\  |
+                    |,/    |    `\|
+                   10      |      11
+                 ,/ |      0      | `\
+                u   |    ,/ `\    |    v
+                    |  ,6     `7  |
+                    |,/         `\|
+                    1------9------2
+
+            */
+
             // -1 face
-            nodal_connectivity.row(0).swap(nodal_connectivity.row(1));
-            nodal_connectivity.row(3).swap(nodal_connectivity.row(6));
-            nodal_connectivity.row(7).swap(nodal_connectivity.row(4));
-            nodal_connectivity.row(5).swap(nodal_connectivity.row(9));
+            node_indices.row(3).swap(node_indices.row(6));
+            node_indices.row(4).swap(node_indices.row(9));
+            node_indices.row(5).swap(node_indices.row(7));
 
             // mid face
-            nodal_connectivity.row(8).swap(nodal_connectivity.row(7));
-            nodal_connectivity.row(10).swap(nodal_connectivity.row(6));
-            nodal_connectivity.row(11).swap(nodal_connectivity.row(8));
+            node_indices.row(6).swap(node_indices.row(8));
+            node_indices.row(8).swap(node_indices.row(11));
+            node_indices.row(10).swap(node_indices.row(7));
 
             // +1 face
-            nodal_connectivity.row(11).swap(nodal_connectivity.row(9));
+            node_indices.row(13).swap(node_indices.row(14));
+            node_indices.row(10).swap(node_indices.row(11));
+            node_indices.row(10).swap(node_indices.row(9));
 
             break;
         }
@@ -120,10 +157,10 @@ void convert_from_gmsh(indices& nodal_connectivity, element_topology const topol
 
             */
 
-            nodal_connectivity.row(21).swap(nodal_connectivity.row(25));
-            nodal_connectivity.row(25).swap(nodal_connectivity.row(22));
-            nodal_connectivity.row(24).swap(nodal_connectivity.row(25));
-            nodal_connectivity.row(23).swap(nodal_connectivity.row(25));
+            node_indices.row(21).swap(node_indices.row(25));
+            node_indices.row(25).swap(node_indices.row(22));
+            node_indices.row(24).swap(node_indices.row(25));
+            node_indices.row(23).swap(node_indices.row(25));
 
             [[fallthrough]];
         }
@@ -159,18 +196,18 @@ void convert_from_gmsh(indices& nodal_connectivity, element_topology const topol
                    4----12----5
             */
 
-            nodal_connectivity.row(11).swap(nodal_connectivity.row(9));
-            nodal_connectivity.row(13).swap(nodal_connectivity.row(10));
+            node_indices.row(11).swap(node_indices.row(9));
+            node_indices.row(13).swap(node_indices.row(10));
 
-            nodal_connectivity.row(12).swap(nodal_connectivity.row(17));
-            nodal_connectivity.row(16).swap(nodal_connectivity.row(12));
-            nodal_connectivity.row(16).swap(nodal_connectivity.row(13));
+            node_indices.row(12).swap(node_indices.row(17));
+            node_indices.row(16).swap(node_indices.row(12));
+            node_indices.row(16).swap(node_indices.row(13));
 
-            nodal_connectivity.row(13).swap(nodal_connectivity.row(15));
-            nodal_connectivity.row(13).swap(nodal_connectivity.row(19));
+            node_indices.row(13).swap(node_indices.row(15));
+            node_indices.row(13).swap(node_indices.row(19));
 
-            nodal_connectivity.row(13).swap(nodal_connectivity.row(18));
-            nodal_connectivity.row(14).swap(nodal_connectivity.row(18));
+            node_indices.row(13).swap(node_indices.row(18));
+            node_indices.row(14).swap(node_indices.row(18));
 
             break;
         }
@@ -179,20 +216,39 @@ void convert_from_gmsh(indices& nodal_connectivity, element_topology const topol
     }
 }
 
-indices convert_to_vtk(indices nodal_connectivity, element_topology const topology)
+indices convert_to_vtk(indices node_indices, element_topology const topology)
 {
     switch (topology)
     {
         case element_topology::tetrahedron4:
         {
-            nodal_connectivity.row(0).swap(nodal_connectivity.row(1));
+            node_indices.row(0).swap(node_indices.row(1));
 
             break;
         }
         case element_topology::tetrahedron10:
         {
-            nodal_connectivity.row(6).swap(nodal_connectivity.row(8));
-            nodal_connectivity.row(8).swap(nodal_connectivity.row(9));
+            node_indices.row(6).swap(node_indices.row(8));
+            node_indices.row(8).swap(node_indices.row(9));
+
+            break;
+        }
+        case element_topology::prism15:
+        {
+            // -1 face
+            node_indices.row(3).swap(node_indices.row(6));
+            node_indices.row(4).swap(node_indices.row(7));
+            node_indices.row(5).swap(node_indices.row(8));
+
+            // mid face
+            node_indices.row(3).swap(node_indices.row(12));
+            node_indices.row(4).swap(node_indices.row(13));
+            node_indices.row(5).swap(node_indices.row(14));
+
+            // +1 face
+            node_indices.row(3).swap(node_indices.row(9));
+            node_indices.row(4).swap(node_indices.row(10));
+            node_indices.row(5).swap(node_indices.row(11));
 
             break;
         }
@@ -231,15 +287,15 @@ indices convert_to_vtk(indices nodal_connectivity, element_topology const topolo
              *  |      |
              *  0-- 8--1
              */
-            nodal_connectivity.row(21).swap(nodal_connectivity.row(25));
-            nodal_connectivity.row(20).swap(nodal_connectivity.row(24));
+            node_indices.row(21).swap(node_indices.row(25));
+            node_indices.row(20).swap(node_indices.row(24));
 
             break;
         }
         default:
             break;
     }
-    return nodal_connectivity;
+    return node_indices;
 }
 
 element_topology gmsh_type_to_enum(std::int32_t const element_code)

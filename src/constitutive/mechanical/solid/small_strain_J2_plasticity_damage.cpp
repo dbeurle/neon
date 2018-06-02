@@ -4,7 +4,7 @@
 #include "numeric/mechanics"
 
 #include "io/json.hpp"
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 
 #include <range/v3/view/transform.hpp>
 #include <tbb/parallel_for.h>
@@ -17,8 +17,8 @@ small_strain_J2_plasticity_damage::small_strain_J2_plasticity_damage(
     std::shared_ptr<internal_variables_t>& variables, json const& material_data)
     : small_strain_J2_plasticity(variables, material_data), material(material_data)
 {
-    variables->add(internal_variables_t::Tensor::BackStress,
-                   internal_variables_t::Tensor::KinematicHardening,
+    variables->add(internal_variables_t::second::BackStress,
+                   internal_variables_t::second::KinematicHardening,
                    internal_variables_t::scalar::Damage,
                    internal_variables_t::scalar::EnergyReleaseRate);
 }
@@ -33,25 +33,25 @@ void small_strain_J2_plasticity_damage::update_internal_variables(double const t
           cauchy_stresses,
           back_stresses,
           accumulated_kinematic_stresses] = variables
-                                                ->fetch(internal_variables_t::Tensor::LinearisedPlasticStrain,
-                                                        internal_variables_t::Tensor::LinearisedStrain,
-                                                        internal_variables_t::Tensor::Cauchy,
-                                                        internal_variables_t::Tensor::BackStress,
-                                                        internal_variables_t::Tensor::KinematicHardening);
+                                                ->get(internal_variables_t::second::LinearisedPlasticStrain,
+                                                        internal_variables_t::second::LinearisedStrain,
+                                                        internal_variables_t::second::cauchy_stress,
+                                                        internal_variables_t::second::BackStress,
+                                                        internal_variables_t::second::KinematicHardening);
 
     // Retrieve the accumulated internal variables
     auto [accumulated_plastic_strains,
           von_mises_stresses,
           scalar_damages,
-          energy_release_rates] = variables->fetch(internal_variables_t::scalar::EffectivePlasticStrain,
+          energy_release_rates] = variables->get(internal_variables_t::scalar::EffectivePlasticStrain,
                                                    internal_variables_t::scalar::VonMisesStress,
                                                    internal_variables_t::scalar::Damage,
                                                    internal_variables_t::scalar::EnergyReleaseRate);
 
-    auto& tangent_operators = variables->fetch(internal_variables_t::rank4::tangent_operator);
+    auto& tangent_operators = variables->get(internal_variables_t::fourth::tangent_operator);
 
     // Compute the linear strain gradient from the displacement gradient
-    strains = variables->fetch(internal_variables_t::Tensor::DisplacementGradient)
+    strains = variables->get(internal_variables_t::second::DisplacementGradient)
               | ranges::view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
     // Perform the update algorithm for each quadrature point
@@ -135,10 +135,12 @@ double small_strain_J2_plasticity_damage::perform_radial_return(matrix3& cauchy_
     // TODO: double check kinetic kinematic
     M.block<6, 6>(2, 2) = voigt::kinetic::fourth_order_identity();
 
-    auto const kp = material.plasticity_viscous_multiplier();
+    auto const sp = material.plasticity_viscous_denominator();
     auto const np = material.plasticity_viscous_exponent();
-    auto const kd = material.damage_viscous_multiplier();
+    auto const kp = std::pow(sp, -np); // plasticity viscous multiplier
+    auto const sd = material.damage_viscous_denominator();
     auto const nd = material.damage_viscous_exponent();
+    auto const kd = std::pow(sd, -nd); // damage viscous multiplier
     auto const C = material.kinematic_hardening_modulus();
     auto const gamma = material.softening_multiplier();
 
@@ -206,6 +208,14 @@ double small_strain_J2_plasticity_damage::perform_radial_return(matrix3& cauchy_
         y -= M.fullPivLu().solve(f);
 
         iterations++;
+    }
+
+    // ensure that the damage does not exceed one
+    if (y(14) > 1)
+    {
+        std::cout << "Damage is greater than one\n";
+        std::cout << "Consider decreasing the load\n";
+        throw computational_error("Radial return failure\n");
     }
 
     if (iterations == max_iterations)

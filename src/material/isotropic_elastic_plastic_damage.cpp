@@ -1,7 +1,7 @@
 
 #include "isotropic_elastic_plastic_damage.hpp"
 
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 
 #include "io/json.hpp"
 
@@ -22,25 +22,24 @@ isotropic_elastic_plastic_damage::isotropic_elastic_plastic_damage(json const& m
     {
         throw std::domain_error("\"PlasticityViscousExponent\" needs to be specified");
     }
-    if (!material_data.count("PlasticityViscousMultiplier"))
+    if (!material_data.count("PlasticityViscousDenominator"))
     {
-        throw std::domain_error("\"PlasticityViscousMultiplier\" needs to be specified");
+        throw std::domain_error("\"PlasticityViscousDenominator\" needs to be specified");
     }
     if (!material_data.count("DamageViscousExponent"))
     {
         throw std::domain_error("\"DamageViscousExponent\" needs to be specified");
     }
-    if (!material_data.count("DamageViscousMultiplier"))
+    if (!material_data.count("DamageViscousDenominator"))
     {
-        throw std::domain_error("\"DamageViscousMultiplier\" needs to be specified");
+        throw std::domain_error("\"DamageViscousDenominator\" needs to be specified");
     }
 
     gamma = material_data["SofteningMultiplier"];
     C = material_data["KinematicHardeningModulus"];
     np = material_data["PlasticityViscousExponent"];
-    kp = material_data["PlasticityViscousMultiplier"];
+    sp = material_data["PlasticityViscousDenominator"];
     nd = material_data["DamageViscousExponent"];
-    kd = material_data["DamageViscousMultiplier"];
-    // TODO: may use "IsotropicHardeningModulus" : 400.0e6,
+    sd = material_data["DamageViscousDenominator"];
 }
 }

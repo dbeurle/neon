@@ -3,7 +3,7 @@
 
 #include "numeric/dense_matrix.hpp"
 
-/// \file Projection.hpp
+/// \file projection.hpp
 
 namespace neon::geometry
 {

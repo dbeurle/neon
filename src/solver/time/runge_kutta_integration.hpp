@@ -9,9 +9,9 @@
 namespace neon
 {
 /// Perform a second order Runge-Kutta step for the given type.
-/// The type \p functor must accept time and the value.
-template <typename functor>
-auto runge_kutta_second_order(functor&& f)
+/// The type \p function must accept time and the value.
+template <typename function>
+auto runge_kutta_second_order(function&& f)
 {
     return [f](auto const t, auto const y, auto const dt) {
         static_assert(std::is_floating_point<decltype(t)>::value);
@@ -24,9 +24,9 @@ auto runge_kutta_second_order(functor&& f)
 }
 
 /// Perform a fourth order Runge-Kutta step for the given type.
-/// The type \p functor must accept time and the value.
-template <typename functor>
-auto runge_kutta_fourth_order(functor&& f)
+/// The type \p function must accept time and the value.
+template <typename function>
+auto runge_kutta_fourth_order(function&& f)
 {
     return [f](auto const t, auto const y, auto const dt) {
         static_assert(std::is_floating_point<decltype(t)>::value);

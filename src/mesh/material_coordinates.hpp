@@ -8,33 +8,34 @@ namespace neon
 class material_coordinates : public nodal_coordinates
 {
 public:
-    /** Construct this class using a set of initial coordinates */
+    /// Construct this class using a set of initial coordinates
     material_coordinates(matrix3x const& initial_coordinates);
 
-    /** @return element reference configuration based on the local node numbers*/
+    /// \return element reference configuration based on the local node numbers
     template <typename indices_type>
     auto const initial_configuration(indices_type const local_nodes) const
     {
         return X(Eigen::placeholders::all, local_nodes);
     }
 
-    /** @return element current configuration based on the local node numbers*/
+    /// \return element current configuration based on the local node numbers
     template <typename indices_type>
     auto const current_configuration(indices_type const local_nodes) const
     {
         return x(Eigen::placeholders::all, local_nodes);
     }
 
-    /** @param u - displacement vector from initial configuration (x,y,z...) */
+    /// \param u - displacement vector from initial configuration (x,y,z...)
     void update_current_configuration(vector const& u);
 
-    /** @param u - displacement vector from initial configuration (x,y...) */
+    /// \param u - displacement vector from initial configuration (x,y...)
     void update_current_xy_configuration(vector const& u);
 
     [[nodiscard]] matrix3x displacement() const;
 
 protected:
-    matrix3x x; //!< Current configuration
+    /// Current configuration
+    matrix3x x;
 };
 
 // template <typename traits>
@@ -47,7 +48,7 @@ protected:
 //     using base_type::fixed_size;
 //
 // public:
-//     /** @return element reference configuration based on the local node numbers*/
+//     /** \return element reference configuration based on the local node numbers*/
 //     auto const initial_configuration(index_view local_nodes) const
 //     {
 //         return X(Eigen::placeholders::all, local_nodes);

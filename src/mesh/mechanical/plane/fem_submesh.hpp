@@ -6,6 +6,7 @@
 #include "constitutive/constitutive_model.hpp"
 #include "constitutive/internal_variables.hpp"
 #include "interpolations/shape_function.hpp"
+#include "traits/mechanics.hpp"
 
 #include <memory>
 #include <utility>
@@ -16,15 +17,16 @@ class material_coordinates;
 
 namespace mechanical::plane
 {
-/**
- * fem_submesh provides the element local routines for computing the system
- * components for a generalised plane strain/stress mechanics discretisation.
- * This class conforms to the CRTP interface \sa detail::fem_submesh
- */
+/// fem_submesh provides the element local routines for computing the system
+/// components for a generalised plane strain/stress mechanics discretisation.
+/// This class conforms to the CRTP interface \sa detail::fem_submesh
 class fem_submesh : public detail::fem_submesh<plane::fem_submesh, plane::internal_variables_t>
 {
 public:
-    /** Constructor providing the material coordinates reference */
+    using traits = mechanical::traits<theory::plane_strain, discretisation::linear>;
+
+public:
+    /// Constructor providing the material coordinates reference
     explicit fem_submesh(json const& material_data,
                          json const& simulation_data,
                          std::shared_ptr<material_coordinates>& mesh_coordinates,
@@ -43,33 +45,32 @@ public:
 
     void save_internal_variables(bool const have_converged);
 
-    [[nodiscard]] auto dofs_per_node() const { return 2; }
+    [[nodiscard]] auto dofs_per_node() const noexcept { return 2; }
 
     [[nodiscard]] auto const& shape_function() const { return *sf; }
 
     [[nodiscard]] auto const& constitutive() const { return *cm; }
 
-    /** @return the tangent consistent stiffness matrix */
+    /// \return the tangent consistent stiffness matrix
     [[nodiscard]] std::pair<index_view, matrix> tangent_stiffness(std::int64_t const element) const;
 
-    /** @return the internal element force */
+    /// \return the internal element force
     [[nodiscard]] std::pair<index_view, vector> internal_force(std::int64_t const element) const;
 
-    /** @return the consistent mass matrix \sa diagonal_mass */
+    /// \return the consistent mass matrix \sa diagonal_mass
     [[nodiscard]] std::pair<index_view, matrix> consistent_mass(std::int64_t const element) const;
 
-    /** @return the consistent mass matrix \sa diagonal_mass */
+    /// \return the consistent mass matrix \sa diagonal_mass
     [[nodiscard]] std::pair<index_view, vector> diagonal_mass(std::int64_t const element) const;
 
-    /** Update the internal variables for the mesh group
-     *  \sa update_deformation_measures()
-     *  \sa update_Jacobian_determinants()
-     *  \sa check_element_distortion()
-     */
+    /// Update the internal variables for the mesh group
+    /// \sa update_deformation_measures()
+    /// \sa update_Jacobian_determinants()
+    /// \sa check_element_distortion()
     void update_internal_variables(double const time_step_size = 1.0);
 
     [[nodiscard]] std::pair<vector, vector> nodal_averaged_variable(
-        internal_variables_t::Tensor const tensor_name) const;
+        internal_variables_t::second const tensor_name) const;
 
     [[nodiscard]] std::pair<vector, vector> nodal_averaged_variable(
         internal_variables_t::scalar const scalar_name) const;
@@ -116,14 +117,17 @@ protected:
 private:
     std::shared_ptr<material_coordinates> mesh_coordinates;
 
-    std::unique_ptr<surface_interpolation> sf; //!< Shape function
+    /// Shape function
+    std::unique_ptr<surface_interpolation> sf;
 
     variable_view view;
     std::shared_ptr<internal_variables_t> variables;
 
-    std::unique_ptr<constitutive_model> cm; //!< Constitutive model
+    /// Constitutive model
+    std::unique_ptr<constitutive_model> cm;
 
-    indices dof_list; //!< Map for the local element to process indices
+    /// Map for the local element to process indices
+    indices dof_list;
 };
 }
 }

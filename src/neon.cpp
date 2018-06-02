@@ -1,7 +1,7 @@
 
 #include "simulation_parser.hpp"
 
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 
 #include <stdexcept>
 #include <termcolor/termcolor.hpp>

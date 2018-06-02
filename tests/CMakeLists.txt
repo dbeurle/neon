@@ -8,16 +8,20 @@ foreach(test
              constitutive
              dof_numbering
              gauss_quadrature
+             linear_beam_theory
              linear_solvers
              eigen_solvers
+             jacobian_determinant
              material
              material_coordinates
              matrix_system
              mesh
              nodal_coordinates
+             nodal_variables
              tensor
              time_stepping
-             time_integrators)
+             time_integrators
+             trapezoidal)
 
     add_executable(${test}_test ${test}.cpp)
 

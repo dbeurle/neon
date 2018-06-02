@@ -9,7 +9,7 @@ A non-linear finite element code.  This project is still under development and i
 
 ## Building
 
-### Docker build
+### Docker
 
 Go to the top level directory in the git repository and enter
 
@@ -45,16 +45,16 @@ Other dependencies are pulled in during build time with `CMake` and include
 For best performance build with native optimisations on for the machine you are using.  This will automatically trigger Eigen to use wider SIMD instruction when available on native architecture at the expense of portability.
 
 The build instructions for debug are
-- `mkdir build && cd build/`
-- `cmake ..`
-- `make all`
+- `$ mkdir build && cd build/`
+- `$ cmake ..`
+- `$ make all`
 
 and for release mode with optimisations
 
-- `mkdir build && cd build/`
-- `cmake -DCMAKE_BUILD_TYPE=Release ..`
-- `make all -j<# cpus>`
-- `make install`
+- `$ mkdir build && cd build/`
+- `$ cmake -DCMAKE_BUILD_TYPE=Release ..`
+- `$ make all -j<# cpus>`
+- `$ sudo make install`
 
 If the code is only used on a particular machine, then machine specification optimisations can be invoked by specifying the `CMake` symbol
 - `-DENABLE_NATIVE=1`
@@ -71,7 +71,44 @@ For checking the successful compilation of the program, invoke the test suite by
 
 in the build directory.
 
+#### Ubuntu 16.04
 
+Install dependencies through the package manager:
+
+`$ sudo apt install cmake git mercurical libz-dev libcurl3-dev libvtk6-dev libtbb-dev libboost-filesystem-dev libmumps-seq-dev libopenblas-dev libarpack2-dev, libscotch-dev, hwloc libhwloc-dev libgfortran-7-dev`
+
+Update to compatible CMake (https://cmake.org/download/).
+
+On 16.04 you need a C++17 compatible compiler:
+
+`$ sudo add-apt-repository ppa:ubuntu-toolchain-r/test`
+`$ sudo apt install g++-7`
+
+Then clone the repository and add
+
+`$ git clone <neon>`
+
+and enter the repository
+
+`$ cd neon/docker-base && sh install_pastix.sh`
+
+After this compiles and fails to install, enter the commands to install and link the libraries
+
+`cd pastix_5.2.3/build && sudo make install && sudo ln -s /usr/local/lib/libpastix.so /usr/lib/libpastix.so`
+
+Provide the `sudo` password when prompted.  Go back to the top `neon` directory and create and enter the `build` directory
+
+`$ mkdir build && cd build`
+
+let `CMake` know want to use `g++-7` as a C++ compiler
+
+`$ export CXX=g++-7; cmake ..`
+
+finally compiling with
+
+`$ make all -jN`
+
+where `N` is the number of parallel build jobs you want to run.
 
 ## Licensing
 

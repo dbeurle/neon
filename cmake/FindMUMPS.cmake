@@ -20,7 +20,7 @@ find_path(
 
 find_library(
 	MUMPS_LIBRARY
-	NAMES dmumps
+	NAMES dmumps_seq dmumps
 	DOC "MUMPS library"
 )
 

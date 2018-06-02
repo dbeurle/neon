@@ -18,16 +18,16 @@ public:
     double softening_multiplier() const { return gamma; }
     double kinematic_hardening_modulus() const { return C; }
     double plasticity_viscous_exponent() const { return np; }
-    double plasticity_viscous_multiplier() const { return kp; }
+    double plasticity_viscous_denominator() const { return sp; }
     double damage_viscous_exponent() const { return nd; }
-    double damage_viscous_multiplier() const { return kd; }
+    double damage_viscous_denominator() const { return sd; }
 
 protected:
     double gamma = 1.0; // !< Kinematic hardening numerator
     double C = 1.0;     // !< Kinematic hardening denominator
-    double kp = 1.0;    //!< viscous multiplier
+    double sp = 1.0;    //!< viscous denominator
     double np = 1.0;    //!< viscous exponent
-    double kd = 1.0;    //!< damage viscous multiplier
+    double sd = 1.0;    //!< damage viscous denominator
     double nd = 1.0;    //!< damage viscous exponent
 };
 }

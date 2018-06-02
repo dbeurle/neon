@@ -3,7 +3,7 @@
 
 #include "mesh/node_ordering_adapter.hpp"
 
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 
 #include "io/json.hpp"
 
@@ -40,7 +40,7 @@ basic_submesh::basic_submesh(json const& mesh)
 
     m_topology = gmsh_type_to_enum(mesh["Type"]);
 
-    connectivity.resize(mesh["NodalConnectivity"][0].size(), mesh["NodalConnectivity"].size());
+    node_indices.resize(mesh["NodalConnectivity"][0].size(), mesh["NodalConnectivity"].size());
 
     {
         std::int64_t element_counter{0};
@@ -50,22 +50,20 @@ basic_submesh::basic_submesh(json const& mesh)
             std::int64_t node_counter{0};
             for (auto const& node : mesh_connectivity)
             {
-                connectivity(node_counter++, element_counter) = node;
+                node_indices(node_counter++, element_counter) = node;
             }
             ++element_counter;
         }
     }
-    convert_from_gmsh(connectivity, m_topology);
+    convert_from_gmsh(node_indices, m_topology);
 }
 
-std::vector<std::int32_t> basic_submesh::unique_connectivity() const
+std::vector<std::int32_t> basic_submesh::unique_node_indices() const
 {
     std::set<std::int32_t> unique_set;
 
-    std::copy_n(connectivity.data(),
-                connectivity.size(),
-                std::inserter(unique_set, std::end(unique_set)));
+    std::copy_n(node_indices.data(), node_indices.size(), std::inserter(unique_set, end(unique_set)));
 
-    return {std::begin(unique_set), std::end(unique_set)};
+    return {begin(unique_set), end(unique_set)};
 }
 }

@@ -1,0 +1,68 @@
+{
+    "Name" : "BeamLoad",
+    "Cores" : 4,
+    "Part": [{
+        "Name" : "beam",
+        "Material" : "steel"
+    }],
+    "Material" : [{
+        "Name" : "steel",
+        "ElasticModulus" : 200.0e9,
+        "PoissonsRatio" : 0.3
+    }],
+    "SimulationCases" : [{
+        "Name" : "Uniaxial",
+		"Module" : "Beam",
+        "Solution" : "Equilibrium",
+        "Time" : {
+            "Period" : 1.0,
+            "Increments" : {
+                "Initial" : 1.0,
+                "Minimum" : 0.00001,
+                "Maximum" : 1.0,
+                "Adaptive" : true
+            }
+        },
+		"Mesh" : [{
+            "Name" : "beam",
+            "ConstitutiveModel" : {
+                "Name" : "LinearIsotropic"
+            },
+            "ElementOptions" : {
+                "Quadrature" : "Reduced"
+            },
+            "BoundaryConditions" : [{
+                "Name" : "fix",
+                "Type" : "displacement",
+                "Time" : [0.0, 1.0],
+                "x" : [0.0, 0.0],
+                "y" : [0.0, 0.0],
+                "z" : [0.0, 0.0]
+            },
+            {
+                "Name" : "fix",
+                "Type" : "rotation",
+                "Time" : [0.0, 1.0],
+                "x" : [0.0, 0.0],
+                "y" : [0.0, 0.0],
+                "z" : [0.0, 0.0]
+            },
+            {
+                "Name" : "load",
+                "Type" : "force",
+                "Time" : [0.0, 1.0],
+                "x" : [0.0, 1000.0],
+                "y" : [0.0, 2000.0],
+                "z" : [0.0, 2000.0]
+            }]
+        }],
+		"LinearSolver" :  {
+		    "Type" : "PaStiX",
+            "MaxIterations" : 3000,
+    	    "Tolerance"  : 1.0e-8
+        },
+        "Visualisation" : {
+            "Fields" : ["Displacement"]
+        }
+    }]
+}

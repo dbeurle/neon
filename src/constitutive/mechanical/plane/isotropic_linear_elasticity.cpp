@@ -1,7 +1,7 @@
 
 #include "isotropic_linear_elasticity.hpp"
 
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 #include "constitutive/internal_variables.hpp"
 
 #include "numeric/mechanics"
@@ -15,11 +15,11 @@ isotropic_linear_elasticity::isotropic_linear_elasticity(
     std::shared_ptr<internal_variables_t>& variables, json const& material_data, plane const state)
     : constitutive_model(variables), material(material_data), state(state)
 {
-    variables->add(internal_variables_t::Tensor::LinearisedStrain,
+    variables->add(internal_variables_t::second::LinearisedStrain,
                    internal_variables_t::scalar::VonMisesStress);
 
     // Add material tangent with the linear elasticity spatial moduli
-    variables->add(internal_variables_t::rank4::tangent_operator, elastic_moduli());
+    variables->add(internal_variables_t::fourth::tangent_operator, elastic_moduli());
 }
 
 isotropic_linear_elasticity::~isotropic_linear_elasticity() = default;
@@ -32,17 +32,17 @@ void isotropic_linear_elasticity::update_internal_variables(double const time_st
 
     // Extract the internal variables
     auto [elastic_strains,
-          cauchy_stresses] = variables->fetch(internal_variables_t::Tensor::LinearisedStrain,
-                                              internal_variables_t::Tensor::Cauchy);
+          cauchy_stresses] = variables->get(internal_variables_t::second::LinearisedStrain,
+                                              internal_variables_t::second::cauchy_stress);
 
-    auto& von_mises_stresses = variables->fetch(internal_variables_t::scalar::VonMisesStress);
+    auto& von_mises_stresses = variables->get(internal_variables_t::scalar::VonMisesStress);
 
-    auto const& tangents = variables->fetch(internal_variables_t::rank4::tangent_operator);
+    auto const& tangents = variables->get(internal_variables_t::fourth::tangent_operator);
 
     // std::cout << "Computing elastic strains" << std::endl;
 
     // Compute the linear strain gradient from the displacement gradient
-    elastic_strains = variables->fetch(internal_variables_t::Tensor::DisplacementGradient)
+    elastic_strains = variables->get(internal_variables_t::second::DisplacementGradient)
                       | view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
     for (auto const& elastic_strain : elastic_strains)

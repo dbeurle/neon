@@ -1,7 +1,7 @@
 
 #include "fem_submesh.hpp"
 
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 
 #include "constitutive/constitutive_model_factory.hpp"
 #include "interpolations/interpolation_factory.hpp"
@@ -9,7 +9,7 @@
 #include "mesh/material_coordinates.hpp"
 #include "numeric/gradient_operator.hpp"
 #include "numeric/mechanics"
-#include "math/transform_expand.hpp"
+#include "mesh/dof_allocator.hpp"
 #include "traits/mechanics.hpp"
 
 #include <termcolor/termcolor.hpp>
@@ -33,28 +33,20 @@ fem_submesh::fem_submesh(json const& material_data,
       cm(make_constitutive_model(variables, material_data, mesh_data))
 {
     // Allocate storage for the displacement gradient
-    variables->add(internal_variables_t::Tensor::DisplacementGradient,
-                   internal_variables_t::Tensor::DeformationGradient,
-                   internal_variables_t::Tensor::Cauchy);
+    variables->add(internal_variables_t::second::DisplacementGradient,
+                   internal_variables_t::second::DeformationGradient,
+                   internal_variables_t::second::cauchy_stress);
 
     variables->add(internal_variables_t::scalar::DetF);
 
     // Get the old data to the undeformed configuration
-    auto& deformation_gradients = variables->fetch(internal_variables_t::Tensor::DeformationGradient);
+    auto& deformation_gradients = variables->get(internal_variables_t::second::DeformationGradient);
 
-    std::fill(std::begin(deformation_gradients), std::end(deformation_gradients), matrix3::Identity());
+    std::fill(begin(deformation_gradients), end(deformation_gradients), matrix3::Identity());
 
     variables->commit();
 
-    // Allocate the degree of freedom indices
-    dof_list.resize(connectivity.rows() * traits<type::solid>::dof_order.size(), connectivity.cols());
-
-    for (indices::Index i{0}; i < connectivity.cols(); ++i)
-    {
-        transform_expand_view(connectivity(Eigen::placeholders::all, i),
-                              dof_list(Eigen::placeholders::all, i),
-                              traits<type::solid>::dof_order);
-    }
+    dof_allocator(node_indices, dof_list, traits::dof_order);
 }
 
 void fem_submesh::save_internal_variables(bool const have_converged)
@@ -91,7 +83,7 @@ std::pair<index_view, vector> fem_submesh::internal_force(std::int32_t const ele
 
 matrix fem_submesh::geometric_tangent_stiffness(matrix3x const& x, std::int32_t const element) const
 {
-    auto const& cauchy_stresses = variables->fetch(internal_variables_t::Tensor::Cauchy);
+    auto const& cauchy_stresses = variables->get(internal_variables_t::second::cauchy_stress);
 
     auto n = nodes_per_element();
 
@@ -117,7 +109,7 @@ matrix fem_submesh::material_tangent_stiffness(matrix3x const& x, std::int32_t c
 {
     auto const local_dofs = nodes_per_element() * dofs_per_node();
 
-    auto const& tangent_operators = variables->fetch(internal_variables_t::rank4::tangent_operator);
+    auto const& tangent_operators = variables->get(internal_variables_t::fourth::tangent_operator);
 
     matrix const kmat = matrix::Zero(local_dofs, local_dofs);
     matrix B = matrix::Zero(6, local_dofs);
@@ -138,7 +130,7 @@ matrix fem_submesh::material_tangent_stiffness(matrix3x const& x, std::int32_t c
 
 vector fem_submesh::internal_nodal_force(matrix3x const& x, std::int32_t const element) const
 {
-    auto const& cauchy_stresses = variables->fetch(internal_variables_t::Tensor::Cauchy);
+    auto const& cauchy_stresses = variables->get(internal_variables_t::second::cauchy_stress);
 
     auto const [m, n] = std::make_pair(nodes_per_element(), dofs_per_node());
 
@@ -210,15 +202,15 @@ void fem_submesh::update_internal_variables(double const time_step_size)
 
 void fem_submesh::update_deformation_measures()
 {
-    auto& H_list = variables->fetch(internal_variables_t::Tensor::DisplacementGradient);
-    auto& F_list = variables->fetch(internal_variables_t::Tensor::DeformationGradient);
+    auto& H_list = variables->get(internal_variables_t::second::DisplacementGradient);
+    auto& F_list = variables->get(internal_variables_t::second::DeformationGradient);
 
     tbb::parallel_for(std::int64_t{0}, elements(), [&](auto const element) {
         // Gather the material coordinates
         auto const X = mesh_coordinates->initial_configuration(local_node_view(element));
         auto const x = mesh_coordinates->current_configuration(local_node_view(element));
 
-        sf->quadrature().for_each([&](auto const& femval, const auto& l) {
+        sf->quadrature().for_each([&](auto const& femval, auto const l) {
             auto const& [N, rhea] = femval;
 
             // Local deformation gradient for the initial configuration
@@ -226,7 +218,7 @@ void fem_submesh::update_deformation_measures()
             matrix3 const F = local_deformation_gradient(rhea, x);
 
             // Gradient operator in index notation
-            matrix const& B_0t = rhea * F_0.inverse();
+            matrixxd<3> const B_0t = rhea * F_0.inverse();
 
             // Displacement gradient
             matrix3 const H = (x - X) * B_0t;
@@ -239,27 +231,27 @@ void fem_submesh::update_deformation_measures()
 
 void fem_submesh::update_Jacobian_determinants()
 {
-    auto const& deformation_gradients = variables->fetch(
-        internal_variables_t::Tensor::DeformationGradient);
+    auto const& deformation_gradients = variables->get(
+        internal_variables_t::second::DeformationGradient);
 
-    auto& F_determinants = variables->fetch(internal_variables_t::scalar::DetF);
+    auto& F_determinants = variables->get(internal_variables_t::scalar::DetF);
 
-    std::transform(std::begin(deformation_gradients),
-                   std::end(deformation_gradients),
-                   std::begin(F_determinants),
+    std::transform(begin(deformation_gradients),
+                   end(deformation_gradients),
+                   begin(F_determinants),
                    [](matrix3 const& F) { return F.determinant(); });
 
-    auto const found = std::find_if(std::begin(F_determinants),
-                                    std::end(F_determinants),
-                                    [](auto const detF) { return detF <= 0.0; });
+    auto const found = std::find_if(begin(F_determinants), end(F_determinants), [](auto const detF) {
+        return detF <= 0.0;
+    });
 
-    if (found != std::end(F_determinants))
+    if (found != end(F_determinants))
     {
-        auto const count = std::count_if(std::begin(F_determinants),
-                                         std::end(F_determinants),
+        auto const count = std::count_if(begin(F_determinants),
+                                         end(F_determinants),
                                          [](auto const detF) { return detF <= 0.0; });
 
-        auto const i = std::distance(F_determinants.begin(), found);
+        auto const i = std::distance(begin(F_determinants), found);
 
         auto const [element, quadrature_point] = std::div(i, sf->quadrature().points());
 
@@ -270,13 +262,13 @@ void fem_submesh::update_Jacobian_determinants()
     }
 }
 
-fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
-    internal_variables_t::Tensor const tensor_name) const
+std::pair<vector, vector> fem_submesh::nodal_averaged_variable(
+    internal_variables_t::second const tensor_name) const
 {
     vector count = vector::Zero(mesh_coordinates->size() * 9);
     vector value = count;
 
-    auto const& tensor_list = variables->fetch(tensor_name);
+    auto const& tensor_list = variables->get(tensor_name);
 
     auto const& E = sf->local_quadrature_extrapolation();
 
@@ -312,13 +304,13 @@ fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
     return {value, count};
 }
 
-fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(
+std::pair<vector, vector> fem_submesh::nodal_averaged_variable(
     internal_variables_t::scalar const scalar_name) const
 {
     vector count = vector::Zero(mesh_coordinates->size());
     vector value = count;
 
-    auto const& scalar_list = variables->fetch(scalar_name);
+    auto const& scalar_list = variables->get(scalar_name);
 
     auto const& E = sf->local_quadrature_extrapolation();
 

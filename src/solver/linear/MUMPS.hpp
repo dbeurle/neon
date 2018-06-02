@@ -4,8 +4,8 @@
 #include "linear_solver.hpp"
 
 // Mumps includes
-#include <MUMPS/dmumps_c.h>
-#include <MUMPS/smumps_c.h>
+#include <dmumps_c.h>
+#include <smumps_c.h>
 
 namespace neon
 {

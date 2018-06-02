@@ -1,11 +1,14 @@
 
 #include "fem_dynamic_matrix.hpp"
 
-#include "io/json.hpp"
+#include "assembler/homogeneous_dirichlet.hpp"
 #include "solver/linear/linear_solver.hpp"
+#include "io/json.hpp"
+
+#include <termcolor/termcolor.hpp>
+#include <tbb/parallel_for.h>
 
 #include <chrono>
-#include <termcolor/termcolor.hpp>
 
 namespace neon::diffusion
 {
@@ -47,9 +50,9 @@ void fem_dynamic_matrix::solve()
 
         vector b = M * d + time_solver.current_time_step_size() * f;
 
-        apply_dirichlet_conditions(A, d, b);
+        fem::apply_dirichlet_conditions(A, d, b, mesh);
 
-        linear_solver->solve(A, d, b);
+        solver->solve(A, d, b);
 
         auto const end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> const elapsed_seconds = end - start;
@@ -64,7 +67,7 @@ void fem_dynamic_matrix::assemble_mass()
 {
     M.resize(mesh.active_dofs(), mesh.active_dofs());
 
-    std::vector<Doublet<int>> doublets;
+    std::vector<doublet<int>> doublets;
     doublets.reserve(mesh.active_dofs());
 
     for (auto const& submesh : mesh.meshes())
@@ -90,17 +93,13 @@ void fem_dynamic_matrix::assemble_mass()
 
     for (auto const& submesh : mesh.meshes())
     {
-#pragma omp parallel for
         for (std::int64_t element = 0; element < submesh.elements(); ++element)
         {
-            // auto const[dofs, m] = submesh.consistent_mass(element);
-            auto const& tpl = submesh.consistent_mass(element);
-            auto const& dofs = std::get<0>(tpl);
-            auto const& m = std::get<1>(tpl);
+            auto const& [dofs, m] = submesh.consistent_mass(element);
 
-            for (std::int64_t b{0}; b < dofs.size(); b++)
+            for (std::int64_t a{0}; a < dofs.size(); a++)
             {
-                for (std::int64_t a{0}; a < dofs.size(); a++)
+                for (std::int64_t b{0}; b < dofs.size(); b++)
                 {
                     M.coefficient_update(dofs(a), dofs(b), m(a, b));
                 }

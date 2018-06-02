@@ -232,36 +232,31 @@ TEST_CASE("Traction test for mixed mesh", "[nonfollower_load_boundary]")
                                     boundary,
                                     {{"x", 0}, {"y", 1}, {"z", 2}},
                                     1.0);
+    // Check the triangle element
+    std::visit(
+        [&](auto const& mesh) {
+            auto const& [dofs_tri, f_tri] = mesh.external_force(0, 1.0);
 
-    for (auto const& [is_dof_active, meshes] : loads.interface())
-    {
-        if (is_dof_active)
-        {
-            std::visit(
-                [&](auto const& mesh) {
-                    auto const& [dofs_tri, f_tri] = mesh.external_force(0, 1.0);
+            REQUIRE(dofs_tri.size() == 3);
+            REQUIRE(f_tri.rows() == 3);
 
-                    REQUIRE(dofs_tri.size() == 3);
-                    REQUIRE(f_tri.rows() == 3);
+            // Check dofs are correctly written
+            REQUIRE((dofs_tri - known_dofs_tri.col(0)).sum() == 0);
+        },
+        loads.natural_interface().at(0));
 
-                    // Check dofs are correctly written
-                    REQUIRE((dofs_tri - known_dofs_tri.col(0)).sum() == 0);
-                },
-                meshes.at(0));
+    // Check the quadrilateral element
+    std::visit(
+        [&](auto const& mesh) {
+            auto const& [dofs_quad, f_quad] = mesh.external_force(0, 1.0);
 
-            std::visit(
-                [&](auto const& mesh) {
-                    auto const& [dofs_quad, f_quad] = mesh.external_force(0, 1.0);
+            REQUIRE(dofs_quad.size() == 4);
+            REQUIRE(f_quad.rows() == 4);
 
-                    REQUIRE(dofs_quad.size() == 4);
-                    REQUIRE(f_quad.rows() == 4);
-
-                    // Check dofs are correctly written
-                    REQUIRE((dofs_quad - known_dofs_quad.col(0)).sum() == 0);
-                },
-                meshes.at(1));
-        }
-    }
+            // Check dofs are correctly written
+            REQUIRE((dofs_quad - known_dofs_quad.col(0)).sum() == 0);
+        },
+        loads.natural_interface().at(1));
 }
 TEST_CASE("Newton cooling boundary conditions")
 {

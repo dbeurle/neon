@@ -5,9 +5,6 @@
 #include "constitutive/mechanical/volumetric_free_energy.hpp"
 #include "constitutive/mechanical/detail/microsphere.hpp"
 
-#include <range/v3/view/transform.hpp>
-#include <range/v3/view/zip.hpp>
-
 #include <tbb/parallel_for.h>
 
 namespace neon::mechanical::solid
@@ -17,10 +14,10 @@ affine_microsphere::affine_microsphere(std::shared_ptr<internal_variables_t>& va
                                        unit_sphere_quadrature::Rule const rule)
     : constitutive_model(variables), unit_sphere(rule), material(material_data)
 {
-    variables->add(internal_variables_t::rank4::tangent_operator);
+    variables->add(internal_variables_t::fourth::tangent_operator);
 
     // Deviatoric stress
-    variables->add(internal_variables_t::Tensor::Kirchhoff);
+    variables->add(internal_variables_t::second::Kirchhoff);
 
     // Commit these to history in case of failure on first time step
     variables->commit();
@@ -28,14 +25,14 @@ affine_microsphere::affine_microsphere(std::shared_ptr<internal_variables_t>& va
 
 void affine_microsphere::update_internal_variables(double const time_step_size)
 {
-    auto& tangent_operators = variables->fetch(internal_variables_t::rank4::tangent_operator);
+    auto& tangent_operators = variables->get(internal_variables_t::fourth::tangent_operator);
 
-    auto const& deformation_gradients = variables->fetch(
-        internal_variables_t::Tensor::DeformationGradient);
+    auto const& deformation_gradients = variables->get(
+        internal_variables_t::second::DeformationGradient);
 
-    auto& cauchy_stresses = variables->fetch(internal_variables_t::Tensor::Cauchy);
+    auto& cauchy_stresses = variables->get(internal_variables_t::second::cauchy_stress);
 
-    auto const& det_deformation_gradients = variables->fetch(internal_variables_t::scalar::DetF);
+    auto const& det_deformation_gradients = variables->get(internal_variables_t::scalar::DetF);
 
     auto const K{material.bulk_modulus()};
     auto const G{material.shear_modulus()};

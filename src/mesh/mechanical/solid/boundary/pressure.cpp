@@ -1,7 +1,7 @@
 
 #include "pressure.hpp"
 
-#include "geometry/Projection.hpp"
+#include "geometry/projection.hpp"
 
 #include <Eigen/Geometry>
 
@@ -10,10 +10,9 @@ namespace neon::mechanical::solid
 std::pair<index_view, vector> pressure::external_force(std::int64_t const element,
                                                        double const load_factor) const
 {
-    auto const X = coordinates->initial_configuration(
-        nodal_connectivity(Eigen::placeholders::all, element));
+    auto const node_view = nodal_connectivity(Eigen::placeholders::all, element);
 
-    auto const X_surface = geometry::project_to_plane(X);
+    auto const X = coordinates->initial_configuration(node_view);
 
     auto const pressure = interpolate_prescribed_load(load_factor);
 
@@ -23,12 +22,14 @@ std::pair<index_view, vector> pressure::external_force(std::int64_t const elemen
                                                 [&](auto const& femval, auto const& l) -> matrix {
                                                     auto const& [N, dN] = femval;
 
-                                                    auto const j = (X_surface * dN).determinant();
+                                                    matrix32 const jacobian = X * dN;
 
-                                                    vector3 const x_xi = (X * dN).col(0);
-                                                    vector3 const x_eta = (X * dN).col(1);
+                                                    auto const j = jacobian_determinant(jacobian);
 
-                                                    vector3 const normal = x_xi.cross(x_eta).normalized();
+                                                    vector3 dx_dxi = jacobian.col(0);
+                                                    vector3 dx_deta = jacobian.col(1);
+
+                                                    vector3 normal = dx_dxi.cross(dx_deta).normalized();
 
                                                     return N * normal.transpose() * j;
                                                 });

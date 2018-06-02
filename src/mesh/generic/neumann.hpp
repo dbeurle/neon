@@ -3,28 +3,36 @@
 
 #include "vector_contribution.hpp"
 
-#include "geometry/Projection.hpp"
+#include "math/jacobian_determinant.hpp"
 #include "mesh/material_coordinates.hpp"
 
 #include <memory>
 
 namespace neon
 {
-/**
- * neumann is a base class for Neumann (derivative) type boundary conditions.
- * This includes the nodal connectivities and degrees of freedom lists.  Derived
- * classes must implement shape functions and the appropriate finite element
- * approximation for the given problem
- */
+/// neumann is a base class for Neumann (derivative) type boundary conditions.
+/// This includes the nodal connectivities and degrees of freedom lists.  Derived
+/// classes must implement shape functions and the appropriate finite element
+/// approximation for the given problem
 class neumann : public vector_contribution
 {
 public:
+    /// \param nodal_connectivity Nodal list
+    /// \param dof_list Degree of freedom mapping
+    /// \param material_coordinates Nodal coordinates
+    /// \param times Input times
+    /// \param times Input boundary values for each time
     explicit neumann(indices nodal_connectivity,
                      indices dof_list,
                      std::shared_ptr<material_coordinates>& material_coordinates,
                      json const& times,
                      json const& loads);
 
+    /// \param nodal_connectivity Nodal list
+    /// \param dof_list Degree of freedom mapping
+    /// \param material_coordinates Nodal coordinates
+    /// \param boundary Boundary information
+    /// \param
     explicit neumann(indices nodal_connectivity,
                      indices dof_list,
                      std::shared_ptr<material_coordinates>& material_coordinates,
@@ -32,19 +40,30 @@ public:
                      std::string const& name,
                      double const generate_time_step);
 
-    [[nodiscard]] auto elements() const { return nodal_connectivity.cols(); }
+    [[nodiscard]] auto elements() const noexcept { return nodal_connectivity.cols(); }
 
 protected:
-    indices nodal_connectivity, dof_list;
+    /// Indices for the nodal coordinates
+    indices nodal_connectivity;
 
+    /// Indices for the degrees of freedom
+    indices dof_list;
+
+    /// Coordinates for the boundary element group
     std::shared_ptr<material_coordinates> coordinates;
 };
 
-template <typename SurfaceInterpolation_Tp>
+/// surface_load is a specialisation of a \p neumann boundary condition that
+/// computes a surface integral for scalar loads
+template <typename surface_interpolation_type>
 class surface_load : public neumann
 {
 public:
-    explicit surface_load(std::unique_ptr<SurfaceInterpolation_Tp>&& sf,
+    /// Type alias for the surface interpolation type
+    using surface_interpolation = surface_interpolation_type;
+
+public:
+    explicit surface_load(std::unique_ptr<surface_interpolation>&& sf,
                           indices nodal_connectivity,
                           indices dof_list,
                           std::shared_ptr<material_coordinates>& coordinates,
@@ -55,7 +74,7 @@ public:
     {
     }
 
-    explicit surface_load(std::unique_ptr<SurfaceInterpolation_Tp>&& sf,
+    explicit surface_load(std::unique_ptr<surface_interpolation>&& sf,
                           indices nodal_connectivity,
                           indices dof_list,
                           std::shared_ptr<material_coordinates>& coordinates,
@@ -67,24 +86,24 @@ public:
     {
     }
 
-    /**
-     * Compute the external force due to a neumann type boundary condition.
-     * This computes the following integral on a boundary element
-     */
+    /// Compute the external force due to a neumann type boundary condition.
+    /// This computes the following integral on a boundary element
+    /// \param element Surface element to compute external force on
+    /// \param load_factor Load factor to interpolate load with
+    /// \return Dof list and a vector for assembly
     virtual std::pair<index_view, vector> external_force(std::int64_t const element,
                                                          double const load_factor) const override
     {
-        auto const X = geometry::project_to_plane(coordinates->initial_configuration(
-            nodal_connectivity(Eigen::placeholders::all, element)));
+        auto const node_view = nodal_connectivity(Eigen::placeholders::all, element);
+
+        auto const X = coordinates->initial_configuration(node_view);
 
         // Perform the computation of the external load vector
         auto const f_ext = sf->quadrature().integrate(vector::Zero(X.cols()).eval(),
-                                                      [&](auto const& femval, auto const& l) -> vector {
+                                                      [&](auto const& femval, auto const l) -> vector {
                                                           auto const& [N, dN] = femval;
 
-                                                          auto const j = (X * dN).determinant();
-
-                                                          return N * j;
+                                                          return N * jacobian_determinant(X * dN);
                                                       });
 
         return {dof_list(Eigen::placeholders::all, element),
@@ -92,14 +111,21 @@ public:
     }
 
 protected:
-    std::unique_ptr<SurfaceInterpolation_Tp> sf;
+    /// Shape function for surface interpolation
+    std::unique_ptr<surface_interpolation> sf;
 };
 
-template <typename VolumeInterpolation_Tp>
+/// volume_load provides an interface for computing the contribution to the
+/// load vector from a volume load boundary.
+template <typename volume_interpolation_type>
 class volume_load : public neumann
 {
 public:
-    explicit volume_load(std::unique_ptr<VolumeInterpolation_Tp>&& sf,
+    /// Type alias for the volume interpolation type
+    using volume_interpolation = volume_interpolation_type;
+
+public:
+    explicit volume_load(std::unique_ptr<volume_interpolation>&& sf,
                          indices nodal_connectivity,
                          indices dof_list,
                          std::shared_ptr<material_coordinates>& coordinates,
@@ -110,7 +136,7 @@ public:
     {
     }
 
-    explicit volume_load(std::unique_ptr<VolumeInterpolation_Tp>&& sf,
+    explicit volume_load(std::unique_ptr<volume_interpolation>&& sf,
                          indices nodal_connectivity,
                          indices dof_list,
                          std::shared_ptr<material_coordinates>& coordinates,
@@ -122,20 +148,19 @@ public:
     {
     }
 
-    std::pair<index_view, vector> external_force(std::int64_t const element,
-                                                 double const load_factor) const override
+    virtual std::pair<index_view, vector> external_force(std::int64_t const element,
+                                                         double const load_factor) const override
     {
-        auto const X = coordinates->initial_configuration(
-            nodal_connectivity(Eigen::placeholders::all, element));
+        auto const node_view = nodal_connectivity(Eigen::placeholders::all, element);
+
+        auto const X = coordinates->initial_configuration(node_view);
 
         // Perform the computation of the external load vector
         auto const f_ext = sf->quadrature().integrate(vector::Zero(X.cols()).eval(),
-                                                      [&](auto const& femval, auto const& l) -> vector {
+                                                      [&](auto const& femval, auto const l) -> vector {
                                                           auto const& [N, dN] = femval;
 
-                                                          auto const j = (X * dN).determinant();
-
-                                                          return N * j;
+                                                          return N * jacobian_determinant(X * dN);
                                                       });
 
         return {dof_list(Eigen::placeholders::all, element),
@@ -143,6 +168,6 @@ public:
     }
 
 protected:
-    std::unique_ptr<VolumeInterpolation_Tp> sf;
+    std::unique_ptr<volume_interpolation> sf;
 };
 }

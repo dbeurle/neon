@@ -10,20 +10,19 @@ namespace neon
 /// micromechanical_elastomer exposes an interface that returns the fundamental
 /// material properties from a micromechanical point of view, including the
 /// physical constants which make up the shear modulus for an entropy elastic
-/// model.
-///
-/// These additional parameters are associated with the evolution of the segments per
-/// chain in the network.
+/// model.  These additional parameters are associated with the evolution of the
+/// segments per chain in the network.
 class micromechanical_elastomer : public isotropic_elastic_property
 {
 public:
     micromechanical_elastomer(json const& material_data);
 
-    /** @return The number of segments per polymer chain */
+    /// \return The number of segments per polymer chain
     auto const segments_per_chain() const { return N; }
 
 protected:
-    double N{0.0}; //!< Number of segment per chain
+    /// Number of segment per chain
+    double N{0.0};
 };
 
 /// stochastic_micromechanical_elastomer is responsible for handling a distribution

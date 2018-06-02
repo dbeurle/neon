@@ -41,14 +41,14 @@ gaussian_ageing_affine_microsphere::gaussian_ageing_affine_microsphere(
 
 void gaussian_ageing_affine_microsphere::update_internal_variables(double const time_step_size)
 {
-    auto& tangent_operators = variables->fetch(internal_variables_t::rank4::tangent_operator);
+    auto& tangent_operators = variables->get(internal_variables_t::fourth::tangent_operator);
 
-    auto const& deformation_gradients = variables->fetch(
-        internal_variables_t::Tensor::DeformationGradient);
+    auto const& deformation_gradients = variables->get(
+        internal_variables_t::second::DeformationGradient);
 
-    auto& cauchy_stresses = variables->fetch(internal_variables_t::Tensor::Cauchy);
+    auto& cauchy_stresses = variables->get(internal_variables_t::second::cauchy_stress);
 
-    auto const& det_deformation_gradients = variables->fetch(internal_variables_t::scalar::DetF);
+    auto const& det_deformation_gradients = variables->get(internal_variables_t::scalar::DetF);
 
     auto& active_chains = variables->fetch(internal_variables_t::scalar::active_chains);
 

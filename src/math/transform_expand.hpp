@@ -1,10 +1,14 @@
 
+#pragma once
+
 #include <type_traits>
+
+/// \file transform_expand.hpp
 
 namespace neon
 {
 /**
- * transform_expand_view_n takes a view of a contiguous input and output view
+ * transform_expand_view takes a view of a contiguous input and output view
  * of a contiguous storage and applies an inline expansion according to the
  * ordering provided.
  *

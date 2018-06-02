@@ -1,6 +1,8 @@
 
 #include "newton_convection.hpp"
 
+#include "math/jacobian_determinant.hpp"
+
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/zip.hpp>
 
@@ -32,15 +34,16 @@ newton_convection::newton_convection(std::unique_ptr<surface_interpolation>&& sf
 std::pair<index_view, matrix> newton_convection::external_stiffness(std::int64_t const element,
                                                                     double const load_factor) const
 {
-    auto const X = geometry::project_to_plane(
-        coordinates->initial_configuration(nodal_connectivity(Eigen::placeholders::all, element)));
+    auto const node_view = nodal_connectivity(Eigen::placeholders::all, element);
+
+    auto const X = coordinates->initial_configuration(node_view);
 
     // Perform the computation of the external element stiffness matrix
     auto const k_ext = sf->quadrature().integrate(matrix::Zero(X.cols(), X.cols()).eval(),
                                                   [&](auto const& femval, auto const& l) -> matrix {
                                                       auto const& [N, dN] = femval;
 
-                                                      auto const j = (X * dN).determinant();
+                                                      auto const j = jacobian_determinant(X * dN);
 
                                                       return N * N.transpose() * j;
                                                   });

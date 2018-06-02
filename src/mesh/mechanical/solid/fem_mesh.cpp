@@ -2,17 +2,15 @@
 #include "fem_mesh.hpp"
 
 #include "mesh/basic_mesh.hpp"
-#include "mesh/mesh_dof_filter.hpp"
+#include "mesh/dof_allocator.hpp"
+#include "io/json.hpp"
 
 #include <chrono>
 #include <exception>
 #include <memory>
 #include <numeric>
 
-#include "io/json.hpp"
 #include <termcolor/termcolor.hpp>
-
-#include <range/v3/view/transform.hpp>
 
 namespace neon::mechanical::solid
 {
@@ -20,23 +18,21 @@ fem_mesh::fem_mesh(basic_mesh const& basic_mesh,
                    json const& material_data,
                    json const& simulation_data,
                    double const generate_time_step)
-    : mesh_coordinates(std::make_shared<material_coordinates>(basic_mesh.coordinates())),
+    : coordinates(std::make_shared<material_coordinates>(basic_mesh.coordinates())),
       generate_time_step{generate_time_step}
 {
     check_boundary_conditions(simulation_data["BoundaryConditions"]);
 
-    auto const& simulation_name = simulation_data["Name"].get<std::string>();
-
-    for (auto const& submesh : basic_mesh.meshes(simulation_name))
+    for (auto const& submesh : basic_mesh.meshes(simulation_data["Name"]))
     {
-        submeshes.emplace_back(material_data, simulation_data, mesh_coordinates, submesh);
+        submeshes.emplace_back(material_data, simulation_data, coordinates, submesh);
     }
     allocate_boundary_conditions(simulation_data, basic_mesh);
 }
 
 bool fem_mesh::is_symmetric() const
 {
-    return std::all_of(std::begin(submeshes), std::end(submeshes), [](auto const& submesh) {
+    return std::all_of(begin(submeshes), end(submeshes), [](auto const& submesh) {
         return submesh.constitutive().is_symmetric();
     });
 }
@@ -45,7 +41,7 @@ void fem_mesh::update_internal_variables(vector const& u, double const time_step
 {
     auto const start = std::chrono::high_resolution_clock::now();
 
-    mesh_coordinates->update_current_configuration(u);
+    coordinates->update_current_configuration(u);
 
     for (auto& submesh : submeshes) submesh.update_internal_variables(time_step_size);
 
@@ -63,18 +59,17 @@ void fem_mesh::save_internal_variables(bool const have_converged)
 
 bool fem_mesh::is_nonfollower_load(std::string const& boundary_type) const
 {
-    return boundary_type == "Traction" || boundary_type == "Pressure" || boundary_type == "BodyForce";
+    return boundary_type == "Traction" || boundary_type == "Pressure"
+           || boundary_type == "BodyForce" || boundary_type == "NodalForce";
 }
 
 void fem_mesh::allocate_boundary_conditions(json const& simulation_data, basic_mesh const& basic_mesh)
 {
-    auto const& boundary_data = simulation_data["BoundaryConditions"];
-
     // Populate the boundary conditions and their corresponding mesh
-    for (auto const& boundary : boundary_data)
+    for (auto const& boundary : simulation_data["BoundaryConditions"])
     {
-        auto const& boundary_name = boundary["Name"].get<std::string>();
-        auto const& boundary_type = boundary["Type"].get<std::string>();
+        std::string const& boundary_name = boundary["Name"];
+        std::string const& boundary_type = boundary["Type"];
 
         if (boundary_type == "Displacement")
         {
@@ -83,7 +78,7 @@ void fem_mesh::allocate_boundary_conditions(json const& simulation_data, basic_m
         else if (is_nonfollower_load(boundary_type))
         {
             nonfollower_loads.emplace(boundary_name,
-                                      nonfollower_load_boundary(mesh_coordinates,
+                                      nonfollower_load_boundary(coordinates,
                                                                 basic_mesh.meshes(boundary_name),
                                                                 simulation_data,
                                                                 boundary,
@@ -99,26 +94,24 @@ void fem_mesh::allocate_boundary_conditions(json const& simulation_data, basic_m
 
 void fem_mesh::allocate_displacement_boundary(json const& boundary, basic_mesh const& basic_mesh)
 {
-    using namespace ranges;
+    std::string const& boundary_name = boundary["Name"];
 
-    auto const& boundary_name = boundary["Name"].get<std::string>();
-
-    auto const dirichlet_dofs = mesh_dof_filter<3>(basic_mesh.meshes(boundary_name));
-
-    for (auto it = dof_table.begin(); it != dof_table.end(); ++it)
+    for (auto const& [dof_key, dof_offset] : dof_table)
     {
-        if (boundary.count(it->first))
+        if (boundary.count(dof_key))
         {
-            auto const& dof_offset = it->second;
+            auto boundary_dofs = unique_dof_allocator<traits::dofs_per_node>(
+                basic_mesh.meshes(boundary_name));
 
             // Offset the degrees of freedom on the boundary
-            auto const boundary_dofs = view::transform(dirichlet_dofs, [&](auto const& dof) {
-                return dof + dof_offset;
-            });
+            std::transform(begin(boundary_dofs),
+                           end(boundary_dofs),
+                           begin(boundary_dofs),
+                           [&](auto const dof) { return dof + dof_offset; });
 
             displacement_bcs[boundary_name].emplace_back(boundary_dofs,
                                                          boundary,
-                                                         it->first,
+                                                         dof_key,
                                                          generate_time_step);
         }
     }
@@ -133,32 +126,23 @@ std::vector<double> fem_mesh::time_history() const
     {
         for (auto const& boundary : boundaries)
         {
-            for (auto t : boundary.time_history())
-            {
-                history.insert(t);
-            }
+            auto const times = boundary.time_history();
+            history.insert(begin(times), end(times));
         }
     }
     for (auto const& [key, nonfollower_load] : nonfollower_loads)
     {
-        for (auto const& [is_dof_active, boundaries] : nonfollower_load.interface())
+        for (auto const& boundary_variant : nonfollower_load.natural_interface())
         {
-            if (!is_dof_active) continue;
-
-            for (auto const& boundary_variant : boundaries)
-            {
-                std::visit(
-                    [&](auto const& surface_mesh) {
-                        for (auto t : surface_mesh.time_history())
-                        {
-                            history.insert(t);
-                        }
-                    },
-                    boundary_variant);
-            }
+            std::visit(
+                [&](auto const& boundary_mesh) {
+                    auto const times = boundary_mesh.time_history();
+                    history.insert(begin(times), end(times));
+                },
+                boundary_variant);
         }
     }
-    return std::vector<double>{std::begin(history), std::end(history)};
+    return {begin(history), end(history)};
 }
 
 void fem_mesh::check_boundary_conditions(json const& boundary_data) const

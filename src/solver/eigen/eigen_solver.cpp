@@ -1,8 +1,7 @@
 
 #include "eigen_solver.hpp"
-#include "Exceptions.hpp"
+#include "exceptions.hpp"
 
-#include <iostream>
 #include "arpack_ng/ArpackSelfAdjointEigenSolver.h"
 
 namespace neon

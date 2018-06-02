@@ -13,9 +13,9 @@
 
 namespace neon
 {
-std::unique_ptr<LinearSolver> make_linear_solver(json const& solver_data, bool const is_symmetric)
+std::unique_ptr<linear_solver> make_linear_solver(json const& solver_data, bool const is_symmetric)
 {
-    std::string const& solver_name = solver_data["Type"].get<std::string>();
+    std::string const& solver_name = solver_data["Type"];
 
     if (solver_name == "PaStiX")
     {

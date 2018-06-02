@@ -1,7 +1,7 @@
 
 #include "tetrahedron_quadrature.hpp"
 
-#include <range/v3/action/transform.hpp>
+#include <algorithm>
 
 namespace neon
 {
@@ -36,6 +36,6 @@ tetrahedron_quadrature::tetrahedron_quadrature(Rule rule)
     }
 
     // Convert the weightings to proper quadrature format
-    w |= ranges::action::transform([](auto const& wl) { return wl / 6.0; });
+    std::transform(begin(w), end(w), begin(w), [](auto const i) { return i / 6.0; });
 }
 }

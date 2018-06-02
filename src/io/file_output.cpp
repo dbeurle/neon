@@ -1,5 +1,5 @@
 
-#include "FileIO.hpp"
+#include "file_output.hpp"
 
 #include <exception>
 
@@ -21,7 +21,9 @@
 
 namespace neon
 {
-FileIO::FileIO(std::string file_name, json const& visualisation_data)
+namespace io
+{
+file_output::file_output(std::string file_name, json const& visualisation_data)
     : file_name(file_name), unstructured_mesh(vtkSmartPointer<vtkUnstructuredGrid>::New())
 {
     if (visualisation_data.count("WriteEvery"))
@@ -47,14 +49,14 @@ FileIO::FileIO(std::string file_name, json const& visualisation_data)
 
     if (visualisation_data.count("Fields"))
     {
-        for (auto const& field : visualisation_data["Fields"])
+        for (std::string const& field : visualisation_data["Fields"])
         {
-            output_set.insert(field.get<std::string>());
+            output_set.insert(field);
         }
     }
 }
 
-FileIO::~FileIO()
+file_output::~file_output()
 {
     // Close off the last of the file for the timestepping
     pvd_file << std::string(2, ' ') << "</Collection>\n"
@@ -62,7 +64,7 @@ FileIO::~FileIO()
     pvd_file.close();
 }
 
-void FileIO::write_to_file(int const time_step, double const total_time)
+void file_output::write_to_file(int const time_step, double const total_time)
 {
     auto unstructured_mesh_writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
 
@@ -75,7 +77,7 @@ void FileIO::write_to_file(int const time_step, double const total_time)
     unstructured_mesh_writer->SetFileName(vtk_filename.c_str());
     unstructured_mesh_writer->SetInputData(unstructured_mesh);
 
-    if (use_binary_format == false) unstructured_mesh_writer->SetDataModeToAscii();
+    if (!use_binary_format) unstructured_mesh_writer->SetDataModeToAscii();
 
     unstructured_mesh_writer->Write();
 
@@ -86,25 +88,25 @@ void FileIO::write_to_file(int const time_step, double const total_time)
              << unstructured_mesh_writer->GetDefaultFileExtension() << "\" />\n";
 }
 
-void FileIO::add_field(std::string const& name, vector const& field, int const components)
+void file_output::add_field(std::string const& name, vector const& field, int const components)
 {
     auto scalar_value = vtkSmartPointer<vtkDoubleArray>::New();
 
     scalar_value->SetName(name.c_str());
     scalar_value->SetNumberOfComponents(components);
-    // scalar_value->SetNumberOfTuples(field.size() / components);
 
-    for (auto i = 0; i < field.size(); i += components)
+    for (std::int64_t i{0}; i < field.size(); i += components)
     {
-        scalar_value->InsertNextTuple(&field(i));
+        scalar_value->InsertNextTuple(field.data() + i);
     }
     unstructured_mesh->GetPointData()->AddArray(scalar_value);
+}
 }
 
 namespace diffusion
 {
-FileIO::FileIO(std::string file_name, json const& visualisation_data, fem_mesh const& mesh)
-    : neon::FileIO(file_name, visualisation_data), mesh(mesh)
+file_output::file_output(std::string file_name, json const& visualisation_data, fem_mesh const& mesh)
+    : io::file_output(file_name, visualisation_data), mesh(mesh)
 {
     // Check the output set against the known values for this module
     for (auto const& output : output_set)
@@ -118,7 +120,7 @@ FileIO::FileIO(std::string file_name, json const& visualisation_data, fem_mesh c
     add_mesh();
 }
 
-void FileIO::write(int const time_step, double const total_time, vector const& scalars)
+void file_output::write(int const time_step, double const total_time, vector const& scalars)
 {
     if (time_step % write_every != 0) return;
 
@@ -133,14 +135,14 @@ void FileIO::write(int const time_step, double const total_time, vector const& s
     write_to_file(time_step, total_time);
 }
 
-void FileIO::add_mesh()
+void file_output::add_mesh()
 {
     // Populate an unstructured grid object
     unstructured_mesh->SetPoints(io::vtk_coordinates(mesh.geometry().coordinates()));
 
     for (auto const& submesh : mesh.meshes())
     {
-        auto const vtk_ordered_connectivity = convert_to_vtk(submesh.element_connectivity(),
+        auto const vtk_ordered_connectivity = convert_to_vtk(submesh.all_node_indices(),
                                                              submesh.topology());
 
         for (std::int64_t element{0}; element < vtk_ordered_connectivity.cols(); ++element)

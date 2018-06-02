@@ -33,16 +33,16 @@ public:
 
 protected:
     [[nodiscard]] double interpolate_prescribed_load(
-        std::vector<std::pair<double, double>> const& time_value, double const step_time) const;
-    /**
-     * Perform checks on the time/load boundary values.
-     */
+        std::vector<std::pair<double, double>> const& time_value,
+        double const step_time) const;
+
+    /// Allocate and check the time/load boundary values
     void allocate_time_load(json const& times, json const& loads);
 
     /**
      * Generate boundary values that follows a sinusoidal wave with fixed time step.
      * @param JSON boundary object
-     * @param dof {x,y,z}
+     * @param dofs {x,y,z}
      * @param time step
      */
     void generate_sinusoidal(json const& boundary,
