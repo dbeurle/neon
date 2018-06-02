@@ -25,6 +25,7 @@ public:
 
     /// \return view index into the vector
     std::size_t operator()(std::size_t const element, std::size_t const quadrature_point) const
+        noexcept
     {
         return quadrature_points * element + quadrature_point;
     }
@@ -99,19 +100,21 @@ public:
         shear_stiffness
     };
 
-    enum class vector : std::uint8_t {
-        Chains,
-        Segments,
-        ShearModuli,
-        HeatFlux,
-        deformation_history
-    };
+    /// Names for vector values
+    enum class vector : std::uint8_t { HeatFlux, deformation_history };
 
+    /// Names for scalar values
     enum class scalar : std::uint8_t {
-        /// Chains for the micromechanical model
-        Chains,
-        /// Segments for the micromechanical model
-        Segments,
+        /// Active chains per unit volume
+        active_chains,
+        /// Inactive chains per unit volume
+        inactive_chains,
+        /// Active number of segments per chain
+        active_segments,
+        /// Inactive number of segments per chain
+        inactive_segments,
+        /// Reduction factor for network decay
+        reduction_factor,
         /// Shear moduli
         ShearModuli,
         /// Von Mises equivalent stress

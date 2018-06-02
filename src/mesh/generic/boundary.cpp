@@ -34,6 +34,15 @@ boundary::boundary(json const& boundary, std::string const& name, double const g
     }
 }
 
+bool boundary::is_active(double const time) const
+{
+    // Check if the time
+    auto const initial_time = time_load.front().first;
+    auto const final_time = time_load.back().first;
+
+    return (time >= initial_time && time <= final_time);
+}
+
 std::vector<double> boundary::time_history() const { return time_load | ranges::view::keys; }
 
 double boundary::interpolate_prescribed_load(double const step_time) const

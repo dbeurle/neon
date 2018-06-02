@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+/// \file block_sequence.hpp
+
 namespace neon
 {
 /// block_sequence provides the index mapping for Eigen views.  This functionality
@@ -25,7 +27,7 @@ public:
     /// Construct the sequence
     /// \param first The first element in the sequence
     /// \param size The total number of values in the sequence (<N)
-    block_sequence(index_type const first, index_type const size) : m_first(first), m_size(size) {}
+    block_sequence(index_type const first, index_type const size) : first(first), m_size(size) {}
 
     /// \return Sequence size
     auto size() const noexcept { return m_size; }
@@ -34,12 +36,12 @@ public:
     auto operator[](index_type const index) const noexcept
     {
         auto const quotient = index % block_size;
-        auto const remainder = index / block_size;
+        auto const division = index / block_size;
 
-        return m_first + increment_size * remainder + quotient;
+        return first + increment_size * division + quotient;
     }
 
 protected:
-    index_type m_first, m_size;
+    index_type first, m_size;
 };
 }

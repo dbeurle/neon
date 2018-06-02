@@ -38,6 +38,9 @@ void fem_dynamic_matrix::solve()
 
     compute_external_force();
 
+    sparse_matrix A;
+    vector b;
+
     while (time_solver.loop())
     {
         auto const start = std::chrono::high_resolution_clock::now();
@@ -46,9 +49,9 @@ void fem_dynamic_matrix::solve()
                   << time_solver.iteration() << ", simulation time: " << time_solver.current_time()
                   << termcolor::reset << std::endl;
 
-        sparse_matrix A = M + time_solver.current_time_step_size() * K;
+        A = M + time_solver.current_time_step_size() * K;
 
-        vector b = M * d + time_solver.current_time_step_size() * f;
+        b = M * d + time_solver.current_time_step_size() * f;
 
         fem::apply_dirichlet_conditions(A, d, b, mesh);
 

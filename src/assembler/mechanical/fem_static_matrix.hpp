@@ -78,6 +78,8 @@ protected:
 
     double residual_tolerance{1.0e-3};
     double displacement_tolerance{1.0e-3};
+    /// Maximum number of Newton Raphson iterations before cutback
+    std::int64_t max_nr_iterations = 10;
 
     double relative_displacement_norm;
     double relative_force_norm;
@@ -119,6 +121,11 @@ fem_static_matrix<fem_mesh_type>::fem_static_matrix(mesh_type& fem_mesh, json co
         throw std::domain_error("ResidualTolerance not specified in "
                                 "NonlinearOptions");
     }
+    if (simulation["NonlinearOptions"].count("NewtonRaphsonIterations"))
+    {
+        max_nr_iterations = simulation["NonlinearOptions"]["NewtonRaphsonIterations"];
+    }
+
     residual_tolerance = simulation["NonlinearOptions"]["ResidualTolerance"];
     displacement_tolerance = simulation["NonlinearOptions"]["DisplacementTolerance"];
 
@@ -374,10 +381,8 @@ void fem_static_matrix<fem_mesh_type>::perform_equilibrium_iterations()
     displacement = displacement_old;
 
     // Full Newton-Raphson iteration to solve nonlinear equations
-    auto constexpr max_iterations{10};
     auto current_iteration{0};
-
-    while (current_iteration < max_iterations)
+    while (current_iteration < max_nr_iterations)
     {
         auto const start = std::chrono::high_resolution_clock::now();
 
@@ -415,17 +420,17 @@ void fem_static_matrix<fem_mesh_type>::perform_equilibrium_iterations()
 
         current_iteration++;
     }
-    if (current_iteration == max_iterations)
+    if (current_iteration == max_nr_iterations)
     {
         throw computational_error("Reached Newton-Raphson iteration limit");
     }
 
-    if (current_iteration != max_iterations)
+    if (current_iteration != max_nr_iterations)
     {
         displacement_old = displacement;
 
-        adaptive_load.update_convergence_state(current_iteration != max_iterations);
-        fem_mesh.save_internal_variables(current_iteration != max_iterations);
+        adaptive_load.update_convergence_state(current_iteration != max_nr_iterations);
+        fem_mesh.save_internal_variables(current_iteration != max_nr_iterations);
 
         fem_mesh.update_internal_forces(f_int);
 

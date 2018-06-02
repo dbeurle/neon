@@ -1,5 +1,6 @@
 
 add_subdirectory(neohooke)
 add_subdirectory(gaussian_affine_microsphere)
+add_subdirectory(gaussian_affine_microsphere_ageing)
 add_subdirectory(affine_microsphere)
 add_subdirectory(nonaffine_microsphere)

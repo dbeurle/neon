@@ -156,22 +156,21 @@ TEST_CASE("Microsphere model error test")
 
     SECTION("Type not specified correctly")
     {
-        REQUIRE_THROWS_AS(make_constitutive_model(variables,
-                                                  json::parse("{}"),
-                                                  json::parse("{\"ConstitutiveModel\" : {\"Name\": "
-                                                              "\"Microsphere\", \"Type\" "
-                                                              ": \"Afwsfine\"}}")),
+        // clang-format off
+        auto const input{"{\"ConstitutiveModel\":{\"Name\":\"Microsphere\",\"Type\": \"Afwsfine\"}}"};
+        // clang-format on
+
+        REQUIRE_THROWS_AS(make_constitutive_model(variables, json::parse("{}"), json::parse(input)),
                           std::domain_error);
     }
 
     SECTION("Exception for quadrature scheme")
     {
-        REQUIRE_THROWS_AS(make_constitutive_model(variables,
-                                                  json::parse("{}"),
-                                                  json::parse("{\"ConstitutiveModel\" : {\"Name\": "
-                                                              "\"Microsphere\", \"Type\" "
-                                                              ": \"Affine\", "
-                                                              "\"Statistics\":\"Gaussian\"}}")),
+        // clang-format off
+        auto const input{"{\"ConstitutiveModel\":{\"Name\":\"Microsphere\",\"Type\": \"Affine\",\"Statistics\":\"Gaussian\"}}"};
+        // clang-format on
+
+        REQUIRE_THROWS_AS(make_constitutive_model(variables, json::parse("{}"), json::parse(input)),
                           std::domain_error);
     }
 }
@@ -1068,48 +1067,26 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
                    internal_variables_t::second::cauchy_stress);
     variables->add(internal_variables_t::scalar::DetF);
 
+    auto const material_input{"{\"Name\":\"steel\","
+                              "\"ElasticModulus\":134.0e3,"
+                              "\"PoissonsRatio\":0.3,"
+                              "\"YieldStress\":85,"
+                              "\"KinematicHardeningModulus\": 5500,"
+                              "\"SofteningMultiplier\" : 250,"
+                              "\"PlasticityViscousExponent\" : 2.5,"
+                              "\"PlasticityViscousDenominator\" : 1.923536463026969e-08,"
+                              "\"DamageViscousExponent\" : 2,"
+                              "\"DamageViscousDenominator\" : 2.777777777777778"
+                              "}"};
+
+    auto const constitutive_input{"{\"ConstitutiveModel\" : "
+                                  "{\"Name\" : \"J2Plasticity\","
+                                  "\"Damage\" : \"IsotropicChaboche\", "
+                                  "\"FiniteStrain\" : false}}"};
+
     auto small_strain_J2_plasticity_damage = make_constitutive_model(variables,
-                                                                     json::parse("{\"Name\": "
-                                                                                 "\"steel\", "
-                                                                                 "\"ElasticModulus"
-                                                                                 "\": 134.0e3, "
-                                                                                 "\"PoissonsRatio\""
-                                                                                 ": 0.3, "
-                                                                                 "\"YieldStress\": "
-                                                                                 "85, "
-                                                                                 "\"KinematicHarden"
-                                                                                 "ingModulus\": "
-                                                                                 "5500,"
-                                                                                 "\"SofteningMultip"
-                                                                                 "lier\" : "
-                                                                                 "250,"
-                                                                                 "\"PlasticityVisco"
-                                                                                 "usExponent\" : "
-                                                                                 "2.5,"
-                                                                                 "\"PlasticityVisco"
-                                                                                 "usMultiplier\" "
-                                                                                 ": "
-                                                                                 "1."
-                                                                                 "923536463026969e-"
-                                                                                 "08,"
-                                                                                 "\"DamageViscousEx"
-                                                                                 "ponent\" : "
-                                                                                 "2,"
-                                                                                 "\"DamageViscousMu"
-                                                                                 "ltiplier\" : "
-                                                                                 "2."
-                                                                                 "777777777777778"
-                                                                                 "}"),
-                                                                     json::parse("{\"ConstitutiveMo"
-                                                                                 "del\" : "
-                                                                                 "{\"Name\" : "
-                                                                                 "\"J2Plasticity"
-                                                                                 "\", "
-                                                                                 "\"Damage\" : "
-                                                                                 "\"IsotropicChaboc"
-                                                                                 "he\", "
-                                                                                 "\"FiniteStrain\" "
-                                                                                 ": false}}"));
+                                                                     json::parse(material_input),
+                                                                     json::parse(constitutive_input));
 
     // Get the tensor variables
     auto [displacement_gradients,

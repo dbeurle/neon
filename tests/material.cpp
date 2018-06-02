@@ -126,25 +126,13 @@ TEST_CASE("Micromechanical elastomer")
                        {"ElasticModulus", 10.0e6},
                        {"PoissonsRatio", 0.45},
                        {"SegmentsPerChain", 70},
-                       {"SegmentDecayRate", 0.97},
-                       {"CrosslinkGrowthRate", 350000.0},
+                       {"RecombinationProbability", 0.0001},
                        {"ScissionProbability", 0.0001}};
 
     ageing_micromechanical_elastomer elastomer(material_data);
 
-    REQUIRE(elastomer.compute_new_shear_modulus(0.1) < elastomer.shear_modulus());
-    REQUIRE(elastomer.compute_new_segment(70, 0.1) < 70.0);
-
-    // Dummy sets of shear modulus histories
-    std::vector<double> shear_modulus{350, 30, 30, 30};
-    std::vector<double> const segments{70, 65, 60, 55};
-
-    shear_modulus = elastomer.scission(shear_modulus, segments, 0.1);
-
-    REQUIRE(shear_modulus.at(0) < 350);
-    REQUIRE(shear_modulus.at(1) < 30);
-    REQUIRE(shear_modulus.at(2) < 30);
-    REQUIRE(shear_modulus.at(3) < 30);
+    REQUIRE(elastomer.scission_probability() == Approx(0.0001));
+    REQUIRE(elastomer.recombination_probability() == Approx(0.0001));
 }
 TEST_CASE("Diffusion material")
 {
