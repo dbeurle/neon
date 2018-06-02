@@ -108,10 +108,16 @@ public:
     };
 
     enum class scalar : std::uint8_t {
-        /// Chains for the micromechanical model
-        Chains,
-        /// Segments for the micromechanical model
-        Segments,
+        /// Active chains per unit volume
+        active_chains,
+        /// Inactive chains per unit volume
+        inactive_chains,
+        /// Active number of segments per chain
+        active_segments,
+        /// Inactive number of segments per chain
+        inactive_segments,
+        /// Reduction factor for network decay
+        reduction_factor,
         /// Shear moduli
         ShearModuli,
         /// Von Mises equivalent stress
