@@ -49,6 +49,7 @@ using matrix3x = Eigen::Matrix<double, 3, Eigen::Dynamic>;
 using vector = Eigen::Matrix<double, Eigen::Dynamic, 1>;
 using vector2 = Eigen::Vector2d;
 using vector3 = Eigen::Vector3d;
+using vector4 = Eigen::Vector4d;
 using vector6 = Eigen::Matrix<double, 6, 1>;
 using vector16 = Eigen::Matrix<double, 16, 1>;
 }

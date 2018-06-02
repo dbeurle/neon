@@ -25,6 +25,7 @@ public:
 
     /// \return view index into the vector
     std::size_t operator()(std::size_t const element, std::size_t const quadrature_point) const
+        noexcept
     {
         return quadrature_points * element + quadrature_point;
     }
@@ -99,14 +100,10 @@ public:
         shear_stiffness
     };
 
-    enum class vector : std::uint8_t {
-        Chains,
-        Segments,
-        ShearModuli,
-        HeatFlux,
-        deformation_history
-    };
+    /// Names for vector values
+    enum class vector : std::uint8_t { HeatFlux, deformation_history };
 
+    /// Names for scalar values
     enum class scalar : std::uint8_t {
         /// Active chains per unit volume
         active_chains,

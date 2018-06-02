@@ -7,6 +7,7 @@
 
 /// \file float_compare.hpp
 
+/// neon namespace
 namespace neon
 {
 /// Perform a floating point comparison using a specified number of units
@@ -23,7 +24,7 @@ std::enable_if_t<std::is_floating_point<T>::value, bool> is_approx(T const x,
     // Taken and modified from
     // http://en.cppreference.com/w/cpp/types/numeric_limits/epsilon
     // Since the numeric epsilon is defined at 1.0 then it must be scaled by
-    // the worse case (x + y) and accounted for my the ULP (units in the last place).
+    // the worse case (x + y) and accounted for by the ULP (units in the last place).
     return std::abs(x - y) < std::numeric_limits<T>::epsilon() * std::abs(x + y) * ulp
            || std::abs(x - y) < std::numeric_limits<T>::min();
 }

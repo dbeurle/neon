@@ -6,12 +6,12 @@ list(REMOVE_ITEM NEON_SOURCES "neon.cpp")
 
 add_library(neon ${NEON_SOURCES})
 
-target_compile_options(neon PUBLIC $<$<CONFIG:RELEASE>:-O3 -DNDEBUG>)
+target_compile_options(neon PUBLIC $<$<CONFIG:RELEASE>:-O3>)
 
 set_target_properties(neon PROPERTIES CXX_STANDARD 17
                                       CXX_STANDARD_REQUIRED YES
                                       CXX_EXTENSIONS NO
-                           COMPILE_FLAGS "-Wall -Wno-unused-variable ${OpenMP_CXX_FLAGS}")
+                           COMPILE_FLAGS "-Wall -Wno-unused-variable")
 
 if (ENABLE_LTO)
     include(CheckIPOSupported)
@@ -45,8 +45,9 @@ if (ENABLE_CUDA)
 endif()
 
 target_link_libraries(neon
-                      PRIVATE
+                      PUBLIC
                       OpenMP::OpenMP_CXX
+                      PRIVATE
                       ${Boost_LIBRARIES}
                       ${MUMPS_LIBRARY}
                       ${BLAS_LIBRARIES}
