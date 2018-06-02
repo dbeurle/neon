@@ -14,11 +14,12 @@ In the non-linear finite element framework, the solution of the non-linear equat
 
 To perform the solution stage, neon implements the full Newton-Raphson method such that an updated tangent matrix is computed in each iteration.  Since the assembly of the tangent stiffness matrix is implemented in parallel, the computational cost is very low in comparison to the cost of a linear solve.  Other finite element solvers will avoid the computation of stiffness matrix due to the computational cost at the expense of improved convergence properties.
 
-The iterative nature of a non-linear problem requires the use of tolerances to determine if the results are sufficiently converged.  For this, non-linear simulation cases need to specify the relative displacement and force residuals ::
+The iterative nature of a non-linear problem requires the use of tolerances to determine if the results are sufficiently converged.  For this, non-linear simulation cases need to specify the relative displacement, force residuals and the maximum number of Newton-Raphson iterations to perform before a cutback ::
 
     "NonlinearOptions" : {
         "DisplacementTolerance" : 1.0e-5,
-        "ResidualTolerance" : 1.0e-4
+        "ResidualTolerance" : 1.0e-4,
+        "NewtonRaphsonIterations" : 15
     }
 
 Methods to improve the properties of the Newton-Raphson could be implemented on top of the current non-linear solvers.
