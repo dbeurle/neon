@@ -95,7 +95,7 @@ void file_output::add_field(std::string const& name, vector const& field, int co
     scalar_value->SetName(name.c_str());
     scalar_value->SetNumberOfComponents(components);
 
-    for (std::int64_t i{0}; i < field.size(); i += components)
+    for (std::int64_t i{}; i < field.size(); i += components)
     {
         scalar_value->InsertNextTuple(field.data() + i);
     }
