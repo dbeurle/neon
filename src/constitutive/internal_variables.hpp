@@ -97,7 +97,11 @@ public:
         /// Beam bending stiffness
         bending_stiffness,
         /// Beam shear stiffness
-        shear_stiffness
+        shear_stiffness,
+        /// Secondary network accumulated integral
+        accumulated_ageing_integral,
+        /// Last evaluated integrand for accumulated integral
+        ageing_integrand
     };
 
     /// Names for vector values
@@ -106,17 +110,15 @@ public:
     /// Names for scalar values
     enum class scalar : std::uint8_t {
         /// Active chains per unit volume
-        active_chains,
+        active_shear_modulus,
         /// Inactive chains per unit volume
-        inactive_chains,
+        inactive_shear_modulus,
         /// Active number of segments per chain
         active_segments,
         /// Inactive number of segments per chain
         inactive_segments,
         /// Reduction factor for network decay
         reduction_factor,
-        /// Shear moduli
-        ShearModuli,
         /// Von Mises equivalent stress
         VonMisesStress,
         /// Accumulated (effective) plastic strain
