@@ -1,17 +1,13 @@
 
 #include <catch.hpp>
 
-#include <range/v3/numeric.hpp>
-
 #include "material/isotropic_elastic_plastic.hpp"
 #include "material/isotropic_elastic_property.hpp"
 #include "material/micromechanical_elastomer.hpp"
-
 #include "material/linear_diffusion.hpp"
+#include "io/json.hpp"
 
 #include <stdexcept>
-
-#include "io/json.hpp"
 
 using namespace neon;
 
@@ -126,13 +122,43 @@ TEST_CASE("Micromechanical elastomer")
                        {"ElasticModulus", 10.0e6},
                        {"PoissonsRatio", 0.45},
                        {"SegmentsPerChain", 70},
-                       {"RecombinationProbability", 0.0001},
-                       {"ScissionProbability", 0.0001}};
+                       {"RecombinationProbability", 1.0e-6},
+                       {"ScissionProbability", 1.0e-6}};
 
-    ageing_micromechanical_elastomer elastomer(material_data);
+    ageing_micromechanical_elastomer network(material_data);
 
-    REQUIRE(elastomer.scission_probability() == Approx(0.0001));
-    REQUIRE(elastomer.recombination_probability() == Approx(0.0001));
+    SECTION("basic data check")
+    {
+        REQUIRE(network.scission_probability() == Approx(1.0e-6));
+        REQUIRE(network.recombination_probability() == Approx(1.0e-6));
+        REQUIRE(network.segments_per_chain() == Approx(70.0));
+    }
+    SECTION("network evolution test")
+    {
+        // Create initial conditions
+        vector5 z(5);
+        // Active set shear modulus
+        z(0) = network.shear_modulus();
+        // Inactive set
+        z(1) = 0.0;
+        // Reduction factor
+        z(2) = 1.0;
+        // Active segments
+        z(3) = network.segments_per_chain();
+        // Inactive segments
+        z(4) = 0.0;
+
+        for (int i = 0; i < 3; ++i)
+        {
+            z = network.integrate(z, 0.1);
+
+            REQUIRE(z(0) > network.shear_modulus());
+            REQUIRE(z(1) > 0.0);
+            REQUIRE(z(2) < 1.0);
+            REQUIRE(z(3) < network.segments_per_chain());
+            REQUIRE(z(4) >= 0.0);
+        }
+    }
 }
 TEST_CASE("Diffusion material")
 {

@@ -2,8 +2,7 @@
 #pragma once
 
 #include "isotropic_elastic_property.hpp"
-
-#include <vector>
+#include "numeric/dense_matrix.hpp"
 
 namespace neon
 {
@@ -25,21 +24,27 @@ protected:
     double N{0.0};
 };
 
-/// stochastic_micromechanical_elastomer is responsible for handling a distribution
-/// for the material properties of an elastomer
+/// ageing_micromechanical_elastomer is responsible for storing the
+/// probabilities of a scission and a combination event
 class ageing_micromechanical_elastomer : public micromechanical_elastomer
 {
 public:
     ageing_micromechanical_elastomer(json const& material_data);
 
     /// \return The probability per unit time of a chain scission event
-    [[nodiscard]] double scission_probability() const noexcept { return pr_scission; }
+    [[nodiscard]] double scission_probability() const noexcept { return scission; }
 
     /// \return The probability per unit time of chains recombining
-    [[nodiscard]] double recombination_probability() const noexcept { return pr_recombination; }
+    [[nodiscard]] double recombination_probability() const noexcept { return recombination; }
+
+    [[nodiscard]] double creation_rate(vector5 const& z) const;
+
+    [[nodiscard]] vector5 integrate(vector5 z, double const time_step_size) const;
 
 protected:
-    double pr_scission{0.0};      /// Scission probability
-    double pr_recombination{0.0}; /// Recombination probability
+    /// Scission probability
+    double scission{0.0};
+    /// Recombination probability
+    double recombination{0.0};
 };
 }
