@@ -42,10 +42,8 @@ T trapezoidal(T const lower_bound, T const upper_bound, T const step_size, funct
 /// \param step_size Step size of the interval
 /// \return Numerically integrate value for the interval
 template <class T>
-T partial_trapezoidal(T const left_value, T const right_value, T const step_size)
+T partial_trapezoidal(T const left_value, T const right_value, double const step_size)
 {
-    static_assert(std::is_floating_point<T>::value, "Integration of floating point only");
-
-    return (left_value + right_value) / 2.0 * step_size;
+    return (left_value + right_value) * 0.5 * step_size;
 }
 }
