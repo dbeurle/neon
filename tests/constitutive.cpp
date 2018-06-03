@@ -2,20 +2,15 @@
 #include <catch.hpp>
 
 #include "constitutive/internal_variables.hpp"
-
 #include "constitutive/mechanical/solid/affine_microsphere.hpp"
 #include "constitutive/mechanical/solid/compressible_neohooke.hpp"
 #include "constitutive/mechanical/solid/small_strain_J2_plasticity.hpp"
 #include "constitutive/mechanical/detail/J2_plasticity.hpp"
 #include "constitutive/mechanical/plane/isotropic_linear_elasticity.hpp"
 #include "constitutive/thermal/isotropic_diffusion.hpp"
-
 #include "constitutive/constitutive_model_factory.hpp"
-
 #include "material/isotropic_elastic_plastic.hpp"
-
 #include "exceptions.hpp"
-
 #include "io/json.hpp"
 
 #include <Eigen/Dense>
@@ -174,7 +169,7 @@ TEST_CASE("Microsphere model error test")
                           std::domain_error);
     }
 }
-TEST_CASE("Gaussian affine microsphere model", )
+TEST_CASE("Gaussian affine microsphere model")
 {
     using namespace neon::mechanical::solid;
 
@@ -259,6 +254,138 @@ TEST_CASE("Gaussian affine microsphere model", )
         {
             REQUIRE(cauchy_stress.norm() > 0.0);
         }
+    }
+}
+TEST_CASE("Gaussian affine microsphere model with ageing")
+{
+    using namespace neon::mechanical::solid;
+
+    auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
+
+    // Add the required variables for an updated Lagrangian formulation
+    variables->add(internal_variables_t::second::DeformationGradient,
+                   internal_variables_t::second::cauchy_stress);
+
+    variables->add(internal_variables_t::scalar::DetF);
+
+    auto const material_data{"{\"Name\" : \"rubber\","
+                             "\"ShearModulus\" : 2.0e6,"
+                             "\"BulkModulus\" : 100e6,"
+                             "\"SegmentsPerChain\" : 50,"
+                             "\"ScissionProbability\" : 1.0e-5,"
+                             "\"RecombinationProbability\" : 1.0e-5}"};
+
+    auto const constitutive_data{"{\"ConstitutiveModel\" : {\"Name\": \"Microsphere\","
+                                 "\"Type\":\"Affine\","
+                                 "\"Statistics\":\"Gaussian\","
+                                 "\"Quadrature\":\"BO21\","
+                                 "\"Ageing\":\"BAND\"}}"};
+
+    auto affine = make_constitutive_model(variables,
+                                          json::parse(material_data),
+                                          json::parse(constitutive_data));
+
+    auto [F_list, cauchy_stresses] = variables->get(internal_variables_t::second::DeformationGradient,
+                                                    internal_variables_t::second::cauchy_stress);
+
+    auto& J_list = variables->get(internal_variables_t::scalar::DetF);
+    std::fill(begin(J_list), end(J_list), 1.0);
+
+    auto& material_tangents = variables->get(internal_variables_t::fourth::tangent_operator);
+
+    Eigen::EigenSolver<Eigen::MatrixXd> eigen_solver;
+
+    SECTION("Setup checks")
+    {
+        REQUIRE(affine->is_symmetric());
+        REQUIRE(affine->is_finite_deformation());
+        REQUIRE(affine->intrinsic_material().name() == "rubber");
+
+        REQUIRE(variables->has(internal_variables_t::scalar::active_shear_modulus));
+        REQUIRE(variables->has(internal_variables_t::scalar::inactive_shear_modulus));
+        REQUIRE(variables->has(internal_variables_t::scalar::active_segments));
+        REQUIRE(variables->has(internal_variables_t::scalar::inactive_segments));
+        REQUIRE(variables->has(internal_variables_t::scalar::reduction_factor));
+        REQUIRE(variables->has(internal_variables_t::second::accumulated_ageing_integral));
+        REQUIRE(variables->has(internal_variables_t::second::ageing_integrand));
+
+        auto& segments = variables->get(internal_variables_t::scalar::active_segments);
+        for (auto segment : segments)
+        {
+            REQUIRE(segment == Approx(50.0));
+        }
+
+        auto& shear_moduli = variables->get(internal_variables_t::scalar::active_shear_modulus);
+        for (auto shear_modulus : shear_moduli)
+        {
+            REQUIRE(shear_modulus == Approx(2.0e6));
+        }
+    }
+    SECTION("Affine model under no load")
+    {
+        std::fill(begin(F_list), end(F_list), neon::matrix3::Identity());
+
+        affine->update_internal_variables(1.0);
+
+        // Check the network parameters
+        auto [active_segments,
+              inactive_segments,
+              active_shear_moduli,
+              inactive_shear_moduli,
+              reductions] = variables->get(internal_variables_t::scalar::active_segments,
+                                           internal_variables_t::scalar::inactive_segments,
+                                           internal_variables_t::scalar::active_shear_modulus,
+                                           internal_variables_t::scalar::inactive_shear_modulus,
+                                           internal_variables_t::scalar::reduction_factor);
+
+        for (auto active_segment : active_segments)
+        {
+            REQUIRE(active_segment > 49.0);
+            REQUIRE(active_segment < 50.0);
+        }
+        for (auto inactive_segment : inactive_segments)
+        {
+            REQUIRE(inactive_segment > 24.0);
+            REQUIRE(inactive_segment < 25.0);
+        }
+        for (auto shear_modulus : active_shear_moduli)
+        {
+            REQUIRE(shear_modulus < 2.01e6);
+            REQUIRE(shear_modulus > 2.0e6);
+        }
+        for (auto shear_modulus : inactive_shear_moduli)
+        {
+            REQUIRE(shear_modulus < 2000.0);
+            REQUIRE(shear_modulus > 1000.0);
+        }
+        for (auto reduction : reductions)
+        {
+            REQUIRE(reduction > 0.99);
+            REQUIRE(reduction < 1.0);
+        }
+
+        auto [accumulated,
+              previous] = variables->get(internal_variables_t::second::accumulated_ageing_integral,
+                                         internal_variables_t::second::ageing_integrand);
+
+        for (auto const& i : accumulated)
+        {
+            std::cout << i << "\n";
+        }
+        std::cout << "Previous values\n";
+        for (auto const& i : previous)
+        {
+            std::cout << i << "\n";
+        }
+
+        // for (auto const& material_tangent : material_tangents)
+        // {
+        //     REQUIRE((material_tangent - material_tangent.transpose()).norm()
+        //             == Approx(0.0).margin(ZERO_MARGIN));
+        //
+        //     eigen_solver.compute(material_tangent);
+        //     REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
+        // }
     }
 }
 TEST_CASE("Affine microsphere model")

@@ -119,14 +119,18 @@ private:
                                             "KinematicHardening",
                                             "BackStress",
                                             "Displacement",
-                                            "ReactionForce"}};
+                                            "ReactionForce",
+                                            "ActiveChains",
+                                            "InactiveChains",
+                                            "ActiveSegments",
+                                            "InactiveSegments"}};
 
     // clang-format off
     scalar_map_t const scalar_map{{"AccumulatedPlasticStrain", variable_type::scalar::EffectivePlasticStrain},
                                   {"VonMisesStress", variable_type::scalar::VonMisesStress},
                                   {"Damage", variable_type::scalar::Damage},
-                                  {"ActiveChains", variable_type::scalar::active_chains},
-                                  {"InactiveChains", variable_type::scalar::inactive_chains},
+                                  {"ActiveShearModulus", variable_type::scalar::active_shear_modulus},
+                                  {"InactiveShearModulus", variable_type::scalar::inactive_shear_modulus},
                                   {"ActiveSegments", variable_type::scalar::active_segments},
                                   {"InactiveSegments", variable_type::scalar::inactive_segments},
                                   {"EnergyReleaseRate", variable_type::scalar::EnergyReleaseRate}};

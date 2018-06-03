@@ -27,10 +27,8 @@ class gaussian_ageing_affine_microsphere : public gaussian_affine_microsphere
 public:
     /// Store the active and inactive value
     using value_pair = std::pair<double, double>;
-
     /// Type for the composition of the active/inactive shear modulus history
     using shear_modulus_composition = std::vector<double>;
-
     /// Type for the deformation history
     using deformation_composition = std::vector<matrix3>;
 
