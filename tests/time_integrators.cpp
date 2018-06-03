@@ -5,82 +5,60 @@
 #include "solver/time/euler_integration.hpp"
 
 #include "numeric/dense_matrix.hpp"
+#include "numeric/interval.hpp"
 
 #include <cmath>
 
 constexpr auto ZERO_MARGIN = 1.0e-5;
 
-template <typename T, typename U, typename integrator>
-T generic_integrate(T y, U const end_time, U const step_size, integrator&& integrate)
+using neon::explicit_euler;
+using neon::runge_kutta_fourth_fifth_order;
+using neon::runge_kutta_fourth_order;
+using neon::runge_kutta_second_order;
+
+TEST_CASE("interval")
 {
-    auto const time_steps = static_cast<int>(end_time / step_size) + 1;
-
-    auto t = 0.0;
-
-    for (auto i = 0; i < time_steps - 1; ++i)
-    {
-        y += integrate(t, y, step_size);
-        t += step_size;
-    }
-    return y;
+    REQUIRE(neon::interval(0.0, 5.0, 1.0) == 5);
+    REQUIRE(neon::interval(0.0, 1.0, 0.1) == 10);
 }
 
 TEST_CASE("dy/dt = 1 integration")
 {
-    REQUIRE(generic_integrate(0.0, 10.0, 1.0, neon::explicit_euler([](auto const t, auto const y) {
-                                  return 1.0;
-                              }))
-            == Approx(10.0).margin(ZERO_MARGIN));
+    REQUIRE(explicit_euler(0.0, 10.0, 0.0, [](auto const t, double const y) { return 1.0; })
+            == Approx(10.0));
 
-    REQUIRE(
-        generic_integrate(0.0, 10.0, 1.0, neon::runge_kutta_second_order([](auto const t, auto const y) {
-                              return 1.0;
-                          }))
-        == Approx(10.0).margin(ZERO_MARGIN));
+    REQUIRE(runge_kutta_second_order(0.0, 10.0, 0.0, [](auto const t, double const y) { return 1.0; })
+            == Approx(10.0));
 
-    REQUIRE(
-        generic_integrate(0.0, 10.0, 1.0, neon::runge_kutta_fourth_order([](auto const t, auto const y) {
-                              return 1.0;
-                          }))
-        == Approx(10.0).margin(ZERO_MARGIN));
+    REQUIRE(runge_kutta_fourth_order(0.0, 10.0, 0.0, [](auto const t, auto const y) { return 1.0; })
+            == Approx(10.0));
 }
-TEST_CASE("dy/dt = 2t integration")
+TEST_CASE("dy/dt = y integration")
 {
-    REQUIRE(generic_integrate(0.0, 5.0, 0.1, neon::explicit_euler([](auto const t, auto const y) {
-                                  return 2.0 * t;
-                              }))
-            == Approx(24.5).margin(ZERO_MARGIN));
+    // Exact solution should be std::exp(1.0)
+    REQUIRE(explicit_euler(0.0, 1.0, 1.0, [](double const t, double const y) { return y; })
+            == Approx(2.0));
 
-    REQUIRE(
-        generic_integrate(0.0, 5.0, 0.1, neon::runge_kutta_second_order([](auto const t, auto const y) {
-                              return 2.0 * t;
-                          }))
-        == Approx(25.0).margin(ZERO_MARGIN));
+    REQUIRE(runge_kutta_second_order(0.0, 1.0, 1.0, [](double const t, double const y) { return y; })
+            == Approx(2.5));
 
-    REQUIRE(
-        generic_integrate(0.0, 5.0, 0.1, neon::runge_kutta_fourth_order([](auto const t, auto const y) {
-                              return 2.0 * t;
-                          }))
-        == Approx(25.0).margin(ZERO_MARGIN));
+    REQUIRE(runge_kutta_fourth_order(0.0, 1.0, 1.0, [](double const t, double const y) { return y; })
+            == Approx(2.70833));
 
-    REQUIRE(generic_integrate(0.0,
-                              5.0,
-                              0.1,
-                              neon::runge_kutta_fourth_fifth_order(
-                                  [](auto const t, auto const y) { return 2.0 * t; }))
-            == Approx(25.0).margin(ZERO_MARGIN));
+    REQUIRE(runge_kutta_fourth_fifth_order(0.0,
+                                           1.0,
+                                           1.0,
+                                           [](double const t, double const y) { return y; })
+            == Approx(std::exp(1.0)));
 }
-TEST_CASE("dy/dt = 2t integration with system")
+TEST_CASE("dy/dt = y integration with system")
 {
     using neon::vector4;
-    vector4 y;
-    REQUIRE((generic_integrate(y.setZero(),
-                               5.0,
-                               0.1,
-                               neon::runge_kutta_fourth_fifth_order([](auto const t, auto const y) {
-                                   return 2.0 * t * vector4::Ones();
-                               }))
-             - 25.0 * vector4::Ones())
+    REQUIRE((runge_kutta_fourth_fifth_order(0.0,
+                                            1.0,
+                                            vector4::Ones().eval(),
+                                            [](double const t, vector4 y) { return y; })
+             - std::exp(1.0) * vector4::Ones())
                 .norm()
             == Approx(0.0).margin(ZERO_MARGIN));
 }
