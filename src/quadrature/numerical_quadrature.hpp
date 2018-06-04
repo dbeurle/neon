@@ -28,8 +28,8 @@ public:
     /// \param integral - Initial value for the numerical integration
     /// \param f - A lambda function that accepts an femValue and quadrature point
     /// \return The numerically integrated matrix
-    template <typename MatrixTp, typename Functor>
-    MatrixTp integrate(MatrixTp operand, Functor&& f) const
+    template <typename matrix_type, typename Functor>
+    matrix_type integrate(matrix_type operand, Functor&& f) const
     {
         for (std::size_t l{0}; l < points(); ++l)
         {
@@ -42,8 +42,8 @@ public:
     /// \param integral Value for the numerical integration (accumulated into)
     /// \param f A lambda function that accepts an femValue and quadrature point
     /// \return The numerically integrated matrix
-    template <typename Functor>
-    void integrate_inplace(matrix& integral, Functor&& f) const
+    template <typename function>
+    void integrate_inplace(matrix& integral, function&& f) const
     {
         for (std::size_t l{0}; l < points(); ++l)
         {
@@ -55,8 +55,8 @@ public:
     /// \param integral Value for the numerical integration (accumulated into)
     /// \param f A lambda function that accepts an femValue and quadrature point
     /// \return The numerically integrated matrix
-    template <typename Functor>
-    void integrate_inplace(Eigen::Map<matrix> integral, Functor&& f) const
+    template <typename function>
+    void integrate_inplace(Eigen::Map<matrix> integral, function&& f) const
     {
         for (std::size_t l{0}; l < points(); ++l)
         {
@@ -64,14 +64,12 @@ public:
         }
     }
 
-    /**
-     * Perform the numerical integration of a lambda function.
-     * @param integral - Initial value for the numerical integration
-     * @param f - A lambda function that accepts an femValue and quadrature point
-     * @return The numerically integrated scalar
-     */
-    template <typename Functor>
-    double integrate(double integral, Functor&& f) const
+    /// Perform the numerical integration of a lambda function.
+    /// \param integral - Initial value for the numerical integration
+    /// \param f - A lambda function that accepts an femValue and quadrature point
+    /// \return The numerically integrated scalar
+    template <typename function>
+    double integrate(double integral, function&& f) const
     {
         for (std::size_t l{0}; l < points(); ++l)
         {
@@ -80,8 +78,8 @@ public:
         return integral;
     }
 
-    template <typename Functor>
-    void for_each(Functor&& eval_func) const
+    template <typename function>
+    void for_each(function&& eval_func) const
     {
         for (std::size_t l{0}; l < points(); ++l)
         {
