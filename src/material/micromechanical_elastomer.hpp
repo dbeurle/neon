@@ -37,7 +37,10 @@ public:
     /// \return The probability per unit time of chains recombining
     [[nodiscard]] double recombination_probability() const noexcept { return recombination; }
 
-    [[nodiscard]] double creation_rate(vector5 const& z) const;
+    [[nodiscard]] double creation_rate(double const active_shear_modulus,
+                                       double const inactive_shear_modulus,
+                                       double const active_segments,
+                                       double const inactive_segments) const;
 
     [[nodiscard]] vector5 integrate(vector5 z, double const time_step_size) const;
 

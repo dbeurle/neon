@@ -46,17 +46,17 @@ ageing_micromechanical_elastomer::ageing_micromechanical_elastomer(json const& m
     }
 }
 
-double ageing_micromechanical_elastomer::creation_rate(vector5 const& z) const
+double ageing_micromechanical_elastomer::creation_rate(double const active_shear_modulus,
+                                                       double const inactive_shear_modulus,
+                                                       double const active_segments,
+                                                       double const inactive_segments) const
 {
-    double const active_segments = z(3);
-    double const inactive_segments = z(4);
-
     // Inactive set recombination
     auto const alpha = 1.0 - std::pow(1.0 - recombination, inactive_segments + 1.0);
     // Active set generation
     auto const eta = 1.0 - std::pow(1.0 - recombination, active_segments + 1.0);
 
-    return alpha * z(1) + 4 * eta * z(0);
+    return alpha * inactive_shear_modulus + 4 * eta * active_shear_modulus;
 }
 
 vector5 ageing_micromechanical_elastomer::integrate(vector5 z, double const time_step_size) const

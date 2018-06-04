@@ -43,6 +43,8 @@ bool boundary::is_active(double const time) const
     return (time >= initial_time && time <= final_time);
 }
 
+bool boundary::is_not_active(double const time) const { return !is_active(time); }
+
 std::vector<double> boundary::time_history() const { return time_load | ranges::view::keys; }
 
 double boundary::interpolate_prescribed_load(double const step_time) const

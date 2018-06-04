@@ -273,7 +273,7 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
                              "\"BulkModulus\" : 100e6,"
                              "\"SegmentsPerChain\" : 50,"
                              "\"ScissionProbability\" : 1.0e-5,"
-                             "\"RecombinationProbability\" : 0.0}"};
+                             "\"RecombinationProbability\" : 1.0e-5}"};
 
     auto const constitutive_data{"{\"ConstitutiveModel\" : {\"Name\": \"Microsphere\","
                                  "\"Type\":\"Affine\","
@@ -306,7 +306,7 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
         REQUIRE(variables->has(internal_variables_t::scalar::active_segments));
         REQUIRE(variables->has(internal_variables_t::scalar::inactive_segments));
         REQUIRE(variables->has(internal_variables_t::scalar::reduction_factor));
-        REQUIRE(variables->has(internal_variables_t::vector::sphere_integral));
+        REQUIRE(variables->has(internal_variables_t::vector::secondary_moduli));
         REQUIRE(variables->has(internal_variables_t::vector::sphere_last_function));
 
         for (auto segment : variables->get(internal_variables_t::scalar::active_segments))
@@ -317,7 +317,7 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
         {
             REQUIRE(shear_modulus == Approx(2.0e6));
         }
-        for (auto& value : variables->get(internal_variables_t::vector::sphere_integral))
+        for (auto& value : variables->get(internal_variables_t::vector::secondary_moduli))
         {
             REQUIRE(value.size() == 21);
         }
@@ -369,7 +369,7 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
             REQUIRE(reduction < 1.0);
         }
 
-        for (auto const& i : variables->get(internal_variables_t::vector::sphere_integral))
+        for (auto const& i : variables->get(internal_variables_t::vector::secondary_moduli))
         {
             for (auto j : i)
             {

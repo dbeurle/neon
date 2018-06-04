@@ -27,20 +27,16 @@ gaussian_ageing_affine_microsphere::gaussian_ageing_affine_microsphere(
                    internal_variables_t::scalar::reduction_factor,
                    internal_variables_t::scalar::inactive_segments);
 
-    variables->add(internal_variables_t::vector::sphere_integral,
+    variables->add(internal_variables_t::vector::secondary_moduli,
                    internal_variables_t::vector::sphere_last_function);
 
-    auto [sphere_integral,
-          sphere_last_function] = variables->get(internal_variables_t::vector::sphere_integral,
-                                                 internal_variables_t::vector::sphere_last_function);
-
-    for (auto& i : sphere_integral)
+    for (auto& sphere_values : variables->get(internal_variables_t::vector::secondary_moduli))
     {
-        i.resize(unit_sphere.points(), 0.0);
+        sphere_values.resize(unit_sphere.points(), 0.0);
     }
-    for (auto& i : sphere_last_function)
+    for (auto& sphere_values : variables->get(internal_variables_t::vector::sphere_last_function))
     {
-        i.resize(unit_sphere.points(), 0.0);
+        sphere_values.resize(unit_sphere.points(), 0.0);
     }
 
     auto [active_shear_modulus,
@@ -58,17 +54,6 @@ gaussian_ageing_affine_microsphere::gaussian_ageing_affine_microsphere(
 
 void gaussian_ageing_affine_microsphere::update_internal_variables(double const time_step_size)
 {
-    std::cout << "Gaussian ageing model!" << std::endl;
-
-    auto& tangent_operators = variables->get(internal_variables_t::fourth::tangent_operator);
-
-    auto const& deformation_gradients = variables->get(
-        internal_variables_t::second::DeformationGradient);
-
-    auto& cauchy_stresses = variables->get(internal_variables_t::second::cauchy_stress);
-
-    auto const& det_F = variables->get(internal_variables_t::scalar::DetF);
-
     auto [active_shear_modulus,
           inactive_shear_modulus,
           reduction_factor,
@@ -79,19 +64,24 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
                                               internal_variables_t::scalar::active_segments,
                                               internal_variables_t::scalar::inactive_segments);
 
-    auto const& active_shear_modulus_old = variables->get_old(
-        internal_variables_t::scalar::active_shear_modulus);
-
-    auto [sphere_integral,
-          sphere_last_function] = variables->get(internal_variable_t::vector::sphere_integral,
+    auto [secondary_moduli,
+          sphere_last_function] = variables->get(internal_variable_t::vector::secondary_moduli,
                                                  internal_variable_t::vector::sphere_last_function);
+
+    auto& secondary_moduli_old = variables->get_old(internal_variable_t::vector::secondary_moduli);
+
+    auto& cauchy_stresses = variables->get(internal_variables_t::second::cauchy_stress);
+
+    auto const& det_F = variables->get(internal_variables_t::scalar::DetF);
+    auto const& deformation_gradients = variables->get(
+        internal_variables_t::second::DeformationGradient);
+
+    auto& tangent_operators = variables->get(internal_variables_t::fourth::tangent_operator);
 
     auto const K{material.bulk_modulus()};
 
     tbb::parallel_for(std::size_t{0}, deformation_gradients.size(), [&, this](auto const l) {
-        matrix3 const& F = deformation_gradients[l];
-
-        matrix3 const F_bar = unimodular(F);
+        matrix3 const F_bar = unimodular(deformation_gradients[l]);
 
         if (!is_approx(time_step_size, 0.0))
         {
@@ -112,44 +102,42 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
             reduction_factor[l] = parameters(2);
             active_segments[l] = parameters(3);
             inactive_segments[l] = parameters(4);
-
-            // Partially integrate the ageing integral and accumulate into the
-            // previous integral.  Save the current value for the next step in
-            // the accumulated integral
-            std::cout << "parameters\n" << parameters << std::endl;
-            std::cout << "material.creation_rate(parameters) " << material.creation_rate(parameters)
-                      << std::endl;
-
-            // Loop over all the pointers
-            unit_sphere.for_each([&](auto const& coordinates, auto const sphere_index) {
-                auto const& [r, _] = coordinates;
-
-                auto const micro_stretch = compute_microstretch(deformed_tangent(F_bar, r));
-
-                auto const sphere_function = material.creation_rate(parameters)
-                                             / (parameters(2) * micro_stretch);
-
-                sphere_integral.at(l).at(
-                    sphere_index) += partial_trapezoidal(sphere_last_function.at(l).at(sphere_index),
-                                                         sphere_function,
-                                                         time_step_size);
-                sphere_last_function.at(l).at(sphere_index) = sphere_function;
-            });
         }
+        // Partially integrate the ageing integral and accumulate into the
+        // previous integral.  Save the current value for the next step in
+        // the accumulated integral
+        unit_sphere.for_each([&](auto const& coordinates, auto const sphere_index) {
+            auto const& [r, _] = coordinates;
+
+            auto const micro_stretch = compute_microstretch(deformed_tangent(F_bar, r));
+
+            auto const sphere_function = material.creation_rate(active_shear_modulus[l],
+                                                                inactive_shear_modulus[l],
+                                                                active_segments[l],
+                                                                inactive_segments[l])
+                                         / (reduction_factor[l] * micro_stretch);
+
+            secondary_moduli.at(l).at(
+                sphere_index) = secondary_moduli_old.at(l).at(sphere_index)
+                                + partial_trapezoidal(sphere_last_function.at(l).at(sphere_index),
+                                                      sphere_function,
+                                                      time_step_size);
+
+            sphere_last_function.at(l).at(sphere_index) = sphere_function;
+        });
+
         // clang-format off
         matrix3 const macro_stress = 3.0 * unit_sphere.integrate(matrix3::Zero().eval(), [&](auto const& coordinates, auto const sphere_index) -> matrix3 {
                                             auto const& [r, _] = coordinates;
 
                                             vector3 const t = deformed_tangent(F_bar, r);
 
-                                            auto const secondary_shear_modulus = sphere_integral.at(l).at(sphere_index);
+                                            auto const secondary_shear_modulus = secondary_moduli.at(l).at(sphere_index);
 
                                             auto const shear_modulus = (material.shear_modulus() + secondary_shear_modulus) * reduction_factor[l];
 
                                             return shear_modulus * outer_product(t, t);
                                         });
-
-
 
         matrix6 const macro_moduli = -3.0 * unit_sphere.integrate(matrix6::Zero().eval(), [&](auto const& coordinates, auto const sphere_index) -> matrix6 {
                                                 auto const& [r, _] = coordinates;
@@ -158,7 +146,7 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
 
                                                 auto const micro_stretch = compute_microstretch(t);
 
-                                                auto const secondary_shear_modulus = sphere_integral.at(l).at(sphere_index);
+                                                auto const secondary_shear_modulus = secondary_moduli.at(l).at(sphere_index);
 
                                                 auto const shear_modulus = (material.shear_modulus() + secondary_shear_modulus) * reduction_factor[l];
 

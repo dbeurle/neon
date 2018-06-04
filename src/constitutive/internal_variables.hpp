@@ -100,8 +100,8 @@ public:
 
     /// Names for vector values using a std::vector type
     enum class vector : std::uint8_t {
-        /// Accumulated sphere integral for microsphere ageing
-        sphere_integral,
+        /// Accumulated secondary shear modulus integral for microsphere ageing
+        secondary_moduli,
         /// Last function evaluation in trapezoidal method
         sphere_last_function
     };
@@ -227,6 +227,12 @@ public:
     bool has(fourth const name) const
     {
         return fourth_order_tensors.find(name) != fourth_order_tensors.end();
+    }
+
+    /// Const access to the converged vector variables
+    std::vector<std::vector<scalar_type>> const& get_old(vector const name) const
+    {
+        return vectors_old.find(name)->second;
     }
 
     /// Const access to the converged tensor variables
@@ -360,15 +366,17 @@ public:
     /// Commit to history when iteration converges
     void commit()
     {
-        second_order_tensors_old = second_order_tensors;
         scalars_old = scalars;
+        vectors_old = vectors;
+        second_order_tensors_old = second_order_tensors;
     }
 
     /// Revert to the old state when iteration doesn't converge
     void revert()
     {
-        second_order_tensors = second_order_tensors_old;
         scalars = scalars_old;
+        vectors = vectors_old;
+        second_order_tensors = second_order_tensors_old;
     }
 
     /// \return Number of internal variables

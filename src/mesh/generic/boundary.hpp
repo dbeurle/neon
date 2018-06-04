@@ -21,7 +21,11 @@ public:
 
     ~boundary() = default;
 
+    /// \return true if the boundary is active \sa is_not_active
     [[nodiscard]] bool is_active(double const time) const;
+
+    /// \return true if the boundary is inactive \sa is_active
+    [[nodiscard]] bool is_not_active(double const time) const;
 
     [[nodiscard]] std::vector<double> time_history() const;
 
