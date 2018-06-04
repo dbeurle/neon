@@ -110,9 +110,7 @@ protected:
 
     void check_increment_data(json const& increment_data);
 
-    [[nodiscard]] bool is_highly_nonlinear() const {
-        return consecutive_unconverged > 0 || consecutive_converged < 4;
-    }
+    [[nodiscard]] bool is_highly_nonlinear() const;
 
     protected : std::int32_t const increment_limit{10}; //!< Maximum allowable increments
     std::int32_t successful_increments{0};              //!< Number of converged steps

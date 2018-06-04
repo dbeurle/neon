@@ -151,4 +151,9 @@ void adaptive_time_step::check_increment_data(json const& increment_data)
     if (!increment_data["Increments"].count("Maximum"))
         throw std::runtime_error("Increment-Maximum data not provided!\n");
 }
+
+bool adaptive_time_step::is_highly_nonlinear() const
+{
+    return consecutive_unconverged > 0 || consecutive_converged < 4;
+}
 }
