@@ -58,55 +58,6 @@ public:
     static auto constexpr tensor_size = rank2_dimension * rank2_dimension;
 
 public:
-    /// Fourth order tensor types
-    enum class fourth : std::uint8_t {
-        /// Material tangent operator
-        tangent_operator
-    };
-
-    /// Second order tensor internal variables types
-    enum class second : std::uint8_t {
-        /// Cauchy stress
-        cauchy_stress,
-        /// Kirchhoff stress
-        Kirchhoff,
-        /// First Piola-Kirchhoff stress (PK1)
-        PiolaKirchhoff1,
-        /// Second Piola-Kirchhoff stress (PK2)
-        PiolaKirchhoff2,
-        /// Linearised (infinitesimal) total strain
-        LinearisedStrain,
-        /// Linearised (infinitesimal) plastic strain
-        LinearisedPlasticStrain,
-        /// Hencky elastic strain
-        HenckyStrainElastic,
-        /// Deformation gradient (F)
-        DeformationGradient,
-        /// Plastic deformation gradient (Fp)
-        DeformationGradientPlastic,
-        /// Displacement gradient (H)
-        DisplacementGradient,
-        /// Green-Lagrange strain (E)
-        GreenLagrange,
-        /// Back stress (for hardening)
-        BackStress,
-        /// Kinematic hardening
-        KinematicHardening,
-        /// Conductivity tensor
-        Conductivity,
-        /// Beam bending stiffness
-        bending_stiffness,
-        /// Beam shear stiffness
-        shear_stiffness,
-        /// Secondary network accumulated integral
-        accumulated_ageing_integral,
-        /// Last evaluated integrand for accumulated integral
-        ageing_integrand
-    };
-
-    /// Names for vector values
-    enum class vector : std::uint8_t { HeatFlux, deformation_history };
-
     /// Names for scalar values
     enum class scalar : std::uint8_t {
         /// Active chains per unit volume
@@ -147,6 +98,56 @@ public:
         second_moment_area_2
     };
 
+    /// Names for vector values using a std::vector type
+    enum class vector : std::uint8_t {
+        /// Accumulated sphere integral for microsphere ageing
+        sphere_integral,
+        /// Last function evaluation in trapezoidal method
+        sphere_last_function
+    };
+
+    /// Second order tensor internal variables types
+    enum class second : std::uint8_t {
+        /// Cauchy stress
+        cauchy_stress,
+        /// Kirchhoff stress
+        Kirchhoff,
+        /// First Piola-Kirchhoff stress (PK1)
+        PiolaKirchhoff1,
+        /// Second Piola-Kirchhoff stress (PK2)
+        PiolaKirchhoff2,
+        /// Linearised (infinitesimal) total strain
+        LinearisedStrain,
+        /// Linearised (infinitesimal) plastic strain
+        LinearisedPlasticStrain,
+        /// Hencky elastic strain
+        HenckyStrainElastic,
+        /// Deformation gradient (F)
+        DeformationGradient,
+        /// Plastic deformation gradient (Fp)
+        DeformationGradientPlastic,
+        /// Displacement gradient (H)
+        DisplacementGradient,
+        /// Green-Lagrange strain (E)
+        GreenLagrange,
+        /// Back stress (for hardening)
+        BackStress,
+        /// Kinematic hardening
+        KinematicHardening,
+        /// Conductivity tensor
+        Conductivity,
+        /// Beam bending stiffness
+        bending_stiffness,
+        /// Beam shear stiffness
+        shear_stiffness
+    };
+
+    /// Fourth order tensor types
+    enum class fourth : std::uint8_t {
+        /// Material tangent operator
+        tangent_operator
+    };
+
 public:
     internal_variables(std::size_t const size) : size{size} {}
 
@@ -159,15 +160,6 @@ public:
     /// Implicitly defined move constructor
     internal_variables(internal_variables&&) = default;
 
-    /// Add a number of tensor type variables to the object store
-    template <typename... all_types>
-    void add(second const name, all_types... names)
-    {
-        second_order_tensors[name].resize(size, second_tensor_type::Zero());
-        second_order_tensors_old[name].resize(size, second_tensor_type::Zero());
-        add(names...);
-    }
-
     /// Add a number of scalar type variables to the object store
     template <typename... all_types>
     void add(scalar const name, all_types const... names)
@@ -177,11 +169,36 @@ public:
         add(names...);
     }
 
+    /// Add a number of scalar type variables to the object store
+    template <typename... all_types>
+    void add(vector const name, all_types const... names)
+    {
+        vectors[name].resize(size, {});
+        vectors_old[name].resize(size, {});
+        add(names...);
+    }
+
+    /// Add a number of tensor type variables to the object store
+    template <typename... all_types>
+    void add(second const name, all_types... names)
+    {
+        second_order_tensors[name].resize(size, second_tensor_type::Zero());
+        second_order_tensors_old[name].resize(size, second_tensor_type::Zero());
+        add(names...);
+    }
+
     /// Allocate scalars (defaulted to zeros)
     void add(scalar const name, double const value = 0.0)
     {
         scalars[name].resize(size, value);
         scalars_old[name].resize(size, value);
+    }
+
+    /// Allocate vectors (defaulted to empyth)
+    void add(vector const name)
+    {
+        vectors[name].resize(size, {});
+        vectors_old[name].resize(size, {});
     }
 
     /// Allocate second order tensors (defaulted to zeros)
@@ -199,6 +216,8 @@ public:
     }
 
     bool has(scalar const name) const { return scalars.find(name) != scalars.end(); }
+
+    bool has(vector const name) const { return vectors.find(name) != vectors.end(); }
 
     bool has(second const name) const
     {
@@ -228,9 +247,20 @@ public:
         if (!has(name))
         {
             throw std::domain_error("Scalar " + std::to_string(static_cast<int>(name))
-                                    + " does not exist in the std::unordered_map");
+                                    + " does not exist in the variable table");
         }
         return scalars.find(name)->second;
+    }
+
+    /// Mutable access to the non-converged scalar variables
+    std::vector<std::vector<scalar_type>>& get(vector const name)
+    {
+        if (!has(name))
+        {
+            throw std::domain_error("Vector " + std::to_string(static_cast<int>(name))
+                                    + " does not exist in the variable table");
+        }
+        return vectors.find(name)->second;
     }
 
     /// Mutable access to the non-converged second order tensor variables
@@ -239,7 +269,7 @@ public:
         if (!has(name))
         {
             throw std::domain_error("Second order tensor " + std::to_string(static_cast<int>(name))
-                                    + " does not exist in the std::unordered_map");
+                                    + " does not exist in the variable table");
         }
         return second_order_tensors.find(name)->second;
     }
@@ -250,7 +280,7 @@ public:
         if (!has(name))
         {
             throw std::domain_error("Fourth order tensor " + std::to_string(static_cast<int>(name))
-                                    + " does not exist in the std::unordered_map");
+                                    + " does not exist in the variable table");
         }
         return fourth_order_tensors.find(name)->second;
     }
@@ -261,6 +291,14 @@ public:
     {
         return std::make_tuple(std::ref(scalars.find(var0)->second),
                                std::ref(scalars.find(vars)->second)...);
+    }
+
+    /// Mutable access to the non-converged scalar variables
+    template <typename... vector_types>
+    auto get(vector const var0, vector_types const... vars)
+    {
+        return std::make_tuple(std::ref(vectors.find(var0)->second),
+                               std::ref(vectors.find(vars)->second)...);
     }
 
     /// Mutable access to the non-converged tensor variables
@@ -337,15 +375,22 @@ public:
     auto entries() const noexcept { return size; }
 
 protected:
-    // These state variables are committed and reverted depending on the outer
-    // simulation loop.  If a nonlinear iteration does not converge then revert
-    // the state back to the previous state.  The second_order_tensors and scalars fields
-    // are the 'unstable' variables and the *old are the stable variants
-    std::unordered_map<second, std::vector<second_tensor_type>> second_order_tensors,
-        second_order_tensors_old;
+    /// Hash map of scalar history
+    std::unordered_map<scalar, std::vector<scalar_type>> scalars;
+    /// Hash map of old scalar history
+    std::unordered_map<scalar, std::vector<scalar_type>> scalars_old;
 
-    std::unordered_map<scalar, std::vector<scalar_type>> scalars, scalars_old;
+    /// Hash map of vectors
+    std::unordered_map<vector, std::vector<std::vector<scalar_type>>> vectors;
+    /// Hash map of old vectors
+    std::unordered_map<vector, std::vector<std::vector<scalar_type>>> vectors_old;
 
+    /// Hash map of second order tensors
+    std::unordered_map<second, std::vector<second_tensor_type>> second_order_tensors;
+    /// Hash map of old second order tensors
+    std::unordered_map<second, std::vector<second_tensor_type>> second_order_tensors_old;
+
+    /// Fourth order tensors
     std::unordered_map<fourth, std::vector<fourth_tensor_type>> fourth_order_tensors;
 
     std::size_t size;
