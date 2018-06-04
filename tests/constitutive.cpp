@@ -1201,9 +1201,9 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
                               "\"KinematicHardeningModulus\": 5500,"
                               "\"SofteningMultiplier\" : 250,"
                               "\"PlasticityViscousExponent\" : 2.5,"
-                              "\"PlasticityViscousDenominator\" : 1.923536463026969e-08,"
+                              "\"PlasticityViscousDenominator\" : 1220,"
                               "\"DamageViscousExponent\" : 2,"
-                              "\"DamageViscousDenominator\" : 2.777777777777778"
+                              "\"DamageViscousDenominator\" : 0.6"
                               "}"};
 
     auto const constitutive_input{"{\"ConstitutiveModel\" : "
