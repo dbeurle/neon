@@ -120,8 +120,8 @@ private:
                                             "BackStress",
                                             "Displacement",
                                             "ReactionForce",
-                                            "ActiveChains",
-                                            "InactiveChains",
+                                            "ActiveShearModulus",
+                                            "InactiveShearModulus",
                                             "ActiveSegments",
                                             "InactiveSegments"}};
 
