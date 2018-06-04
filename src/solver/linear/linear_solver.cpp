@@ -7,7 +7,9 @@
 #include "exceptions.hpp"
 #include "simulation_parser.hpp"
 
+#ifdef ENABLE_OPENMP
 #include <omp.h>
+#endif
 
 #include <cfenv>
 #include <chrono>
@@ -45,7 +47,11 @@ void conjugate_gradient::solve(sparse_matrix const& A, vector& x, vector const& 
 
     pcg.compute(A);
 
-    x = pcg.solveWithGuess(b, x);
+    x = pcg.solve(b);
+
+    std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << pcg.iterations()
+              << " (max. " << max_iterations << "), estimated error: " << pcg.error() << " (min. "
+              << residual_tolerance << ")\n";
 
     if (std::fetestexcept(FE_INVALID))
     {
@@ -55,12 +61,8 @@ void conjugate_gradient::solve(sparse_matrix const& A, vector& x, vector const& 
     if (pcg.iterations() >= max_iterations)
     {
         throw computational_error("Conjugate gradient solver maximum iterations "
-                                  "reached\n");
+                                  "reached");
     }
-
-    std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << pcg.iterations()
-              << " (max. " << max_iterations << "), estimated error: " << pcg.error() << " (min. "
-              << residual_tolerance << ")\n";
 }
 
 void biconjugate_gradient_stabilised::solve(sparse_matrix const& A, vector& x, vector const& b)
