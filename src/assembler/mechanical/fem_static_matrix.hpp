@@ -145,6 +145,8 @@ void fem_static_matrix<fem_mesh_type>::solve()
         // Initialise the mesh with zero displacements
         fem_mesh.update_internal_variables(displacement);
 
+        io.write(adaptive_load.step(), adaptive_load.time());
+
         while (!adaptive_load.is_fully_applied())
         {
             std::cout << "\n"
