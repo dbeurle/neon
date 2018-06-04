@@ -19,20 +19,29 @@ gaussian_ageing_affine_microsphere::gaussian_ageing_affine_microsphere(
     std::shared_ptr<internal_variables_t>& variables,
     json const& material_data,
     unit_sphere_quadrature::point const rule)
-    : gaussian_affine_microsphere{variables, material_data, rule},
-      material{material_data},
-      shear_moduli{variables->entries(), {material.shear_modulus()}},
-      inactive_shear_moduli(variables->entries(), 0.0),
-      segments{variables->entries(), {material.segments_per_chain(), 0.0}},
-      intermediate_deformations{variables->entries(), {matrix3::Identity()}}
+    : gaussian_affine_microsphere{variables, material_data, rule}, material{material_data}
 {
     variables->add(internal_variables_t::scalar::active_shear_modulus,
                    internal_variables_t::scalar::inactive_shear_modulus,
                    internal_variables_t::scalar::active_segments,
                    internal_variables_t::scalar::reduction_factor,
-                   internal_variables_t::scalar::inactive_segments,
-                   internal_variables_t::second::accumulated_ageing_integral,
-                   internal_variables_t::second::ageing_integrand);
+                   internal_variables_t::scalar::inactive_segments);
+
+    variables->add(internal_variables_t::vector::sphere_integral,
+                   internal_variables_t::vector::sphere_last_function);
+
+    auto [sphere_integral,
+          sphere_last_function] = variables->get(internal_variables_t::vector::sphere_integral,
+                                                 internal_variables_t::vector::sphere_last_function);
+
+    for (auto& i : sphere_integral)
+    {
+        i.resize(unit_sphere.points(), 0.0);
+    }
+    for (auto& i : sphere_last_function)
+    {
+        i.resize(unit_sphere.points(), 0.0);
+    }
 
     auto [active_shear_modulus,
           active_segments,
@@ -73,13 +82,16 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
     auto const& active_shear_modulus_old = variables->get_old(
         internal_variables_t::scalar::active_shear_modulus);
 
-    auto& running_integral = variables->get(internal_variable_t::second::accumulated_ageing_integral);
-    auto& last_eval = variables->get(internal_variable_t::second::ageing_integrand);
+    auto [sphere_integral,
+          sphere_last_function] = variables->get(internal_variable_t::vector::sphere_integral,
+                                                 internal_variable_t::vector::sphere_last_function);
 
     auto const K{material.bulk_modulus()};
 
     tbb::parallel_for(std::size_t{0}, deformation_gradients.size(), [&, this](auto const l) {
         matrix3 const& F = deformation_gradients[l];
+
+        matrix3 const F_bar = unimodular(F);
 
         if (!is_approx(time_step_size, 0.0))
         {
@@ -108,50 +120,58 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
             std::cout << "material.creation_rate(parameters) " << material.creation_rate(parameters)
                       << std::endl;
 
-            matrix3 const current_eval = material.creation_rate(parameters) / parameters(2)
-                                         * F.inverse();
+            // Loop over all the pointers
+            unit_sphere.for_each([&](auto const& coordinates, auto const sphere_index) {
+                auto const& [r, _] = coordinates;
 
-            std::cout << "last eval\n" << last_eval[l] << std::endl;
-            std::cout << "current_eval\n" << current_eval << "\n";
+                auto const micro_stretch = compute_microstretch(deformed_tangent(F_bar, r));
 
-            running_integral[l] += partial_trapezoidal(last_eval[l], current_eval, time_step_size);
+                auto const sphere_function = material.creation_rate(parameters)
+                                             / (parameters(2) * micro_stretch);
 
-            last_eval[l] = current_eval;
+                sphere_integral.at(l).at(
+                    sphere_index) += partial_trapezoidal(sphere_last_function.at(l).at(sphere_index),
+                                                         sphere_function,
+                                                         time_step_size);
+                sphere_last_function.at(l).at(sphere_index) = sphere_function;
+            });
         }
+        // clang-format off
+        matrix3 const macro_stress = 3.0 * unit_sphere.integrate(matrix3::Zero().eval(), [&](auto const& coordinates, auto const sphere_index) -> matrix3 {
+                                            auto const& [r, _] = coordinates;
 
-        // // Stress computation over the secondary network deformation history
-        // // clang-format off
-        // matrix3 const macro_stress = std::accumulate(begin(intermediate_deformations[l]),
-        //                                              end(intermediate_deformations[l]),
-        //                                              matrix3::Zero().eval(),
-        //                                              [&, this, time_index = 0ul](matrix3 const p, auto const& F_0) mutable {
-        //
-        //                                                  matrix3 const F_bar = unimodular(F_0.inverse() * F);
-        //
-        //                                                  auto const G{shear_moduli[l][time_index++]};
-        //
-        //                                                  return p + compute_macro_stress(F_bar, G);
-        //                                              });
-        //
-        // // Tangent operator computation over the secondary network deformation history
-        // matrix6 const macro_moduli = std::accumulate(begin(intermediate_deformations[l]),
-        //                                              end(intermediate_deformations[l]),
-        //                                              matrix6::Zero().eval(),
-        //                                              [&, this, time_index = 0ul](matrix6 const p, auto const& F_0) mutable {
-        //
-        //                                                  matrix3 const F_bar = unimodular(F_0.inverse() * F);
-        //
-        //                                                  auto const G{shear_moduli[l][time_index++]};
-        //
-        //                                                  return p + compute_macro_moduli(F_bar, G);
-        //                                              });
-        // // clang-format on
-        // auto const J = det_F[l];
-        //
-        // auto const pressure = J * volumetric_free_energy_dJ(J, K);
-        //
-        // cauchy_stresses[l] = compute_kirchhoff_stress(pressure, macro_stress) / J;
-        //
-        // tangent_operators[l] = compute_material_tangent(J, K, macro_moduli, macro_stress);
+                                            vector3 const t = deformed_tangent(F_bar, r);
+
+                                            auto const secondary_shear_modulus = sphere_integral.at(l).at(sphere_index);
+
+                                            auto const shear_modulus = (material.shear_modulus() + secondary_shear_modulus) * reduction_factor[l];
+
+                                            return shear_modulus * outer_product(t, t);
+                                        });
+
+
+
+        matrix6 const macro_moduli = -3.0 * unit_sphere.integrate(matrix6::Zero().eval(), [&](auto const& coordinates, auto const sphere_index) -> matrix6 {
+                                                auto const& [r, _] = coordinates;
+
+                                                vector3 const t = deformed_tangent(F_bar, r);
+
+                                                auto const micro_stretch = compute_microstretch(t);
+
+                                                auto const secondary_shear_modulus = sphere_integral.at(l).at(sphere_index);
+
+                                                auto const shear_modulus = (material.shear_modulus() + secondary_shear_modulus) * reduction_factor[l];
+
+                                                return shear_modulus * std::pow(micro_stretch, -2) * outer_product(t, t, t, t);
+                                            });
+        // clang-format on
+
+        auto const J = det_F[l];
+
+        auto const pressure = J * volumetric_free_energy_dJ(J, K);
+
+        cauchy_stresses[l] = compute_kirchhoff_stress(pressure, macro_stress) / J;
+
+        tangent_operators[l] = compute_material_tangent(J, K, macro_moduli, macro_stress);
     });
 }

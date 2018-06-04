@@ -25,14 +25,6 @@ namespace neon::mechanical::solid
 class gaussian_ageing_affine_microsphere : public gaussian_affine_microsphere
 {
 public:
-    /// Store the active and inactive value
-    using value_pair = std::pair<double, double>;
-    /// Type for the composition of the active/inactive shear modulus history
-    using shear_modulus_composition = std::vector<double>;
-    /// Type for the deformation history
-    using deformation_composition = std::vector<matrix3>;
-
-public:
     /// \param variables Reference to internal state variable store
     /// \param material_data Json object with input file material data
     explicit gaussian_ageing_affine_microsphere(std::shared_ptr<internal_variables_t>& variables,
@@ -44,14 +36,6 @@ public:
 private:
     /// Material with micromechanical parameters
     ageing_micromechanical_elastomer material;
-    /// Quadrature point active shear moduli
-    std::vector<shear_modulus_composition> shear_moduli;
-    /// Quadrature point inactive shear moduli
-    std::vector<double> inactive_shear_moduli;
-    /// Quadrature point average segment
-    std::vector<value_pair> segments;
-    /// Secondary network variables
-    std::vector<deformation_composition> intermediate_deformations;
 };
 /** \} */
 }
