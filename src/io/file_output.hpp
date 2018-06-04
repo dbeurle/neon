@@ -290,7 +290,7 @@ private:
 private:
     fem_mesh const& mesh;
 
-    VectorMap const vector_map{{"HeatFlux", internal_variables_t::vector::HeatFlux}};
+    VectorMap const vector_map{};
 };
 }
 }
