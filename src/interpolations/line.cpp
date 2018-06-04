@@ -25,19 +25,19 @@ void line2::precompute_shape_functions()
         auto const& [l, xi] = coordinates;
 
         vector N(2);
-        matrix rhea(2, 1);
+        matrix dN(2, 1);
 
         N(0) = 1.0 / 2.0 * (1.0 - xi);
         N(1) = 1.0 / 2.0 * (1.0 + xi);
 
-        rhea(0, 0) = -1.0 / 2.0;
-        rhea(1, 0) = 1.0 / 2.0;
+        dN(0, 0) = -1.0 / 2.0;
+        dN(1, 0) = 1.0 / 2.0;
 
         local_quadrature_coordinates(l, 0) = xi;
 
         N_matrix.row(l) = N;
 
-        return std::make_tuple(N, rhea);
+        return std::make_tuple(N, dN);
     });
 
     // Compute extrapolation algorithm matrices
