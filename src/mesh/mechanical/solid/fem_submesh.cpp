@@ -1,4 +1,6 @@
 
+#define EIGEN_DONT_PARALLELIZE
+
 #include "fem_submesh.hpp"
 
 #include "exceptions.hpp"
