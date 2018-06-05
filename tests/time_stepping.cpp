@@ -29,7 +29,7 @@ TEST_CASE("adaptive time control")
     SECTION("naughty nonlinear iteration")
     {
         auto last_good_load_factor = load.step_time();
-        for (int i = 0; i < 9; i++)
+        for (int i = 0; i < 4; i++)
         {
             load.update_convergence_state(false);
             REQUIRE(load.step_time() < last_good_load_factor);
