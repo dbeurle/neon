@@ -75,14 +75,17 @@ protected:
 
     /// Cache the sparsity pattern
     bool is_sparsity_computed{false};
+    /// Flag for norm computation
+    bool use_relative_norm{true};
 
     double residual_tolerance{1.0e-3};
     double displacement_tolerance{1.0e-3};
-    /// Maximum number of Newton Raphson iterations before cutback
-    std::int64_t max_nr_iterations = 10;
 
-    double relative_displacement_norm;
-    double relative_force_norm;
+    double displacement_norm;
+    double force_norm;
+
+    /// Maximum number of Newton Raphson iterations before cutback
+    int maximum_iterations = 10;
 
     /// Tangent sparse stiffness matrix
     sparse_matrix Kt;
@@ -123,7 +126,11 @@ fem_static_matrix<fem_mesh_type>::fem_static_matrix(mesh_type& fem_mesh, json co
     }
     if (simulation["NonlinearOptions"].count("NewtonRaphsonIterations"))
     {
-        max_nr_iterations = simulation["NonlinearOptions"]["NewtonRaphsonIterations"];
+        maximum_iterations = simulation["NonlinearOptions"]["NewtonRaphsonIterations"];
+    }
+    if (simulation["NonlinearOptions"].count("AbsoluteTolerance"))
+    {
+        use_relative_norm = false;
     }
 
     residual_tolerance = simulation["NonlinearOptions"]["ResidualTolerance"];
@@ -346,15 +353,14 @@ void fem_static_matrix<fem_mesh_type>::apply_displacement_boundaries()
 template <class fem_mesh_type>
 bool fem_static_matrix<fem_mesh_type>::is_iteration_converged() const
 {
-    return relative_displacement_norm <= displacement_tolerance
-           && relative_force_norm <= residual_tolerance;
+    return displacement_norm <= displacement_tolerance && force_norm <= residual_tolerance;
 }
 
 template <class fem_mesh_type>
 void fem_static_matrix<fem_mesh_type>::print_convergence_progress() const
 {
     std::cout << std::string(6, ' ') << termcolor::bold;
-    if (relative_displacement_norm <= displacement_tolerance)
+    if (displacement_norm <= displacement_tolerance)
     {
         std::cout << termcolor::green;
     }
@@ -362,10 +368,10 @@ void fem_static_matrix<fem_mesh_type>::print_convergence_progress() const
     {
         std::cout << termcolor::yellow;
     }
-    std::cout << "Incremental displacement norm " << relative_displacement_norm << "\n"
+    std::cout << "Incremental displacement norm " << displacement_norm << "\n"
               << termcolor::reset << std::string(6, ' ');
 
-    if (relative_force_norm <= residual_tolerance)
+    if (force_norm <= residual_tolerance)
     {
         std::cout << termcolor::green;
     }
@@ -373,20 +379,24 @@ void fem_static_matrix<fem_mesh_type>::print_convergence_progress() const
     {
         std::cout << termcolor::yellow;
     }
-    std::cout << termcolor::bold << "Residual force norm " << relative_force_norm
-              << termcolor::reset << "\n";
+    std::cout << termcolor::bold << "Residual force norm " << force_norm << termcolor::reset << "\n";
 }
 
 template <class fem_mesh_type>
 void fem_static_matrix<fem_mesh_type>::update_relative_norms()
 {
-    relative_displacement_norm = delta_d.norm(); // / displacement.norm();
-    relative_force_norm = minus_residual.norm();
-
-    // std::cout << minus_residual.norm() << ", " << f_ext.norm() << ", " << f_int.norm() << "\n";
-    // < residual_tolerance
-    //? (f_int - f_ext).norm()
-    //: minus_residual.norm() / std::max(f_ext.norm(), f_int.norm());
+    if (use_relative_norm)
+    {
+        displacement_norm = delta_d.norm() / displacement.norm();
+        force_norm = is_approx(std::max(f_ext.norm(), f_int.norm()), 0.0)
+                         ? 1.0
+                         : minus_residual.norm() / std::max(f_ext.norm(), f_int.norm());
+    }
+    else
+    {
+        displacement_norm = delta_d.norm();
+        force_norm = minus_residual.norm();
+    }
 }
 
 template <class fem_mesh_type>
@@ -396,7 +406,7 @@ void fem_static_matrix<fem_mesh_type>::perform_equilibrium_iterations()
 
     // Full Newton-Raphson iteration to solve nonlinear equations
     auto current_iteration{0};
-    while (current_iteration < max_nr_iterations)
+    while (current_iteration < maximum_iterations)
     {
         auto const start = std::chrono::steady_clock::now();
 
@@ -416,11 +426,7 @@ void fem_static_matrix<fem_mesh_type>::perform_equilibrium_iterations()
 
         solver->solve(Kt, delta_d, minus_residual);
 
-        // std::cout << "incremental displacement\n" << delta_d << "\n\n";
-
         displacement += delta_d;
-
-        // std::cout << "displacement\n" << displacement << "\n\n";
 
         fem_mesh.update_internal_variables(displacement,
                                            current_iteration == 0 ? adaptive_load.increment() : 0.0);
@@ -438,17 +444,17 @@ void fem_static_matrix<fem_mesh_type>::perform_equilibrium_iterations()
 
         current_iteration++;
     }
-    if (current_iteration == max_nr_iterations)
+    if (current_iteration == maximum_iterations)
     {
         throw computational_error("Reached Newton-Raphson iteration limit");
     }
 
-    if (current_iteration != max_nr_iterations)
+    if (current_iteration != maximum_iterations)
     {
         displacement_old = displacement;
 
-        adaptive_load.update_convergence_state(current_iteration != max_nr_iterations);
-        fem_mesh.save_internal_variables(current_iteration != max_nr_iterations);
+        adaptive_load.update_convergence_state(current_iteration != maximum_iterations);
+        fem_mesh.save_internal_variables(current_iteration != maximum_iterations);
 
         fem_mesh.update_internal_forces(f_int);
 
