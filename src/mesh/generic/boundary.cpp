@@ -99,7 +99,6 @@ void boundary::generate_sinusoidal(json const& boundary,
         }
     }
 
-    std::vector<double> const time = boundary["Time"];
     std::vector<double> const amplitude = boundary[name];
     std::vector<double> const period = boundary["Period"];
     std::vector<double> const number_of_cycles = boundary["NumberOfCycles"];
@@ -113,29 +112,34 @@ void boundary::generate_sinusoidal(json const& boundary,
     }
 
     std::vector<double> times, loads;
+    // the first time step is zero
     times.push_back(0);
+    loads.push_back(0);
 
-    // Loop over the blocks
+    // Loop over blocks of cycles.
+    // Each block corresponds to one entry in amplitude, period, number_of_cycles and phase
     for (std::size_t i = 0; i < amplitude.size(); ++i)
     {
+        // the angular frequency
         auto const omega = 2.0 * M_PI / period[i];
-
+        // number of time steps within one block of cycles
         auto const number_of_steps = number_of_cycles[i] * period[i] / generate_time_step;
-
+        // steps over the current block excluding zero
         std::vector<double> time_block(number_of_steps);
+        std::vector<double> load_block(number_of_steps);
         std::iota(time_block.begin(), time_block.end(), 1);
-
+        // scale the steps to time and shift if the current block is not the first
         auto const scale_factor = number_of_cycles[i] * period[i] / time_block.back();
-
         time_block = time_block | view::transform([&scale_factor, &times](double x) {
                          return x * scale_factor + times.back();
                      });
-
+        // compute the load corresponding to each time step
+        load_block = time_block | view::transform([i, &amplitude, omega, &phase](double x) {
+                         return amplitude[i] * std::sin(omega * x + phase[i]);
+                     });
+        // append the current block time steps and loads to the total time and load vectors
         times.insert(times.end(), time_block.begin(), time_block.end());
-
-        loads = times | view::transform([i, &amplitude, omega, &phase](double x) {
-                    return amplitude[i] * std::sin(omega * x + phase[i]);
-                });
+        loads.insert(loads.end(), load_block.begin(), load_block.end());
     }
     allocate_time_load(times, loads);
 }

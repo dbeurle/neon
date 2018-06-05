@@ -66,7 +66,6 @@
             {
                 "Name" : "ZLoad",
 				        "Type" : "Displacement",
-                "Time" : [0.0, 0.01],
                 "z" : [0.001],
                 "GenerateType" : "Sinusoidal",
                 "Period" : [0.01],
