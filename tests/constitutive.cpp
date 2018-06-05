@@ -350,7 +350,7 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
         }
         for (auto inactive_segment : inactive_segments)
         {
-            REQUIRE(inactive_segment > 24.0);
+            REQUIRE(inactive_segment > 20.0);
             REQUIRE(inactive_segment < 25.0);
         }
         for (auto shear_modulus : active_shear_moduli)
@@ -369,27 +369,6 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
             REQUIRE(reduction < 1.0);
         }
 
-        for (auto const& i : variables->get(internal_variables_t::vector::secondary_moduli))
-        {
-            for (auto j : i)
-            {
-                std::cout << j << "\n";
-            }
-        }
-        std::cout << "Previous values\n";
-        for (auto const& i : variables->get(internal_variables_t::vector::sphere_last_function))
-        {
-            for (auto j : i)
-            {
-                std::cout << j << "\n";
-            }
-        }
-        std::cout << "Stress tensor\n";
-        for (auto const& i : variables->get(internal_variables_t::second::cauchy_stress))
-        {
-            std::cout << i << "\n\n";
-        }
-
         for (auto const& material_tangent : material_tangents)
         {
             REQUIRE((material_tangent - material_tangent.transpose()).norm()
@@ -401,10 +380,6 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
     }
     SECTION("uniaxial load")
     {
-        std::cout << "Uniaxial load test\n\n";
-
-        std::cout << "setting to unity\n";
-
         for (auto& F : F_list)
         {
             F(0, 0) = 1.0;
