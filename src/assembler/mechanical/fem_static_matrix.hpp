@@ -384,7 +384,6 @@ void fem_static_matrix<fem_mesh_type>::update_relative_norms()
     relative_force_norm = minus_residual.norm();
 
     // std::cout << minus_residual.norm() << ", " << f_ext.norm() << ", " << f_int.norm() << "\n";
-
     // < residual_tolerance
     //? (f_int - f_ext).norm()
     //: minus_residual.norm() / std::max(f_ext.norm(), f_int.norm());

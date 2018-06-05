@@ -37,7 +37,7 @@ private:
     /// Material with micromechanical parameters
     ageing_micromechanical_elastomer material;
 
-    double local_time_step_size = 0.0;
+    double last_time_step_size = 0.0;
 };
 /** \} */
 }
