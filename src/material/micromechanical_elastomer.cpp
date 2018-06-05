@@ -62,7 +62,7 @@ double ageing_micromechanical_elastomer::creation_rate(double const active_shear
 vector5 ageing_micromechanical_elastomer::integrate(vector5 z, double const time_step_size) const
 {
     // Define the right hand side of the ageing evolution equations
-    return runge_kutta_fourth_fifth_order(0.0, time_step_size, z, [=](double const t, vector5 y) -> vector5 {
+    return runge_kutta_fourth_order(0.0, time_step_size, z, [=](double const t, vector5 y) -> vector5 {
         // Unpack the vector
         double const active_chains = y(0);
         double const inactive_chains = y(1);

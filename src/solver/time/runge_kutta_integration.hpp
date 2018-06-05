@@ -14,7 +14,7 @@ namespace neon
 /// Perform a second order Runge-Kutta step for the given type.
 /// The type \p function must accept time and the value.
 template <typename T, typename function>
-T runge_kutta_second_order(double const t, double const dt, T&& y, function&& f)
+T runge_kutta_second_order(double const t, double const dt, T const& y, function&& f)
 {
     T const dy1 = dt * f(t, y);
     T const dy2 = dt * f(t + dt, y + dy1);
@@ -24,7 +24,7 @@ T runge_kutta_second_order(double const t, double const dt, T&& y, function&& f)
 /// Perform a fourth order Runge-Kutta step for the given type.
 /// The type \p function must accept time and the value.
 template <typename T, typename function>
-T runge_kutta_fourth_order(double const t, double const dt, T&& y, function&& f)
+T runge_kutta_fourth_order(double const t, double const dt, T const& y, function&& f)
 {
     T const dy1 = dt * f(t, y);
     T const dy2 = dt * f(t + dt / 2.0, y + dy1 / 2.0);

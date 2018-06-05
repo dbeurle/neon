@@ -69,6 +69,8 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
                                                  internal_variable_t::vector::sphere_last_function);
 
     auto& secondary_moduli_old = variables->get_old(internal_variable_t::vector::secondary_moduli);
+    auto& sphere_last_function_old = variables->get_old(
+        internal_variable_t::vector::sphere_last_function);
 
     auto& cauchy_stresses = variables->get(internal_variables_t::second::cauchy_stress);
 
@@ -102,7 +104,10 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
             reduction_factor[l] = parameters(2);
             active_segments[l] = parameters(3);
             inactive_segments[l] = parameters(4);
+
+            local_time_step_size = time_step_size;
         }
+
         // Partially integrate the ageing integral and accumulate into the
         // previous integral.  Save the current value for the next step in
         // the accumulated integral
@@ -119,9 +124,9 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
 
             secondary_moduli.at(l).at(
                 sphere_index) = secondary_moduli_old.at(l).at(sphere_index)
-                                + partial_trapezoidal(sphere_last_function.at(l).at(sphere_index),
+                                + partial_trapezoidal(sphere_last_function_old.at(l).at(sphere_index),
                                                       sphere_function,
-                                                      time_step_size);
+                                                      local_time_step_size);
 
             sphere_last_function.at(l).at(sphere_index) = sphere_function;
         });

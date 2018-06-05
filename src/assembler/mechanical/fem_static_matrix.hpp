@@ -187,7 +187,7 @@ void fem_static_matrix<fem_mesh_type>::compute_internal_force()
 
     for (auto const& submesh : fem_mesh.meshes())
     {
-        for (std::int64_t element = 0; element < submesh.elements(); ++element)
+        for (std::int64_t element{0}; element < submesh.elements(); ++element)
         {
             auto const [dofs, fe_int] = submesh.internal_force(element);
 
@@ -199,7 +199,7 @@ void fem_static_matrix<fem_mesh_type>::compute_internal_force()
 template <class fem_mesh_type>
 void fem_static_matrix<fem_mesh_type>::compute_external_force()
 {
-    auto const start = std::chrono::high_resolution_clock::now();
+    auto const start = std::chrono::steady_clock::now();
 
     auto const step_time = adaptive_load.step_time();
 
@@ -228,7 +228,7 @@ void fem_static_matrix<fem_mesh_type>::compute_external_force()
             }
         }
     }
-    auto const end = std::chrono::high_resolution_clock::now();
+    auto const end = std::chrono::steady_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
     std::cout << std::string(6, ' ') << "External forces assembly took " << elapsed_seconds.count()
               << "s\n";
@@ -243,7 +243,7 @@ void fem_static_matrix<fem_mesh_type>::assemble_stiffness()
         is_sparsity_computed = true;
     }
 
-    auto const start = std::chrono::high_resolution_clock::now();
+    auto const start = std::chrono::steady_clock::now();
 
     Kt.coeffs() = 0.0;
 
@@ -262,7 +262,7 @@ void fem_static_matrix<fem_mesh_type>::assemble_stiffness()
         });
     }
 
-    auto const end = std::chrono::high_resolution_clock::now();
+    auto const end = std::chrono::steady_clock::now();
     std::chrono::duration<double> const elapsed_seconds = end - start;
 
     std::cout << std::string(6, ' ') << "Tangent stiffness assembly took "
@@ -380,11 +380,14 @@ void fem_static_matrix<fem_mesh_type>::print_convergence_progress() const
 template <class fem_mesh_type>
 void fem_static_matrix<fem_mesh_type>::update_relative_norms()
 {
-    relative_displacement_norm = delta_d.norm() / displacement.norm();
+    relative_displacement_norm = delta_d.norm(); // / displacement.norm();
+    relative_force_norm = minus_residual.norm();
 
-    relative_force_norm = is_approx(std::max(f_ext.norm(), f_int.norm()), 0.0)
-                              ? 1.0
-                              : minus_residual.norm() / std::max(f_ext.norm(), f_int.norm());
+    // std::cout << minus_residual.norm() << ", " << f_ext.norm() << ", " << f_int.norm() << "\n";
+
+    // < residual_tolerance
+    //? (f_int - f_ext).norm()
+    //: minus_residual.norm() / std::max(f_ext.norm(), f_int.norm());
 }
 
 template <class fem_mesh_type>
@@ -396,7 +399,7 @@ void fem_static_matrix<fem_mesh_type>::perform_equilibrium_iterations()
     auto current_iteration{0};
     while (current_iteration < max_nr_iterations)
     {
-        auto const start = std::chrono::high_resolution_clock::now();
+        auto const start = std::chrono::steady_clock::now();
 
         std::cout << std::string(4, ' ') << termcolor::blue << termcolor::bold
                   << "Newton-Raphson iteration " << current_iteration << termcolor::reset
@@ -414,7 +417,11 @@ void fem_static_matrix<fem_mesh_type>::perform_equilibrium_iterations()
 
         solver->solve(Kt, delta_d, minus_residual);
 
+        // std::cout << "incremental displacement\n" << delta_d << "\n\n";
+
         displacement += delta_d;
+
+        // std::cout << "displacement\n" << displacement << "\n\n";
 
         fem_mesh.update_internal_variables(displacement,
                                            current_iteration == 0 ? adaptive_load.increment() : 0.0);
@@ -423,7 +430,7 @@ void fem_static_matrix<fem_mesh_type>::perform_equilibrium_iterations()
 
         print_convergence_progress();
 
-        auto const end = std::chrono::high_resolution_clock::now();
+        auto const end = std::chrono::steady_clock::now();
         std::chrono::duration<double> const elapsed_seconds = end - start;
         std::cout << std::string(6, ' ') << "Equilibrium iteration required "
                   << elapsed_seconds.count() << "s\n";

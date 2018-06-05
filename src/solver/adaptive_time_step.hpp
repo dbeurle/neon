@@ -112,11 +112,16 @@ protected:
 
     [[nodiscard]] bool is_highly_nonlinear() const;
 
-    protected : std::int32_t const increment_limit{10}; //!< Maximum allowable increments
-    std::int32_t successful_increments{0};              //!< Number of converged steps
+protected:
+    /// Maximum allowable increments
+    std::int32_t const increment_limit{5};
+    /// Number of converged steps
+    std::int32_t successful_increments{0};
 
-    std::int32_t consecutive_converged{0};   //!< Number of consecutive successful attempts
-    std::int32_t consecutive_unconverged{0}; //!< Number of consecutive unsuccessful attempts
+    /// Number of consecutive successful attempts
+    std::int32_t consecutive_converged{0};
+    /// Number of consecutive unsuccessful attempts
+    std::int32_t consecutive_unconverged{0};
 
     double initial_time{1.0};
     double final_time{1.0};

@@ -10,8 +10,8 @@
         "ElasticModulus" : 10.0e6,
         "PoissonsRatio" : 0.45,
         "SegmentsPerChain" : 60,
-        "ScissionProbability" : 5.2e-5,
-        "RecombinationProbability" : 5.3e-5
+        "ScissionProbability" : 5.0e-5,
+        "RecombinationProbability" : 0.0
     }],
     "SimulationCases" : [{
         "Name" : "Load",
@@ -20,14 +20,14 @@
         "NonlinearOptions" : {
             "ResidualTolerance" : 1.0e-3,
             "DisplacementTolerance" : 1.0e-3,
-            "NewtonRaphsonIterations" : 15
+            "NewtonRaphsonIterations" : 20
         },
         "Time" : {
             "Period" : 102.0,
             "Increments" : {
                 "Initial" : 0.05,
                 "Minimum" : 0.001,
-                "Maximum" : 0.5,
+                "Maximum" : 1.0,
                 "Adaptive" : true
             }
         },
@@ -74,7 +74,9 @@
             "Tolerance"  : 1.0e-8
         },
         "Visualisation" : {
-            "Fields" : ["Displacement", "DeformationGradient", "CauchyStress", "ActiveChains", "InactiveChains", "ActiveSegments", "InactiveSegments"]
+            "Fields" : ["Displacement", "DeformationGradient", "CauchyStress",
+                        "ActiveShearModulus", "InactiveShearModulus", "ActiveSegments",
+                        "InactiveSegments"]
         }
     }]
 }
