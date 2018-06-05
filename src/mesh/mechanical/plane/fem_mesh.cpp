@@ -151,13 +151,18 @@ void fem_mesh::check_boundary_conditions(json const& boundary_data) const
 {
     for (auto const& boundary : boundary_data)
     {
-        for (auto const& mandatory_field : {"Name", "Time", "Type"})
+        for (auto const& mandatory_field : {"Name", "Type"})
         {
             if (!boundary.count(mandatory_field))
             {
                 throw std::domain_error("\"" + std::string(mandatory_field)
                                         + "\" was not specified in \"BoundaryCondition\".");
             }
+        }
+        if ((!boundary.count("Time")) && (!boundary.count("GenerateType")))
+        {
+            throw std::domain_error("Neither \"Time\" nor \"GenerateType\" was specified in "
+                                    "\"BoundaryCondition\".");
         }
     }
 }

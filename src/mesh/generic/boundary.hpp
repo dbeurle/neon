@@ -44,7 +44,8 @@ protected:
     void allocate_time_load(json const& times, json const& loads);
 
     /**
-     * Generate boundary values that follows a sinusoidal wave with fixed time step.
+     * Generate boundary values that follows a sinusoidal wave with fixed time step. This may be
+     * used to generate block loading where each block follows a specific sinusoidal wave.
      * @param JSON boundary object
      * @param dofs {x,y,z}
      * @param time step
