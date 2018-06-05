@@ -20,7 +20,8 @@
         "NonlinearOptions" : {
             "ResidualTolerance" : 1.0e-3,
             "DisplacementTolerance" : 1.0e-3,
-            "NewtonRaphsonIterations" : 20
+            "AbsoluteTolerance" : true,
+            "NewtonRaphsonIterations" : 16
         },
         "Time" : {
             "Period" : 102.0,

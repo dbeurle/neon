@@ -19,7 +19,8 @@
         "Solution" : "Equilibrium",
         "NonlinearOptions" : {
             "ResidualTolerance" : 1.0e-3,
-            "DisplacementTolerance" : 1.0e-3
+            "DisplacementTolerance" : 1.0e-3,
+            "NewtonRaphsonIterations" : 15
         },
         "Time" : {
             "Period" : 1.0,

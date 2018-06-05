@@ -18,9 +18,10 @@
         "Module" : "SolidMechanics",
         "Solution" : "Equilibrium",
         "NonlinearOptions" : {
-            "DisplacementTolerance" : 1.0e-4,
-            "ResidualTolerance" : 1.0e-4,
-            "NewtonRaphsonIterations" : 16
+            "DisplacementTolerance" : 1.0e-3,
+            "ResidualTolerance" : 1.0e-3,
+            "AbsoluteTolerance" : true,
+            "NewtonRaphsonIterations" : 15
         },
         "Time" : {
             "Period" : 101.0,
