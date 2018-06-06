@@ -46,10 +46,10 @@ This non-linear isotropic ductile damage model is based on the ``"J2Plasticity"`
 
 * ``"KinematicHardeningModulus"`` the kinematic hardening modulus of the material
 * ``"SofteningMultiplier"``  a scaling factor multiplied by the back stress in the plastic yield function
-* ``"PlasticityViscousExponent"`` :math:`K`: relates the plastic multiplier to the plastic yield function exponentially
-* ``"PlasticityViscousDenominator"`` :math:`n`: scales the plastic yield function :math:`\dot{\lambda}_{vp} = \langle \frac{f_{vp}}{K} \rangle^{n}`
-* ``"DamageViscousExponent"`` :math:`s`: scales the damage yield function
-* ``"DamageViscousDenominator"`` :math:`S`: relates the damage multiplier to the damage yield function exponentially :math:`\dot{\lambda}_{d} = \langle \frac{f_{d}}{S} \rangle^{s}`
+* ``"PlasticityViscousExponent"`` :math:`n`: relates the plastic multiplier to the plastic yield function exponentially
+* ``"PlasticityViscousDenominator"`` :math:`K`: scales the plastic yield function :math:`\dot{\lambda}_{vp} = \langle \frac{f_{vp}}{K} \rangle^{n}`
+* ``"DamageViscousExponent"`` :math:`s`: relates the damage multiplier to the damage yield function exponentially
+* ``"DamageViscousDenominator"`` :math:`S`: scales the damage yield function :math:`\dot{\lambda}_{d} = \langle \frac{f_{d}}{S} \rangle^{s}`
 
 This model is used by specifying ::
 
