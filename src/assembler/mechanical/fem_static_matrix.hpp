@@ -151,6 +151,7 @@ void fem_static_matrix<fem_mesh_type>::solve()
     {
         // Initialise the mesh with zero displacements
         fem_mesh.update_internal_variables(displacement);
+        fem_mesh.update_internal_forces(f_int);
 
         io.write(adaptive_load.step(), adaptive_load.time());
 
@@ -411,8 +412,7 @@ void fem_static_matrix<fem_mesh_type>::perform_equilibrium_iterations()
         auto const start = std::chrono::steady_clock::now();
 
         std::cout << std::string(4, ' ') << termcolor::blue << termcolor::bold
-                  << "Newton-Raphson iteration " << current_iteration << termcolor::reset
-                  << std::endl;
+                  << "Newton-Raphson iteration " << current_iteration << termcolor::reset << "\n";
 
         assemble_stiffness();
 
