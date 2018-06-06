@@ -34,6 +34,15 @@ public:
     virtual void update_internal_variables(double const time_step_size) override;
 
 private:
+    matrix3 compute_macro_stress(matrix3 const& F_bar,
+                                 std::vector<double> const& secondary_modulus,
+                                 double const reduction_factor) const;
+
+    matrix6 compute_macro_moduli(matrix3 const& F_bar,
+                                 std::vector<double> const& secondary_modulus,
+                                 double const reduction_factor) const;
+
+private:
     /// Material with micromechanical parameters
     ageing_micromechanical_elastomer material;
 

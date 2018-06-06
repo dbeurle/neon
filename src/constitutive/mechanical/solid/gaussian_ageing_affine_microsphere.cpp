@@ -13,8 +13,8 @@
 #include <cassert>
 #include <numeric>
 
-using neon::mechanical::solid::gaussian_ageing_affine_microsphere;
-
+namespace neon::mechanical::solid
+{
 gaussian_ageing_affine_microsphere::gaussian_ageing_affine_microsphere(
     std::shared_ptr<internal_variables_t>& variables,
     json const& material_data,
@@ -85,8 +85,8 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
     tbb::parallel_for(std::size_t{0}, deformation_gradients.size(), [&, this](auto const l) {
         matrix3 const F_bar = unimodular(deformation_gradients[l]);
 
-        auto& secondary_modulus = secondary_moduli.at(l);
-        auto const& secondary_modulus_old = secondary_moduli_old.at(l);
+        auto& secondary_modulus = secondary_moduli[l];
+        auto const& secondary_modulus_old = secondary_moduli_old[l];
 
         if (!is_approx(time_step_size, 0.0))
         {
@@ -127,40 +127,20 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
 
             secondary_modulus.at(
                 sphere_index) = secondary_modulus_old.at(sphere_index)
-                                + partial_trapezoidal(sphere_last_function_old.at(l).at(sphere_index),
+                                + partial_trapezoidal(sphere_last_function_old[l].at(sphere_index),
                                                       sphere_function,
                                                       last_time_step_size);
 
-            sphere_last_function.at(l).at(sphere_index) = sphere_function;
+            sphere_last_function[l].at(sphere_index) = sphere_function;
         });
 
-        // clang-format off
-        matrix3 const macro_stress = 3.0 * unit_sphere.integrate(matrix3::Zero().eval(), [&](auto const& coordinates, auto const sphere_index) -> matrix3 {
-                                            auto const& [r, _] = coordinates;
+        matrix3 const macro_stress = compute_macro_stress(F_bar,
+                                                          secondary_modulus,
+                                                          reduction_factor[l]);
 
-                                            vector3 const t = deformed_tangent(F_bar, r);
-
-                                            auto const secondary_shear_modulus = secondary_modulus.at(sphere_index);
-
-                                            auto const shear_modulus = (material.shear_modulus() + secondary_shear_modulus);
-
-                                            return shear_modulus * outer_product(t, t);
-                                        }) * reduction_factor[l];
-
-        matrix6 const macro_moduli = -3.0 * unit_sphere.integrate(matrix6::Zero().eval(), [&](auto const& coordinates, auto const sphere_index) -> matrix6 {
-                                                auto const& [r, _] = coordinates;
-
-                                                vector3 const t = deformed_tangent(F_bar, r);
-
-                                                auto const micro_stretch = compute_microstretch(t);
-
-                                                auto const secondary_shear_modulus = secondary_modulus.at(sphere_index);
-
-                                                auto const shear_modulus = (material.shear_modulus() + secondary_shear_modulus);
-
-                                                return shear_modulus * std::pow(micro_stretch, -2) * outer_product(t, t, t, t);
-                                            }) * reduction_factor[l];
-        // clang-format on
+        matrix6 const macro_moduli = compute_macro_moduli(F_bar,
+                                                          secondary_modulus,
+                                                          reduction_factor[l]);
 
         auto const J = det_F[l];
 
@@ -170,4 +150,52 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
 
         tangent_operators[l] = compute_material_tangent(J, K, macro_moduli, macro_stress);
     });
+}
+
+matrix3 gaussian_ageing_affine_microsphere::compute_macro_stress(
+    matrix3 const& F_bar,
+    std::vector<double> const& secondary_modulus,
+    double const reduction_factor) const
+{
+    return 3.0 * reduction_factor
+           * unit_sphere.integrate(matrix3::Zero().eval(),
+                                   [&](auto const& coordinates, auto const sphere_index) -> matrix3 {
+                                       auto const& [r, _] = coordinates;
+
+                                       vector3 const t = deformed_tangent(F_bar, r);
+
+                                       auto const secondary_shear_modulus = secondary_modulus.at(
+                                           sphere_index);
+
+                                       auto const shear_modulus = material.shear_modulus()
+                                                                  + secondary_shear_modulus;
+
+                                       return shear_modulus * outer_product(t, t);
+                                   });
+}
+
+matrix6 gaussian_ageing_affine_microsphere::compute_macro_moduli(
+    matrix3 const& F_bar,
+    std::vector<double> const& secondary_modulus,
+    double const reduction_factor) const
+{
+    return -3.0 * reduction_factor
+           * unit_sphere.integrate(matrix6::Zero().eval(),
+                                   [&](auto const& coordinates, auto const sphere_index) -> matrix6 {
+                                       auto const& [r, _] = coordinates;
+
+                                       vector3 const t = deformed_tangent(F_bar, r);
+
+                                       auto const micro_stretch = compute_microstretch(t);
+
+                                       auto const secondary_shear_modulus = secondary_modulus.at(
+                                           sphere_index);
+
+                                       auto const shear_modulus = material.shear_modulus()
+                                                                  + secondary_shear_modulus;
+
+                                       return shear_modulus * std::pow(micro_stretch, -2)
+                                              * outer_product(t, t, t, t);
+                                   });
+}
 }
