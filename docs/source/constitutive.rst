@@ -42,7 +42,26 @@ where the finite strain version of the J2 model is not required.  Further modifi
 Isotropic Chaboche damage
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-TODO Fill out model details.
+This non-linear isotropic ductile damage model is based on the ``"J2Plasticity"`` model. It is mainly controlled by the following material parameters:
+
+* ``"KinematicHardeningModulus"`` the kinematic hardening modulus of the material
+* ``"SofteningMultiplier"``  a scaling factor multiplied by the back stress in the plastic yield function
+* ``"PlasticityViscousExponent"`` :math:`K`: relates the plastic multiplier to the plastic yield function exponentially
+* ``"PlasticityViscousDenominator"`` :math:`n`: scales the plastic yield function
+.. math:: \dot{\lambda}_{vp} = \langle \frac{f_{vp}}{K} \rangle^{n} \\
+* ``"DamageViscousExponent"`` :math:`s`: scales the damage yield function
+* ``"DamageViscousDenominator"`` :math:`S`: relates the damage multiplier to the damage yield function exponentially
+.. math::  \dot{\lambda}_{d} = \langle \frac{f_{d}}{S} \rangle^{s} \\
+
+This model is used by specifying ::
+
+    "ConstitutiveModel" : {
+          "Name" : "J2Plasticity",
+          "Damage" : "IsotropicChaboche",
+          "FiniteStrain" : false
+      }
+
+This constitutive model is implemented only in an infinitesimal strain framework.
 
 Neo-Hooke elasticity
 ====================

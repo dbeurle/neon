@@ -17,9 +17,29 @@ where multiple boundary conditions can be added by inserting extra elements into
 
 The specified time and values are automatically linearly interpolated if a time step happens to fall between two values.  For convenience the adaptive time step algorithm will always produce a solution at the specified time points to easy experimental comparisons.
 
-Since boundary conditions can vary over time, it is possible to specify cyclic type boundary conditions that follow a periodic curve.  This can be specified with ::
+Since boundary conditions can vary over time, it is possible to specify cyclic type boundary conditions that follow a periodic curve.  Currently, only a sinusoidal periodic type is implemented and it can be specified with ::
 
-    "Periodic"
+    "BoundaryConditions" : [{
+        "Name" : "x-sym",
+        "Type" : "Displacement",
+        "GenerateType" : "Sinusoidal",
+        "x" : [0.05, 0.10],
+        "Period" : [10,10],
+        "Phase" : [0,0],
+        "NumberOfCycles" : [2,1]
+    }]
+
+
+This may be used to generate block loading where each block follows a specific sinusoidal wave that corresponds to one entry of ``"x"``, ``"Period"``, ``"Phase"`` and ``"NumberOfCycles"``. In this case the time step is taken to be equal to ::
+
+    "Time" : {
+        "Period" : 30,
+        "Increments" : {
+            "Initial" : 0.1
+        }
+
+and the time steps are generated automatically based on the given boundary condition parameters.
+
 
 Essential (Dirichlet) type
 ==========================
