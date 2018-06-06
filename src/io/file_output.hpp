@@ -68,7 +68,7 @@ protected:
     std::set<std::string> output_set;
 
     /// Time steps to write out (e.g. two is every second time step)
-    int write_every = 1;
+    int write_every{1};
 
     /// Default to using binary VTK output for efficiency
     bool use_binary_format = true;
@@ -249,19 +249,17 @@ void file_output<fem_mesh>::add_mesh()
 
     for (auto const& submesh : mesh.meshes())
     {
-        auto const vtk_ordered_connectivity = convert_to_vtk(submesh.all_node_indices(),
-                                                             submesh.topology());
+        auto const vtk_node_indices = convert_to_vtk(submesh.all_node_indices(), submesh.topology());
 
-        for (std::int64_t element{0}; element < vtk_ordered_connectivity.cols(); ++element)
+        for (std::int64_t element{0}; element < vtk_node_indices.cols(); ++element)
         {
-            auto vtk_node_list = vtkSmartPointer<vtkIdList>::New();
+            auto node_indices = vtkSmartPointer<vtkIdList>::New();
 
-            for (std::int64_t node{0}; node < vtk_ordered_connectivity.rows(); ++node)
+            for (std::int64_t node{0}; node < vtk_node_indices.rows(); ++node)
             {
-                vtk_node_list->InsertNextId(
-                    static_cast<std::int64_t>(vtk_ordered_connectivity(node, element)));
+                node_indices->InsertNextId(static_cast<std::int64_t>(vtk_node_indices(node, element)));
             }
-            unstructured_mesh->InsertNextCell(to_vtk(submesh.topology()), vtk_node_list);
+            unstructured_mesh->InsertNextCell(to_vtk(submesh.topology()), node_indices);
         }
     }
     unstructured_mesh->GetPointData()->AddArray(io::vtk_displacement(mesh.geometry().coordinates()));
