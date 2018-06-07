@@ -403,6 +403,10 @@ unit_sphere_quadrature::unit_sphere_quadrature(point const p)
                  0.016091211796527,     0.0142482831673454,  0.0164799866076456,
                  0.0126982495896839,    0.0139536823523654,  0.0170321172872448};
 
+            std::transform(begin(w), end(w), begin(w), [](auto const w_l) {
+                return w_l / (4.0 * M_PI);
+            });
+
             clist = {{0, 0, 0, 1},
                      {1, 0.996972891319, 0, -0.077749945174},
                      {2, -0.982581060536, -0.178228496639, 0.052621881972},
@@ -1313,7 +1317,7 @@ unit_sphere_quadrature::unit_sphere_quadrature(point const p)
 void unit_sphere_quadrature::precompute_coordinates()
 {
     this->evaluate([](auto const& coordinate) {
-        auto const & [ l, r1, r2, r3 ] = coordinate;
+        auto const& [l, r1, r2, r3] = coordinate;
 
         vector3 t(r1, r2, r3);
 
