@@ -31,6 +31,9 @@ class ageing_micromechanical_elastomer : public micromechanical_elastomer
 public:
     ageing_micromechanical_elastomer(json const& material_data);
 
+    /// \return Bond length for a carbon-carbon bond
+    [[nodiscard]] double bond_length() const noexcept { return C_bond_length; }
+
     /// \return The probability per unit time of a chain scission event
     [[nodiscard]] double scission_probability() const noexcept { return scission; }
 
@@ -49,5 +52,7 @@ protected:
     double scission{0.0};
     /// Recombination probability
     double recombination{0.0};
+    /// Carbon-carbon bond length
+    double C_bond_length{130.0E-12};
 };
 }
