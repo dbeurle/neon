@@ -453,9 +453,11 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
         }
     }
 }
-TEST_CASE("Gaussian affine microsphere model with BAND crosslinking only")
+TEST_CASE("Gaussian affine microsphere model with crosslinking only")
 {
     using namespace neon::mechanical::solid;
+
+    std::cout << "Constant cross-linking stress check\n";
 
     auto variables = std::make_shared<internal_variables_t>(1);
 
@@ -529,7 +531,7 @@ TEST_CASE("Gaussian affine microsphere model with BAND crosslinking only")
         }
         for (auto reduction : reductions)
         {
-            REQUIRE(reduction == Approx(1.0));
+            REQUIRE(reduction <= 1.0);
         }
 
         for (auto const& material_tangent : material_tangents)
@@ -539,6 +541,51 @@ TEST_CASE("Gaussian affine microsphere model with BAND crosslinking only")
 
             eigen_solver.compute(material_tangent);
             REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
+        }
+    }
+    SECTION("constant load")
+    {
+        // Check the network parameters
+        // auto [active_segments,
+        //       inactive_segments,
+        //       active_shear_moduli,
+        //       inactive_shear_moduli,
+        //       reductions] = variables->get(internal_variables_t::scalar::active_segments,
+        //                                    internal_variables_t::scalar::inactive_segments,
+        //                                    internal_variables_t::scalar::active_shear_modulus,
+        //                                    internal_variables_t::scalar::inactive_shear_modulus,
+        //                                    internal_variables_t::scalar::reduction_factor);
+
+        std::fill(begin(F_list), end(F_list), neon::matrix3::Identity());
+
+        affine->update_internal_variables(1.0);
+
+        for (auto& F : F_list)
+        {
+            F(0, 0) = 1.1;
+            F(1, 1) = 1.0 / std::sqrt(1.1);
+            F(2, 2) = 1.0 / std::sqrt(1.1);
+        }
+
+        affine->update_internal_variables(1.0);
+
+        for (auto const& cauchy_stress : cauchy_stresses)
+        {
+            std::cout << "Step 1: cauchy_stress\n" << cauchy_stress << "\n\n";
+        }
+
+        affine->update_internal_variables(1.0);
+
+        for (auto const& cauchy_stress : cauchy_stresses)
+        {
+            std::cout << "Step 2: cauchy_stress\n" << cauchy_stress << "\n\n";
+        }
+
+        affine->update_internal_variables(1.0);
+
+        for (auto const& cauchy_stress : cauchy_stresses)
+        {
+            std::cout << "Step 3: cauchy_stress\n" << cauchy_stress << "\n\n";
         }
     }
 }
