@@ -34,13 +34,37 @@ public:
     virtual void update_internal_variables(double const time_step_size) override;
 
 private:
-    matrix3 compute_macro_stress(matrix3 const& F_bar,
-                                 std::vector<double> const& secondary_modulus,
-                                 double const reduction_factor) const;
+    [[nodiscard]] matrix3 compute_macro_stress(matrix3 const& F_bar,
+                                               std::vector<double> const& secondary_modulus,
+                                               double const reduction_factor) const;
 
-    matrix6 compute_macro_moduli(matrix3 const& F_bar,
-                                 std::vector<double> const& secondary_modulus,
-                                 double const reduction_factor) const;
+    [[nodiscard]] matrix6 compute_macro_moduli(matrix3 const& F_bar,
+                                               std::vector<double> const& secondary_modulus,
+                                               double const reduction_factor) const;
+
+    /// Compute the force contribution to the secondary modulus
+    /// \return evaluated integrand
+    [[nodiscard]] double evaluate_integrand_force(double const creation_rate,
+                                                  double const reduction_factor,
+                                                  double const micro_stretch) const;
+
+    /// Compute the energy contribution to the secondary modulus
+    /// \return evaluated integrand
+    [[nodiscard]] double evaluate_integrand_energy(double const creation_rate,
+                                                   double const reduction_factor,
+                                                   double const micro_stretch) const;
+
+    /// Compute the integral prefactor that involves the free energy and the constant contribution
+    /// from the statistical mechanical chain formation
+    /// \return factor value
+    [[nodiscard]] double compute_energy_prefactor(double const micro_stretch,
+                                                  double const active_segments) const;
+
+    /// Integrate the time history and return the integrated value
+    [[nodiscard]] double integrate_history(double const modulus,
+                                           double const sphere_old,
+                                           double const sphere,
+                                           double const time_step_size) const;
 
 private:
     /// Material with micromechanical parameters

@@ -11,27 +11,21 @@
 
 namespace neon::mechanical::solid
 {
-/**
- * \ingroup Hyperelastic
- * \addtogroup Hyperelastic
- * \{
- *
- * gaussian_affine_microsphere is responsible for computing the Cauchy stress and the
- * material tangent in implicit methods.  The affine microsphere model \cite Miehe2004
- * is used to model elastomer materials using micromechanical motivations and
- * homogenises the force from a single chain over a unit sphere.  In this variant
- * the non-Gaussian chain theory is replaced with the Gaussian chain theory.
- *
- * This constitutive model requires the use of a quadrature scheme for the unit
- * sphere and this internal variable update can be computationally expensive.
- */
+/// \ingroup Hyperelastic
+/// \addtogroup Hyperelastic
+/// \{
+/// gaussian_affine_microsphere is responsible for computing the Cauchy stress and the
+/// material tangent in implicit methods.  The affine microsphere model \cite Miehe2004
+/// is used to model elastomer materials using micromechanical motivations and
+/// homogenises the force from a single chain over a unit sphere.  In this variant
+/// the non-Gaussian chain theory is replaced with the Gaussian chain theory.
+/// This constitutive model requires the use of a quadrature scheme for the unit
+/// sphere and this internal variable update can be computationally expensive.
 class gaussian_affine_microsphere : public constitutive_model
 {
 public:
-    /**
-     * @param variables Reference to internal state variable store
-     * @param material_data json object with input file material data
-     */
+    /// \param variables Reference to internal state variable store
+    /// \param material_data json object with input file material data
     explicit gaussian_affine_microsphere(std::shared_ptr<internal_variables_t>& variables,
                                          json const& material_data,
                                          unit_sphere_quadrature::point const p);
@@ -107,13 +101,17 @@ protected:
                                                double const shear_modulus) const;
 
 protected:
-    unit_sphere_quadrature unit_sphere; //!< Unit sphere quadrature rule
+    /// Unit sphere quadrature rule
+    unit_sphere_quadrature unit_sphere;
+    /// Outer product
+    matrix6 const IoI = voigt::I_outer_I();
+    /// Fourth order identity
+    matrix6 const I = voigt::kinematic::fourth_order_identity();
+    /// Deviatoric fourth order tensor
+    matrix6 const P = voigt::kinetic::deviatoric();
 
-    matrix6 const IoI = voigt::I_outer_I();                      //!< Outer product
-    matrix6 const I = voigt::kinematic::fourth_order_identity(); //!< Fourth order identity
-    matrix6 const P = voigt::kinetic::deviatoric();              //!< Deviatoric fourth order tensor
-
-    micromechanical_elastomer material; //!< Material with micromechanical parameters
+    /// Material with micromechanical parameters
+    micromechanical_elastomer material;
 };
 /** \} */
 }

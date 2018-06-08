@@ -101,9 +101,13 @@ public:
     /// Names for vector values using a std::vector type
     enum class vector : std::uint8_t {
         /// Accumulated secondary shear modulus integral for microsphere ageing
-        secondary_moduli,
-        /// Last function evaluation in trapezoidal method
-        sphere_last_function
+        force_secondary_moduli,
+        /// Accumulated secondary shear modulus integral for microsphere ageing
+        energy_secondary_moduli,
+        /// Previous sphere integrand for force contribution
+        force_sphere_previous,
+        /// Previous sphere integrand for energy contribution
+        energy_sphere_previous
     };
 
     /// Second order tensor internal variables types

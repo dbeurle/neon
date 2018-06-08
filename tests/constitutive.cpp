@@ -306,8 +306,12 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
         REQUIRE(variables->has(internal_variables_t::scalar::active_segments));
         REQUIRE(variables->has(internal_variables_t::scalar::inactive_segments));
         REQUIRE(variables->has(internal_variables_t::scalar::reduction_factor));
-        REQUIRE(variables->has(internal_variables_t::vector::secondary_moduli));
-        REQUIRE(variables->has(internal_variables_t::vector::sphere_last_function));
+
+        REQUIRE(variables->has(internal_variables_t::vector::force_secondary_moduli));
+        REQUIRE(variables->has(internal_variables_t::vector::energy_sphere_previous));
+
+        REQUIRE(variables->has(internal_variables_t::vector::force_sphere_previous));
+        REQUIRE(variables->has(internal_variables_t::vector::energy_secondary_moduli));
 
         for (auto segment : variables->get(internal_variables_t::scalar::active_segments))
         {
@@ -317,11 +321,11 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
         {
             REQUIRE(shear_modulus == Approx(2.0e6));
         }
-        for (auto& value : variables->get(internal_variables_t::vector::secondary_moduli))
+        for (auto& value : variables->get(internal_variables_t::vector::force_secondary_moduli))
         {
             REQUIRE(value.size() == 21);
         }
-        for (auto& value : variables->get(internal_variables_t::vector::sphere_last_function))
+        for (auto& value : variables->get(internal_variables_t::vector::force_sphere_previous))
         {
             REQUIRE(value.size() == 21);
         }
