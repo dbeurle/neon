@@ -44,7 +44,7 @@ void small_strain_J2_plasticity_damage::update_internal_variables(double const t
           von_mises_stresses,
           scalar_damages,
           energy_release_rates] = variables->get(internal_variables_t::scalar::EffectivePlasticStrain,
-                                                   internal_variables_t::scalar::VonMisesStress,
+                                                   internal_variables_t::scalar::von_mises_stress,
                                                    internal_variables_t::scalar::Damage,
                                                    internal_variables_t::scalar::EnergyReleaseRate);
 

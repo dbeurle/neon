@@ -127,7 +127,7 @@ private:
 
     // clang-format off
     scalar_map_t const scalar_map{{"AccumulatedPlasticStrain", variable_type::scalar::EffectivePlasticStrain},
-                                  {"VonMisesStress", variable_type::scalar::VonMisesStress},
+                                  {"VonMisesStress", variable_type::scalar::von_mises_stress},
                                   {"Damage", variable_type::scalar::Damage},
                                   {"ActiveShearModulus", variable_type::scalar::active_shear_modulus},
                                   {"InactiveShearModulus", variable_type::scalar::inactive_shear_modulus},

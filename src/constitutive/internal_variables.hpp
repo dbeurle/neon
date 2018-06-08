@@ -71,7 +71,7 @@ public:
         /// Reduction factor for network decay
         reduction_factor,
         /// Von Mises equivalent stress
-        VonMisesStress,
+        von_mises_stress,
         /// Accumulated (effective) plastic strain
         EffectivePlasticStrain,
         /// Reference Jacobian determinant

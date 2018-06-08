@@ -40,7 +40,7 @@ void small_strain_J2_plasticity::update_internal_variables(double const time_ste
     // Retrieve the accumulated internal variables
     auto [accumulated_plastic_strains,
           von_mises_stresses] = variables->get(internal_variables_t::scalar::EffectivePlasticStrain,
-                                                 internal_variables_t::scalar::VonMisesStress);
+                                                 internal_variables_t::scalar::von_mises_stress);
 
     auto& tangent_operators = variables->get(internal_variables_t::fourth::tangent_operator);
 

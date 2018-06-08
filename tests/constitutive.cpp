@@ -691,7 +691,7 @@ TEST_CASE("Plane stress elasticity model")
         REQUIRE(elastic_model->is_finite_deformation() == false);
         REQUIRE(elastic_model->intrinsic_material().name() == "steel");
 
-        REQUIRE(variables->has(internal_variables_t::scalar::VonMisesStress));
+        REQUIRE(variables->has(internal_variables_t::scalar::von_mises_stress));
         REQUIRE(variables->has(internal_variables_t::second::cauchy_stress));
         REQUIRE(variables->has(internal_variables_t::second::LinearisedStrain));
         REQUIRE(variables->has(internal_variables_t::fourth::tangent_operator));
@@ -734,7 +734,7 @@ TEST_CASE("Plane stress elasticity model")
 
         auto [von_mises_stresses,
               accumulated_plastic_strains] = variables
-                                                 ->get(internal_variables_t::scalar::VonMisesStress,
+                                                 ->get(internal_variables_t::scalar::von_mises_stress,
                                                        internal_variables_t::scalar::EffectivePlasticStrain);
 
         for (auto const& material_tangent : material_tangents)
@@ -812,7 +812,7 @@ TEST_CASE("Plane strain elasticity model")
         REQUIRE(elastic_model->is_finite_deformation() == false);
         REQUIRE(elastic_model->intrinsic_material().name() == "steel");
 
-        REQUIRE(variables->has(internal_variables_t::scalar::VonMisesStress));
+        REQUIRE(variables->has(internal_variables_t::scalar::von_mises_stress));
         REQUIRE(variables->has(internal_variables_t::second::cauchy_stress));
         REQUIRE(variables->has(internal_variables_t::second::LinearisedStrain));
         REQUIRE(variables->has(internal_variables_t::fourth::tangent_operator));
@@ -854,7 +854,7 @@ TEST_CASE("Plane strain elasticity model")
 
         auto [von_mises_stresses,
               accumulated_plastic_strains] = variables
-                                                 ->get(internal_variables_t::scalar::VonMisesStress,
+                                                 ->get(internal_variables_t::scalar::von_mises_stress,
                                                        internal_variables_t::scalar::EffectivePlasticStrain);
 
         for (auto const& material_tangent : material_tangents)
@@ -931,7 +931,7 @@ TEST_CASE("Solid mechanics elasticity model")
         REQUIRE(elastic_model->is_finite_deformation() == false);
         REQUIRE(elastic_model->intrinsic_material().name() == "steel");
 
-        REQUIRE(variables->has(internal_variables_t::scalar::VonMisesStress));
+        REQUIRE(variables->has(internal_variables_t::scalar::von_mises_stress));
         REQUIRE(variables->has(internal_variables_t::second::cauchy_stress));
         REQUIRE(variables->has(internal_variables_t::second::LinearisedStrain));
         REQUIRE(variables->has(internal_variables_t::fourth::tangent_operator));
@@ -992,7 +992,7 @@ TEST_CASE("Solid mechanics elasticity model")
 
         auto [von_mises_stresses,
               accumulated_plastic_strains] = variables
-                                                 ->get(internal_variables_t::scalar::VonMisesStress,
+                                                 ->get(internal_variables_t::scalar::von_mises_stress,
                                                        internal_variables_t::scalar::EffectivePlasticStrain);
 
         for (auto const& material_tangent : material_tangents)
@@ -1122,7 +1122,7 @@ TEST_CASE("Solid mechanics J2 plasticity model")
         REQUIRE(small_strain_J2_plasticity->is_finite_deformation() == false);
         REQUIRE(small_strain_J2_plasticity->intrinsic_material().name() == "steel");
 
-        REQUIRE(variables->has(internal_variables_t::scalar::VonMisesStress));
+        REQUIRE(variables->has(internal_variables_t::scalar::von_mises_stress));
         REQUIRE(variables->has(internal_variables_t::scalar::EffectivePlasticStrain));
         REQUIRE(variables->has(internal_variables_t::second::LinearisedStrain));
         REQUIRE(variables->has(internal_variables_t::second::LinearisedPlasticStrain));
@@ -1162,7 +1162,7 @@ TEST_CASE("Solid mechanics J2 plasticity model")
 
         auto [von_mises_stresses,
               accumulated_plastic_strains] = variables
-                                                 ->get(internal_variables_t::scalar::VonMisesStress,
+                                                 ->get(internal_variables_t::scalar::von_mises_stress,
                                                        internal_variables_t::scalar::EffectivePlasticStrain);
 
         for (auto const& material_tangent : material_tangents)
@@ -1206,7 +1206,7 @@ TEST_CASE("Solid mechanics J2 plasticity model")
 
         auto [von_mises_stresses,
               accumulated_plastic_strains] = variables
-                                                 ->get(internal_variables_t::scalar::VonMisesStress,
+                                                 ->get(internal_variables_t::scalar::von_mises_stress,
                                                        internal_variables_t::scalar::EffectivePlasticStrain);
 
         for (auto const& material_tangent : material_tangents)
@@ -1298,7 +1298,7 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
 
         REQUIRE(small_strain_J2_plasticity_damage->intrinsic_material().name() == "steel");
 
-        REQUIRE(variables->has(internal_variables_t::scalar::VonMisesStress));
+        REQUIRE(variables->has(internal_variables_t::scalar::von_mises_stress));
         REQUIRE(variables->has(internal_variables_t::scalar::EffectivePlasticStrain));
         REQUIRE(variables->has(internal_variables_t::second::LinearisedStrain));
         REQUIRE(variables->has(internal_variables_t::second::LinearisedPlasticStrain));
@@ -1316,7 +1316,7 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
 
         auto [von_mises_stresses,
               accumulated_plastic_strains] = variables
-                                                 ->get(internal_variables_t::scalar::VonMisesStress,
+                                                 ->get(internal_variables_t::scalar::von_mises_stress,
                                                        internal_variables_t::scalar::EffectivePlasticStrain);
 
         for (auto const& material_tangent : material_tangents)
@@ -1360,7 +1360,7 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
 
         auto [von_mises_stresses,
               accumulated_plastic_strains] = variables
-                                                 ->get(internal_variables_t::scalar::VonMisesStress,
+                                                 ->get(internal_variables_t::scalar::von_mises_stress,
                                                        internal_variables_t::scalar::EffectivePlasticStrain);
 
         for (auto const& cauchy_stress : cauchy_stresses)
@@ -1468,7 +1468,7 @@ TEST_CASE("Thermal isotropic model")
 //         REQUIRE(small_strain_J2_plasticity->is_finite_deformation() == true);
 //         REQUIRE(small_strain_J2_plasticity->intrinsic_material().name() == "steel");
 //
-//         REQUIRE(variables->has(internal_variables_t::scalar::VonMisesStress));
+//         REQUIRE(variables->has(internal_variables_t::scalar::von_mises_stress));
 //         REQUIRE(variables->has(internal_variables_t::scalar::EffectivePlasticStrain));
 //         REQUIRE(variables->has(internal_variables_t::second::HenckyStrainElastic));
 //         REQUIRE(variables->has(internal_variables_t::fourth::tangent_operator));
@@ -1520,7 +1520,7 @@ TEST_CASE("Thermal isotropic model")
 //     //         REQUIRE(cauchy_stress(2, 2) > 0.0);
 //     //     }
 //     //     for (auto& von_mises_stress :
-//     variables->get(internal_variables_t::scalar::VonMisesStress))
+//     variables->get(internal_variables_t::scalar::von_mises_stress))
 //     //     {
 //     //         REQUIRE(von_mises_stress < 200.0e6);
 //     //     }
@@ -1532,7 +1532,7 @@ TEST_CASE("Thermal isotropic model")
 //     //     small_strain_J2_plasticity->update_internal_variables(1.0);
 //     //
 //     //     auto[von_mises_stresses, accumulated_plastic_strains] =
-//     //     variables->get(internal_variables_t::scalar::VonMisesStress,
+//     //     variables->get(internal_variables_t::scalar::von_mises_stress,
 //     // internal_variables_t::scalar::EffectivePlasticStrain);
 //     //
 //     //     // Ensure symmetry is correct
