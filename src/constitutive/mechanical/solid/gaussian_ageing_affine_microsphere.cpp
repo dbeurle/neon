@@ -241,7 +241,7 @@ double gaussian_ageing_affine_microsphere::evaluate_integrand_energy(double cons
                                                                      double const reduction_factor,
                                                                      double const micro_stretch) const
 {
-    return creation_rate * (std::pow(micro_stretch, -2) / reduction_factor);
+    return creation_rate / (std::pow(micro_stretch, 2) * reduction_factor);
 }
 
 double gaussian_ageing_affine_microsphere::compute_energy_prefactor(double const micro_stretch,
