@@ -253,13 +253,13 @@ matrix6 gaussian_ageing_affine_microsphere::compute_macro_moduli(matrix3 const& 
 
                      auto const micro_stretch = compute_microstretch(t);
 
-                     auto const shear_modulus = modulus3.at(index)
-                                                    * compute_prefactor_first(micro_stretch,
-                                                                              active_segments)
-                                                - 0.5
-                                                      * compute_prefactor_second(micro_stretch,
-                                                                                 active_segments)
-                                                      * modulus2.at(index);
+                     auto const shear_modulus = -1.0 / 2.0
+                                                    * compute_prefactor_second(micro_stretch,
+                                                                               active_segments)
+                                                    * modulus2.at(index)
+                                                + compute_prefactor_first(micro_stretch,
+                                                                          active_segments)
+                                                      * modulus3.at(index);
 
                      return shear_modulus * std::pow(micro_stretch, -1) * outer_product(t, t, t, t);
                  });
@@ -302,7 +302,7 @@ double gaussian_ageing_affine_microsphere::compute_prefactor_second(double const
     auto const b = material.bond_length();
     auto const N = material.segments_per_chain();
 
-    return 2.0 + std::pow(micro_stretch, -2) * std::log(3.0 / (2.0 * M_PI * N * std::pow(b, 2)));
+    return 3.0 + std::pow(micro_stretch, -2) * std::log(3.0 / (2.0 * M_PI * N * std::pow(b, 2)));
 }
 
 double gaussian_ageing_affine_microsphere::integrate_history(double const modulus,
