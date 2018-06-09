@@ -307,11 +307,13 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
         REQUIRE(variables->has(internal_variables_t::scalar::inactive_segments));
         REQUIRE(variables->has(internal_variables_t::scalar::reduction_factor));
 
-        REQUIRE(variables->has(internal_variables_t::vector::force_secondary_moduli));
-        REQUIRE(variables->has(internal_variables_t::vector::energy_sphere_previous));
+        REQUIRE(variables->has(internal_variables_t::vector::first_ageing_moduli));
+        REQUIRE(variables->has(internal_variables_t::vector::second_ageing_moduli));
+        REQUIRE(variables->has(internal_variables_t::vector::third_ageing_moduli));
 
-        REQUIRE(variables->has(internal_variables_t::vector::force_sphere_previous));
-        REQUIRE(variables->has(internal_variables_t::vector::energy_secondary_moduli));
+        REQUIRE(variables->has(internal_variables_t::vector::first_previous));
+        REQUIRE(variables->has(internal_variables_t::vector::second_previous));
+        REQUIRE(variables->has(internal_variables_t::vector::third_previous));
 
         for (auto segment : variables->get(internal_variables_t::scalar::active_segments))
         {
@@ -321,11 +323,11 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
         {
             REQUIRE(shear_modulus == Approx(2.0e6));
         }
-        for (auto& value : variables->get(internal_variables_t::vector::force_secondary_moduli))
+        for (auto& value : variables->get(internal_variables_t::vector::first_ageing_moduli))
         {
             REQUIRE(value.size() == 21);
         }
-        for (auto& value : variables->get(internal_variables_t::vector::force_sphere_previous))
+        for (auto& value : variables->get(internal_variables_t::vector::first_previous))
         {
             REQUIRE(value.size() == 21);
         }
@@ -586,6 +588,31 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
         for (auto const& cauchy_stress : cauchy_stresses)
         {
             std::cout << "Step 3: cauchy_stress\n" << cauchy_stress << "\n\n";
+        }
+
+        affine->update_internal_variables(1.0);
+
+        for (auto const& cauchy_stress : cauchy_stresses)
+        {
+            std::cout << "Step 3: cauchy_stress\n" << cauchy_stress << "\n\n";
+        }
+
+        affine->update_internal_variables(1.0);
+
+        for (auto const& cauchy_stress : cauchy_stresses)
+        {
+            std::cout << "Step 3: cauchy_stress\n" << cauchy_stress << "\n\n";
+        }
+
+        for (auto const& material_tangent : material_tangents)
+        {
+            std::cout << "tangent_matrix\n" << material_tangent << "\n";
+
+            REQUIRE((material_tangent - material_tangent.transpose()).norm()
+                    == Approx(0.0).margin(ZERO_MARGIN));
+
+            eigen_solver.compute(material_tangent);
+            REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
         }
     }
 }

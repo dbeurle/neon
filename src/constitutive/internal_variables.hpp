@@ -100,14 +100,15 @@ public:
 
     /// Names for vector values using a std::vector type
     enum class vector : std::uint8_t {
-        /// Accumulated secondary shear modulus integral for microsphere ageing
-        force_secondary_moduli,
-        /// Accumulated secondary shear modulus integral for microsphere ageing
-        energy_secondary_moduli,
-        /// Previous sphere integrand for force contribution
-        force_sphere_previous,
-        /// Previous sphere integrand for energy contribution
-        energy_sphere_previous
+        /// Primary ageing shear modulus
+        first_ageing_moduli,
+        /// Secondary ageing shear modulus
+        second_ageing_moduli,
+        /// Tertiary ageing shear modulus
+        third_ageing_moduli,
+        first_previous,
+        second_previous,
+        third_previous
     };
 
     /// Second order tensor internal variables types
