@@ -47,10 +47,7 @@ void gaussian_affine_microsphere::update_internal_variables(double const time_st
 
         cauchy_stresses[l] = compute_kirchhoff_stress(pressure, macro_stress) / J;
 
-        tangent_operators[l] = compute_material_tangent(J,
-                                                        K,
-                                                        compute_macro_moduli(F_bar, G),
-                                                        macro_stress);
+        tangent_operators[l] = compute_material_tangent(J, K, matrix6::Zero(), macro_stress);
     });
 }
 
@@ -58,7 +55,6 @@ matrix3 gaussian_affine_microsphere::compute_kirchhoff_stress(double const press
                                                               matrix3 const& macro_stress) const
 {
     using namespace voigt;
-
     return pressure * matrix3::Identity() + kinetic::from(P * kinetic::to(macro_stress));
 }
 
@@ -91,22 +87,6 @@ matrix3 gaussian_affine_microsphere::compute_macro_stress(matrix3 const& F_unimo
                                        vector3 const t = deformed_tangent(F_unimodular, r);
 
                                        return outer_product(t, t);
-                                   });
-}
-
-matrix6 gaussian_affine_microsphere::compute_macro_moduli(matrix3 const& F_unimodular,
-                                                          double const shear_modulus) const
-{
-    return -3.0 * shear_modulus
-           * unit_sphere.integrate(matrix6::Zero().eval(),
-                                   [&](auto const& coordinates, auto const l) -> matrix6 {
-                                       auto const& [r, _] = coordinates;
-
-                                       vector3 const t = deformed_tangent(F_unimodular, r);
-
-                                       auto const micro_stretch = compute_microstretch(t);
-
-                                       return std::pow(micro_stretch, -2) * outer_product(t, t, t, t);
                                    });
 }
 }

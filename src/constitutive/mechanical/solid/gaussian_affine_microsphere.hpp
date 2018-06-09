@@ -83,23 +83,6 @@ protected:
     [[nodiscard]] matrix3 compute_macro_stress(matrix3 const& F_unimodular,
                                                double const shear_modulus) const;
 
-    /**
-     * Compute the material tangent matrix using the unit sphere homogenisation
-     * technique for a given F and N
-         \f{align*}{
-            \bar{\mathbb{C}}_f &= -3\mu \sum_{i=1}^{m} \bar{\lambda}_i^{-2}
-                                     \boldsymbol{t}_i \otimes
-                                     \boldsymbol{t}_i \otimes
-                                     \boldsymbol{t}_i \otimes
-                                     \boldsymbol{t}_i w_i
-         \f}
-     * @param F_unimodular Unimodular decomposition of the deformation gradient
-     * @param shear_modulus The material shear modulus
-     * @return Macromoduli from unit sphere homogenisation
-     */
-    [[nodiscard]] matrix6 compute_macro_moduli(matrix3 const& F_unimodular,
-                                               double const shear_modulus) const;
-
 protected:
     /// Unit sphere quadrature rule
     unit_sphere_quadrature unit_sphere;
