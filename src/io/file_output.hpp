@@ -107,6 +107,7 @@ private:
 private:
     fem_mesh_type const& mesh;
 
+    /// Allowable fields must also be in either scalar_map / tensor_map
     std::set<std::string> allowable_fields{{"AccumulatedPlasticStrain",
                                             "VonMisesStress",
                                             "Damage",
@@ -123,7 +124,8 @@ private:
                                             "ActiveShearModulus",
                                             "InactiveShearModulus",
                                             "ActiveSegments",
-                                            "InactiveSegments"}};
+                                            "InactiveSegments",
+                                            "ReductionFactor"}};
 
     // clang-format off
     scalar_map_t const scalar_map{{"AccumulatedPlasticStrain", variable_type::scalar::EffectivePlasticStrain},
@@ -133,6 +135,7 @@ private:
                                   {"InactiveShearModulus", variable_type::scalar::inactive_shear_modulus},
                                   {"ActiveSegments", variable_type::scalar::active_segments},
                                   {"InactiveSegments", variable_type::scalar::inactive_segments},
+                                  {"ReductionFactor", variable_type::scalar::reduction_factor},
                                   {"EnergyReleaseRate", variable_type::scalar::EnergyReleaseRate}};
 
     tensor_map_t const tensor_map{{"CauchyStress", variable_type::second::cauchy_stress},
