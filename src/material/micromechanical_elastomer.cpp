@@ -53,7 +53,7 @@ double ageing_micromechanical_elastomer::creation_rate(double const active_shear
 {
     // Inactive set recombination
     auto const alpha = 1.0 - std::pow(1.0 - recombination, inactive_segments + 1.0);
-    // Active set generation
+    // Active set combination
     auto const eta = 1.0 - std::pow(1.0 - recombination, active_segments + 1.0);
 
     return alpha * inactive_shear_modulus + 4 * eta * active_shear_modulus;
@@ -62,10 +62,10 @@ double ageing_micromechanical_elastomer::creation_rate(double const active_shear
 vector5 ageing_micromechanical_elastomer::integrate(vector5 z, double const time_step_size) const
 {
     // Define the right hand side of the ageing evolution equations
-    return runge_kutta_fourth_order(0.0, time_step_size, z, [=](double const t, vector5 y) -> vector5 {
+    return runge_kutta_fourth_fifth_order(0.0, time_step_size, z, [=](double const t, vector5 y) -> vector5 {
         // Unpack the vector
-        double const active_chains = y(0);
-        double const inactive_chains = y(1);
+        double const active_shear_modulus = y(0);
+        double const inactive_shear_modulus = y(1);
         double const reduction = y(2);
         double const active_segments = y(3);
         double const inactive_segments = y(4);
@@ -79,24 +79,23 @@ vector5 ageing_micromechanical_elastomer::integrate(vector5 z, double const time
         // Inactive set generation
         auto const nu = 1.0 - std::pow(1.0 - scission, inactive_segments);
 
-        auto const chain_formation_rate = alpha * inactive_chains + 4.0 * eta * active_chains;
-
         // Active set rate of change
-        auto const y0 = chain_formation_rate - active_chains * (beta + 2.0 * eta);
+        auto const y0 = alpha * inactive_shear_modulus + active_shear_modulus * (2.0 * eta - beta);
         // Inactive set rate of change
-        auto const y1 = 2.0 * (beta * active_chains + inactive_chains * (nu - alpha));
+        auto const y1 = 2.0 * beta * active_shear_modulus
+                        + inactive_shear_modulus * (nu - 2.0 * alpha);
         // Reduction factor rate of change
         auto const y2 = -reduction * (beta + 2.0 * eta);
         // Active set average segments per chain rate
-        auto const y3 = (2.0 * alpha * inactive_chains * inactive_segments
-                         - active_segments * beta * active_chains - active_segments * y0)
-                        / active_chains;
+        auto const y3 = (2.0 * alpha * inactive_shear_modulus * inactive_segments
+                         - beta * active_segments * active_shear_modulus - active_segments * y0)
+                        / active_shear_modulus;
         // Inactive set average segments per chain rate
-        auto const y4 = inactive_chains > 1.0e-4
-                            ? (beta * active_segments * active_chains
-                               - 2.0 * alpha * inactive_segments * inactive_chains
+        auto const y4 = inactive_shear_modulus > 1.0e-4
+                            ? (beta * active_segments * active_shear_modulus
+                               - 2.0 * alpha * inactive_segments * inactive_shear_modulus
                                - inactive_segments * y1)
-                                  / inactive_chains
+                                  / inactive_shear_modulus
                             : 0.0;
 
         // Repack the data into y and return this as the update
