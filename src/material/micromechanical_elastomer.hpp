@@ -17,7 +17,7 @@ public:
     micromechanical_elastomer(json const& material_data);
 
     /// \return The number of segments per polymer chain
-    auto const segments_per_chain() const { return N; }
+    [[nodiscard]] auto segments_per_chain() const noexcept { return N; }
 
 protected:
     /// Number of segment per chain
