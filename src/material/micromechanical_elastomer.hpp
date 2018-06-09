@@ -59,6 +59,6 @@ protected:
     /// Recombination probability
     double recombination{0.0};
     /// Carbon-carbon bond length
-    double C_bond_length{130.0E-12};
+    double C_bond_length{150.0E-12};
 };
 }
