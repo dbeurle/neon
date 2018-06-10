@@ -34,12 +34,6 @@ public:
     /// \return Bond length for a carbon-carbon bond
     [[nodiscard]] double bond_length() const noexcept { return C_bond_length; }
 
-    /// \return Boltzmann constant in SI units
-    [[nodiscard]] double constexpr boltzmann_constant_si() const noexcept { return 1.3806503E-23; }
-
-    /// \return Absolute temperature
-    [[nodiscard]] double constexpr temperature() const noexcept { return 298.0; }
-
     /// \return The probability per unit time of a chain scission event
     [[nodiscard]] double scission_probability() const noexcept { return scission; }
 
@@ -59,6 +53,6 @@ protected:
     /// Recombination probability
     double recombination{0.0};
     /// Carbon-carbon bond length
-    double C_bond_length{150.0E-12};
+    double C_bond_length{150.0E-5};
 };
 }

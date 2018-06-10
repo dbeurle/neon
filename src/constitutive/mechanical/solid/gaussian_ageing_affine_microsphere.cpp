@@ -290,7 +290,8 @@ double gaussian_ageing_affine_microsphere::compute_prefactor_first(double const 
                                                                    double const active_segments) const
 {
     auto const b = material.bond_length();
-    auto const N = material.segments_per_chain();
+    // auto const N = material.segments_per_chain();
+    auto const N = active_segments;
 
     return micro_stretch
            - std::pow(micro_stretch, -1) * std::log(3.0 / (2.0 * M_PI * N * std::pow(b, 2)));
@@ -300,7 +301,8 @@ double gaussian_ageing_affine_microsphere::compute_prefactor_second(double const
                                                                     double const active_segments) const
 {
     auto const b = material.bond_length();
-    auto const N = material.segments_per_chain();
+    // auto const N = material.segments_per_chain();
+    auto const N = active_segments;
 
     return 3.0 + std::pow(micro_stretch, -2) * std::log(3.0 / (2.0 * M_PI * N * std::pow(b, 2)));
 }
