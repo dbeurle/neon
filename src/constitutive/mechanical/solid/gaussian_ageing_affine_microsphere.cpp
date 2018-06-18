@@ -108,7 +108,7 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
     auto const& det_F = variables->get(internal_variables_t::scalar::DetF);
 
     auto const& deformation_gradients = variables->get(
-        internal_variables_t::second::DeformationGradient);
+        internal_variables_t::second::deformation_gradient);
 
     auto& tangent_operators = variables->get(internal_variables_t::fourth::tangent_operator);
 

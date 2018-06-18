@@ -160,9 +160,9 @@ TEST_CASE("Solid submesh test")
     {
         // Check the standard ones are used
         REQUIRE(internal_vars.has(
-            mechanical::solid::internal_variables_t::second::DisplacementGradient));
+            mechanical::solid::internal_variables_t::second::displacement_gradient));
         REQUIRE(
-            internal_vars.has(mechanical::solid::internal_variables_t::second::DeformationGradient));
+            internal_vars.has(mechanical::solid::internal_variables_t::second::deformation_gradient));
         REQUIRE(internal_vars.has(mechanical::solid::internal_variables_t::second::cauchy_stress));
         REQUIRE(internal_vars.has(mechanical::solid::internal_variables_t::scalar::DetF));
     }

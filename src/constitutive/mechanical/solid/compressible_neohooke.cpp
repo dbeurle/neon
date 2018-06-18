@@ -24,7 +24,7 @@ void compressible_neohooke::update_internal_variables(double const time_step_siz
 
     // Get references into the hash table
     auto [F_list,
-          cauchy_stresses] = variables->get(internal_variables_t::second::DeformationGradient,
+          cauchy_stresses] = variables->get(internal_variables_t::second::deformation_gradient,
                                               internal_variables_t::second::cauchy_stress);
 
     auto& tangent_operators = variables->get(internal_variables_t::fourth::tangent_operator);

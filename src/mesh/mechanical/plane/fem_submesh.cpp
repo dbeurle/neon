@@ -31,13 +31,13 @@ fem_submesh::fem_submesh(json const& material_data,
       cm(make_constitutive_model(variables, material_data, simulation_data))
 {
     // Allocate storage for the displacement gradient
-    variables->add(internal_variables_t::second::DisplacementGradient,
-                   internal_variables_t::second::DeformationGradient,
+    variables->add(internal_variables_t::second::displacement_gradient,
+                   internal_variables_t::second::deformation_gradient,
                    internal_variables_t::second::cauchy_stress,
                    internal_variables_t::scalar::DetF);
 
     // Get the old data to the undeformed configuration
-    for (auto& F : variables->get(internal_variables_t::second::DeformationGradient))
+    for (auto& F : variables->get(internal_variables_t::second::deformation_gradient))
     {
         F = matrix2::Identity();
     }
@@ -199,8 +199,8 @@ void fem_submesh::update_internal_variables(double const time_step_size)
 
 void fem_submesh::update_deformation_measures()
 {
-    auto& H_list = variables->get(internal_variables_t::second::DisplacementGradient);
-    auto& F_list = variables->get(internal_variables_t::second::DeformationGradient);
+    auto& H_list = variables->get(internal_variables_t::second::displacement_gradient);
+    auto& F_list = variables->get(internal_variables_t::second::deformation_gradient);
 
     for (std::int64_t element{0}; element < elements(); ++element)
     {
@@ -231,7 +231,7 @@ void fem_submesh::update_deformation_measures()
 
 void fem_submesh::update_Jacobian_determinants()
 {
-    auto const& F = variables->get(internal_variables_t::second::DeformationGradient);
+    auto const& F = variables->get(internal_variables_t::second::deformation_gradient);
     auto& F_det = variables->get(internal_variables_t::scalar::DetF);
 
     std::transform(begin(F), end(F), begin(F_det), [](auto const& F) { return F.determinant(); });

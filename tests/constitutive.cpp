@@ -69,7 +69,7 @@ TEST_CASE("Neo-Hookean model")
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
     // Add the required variables for an updated Lagrangian formulation
-    variables->add(internal_variables_t::second::DeformationGradient,
+    variables->add(internal_variables_t::second::deformation_gradient,
                    internal_variables_t::second::cauchy_stress);
     variables->add(internal_variables_t::scalar::DetF);
 
@@ -79,7 +79,7 @@ TEST_CASE("Neo-Hookean model")
                                                          "\"NeoHooke\"} }"));
 
     // Get the tensor variables
-    auto [F_list, cauchy_stresses] = variables->get(internal_variables_t::second::DeformationGradient,
+    auto [F_list, cauchy_stresses] = variables->get(internal_variables_t::second::deformation_gradient,
                                                     internal_variables_t::second::cauchy_stress);
 
     auto& J_list = variables->get(internal_variables_t::scalar::DetF);
@@ -176,7 +176,7 @@ TEST_CASE("Gaussian affine microsphere model")
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
     // Add the required variables for an updated Lagrangian formulation
-    variables->add(internal_variables_t::second::DeformationGradient,
+    variables->add(internal_variables_t::second::deformation_gradient,
                    internal_variables_t::second::cauchy_stress);
 
     variables->add(internal_variables_t::scalar::DetF);
@@ -192,7 +192,7 @@ TEST_CASE("Gaussian affine microsphere model")
                                                       "\"Quadrature\" : "
                                                       "\"BO21\"}}"));
 
-    auto [F_list, cauchy_stresses] = variables->get(internal_variables_t::second::DeformationGradient,
+    auto [F_list, cauchy_stresses] = variables->get(internal_variables_t::second::deformation_gradient,
                                                     internal_variables_t::second::cauchy_stress);
 
     auto& J_list = variables->get(internal_variables_t::scalar::DetF);
@@ -263,7 +263,7 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
     auto variables = std::make_shared<internal_variables_t>(1);
 
     // Add the required variables for an updated Lagrangian formulation
-    variables->add(internal_variables_t::second::DeformationGradient,
+    variables->add(internal_variables_t::second::deformation_gradient,
                    internal_variables_t::second::cauchy_stress);
 
     variables->add(internal_variables_t::scalar::DetF);
@@ -285,7 +285,7 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
                                           json::parse(material_data),
                                           json::parse(constitutive_data));
 
-    auto [F_list, cauchy_stresses] = variables->get(internal_variables_t::second::DeformationGradient,
+    auto [F_list, cauchy_stresses] = variables->get(internal_variables_t::second::deformation_gradient,
                                                     internal_variables_t::second::cauchy_stress);
 
     auto& J_list = variables->get(internal_variables_t::scalar::DetF);
@@ -464,7 +464,7 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
     auto variables = std::make_shared<internal_variables_t>(1);
 
     // Add the required variables for an updated Lagrangian formulation
-    variables->add(internal_variables_t::second::DeformationGradient,
+    variables->add(internal_variables_t::second::deformation_gradient,
                    internal_variables_t::second::cauchy_stress);
 
     variables->add(internal_variables_t::scalar::DetF);
@@ -486,7 +486,7 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
                                           json::parse(material_data),
                                           json::parse(constitutive_data));
 
-    auto [F_list, cauchy_stresses] = variables->get(internal_variables_t::second::DeformationGradient,
+    auto [F_list, cauchy_stresses] = variables->get(internal_variables_t::second::deformation_gradient,
                                                     internal_variables_t::second::cauchy_stress);
 
     auto& J_list = variables->get(internal_variables_t::scalar::DetF);
@@ -623,7 +623,7 @@ TEST_CASE("Affine microsphere model")
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
     // Add the required variables for an updated Lagrangian formulation
-    variables->add(internal_variables_t::second::DeformationGradient,
+    variables->add(internal_variables_t::second::deformation_gradient,
                    internal_variables_t::second::cauchy_stress);
 
     variables->add(internal_variables_t::scalar::DetF);
@@ -638,7 +638,7 @@ TEST_CASE("Affine microsphere model")
                                                       ": \"Affine\", \"Statistics\":\"Langevin\", "
                                                       "\"Quadrature\" : \"BO21\"}}"));
 
-    auto [F_list, cauchy_stresses] = variables->get(internal_variables_t::second::DeformationGradient,
+    auto [F_list, cauchy_stresses] = variables->get(internal_variables_t::second::deformation_gradient,
                                                     internal_variables_t::second::cauchy_stress);
 
     auto& J_list = variables->get(internal_variables_t::scalar::DetF);
@@ -709,7 +709,7 @@ TEST_CASE("NonAffine microsphere model")
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
     // Add the required variables for an updated Lagrangian formulation
-    variables->add(internal_variables_t::second::DeformationGradient,
+    variables->add(internal_variables_t::second::deformation_gradient,
                    internal_variables_t::second::cauchy_stress);
     variables->add(internal_variables_t::scalar::DetF);
 
@@ -725,7 +725,7 @@ TEST_CASE("NonAffine microsphere model")
                                                       "\"BO21\"}}"));
 
     // Get the tensor variables
-    auto [F_list, cauchy_stresses] = variables->get(internal_variables_t::second::DeformationGradient,
+    auto [F_list, cauchy_stresses] = variables->get(internal_variables_t::second::deformation_gradient,
                                                     internal_variables_t::second::cauchy_stress);
 
     auto& J_list = variables->get(internal_variables_t::scalar::DetF);
@@ -827,7 +827,7 @@ TEST_CASE("Plane stress elasticity model")
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
     // Add the required variables for an updated Lagrangian formulation
-    variables->add(internal_variables_t::second::DisplacementGradient,
+    variables->add(internal_variables_t::second::displacement_gradient,
                    internal_variables_t::second::cauchy_stress,
                    internal_variables_t::scalar::DetF);
 
@@ -840,7 +840,7 @@ TEST_CASE("Plane stress elasticity model")
 
     // Get the tensor variables
     auto [displacement_gradients,
-          cauchy_stresses] = variables->get(internal_variables_t::second::DisplacementGradient,
+          cauchy_stresses] = variables->get(internal_variables_t::second::displacement_gradient,
                                             internal_variables_t::second::cauchy_stress);
 
     auto& J_list = variables->get(internal_variables_t::scalar::DetF);
@@ -860,7 +860,7 @@ TEST_CASE("Plane stress elasticity model")
 
         REQUIRE(variables->has(internal_variables_t::scalar::von_mises_stress));
         REQUIRE(variables->has(internal_variables_t::second::cauchy_stress));
-        REQUIRE(variables->has(internal_variables_t::second::LinearisedStrain));
+        REQUIRE(variables->has(internal_variables_t::second::linearised_strain));
         REQUIRE(variables->has(internal_variables_t::fourth::tangent_operator));
     }
     SECTION("No load")
@@ -902,7 +902,7 @@ TEST_CASE("Plane stress elasticity model")
         auto [von_mises_stresses,
               accumulated_plastic_strains] = variables
                                                  ->get(internal_variables_t::scalar::von_mises_stress,
-                                                       internal_variables_t::scalar::EffectivePlasticStrain);
+                                                       internal_variables_t::scalar::effective_plastic_strain);
 
         for (auto const& material_tangent : material_tangents)
         {
@@ -948,7 +948,7 @@ TEST_CASE("Plane strain elasticity model")
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
     // Add the required variables for an updated Lagrangian formulation
-    variables->add(internal_variables_t::second::DisplacementGradient,
+    variables->add(internal_variables_t::second::displacement_gradient,
                    internal_variables_t::second::cauchy_stress,
                    internal_variables_t::scalar::DetF);
 
@@ -961,7 +961,7 @@ TEST_CASE("Plane strain elasticity model")
 
     // Get the tensor variables
     auto [displacement_gradients,
-          cauchy_stresses] = variables->get(internal_variables_t::second::DisplacementGradient,
+          cauchy_stresses] = variables->get(internal_variables_t::second::displacement_gradient,
                                             internal_variables_t::second::cauchy_stress);
 
     auto& J_list = variables->get(internal_variables_t::scalar::DetF);
@@ -981,7 +981,7 @@ TEST_CASE("Plane strain elasticity model")
 
         REQUIRE(variables->has(internal_variables_t::scalar::von_mises_stress));
         REQUIRE(variables->has(internal_variables_t::second::cauchy_stress));
-        REQUIRE(variables->has(internal_variables_t::second::LinearisedStrain));
+        REQUIRE(variables->has(internal_variables_t::second::linearised_strain));
         REQUIRE(variables->has(internal_variables_t::fourth::tangent_operator));
     }
     SECTION("No load")
@@ -1022,7 +1022,7 @@ TEST_CASE("Plane strain elasticity model")
         auto [von_mises_stresses,
               accumulated_plastic_strains] = variables
                                                  ->get(internal_variables_t::scalar::von_mises_stress,
-                                                       internal_variables_t::scalar::EffectivePlasticStrain);
+                                                       internal_variables_t::scalar::effective_plastic_strain);
 
         for (auto const& material_tangent : material_tangents)
         {
@@ -1067,7 +1067,7 @@ TEST_CASE("Solid mechanics elasticity model")
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
     // Add the required variables for an updated Lagrangian formulation
-    variables->add(internal_variables_t::second::DisplacementGradient,
+    variables->add(internal_variables_t::second::displacement_gradient,
                    internal_variables_t::second::cauchy_stress,
                    internal_variables_t::scalar::DetF);
 
@@ -1080,7 +1080,7 @@ TEST_CASE("Solid mechanics elasticity model")
 
     // Get the tensor variables
     auto [displacement_gradients,
-          cauchy_stresses] = variables->get(internal_variables_t::second::DisplacementGradient,
+          cauchy_stresses] = variables->get(internal_variables_t::second::displacement_gradient,
                                             internal_variables_t::second::cauchy_stress);
 
     auto& J_list = variables->get(internal_variables_t::scalar::DetF);
@@ -1100,7 +1100,7 @@ TEST_CASE("Solid mechanics elasticity model")
 
         REQUIRE(variables->has(internal_variables_t::scalar::von_mises_stress));
         REQUIRE(variables->has(internal_variables_t::second::cauchy_stress));
-        REQUIRE(variables->has(internal_variables_t::second::LinearisedStrain));
+        REQUIRE(variables->has(internal_variables_t::second::linearised_strain));
         REQUIRE(variables->has(internal_variables_t::fourth::tangent_operator));
     }
     SECTION("No load")
@@ -1160,7 +1160,7 @@ TEST_CASE("Solid mechanics elasticity model")
         auto [von_mises_stresses,
               accumulated_plastic_strains] = variables
                                                  ->get(internal_variables_t::scalar::von_mises_stress,
-                                                       internal_variables_t::scalar::EffectivePlasticStrain);
+                                                       internal_variables_t::scalar::effective_plastic_strain);
 
         for (auto const& material_tangent : material_tangents)
         {
@@ -1251,7 +1251,7 @@ TEST_CASE("Solid mechanics J2 plasticity model")
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
     // Add the required variables for an updated Lagrangian formulation
-    variables->add(internal_variables_t::second::DisplacementGradient,
+    variables->add(internal_variables_t::second::displacement_gradient,
                    internal_variables_t::second::cauchy_stress);
     variables->add(internal_variables_t::scalar::DetF);
 
@@ -1271,7 +1271,7 @@ TEST_CASE("Solid mechanics J2 plasticity model")
 
     // Get the tensor variables
     auto [displacement_gradients,
-          cauchy_stresses] = variables->get(internal_variables_t::second::DisplacementGradient,
+          cauchy_stresses] = variables->get(internal_variables_t::second::displacement_gradient,
                                             internal_variables_t::second::cauchy_stress);
 
     auto& J_list = variables->get(internal_variables_t::scalar::DetF);
@@ -1290,9 +1290,9 @@ TEST_CASE("Solid mechanics J2 plasticity model")
         REQUIRE(small_strain_J2_plasticity->intrinsic_material().name() == "steel");
 
         REQUIRE(variables->has(internal_variables_t::scalar::von_mises_stress));
-        REQUIRE(variables->has(internal_variables_t::scalar::EffectivePlasticStrain));
-        REQUIRE(variables->has(internal_variables_t::second::LinearisedStrain));
-        REQUIRE(variables->has(internal_variables_t::second::LinearisedPlasticStrain));
+        REQUIRE(variables->has(internal_variables_t::scalar::effective_plastic_strain));
+        REQUIRE(variables->has(internal_variables_t::second::linearised_strain));
+        REQUIRE(variables->has(internal_variables_t::second::linearised_plastic_strain));
         REQUIRE(variables->has(internal_variables_t::fourth::tangent_operator));
     }
     SECTION("Helper function")
@@ -1330,7 +1330,7 @@ TEST_CASE("Solid mechanics J2 plasticity model")
         auto [von_mises_stresses,
               accumulated_plastic_strains] = variables
                                                  ->get(internal_variables_t::scalar::von_mises_stress,
-                                                       internal_variables_t::scalar::EffectivePlasticStrain);
+                                                       internal_variables_t::scalar::effective_plastic_strain);
 
         for (auto const& material_tangent : material_tangents)
         {
@@ -1374,7 +1374,7 @@ TEST_CASE("Solid mechanics J2 plasticity model")
         auto [von_mises_stresses,
               accumulated_plastic_strains] = variables
                                                  ->get(internal_variables_t::scalar::von_mises_stress,
-                                                       internal_variables_t::scalar::EffectivePlasticStrain);
+                                                       internal_variables_t::scalar::effective_plastic_strain);
 
         for (auto const& material_tangent : material_tangents)
         {
@@ -1418,7 +1418,7 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
 
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
-    variables->add(internal_variables_t::second::DisplacementGradient,
+    variables->add(internal_variables_t::second::displacement_gradient,
                    internal_variables_t::second::cauchy_stress);
     variables->add(internal_variables_t::scalar::DetF);
 
@@ -1445,11 +1445,11 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
 
     // Get the tensor variables
     auto [displacement_gradients,
-          cauchy_stresses] = variables->get(internal_variables_t::second::DisplacementGradient,
+          cauchy_stresses] = variables->get(internal_variables_t::second::displacement_gradient,
                                             internal_variables_t::second::cauchy_stress);
 
     auto [J_list, damage_list] = variables->get(internal_variables_t::scalar::DetF,
-                                                internal_variables_t::scalar::Damage);
+                                                internal_variables_t::scalar::damage);
 
     auto& material_tangents = variables->get(internal_variables_t::fourth::tangent_operator);
 
@@ -1466,14 +1466,14 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
         REQUIRE(small_strain_J2_plasticity_damage->intrinsic_material().name() == "steel");
 
         REQUIRE(variables->has(internal_variables_t::scalar::von_mises_stress));
-        REQUIRE(variables->has(internal_variables_t::scalar::EffectivePlasticStrain));
-        REQUIRE(variables->has(internal_variables_t::second::LinearisedStrain));
-        REQUIRE(variables->has(internal_variables_t::second::LinearisedPlasticStrain));
+        REQUIRE(variables->has(internal_variables_t::scalar::effective_plastic_strain));
+        REQUIRE(variables->has(internal_variables_t::second::linearised_strain));
+        REQUIRE(variables->has(internal_variables_t::second::linearised_plastic_strain));
         REQUIRE(variables->has(internal_variables_t::fourth::tangent_operator));
-        REQUIRE(variables->has(internal_variables_t::scalar::Damage));
-        REQUIRE(variables->has(internal_variables_t::scalar::EnergyReleaseRate));
-        REQUIRE(variables->has(internal_variables_t::second::KinematicHardening));
-        REQUIRE(variables->has(internal_variables_t::second::BackStress));
+        REQUIRE(variables->has(internal_variables_t::scalar::damage));
+        REQUIRE(variables->has(internal_variables_t::scalar::energy_release_rate));
+        REQUIRE(variables->has(internal_variables_t::second::kinematic_hardening));
+        REQUIRE(variables->has(internal_variables_t::second::back_stress));
     }
     SECTION("Uniaxial elastic load")
     {
@@ -1484,7 +1484,7 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
         auto [von_mises_stresses,
               accumulated_plastic_strains] = variables
                                                  ->get(internal_variables_t::scalar::von_mises_stress,
-                                                       internal_variables_t::scalar::EffectivePlasticStrain);
+                                                       internal_variables_t::scalar::effective_plastic_strain);
 
         for (auto const& material_tangent : material_tangents)
         {
@@ -1528,7 +1528,7 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
         auto [von_mises_stresses,
               accumulated_plastic_strains] = variables
                                                  ->get(internal_variables_t::scalar::von_mises_stress,
-                                                       internal_variables_t::scalar::EffectivePlasticStrain);
+                                                       internal_variables_t::scalar::effective_plastic_strain);
 
         for (auto const& cauchy_stress : cauchy_stresses)
         {
@@ -1611,14 +1611,14 @@ TEST_CASE("Thermal isotropic model")
 //     internal_variables variables(1);
 //
 //     // Add the required variables for an updated Lagrangian formulation
-//     variables->add(internal_variables_t::second::DeformationGradient,
+//     variables->add(internal_variables_t::second::deformation_gradient,
 //     internal_variables_t::second::cauchy_stress); variables->add(internal_variables_t::scalar::DetF);
 //
 //     auto small_strain_J2_plasticity = make_constitutive_model(variables, material_data, simulation_data);
 //
 //     // Get the tensor variables
 //     auto[F_list, cauchy_stresses] =
-//     variables->get(internal_variables_t::second::DeformationGradient,
+//     variables->get(internal_variables_t::second::deformation_gradient,
 //                                               internal_variables_t::second::cauchy_stress);
 //
 //     auto& J_list = variables->get(internal_variables_t::scalar::DetF);
@@ -1636,7 +1636,7 @@ TEST_CASE("Thermal isotropic model")
 //         REQUIRE(small_strain_J2_plasticity->intrinsic_material().name() == "steel");
 //
 //         REQUIRE(variables->has(internal_variables_t::scalar::von_mises_stress));
-//         REQUIRE(variables->has(internal_variables_t::scalar::EffectivePlasticStrain));
+//         REQUIRE(variables->has(internal_variables_t::scalar::effective_plastic_strain));
 //         REQUIRE(variables->has(internal_variables_t::second::HenckyStrainElastic));
 //         REQUIRE(variables->has(internal_variables_t::fourth::tangent_operator));
 //     }
@@ -1700,7 +1700,7 @@ TEST_CASE("Thermal isotropic model")
 //     //
 //     //     auto[von_mises_stresses, accumulated_plastic_strains] =
 //     //     variables->get(internal_variables_t::scalar::von_mises_stress,
-//     // internal_variables_t::scalar::EffectivePlasticStrain);
+//     // internal_variables_t::scalar::effective_plastic_strain);
 //     //
 //     //     // Ensure symmetry is correct
 //     //     for (auto const& material_tangent : material_tangents)

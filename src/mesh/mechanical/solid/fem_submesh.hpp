@@ -26,39 +26,41 @@ public:
     using traits = mechanical::traits<theory::solid, discretisation::finite_strain>;
 
 public:
-    /** Constructor providing the material coordinates reference */
     explicit fem_submesh(json const& material_data,
                          json const& mesh_data,
-                         std::shared_ptr<material_coordinates>& material_coordinates,
+                         std::shared_ptr<material_coordinates>& coordinates,
                          basic_submesh const& submesh);
 
-    /// \return A view of degrees of freedom for an element
-    [[nodiscard]] auto const local_dof_view(std::int64_t const element) const
+    /// \return view of degrees of freedom for an element
+    [[nodiscard]] auto const local_dof_view(std::int32_t const element) const
     {
         return dof_indices(Eigen::placeholders::all, element);
     }
 
-    /// \return The internal variable store
+    /// \return internal variables at the quadrature point
     [[nodiscard]] auto const& internal_variables() const { return *variables; }
 
     void save_internal_variables(bool const have_converged);
 
+    /// \return number of degrees of freedom per node
     [[nodiscard]] auto dofs_per_node() const noexcept { return traits::dofs_per_node; }
 
+    /// \return interpolation function used on the mesh
     [[nodiscard]] auto const& shape_function() const { return *sf; }
 
+    /// \return underlying constitutive model
     [[nodiscard]] auto const& constitutive() const { return *cm; }
 
-    /// \return the tangent consistent stiffness matrix
+    /// \return tangent consistent stiffness matrix
     [[nodiscard]] std::pair<index_view, matrix> tangent_stiffness(std::int32_t const element) const;
 
-    /// \return the internal element force
+    /// \return internal element force
     [[nodiscard]] std::pair<index_view, vector> internal_force(std::int32_t const element) const;
 
-    /// \return the consistent mass matrix \sa diagonal_mass
+    /// \return consistent mass matrix \sa diagonal_mass
     [[nodiscard]] std::pair<index_view, matrix> consistent_mass(std::int32_t const element) const;
 
-    /// \return the consistent mass matrix \sa diagonal_mass
+    /// \return consistent mass matrix \sa diagonal_mass
     [[nodiscard]] std::pair<index_view, vector> diagonal_mass(std::int32_t const element) const;
 
     /// Update the internal variables for the mesh group
@@ -74,11 +76,10 @@ public:
         internal_variable_type::scalar const scalar_name) const;
 
 protected:
-    /** Update the strain measures defined by the constitutive model */
+    /// Update the strain measures defined by the constitutive model
     void update_deformation_measures();
 
-    /** Computes the Jacobian determinants and check if negative
-     */
+    /// Compute the Jacobian determinants and check if negative
     void update_Jacobian_determinants();
 
     /**
@@ -113,7 +114,7 @@ protected:
                                               std::int32_t const element) const;
 
 private:
-    std::shared_ptr<material_coordinates> mesh_coordinates;
+    std::shared_ptr<material_coordinates> coordinates;
 
     /// Shape function (volume interpolation)
     std::unique_ptr<volume_interpolation> sf;

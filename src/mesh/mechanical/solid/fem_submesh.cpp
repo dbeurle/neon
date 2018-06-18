@@ -25,24 +25,24 @@ namespace neon::mechanical::solid
 {
 fem_submesh::fem_submesh(json const& material_data,
                          json const& mesh_data,
-                         std::shared_ptr<material_coordinates>& mesh_coordinates,
+                         std::shared_ptr<material_coordinates>& coordinates,
                          basic_submesh const& submesh)
     : basic_submesh(submesh),
-      mesh_coordinates(mesh_coordinates),
+      coordinates(coordinates),
       sf(make_volume_interpolation(topology(), mesh_data)),
       view(sf->quadrature().points()),
       variables(std::make_shared<internal_variables_t>(elements() * sf->quadrature().points())),
       cm(make_constitutive_model(variables, material_data, mesh_data))
 {
     // Allocate storage for the displacement gradient
-    variables->add(internal_variables_t::second::DisplacementGradient,
-                   internal_variables_t::second::DeformationGradient,
+    variables->add(internal_variables_t::second::displacement_gradient,
+                   internal_variables_t::second::deformation_gradient,
                    internal_variables_t::second::cauchy_stress);
 
     variables->add(internal_variables_t::scalar::DetF);
 
     // Get the old data to the undeformed configuration
-    auto& deformation_gradients = variables->get(internal_variables_t::second::DeformationGradient);
+    auto& deformation_gradients = variables->get(internal_variables_t::second::deformation_gradient);
 
     std::fill(begin(deformation_gradients), end(deformation_gradients), matrix3::Identity());
 
@@ -65,7 +65,7 @@ void fem_submesh::save_internal_variables(bool const have_converged)
 
 std::pair<index_view, matrix> fem_submesh::tangent_stiffness(std::int32_t const element) const
 {
-    auto const x = mesh_coordinates->current_configuration(local_node_view(element));
+    auto const x = coordinates->current_configuration(local_node_view(element));
 
     matrix ke = material_tangent_stiffness(x, element);
 
@@ -78,7 +78,7 @@ std::pair<index_view, matrix> fem_submesh::tangent_stiffness(std::int32_t const 
 
 std::pair<index_view, vector> fem_submesh::internal_force(std::int32_t const element) const
 {
-    auto const& x = mesh_coordinates->current_configuration(local_node_view(element));
+    auto const& x = coordinates->current_configuration(local_node_view(element));
 
     return {local_dof_view(element), internal_nodal_force(x, element)};
 }
@@ -157,7 +157,7 @@ vector fem_submesh::internal_nodal_force(matrix3x const& x, std::int32_t const e
 
 std::pair<index_view, matrix> fem_submesh::consistent_mass(std::int32_t const element) const
 {
-    auto const& X = mesh_coordinates->initial_configuration(local_node_view(element));
+    auto const& X = coordinates->initial_configuration(local_node_view(element));
 
     auto const density_0 = cm->intrinsic_material().initial_density();
 
@@ -204,13 +204,13 @@ void fem_submesh::update_internal_variables(double const time_step_size)
 
 void fem_submesh::update_deformation_measures()
 {
-    auto& H_list = variables->get(internal_variables_t::second::DisplacementGradient);
-    auto& F_list = variables->get(internal_variables_t::second::DeformationGradient);
+    auto& H_list = variables->get(internal_variables_t::second::displacement_gradient);
+    auto& F_list = variables->get(internal_variables_t::second::deformation_gradient);
 
     tbb::parallel_for(std::int64_t{0}, elements(), [&](auto const element) {
         // Gather the material coordinates
-        auto const X = mesh_coordinates->initial_configuration(local_node_view(element));
-        auto const x = mesh_coordinates->current_configuration(local_node_view(element));
+        auto const X = coordinates->initial_configuration(local_node_view(element));
+        auto const x = coordinates->current_configuration(local_node_view(element));
 
         sf->quadrature().for_each([&](auto const& femval, auto const l) {
             auto const& [N, rhea] = femval;
@@ -234,7 +234,7 @@ void fem_submesh::update_deformation_measures()
 void fem_submesh::update_Jacobian_determinants()
 {
     auto const& deformation_gradients = variables->get(
-        internal_variables_t::second::DeformationGradient);
+        internal_variables_t::second::deformation_gradient);
 
     auto& F_determinants = variables->get(internal_variables_t::scalar::DetF);
 
@@ -243,15 +243,15 @@ void fem_submesh::update_Jacobian_determinants()
                    begin(F_determinants),
                    [](matrix3 const& F) { return F.determinant(); });
 
-    auto const found = std::find_if(begin(F_determinants), end(F_determinants), [](auto const detF) {
-        return detF <= 0.0;
+    auto const found = std::find_if(begin(F_determinants), end(F_determinants), [](auto const i) {
+        return std::signbit(i);
     });
 
     if (found != end(F_determinants))
     {
         auto const count = std::count_if(begin(F_determinants),
                                          end(F_determinants),
-                                         [](auto const detF) { return detF <= 0.0; });
+                                         [](auto const i) { return std::signbit(i); });
 
         auto const i = std::distance(begin(F_determinants), found);
 
@@ -267,7 +267,7 @@ void fem_submesh::update_Jacobian_determinants()
 std::pair<vector, vector> fem_submesh::nodal_averaged_variable(
     internal_variables_t::second const tensor_name) const
 {
-    vector count = vector::Zero(mesh_coordinates->size() * 9);
+    vector count = vector::Zero(coordinates->size() * 9);
     vector value = count;
 
     auto const& tensor_list = variables->get(tensor_name);
@@ -309,7 +309,7 @@ std::pair<vector, vector> fem_submesh::nodal_averaged_variable(
 std::pair<vector, vector> fem_submesh::nodal_averaged_variable(
     internal_variables_t::scalar const scalar_name) const
 {
-    vector count = vector::Zero(mesh_coordinates->size());
+    vector count = vector::Zero(coordinates->size());
     vector value = count;
 
     auto const& scalar_list = variables->get(scalar_name);

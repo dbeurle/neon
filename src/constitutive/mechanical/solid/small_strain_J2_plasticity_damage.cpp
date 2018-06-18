@@ -17,10 +17,10 @@ small_strain_J2_plasticity_damage::small_strain_J2_plasticity_damage(
     std::shared_ptr<internal_variables_t>& variables, json const& material_data)
     : small_strain_J2_plasticity(variables, material_data), material(material_data)
 {
-    variables->add(internal_variables_t::second::BackStress,
-                   internal_variables_t::second::KinematicHardening,
-                   internal_variables_t::scalar::Damage,
-                   internal_variables_t::scalar::EnergyReleaseRate);
+    variables->add(internal_variables_t::second::back_stress,
+                   internal_variables_t::second::kinematic_hardening,
+                   internal_variables_t::scalar::damage,
+                   internal_variables_t::scalar::energy_release_rate);
 }
 
 small_strain_J2_plasticity_damage::~small_strain_J2_plasticity_damage() = default;
@@ -33,25 +33,25 @@ void small_strain_J2_plasticity_damage::update_internal_variables(double const t
           cauchy_stresses,
           back_stresses,
           accumulated_kinematic_stresses] = variables
-                                                ->get(internal_variables_t::second::LinearisedPlasticStrain,
-                                                        internal_variables_t::second::LinearisedStrain,
+                                                ->get(internal_variables_t::second::linearised_plastic_strain,
+                                                        internal_variables_t::second::linearised_strain,
                                                         internal_variables_t::second::cauchy_stress,
-                                                        internal_variables_t::second::BackStress,
-                                                        internal_variables_t::second::KinematicHardening);
+                                                        internal_variables_t::second::back_stress,
+                                                        internal_variables_t::second::kinematic_hardening);
 
     // Retrieve the accumulated internal variables
     auto [accumulated_plastic_strains,
           von_mises_stresses,
           scalar_damages,
-          energy_release_rates] = variables->get(internal_variables_t::scalar::EffectivePlasticStrain,
+          energy_release_rates] = variables->get(internal_variables_t::scalar::effective_plastic_strain,
                                                    internal_variables_t::scalar::von_mises_stress,
-                                                   internal_variables_t::scalar::Damage,
-                                                   internal_variables_t::scalar::EnergyReleaseRate);
+                                                   internal_variables_t::scalar::damage,
+                                                   internal_variables_t::scalar::energy_release_rate);
 
     auto& tangent_operators = variables->get(internal_variables_t::fourth::tangent_operator);
 
     // Compute the linear strain gradient from the displacement gradient
-    strains = variables->get(internal_variables_t::second::DisplacementGradient)
+    strains = variables->get(internal_variables_t::second::displacement_gradient)
               | ranges::view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
     // Perform the update algorithm for each quadrature point

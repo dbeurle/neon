@@ -4,15 +4,16 @@
 #include "mesh/generic/dirichlet.hpp"
 #include "mesh/mechanical/solid/boundary/nonfollower_load.hpp"
 #include "mesh/mechanical/solid/fem_submesh.hpp"
-#include "mesh/nodal_variables.hpp"
+#include "io/file_output.hpp"
 
 #include <map>
 
 namespace neon
 {
 class basic_mesh;
+}
 
-namespace mechanical::solid
+namespace neon::mechanical::solid
 {
 class fem_mesh
 {
@@ -36,9 +37,10 @@ public:
     [[nodiscard]] bool is_symmetric() const;
 
     /// Update the internal forces for printing out reaction forces
-    void update_internal_forces(vector const& fint) { internal_forces = fint; }
+    void update_internal_forces(vector const& fint) { reaction_forces = -fint; }
 
-    vector nodal_reaction_forces() const { return -internal_forces; }
+    /// \return nodal reaction forces
+    vector const& nodal_reaction_forces() const { return reaction_forces; }
 
     /// Deform the body by updating the displacement x = X + u
     /// and update the internal variables with the new deformation and the
@@ -67,18 +69,22 @@ public:
     /// Provide const access to the discretised geometry for this mesh
     [[nodiscard]] auto const& geometry() const { return *coordinates; }
 
+    /// Write out results to file
+    void write(std::int64_t const time_step, double const current_time);
+
 protected:
     void check_boundary_conditions(json const& boundary_data) const;
 
-    void allocate_boundary_conditions(json const& boundary_data, basic_mesh const& basic_mesh);
+    void allocate_boundary_conditions(json const& boundary_data, basic_mesh const& reference_mesh);
 
-    void allocate_displacement_boundary(json const& boundary, basic_mesh const& basic_mesh);
+    void allocate_displacement_boundary(json const& boundary, basic_mesh const& reference_mesh);
 
     [[nodiscard]] bool is_nonfollower_load(std::string const& boundary_type) const;
 
 protected:
     std::shared_ptr<material_coordinates> coordinates;
 
+    /// Meshes that contain individual element types
     std::vector<fem_submesh> submeshes;
 
     /// Displacement boundary conditions
@@ -87,8 +93,8 @@ protected:
     /// Nonfollower (force) boundary conditions
     std::map<std::string, nonfollower_load_boundary> nonfollower_loads;
 
-    /// Internal nodal forces for reaction forces
-    vector internal_forces;
+    /// Nodal reaction forces
+    vector reaction_forces;
 
     std::unordered_map<std::string, int> const dof_table = {{"x", 0}, {"y", 1}, {"z", 2}};
 
@@ -99,6 +105,8 @@ protected:
     /// ensures the compatibility between user
     /// defined and sinusoidal boundary conditions.
     double generate_time_step;
+
+    /// File output handle
+    // std::unique_ptr<io::file_output> writer;
 };
-}
 }

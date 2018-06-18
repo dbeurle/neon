@@ -19,7 +19,8 @@ fem_mesh::fem_mesh(basic_mesh const& basic_mesh,
                    json const& simulation_data,
                    double const generate_time_step)
     : coordinates(std::make_shared<material_coordinates>(basic_mesh.coordinates())),
-      generate_time_step{generate_time_step}
+      generate_time_step{generate_time_step},
+      io(std::make_unique<vtk_file_output>(simulation_data["Name"], simulation_data["Visualisation"]))
 {
     check_boundary_conditions(simulation_data["BoundaryConditions"]);
 
@@ -39,13 +40,13 @@ bool fem_mesh::is_symmetric() const
 
 void fem_mesh::update_internal_variables(vector const& u, double const time_step_size)
 {
-    auto const start = std::chrono::high_resolution_clock::now();
+    auto const start = std::chrono::steady_clock::now();
 
     coordinates->update_current_configuration(u);
 
     for (auto& submesh : submeshes) submesh.update_internal_variables(time_step_size);
 
-    auto const end = std::chrono::high_resolution_clock::now();
+    auto const end = std::chrono::steady_clock::now();
     std::chrono::duration<double> const elapsed_seconds = end - start;
 
     std::cout << std::string(6, ' ') << "Internal variable update took " << elapsed_seconds.count()
@@ -122,7 +123,7 @@ std::vector<double> fem_mesh::time_history() const
     std::set<double> history;
 
     // Append time history from each boundary condition
-    for (auto const& [key, boundaries] : displacement_bcs)
+    for (auto const& [name, boundaries] : displacement_bcs)
     {
         for (auto const& boundary : boundaries)
         {
@@ -130,7 +131,7 @@ std::vector<double> fem_mesh::time_history() const
             history.insert(begin(times), end(times));
         }
     }
-    for (auto const& [key, nonfollower_load] : nonfollower_loads)
+    for (auto const& [name, nonfollower_load] : nonfollower_loads)
     {
         for (auto const& boundary_variant : nonfollower_load.natural_interface())
         {
@@ -143,6 +144,11 @@ std::vector<double> fem_mesh::time_history() const
         }
     }
     return {begin(history), end(history)};
+}
+
+void fem_mesh::write(std::int64_t const time_step, double const current_time)
+{
+    // now we need to write out to the file by adding our mesh and coordinates
 }
 
 void fem_mesh::check_boundary_conditions(json const& boundary_data) const

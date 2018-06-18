@@ -14,8 +14,8 @@ small_strain_J2_plasticity::small_strain_J2_plasticity(std::shared_ptr<internal_
                                                        json const& material_data)
     : isotropic_linear_elasticity(variables, material_data), material(material_data)
 {
-    variables->add(internal_variables_t::second::LinearisedPlasticStrain);
-    variables->add(internal_variables_t::scalar::EffectivePlasticStrain);
+    variables->add(internal_variables_t::second::linearised_plastic_strain);
+    variables->add(internal_variables_t::scalar::effective_plastic_strain);
 
     variables->commit();
 }
@@ -29,19 +29,19 @@ void small_strain_J2_plasticity::update_internal_variables(double const time_ste
     // Extract the internal variables
     auto [plastic_strains,
           strains,
-          cauchy_stresses] = variables->get(internal_variables_t::second::LinearisedPlasticStrain,
-                                              internal_variables_t::second::LinearisedStrain,
+          cauchy_stresses] = variables->get(internal_variables_t::second::linearised_plastic_strain,
+                                              internal_variables_t::second::linearised_strain,
                                               internal_variables_t::second::cauchy_stress);
 
     // Retrieve the accumulated internal variables
     auto [accumulated_plastic_strains,
-          von_mises_stresses] = variables->get(internal_variables_t::scalar::EffectivePlasticStrain,
+          von_mises_stresses] = variables->get(internal_variables_t::scalar::effective_plastic_strain,
                                                  internal_variables_t::scalar::von_mises_stress);
 
     auto& tangent_operators = variables->get(internal_variables_t::fourth::tangent_operator);
 
     // Compute the linear strain gradient from the displacement gradient
-    strains = variables->get(internal_variables_t::second::DisplacementGradient)
+    strains = variables->get(internal_variables_t::second::displacement_gradient)
               | ranges::view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
     // Perform the update algorithm for each quadrature point

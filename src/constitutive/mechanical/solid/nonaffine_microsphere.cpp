@@ -27,7 +27,7 @@ nonaffine_microsphere::nonaffine_microsphere(std::shared_ptr<internal_variables_
 void nonaffine_microsphere::update_internal_variables(double const time_step_size)
 {
     auto const& deformation_gradients = variables->get(
-        internal_variables_t::second::DeformationGradient);
+        internal_variables_t::second::deformation_gradient);
     auto& cauchy_stresses = variables->get(internal_variables_t::second::cauchy_stress);
 
     auto const& detF_list = variables->get(internal_variables_t::scalar::DetF);

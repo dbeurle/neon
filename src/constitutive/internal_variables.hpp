@@ -73,15 +73,15 @@ public:
         /// Von Mises equivalent stress
         von_mises_stress,
         /// Accumulated (effective) plastic strain
-        EffectivePlasticStrain,
+        effective_plastic_strain,
         /// Reference Jacobian determinant
         DetF0,
         /// Updated Jacobian determinant
         DetF,
         /// Scalar damage variable
-        Damage,
+        damage,
         /// Scalar energy release rate
-        EnergyReleaseRate,
+        energy_release_rate,
         /// Beam torsional stiffness
         torsional_stiffness,
         /// Beam axial stiffness
@@ -116,29 +116,29 @@ public:
         /// Cauchy stress
         cauchy_stress,
         /// Kirchhoff stress
-        Kirchhoff,
+        kirchhoff_stress,
         /// First Piola-Kirchhoff stress (PK1)
-        PiolaKirchhoff1,
+        piola_kirchhoff1,
         /// Second Piola-Kirchhoff stress (PK2)
-        PiolaKirchhoff2,
+        piola_kirchhoff2,
         /// Linearised (infinitesimal) total strain
-        LinearisedStrain,
+        linearised_strain,
         /// Linearised (infinitesimal) plastic strain
-        LinearisedPlasticStrain,
+        linearised_plastic_strain,
         /// Hencky elastic strain
         HenckyStrainElastic,
         /// Deformation gradient (F)
-        DeformationGradient,
+        deformation_gradient,
         /// Plastic deformation gradient (Fp)
-        DeformationGradientPlastic,
+        deformation_gradient_plastic,
         /// Displacement gradient (H)
-        DisplacementGradient,
+        displacement_gradient,
         /// Green-Lagrange strain (E)
-        GreenLagrange,
+        green_lagrange,
         /// Back stress (for hardening)
-        BackStress,
+        back_stress,
         /// Kinematic hardening
-        KinematicHardening,
+        kinematic_hardening,
         /// Conductivity tensor
         Conductivity,
         /// Beam bending stiffness

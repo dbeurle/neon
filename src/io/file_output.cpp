@@ -51,7 +51,7 @@ file_output::file_output(std::string file_name, json const& visualisation_data)
     {
         for (std::string const& field : visualisation_data["Fields"])
         {
-            output_set.insert(field);
+            output_variables.insert(field);
         }
     }
 }
@@ -102,6 +102,104 @@ void file_output::add_field(std::string const& name, vector const& field, int co
     }
     unstructured_mesh->GetPointData()->AddArray(scalar_field);
 }
+
+vtk_file_output::vtk_file_output(std::string file_name, json const& visualisation_data)
+    : file_output(file_name, visualisation_data)
+{
+    pvd_file.open(file_name + ".pvd");
+
+    if (!pvd_file.is_open())
+    {
+        throw std::domain_error("Not able to write to disk for visualisation\n");
+    }
+
+    pvd_file << "<?xml version=\"1.0\"?>\n";
+    pvd_file << "<VTKFile type=\"Collection\" version=\"0.1\">\n";
+    pvd_file << std::string(2, ' ') << "<Collection>\n";
+
+    unstructured_mesh->Allocate();
+}
+
+vtk_file_output::~vtk_file_output()
+{
+    // close off the last of the file for the time stepping
+    pvd_file << std::string(2, ' ') << "</Collection>\n"
+             << "</VTKFile>\n";
+    pvd_file.close();
+}
+
+void vtk_file_output::write(int const time_step, double const total_time)
+{
+    // wait on previous future
+    write_future.wait();
+
+    if (write_future.get() == 1)
+    {
+        throw std::domain_error("Error in VTK file IO occurred");
+    }
+
+    write_future = std::async(std::launch::async, [this, time_step, total_time]() {
+        auto unstructured_mesh_writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
+
+        auto const vtk_filename = directory_name + "/" + file_name + "_" + std::to_string(time_step)
+                                  + "." + unstructured_mesh_writer->GetDefaultFileExtension();
+
+        std::cout << "\n"
+                  << std::string(4, ' ') << "Writing solution to file for step " << time_step
+                  << "\n";
+
+        unstructured_mesh_writer->SetFileName(vtk_filename.c_str());
+        unstructured_mesh_writer->SetInputData(unstructured_mesh);
+
+        if (!use_binary_format) unstructured_mesh_writer->SetDataModeToAscii();
+
+        // Update the pvd file for timestep mapping
+        pvd_file << std::string(4, ' ') << "<DataSet timestep = \"" << std::to_string(total_time)
+                 << "\" file = \"" << directory_name << "/" << file_name << "_"
+                 << std::to_string(time_step) << "."
+                 << unstructured_mesh_writer->GetDefaultFileExtension() << "\" />\n";
+
+        return unstructured_mesh_writer->Write();
+    });
+}
+
+void vtk_file_output::coordinates(matrix3x const& configuration) {}
+
+void vtk_file_output::mesh(indices const& all_node_indices, element_topology const topology)
+{
+    auto const vtk_node_indices = convert_to_vtk(all_node_indices, topology);
+
+    for (std::int64_t element{0}; element < vtk_node_indices.cols(); ++element)
+    {
+        auto node_indices = vtkSmartPointer<vtkIdList>::New();
+
+        for (std::int64_t node{0}; node < vtk_node_indices.rows(); ++node)
+        {
+            node_indices->InsertNextId(static_cast<std::int64_t>(vtk_node_indices(node, element)));
+        }
+        unstructured_mesh->InsertNextCell(to_vtk(topology), node_indices);
+    }
+}
+
+void vtk_file_output::field(std::string const& name,
+                            vector const& flattened_field,
+                            std::int64_t const components)
+{
+    // ensure not adding to a field still being written to file
+    write_future.wait();
+
+    auto vtk_field = vtkSmartPointer<vtkDoubleArray>::New();
+
+    vtk_field->SetName(name.c_str());
+    vtk_field->SetNumberOfComponents(components);
+    vtk_field->Allocate(flattened_field.size() / components);
+
+    for (std::int64_t index{0}; index < flattened_field.size(); index += components)
+    {
+        vtk_field->InsertNextTuple(flattened_field.data() + index);
+    }
+    unstructured_mesh->GetPointData()->AddArray(vtk_field);
+}
 }
 
 namespace diffusion
@@ -110,7 +208,7 @@ file_output::file_output(std::string file_name, json const& visualisation_data, 
     : io::file_output(file_name, visualisation_data), mesh(mesh)
 {
     // Check the output set against the known values for this module
-    for (auto const& output : output_set)
+    for (auto const& output : output_variables)
     {
         if (vector_map.find(output) == vector_map.end() && output != primary_field)
         {
@@ -126,7 +224,7 @@ void file_output::write(int const time_step, double const total_time, vector con
     if (time_step % write_every != 0) return;
 
     // Write out the required fields
-    for (auto const& name : output_set)
+    for (auto const& name : output_variables)
     {
         if (name == primary_field)
         {
