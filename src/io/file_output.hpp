@@ -29,14 +29,13 @@
 #pragma clang diagnostic pop
 #endif
 
+#include <algorithm>
+#include <future>
 #include <map>
 #include <set>
 #include <string>
-#include <algorithm>
 
-namespace neon
-{
-namespace io
+namespace neon::io
 {
 class file_output
 {
@@ -46,7 +45,14 @@ public:
     /// Virtual destructor to finish writing out the time step mapping
     virtual ~file_output();
 
-    file_output(file_output&&) = default;
+    /// Add coordinates to the file output set
+    virtual void coordinates(matrix3x const& configuration);
+
+    /// Add mesh information to the file output set
+    virtual void mesh(indices const& all_node_indices, element_topology const topology);
+
+    /// Write out to file in the format specified
+    virtual void write() {}
 
 protected:
     virtual void write_to_file(int const time_step, double const total_time);
@@ -57,25 +63,58 @@ protected:
 protected:
     /// Directory to store visualisation output
     std::string const directory_name{"visualisation"};
-
+    /// Output file name that appears on disk
     std::string file_name;
-
-    vtkSmartPointer<vtkUnstructuredGrid> unstructured_mesh; /// VTK representation of mesh
-
+    /// VTK representation of mesh
+    vtkSmartPointer<vtkUnstructuredGrid> unstructured_mesh;
     /// Stream for writing time history
     std::ofstream pvd_file;
 
-    std::set<std::string> output_set;
-
+    std::set<std::string> output_variables;
     /// Time steps to write out (e.g. two is every second time step)
     int write_every{1};
-
     /// Default to using binary VTK output for efficiency
     bool use_binary_format = true;
 };
+
+// vtk_file_output output should be asynchronous as these operations are
+// typically expensive.  For the asynchronous aspect - the file_output class
+// should take the vtk object to write out while the computation continues.
+class vtk_file_output : public io::file_output
+{
+public:
+    explicit vtk_file_output(std::string file_name, json const& visualisation_data);
+
+    virtual ~vtk_file_output();
+
+    /// Write out to file
+    virtual void write(int const time_step, double const total_time) final;
+
+    virtual void coordinates(matrix3x const& configuration) override final;
+
+    /// Add mesh information to the file output set
+    virtual void mesh(indices const& all_node_indices, element_topology const topology) override final;
+
+    /// Add the field to the output field with
+    /// \param name Field name
+    /// \param data Flat vector of encoded data
+    /// \param components Number of components encoded in the field
+    virtual void field(std::string const& name, vector const& data, std::int64_t const components) final;
+
+private:
+    /// Holds one if successful and zero otherwise.  Use this to perform the
+    /// io without blocking computation
+    std::future<int> write_future;
+    /// VTK representation of mesh
+    vtkSmartPointer<vtkUnstructuredGrid> unstructured_mesh;
+    /// Default to using binary VTK output for efficiency
+    bool use_binary_format{true};
+    /// Stream for writing time history
+    std::ofstream pvd_file;
+};
 }
 
-namespace mechanical
+namespace neon::mechanical
 {
 template <typename fem_mesh>
 class file_output : public io::file_output
@@ -105,8 +144,8 @@ private:
     void add_mesh();
 
 private:
+    /// Reference to the mesh to output
     fem_mesh_type const& mesh;
-
     /// Allowable fields must also be in either scalar_map / tensor_map
     std::set<std::string> allowable_fields{{"AccumulatedPlasticStrain",
                                             "VonMisesStress",
@@ -128,23 +167,23 @@ private:
                                             "ReductionFactor"}};
 
     // clang-format off
-    scalar_map_t const scalar_map{{"AccumulatedPlasticStrain", variable_type::scalar::EffectivePlasticStrain},
+    scalar_map_t const scalar_map{{"AccumulatedPlasticStrain", variable_type::scalar::effective_plastic_strain},
                                   {"VonMisesStress", variable_type::scalar::von_mises_stress},
-                                  {"Damage", variable_type::scalar::Damage},
+                                  {"Damage", variable_type::scalar::damage},
                                   {"ActiveShearModulus", variable_type::scalar::active_shear_modulus},
                                   {"InactiveShearModulus", variable_type::scalar::inactive_shear_modulus},
                                   {"ActiveSegments", variable_type::scalar::active_segments},
                                   {"InactiveSegments", variable_type::scalar::inactive_segments},
                                   {"ReductionFactor", variable_type::scalar::reduction_factor},
-                                  {"EnergyReleaseRate", variable_type::scalar::EnergyReleaseRate}};
+                                  {"EnergyReleaseRate", variable_type::scalar::energy_release_rate}};
 
     tensor_map_t const tensor_map{{"CauchyStress", variable_type::second::cauchy_stress},
-                                  {"LinearisedStrain", variable_type::second::LinearisedStrain},
-                                  {"LinearisedPlasticStrain", variable_type::second::LinearisedPlasticStrain},
-                                  {"DeformationGradient", variable_type::second::DeformationGradient},
-                                  {"DisplacementGradient", variable_type::second::DisplacementGradient},
-                                  {"KinematicHardening", variable_type::second::KinematicHardening},
-                                  {"BackStress", variable_type::second::BackStress}};
+                                  {"LinearisedStrain", variable_type::second::linearised_strain},
+                                  {"LinearisedPlasticStrain", variable_type::second::linearised_plastic_strain},
+                                  {"DeformationGradient", variable_type::second::deformation_gradient},
+                                  {"DisplacementGradient", variable_type::second::displacement_gradient},
+                                  {"KinematicHardening", variable_type::second::kinematic_hardening},
+                                  {"BackStress", variable_type::second::back_stress}};
     // clang-format on
 };
 
@@ -157,10 +196,11 @@ file_output<fem_mesh>::file_output(std::string file_name,
     // Check the output set against the known values for this module
     if (!std::includes(begin(allowable_fields),
                        end(allowable_fields),
-                       begin(output_set),
-                       end(output_set)))
+                       begin(output_variables),
+                       end(output_variables)))
     {
-        throw std::domain_error("Requested output is not valid for a solid mechanics simulation\n");
+        throw std::domain_error("Requested output is not valid for a solid mechanics "
+                                "simulation\n");
     }
     add_mesh();
 }
@@ -173,7 +213,7 @@ void file_output<fem_mesh>::write(int const time_step, double const total_time)
     vector nodal_averaged_value, insertions;
 
     // Write out the required fields
-    for (auto const& name : output_set)
+    for (auto const& name : output_variables)
     {
         if (auto found = tensor_map.find(name); found != tensor_map.end())
         {
@@ -221,7 +261,6 @@ void file_output<fem_mesh>::write(int const time_step, double const total_time)
                 nodal_averaged_value += value;
                 insertions += count;
             }
-
             nodal_averaged_value = nodal_averaged_value.cwiseQuotient(insertions);
 
             add_field(name_str, nodal_averaged_value, 1);
@@ -269,7 +308,7 @@ void file_output<fem_mesh>::add_mesh()
 }
 }
 
-namespace diffusion
+namespace neon::diffusion
 {
 class file_output : public io::file_output
 {
@@ -293,5 +332,4 @@ private:
 
     VectorMap const vector_map{};
 };
-}
 }
