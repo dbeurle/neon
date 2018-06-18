@@ -31,11 +31,12 @@ protected:
     void assemble_stiffness();
 
 protected:
-    mesh_type& mesh; /// fem mesh
-
-    sparse_matrix K; /// Stiffness matrix
-
-    eigen_solver eigenvalues; /// Eigenvalue solver
+    /// fem mesh
+    mesh_type& mesh;
+    /// Stiffness matrix
+    sparse_matrix K;
+    /// Eigenvalue solver
+    eigen_solver eigenvalues;
 };
 
 template <typename fem_mesh_type>
