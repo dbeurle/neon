@@ -149,7 +149,7 @@ void fem_static_matrix<fem_mesh_type>::solve()
         fem_mesh.update_internal_variables(displacement);
         fem_mesh.update_internal_forces(f_int);
 
-        // io.write(adaptive_load.step(), adaptive_load.time());
+        fem_mesh.write(adaptive_load.step(), adaptive_load.time());
 
         while (!adaptive_load.is_fully_applied())
         {
@@ -454,7 +454,7 @@ void fem_static_matrix<fem_mesh_type>::perform_equilibrium_iterations()
 
         fem_mesh.update_internal_forces(f_int);
 
-        // io.write(adaptive_load.step(), adaptive_load.time());
+        fem_mesh.write(adaptive_load.step(), adaptive_load.time());
     }
 }
 }

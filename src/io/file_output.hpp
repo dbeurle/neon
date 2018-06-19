@@ -33,7 +33,15 @@ public:
     /// Write out to file in the format specified
     virtual void write(int const time_step, double const total_time) = 0;
 
+    /// Add the field to the output field with
+    /// \param name Field name
+    /// \param data Flat vector of encoded data
+    /// \param components Number of components encoded in the field
+    virtual void field(std::string const& name, vector const& data, std::int64_t const components) = 0;
+
     [[nodiscard]] bool is_output_requested(std::string const& name) const;
+
+    [[nodiscard]] std::set<std::string> outputs() const noexcept { return output_variables; }
 
 protected:
     /// Directory to store visualisation output
@@ -64,16 +72,14 @@ public:
     /// Add mesh information to the file output set
     virtual void mesh(indices const& all_node_indices, element_topology const topology) override final;
 
-    /// Add the field to the output field with
-    /// \param name Field name
-    /// \param data Flat vector of encoded data
-    /// \param components Number of components encoded in the field
-    virtual void field(std::string const& name, vector const& data, std::int64_t const components) final;
+    virtual void field(std::string const& name,
+                       vector const& data,
+                       std::int64_t const components) override final;
 
 private:
     /// Holds one if successful and zero otherwise.  Use this to perform the
     /// io without blocking computation
-    std::future<int> write_future;
+    std::future<int> future;
     /// VTK representation of mesh
     vtkSmartPointer<vtkUnstructuredGrid> unstructured_mesh;
     /// Default to using binary VTK output for efficiency
@@ -276,28 +282,3 @@ private:
 //     unstructured_mesh->GetPointData()->AddArray(io::vtk_displacement(mesh.geometry().coordinates()));
 // }
 // }
-//
-// namespace neon::diffusion
-// {
-// class file_output : public io::file_output
-// {
-// public:
-//     using VectorMap = std::map<std::string, internal_variables_t::vector>;
-//
-//     std::string const primary_field{"Temperature"};
-//
-// public:
-//     explicit file_output(std::string file_name, json const& visualisation_data, fem_mesh const& mesh);
-//
-//     file_output(file_output&&) = default;
-//
-//     void write(int const time_step, double const total_time, vector const& temperature);
-//
-// private:
-//     void add_mesh();
-//
-// private:
-//     fem_mesh const& mesh;
-//
-//     VectorMap const vector_map{};
-// };

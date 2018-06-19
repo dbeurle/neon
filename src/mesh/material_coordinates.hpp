@@ -33,6 +33,8 @@ public:
 
     [[nodiscard]] matrix3x displacement() const;
 
+    [[nodiscard]] vector displacement_vector() const;
+
 protected:
     /// Current configuration
     matrix3x x;

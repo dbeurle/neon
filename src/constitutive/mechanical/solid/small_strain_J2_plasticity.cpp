@@ -17,6 +17,9 @@ small_strain_J2_plasticity::small_strain_J2_plasticity(std::shared_ptr<internal_
     variables->add(internal_variables_t::second::linearised_plastic_strain);
     variables->add(internal_variables_t::scalar::effective_plastic_strain);
 
+    names.emplace("linearised_plastic_strain");
+    names.emplace("effective_plastic_strain");
+
     variables->commit();
 }
 
@@ -30,13 +33,13 @@ void small_strain_J2_plasticity::update_internal_variables(double const time_ste
     auto [plastic_strains,
           strains,
           cauchy_stresses] = variables->get(internal_variables_t::second::linearised_plastic_strain,
-                                              internal_variables_t::second::linearised_strain,
-                                              internal_variables_t::second::cauchy_stress);
+                                            internal_variables_t::second::linearised_strain,
+                                            internal_variables_t::second::cauchy_stress);
 
     // Retrieve the accumulated internal variables
     auto [accumulated_plastic_strains,
           von_mises_stresses] = variables->get(internal_variables_t::scalar::effective_plastic_strain,
-                                                 internal_variables_t::scalar::von_mises_stress);
+                                               internal_variables_t::scalar::von_mises_stress);
 
     auto& tangent_operators = variables->get(internal_variables_t::fourth::tangent_operator);
 

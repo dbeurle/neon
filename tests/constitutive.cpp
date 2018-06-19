@@ -1639,7 +1639,7 @@ TEST_CASE("Thermal isotropic model")
 //
 //         REQUIRE(variables->has(internal_variables_t::scalar::von_mises_stress));
 //         REQUIRE(variables->has(internal_variables_t::scalar::effective_plastic_strain));
-//         REQUIRE(variables->has(internal_variables_t::second::HenckyStrainElastic));
+//         REQUIRE(variables->has(internal_variables_t::second::hencky_strain_elastic));
 //         REQUIRE(variables->has(internal_variables_t::fourth::tangent_operator));
 //     }
 //     SECTION("Initial material tangent symmetry")

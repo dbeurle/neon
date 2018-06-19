@@ -24,8 +24,8 @@ gaussian_ageing_affine_microsphere::gaussian_ageing_affine_microsphere(
     variables->add(internal_variables_t::scalar::active_shear_modulus,
                    internal_variables_t::scalar::inactive_shear_modulus,
                    internal_variables_t::scalar::active_segments,
-                   internal_variables_t::scalar::reduction_factor,
-                   internal_variables_t::scalar::inactive_segments);
+                   internal_variables_t::scalar::inactive_segments,
+                   internal_variables_t::scalar::reduction_factor);
 
     variables->add(internal_variables_t::vector::first_ageing_moduli,
                    internal_variables_t::vector::second_ageing_moduli,
@@ -33,6 +33,12 @@ gaussian_ageing_affine_microsphere::gaussian_ageing_affine_microsphere(
                    internal_variables_t::vector::first_previous,
                    internal_variables_t::vector::second_previous,
                    internal_variables_t::vector::third_previous);
+
+    names.emplace("active_shear_modulus");
+    names.emplace("inactive_shear_modulus");
+    names.emplace("active_segments");
+    names.emplace("inactive_segments");
+    names.emplace("reduction_factor");
 
     for (auto& values : variables->get(internal_variables_t::vector::first_ageing_moduli))
     {

@@ -10,6 +10,11 @@ material_coordinates::material_coordinates(matrix3x const& initial_coordinates)
 
 matrix3x material_coordinates::displacement() const { return x - X; }
 
+vector material_coordinates::displacement_vector() const
+{
+    return Eigen::Map<vector>(displacement().data(), displacement().size());
+}
+
 void material_coordinates::update_current_xy_configuration(vector const& u)
 {
     x.row(0) = X.row(0) + u.transpose()(Eigen::seq(0, u.size() - 1, 2));

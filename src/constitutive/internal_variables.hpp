@@ -126,7 +126,7 @@ public:
         /// Linearised (infinitesimal) plastic strain
         linearised_plastic_strain,
         /// Hencky elastic strain
-        HenckyStrainElastic,
+        hencky_strain_elastic,
         /// Deformation gradient (F)
         deformation_gradient,
         /// Plastic deformation gradient (Fp)

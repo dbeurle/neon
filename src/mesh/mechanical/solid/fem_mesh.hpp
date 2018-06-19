@@ -70,7 +70,7 @@ public:
     [[nodiscard]] auto const& geometry() const { return *coordinates; }
 
     /// Write out results to file
-    void write(std::int64_t const time_step, double const current_time);
+    void write(std::int32_t const time_step, double const current_time);
 
 protected:
     void check_boundary_conditions(json const& boundary_data) const;

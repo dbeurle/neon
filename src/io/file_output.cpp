@@ -13,7 +13,6 @@
 
 #include "io/vtk_coordinates.hpp"
 
-#include <vtkDataObject.h>
 #include <vtkIdList.h>
 #include <vtkDoubleArray.h>
 #include <vtkIdTypeArray.h>
@@ -31,21 +30,27 @@ namespace neon::io
 file_output::file_output(std::string file_name, json const& visualisation_data)
     : file_name(file_name)
 {
-    if (visualisation_data.count("WriteEvery"))
+    if (visualisation_data.is_null())
+    {
+        throw std::domain_error("Visualisation data must be specified");
+    }
+
+    if (visualisation_data.find("WriteEvery") != visualisation_data.end())
     {
         write_every = visualisation_data["WriteEvery"];
     }
-
-    boost::filesystem::path directory_path(directory_name);
-    boost::filesystem::create_directory(directory_path);
-
-    if (visualisation_data.count("Fields"))
+    if (visualisation_data.find("Fields") != visualisation_data.end())
     {
         for (std::string const& field : visualisation_data["Fields"])
         {
             output_variables.insert(field);
         }
     }
+    else
+    {
+        std::cout << std::string(4, ' ') << "No outputs were requested.  I find this strange.\n";
+    }
+    boost::filesystem::create_directory(boost::filesystem::path(directory_name));
 }
 
 bool file_output::is_output_requested(std::string const& name) const
@@ -79,20 +84,18 @@ vtk_file_output::~vtk_file_output()
     pvd_file.close();
 }
 
-void vtk_file_output::write(int const time_step, double const total_time)
+void vtk_file_output::write(int const time_step, double const current_time)
 {
     // wait on previous future
-    if (write_future.valid())
+    if (future.valid())
     {
-        write_future.wait();
-
-        if (write_future.get() == 1)
+        if (future.wait(); future.get() == 0)
         {
             throw std::domain_error("Error in VTK file IO occurred");
         }
     }
 
-    write_future = std::async(std::launch::async, [this, time_step, total_time]() {
+    future = std::async(std::launch::async, [this, time_step, current_time]() {
         auto unstructured_mesh_writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
 
         auto const vtk_filename = directory_name + "/" + file_name + "_" + std::to_string(time_step)
@@ -108,7 +111,7 @@ void vtk_file_output::write(int const time_step, double const total_time)
         if (!use_binary_format) unstructured_mesh_writer->SetDataModeToAscii();
 
         // Update the pvd file for timestep mapping
-        pvd_file << std::string(4, ' ') << "<DataSet timestep = \"" << std::to_string(total_time)
+        pvd_file << std::string(4, ' ') << "<DataSet timestep = \"" << std::to_string(current_time)
                  << "\" file = \"" << directory_name << "/" << file_name << "_"
                  << std::to_string(time_step) << "."
                  << unstructured_mesh_writer->GetDefaultFileExtension() << "\" />\n";
@@ -123,18 +126,18 @@ void vtk_file_output::coordinates(matrix const& configuration)
 
     points->Allocate(configuration.size() / configuration.rows());
 
-    for (std::int64_t i{0}; i < configuration.size(); i += configuration.rows())
+    for (std::int64_t i{0}; i < configuration.cols(); ++i)
     {
-        points->InsertNextPoint(configuration(i),
-                                (configuration.rows() > 1 ? configuration(i + 1) : 0.0),
-                                (configuration.rows() > 2 ? configuration(i + 2) : 0.0));
+        points->InsertNextPoint(configuration(0, i),
+                                (configuration.rows() > 1 ? configuration(1, i) : 0.0),
+                                (configuration.rows() > 2 ? configuration(2, i) : 0.0));
     }
     unstructured_mesh->SetPoints(points);
 }
 
 void vtk_file_output::mesh(indices const& all_node_indices, element_topology const topology)
 {
-    auto const vtk_node_indices = convert_to_vtk(all_node_indices, topology);
+    indices const vtk_node_indices = convert_to_vtk(all_node_indices, topology);
 
     for (std::int64_t element{0}; element < vtk_node_indices.cols(); ++element)
     {
@@ -149,21 +152,20 @@ void vtk_file_output::mesh(indices const& all_node_indices, element_topology con
 }
 
 void vtk_file_output::field(std::string const& name,
-                            vector const& flattened_field,
+                            vector const& field_vector,
                             std::int64_t const components)
 {
-    // ensure not adding to a field still being written to file
-    write_future.wait();
+    future.wait();
 
     auto vtk_field = vtkSmartPointer<vtkDoubleArray>::New();
 
     vtk_field->SetName(name.c_str());
     vtk_field->SetNumberOfComponents(components);
-    vtk_field->Allocate(flattened_field.size() / components);
+    vtk_field->Allocate(field_vector.size() / components);
 
-    for (std::int64_t index{0}; index < flattened_field.size(); index += components)
+    for (std::int64_t index{0}; index < field_vector.size(); index += components)
     {
-        vtk_field->InsertNextTuple(flattened_field.data() + index);
+        vtk_field->InsertNextTuple(field_vector.data() + index);
     }
     unstructured_mesh->GetPointData()->AddArray(vtk_field);
 }
@@ -186,7 +188,7 @@ void vtk_file_output::field(std::string const& name,
 //     add_mesh();
 // }
 //
-// void file_output::write(int const time_step, double const total_time, vector const& scalars)
+// void file_output::write(int const time_step, double const current_time, vector const& scalars)
 // {
 //     if (time_step % write_every != 0) return;
 //

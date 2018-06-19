@@ -99,7 +99,7 @@ void simulation_parser::parse()
     for (auto const& simulation : root["SimulationCases"])
     {
         // Ensure the required fields exist
-        for (auto required_field : {"Name", "Time", "Solution", "Visualisation", "LinearSolver"})
+        for (auto required_field : {"Name", "Time", "Solution", "LinearSolver"})
         {
             if (!simulation.count(required_field))
             {
@@ -160,7 +160,7 @@ void simulation_parser::build_simulation_tree()
         std::cout << std::string(4, ' ') << "Simulation \"" << name << "\" is continued by:\n";
         for (auto const& item : queue)
         {
-            std::cout << std::string(4, ' ') << "\"" << item["Name"] << "\"" << std::endl;
+            std::cout << std::string(4, ' ') << item["Name"] << std::endl;
         }
     }
 }
@@ -232,7 +232,8 @@ std::unordered_set<std::string> simulation_parser::parse_material_names(json con
 }
 
 std::unordered_set<std::string> simulation_parser::parse_part_names(
-    json const& parts, std::unordered_set<std::string> const& material_names) const
+    json const& parts,
+    std::unordered_set<std::string> const& material_names) const
 {
     std::unordered_set<std::string> part_names;
 
