@@ -53,7 +53,7 @@ void fem_static_matrix::compute_sparsity_pattern()
 
 void fem_static_matrix::compute_external_force(double const load_factor)
 {
-    auto const start = std::chrono::high_resolution_clock::now();
+    auto const start = std::chrono::steady_clock::now();
 
     f.setZero();
 
@@ -90,7 +90,7 @@ void fem_static_matrix::compute_external_force(double const load_factor)
             }
         }
     }
-    auto const end = std::chrono::high_resolution_clock::now();
+    auto const end = std::chrono::steady_clock::now();
 
     std::chrono::duration<double> const elapsed_seconds = end - start;
 
@@ -118,7 +118,7 @@ void fem_static_matrix::assemble_stiffness()
 {
     if (!is_sparsity_computed) compute_sparsity_pattern();
 
-    auto const start = std::chrono::high_resolution_clock::now();
+    auto const start = std::chrono::steady_clock::now();
 
     K.coeffs() = 0.0;
 
@@ -137,7 +137,7 @@ void fem_static_matrix::assemble_stiffness()
         });
     }
 
-    auto const end = std::chrono::high_resolution_clock::now();
+    auto const end = std::chrono::steady_clock::now();
 
     std::chrono::duration<double> const elapsed_seconds = end - start;
 

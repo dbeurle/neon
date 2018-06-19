@@ -43,7 +43,7 @@ void fem_dynamic_matrix::solve()
 
     while (time_solver.loop())
     {
-        auto const start = std::chrono::high_resolution_clock::now();
+        auto const start = std::chrono::steady_clock::now();
 
         std::cout << std::string(4, ' ') << termcolor::blue << termcolor::bold << "Time step "
                   << time_solver.iteration() << ", simulation time: " << time_solver.current_time()
@@ -57,7 +57,7 @@ void fem_dynamic_matrix::solve()
 
         solver->solve(A, d, b);
 
-        auto const end = std::chrono::high_resolution_clock::now();
+        auto const end = std::chrono::steady_clock::now();
         std::chrono::duration<double> const elapsed_seconds = end - start;
         std::cout << std::string(6, ' ') << "Time step took " << elapsed_seconds.count() << "s\n";
 
@@ -92,7 +92,7 @@ void fem_dynamic_matrix::assemble_mass()
 
     doublets.clear();
 
-    auto const start = std::chrono::high_resolution_clock::now();
+    auto const start = std::chrono::steady_clock::now();
 
     for (auto const& submesh : mesh.meshes())
     {
@@ -110,7 +110,7 @@ void fem_dynamic_matrix::assemble_mass()
         }
     }
 
-    auto const end = std::chrono::high_resolution_clock::now();
+    auto const end = std::chrono::steady_clock::now();
     std::chrono::duration<double> const elapsed_seconds = end - start;
 
     std::cout << std::string(6, ' ') << "Mass assembly took " << elapsed_seconds.count() << "s\n";
