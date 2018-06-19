@@ -14,6 +14,7 @@
 #include <memory>
 #include <string>
 #include <iostream>
+#include <variant>
 
 #include <termcolor/termcolor.hpp>
 #include <tbb/parallel_for.h>
@@ -69,8 +70,6 @@ private:
 protected:
     mesh_type& fem_mesh;
 
-    file_output<mesh_type> io;
-
     adaptive_time_step adaptive_load;
 
     /// Cache the sparsity pattern
@@ -93,14 +92,12 @@ protected:
     vector f_int;
     /// External force vector
     vector f_ext;
-
     /// Displacement vector
     vector displacement;
     /// Last displacement vector
     vector displacement_old;
     /// Incremental displacement vector
     vector delta_d;
-
     /// Minus residual vector
     vector minus_residual;
 
@@ -110,7 +107,6 @@ protected:
 template <class fem_mesh_type>
 fem_static_matrix<fem_mesh_type>::fem_static_matrix(mesh_type& fem_mesh, json const& simulation)
     : fem_mesh(fem_mesh),
-      io(simulation["Name"], simulation["Visualisation"], fem_mesh),
       adaptive_load(simulation["Time"], fem_mesh.time_history()),
       solver(make_linear_solver(simulation["LinearSolver"], fem_mesh.is_symmetric()))
 {
@@ -153,7 +149,7 @@ void fem_static_matrix<fem_mesh_type>::solve()
         fem_mesh.update_internal_variables(displacement);
         fem_mesh.update_internal_forces(f_int);
 
-        io.write(adaptive_load.step(), adaptive_load.time());
+        // io.write(adaptive_load.step(), adaptive_load.time());
 
         while (!adaptive_load.is_fully_applied())
         {
@@ -458,7 +454,7 @@ void fem_static_matrix<fem_mesh_type>::perform_equilibrium_iterations()
 
         fem_mesh.update_internal_forces(f_int);
 
-        io.write(adaptive_load.step(), adaptive_load.time());
+        // io.write(adaptive_load.step(), adaptive_load.time());
     }
 }
 }

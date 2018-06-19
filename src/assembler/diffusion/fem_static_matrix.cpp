@@ -16,7 +16,6 @@ fem_static_matrix::fem_static_matrix(fem_mesh& mesh, json const& simulation_data
     : mesh(mesh),
       f(vector::Zero(mesh.active_dofs())),
       d(vector::Zero(mesh.active_dofs())),
-      file_io(simulation_data["Name"].get<std::string>(), simulation_data["Visualisation"], mesh),
       solver(make_linear_solver(simulation_data["LinearSolver"]))
 {
 }
@@ -111,7 +110,7 @@ void fem_static_matrix::solve()
 
     solver->solve(K, d, f);
 
-    file_io.write(0, 0.0, d);
+    // file_io.write(0, 0.0, d);
 }
 
 void fem_static_matrix::assemble_stiffness()

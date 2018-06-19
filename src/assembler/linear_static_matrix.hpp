@@ -48,8 +48,6 @@ protected:
 protected:
     mesh_type& fem_mesh;
 
-    mechanical::file_output<mesh_type> io;
-
     /// Adaptive load stepping
     adaptive_time_step adaptive_load;
 
@@ -62,7 +60,6 @@ protected:
     vector f_ext;
     /// Solution vector
     vector d;
-
     /// Cache the sparsity pattern
     bool is_sparsity_computed{false};
 };
@@ -71,7 +68,6 @@ template <typename fem_mesh_type>
 linear_static_matrix<fem_mesh_type>::linear_static_matrix(mesh_type& fem_mesh,
                                                           json const& simulation_data)
     : fem_mesh(fem_mesh),
-      io(simulation_data["Name"], simulation_data["Visualisation"], fem_mesh),
       adaptive_load(simulation_data["Time"], fem_mesh.time_history()),
       solver(make_linear_solver(simulation_data["LinearSolver"], fem_mesh.is_symmetric()))
 {
@@ -93,7 +89,7 @@ void linear_static_matrix<fem_mesh_type>::solve()
 
     fem_mesh.update_internal_variables(d);
 
-    io.write(adaptive_load.step(), adaptive_load.time());
+    // io.write(adaptive_load.step(), adaptive_load.time());
 }
 
 template <typename fem_mesh_type>

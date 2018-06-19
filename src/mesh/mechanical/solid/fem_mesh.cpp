@@ -20,13 +20,18 @@ fem_mesh::fem_mesh(basic_mesh const& basic_mesh,
                    double const generate_time_step)
     : coordinates(std::make_shared<material_coordinates>(basic_mesh.coordinates())),
       generate_time_step{generate_time_step},
-      io(std::make_unique<vtk_file_output>(simulation_data["Name"], simulation_data["Visualisation"]))
+      writer(std::make_unique<io::vtk_file_output>(simulation_data["Name"],
+                                                   simulation_data["Visualisation"]))
 {
     check_boundary_conditions(simulation_data["BoundaryConditions"]);
+
+    writer->coordinates(coordinates->coordinates());
 
     for (auto const& submesh : basic_mesh.meshes(simulation_data["Name"]))
     {
         submeshes.emplace_back(material_data, simulation_data, coordinates, submesh);
+
+        writer->mesh(submesh.all_node_indices(), submesh.topology());
     }
     allocate_boundary_conditions(simulation_data, basic_mesh);
 }
@@ -148,7 +153,17 @@ std::vector<double> fem_mesh::time_history() const
 
 void fem_mesh::write(std::int64_t const time_step, double const current_time)
 {
-    // now we need to write out to the file by adding our mesh and coordinates
+    // add displacement
+    if (writer->is_output_requested("displacement"))
+    {
+    }
+    if (writer->is_output_requested("reaction_force"))
+    {
+    }
+
+    std::cout << "Writing out\n";
+
+    writer->write(time_step, current_time);
 }
 
 void fem_mesh::check_boundary_conditions(json const& boundary_data) const

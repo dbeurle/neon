@@ -45,13 +45,14 @@ protected:
 protected:
     fem_mesh& mesh;
 
-    bool is_sparsity_computed = false;
-
-    sparse_matrix K; /// Conductivity matrix
-    vector f;        /// Heat vector
-    vector d;        /// Temperature vector
-
-    file_output file_io;
+    /// Cache flag for matrix assembly
+    bool is_sparsity_computed{false};
+    /// Conductivity matrix
+    sparse_matrix K;
+    /// Heat vector
+    vector f;
+    /// Temperature vector
+    vector d;
 
     std::unique_ptr<linear_solver> solver;
 };

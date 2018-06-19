@@ -26,7 +26,7 @@ fem_dynamic_matrix::fem_dynamic_matrix(fem_mesh& fem_mesh, json const& simulatio
 void fem_dynamic_matrix::solve()
 {
     // Perform time dependent solution
-    file_io.write(0, 0.0, d);
+    // file_io.write(0, 0.0, d);
 
     std::cout << "\n"
               << std::string(4, ' ') << "Solving " << mesh.active_dofs()
@@ -61,7 +61,7 @@ void fem_dynamic_matrix::solve()
         std::chrono::duration<double> const elapsed_seconds = end - start;
         std::cout << std::string(6, ' ') << "Time step took " << elapsed_seconds.count() << "s\n";
 
-        file_io.write(time_solver.iteration(), time_solver.current_time(), d);
+        // mesh.write(time_solver.iteration(), time_solver.current_time());
     }
     std::cout << "Solver routine completed\n";
 }

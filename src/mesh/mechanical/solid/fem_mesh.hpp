@@ -107,6 +107,6 @@ protected:
     double generate_time_step;
 
     /// File output handle
-    // std::unique_ptr<io::file_output> writer;
+    std::unique_ptr<io::file_output> writer;
 };
 }

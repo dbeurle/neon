@@ -7,25 +7,6 @@
 
 namespace neon::io
 {
-/// Copy coordinates from a matrix into a vtkPoints data structure
-/// \param X matrix of coordinates
-/// \return A vktSmartPointer of vtkPoints from \p X
-template <typename matrix_type>
-vtkSmartPointer<vtkPoints> vtk_coordinates(matrix_type const& X)
-{
-    auto points = vtkSmartPointer<vtkPoints>::New();
-
-    points->Allocate(X.size() / X.rows());
-
-    for (std::int64_t i{0}; i < X.size(); i += X.rows())
-    {
-        points->InsertNextPoint(X(i),
-                                (X.rows() > 1 ? X(i + 1) : 0.0),
-                                (X.rows() > 2 ? X(i + 2) : 0.0));
-    }
-    return points;
-}
-
 /// Copy input data into a vtkDoubleArray for output
 /// \tparam rows Compile time rows of input data
 /// \param input_data Data to output size = rows * cols
