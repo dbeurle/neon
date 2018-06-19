@@ -10,6 +10,8 @@
 
 constexpr auto ZERO_MARGIN = 1.0e-5;
 
+using neon::json;
+
 std::string simple_beam_element()
 {
     // clang-format off

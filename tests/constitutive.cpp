@@ -30,6 +30,8 @@ std::string json_thermal_diffusion()
 constexpr auto internal_variable_size = 2;
 constexpr auto ZERO_MARGIN = 1.0e-5;
 
+using neon::json;
+
 TEST_CASE("No constitutive model error test")
 {
     using namespace neon::mechanical::solid;

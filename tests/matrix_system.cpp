@@ -9,6 +9,8 @@
 
 #include "CubeJson.hpp"
 
+using neon::json;
+
 TEST_CASE("Nonlinear system equilibrium solver test")
 {
     using fem_mesh = neon::mechanical::solid::fem_mesh;
