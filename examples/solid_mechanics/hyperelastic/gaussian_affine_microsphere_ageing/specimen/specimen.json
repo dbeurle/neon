@@ -10,8 +10,8 @@
         "ElasticModulus" : 10.0e6,
         "PoissonsRatio" : 0.45,
         "SegmentsPerChain" : 60,
-        "ScissionProbability" : 5.2e-5,
-        "RecombinationProbability" : 5.3e-5
+        "ScissionProbability" : 5.2e-6,
+        "RecombinationProbability" : 5.3e-7
     }],
     "SimulationCases" : [{
         "Name" : "ramped_load",
@@ -65,14 +65,12 @@
             {
                 "Name" : "load",
                 "Type" : "Displacement",
-                "Time" : [0.0, 1.0, 100.0, 101.0],
-                "y" : [0.0, 0.01, 0.01, 0.0]
+                "Time" : [0.0, 1.0, 100.0],
+                "y" : [0.0, 0.01, 0.01]
             }]
         }],
         "LinearSolver" : {
-            "Type" : "Iterative",
-            "MaxIterations" : 2000,
-            "Tolerance"  : 1.0e-8
+            "Type" : "PaStiX"
         },
         "Visualisation" : {
             "Fields" : ["Displacement", "DeformationGradient", "CauchyStress",
