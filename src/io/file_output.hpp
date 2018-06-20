@@ -89,97 +89,6 @@ private:
 };
 }
 
-// namespace neon::mechanical
-// {
-// template <typename fem_mesh>
-// class file_output : public io::file_output
-// {
-// public:
-//     /// Mechanical mesh type
-//     using fem_mesh_type = fem_mesh;
-//
-//     using variable_type = typename fem_mesh_type::internal_variable_type;
-//
-//     using scalar_map_t = std::map<std::string, typename variable_type::scalar>;
-//     using tensor_map_t = std::map<std::string, typename variable_type::second>;
-//
-// public:
-//     std::string const primary_field{"Displacement"};
-//
-// public:
-//     explicit file_output(std::string file_name,
-//                          json const& visualisation_data,
-//                          fem_mesh_type const& mesh);
-//
-//     file_output(file_output&&) = default;
-//
-//     void write(int const time_step, double const total_time);
-//
-// private:
-//     void add_mesh();
-//
-// private:
-//     /// Reference to the mesh to output
-//     fem_mesh_type const& mesh;
-//     /// Allowable fields must also be in either scalar_map / tensor_map
-//     std::set<std::string> allowable_fields{{"AccumulatedPlasticStrain",
-//                                             "VonMisesStress",
-//                                             "Damage",
-//                                             "EnergyReleaseRate",
-//                                             "CauchyStress",
-//                                             "LinearisedStrain",
-//                                             "LinearisedPlasticStrain",
-//                                             "DeformationGradient",
-//                                             "DisplacementGradient",
-//                                             "KinematicHardening",
-//                                             "BackStress",
-//                                             "Displacement",
-//                                             "ReactionForce",
-//                                             "ActiveShearModulus",
-//                                             "InactiveShearModulus",
-//                                             "ActiveSegments",
-//                                             "InactiveSegments",
-//                                             "ReductionFactor"}};
-//
-//     // clang-format off
-//     scalar_map_t const scalar_map{{"AccumulatedPlasticStrain", variable_type::scalar::effective_plastic_strain},
-//                                   {"VonMisesStress", variable_type::scalar::von_mises_stress},
-//                                   {"Damage", variable_type::scalar::damage},
-//                                   {"ActiveShearModulus", variable_type::scalar::active_shear_modulus},
-//                                   {"InactiveShearModulus", variable_type::scalar::inactive_shear_modulus},
-//                                   {"ActiveSegments", variable_type::scalar::active_segments},
-//                                   {"InactiveSegments", variable_type::scalar::inactive_segments},
-//                                   {"ReductionFactor", variable_type::scalar::reduction_factor},
-//                                   {"EnergyReleaseRate", variable_type::scalar::energy_release_rate}};
-//
-//     tensor_map_t const tensor_map{{"CauchyStress", variable_type::second::cauchy_stress},
-//                                   {"LinearisedStrain", variable_type::second::linearised_strain},
-//                                   {"LinearisedPlasticStrain", variable_type::second::linearised_plastic_strain},
-//                                   {"DeformationGradient", variable_type::second::deformation_gradient},
-//                                   {"DisplacementGradient", variable_type::second::displacement_gradient},
-//                                   {"KinematicHardening", variable_type::second::kinematic_hardening},
-//                                   {"BackStress", variable_type::second::back_stress}};
-//     // clang-format on
-// };
-//
-// template <class fem_mesh>
-// file_output<fem_mesh>::file_output(std::string file_name,
-//                                    json const& visualisation_data,
-//                                    fem_mesh const& mesh)
-//     : io::file_output(file_name, visualisation_data), mesh(mesh)
-// {
-//     // Check the output set against the known values for this module
-//     if (!std::includes(begin(allowable_fields),
-//                        end(allowable_fields),
-//                        begin(output_variables),
-//                        end(output_variables)))
-//     {
-//         throw std::domain_error("Requested output is not valid for a solid mechanics "
-//                                 "simulation\n");
-//     }
-//     add_mesh();
-// }
-//
 // template <class fem_mesh>
 // void file_output<fem_mesh>::write(int const time_step, double const total_time)
 // {
@@ -240,45 +149,10 @@ private:
 //
 //             add_field(name_str, nodal_averaged_value, 1);
 //         }
-//         else if (name == primary_field)
-//         {
-//             unstructured_mesh->GetPointData()->AddArray(
-//                 io::vtk_displacement(mesh.geometry().displacement()));
-//         }
-//         else if (name == "ReactionForce")
-//         {
-//             add_field("reaction forces", mesh.nodal_reaction_forces(), fem_mesh::traits::size);
-//         }
 //         else
 //         {
 //             throw std::domain_error("Field \"" + name
 //                                     + "\" was not found in mesh internal variables\n");
 //         }
 //     }
-//     write_to_file(time_step, total_time);
-// }
-//
-// template <class fem_mesh>
-// void file_output<fem_mesh>::add_mesh()
-// {
-//     // Populate an unstructured grid object
-//     unstructured_mesh->SetPoints(io::vtk_coordinates(mesh.geometry().coordinates()));
-//
-//     for (auto const& submesh : mesh.meshes())
-//     {
-//         auto const vtk_node_indices = convert_to_vtk(submesh.all_node_indices(), submesh.topology());
-//
-//         for (std::int64_t element{0}; element < vtk_node_indices.cols(); ++element)
-//         {
-//             auto node_indices = vtkSmartPointer<vtkIdList>::New();
-//
-//             for (std::int64_t node{0}; node < vtk_node_indices.rows(); ++node)
-//             {
-//                 node_indices->InsertNextId(static_cast<std::int64_t>(vtk_node_indices(node, element)));
-//             }
-//             unstructured_mesh->InsertNextCell(to_vtk(submesh.topology()), node_indices);
-//         }
-//     }
-//     unstructured_mesh->GetPointData()->AddArray(io::vtk_displacement(mesh.geometry().coordinates()));
-// }
 // }
