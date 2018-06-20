@@ -3,10 +3,18 @@
 
 #include "constitutive/variable_types.hpp"
 
+#include <optional>
+
 namespace neon
 {
-namespace mechanical::solid
+namespace mechanical
 {
+std::optional<variable::scalar> is_scalar(std::string const& name);
+
+std::optional<variable::vector> is_vector(std::string const& name);
+
+std::optional<variable::second> is_second_order_tensor(std::string const& name);
+
 //     // clang-format off
 //     scalar_map_t const scalar_map{{"AccumulatedPlasticStrain", variable_type::scalar::effective_plastic_strain},
 //                                   {"VonMisesStress", variable_type::scalar::von_mises_stress},
