@@ -46,7 +46,7 @@ std::pair<index_view, matrix> fem_submesh::tangent_stiffness(std::int64_t const 
 
     auto const n = nodes_per_element();
 
-    auto const& D_Vec = variables->get(internal_variables_t::second::Conductivity);
+    auto const& D_Vec = variables->get(variable::second::conductivity);
 
     matrix const kmat = sf->quadrature()
                             .integrate(matrix::Zero(n, n).eval(),
@@ -109,7 +109,7 @@ void fem_submesh::update_internal_variables(double const time_step_size)
     }
 }
 
-fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(internal_variables_t::scalar const name) const
+fem_submesh::ValueCount fem_submesh::nodal_averaged_variable(variable::scalar const name) const
 {
     vector count = vector::Zero(mesh_coordinates->size());
     vector value = count;

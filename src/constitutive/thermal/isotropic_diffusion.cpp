@@ -8,9 +8,9 @@ isotropic_diffusion::isotropic_diffusion(std::shared_ptr<internal_variables_t>& 
                                          json const& material_data)
     : constitutive_model(variables), material(material_data)
 {
-    variables->add(internal_variables_t::second::Conductivity);
+    variables->add(variable::second::conductivity);
 
-    for (auto& k : variables->get(internal_variables_t::second::Conductivity))
+    for (auto& k : variables->get(variable::second::conductivity))
     {
         k = material.conductivity_coefficient() * matrix3::Identity();
     }

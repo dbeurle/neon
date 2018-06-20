@@ -14,7 +14,7 @@ gaussian_affine_microsphere::gaussian_affine_microsphere(std::shared_ptr<interna
                                                          unit_sphere_quadrature::point const p)
     : constitutive_model(variables), unit_sphere(p), material(material_data)
 {
-    variables->add(internal_variables_t::fourth::tangent_operator);
+    variables->add(variable::fourth::tangent_operator);
 
     // Commit these to history in case of failure on first time step
     variables->commit();
@@ -22,13 +22,12 @@ gaussian_affine_microsphere::gaussian_affine_microsphere(std::shared_ptr<interna
 
 void gaussian_affine_microsphere::update_internal_variables(double const time_step_size)
 {
-    auto& tangent_operators = variables->get(internal_variables_t::fourth::tangent_operator);
+    auto& tangent_operators = variables->get(variable::fourth::tangent_operator);
 
-    auto const& deformation_gradients = variables->get(
-        internal_variables_t::second::deformation_gradient);
-    auto& cauchy_stresses = variables->get(internal_variables_t::second::cauchy_stress);
+    auto const& deformation_gradients = variables->get(variable::second::deformation_gradient);
+    auto& cauchy_stresses = variables->get(variable::second::cauchy_stress);
 
-    auto const& det_deformation_gradients = variables->get(internal_variables_t::scalar::DetF);
+    auto const& det_deformation_gradients = variables->get(variable::scalar::DetF);
 
     auto const K = material.bulk_modulus();
     auto const G = material.shear_modulus();

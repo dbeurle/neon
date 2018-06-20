@@ -12,30 +12,30 @@ isotropic_linear::isotropic_linear(std::shared_ptr<variable_type>& variables,
     : variables(variables), material(material_data)
 {
     // Allocate the four constitutive values for axial, bending, shear and torsion.
-    variables->add(variable_type::scalar::torsional_stiffness,
-                   variable_type::scalar::axial_stiffness,
-                   variable_type::second::bending_stiffness,
-                   variable_type::second::shear_stiffness);
+    variables->add(variable::scalar::torsional_stiffness,
+                   variable::scalar::axial_stiffness,
+                   variable::second::bending_stiffness,
+                   variable::second::shear_stiffness);
 }
 
 void isotropic_linear::update_internal_variables()
 {
     // Stiffness components
-    auto [D_b, D_s] = variables->get(variable_type::second::bending_stiffness,
-                                     variable_type::second::shear_stiffness);
+    auto [D_b, D_s] = variables->get(variable::second::bending_stiffness,
+                                     variable::second::shear_stiffness);
 
-    auto [D_a, D_t] = variables->get(variable_type::scalar::axial_stiffness,
-                                     variable_type::scalar::torsional_stiffness);
+    auto [D_a, D_t] = variables->get(variable::scalar::axial_stiffness,
+                                     variable::scalar::torsional_stiffness);
 
     // Access the geometric properties at the quadrature points
     auto [shear_area_1,
           shear_area_2,
-          cross_sectional_area] = variables->get(variable_type::scalar::shear_area_1,
-                                                 variable_type::scalar::shear_area_2,
-                                                 variable_type::scalar::cross_sectional_area);
+          cross_sectional_area] = variables->get(variable::scalar::shear_area_1,
+                                                 variable::scalar::shear_area_2,
+                                                 variable::scalar::cross_sectional_area);
     auto [second_moment_area_1,
-          second_moment_area_2] = variables->get(variable_type::scalar::second_moment_area_1,
-                                                 variable_type::scalar::second_moment_area_2);
+          second_moment_area_2] = variables->get(variable::scalar::second_moment_area_1,
+                                                 variable::scalar::second_moment_area_2);
 
     tbb::parallel_for(std::size_t{}, variables->entries(), [&](auto const l) {
         // Polar moment of area

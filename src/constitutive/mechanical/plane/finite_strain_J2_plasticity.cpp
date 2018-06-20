@@ -22,14 +22,14 @@ finite_strain_J2_plasticity::finite_strain_J2_plasticity(std::shared_ptr<interna
                                                          json const& material_data)
     : small_strain_J2_plasticity(variables, material_data)
 {
-    variables->add(internal_variables_t::scalar::von_mises_stress,
-                   internal_variables_t::scalar::effective_plastic_strain,
-                   internal_variables_t::second::hencky_strain_elastic);
+    variables->add(variable::scalar::von_mises_stress,
+                   variable::scalar::effective_plastic_strain,
+                   variable::second::hencky_strain_elastic);
 
     names.emplace("hencky_strain_elastic");
 
     // Add material tangent with the linear elasticity moduli
-    variables->add(internal_variables_t::fourth::tangent_operator,
+    variables->add(variable::fourth::tangent_operator,
                    consistent_tangent(1.0, matrix2::Zero(), matrix2::Zero(), C_e));
 }
 
@@ -44,21 +44,21 @@ void finite_strain_J2_plasticity::update_internal_variables(double const time_st
     // Extract the internal variables
     auto [deformation_gradients,
           log_strain_e_list,
-          cauchy_stresses] = variables->get(internal_variables_t::second::deformation_gradient,
-                                            internal_variables_t::second::hencky_strain_elastic,
-                                            internal_variables_t::second::cauchy_stress);
+          cauchy_stresses] = variables->get(variable::second::deformation_gradient,
+                                            variable::second::hencky_strain_elastic,
+                                            variable::second::cauchy_stress);
 
     auto const old_deformation_gradients = variables->get_old(
-        internal_variables_t::second::deformation_gradient);
+        variable::second::deformation_gradient);
 
-    auto const J_list = variables->get(internal_variables_t::scalar::DetF);
+    auto const J_list = variables->get(variable::scalar::DetF);
 
     // Retrieve the accumulated internal variables
     auto [accumulated_plastic_strains,
-          von_mises_stresses] = variables->get(internal_variables_t::scalar::effective_plastic_strain,
-                                               internal_variables_t::scalar::von_mises_stress);
+          von_mises_stresses] = variables->get(variable::scalar::effective_plastic_strain,
+                                               variable::scalar::von_mises_stress);
 
-    auto& tangent_operators = variables->get(internal_variables_t::fourth::tangent_operator);
+    auto& tangent_operators = variables->get(variable::fourth::tangent_operator);
 
     auto const incremental_deformation_gradients = view::zip(deformation_gradients,
                                                              old_deformation_gradients)

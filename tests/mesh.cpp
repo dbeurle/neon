@@ -13,8 +13,6 @@
 
 #include <range/v3/view.hpp>
 
-#include <sstream>
-
 #include "CubeJson.hpp"
 
 using namespace neon;
@@ -159,12 +157,10 @@ TEST_CASE("Solid submesh test")
     SECTION("Default internal variables test")
     {
         // Check the standard ones are used
-        REQUIRE(internal_vars.has(
-            mechanical::solid::internal_variables_t::second::displacement_gradient));
-        REQUIRE(
-            internal_vars.has(mechanical::solid::internal_variables_t::second::deformation_gradient));
-        REQUIRE(internal_vars.has(mechanical::solid::internal_variables_t::second::cauchy_stress));
-        REQUIRE(internal_vars.has(mechanical::solid::internal_variables_t::scalar::DetF));
+        REQUIRE(internal_vars.has(variable::second::displacement_gradient));
+        REQUIRE(internal_vars.has(variable::second::deformation_gradient));
+        REQUIRE(internal_vars.has(variable::second::cauchy_stress));
+        REQUIRE(internal_vars.has(variable::scalar::DetF));
     }
     SECTION("Tangent stiffness")
     {

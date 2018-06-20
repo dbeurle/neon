@@ -4,6 +4,7 @@
 #include "internal_variables_forward.hpp"
 
 #include "numeric/dense_matrix.hpp"
+#include "constitutive/variable_types.hpp"
 
 #include <functional>
 #include <unordered_map>
@@ -48,110 +49,12 @@ public:
     /// Voigt dimension for the tensor conversion
     static auto constexpr v_n = rank4_dimension;
 
-    using scalar_type = double;
-
     /// A second order tensor type is a small matrix in tensor notation
-    using second_tensor_type = Eigen::Matrix<scalar_type, rank2_dimension, rank2_dimension>;
+    using second_tensor_type = Eigen::Matrix<double, rank2_dimension, rank2_dimension>;
     /// A fourth order tensor type is a fixed size matrix in Voigt notation
-    using fourth_tensor_type = Eigen::Matrix<scalar_type, rank4_dimension, rank4_dimension>;
+    using fourth_tensor_type = Eigen::Matrix<double, rank4_dimension, rank4_dimension>;
 
     static auto constexpr tensor_size = rank2_dimension * rank2_dimension;
-
-public:
-    /// Names for scalar values
-    enum class scalar : std::uint8_t {
-        /// Active chains per unit volume
-        active_shear_modulus,
-        /// Inactive chains per unit volume
-        inactive_shear_modulus,
-        /// Active number of segments per chain
-        active_segments,
-        /// Inactive number of segments per chain
-        inactive_segments,
-        /// Reduction factor for network decay
-        reduction_factor,
-        /// Von Mises equivalent stress
-        von_mises_stress,
-        /// Accumulated (effective) plastic strain
-        effective_plastic_strain,
-        /// Reference Jacobian determinant
-        DetF0,
-        /// Updated Jacobian determinant
-        DetF,
-        /// Scalar damage variable
-        damage,
-        /// Scalar energy release rate
-        energy_release_rate,
-        /// Beam torsional stiffness
-        torsional_stiffness,
-        /// Beam axial stiffness
-        axial_stiffness,
-        /// Beam section shear area (one)
-        shear_area_1,
-        /// Beam section shear area (two)
-        shear_area_2,
-        /// Section cross sectional area
-        cross_sectional_area,
-        /// Beam second moment of area (one)
-        second_moment_area_1,
-        /// Beam second moment of area (two)
-        second_moment_area_2
-    };
-
-    /// Names for vector values using a std::vector type
-    enum class vector : std::uint8_t {
-        /// Primary ageing shear modulus
-        first_ageing_moduli,
-        /// Secondary ageing shear modulus
-        second_ageing_moduli,
-        /// Tertiary ageing shear modulus
-        third_ageing_moduli,
-        first_previous,
-        second_previous,
-        third_previous
-    };
-
-    /// Second order tensor internal variables types
-    enum class second : std::uint8_t {
-        /// Cauchy stress
-        cauchy_stress,
-        /// Kirchhoff stress
-        kirchhoff_stress,
-        /// First Piola-Kirchhoff stress (PK1)
-        piola_kirchhoff1,
-        /// Second Piola-Kirchhoff stress (PK2)
-        piola_kirchhoff2,
-        /// Linearised (infinitesimal) total strain
-        linearised_strain,
-        /// Linearised (infinitesimal) plastic strain
-        linearised_plastic_strain,
-        /// Hencky elastic strain
-        hencky_strain_elastic,
-        /// Deformation gradient (F)
-        deformation_gradient,
-        /// Plastic deformation gradient (Fp)
-        deformation_gradient_plastic,
-        /// Displacement gradient (H)
-        displacement_gradient,
-        /// Green-Lagrange strain (E)
-        green_lagrange,
-        /// Back stress (for hardening)
-        back_stress,
-        /// Kinematic hardening
-        kinematic_hardening,
-        /// Conductivity tensor
-        Conductivity,
-        /// Beam bending stiffness
-        bending_stiffness,
-        /// Beam shear stiffness
-        shear_stiffness
-    };
-
-    /// Fourth order tensor types
-    enum class fourth : std::uint8_t {
-        /// Material tangent operator
-        tangent_operator
-    };
 
 public:
     internal_variables(std::size_t const size) : size{size} {}
@@ -167,7 +70,7 @@ public:
 
     /// Add a number of scalar type variables to the object store
     template <typename... all_types>
-    void add(scalar const name, all_types const... names)
+    void add(variable::scalar const name, all_types const... names)
     {
         scalars[name].resize(size, 0.0);
         scalars_old[name].resize(size, 0.0);
@@ -176,7 +79,7 @@ public:
 
     /// Add a number of scalar type variables to the object store
     template <typename... all_types>
-    void add(vector const name, all_types const... names)
+    void add(variable::vector const name, all_types const... names)
     {
         vectors[name].resize(size, {});
         vectors_old[name].resize(size, {});
@@ -185,7 +88,7 @@ public:
 
     /// Add a number of tensor type variables to the object store
     template <typename... all_types>
-    void add(second const name, all_types... names)
+    void add(variable::second const name, all_types... names)
     {
         second_order_tensors[name].resize(size, second_tensor_type::Zero());
         second_order_tensors_old[name].resize(size, second_tensor_type::Zero());
@@ -193,67 +96,66 @@ public:
     }
 
     /// Allocate scalars (defaulted to zeros)
-    void add(scalar const name, double const value = 0.0)
+    void add(variable::scalar const name, double const value = 0.0)
     {
         scalars[name].resize(size, value);
         scalars_old[name].resize(size, value);
     }
 
     /// Allocate vectors (defaulted to empyth)
-    void add(vector const name)
+    void add(variable::vector const name)
     {
         vectors[name].resize(size, {});
         vectors_old[name].resize(size, {});
     }
 
     /// Allocate second order tensors (defaulted to zeros)
-    void add(second const name)
+    void add(variable::second const name)
     {
         second_order_tensors[name].resize(size, second_tensor_type::Zero());
         second_order_tensors_old[name].resize(size, second_tensor_type::Zero());
     }
 
     /// Allocate fourth order tensor (defaulted to zeros)
-    void add(internal_variables::fourth const name,
-             fourth_tensor_type const m = fourth_tensor_type::Zero())
+    void add(variable::fourth const name, fourth_tensor_type const m = fourth_tensor_type::Zero())
     {
         fourth_order_tensors[name].resize(size, m);
     }
 
-    bool has(scalar const name) const { return scalars.find(name) != scalars.end(); }
+    bool has(variable::scalar const name) const { return scalars.find(name) != scalars.end(); }
 
-    bool has(vector const name) const { return vectors.find(name) != vectors.end(); }
+    bool has(variable::vector const name) const { return vectors.find(name) != vectors.end(); }
 
-    bool has(second const name) const
+    bool has(variable::second const name) const
     {
         return second_order_tensors.find(name) != second_order_tensors.end();
     }
 
-    bool has(fourth const name) const
+    bool has(variable::fourth const name) const
     {
         return fourth_order_tensors.find(name) != fourth_order_tensors.end();
     }
 
     /// Const access to the converged vector variables
-    std::vector<std::vector<scalar_type>> const& get_old(vector const name) const
+    std::vector<std::vector<double>> const& get_old(variable::vector const name) const
     {
         return vectors_old.find(name)->second;
     }
 
     /// Const access to the converged tensor variables
-    std::vector<second_tensor_type> const& get_old(second const name) const
+    std::vector<second_tensor_type> const& get_old(variable::second const name) const
     {
         return second_order_tensors_old.find(name)->second;
     }
 
     /// Const access to the converged scalar variables
-    std::vector<scalar_type> const& get_old(scalar const name) const
+    std::vector<double> const& get_old(variable::scalar const name) const
     {
         return scalars_old.find(name)->second;
     }
 
     /// Mutable access to the non-converged scalar variables
-    std::vector<scalar_type>& get(scalar const name)
+    std::vector<double>& get(variable::scalar const name)
     {
         if (!has(name))
         {
@@ -264,7 +166,7 @@ public:
     }
 
     /// Mutable access to the non-converged scalar variables
-    std::vector<std::vector<scalar_type>>& get(vector const name)
+    std::vector<std::vector<double>>& get(variable::vector const name)
     {
         if (!has(name))
         {
@@ -275,7 +177,7 @@ public:
     }
 
     /// Mutable access to the non-converged second order tensor variables
-    std::vector<second_tensor_type>& get(second const name)
+    std::vector<second_tensor_type>& get(variable::second const name)
     {
         if (!has(name))
         {
@@ -286,7 +188,7 @@ public:
     }
 
     /// Mutable access to the non-converged fourth order tensor variables
-    std::vector<fourth_tensor_type>& get(fourth const name)
+    std::vector<fourth_tensor_type>& get(variable::fourth const name)
     {
         if (!has(name))
         {
@@ -298,7 +200,7 @@ public:
 
     /// Mutable access to the non-converged scalar variables
     template <typename... scalar_types>
-    auto get(scalar const var0, scalar_types const... vars)
+    auto get(variable::scalar const var0, scalar_types const... vars)
     {
         return std::make_tuple(std::ref(scalars.find(var0)->second),
                                std::ref(scalars.find(vars)->second)...);
@@ -306,7 +208,7 @@ public:
 
     /// Mutable access to the non-converged scalar variables
     template <typename... vector_types>
-    auto get(vector const var0, vector_types const... vars)
+    auto get(variable::vector const var0, vector_types const... vars)
     {
         return std::make_tuple(std::ref(vectors.find(var0)->second),
                                std::ref(vectors.find(vars)->second)...);
@@ -314,40 +216,40 @@ public:
 
     /// Mutable access to the non-converged tensor variables
     template <typename... second_types>
-    auto get(second const var0, second_types const... vars)
+    auto get(variable::second const var0, second_types const... vars)
     {
         return std::make_tuple(std::ref(second_order_tensors.find(var0)->second),
                                std::ref(second_order_tensors.find(vars)->second)...);
     }
 
     template <typename... fourth_types>
-    auto get(fourth const var0, fourth_types const... vars)
+    auto get(variable::fourth const var0, fourth_types const... vars)
     {
         return std::make_tuple(std::ref(fourth_order_tensors.find(var0)->second),
                                std::ref(fourth_order_tensors.find(vars)->second)...);
     }
 
     /// Constant access to the non-converged scalar variables
-    std::vector<scalar_type> const& get(scalar const name) const
+    std::vector<double> const& get(variable::scalar const name) const
     {
         return scalars.find(name)->second;
     }
 
     /// Non-mutable access to the non-converged tensor variables
-    std::vector<second_tensor_type> const& get(second const name) const
+    std::vector<second_tensor_type> const& get(variable::second const name) const
     {
         return second_order_tensors.find(name)->second;
     }
 
     /// Non-mutable access to the non-converged matrix variables
-    std::vector<fourth_tensor_type> const& get(fourth const name) const
+    std::vector<fourth_tensor_type> const& get(variable::fourth const name) const
     {
         return fourth_order_tensors.find(name)->second;
     }
 
     /// Const access to the non-converged scalar variables
     template <typename... scalar_types>
-    auto get(scalar const var0, scalar_types const... vars) const
+    auto get(variable::scalar const var0, scalar_types const... vars) const
     {
         return std::make_tuple(std::cref(scalars.find(var0)->second),
                                std::cref(scalars.find(vars)->second)...);
@@ -355,14 +257,14 @@ public:
 
     /// Const access to the non-converged tensor variables
     template <typename... tensor_types>
-    auto get(second const var0, tensor_types const... vars) const
+    auto get(variable::second const var0, tensor_types const... vars) const
     {
         return std::make_tuple(std::cref(second_order_tensors.find(var0)->second),
                                std::cref(second_order_tensors.find(vars)->second)...);
     }
 
     template <typename... fourth_types>
-    auto get(fourth const var0, fourth_types const... vars) const
+    auto get(variable::fourth const var0, fourth_types const... vars) const
     {
         return std::make_tuple(std::cref(fourth_order_tensors.find(var0)->second),
                                std::cref(fourth_order_tensors.find(vars)->second)...);
@@ -389,22 +291,22 @@ public:
 
 protected:
     /// Hash map of scalar history
-    std::unordered_map<scalar, std::vector<scalar_type>> scalars;
+    std::unordered_map<variable::scalar, std::vector<double>> scalars;
     /// Hash map of old scalar history
-    std::unordered_map<scalar, std::vector<scalar_type>> scalars_old;
+    std::unordered_map<variable::scalar, std::vector<double>> scalars_old;
 
     /// Hash map of vectors
-    std::unordered_map<vector, std::vector<std::vector<scalar_type>>> vectors;
+    std::unordered_map<variable::vector, std::vector<std::vector<double>>> vectors;
     /// Hash map of old vectors
-    std::unordered_map<vector, std::vector<std::vector<scalar_type>>> vectors_old;
+    std::unordered_map<variable::vector, std::vector<std::vector<double>>> vectors_old;
 
     /// Hash map of second order tensors
-    std::unordered_map<second, std::vector<second_tensor_type>> second_order_tensors;
+    std::unordered_map<variable::second, std::vector<second_tensor_type>> second_order_tensors;
     /// Hash map of old second order tensors
-    std::unordered_map<second, std::vector<second_tensor_type>> second_order_tensors_old;
+    std::unordered_map<variable::second, std::vector<second_tensor_type>> second_order_tensors_old;
 
     /// Fourth order tensors
-    std::unordered_map<fourth, std::vector<fourth_tensor_type>> fourth_order_tensors;
+    std::unordered_map<variable::fourth, std::vector<fourth_tensor_type>> fourth_order_tensors;
 
     std::size_t size;
 };

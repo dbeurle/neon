@@ -70,10 +70,10 @@ public:
     void update_internal_variables(double const time_step_size = 1.0);
 
     [[nodiscard]] std::pair<vector, vector> nodal_averaged_variable(
-        internal_variables_t::second const tensor_name) const;
+        variable::second const tensor_name) const;
 
     [[nodiscard]] std::pair<vector, vector> nodal_averaged_variable(
-        internal_variables_t::scalar const scalar_name) const;
+        variable::scalar const scalar_name) const;
 
 protected:
     /** Update the strain measures defined by the constitutive model */

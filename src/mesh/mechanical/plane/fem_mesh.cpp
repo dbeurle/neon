@@ -4,10 +4,11 @@
 #include "mesh/basic_mesh.hpp"
 #include "mesh/dof_allocator.hpp"
 #include "io/json.hpp"
+#include "io/post/variable_string_adapter.hpp"
+#include "io/post/node_averaged_variables.hpp"
 
 #include <chrono>
 #include <exception>
-#include <memory>
 #include <numeric>
 
 #include <termcolor/termcolor.hpp>
@@ -19,8 +20,11 @@ fem_mesh::fem_mesh(basic_mesh const& basic_mesh,
                    json const& simulation_data,
                    double const generate_time_step)
     : coordinates(std::make_shared<material_coordinates>(basic_mesh.coordinates())),
-      internal_forces{coordinates->size() * traits::dofs_per_node},
-      generate_time_step{generate_time_step}
+      reaction_forces{coordinates->size() * traits::dofs_per_node},
+      generate_time_step{generate_time_step},
+      writer(std::make_unique<io::vtk_file_output>(simulation_data["Name"],
+                                                   simulation_data["Visualisation"]))
+
 {
     check_boundary_conditions(simulation_data["BoundaryConditions"]);
 
@@ -165,5 +169,45 @@ void fem_mesh::check_boundary_conditions(json const& boundary_data) const
                                     "\"BoundaryCondition\".");
         }
     }
+}
+
+void fem_mesh::write(std::int32_t const time_step, double const current_time)
+{
+    // nodal variables
+    if (writer->is_output_requested("displacement"))
+    {
+        writer->field("displacement", coordinates->displacement_vector(), 2);
+    }
+    if (writer->is_output_requested("reaction_force"))
+    {
+        writer->field("reaction_force", reaction_forces, 2);
+    }
+    // internal variables extrapolated to the nodes
+    for (auto const& name : writer->outputs())
+    {
+        if (name == "displacement" || name == "reaction_force")
+        {
+            continue;
+        }
+        if (auto const scalar_opt = variable::is_scalar(name); scalar_opt)
+        {
+            writer->field(name,
+                          average_internal_variable(submeshes,
+                                                    coordinates->size(),
+                                                    name,
+                                                    scalar_opt.value()),
+                          1);
+        }
+        else if (auto const second_opt = variable::is_second_order_tensor(name); second_opt)
+        {
+            writer->field(name,
+                          average_internal_variable(submeshes,
+                                                    coordinates->size() * 4,
+                                                    name,
+                                                    second_opt.value()),
+                          9);
+        }
+    }
+    writer->write(time_step, current_time);
 }
 }

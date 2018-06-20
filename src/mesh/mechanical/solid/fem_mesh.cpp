@@ -4,6 +4,8 @@
 #include "mesh/basic_mesh.hpp"
 #include "mesh/dof_allocator.hpp"
 #include "io/json.hpp"
+#include "io/post/variable_string_adapter.hpp"
+#include "io/post/node_averaged_variables.hpp"
 
 #include <chrono>
 #include <exception>
@@ -169,8 +171,25 @@ void fem_mesh::write(std::int32_t const time_step, double const current_time)
         {
             continue;
         }
+        if (auto const scalar_opt = variable::is_scalar(name); scalar_opt)
+        {
+            writer->field(name,
+                          average_internal_variable(submeshes,
+                                                    coordinates->size(),
+                                                    name,
+                                                    scalar_opt.value()),
+                          1);
+        }
+        else if (auto const second_opt = variable::is_second_order_tensor(name); second_opt)
+        {
+            writer->field(name,
+                          average_internal_variable(submeshes,
+                                                    coordinates->size() * 9,
+                                                    name,
+                                                    second_opt.value()),
+                          9);
+        }
     }
-
     writer->write(time_step, current_time);
 }
 

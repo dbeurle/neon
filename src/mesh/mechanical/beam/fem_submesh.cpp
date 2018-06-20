@@ -27,12 +27,12 @@ fem_submesh::fem_submesh(json const& material_data,
     orientations.resize(elements(), vector3::UnitX());
     tangents.resize(elements(), vector3::UnitZ());
 
-    variables->add(internal_variable_type::second::cauchy_stress,
-                   internal_variable_type::scalar::shear_area_1,
-                   internal_variable_type::scalar::shear_area_2,
-                   internal_variable_type::scalar::cross_sectional_area,
-                   internal_variable_type::scalar::second_moment_area_1,
-                   internal_variable_type::scalar::second_moment_area_2);
+    variables->add(variable::second::cauchy_stress,
+                   variable::scalar::shear_area_1,
+                   variable::scalar::shear_area_2,
+                   variable::scalar::cross_sectional_area,
+                   variable::scalar::second_moment_area_1,
+                   variable::scalar::second_moment_area_2);
 }
 
 void fem_submesh::update_internal_variables(double const time_step_size)
@@ -42,13 +42,13 @@ void fem_submesh::update_internal_variables(double const time_step_size)
         profile = std::make_unique<geometry::rectangular_bar>(1.0, 1.0);
     }
 
-    auto [A, As1, As2] = variables->get(internal_variable_type::scalar::cross_sectional_area,
-                                        internal_variable_type::scalar::shear_area_1,
-                                        internal_variable_type::scalar::shear_area_2);
+    auto [A, As1, As2] = variables->get(variable::scalar::cross_sectional_area,
+                                        variable::scalar::shear_area_1,
+                                        variable::scalar::shear_area_2);
 
     auto [area_moment_1,
-          area_moment_2] = variables->get(internal_variable_type::scalar::second_moment_area_1,
-                                          internal_variable_type::scalar::second_moment_area_2);
+          area_moment_2] = variables->get(variable::scalar::second_moment_area_1,
+                                          variable::scalar::second_moment_area_2);
 
     // Loop over all elements and quadrature points to compute the profile
     // properties for each quadrature point in the beam
@@ -96,7 +96,7 @@ matrix const& fem_submesh::bending_stiffness(matrix const& configuration,
     B_b.setZero();
     k_b.setZero();
 
-    auto const& D_b = variables->get(internal_variable_type::second::bending_stiffness);
+    auto const& D_b = variables->get(variable::second::bending_stiffness);
 
     sf->quadrature().integrate_inplace(k_b, [&, this](auto const& femval, auto const l) {
         auto const& [N, dN] = femval;
@@ -123,7 +123,7 @@ matrix const& fem_submesh::shear_stiffness(matrix const& configuration, std::int
     B_s.setZero();
     k_s.setZero();
 
-    auto const& D_s = variables->get(internal_variable_type::second::shear_stiffness);
+    auto const& D_s = variables->get(variable::second::shear_stiffness);
 
     sf->quadrature().integrate_inplace(k_s, [&, this](auto const& femval, auto const l) {
         auto const& [N, dN] = femval;
@@ -153,7 +153,7 @@ matrix const& fem_submesh::axial_stiffness(matrix const& configuration, std::int
     B_a.setZero();
     k_a.setZero();
 
-    auto const D_a = variables->get(internal_variable_type::scalar::axial_stiffness);
+    auto const D_a = variables->get(variable::scalar::axial_stiffness);
 
     sf->quadrature().integrate_inplace(k_a, [&, this](auto const& femval, auto const l) {
         auto const& [N, dN] = femval;
@@ -181,7 +181,7 @@ matrix const& fem_submesh::torsional_stiffness(matrix const& configuration,
     B_t.setZero();
     k_t.setZero();
 
-    auto const D_t = variables->get(internal_variable_type::scalar::torsional_stiffness);
+    auto const D_t = variables->get(variable::scalar::torsional_stiffness);
 
     sf->quadrature().integrate_inplace(k_t, [&, this](auto const& femval, auto const l) {
         auto const& [N, dN] = femval;

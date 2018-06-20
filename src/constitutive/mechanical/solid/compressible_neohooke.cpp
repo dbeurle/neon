@@ -15,7 +15,7 @@ compressible_neohooke::compressible_neohooke(std::shared_ptr<internal_variables_
 {
     // The Neo-Hookean model requires the deformation gradient and the Cauchy
     // stress, which are both allocated by default in the mesh object
-    variables->add(internal_variables_t::fourth::tangent_operator);
+    variables->add(variable::fourth::tangent_operator);
 }
 
 void compressible_neohooke::update_internal_variables(double const time_step_size)
@@ -23,12 +23,11 @@ void compressible_neohooke::update_internal_variables(double const time_step_siz
     using namespace ranges;
 
     // Get references into the hash table
-    auto [F_list,
-          cauchy_stresses] = variables->get(internal_variables_t::second::deformation_gradient,
-                                              internal_variables_t::second::cauchy_stress);
+    auto [F_list, cauchy_stresses] = variables->get(variable::second::deformation_gradient,
+                                                    variable::second::cauchy_stress);
 
-    auto& tangent_operators = variables->get(internal_variables_t::fourth::tangent_operator);
-    auto const& detF_list = variables->get(internal_variables_t::scalar::DetF);
+    auto& tangent_operators = variables->get(variable::fourth::tangent_operator);
+    auto const& detF_list = variables->get(variable::scalar::DetF);
 
     auto const I = matrix3::Identity();
 

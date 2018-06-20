@@ -4,6 +4,7 @@
 #include "mesh/generic/dirichlet.hpp"
 #include "mesh/mechanical/plane/boundary/nonfollower_load.hpp"
 #include "mesh/mechanical/plane/fem_submesh.hpp"
+#include "io/file_output.hpp"
 
 #include <map>
 #include <vector>
@@ -35,9 +36,7 @@ public:
     /// resulting matrix from this mesh is symmetric.  \sa LinearSolver
     [[nodiscard]] bool is_symmetric() const;
 
-    void update_internal_forces(vector const& fint) { internal_forces = fint; }
-
-    vector nodal_reaction_forces() const { return -internal_forces; }
+    void update_internal_forces(vector const& fint) { reaction_forces = -fint; }
 
     /// Deform the body by updating the displacement x = X + u
     /// and update the internal variables with the new deformation and the
@@ -66,7 +65,7 @@ public:
     [[nodiscard]] auto const& geometry() const { return *coordinates; }
 
     /// Write out results to file
-    void write(std::int32_t const time_step, double const current_time) {}
+    void write(std::int32_t const time_step, double const current_time);
 
 protected:
     void check_boundary_conditions(json const& boundary_data) const;
@@ -88,7 +87,7 @@ protected:
     std::map<std::string, nonfollower_load_boundary> nonfollower_loads;
 
     /// Internal nodal forces for reaction forces
-    vector internal_forces;
+    vector reaction_forces;
 
     std::unordered_map<std::string, int> const dof_table = {{"x", 0}, {"y", 1}};
 
@@ -99,6 +98,9 @@ protected:
     /// ensures the compatibility between user
     /// defined and sinusoidal boundary conditions.
     double generate_time_step;
+
+    /// File output handle
+    std::unique_ptr<io::file_output> writer;
 };
 }
 }

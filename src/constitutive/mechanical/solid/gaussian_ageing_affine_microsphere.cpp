@@ -21,18 +21,18 @@ gaussian_ageing_affine_microsphere::gaussian_ageing_affine_microsphere(
     unit_sphere_quadrature::point const rule)
     : gaussian_affine_microsphere{variables, material_data, rule}, material{material_data}
 {
-    variables->add(internal_variables_t::scalar::active_shear_modulus,
-                   internal_variables_t::scalar::inactive_shear_modulus,
-                   internal_variables_t::scalar::active_segments,
-                   internal_variables_t::scalar::inactive_segments,
-                   internal_variables_t::scalar::reduction_factor);
+    variables->add(variable::scalar::active_shear_modulus,
+                   variable::scalar::inactive_shear_modulus,
+                   variable::scalar::active_segments,
+                   variable::scalar::inactive_segments,
+                   variable::scalar::reduction_factor);
 
-    variables->add(internal_variables_t::vector::first_ageing_moduli,
-                   internal_variables_t::vector::second_ageing_moduli,
-                   internal_variables_t::vector::third_ageing_moduli,
-                   internal_variables_t::vector::first_previous,
-                   internal_variables_t::vector::second_previous,
-                   internal_variables_t::vector::third_previous);
+    variables->add(variable::vector::first_ageing_moduli,
+                   variable::vector::second_ageing_moduli,
+                   variable::vector::third_ageing_moduli,
+                   variable::vector::first_previous,
+                   variable::vector::second_previous,
+                   variable::vector::third_previous);
 
     names.emplace("active_shear_modulus");
     names.emplace("inactive_shear_modulus");
@@ -40,36 +40,36 @@ gaussian_ageing_affine_microsphere::gaussian_ageing_affine_microsphere(
     names.emplace("inactive_segments");
     names.emplace("reduction_factor");
 
-    for (auto& values : variables->get(internal_variables_t::vector::first_ageing_moduli))
+    for (auto& values : variables->get(variable::vector::first_ageing_moduli))
     {
         values.resize(unit_sphere.points(), 0.0);
     }
-    for (auto& values : variables->get(internal_variables_t::vector::second_ageing_moduli))
+    for (auto& values : variables->get(variable::vector::second_ageing_moduli))
     {
         values.resize(unit_sphere.points(), 0.0);
     }
-    for (auto& values : variables->get(internal_variables_t::vector::third_ageing_moduli))
+    for (auto& values : variables->get(variable::vector::third_ageing_moduli))
     {
         values.resize(unit_sphere.points(), 0.0);
     }
-    for (auto& values : variables->get(internal_variables_t::vector::first_previous))
+    for (auto& values : variables->get(variable::vector::first_previous))
     {
         values.resize(unit_sphere.points(), 0.0);
     }
-    for (auto& values : variables->get(internal_variables_t::vector::second_previous))
+    for (auto& values : variables->get(variable::vector::second_previous))
     {
         values.resize(unit_sphere.points(), 0.0);
     }
-    for (auto& values : variables->get(internal_variables_t::vector::third_previous))
+    for (auto& values : variables->get(variable::vector::third_previous))
     {
         values.resize(unit_sphere.points(), 0.0);
     }
 
     auto [active_shear_modulus,
           active_segments,
-          reduction] = variables->get(internal_variables_t::scalar::active_shear_modulus,
-                                      internal_variables_t::scalar::active_segments,
-                                      internal_variables_t::scalar::reduction_factor);
+          reduction] = variables->get(variable::scalar::active_shear_modulus,
+                                      variable::scalar::active_segments,
+                                      variable::scalar::reduction_factor);
 
     std::fill(begin(active_shear_modulus), end(active_shear_modulus), material.shear_modulus());
     std::fill(begin(active_segments), end(active_segments), material.segments_per_chain());
@@ -84,39 +84,38 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
           inactive_shear_modulus,
           reduction_factor,
           active_segments,
-          inactive_segments] = variables->get(internal_variables_t::scalar::active_shear_modulus,
-                                              internal_variables_t::scalar::inactive_shear_modulus,
-                                              internal_variables_t::scalar::reduction_factor,
-                                              internal_variables_t::scalar::active_segments,
-                                              internal_variables_t::scalar::inactive_segments);
+          inactive_segments] = variables->get(variable::scalar::active_shear_modulus,
+                                              variable::scalar::inactive_shear_modulus,
+                                              variable::scalar::reduction_factor,
+                                              variable::scalar::active_segments,
+                                              variable::scalar::inactive_segments);
 
     // accumulated integral values from time integration
     auto [moduli1,
           moduli2,
-          moduli3] = variables->get(internal_variable_t::vector::first_ageing_moduli,
-                                    internal_variable_t::vector::second_ageing_moduli,
-                                    internal_variable_t::vector::third_ageing_moduli);
+          moduli3] = variables->get(variable::vector::first_ageing_moduli,
+                                    variable::vector::second_ageing_moduli,
+                                    variable::vector::third_ageing_moduli);
 
-    auto [sphere1, sphere2, sphere3] = variables->get(internal_variable_t::vector::first_previous,
-                                                      internal_variable_t::vector::second_previous,
-                                                      internal_variable_t::vector::third_previous);
+    auto [sphere1, sphere2, sphere3] = variables->get(variable::vector::first_previous,
+                                                      variable::vector::second_previous,
+                                                      variable::vector::third_previous);
 
-    auto& moduli1_old = variables->get_old(internal_variable_t::vector::first_ageing_moduli);
-    auto& moduli2_old = variables->get_old(internal_variable_t::vector::second_ageing_moduli);
-    auto& moduli3_old = variables->get_old(internal_variable_t::vector::third_ageing_moduli);
+    auto& moduli1_old = variables->get_old(variable::vector::first_ageing_moduli);
+    auto& moduli2_old = variables->get_old(variable::vector::second_ageing_moduli);
+    auto& moduli3_old = variables->get_old(variable::vector::third_ageing_moduli);
 
-    auto& sphere1_old = variables->get_old(internal_variable_t::vector::first_previous);
-    auto& sphere2_old = variables->get_old(internal_variable_t::vector::second_previous);
-    auto& sphere3_old = variables->get_old(internal_variable_t::vector::third_previous);
+    auto& sphere1_old = variables->get_old(variable::vector::first_previous);
+    auto& sphere2_old = variables->get_old(variable::vector::second_previous);
+    auto& sphere3_old = variables->get_old(variable::vector::third_previous);
 
-    auto& cauchy_stresses = variables->get(internal_variables_t::second::cauchy_stress);
+    auto& cauchy_stresses = variables->get(variable::second::cauchy_stress);
 
-    auto const& det_F = variables->get(internal_variables_t::scalar::DetF);
+    auto const& det_F = variables->get(variable::scalar::DetF);
 
-    auto const& deformation_gradients = variables->get(
-        internal_variables_t::second::deformation_gradient);
+    auto const& deformation_gradients = variables->get(variable::second::deformation_gradient);
 
-    auto& tangent_operators = variables->get(internal_variables_t::fourth::tangent_operator);
+    auto& tangent_operators = variables->get(variable::fourth::tangent_operator);
 
     auto const K{material.bulk_modulus()};
 

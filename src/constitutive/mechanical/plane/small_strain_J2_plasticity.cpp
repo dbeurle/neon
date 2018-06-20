@@ -18,8 +18,8 @@ small_strain_J2_plasticity::small_strain_J2_plasticity(std::shared_ptr<internal_
     : isotropic_linear_elasticity(variables, material_data, isotropic_linear_elasticity::plane::strain),
       material(material_data)
 {
-    variables->add(internal_variables_t::second::linearised_plastic_strain);
-    variables->add(internal_variables_t::scalar::effective_plastic_strain);
+    variables->add(variable::second::linearised_plastic_strain);
+    variables->add(variable::scalar::effective_plastic_strain);
 
     names.emplace("linearised_plastic_strain");
     names.emplace("effective_plastic_strain");
@@ -36,19 +36,19 @@ void small_strain_J2_plasticity::update_internal_variables(double const time_ste
     // Extract the internal variables
     auto [plastic_strains,
           strains,
-          cauchy_stresses] = variables->get(internal_variables_t::second::linearised_plastic_strain,
-                                            internal_variables_t::second::linearised_strain,
-                                            internal_variables_t::second::cauchy_stress);
+          cauchy_stresses] = variables->get(variable::second::linearised_plastic_strain,
+                                            variable::second::linearised_strain,
+                                            variable::second::cauchy_stress);
 
     // Retrieve the accumulated internal variables
     auto [accumulated_plastic_strains,
-          von_mises_stresses] = variables->get(internal_variables_t::scalar::effective_plastic_strain,
-                                               internal_variables_t::scalar::von_mises_stress);
+          von_mises_stresses] = variables->get(variable::scalar::effective_plastic_strain,
+                                               variable::scalar::von_mises_stress);
 
-    auto& tangent_operators = variables->get(internal_variables_t::fourth::tangent_operator);
+    auto& tangent_operators = variables->get(variable::fourth::tangent_operator);
 
     // Compute the linear strain gradient from the displacement gradient
-    strains = variables->get(internal_variables_t::second::displacement_gradient)
+    strains = variables->get(variable::second::displacement_gradient)
               | ranges::view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
     // Perform the update algorithm for each quadrature point

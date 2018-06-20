@@ -14,14 +14,13 @@ isotropic_linear_elasticity::isotropic_linear_elasticity(std::shared_ptr<interna
                                                          json const& material_data)
     : constitutive_model(variables), material(material_data)
 {
-    variables->add(internal_variables_t::second::linearised_strain,
-                   internal_variables_t::scalar::von_mises_stress);
+    variables->add(variable::second::linearised_strain, variable::scalar::von_mises_stress);
 
     names.emplace("linearised_strain");
     names.emplace("von_mises_stress");
 
     // Add material tangent with the linear elasticity spatial moduli
-    variables->add(internal_variables_t::fourth::tangent_operator, elastic_moduli());
+    variables->add(variable::fourth::tangent_operator, elastic_moduli());
 }
 
 isotropic_linear_elasticity::~isotropic_linear_elasticity() = default;
@@ -31,14 +30,13 @@ void isotropic_linear_elasticity::update_internal_variables(double const time_st
     using namespace ranges;
 
     // Extract the internal variables
-    auto [elastic_strains,
-          cauchy_stresses] = variables->get(internal_variables_t::second::linearised_strain,
-                                            internal_variables_t::second::cauchy_stress);
+    auto [elastic_strains, cauchy_stresses] = variables->get(variable::second::linearised_strain,
+                                                             variable::second::cauchy_stress);
 
-    auto& von_mises_stresses = variables->get(internal_variables_t::scalar::von_mises_stress);
+    auto& von_mises_stresses = variables->get(variable::scalar::von_mises_stress);
 
     // Compute the linear strain gradient from the displacement gradient
-    elastic_strains = variables->get(internal_variables_t::second::displacement_gradient)
+    elastic_strains = variables->get(variable::second::displacement_gradient)
                       | view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
     // Compute Cauchy stress from the linear elastic strains

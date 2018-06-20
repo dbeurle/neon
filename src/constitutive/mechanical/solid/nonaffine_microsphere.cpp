@@ -26,14 +26,13 @@ nonaffine_microsphere::nonaffine_microsphere(std::shared_ptr<internal_variables_
 
 void nonaffine_microsphere::update_internal_variables(double const time_step_size)
 {
-    auto const& deformation_gradients = variables->get(
-        internal_variables_t::second::deformation_gradient);
-    auto& cauchy_stresses = variables->get(internal_variables_t::second::cauchy_stress);
+    auto const& deformation_gradients = variables->get(variable::second::deformation_gradient);
+    auto& cauchy_stresses = variables->get(variable::second::cauchy_stress);
 
-    auto const& detF_list = variables->get(internal_variables_t::scalar::DetF);
+    auto const& detF_list = variables->get(variable::scalar::DetF);
 
     // Compute tangent moduli
-    auto& tangent_operators = variables->get(internal_variables_t::fourth::tangent_operator);
+    auto& tangent_operators = variables->get(variable::fourth::tangent_operator);
 
     // Material properties
     auto const K_eff = material.bulk_modulus();

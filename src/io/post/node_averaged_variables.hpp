@@ -10,16 +10,16 @@ namespace neon
 /// Interpolate the internal variables to the mesh nodes and perform an
 /// unweighted average.
 template <typename mesh_type, typename enum_type>
-vector average_internal_variable(mesh_type const& meshes,
-                                 std::int32_t const variable_size,
+vector average_internal_variable(mesh_type const& submeshes,
+                                 std::int64_t const variable_size,
                                  std::string const& variable_name,
                                  enum_type const variable_enum)
 {
-    vector nodal_averaged_value = vector::Zeros(mesh.geometry().size() * variable_size);
-    vector insertion_count = vector::Zeros(mesh.geometry().size() * variable_size);
+    vector nodal_averaged_value = vector::Zero(variable_size);
+    vector insertion_count = vector::Zero(variable_size);
 
     // Add internal variables
-    for (auto const& submesh : meshes)
+    for (auto const& submesh : submeshes)
     {
         if (!submesh.internal_variables().has(variable_enum))
         {

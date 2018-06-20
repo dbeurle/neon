@@ -155,8 +155,10 @@ void vtk_file_output::field(std::string const& name,
                             vector const& field_vector,
                             std::int64_t const components)
 {
-    future.wait();
-
+    if (future.valid())
+    {
+        future.wait();
+    }
     auto vtk_field = vtkSmartPointer<vtkDoubleArray>::New();
 
     vtk_field->SetName(name.c_str());
