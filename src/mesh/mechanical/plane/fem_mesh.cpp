@@ -24,7 +24,6 @@ fem_mesh::fem_mesh(basic_mesh const& basic_mesh,
       generate_time_step{generate_time_step},
       writer(std::make_unique<io::vtk_file_output>(simulation_data["Name"],
                                                    simulation_data["Visualisation"]))
-
 {
     check_boundary_conditions(simulation_data["BoundaryConditions"]);
 
@@ -44,13 +43,13 @@ bool fem_mesh::is_symmetric() const
 
 void fem_mesh::update_internal_variables(vector const& u, double const time_step_size)
 {
-    auto const start = std::chrono::high_resolution_clock::now();
+    auto const start = std::chrono::steady_clock::now();
 
     coordinates->update_current_xy_configuration(u);
 
     for (auto& submesh : submeshes) submesh.update_internal_variables(time_step_size);
 
-    auto const end = std::chrono::high_resolution_clock::now();
+    auto const end = std::chrono::steady_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
 
     std::cout << std::string(6, ' ') << "Internal variable update took " << elapsed_seconds.count()
