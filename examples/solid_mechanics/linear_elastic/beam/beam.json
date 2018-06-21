@@ -54,15 +54,13 @@
                 "x" : [0.0, 1000.0],
                 "y" : [0.0, 2000.0],
                 "z" : [0.0, 2000.0]
-            }]
+            }],
+            "Visualisation" : {
+                "Fields" : ["displacement", "rotation"]
+            }
         }],
 		"LinearSolver" :  {
-		    "Type" : "PaStiX",
-            "MaxIterations" : 3000,
-    	    "Tolerance"  : 1.0e-8
-        },
-        "Visualisation" : {
-            "Fields" : ["displacement", "rotation"]
+		    "Type" : "PaStiX"
         }
     }]
 }

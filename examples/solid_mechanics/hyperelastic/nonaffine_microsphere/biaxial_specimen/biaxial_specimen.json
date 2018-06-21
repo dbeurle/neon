@@ -69,14 +69,14 @@
                 "Type" : "Displacement",
                 "Time" : [0.0, 1.0],
                 "y" : [0.0, 6.0]
-            }]
+            }],
+            "Visualisation" : {
+                "Fields" : ["displacement", "deformation_gradient", "cauchy_stress"],
+                "WriteEvery": 1
+            }
         }],
         "LinearSolver" : {
             "Type" : "Iterative"
-        },
-        "Visualisation" : {
-            "Fields" : ["displacement", "deformation_gradient", "cauchy_stress"],
-            "WriteEvery": 1
         }
     }]
 }

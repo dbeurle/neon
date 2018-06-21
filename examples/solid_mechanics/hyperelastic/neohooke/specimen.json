@@ -59,15 +59,15 @@
                 "Type" : "Traction",
                 "Time" : [0.0, 1.0],
                 "y" : [0.0, 5.0e5]
-            }]
+            }],
+            "Visualisation" : {
+                "Fields" : ["displacement", "deformation_gradient", "cauchy_stress"]
+            }
         }],
         "LinearSolver" : {
             "Type" : "Iterative",
             "MaxIterations" : 1000,
             "Tolerance"  : 1.0e-6
-        },
-        "Visualisation" : {
-            "Fields" : ["displacement", "deformation_gradient", "cauchy_stress"]
         }
     }]
 }

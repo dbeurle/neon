@@ -67,16 +67,16 @@
                 "Type" : "Displacement",
                 "Time" : [0.0, 1.0, 100.0],
                 "y" : [0.0, 0.01, 0.01]
-            }]
+            }],
+            "Visualisation" : {
+                "Fields" : ["displacement", "deformation_gradient", "cauchy_stress",
+                    "active_shear_modulus", "inactive_shear_modulus", "active_segments",
+                    "inactive_segments"],
+                    "WriteEvery": 1
+            }
         }],
         "LinearSolver" : {
             "Type" : "PaStiX"
-        },
-        "Visualisation" : {
-            "Fields" : ["displacement", "deformation_gradient", "cauchy_stress",
-                        "active_shear_modulus", "inactive_shear_modulus", "active_segments",
-                        "inactive_segments"],
-            "WriteEvery": 1
         }
     }]
 }

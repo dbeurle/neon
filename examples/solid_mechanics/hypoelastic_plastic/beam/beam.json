@@ -51,16 +51,14 @@
                 "Type" : "Pressure",
                 "Time" : [0.0, 1.0],
                 "Value" : [0.0, 1.0]
-            }]
+            }],
+            "Visualisation" : {
+                "Fields" : ["displacement", "linearised_strain", "linearised_plastic_strain",
+                    "cauchy_stress", "von_mises_stress", "effective_plastic_strain"]
+            }
         }],
 		"LinearSolver" :  {
-		    "Type" : "PaStiX",
-            "MaxIterations" : 3000,
-    	    "Tolerance"  : 1.0e-8
-        },
-        "Visualisation" : {
-            "Fields" : ["displacement", "linearised_strain", "linearised_plastic_strain",
-                        "cauchy_stress", "von_mises_stress", "effective_plastic_strain"]
+		    "Type" : "PaStiX"
         }
     }]
 }

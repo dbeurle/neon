@@ -67,17 +67,15 @@
                 "Type" : "Displacement",
                 "Time" : [0.0, 100.0, 1400],
                 "z" : [0.0, 0.2, 0.2]
-            }]
+            }],
+            "Visualisation" : {
+                "Fields" : ["displacement", "deformation_gradient", "cauchy_stress",
+                    "active_shear_modulus", "inactive_shear_modulus", "active_segments",
+                    "inactive_segments"]
+            }
         }],
         "LinearSolver" : {
-            "Type" : "PaStiX",
-            "MaxIterations" : 2000,
-            "Tolerance"  : 1.0e-8
-        },
-        "Visualisation" : {
-            "Fields" : ["displacement", "deformation_gradient", "cauchy_stress",
-                        "active_shear_modulus", "inactive_shear_modulus", "active_segments",
-                        "inactive_segments"]
+            "Type" : "PaStiX"
         }
     }]
 }

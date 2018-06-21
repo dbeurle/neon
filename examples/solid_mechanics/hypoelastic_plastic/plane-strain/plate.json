@@ -55,15 +55,13 @@
                 "Type" : "Displacement",
                 "Time" : [0.0, 1.0],
                 "x" : [0.0, 0.01]
-            }]
+            }],
+            "Visualisation" : {
+                "Fields" : ["displacement", "linearised_strain", "cauchy_stress", "von_mises_stress"]
+            }
         }],
 		"LinearSolver" :  {
-		    "Type" : "PaStiX",
-            "MaxIterations" : 3000,
-    	    "Tolerance"  : 1.0e-8
-        },
-        "Visualisation" : {
-            "Fields" : ["displacement", "linearised_strain", "cauchy_stress", "von_mises_stress"]
+		    "Type" : "PaStiX"
         }
     }]
 }
