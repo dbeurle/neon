@@ -8,4 +8,4 @@ configure_file("cube.mesh"
                "${CMAKE_CURRENT_BINARY_DIR}/cube.mesh"
                COPYONLY)
 
-add_test(J2PlasticityLinearHex neonfe cube.json)
+add_test(J2_plasticity_linear_hex neonfe cube.json)
