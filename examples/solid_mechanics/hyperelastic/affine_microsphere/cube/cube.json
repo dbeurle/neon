@@ -63,15 +63,15 @@
 				"Type" : "Displacement",
                 "Time" : [0.0, 1.0],
                 "z" : [0.0, 0.5]
-            }]
+            }],
+            "Visualisation" : {
+                "Fields" : ["displacement", "deformation_gradient", "cauchy_stress"]
+            }
         }],
 		"LinearSolver" : {
 		    "Type" : "Iterative",
             "MaxIterations" : 2000,
             "Tolerance"  : 1.0e-8
-        },
-        "Visualisation" : {
-            "Fields" : ["displacement", "deformation_gradient", "cauchy_stress"]
         }
     }]
 }
