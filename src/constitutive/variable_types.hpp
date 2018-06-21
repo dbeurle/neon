@@ -1,9 +1,13 @@
 
 #pragma once
 
+#include <variant>
+
 /// Define namespace for variable enumeration types
 namespace neon::variable
 {
+enum class nodal : short { displacement, rotation, reaction_force };
+
 /// Names for scalar values
 enum class scalar : short {
     /// Active chains per unit volume
@@ -98,4 +102,6 @@ enum class fourth : short {
     /// Material tangent operator
     tangent_operator
 };
+
+using types = std::variant<scalar, vector, second, fourth, nodal>;
 }

@@ -67,7 +67,7 @@
             "Tolerance"  : 1.0e-6
         },
         "Visualisation" : {
-            "Fields" : ["Displacement", "DeformationGradient", "CauchyStress"]
+            "Fields" : ["displacement", "deformation_gradient", "cauchy_stress"]
         }
     }]
 }

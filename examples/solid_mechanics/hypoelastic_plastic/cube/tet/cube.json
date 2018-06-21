@@ -67,8 +67,8 @@
 		    "Type" : "PaStiX"
         },
         "Visualisation" : {
-            "Fields" : ["Displacement", "LinearisedStrain", "LinearisedPlasticStrain",
-                        "CauchyStress", "VonMisesStress", "AccumulatedPlasticStrain"]
+            "Fields" : ["displacement", "linearised_strain", "linearised_plastic_strain",
+                        "cauchy_stress", "von_mises_stress", "effective_plastic_strain"]
         }
     }]
 }

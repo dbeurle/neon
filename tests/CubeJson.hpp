@@ -132,7 +132,7 @@ inline std::string simulation_data_json()
            "\"ElementOptions\" : {\"Quadrature\" : \"Full\"}, "
            "\"Name\" : \"cube\", "
            //
-           "\"Visualisation\" : {\"Fields\" : [\"Displacement\", \"CauchyStress\"]},"
+           "\"Visualisation\" : {\"Fields\" : [\"displacement\", \"cauchy_stress\"]},"
            //
            "\"NonlinearOptions\" : { "
            "\"DisplacementTolerance\" : 1.0e-5, "

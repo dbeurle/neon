@@ -70,6 +70,8 @@ public:
 protected:
     void check_boundary_conditions(json const& boundary_data) const;
 
+    void allocate_variable_names();
+
     void allocate_boundary_conditions(json const& boundary_data, basic_mesh const& basic_mesh);
 
     void allocate_displacement_boundary(json const& boundary, basic_mesh const& basic_mesh);
@@ -101,6 +103,9 @@ protected:
 
     /// File output handle
     std::unique_ptr<io::file_output> writer;
+
+    /// Output variables
+    std::vector<variable::types> output_variables;
 };
 }
 }

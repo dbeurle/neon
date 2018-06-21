@@ -73,9 +73,9 @@
             "Type" : "PaStiX"
         },
         "Visualisation" : {
-            "Fields" : ["Displacement", "DeformationGradient", "CauchyStress",
-                        "ActiveShearModulus", "InactiveShearModulus", "ActiveSegments",
-                        "InactiveSegments"],
+            "Fields" : ["displacement", "deformation_gradient", "cauchy_stress",
+                        "active_shear_modulus", "inactive_shear_modulus", "active_segments",
+                        "inactive_segments"],
             "WriteEvery": 1
         }
     }]

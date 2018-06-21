@@ -16,6 +16,11 @@
 
 namespace neon::mechanical::solid
 {
+static bool is_nodal_variable(std::string const& name)
+{
+    return name == "displacement" || name == "reaction_force";
+}
+
 fem_mesh::fem_mesh(basic_mesh const& basic_mesh,
                    json const& material_data,
                    json const& simulation_data,
@@ -36,6 +41,7 @@ fem_mesh::fem_mesh(basic_mesh const& basic_mesh,
         writer->mesh(submesh.all_node_indices(), submesh.topology());
     }
     allocate_boundary_conditions(simulation_data, basic_mesh);
+    allocate_variable_names();
 }
 
 bool fem_mesh::is_symmetric() const
@@ -165,30 +171,31 @@ void fem_mesh::write(std::int32_t const time_step, double const current_time)
         writer->field("reaction_force", reaction_forces, 3);
     }
     // internal variables extrapolated to the nodes
-    for (auto const& name : writer->outputs())
+    for (auto const& output_variable : output_variables)
     {
-        if (name == "displacement" || name == "reaction_force")
-        {
-            continue;
-        }
-        if (auto const scalar_opt = variable::is_scalar(name); scalar_opt)
-        {
-            writer->field(name,
-                          average_internal_variable(submeshes,
-                                                    coordinates->size(),
-                                                    name,
-                                                    scalar_opt.value()),
-                          1);
-        }
-        else if (auto const second_opt = variable::is_second_order_tensor(name); second_opt)
-        {
-            writer->field(name,
-                          average_internal_variable(submeshes,
-                                                    coordinates->size() * 9,
-                                                    name,
-                                                    second_opt.value()),
-                          9);
-        }
+        std::visit(
+            [this](auto&& output) {
+                using T = std::decay_t<decltype(output)>;
+                if constexpr (std::is_same_v<T, variable::scalar>)
+                {
+                    writer->field(convert(output),
+                                  average_internal_variable(submeshes,
+                                                            coordinates->size(),
+                                                            convert(output),
+                                                            output),
+                                  1);
+                }
+                else if constexpr (std::is_same_v<T, variable::second>)
+                {
+                    writer->field(convert(output),
+                                  average_internal_variable(submeshes,
+                                                            coordinates->size() * 9,
+                                                            convert(output),
+                                                            output),
+                                  9);
+                }
+            },
+            output_variable);
     }
     writer->write(time_step, current_time);
 }
@@ -210,6 +217,48 @@ void fem_mesh::check_boundary_conditions(json const& boundary_data) const
             throw std::domain_error("Neither \"Time\" nor \"GenerateType\" was specified in "
                                     "\"BoundaryCondition\".");
         }
+    }
+}
+
+void fem_mesh::allocate_variable_names()
+{
+    for (auto const& name : writer->outputs())
+    {
+        if (is_nodal_variable(name)) continue;
+
+        output_variables.emplace_back(variable::convert(name));
+    }
+
+    // check if output variables exist in all the submeshes
+    for (auto const& output_variable : output_variables)
+    {
+        std::visit(
+            [this](auto&& output) {
+                using T = std::decay_t<decltype(output)>;
+                if constexpr (std::is_same_v<T, variable::scalar>)
+                {
+                    if (std::none_of(begin(submeshes), end(submeshes), [&output](auto const& submesh) {
+                            return submesh.internal_variables().has(output);
+                        }))
+                    {
+                        throw std::domain_error("Internal variables do not have the requested "
+                                                "scalar variable ("
+                                                + std::to_string(static_cast<short>(output)) + ")");
+                    }
+                }
+                else if constexpr (std::is_same_v<T, variable::second>)
+                {
+                    if (std::none_of(begin(submeshes), end(submeshes), [&output](auto const& submesh) {
+                            return submesh.internal_variables().has(output);
+                        }))
+                    {
+                        throw std::domain_error("Internal variables do not have the requested "
+                                                "second order tensor variable ("
+                                                + std::to_string(static_cast<short>(output)) + ")");
+                    }
+                }
+            },
+            output_variable);
     }
 }
 }

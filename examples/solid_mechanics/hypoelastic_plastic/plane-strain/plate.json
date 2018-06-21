@@ -63,8 +63,7 @@
     	    "Tolerance"  : 1.0e-8
         },
         "Visualisation" : {
-            "Fields" : ["Displacement", "LinearisedStrain", "CauchyStress", "VonMisesStress"]
+            "Fields" : ["displacement", "linearised_strain", "cauchy_stress", "von_mises_stress"]
         }
-        }
-    ]
+    }]
 }

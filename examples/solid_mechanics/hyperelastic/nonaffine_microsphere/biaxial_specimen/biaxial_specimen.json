@@ -75,7 +75,7 @@
             "Type" : "Iterative"
         },
         "Visualisation" : {
-            "Fields" : ["Displacement", "DeformationGradient", "CauchyStress"],
+            "Fields" : ["displacement", "deformation_gradient", "cauchy_stress"],
             "WriteEvery": 1
         }
     }]
