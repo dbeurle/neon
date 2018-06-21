@@ -82,6 +82,8 @@ vtk_file_output::vtk_file_output(std::string file_name, json const& visualisatio
 
 vtk_file_output::~vtk_file_output()
 {
+    future.wait();
+
     // close off the last of the file for the time stepping
     pvd_file << std::string(2, ' ') << "</Collection>\n"
              << "</VTKFile>\n";
@@ -163,6 +165,7 @@ void vtk_file_output::field(std::string const& name,
     {
         future.wait();
     }
+
     auto vtk_field = vtkSmartPointer<vtkDoubleArray>::New();
 
     vtk_field->SetName(name.c_str());
