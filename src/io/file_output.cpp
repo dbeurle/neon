@@ -34,6 +34,10 @@ file_output::file_output(std::string file_name, json const& visualisation_data)
     {
         throw std::domain_error("Visualisation data must be specified");
     }
+    if (file_name.empty())
+    {
+        throw std::domain_error("Name field must be specified");
+    }
 
     if (visualisation_data.find("WriteEvery") != visualisation_data.end())
     {

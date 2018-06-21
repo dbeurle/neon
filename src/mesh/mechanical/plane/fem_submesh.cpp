@@ -21,10 +21,10 @@ namespace neon::mechanical::plane
 {
 fem_submesh::fem_submesh(json const& material_data,
                          json const& simulation_data,
-                         std::shared_ptr<material_coordinates>& material_coordinates,
+                         std::shared_ptr<material_coordinates>& coordinates,
                          basic_submesh const& submesh)
     : detail::fem_submesh<plane::fem_submesh, plane::internal_variables_t>(submesh),
-      mesh_coordinates{mesh_coordinates},
+      coordinates{coordinates},
       sf(make_surface_interpolation(topology(), simulation_data)),
       view(sf->quadrature().points()),
       variables(std::make_shared<internal_variables_t>(elements() * sf->quadrature().points())),
@@ -62,7 +62,7 @@ void fem_submesh::save_internal_variables(bool const have_converged)
 std::pair<index_view, matrix> fem_submesh::tangent_stiffness(std::int64_t const element) const
 {
     auto const x = geometry::project_to_plane(
-        mesh_coordinates->current_configuration(local_node_view(element)));
+        coordinates->current_configuration(local_node_view(element)));
 
     matrix ke = material_tangent_stiffness(x, element);
 
@@ -76,7 +76,7 @@ std::pair<index_view, matrix> fem_submesh::tangent_stiffness(std::int64_t const 
 std::pair<index_view, vector> fem_submesh::internal_force(std::int64_t const element) const
 {
     auto const x = geometry::project_to_plane(
-        mesh_coordinates->current_configuration(local_node_view(element)));
+        coordinates->current_configuration(local_node_view(element)));
 
     return {local_dof_view(element), internal_nodal_force(x, element)};
 }
@@ -153,7 +153,7 @@ vector fem_submesh::internal_nodal_force(matrix2x const& x, std::int64_t const e
 
 std::pair<index_view, matrix> fem_submesh::consistent_mass(std::int64_t const element) const
 {
-    auto const X = mesh_coordinates->initial_configuration(local_node_view(element));
+    auto const X = coordinates->initial_configuration(local_node_view(element));
     return {local_dof_view(element), X};
     // auto const density_0 = cm->intrinsic_material().initial_density();
     //
@@ -206,9 +206,9 @@ void fem_submesh::update_deformation_measures()
     {
         // Gather the material coordinates
         auto const X = geometry::project_to_plane(
-            mesh_coordinates->initial_configuration(local_node_view(element)));
+            coordinates->initial_configuration(local_node_view(element)));
         auto const x = geometry::project_to_plane(
-            mesh_coordinates->current_configuration(local_node_view(element)));
+            coordinates->current_configuration(local_node_view(element)));
 
         sf->quadrature().for_each([&](auto const& femval, const auto& l) {
             auto const& [N, rhea] = femval;
@@ -253,18 +253,17 @@ void fem_submesh::update_Jacobian_determinants()
     }
 }
 
-std::pair<vector, vector> fem_submesh::nodal_averaged_variable(
-    variable::second const tensor_name) const
+std::pair<vector, vector> fem_submesh::nodal_averaged_variable(variable::second const tensor_name) const
 {
-    vector count = vector::Zero(mesh_coordinates->size() * 4);
+    vector count = vector::Zero(coordinates->size() * 4);
     vector value = count;
 
     auto const& tensor_list = variables->get(tensor_name);
 
-    auto const& E = sf->local_quadrature_extrapolation();
+    matrix const E = sf->local_quadrature_extrapolation();
 
     // vector format of values
-    vector component = vector::Zero(sf->quadrature().points());
+    vector component(sf->quadrature().points());
 
     for (std::int64_t element{0}; element < elements(); ++element)
     {
@@ -294,10 +293,9 @@ std::pair<vector, vector> fem_submesh::nodal_averaged_variable(
     return {value, count};
 }
 
-std::pair<vector, vector> fem_submesh::nodal_averaged_variable(
-    variable::scalar const scalar_name) const
+std::pair<vector, vector> fem_submesh::nodal_averaged_variable(variable::scalar const scalar_name) const
 {
-    vector count = vector::Zero(mesh_coordinates->size());
+    vector count = vector::Zero(coordinates->size());
     vector value = count;
 
     auto const& scalar_list = variables->get(scalar_name);

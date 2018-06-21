@@ -89,13 +89,13 @@ void linear_static_matrix<fem_mesh_type>::solve()
 
     fem_mesh.update_internal_variables(d);
 
-    // io.write(adaptive_load.step(), adaptive_load.time());
+    // fem_mesh.write(adaptive_load.step(), adaptive_load.time());
 }
 
 template <typename fem_mesh_type>
 void linear_static_matrix<fem_mesh_type>::compute_external_force(double const load_factor)
 {
-    auto const start = std::chrono::high_resolution_clock::now();
+    auto const start = std::chrono::steady_clock::now();
 
     auto const step_time = adaptive_load.step_time();
 
@@ -124,7 +124,7 @@ void linear_static_matrix<fem_mesh_type>::compute_external_force(double const lo
             }
         }
     }
-    auto const end = std::chrono::high_resolution_clock::now();
+    auto const end = std::chrono::steady_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
     std::cout << std::string(6, ' ') << "External forces assembly took " << elapsed_seconds.count()
               << "s\n";
@@ -133,7 +133,7 @@ void linear_static_matrix<fem_mesh_type>::compute_external_force(double const lo
 template <typename fem_mesh_type>
 void linear_static_matrix<fem_mesh_type>::assemble_stiffness()
 {
-    auto const start = std::chrono::high_resolution_clock::now();
+    auto const start = std::chrono::steady_clock::now();
 
     if (!is_sparsity_computed)
     {
@@ -158,7 +158,7 @@ void linear_static_matrix<fem_mesh_type>::assemble_stiffness()
         });
     }
 
-    auto const end = std::chrono::high_resolution_clock::now();
+    auto const end = std::chrono::steady_clock::now();
     std::chrono::duration<double> const elapsed_seconds = end - start;
 
     std::cout << std::string(6, ' ') << "Tangent stiffness assembly took "

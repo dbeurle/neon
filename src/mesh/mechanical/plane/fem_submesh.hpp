@@ -29,7 +29,7 @@ public:
     /// Constructor providing the material coordinates reference
     explicit fem_submesh(json const& material_data,
                          json const& simulation_data,
-                         std::shared_ptr<material_coordinates>& mesh_coordinates,
+                         std::shared_ptr<material_coordinates>& coordinates,
                          basic_submesh const& submesh);
 
     fem_submesh(fem_submesh&&) = default;
@@ -45,7 +45,7 @@ public:
 
     void save_internal_variables(bool const have_converged);
 
-    [[nodiscard]] auto dofs_per_node() const noexcept { return 2; }
+    [[nodiscard]] auto dofs_per_node() const noexcept { return traits::dofs_per_node; }
 
     [[nodiscard]] auto const& shape_function() const { return *sf; }
 
@@ -115,7 +115,7 @@ protected:
                                               std::int64_t const element) const;
 
 private:
-    std::shared_ptr<material_coordinates> mesh_coordinates;
+    std::shared_ptr<material_coordinates> coordinates;
 
     /// Shape function
     std::unique_ptr<surface_interpolation> sf;

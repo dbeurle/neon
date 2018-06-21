@@ -32,11 +32,16 @@ fem_mesh::fem_mesh(basic_mesh const& basic_mesh,
 {
     check_boundary_conditions(simulation_data["BoundaryConditions"]);
 
+    writer->coordinates(coordinates->coordinates());
+
     for (auto const& submesh : basic_mesh.meshes(simulation_data["Name"]))
     {
         submeshes.emplace_back(material_data, simulation_data, coordinates, submesh);
+
+        writer->mesh(submesh.all_node_indices(), submesh.topology());
     }
     allocate_boundary_conditions(simulation_data, basic_mesh);
+
     allocate_variable_names();
 }
 
@@ -53,7 +58,10 @@ void fem_mesh::update_internal_variables(vector const& u, double const time_step
 
     coordinates->update_current_xy_configuration(u);
 
-    for (auto& submesh : submeshes) submesh.update_internal_variables(time_step_size);
+    for (auto& submesh : submeshes)
+    {
+        submesh.update_internal_variables(time_step_size);
+    }
 
     auto const end = std::chrono::steady_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
@@ -64,7 +72,10 @@ void fem_mesh::update_internal_variables(vector const& u, double const time_step
 
 void fem_mesh::save_internal_variables(bool const have_converged)
 {
-    for (auto& submesh : submeshes) submesh.save_internal_variables(have_converged);
+    for (auto& submesh : submeshes)
+    {
+        submesh.save_internal_variables(have_converged);
+    }
 }
 
 bool fem_mesh::is_nonfollower_load(std::string const& boundary_type) const
@@ -77,8 +88,8 @@ void fem_mesh::allocate_boundary_conditions(json const& simulation_data, basic_m
     // Populate the boundary conditions and their corresponding mesh
     for (auto const& boundary : simulation_data["BoundaryConditions"])
     {
-        auto const& boundary_name = boundary["Name"].get<std::string>();
-        auto const& boundary_type = boundary["Type"].get<std::string>();
+        std::string const& boundary_name = boundary["Name"];
+        std::string const& boundary_type = boundary["Type"];
 
         if (boundary_type == "Displacement")
         {
@@ -181,11 +192,13 @@ void fem_mesh::write(std::int32_t const time_step, double const current_time)
     // nodal variables
     if (writer->is_output_requested("displacement"))
     {
+        std::cout << "Writing out field" << std::endl;
         writer->field("displacement", coordinates->displacement_vector(), 3);
     }
     if (writer->is_output_requested("reaction_force"))
     {
-        writer->field("reaction_force", reaction_forces, 3);
+        std::cout << "Writing out field" << std::endl;
+        writer->field("reaction_force", reaction_forces, 2);
     }
     // internal variables extrapolated to the nodes
     for (auto const& output_variable : output_variables)
@@ -206,10 +219,10 @@ void fem_mesh::write(std::int32_t const time_step, double const current_time)
                 {
                     writer->field(convert(output),
                                   average_internal_variable(submeshes,
-                                                            coordinates->size() * 9,
+                                                            coordinates->size() * 4,
                                                             convert(output),
                                                             output),
-                                  9);
+                                  4);
                 }
             },
             output_variable);

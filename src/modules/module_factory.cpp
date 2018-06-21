@@ -69,7 +69,7 @@ std::unique_ptr<abstract_module> make_module(
                                 + " is not recognised.  Use \"Equilibrium\" or \"Transient\"\n");
     }
     throw std::domain_error("Module " + module_type
-                            + " is not recognised.  Use \"SolidMechanics\" or "
+                            + " is not recognised.  Use \"PlaneStrain\", \"SolidMechanics\" or "
                               "\"HeatDiffusion\"\n");
     return nullptr;
 }

@@ -14,7 +14,7 @@
     }],
     "SimulationCases" : [{
         "Name" : "SimpleLoading",
-        "Module" : "PlaneMechanics",
+        "Module" : "PlaneStrain",
         "Solution" : "Equilibrium",
         "NonlinearOptions" : {
             "DisplacementTolerance" : 1.0e-4,
@@ -57,7 +57,7 @@
                 "x" : [0.0, 0.01]
             }],
             "Visualisation" : {
-                "Fields" : ["displacement", "linearised_strain", "cauchy_stress", "von_mises_stress"]
+                "Fields" : ["displacement", "reaction_force", "linearised_strain", "cauchy_stress", "von_mises_stress"]
             }
         }],
 		"LinearSolver" :  {

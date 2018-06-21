@@ -16,27 +16,22 @@ class material_coordinates;
 
 namespace diffusion
 {
-/**
- * fem_submesh provides the element local routines for computing the system
- * components for a three-dimensional heat equation discretisation.
- */
+/// fem_submesh provides the element local routines for computing the system
+/// components for a three-dimensional heat equation discretisation.
 class fem_submesh : public basic_submesh
 {
 public:
-    using ValueCount = std::tuple<vector, vector>;
-
-public:
     explicit fem_submesh(json const& material_data,
                          json const& mesh_data,
-                         std::shared_ptr<material_coordinates>& mesh_coordinates,
+                         std::shared_ptr<material_coordinates>& coordinates,
                          basic_submesh const& submesh);
 
-    /** @return list of global degrees of freedom for an element */
+    /// \return list of global degrees of freedom for an element
     [[nodiscard]] index_view local_dof_view(std::int64_t const element) const {
         return local_node_view(element);
     }
 
-        /** @return The internal variable store */
+        /// \return The internal variable store
         [[nodiscard]] auto const& internal_variables() const
     {
         return *variables;
@@ -70,35 +65,37 @@ public:
      */
     [[nodiscard]] std::pair<index_view, matrix> consistent_mass(std::int64_t const element) const;
 
-    /** @return Diagonal mass matrix using row sum technique \sa consistent_mass */
+    /// \return Diagonal mass matrix using row sum technique \sa consistent_mass
     [[nodiscard]] std::pair<index_view, vector> diagonal_mass(std::int64_t const element) const;
 
-    /** Update the internal variables for the mesh group */
+    /// Update the internal variables for the mesh group
     void update_internal_variables(double const time_step_size);
 
-    /**
-     * Compute the local Jacobian matrix \f$ \bf{x}_\xi \f$
-     * @param rhea Shape function gradients at quadrature point
-     * @param configuration Configuration of the element (coordinates)
-     */
-    [[nodiscard]] matrix3 local_jacobian(matrix const& rhea, matrix const& configuration) const {
+    /// Compute the local Jacobian matrix \f$ \bf{x}_\xi \f$
+    /// \param rhea Shape function gradients at quadrature point
+    /// \param configuration Configuration of the element (coordinates)
+    matrix3 local_jacobian(matrix const& rhea, matrix const& configuration) const
+    {
         return configuration * rhea;
     }
 
-        [[nodiscard]] ValueCount
-        nodal_averaged_variable(variable::second const tensor_name) const;
-
-    [[nodiscard]] ValueCount nodal_averaged_variable(variable::scalar const scalar_name) const;
+    ///
+    [[nodiscard]] std::pair<vector, vector> nodal_averaged_variable(
+        variable::scalar const scalar_name) const;
+    ///
+    [[nodiscard]] std::pair<vector, vector> nodal_averaged_variable(
+        variable::second const tensor_name) const;
 
 private:
-    std::shared_ptr<material_coordinates> mesh_coordinates; /// Nodal coordinates
-
-    std::unique_ptr<volume_interpolation> sf; /// Shape function
+    /// Nodal coordinates
+    std::shared_ptr<material_coordinates> coordinates;
+    /// Shape function
+    std::unique_ptr<volume_interpolation> sf;
 
     variable_view view;
     std::shared_ptr<internal_variables_t> variables;
-
-    std::unique_ptr<constitutive_model> cm; /// Constitutive model
+    /// Constitutive model
+    std::unique_ptr<constitutive_model> cm;
 };
 }
 }

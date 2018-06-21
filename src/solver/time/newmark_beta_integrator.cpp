@@ -15,12 +15,9 @@ newmark_beta_integrator::newmark_beta_integrator(json const& time_solver_data)
         artifical_viscosity = 0.5;
         beta_parameter = 0.25;
         std::cout << "Warning: Newmark-Beta parameters were not specified.\nThe "
-                     "artifical "
-                     "viscosity is set to 0.5 and the beta parameter is set to "
-                     "0.25.\nYou can "
-                     "suppress this warning by using \"ViscousDamping\" and "
-                     "\"BetaParameter\" "
-                     "under the \"IntegrationOptions\" field.";
+                     "artifical viscosity is set to 0.5 and the beta parameter is set to "
+                     "0.25.\nYou can suppress this warning by using \"ViscousDamping\" and "
+                     "\"BetaParameter\" under the \"IntegrationOptions\" field.";
     }
     else
     {
