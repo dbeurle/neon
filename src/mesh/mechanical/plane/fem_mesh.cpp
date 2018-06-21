@@ -192,14 +192,13 @@ void fem_mesh::write(std::int32_t const time_step, double const current_time)
     // nodal variables
     if (writer->is_output_requested("displacement"))
     {
-        std::cout << "Writing out field" << std::endl;
         writer->field("displacement", coordinates->displacement_vector(), 3);
     }
     if (writer->is_output_requested("reaction_force"))
     {
-        std::cout << "Writing out field" << std::endl;
         writer->field("reaction_force", reaction_forces, 2);
     }
+
     // internal variables extrapolated to the nodes
     for (auto const& output_variable : output_variables)
     {

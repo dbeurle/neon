@@ -253,6 +253,40 @@ void fem_submesh::update_Jacobian_determinants()
     }
 }
 
+std::pair<vector, vector> fem_submesh::nodal_averaged_variable(variable::scalar const scalar_name) const
+{
+    vector count = vector::Zero(coordinates->size());
+    vector value = count;
+
+    auto const& scalar_list = variables->get(scalar_name);
+
+    auto const& E = sf->local_quadrature_extrapolation();
+
+    // vector format of values
+    vector component = vector::Zero(sf->quadrature().points());
+
+    for (std::int64_t element{0}; element < elements(); ++element)
+    {
+        for (std::size_t l{0}; l < sf->quadrature().points(); ++l)
+        {
+            component(l) = scalar_list[view(element, l)];
+        }
+
+        // Local extrapolation to the nodes
+        vector const nodal_component = E * component;
+
+        // Assemble these into the global value vector
+        auto const& node_list = local_node_view(element);
+
+        for (auto n = 0; n < nodal_component.rows(); n++)
+        {
+            value(node_list[n]) += nodal_component(n);
+            count(node_list[n]) += 1.0;
+        }
+    }
+    return {value, count};
+}
+
 std::pair<vector, vector> fem_submesh::nodal_averaged_variable(variable::second const tensor_name) const
 {
     vector count = vector::Zero(coordinates->size() * 4);
@@ -288,40 +322,6 @@ std::pair<vector, vector> fem_submesh::nodal_averaged_variable(variable::second 
                     count(node_list[n] * 4 + ci * 2 + cj) += 1.0;
                 }
             }
-        }
-    }
-    return {value, count};
-}
-
-std::pair<vector, vector> fem_submesh::nodal_averaged_variable(variable::scalar const scalar_name) const
-{
-    vector count = vector::Zero(coordinates->size());
-    vector value = count;
-
-    auto const& scalar_list = variables->get(scalar_name);
-
-    auto const& E = sf->local_quadrature_extrapolation();
-
-    // vector format of values
-    vector component = vector::Zero(sf->quadrature().points());
-
-    for (std::int64_t element{0}; element < elements(); ++element)
-    {
-        for (std::size_t l{0}; l < sf->quadrature().points(); ++l)
-        {
-            component(l) = scalar_list[view(element, l)];
-        }
-
-        // Local extrapolation to the nodes
-        vector const nodal_component = E * component;
-
-        // Assemble these into the global value vector
-        auto const& node_list = local_node_view(element);
-
-        for (auto n = 0; n < nodal_component.rows(); n++)
-        {
-            value(node_list[n]) += nodal_component(n);
-            count(node_list[n]) += 1.0;
         }
     }
     return {value, count};
