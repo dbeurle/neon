@@ -24,7 +24,7 @@ public:
     using value_types = std::variant<traction, body_force>;
 
 public:
-    explicit nonfollower_load_boundary(std::shared_ptr<material_coordinates>& material_coordinates,
+    explicit nonfollower_load_boundary(std::shared_ptr<material_coordinates>& coordinates,
                                        std::vector<basic_submesh> const& submeshes,
                                        json const& simulation_data,
                                        json const& boundary,

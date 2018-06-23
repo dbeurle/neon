@@ -3,13 +3,12 @@
 
 #include "interpolations/interpolation_factory.hpp"
 
-#include "math/transform_expand.hpp"
 #include "io/json.hpp"
 
 namespace neon::mechanical::plane
 {
 nonfollower_load_boundary::nonfollower_load_boundary(
-    std::shared_ptr<material_coordinates>& material_coordinates,
+    std::shared_ptr<material_coordinates>& coordinates,
     std::vector<basic_submesh> const& submeshes,
     json const& simulation_data,
     json const& boundary,
@@ -20,7 +19,7 @@ nonfollower_load_boundary::nonfollower_load_boundary(
     {
         for (auto it = dof_table.begin(); it != dof_table.end(); ++it)
         {
-            if (boundary.count(it->first))
+            if (boundary.find(it->first) != boundary.end())
             {
                 auto const dof_offset = it->second;
 
@@ -31,7 +30,7 @@ nonfollower_load_boundary::nonfollower_load_boundary(
                                                                          simulation_data),
                                                  mesh.all_node_indices(),
                                                  2 * mesh.all_node_indices() + dof_offset,
-                                                 material_coordinates,
+                                                 coordinates,
                                                  boundary,
                                                  it->first,
                                                  generate_time_step);
@@ -43,7 +42,7 @@ nonfollower_load_boundary::nonfollower_load_boundary(
     {
         for (auto it = dof_table.begin(); it != dof_table.end(); ++it)
         {
-            if (boundary.count(it->first))
+            if (boundary.find(it->first) != boundary.end())
             {
                 auto const dof_offset = it->second;
 
@@ -54,7 +53,7 @@ nonfollower_load_boundary::nonfollower_load_boundary(
                                                                             simulation_data),
                                                  mesh.all_node_indices(),
                                                  2 * mesh.all_node_indices() + dof_offset,
-                                                 material_coordinates,
+                                                 coordinates,
                                                  boundary,
                                                  it->first,
                                                  generate_time_step);
