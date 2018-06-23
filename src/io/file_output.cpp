@@ -82,8 +82,10 @@ vtk_file_output::vtk_file_output(std::string file_name, json const& visualisatio
 
 vtk_file_output::~vtk_file_output()
 {
-    future.wait();
-
+    if (future.valid())
+    {
+        future.wait();
+    }
     // close off the last of the file for the time stepping
     pvd_file << std::string(2, ' ') << "</Collection>\n"
              << "</VTKFile>\n";
