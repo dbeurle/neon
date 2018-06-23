@@ -42,13 +42,13 @@
                 "Type" : "HeatFlux",
                 "Time" : [0.0, 1.0],
                 "Value" : [1500.0, 1500.0]
-            }]
+            }],
+            "Visualisation" : {
+                "Fields" : ["temperature"]
+            }
         }],
         "LinearSolver" : {
-	    "Type" : "PaStiX"
-        },
-        "Visualisation" : {
-            "Fields" : ["Temperature"]
+            "Type" : "PaStiX"
         }
     }]
 }

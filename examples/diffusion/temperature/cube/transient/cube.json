@@ -47,14 +47,14 @@
                 "Type" : "HeatFlux",
                 "Time" : [0.0, 1000.0],
                 "Value" :  [1000.0, 1000.0]
-            }]
+            }],
+            "Visualisation" : {
+                "Fields" : ["temperature"],
+                "WriteEvery" : 10
+            }
         }],
         "LinearSolver" : {
             "Type" : "Iterative"
-        },
-        "Visualisation" : {
-            "Fields" : ["Temperature"],
-            "WriteEvery" : 10
         }
     }]
 }
