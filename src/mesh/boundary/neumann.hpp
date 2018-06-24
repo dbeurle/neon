@@ -17,37 +17,37 @@ namespace neon
 class neumann : public vector_contribution
 {
 public:
-    /// \param nodal_connectivity Nodal list
-    /// \param dof_list Degree of freedom mapping
+    /// \param node_indices Nodal list
+    /// \param dof_indices Degree of freedom mapping
     /// \param material_coordinates Nodal coordinates
     /// \param times Input times
     /// \param times Input boundary values for each time
-    explicit neumann(indices nodal_connectivity,
-                     indices dof_list,
+    explicit neumann(indices node_indices,
+                     indices dof_indices,
                      std::shared_ptr<material_coordinates>& material_coordinates,
                      json const& times,
                      json const& loads);
 
-    /// \param nodal_connectivity Nodal list
-    /// \param dof_list Degree of freedom mapping
+    /// \param node_indices Nodal list
+    /// \param dof_indices Degree of freedom mapping
     /// \param material_coordinates Nodal coordinates
     /// \param boundary Boundary information
     /// \param
-    explicit neumann(indices nodal_connectivity,
-                     indices dof_list,
+    explicit neumann(indices node_indices,
+                     indices dof_indices,
                      std::shared_ptr<material_coordinates>& material_coordinates,
                      json const& boundary,
                      std::string const& name,
                      double const generate_time_step);
 
-    [[nodiscard]] auto elements() const noexcept { return nodal_connectivity.cols(); }
+    [[nodiscard]] auto elements() const noexcept { return node_indices.cols(); }
 
 protected:
     /// Indices for the nodal coordinates
-    indices nodal_connectivity;
+    indices node_indices;
 
     /// Indices for the degrees of freedom
-    indices dof_list;
+    indices dof_indices;
 
     /// Coordinates for the boundary element group
     std::shared_ptr<material_coordinates> coordinates;
@@ -64,24 +64,24 @@ public:
 
 public:
     explicit surface_load(std::unique_ptr<surface_interpolation>&& sf,
-                          indices nodal_connectivity,
-                          indices dof_list,
+                          indices node_indices,
+                          indices dof_indices,
                           std::shared_ptr<material_coordinates>& coordinates,
                           json const& time_history,
                           json const& load_history)
-        : neumann(nodal_connectivity, dof_list, coordinates, time_history, load_history),
+        : neumann(node_indices, dof_indices, coordinates, time_history, load_history),
           sf(std::move(sf))
     {
     }
 
     explicit surface_load(std::unique_ptr<surface_interpolation>&& sf,
-                          indices nodal_connectivity,
-                          indices dof_list,
+                          indices node_indices,
+                          indices dof_indices,
                           std::shared_ptr<material_coordinates>& coordinates,
                           json const& boundary,
                           std::string const& name,
                           double const generate_time_step)
-        : neumann(nodal_connectivity, dof_list, coordinates, boundary, name, generate_time_step),
+        : neumann(node_indices, dof_indices, coordinates, boundary, name, generate_time_step),
           sf(std::move(sf))
     {
     }
@@ -94,7 +94,7 @@ public:
     virtual std::pair<index_view, vector> external_force(std::int64_t const element,
                                                          double const load_factor) const override
     {
-        auto const node_view = nodal_connectivity(Eigen::placeholders::all, element);
+        auto const node_view = node_indices(Eigen::placeholders::all, element);
 
         auto const X = coordinates->initial_configuration(node_view);
 
@@ -106,7 +106,7 @@ public:
                                                           return N * jacobian_determinant(X * dN);
                                                       });
 
-        return {dof_list(Eigen::placeholders::all, element),
+        return {dof_indices(Eigen::placeholders::all, element),
                 interpolate_prescribed_load(load_factor) * f_ext};
     }
 
@@ -126,24 +126,24 @@ public:
 
 public:
     explicit volume_load(std::unique_ptr<volume_interpolation>&& sf,
-                         indices nodal_connectivity,
-                         indices dof_list,
+                         indices node_indices,
+                         indices dof_indices,
                          std::shared_ptr<material_coordinates>& coordinates,
                          json const& time_history,
                          json const& load_history)
-        : neumann(nodal_connectivity, dof_list, coordinates, time_history, load_history),
+        : neumann(node_indices, dof_indices, coordinates, time_history, load_history),
           sf(std::move(sf))
     {
     }
 
     explicit volume_load(std::unique_ptr<volume_interpolation>&& sf,
-                         indices nodal_connectivity,
-                         indices dof_list,
+                         indices node_indices,
+                         indices dof_indices,
                          std::shared_ptr<material_coordinates>& coordinates,
                          json const& boundary,
                          std::string const& name,
                          double const generate_time_step)
-        : neumann(nodal_connectivity, dof_list, coordinates, boundary, name, generate_time_step),
+        : neumann(node_indices, dof_indices, coordinates, boundary, name, generate_time_step),
           sf(std::move(sf))
     {
     }
@@ -151,7 +151,7 @@ public:
     virtual std::pair<index_view, vector> external_force(std::int64_t const element,
                                                          double const load_factor) const override
     {
-        auto const node_view = nodal_connectivity(Eigen::placeholders::all, element);
+        auto const node_view = node_indices(Eigen::placeholders::all, element);
 
         auto const X = coordinates->initial_configuration(node_view);
 
@@ -163,7 +163,7 @@ public:
                                                           return N * jacobian_determinant(X * dN);
                                                       });
 
-        return {dof_list(Eigen::placeholders::all, element),
+        return {dof_indices(Eigen::placeholders::all, element),
                 interpolate_prescribed_load(load_factor) * f_ext};
     }
 

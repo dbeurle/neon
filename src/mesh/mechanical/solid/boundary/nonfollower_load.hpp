@@ -4,7 +4,7 @@
 #include "interpolations/shape_function.hpp"
 #include "mesh/basic_submesh.hpp"
 
-#include "mesh/generic/nodal_value.hpp"
+#include "mesh/boundary/nodal_value.hpp"
 #include "body_force.hpp"
 #include "pressure.hpp"
 #include "traction.hpp"

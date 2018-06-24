@@ -5,7 +5,7 @@
 #include "mesh/basic_submesh.hpp"
 #include "mesh/material_coordinates.hpp"
 
-#include "mesh/generic/nodal_value.hpp"
+#include "mesh/boundary/nodal_value.hpp"
 #include "couple.hpp"
 #include "distributed_load.hpp"
 

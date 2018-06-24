@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/generic/neumann.hpp"
+#include "mesh/boundary/neumann.hpp"
 
 #include "interpolations/shape_function.hpp"
 
@@ -26,14 +26,14 @@ public:
     /**
      * Construct the boundary condition
      * @param sf A surface interpolation
-     * @param nodal_connectivity
+     * @param node_indices
      * @param times A list of times and values
      * @param heat_flux A list of heat fluxes
      * @param external_temperature A list of heat transfer coefficients
      */
     explicit newton_convection(std::unique_ptr<surface_interpolation>&& sf,
-                               indices nodal_connectivity,
-                               indices dof_list,
+                               indices node_indices,
+                               indices dof_indices,
                                std::shared_ptr<material_coordinates>& mesh_coordinates,
                                json const& times,
                                json const& heat_flux,

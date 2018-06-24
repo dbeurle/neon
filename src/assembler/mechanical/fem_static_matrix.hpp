@@ -7,7 +7,6 @@
 #include "numeric/sparse_matrix.hpp"
 #include "solver/adaptive_time_step.hpp"
 #include "solver/linear/linear_solver_factory.hpp"
-#include "io/file_output.hpp"
 #include "io/json.hpp"
 
 #include <chrono>

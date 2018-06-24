@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/generic/neumann.hpp"
+#include "mesh/boundary/neumann.hpp"
 
 #include "interpolations/shape_function.hpp"
 

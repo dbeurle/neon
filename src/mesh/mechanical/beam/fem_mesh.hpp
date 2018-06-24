@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/generic/dirichlet.hpp"
+#include "mesh/boundary/dirichlet.hpp"
 #include "mesh/mechanical/beam/boundary/nonfollower_load.hpp"
 #include "mesh/mechanical/beam/fem_submesh.hpp"
 #include "mesh/nodal_variables.hpp"
