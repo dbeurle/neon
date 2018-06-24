@@ -4,7 +4,7 @@
 #include "mesh/diffusion/fem_submesh.hpp"
 
 #include "mesh/diffusion/boundary/surface_boundary.hpp"
-#include "mesh/generic/dirichlet.hpp"
+#include "mesh/boundary/dirichlet.hpp"
 #include "io/file_output.hpp"
 
 #include <map>

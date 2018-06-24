@@ -2,7 +2,7 @@
 #pragma once
 
 #include "interpolations/shape_function.hpp"
-#include "mesh/generic/neumann.hpp"
+#include "mesh/boundary/neumann.hpp"
 
 namespace neon::mechanical::solid
 {

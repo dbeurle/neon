@@ -52,9 +52,9 @@
             },
             {
                 "Name" : "x-disp",
-                "Type" : "Displacement",
+                "Type" : "Traction",
                 "Time" : [0.0, 1.0],
-                "x" : [0.0, 0.01]
+                "x" : [0.0, 150.0]
             }],
             "Visualisation" : {
                 "Fields" : ["displacement", "reaction_force", "linearised_strain", "cauchy_stress", "von_mises_stress"]

@@ -11,15 +11,15 @@
 namespace neon::diffusion::boundary
 {
 newton_convection::newton_convection(std::unique_ptr<surface_interpolation>&& sf,
-                                     indices nodal_connectivity,
-                                     indices dof_list,
+                                     indices node_indices,
+                                     indices dof_indices,
                                      std::shared_ptr<material_coordinates>& mesh_coordinates,
                                      json const& times,
                                      json const& heat_flux,
                                      json const& heat_transfer_coefficient)
     : surface_load<surface_interpolation>(std::move(sf),
-                                          nodal_connectivity,
-                                          dof_list,
+                                          node_indices,
+                                          dof_indices,
                                           mesh_coordinates,
                                           times,
                                           heat_flux)
@@ -34,7 +34,7 @@ newton_convection::newton_convection(std::unique_ptr<surface_interpolation>&& sf
 std::pair<index_view, matrix> newton_convection::external_stiffness(std::int64_t const element,
                                                                     double const load_factor) const
 {
-    auto const node_view = nodal_connectivity(Eigen::placeholders::all, element);
+    auto const node_view = node_indices(Eigen::placeholders::all, element);
 
     auto const X = coordinates->initial_configuration(node_view);
 
@@ -48,7 +48,7 @@ std::pair<index_view, matrix> newton_convection::external_stiffness(std::int64_t
                                                       return N * N.transpose() * j;
                                                   });
 
-    return {dof_list(Eigen::placeholders::all, element),
+    return {dof_indices(Eigen::placeholders::all, element),
             interpolate_prescribed_load(stiffness_time_data, load_factor) * k_ext};
 }
 }

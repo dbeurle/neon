@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/generic/nodal_value.hpp"
+#include "mesh/boundary/nodal_value.hpp"
 #include "mesh/mechanical/plane/boundary/traction.hpp"
 #include "mesh/mechanical/plane/boundary/body_force.hpp"
 

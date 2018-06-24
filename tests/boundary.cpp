@@ -4,7 +4,7 @@
 #include "interpolations/triangle.hpp"
 #include "quadrature/triangle_quadrature.hpp"
 #include "mesh/basic_submesh.hpp"
-#include "mesh/generic/boundary.hpp"
+#include "mesh/boundary/boundary.hpp"
 #include "mesh/mechanical/solid/boundary/nonfollower_load.hpp"
 #include "mesh/diffusion/boundary/newton_convection.hpp"
 #include "io/json.hpp"

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/generic/boundary.hpp"
+#include "mesh/boundary/boundary.hpp"
 #include "numeric/index_types.hpp"
 
 namespace neon
