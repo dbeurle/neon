@@ -32,6 +32,8 @@ using matrix9 = Eigen::Matrix<double, 9, 9>;
 using matrix12 = Eigen::Matrix<double, 12, 12>;
 /// 16x16 fixed size matrix
 using matrix16 = Eigen::Matrix<double, 16, 16>;
+/// 3x1 fixed size matrix for non-square Jacobians
+using matrix31 = Eigen::Matrix<double, 3, 1>;
 /// 3x2 fixed size matrix for non-square Jacobians
 using matrix32 = Eigen::Matrix<double, 3, 2>;
 
