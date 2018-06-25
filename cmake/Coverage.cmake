@@ -6,7 +6,7 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
 
 add_custom_target(coverage
-                  COMMAND ${CMAKE_MAKE_PROGRAM} -j4
+                  COMMAND ${CMAKE_MAKE_PROGRAM} -j2
                   COMMAND ctest
                   COMMAND lcov --capture --directory ${CMAKE_BINARY_DIR} --output-file coverage.info
                   # Remove the external libraries to get coverage for source only

@@ -20,11 +20,12 @@ script:
     # Coverage for rel with deb info
     - 'if [ "$BUILD_TYPE" = "RelWithDebInfo" ]; then
            docker exec neon-docker /bin/bash -c "pip install cpp-coveralls";
-           docker exec neon-docker /bin/bash -c "mkdir -p neon/build && cd neon/build && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DENABLE_COVERAGE=1 .. && make all -j2";
+           docker exec neon-docker /bin/bash -c "mkdir -p neon/build && cd neon/build && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DENABLE_COVERAGE=1 .. && make coverage";
        else
            docker exec neon-docker /bin/bash -c "mkdir -p neon/build && cd neon/build && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. && make all -j2";
+           docker exec neon-docker /bin/bash -c "cd neon/build && make install && ctest -j2 --output-on-failure";
        fi'
-    - docker exec neon-docker /bin/bash -c "cd neon/build && make install && ctest -j2 --output-on-failure";
+
 after_success:
     # Coverage
     - 'if [ "$BUILD_TYPE" = "RelWithDebInfo" ]; then
