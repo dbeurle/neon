@@ -73,34 +73,25 @@ class adaptive_time_step
 public:
     adaptive_time_step(json const& increment_data, std::vector<double> mandatory_time_history);
 
-    /** Check if the load increment is finalised */
-    [[nodiscard]] bool is_fully_applied() const { return is_applied; }
+    /// Check if the load increment is finalised
+    [[nodiscard]] bool is_fully_applied() const noexcept { return is_applied; }
 
-        /** Get the global time (including past load cases) */
-        [[nodiscard]] double time() const
-    {
-        return total_time + last_converged_time;
-    }
+    /// Get the global time (including past load cases)
+    [[nodiscard]] double time() const noexcept { return total_time + last_converged_time; }
 
-    /** Get the time only for the current load case */
-    [[nodiscard]] double step_time() const { return current_time; }
+    /// Get the time only for the current load case
+    [[nodiscard]] double step_time() const noexcept { return current_time; }
 
-        /** Get the time only for the last converged load case */
-        [[nodiscard]] double last_step_time() const
-    {
-        return last_converged_time;
-    }
+    /// Get the time only for the last converged load case
+    [[nodiscard]] double last_step_time() const noexcept { return last_converged_time; }
 
-    /** Get the pseudo time step size */
-    [[nodiscard]] double increment() const { return current_time - last_converged_time; }
+    /// Get the pseudo time step size
+    [[nodiscard]] double increment() const noexcept { return current_time - last_converged_time; }
 
-        /** The number of steps taken for all time */
-        [[nodiscard]] auto step() const
-    {
-        return successful_increments;
-    }
+    /// The number of steps taken for all time
+    [[nodiscard]] auto step() const noexcept { return successful_increments; }
 
-    /** Update the convergence state to determine the next increment */
+    /// Update the convergence state to determine the next increment
     void update_convergence_state(bool const is_converged);
 
     void reset(json const& new_increment_data);
@@ -127,13 +118,17 @@ protected:
     double final_time{1.0};
     double current_time{1.0};
 
-    double total_time{0.0}; //!< Time history for multi-step simulations
+    /// Time history for multi-step simulations
+    double total_time{0.0};
+    /// Last time when convergence was reached
+    double last_converged_time{0.0};
+    /// Last good timestep size
+    double last_converged_time_step_size{0.0};
 
-    double last_converged_time{0.0};           //!< Last time when convergence was reached
-    double last_converged_time_step_size{0.0}; //!< Last good timestep size
-
-    double minimum_increment; //!< Minimum increment allowed by the algorithm
-    double maximum_increment; //!< Maximum increment allowed by the algorithm
+    /// Minimum increment allowed by the algorithm
+    double minimum_increment;
+    /// Maximum increment allowed by the algorithm
+    double maximum_increment;
 
     bool is_applied{false};
 
