@@ -6,17 +6,15 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
 
 add_custom_target(coverage
-                  COMMAND ${CMAKE_MAKE_PROGRAM} -j2
                   COMMAND ctest
                   COMMAND lcov --capture --directory ${CMAKE_BINARY_DIR} --output-file coverage.info
-                  # Remove the external libraries to get coverage for source only
-                  COMMAND lcov --remove coverage.info '/usr/*' -o coverage.info
-                  COMMAND lcov --remove coverage.info '/build/blaze/*' -o coverage.info
-                  COMMAND lcov --remove coverage.info '/build/catch/*' -o coverage.info
-                  COMMAND lcov --remove coverage.info '/build/eigen3/*' -o coverage.info
-                  COMMAND lcov --remove coverage.info '/build/json/*' -o coverage.info
-                  COMMAND lcov --remove coverage.info '/build/range-v3/*' -o coverage.info
-                  COMMAND lcov --remove coverage.info '/build/termcolor/*' -o coverage.info)
-                  # Generate
-                #   COMMAND genhtml coverage.info --output-directory coverage_output
-                #   COMMAND xdg-open coverage_output/index.html)
+                  # Remove the external libraries to get coverage for neon source only
+                  COMMAND lcov --remove coverage.info '/usr/*'
+                                                      '${CMAKE_BINARY_DIR}/catch*'
+                                                      '${CMAKE_BINARY_DIR}/eigen3*'
+                                                      '${CMAKE_BINARY_DIR}/json*'
+                                                      '${CMAKE_BINARY_DIR}/range-v3*'
+                                                      '${CMAKE_BINARY_DIR}/termcolor*'
+                                                      -o coverage.info)
+                  # COMMAND genhtml coverage.info --output-directory coverage_output
+                  # COMMAND firefox coverage_output/index.html)
