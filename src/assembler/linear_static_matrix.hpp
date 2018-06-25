@@ -97,7 +97,7 @@ void linear_static_matrix<fem_mesh_type>::compute_external_force(double const lo
 {
     auto const start = std::chrono::steady_clock::now();
 
-    auto const step_time = adaptive_load.step_time();
+    // auto const step_time = adaptive_load.step_time();
 
     f_ext.setZero();
 

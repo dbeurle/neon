@@ -31,7 +31,6 @@ void gaussian_affine_microsphere::update_internal_variables(double const time_st
 
     auto const K = material.bulk_modulus();
     auto const G = material.shear_modulus();
-    auto const N = material.segments_per_chain();
 
     tbb::parallel_for(std::size_t{0}, deformation_gradients.size(), [&](auto const l) {
         // Compute the deviatoric (unimodular) deformation gradient

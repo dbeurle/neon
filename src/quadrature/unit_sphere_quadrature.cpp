@@ -90,6 +90,11 @@ unit_sphere_quadrature::unit_sphere_quadrature(point const p)
 
             break;
         }
+        case point::BO61:
+        {
+            throw std::domain_error("Sphere integration rule BO61 not yet implemented");
+            break;
+        }
         case point::FM900:
         {
             // 900 quadrature point scheme on the unit sphere.  This should only
