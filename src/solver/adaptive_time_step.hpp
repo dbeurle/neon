@@ -66,7 +66,6 @@ namespace neon
  *
  * TODO This class can be extended by including a smart prediction algorithm
  * for the determination of the best next step.
- *
  */
 class adaptive_time_step
 {
