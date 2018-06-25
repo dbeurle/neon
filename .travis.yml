@@ -21,6 +21,8 @@ script:
     - docker exec neon-docker /bin/bash -c "cd neon/build && make install && ctest -j2 --output-on-failure"
 after_success:
     # Coverage
-    - docker exec neon-docker /bin/bash -c "pip install cpp-coveralls"
-    - docker exec neon-docker /bin/bash -c "cd neon/build && make coverage && make install"
-    - docker exec neon-docker /bin/bash -c "cd neon/build && cpp-coveralls --lcov-file=coverage.info --no-gcov"
+    - 'if [ "$BUILD_TYPE" = "RelWithDebInfo" ]; then
+           docker exec neon-docker /bin/bash -c "pip install --user cpp-coveralls";
+           docker exec neon-docker /bin/bash -c "cd neon/build && cmake -DENABLE_COVERAGE=1 .. && make coverage && make install";
+           docker exec neon-docker /bin/bash -c "cd neon/build && cpp-coveralls --lcov-file=coverage.info --no-gcov";
+       fi'
