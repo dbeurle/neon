@@ -28,6 +28,7 @@ endif()
 
 if(ENABLE_COVERAGE)
     set_target_properties(neon PROPERTIES COMPILE_FLAGS "--coverage")
+    target_link_libraries(neon PRIVATE --coverage)
 endif()
 
 if(ENABLE_PROFILE)
