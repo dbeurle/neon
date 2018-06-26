@@ -1,8 +1,4 @@
 
-if(NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    message(FATAL_ERROR "Coverage only available when compiling with GCC.")
-endif()
-
 add_custom_target(coverage
                   COMMAND lcov --capture --directory ${CMAKE_BINARY_DIR} --output-file coverage.info
                   # Remove the external libraries to get coverage for neon source only
