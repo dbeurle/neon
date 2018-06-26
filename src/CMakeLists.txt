@@ -11,7 +11,8 @@ target_compile_options(neon PUBLIC $<$<CONFIG:RELEASE>:-O3>)
 set_target_properties(neon PROPERTIES CXX_STANDARD 17
                                       CXX_STANDARD_REQUIRED YES
                                       CXX_EXTENSIONS NO
-                           COMPILE_FLAGS "-Wall -Werror")
+                           COMPILE_FLAGS "-Wall -Wduplicated-cond -Werror"
+                           LINK_FLAGS "-fprofile-arcs")
 
 if (ENABLE_LTO)
     include(CheckIPOSupported)
@@ -23,6 +24,14 @@ endif()
 
 if (ENABLE_NATIVE)
     target_compile_options(neon PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-march=native -mtune=native>)
+endif()
+
+if(ENABLE_COVERAGE)
+    set_target_properties(neon PROPERTIES COMPILE_FLAGS "--coverage")
+endif()
+
+if(ENABLE_PROFILE)
+    set_target_properties(neon PROPERTIES COMPILE_FLAGS "-fno-omit-frame-pointer")
 endif()
 
 target_include_directories(neon PUBLIC ${CMAKE_SOURCE_DIR}/src

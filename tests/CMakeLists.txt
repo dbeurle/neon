@@ -39,7 +39,11 @@ foreach(test
     set_target_properties(${test}_test PROPERTIES CXX_STANDARD 17
                                                   CXX_STANDARD_REQUIRED YES
                                                   CXX_EXTENSIONS NO
-                                       COMPILE_FLAGS "-Wall")
+                                       COMPILE_FLAGS "-Wall -Werror")
+
+    if(ENABLE_COVERAGE)
+        set_target_properties(${test}_test PROPERTIES COMPILE_FLAGS "--coverage")
+    endif()
 
     add_test(${test}_test ${CMAKE_CURRENT_BINARY_DIR}/${test}_test)
 endforeach()
