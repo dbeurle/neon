@@ -3,13 +3,10 @@
 
 #include "exceptions.hpp"
 
-#include <stdexcept>
 #include <termcolor/termcolor.hpp>
 
 int main(int argc, char* argv[])
 {
-    using namespace neon;
-
     if (argc <= 1)
     {
         std::cerr << "No input file was provided.  Use <filename>.json\n";
@@ -18,7 +15,7 @@ int main(int argc, char* argv[])
 
     try
     {
-        simulation_parser simulation(argv[1]);
+        neon::simulation_parser simulation(argv[1]);
 
         simulation.start();
     }
