@@ -23,7 +23,8 @@ simulation_parser::simulation_parser(std::string const& input_file_name)
 {
     if (input_file_name == "" || input_file_name.empty())
     {
-        throw NoInputException();
+        throw std::domain_error("No input file found.  An input file needs to be provided: "
+                                "\"<filename>.neon\"\n");
     }
 
     boost::filesystem::path input_path(input_file_name);
@@ -34,7 +35,7 @@ simulation_parser::simulation_parser(std::string const& input_file_name)
 
     if (extension != ".json")
     {
-        throw InvalidExtensionException(extension);
+        throw std::domain_error("Extension \"" + extension + "\" is not supported, use \".neon\"");
     }
     this->parse();
 }

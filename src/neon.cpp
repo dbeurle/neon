@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
                   << termcolor::reset << std::flush << std::endl;
         return 1;
     }
-    catch (neon::MaterialPropertyException& error)
+    catch (std::domain_error& error)
     {
         std::cout << std::endl
                   << std::string(2, ' ') << termcolor::red << termcolor::bold << error.what()
