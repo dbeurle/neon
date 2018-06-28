@@ -26,19 +26,16 @@ The instructions in the section below can now be followed with the copy of the r
 ### Linux
 
 The external dependencies are:
- - Boost filesystem
+ - Boost filesystem (to be replaced with `std::filesystem`)
  - Pastix and MUMPS for direct linear solvers
- - Scotch for matrix reordering
- - OpenBLAS for linking to linear solvers
- - VTK for writing out simulation data to ParaView
- - A c++17 compatible compiler with unicode support (clang 4.0 or clang 5.0 development)
- - Jsoncpp for processing mesh files
- - OpenMP for parallelisation
+ - VTK for writing out simulation data to a ParaView compatible format
+ - An OpenMP enabled C++17 compiler
+ - Intel Thread Building Blocks TBB
 
 Other dependencies are pulled in during build time with `CMake` and include
 
  - Eigen
- - Range v3
+ - range-v3
  - Termcolor for colour terminal support
  - Catch for unit testing
 

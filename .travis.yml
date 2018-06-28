@@ -19,8 +19,7 @@ script:
     - docker run -e TRAVIS=$TRAVIS -e TRAVIS_JOB_ID=$TRAVIS_JOB_ID --name neon-docker -d -t neon /bin/bash
     # Coverage for rel with deb info
     - 'if [ "$BUILD_TYPE" = "RelWithDebInfo" ]; then
-           docker exec neon-docker /bin/bash -c "dnf install -y gem";
-           docker exec neon-docker /bin/bash -c "gem install coveralls-lcov";
+           docker exec neon-docker /bin/bash -c "dnf install -y gem && gem install coveralls-lcov";
            docker exec neon-docker /bin/bash -c "mkdir -p neon/build && cd neon/build && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DENABLE_COVERAGE=1 .. && make all -j2";
        else
            docker exec neon-docker /bin/bash -c "mkdir -p neon/build && cd neon/build && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. && make all -j2";

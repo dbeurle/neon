@@ -39,10 +39,12 @@ pipeline {
                         fi
                         cd build
                         rm -rf *
-                        cmake -DCMAKE_BUILD_TYPE=RelWithDebug ..
+                        cmake -DCMAKE_BUILD_TYPE=RelWithDebug -DENABLE_COVERAGE=1 ..
                         make all
                         export PATH=$PATH:$(pwd)
                         ctest
+                        make coverage
+                        coveralls-lcov coverage.info
                         '''
                     }
                 }
