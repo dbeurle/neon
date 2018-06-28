@@ -43,6 +43,8 @@ pipeline {
                         make all
                         export PATH=$PATH:$(pwd)
                         ctest
+                        make coverage
+                        coveralls-lcov coverage.info
                         '''
                     }
                 }
