@@ -7,9 +7,9 @@ RUN dnf update -y
 RUN dnf install -y  wget bzip2 patch lcov git mercurial cmake \
                     gcc-c++ openblas-devel MUMPS-devel \
                     boost-devel vtk-devel hwloc-devel scotch-devel \
-                    tbb-devel arpack-devel gem
+                    tbb-devel arpack-devel
 
-RUN gem install coveralls-lcov
+RUN pip install lcov_cobertura
 
 # Copy the current directory contents into the container at /
 COPY docker/add_libraries.diff docker/cmake_patch.diff docker/install_pastix.sh /
