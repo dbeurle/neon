@@ -47,10 +47,12 @@ pipeline {
                         '''
                     }
                     post {
-                        sh '''
-                            ls;
-                            pwd;
-                        '''
+                        success{
+                            sh '''
+                                ls;
+                                pwd;
+                            '''
+                        }
                     }
                 }
                 stage('gcc release') {
