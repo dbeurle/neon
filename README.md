@@ -80,7 +80,7 @@ Then clone the repository and add
 
 and enter the repository
 
-`$ cd neon/docker-base && sh install_pastix.sh`
+`$ cd neon/docker && sh install_pastix.sh`
 
 After this compiles and fails to install, enter the commands to install and link the libraries
 
