@@ -68,18 +68,11 @@ For checking the successful compilation of the program, invoke the test suite by
 
 in the build directory.
 
-#### Ubuntu 16.04
+#### Ubuntu 18.04
 
 Install dependencies through the package manager:
 
-`$ sudo apt install cmake git mercurical libz-dev libcurl3-dev libvtk6-dev libtbb-dev libboost-filesystem-dev libmumps-seq-dev libopenblas-dev libarpack2-dev, libscotch-dev, hwloc libhwloc-dev libgfortran-7-dev`
-
-Update to compatible CMake (https://cmake.org/download/).
-
-On 16.04 you need a C++17 compatible compiler:
-
-`$ sudo add-apt-repository ppa:ubuntu-toolchain-r/test`
-`$ sudo apt install g++-7`
+`$ sudo apt install cmake git mercurcial libvtk7-dev libtbb-dev libboost-filesystem-dev libmumps-seq-dev libopenblas-dev libarpack2-dev, libscotch-dev, hwloc libhwloc-dev libgfortran-7-dev g++`
 
 Then clone the repository and add
 
@@ -97,9 +90,9 @@ Provide the `sudo` password when prompted.  Go back to the top `neon` directory 
 
 `$ mkdir build && cd build`
 
-let `CMake` know want to use `g++-7` as a C++ compiler
+Configure the project with `CMake`
 
-`$ export CXX=g++-7; cmake ..`
+`$ cmake ..`
 
 finally compiling with
 
