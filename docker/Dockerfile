@@ -1,5 +1,5 @@
 
-FROM fedora:latest
+FROM fedora:28
 
 # Install any needed packages specified in dependencies.txt
 RUN dnf update -y

@@ -43,14 +43,14 @@ pipeline {
                         make all
                         export PATH=$PATH:$(pwd)
                         ctest
-                        make coverage
                         '''
                     }
                     post {
                         success{
                             sh '''
-                                ls;
-                                pwd;
+                                ls
+                                pwd
+                                make coverage
                             '''
                         }
                     }
