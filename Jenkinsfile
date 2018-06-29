@@ -48,9 +48,10 @@ pipeline {
                     post {
                         success{
                             sh '''
-                                ls
-                                pwd
+                                cd build
+                                ls -R
                                 make coverage
+
                             '''
                         }
                     }
