@@ -46,6 +46,12 @@ pipeline {
                         make coverage
                         '''
                     }
+                    post {
+                        sh '''
+                            ls;
+                            pwd;
+                        '''
+                    }
                 }
                 stage('gcc release') {
                     agent {
