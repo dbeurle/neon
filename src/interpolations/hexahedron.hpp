@@ -14,7 +14,9 @@ class hexahedron8 : public volume_interpolation
 public:
     explicit hexahedron8(hexahedron_quadrature::point const p);
 
-    virtual int nodes() const override final { return 8; }
+    virtual ~hexahedron8() = default;
+
+    int nodes() const override final { return 8; }
 
     /// \return The element volume
     double compute_measure(matrix const& nodal_coordinates) const;
@@ -44,6 +46,8 @@ class hexahedron20 : public volume_interpolation
 public:
     explicit hexahedron20(hexahedron_quadrature::point const p);
 
+    virtual ~hexahedron20() = default;
+
     int nodes() const override final { return 20; }
 
     /// \return The element volume
@@ -60,6 +64,8 @@ class hexahedron27 : public volume_interpolation
 {
 public:
     explicit hexahedron27(hexahedron_quadrature::point const p);
+
+    virtual ~hexahedron27() = default;
 
     int nodes() const override final { return 27; }
 

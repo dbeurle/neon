@@ -121,7 +121,9 @@ void fem_mesh::allocate_displacement_boundary(json const& boundary, basic_mesh c
             std::transform(begin(boundary_dofs),
                            end(boundary_dofs),
                            begin(boundary_dofs),
-                           [&](auto const dof) { return dof + dof_offset; });
+                           [&, dof_offset = std::ref(dof_offset)](auto const dof) {
+                               return dof + dof_offset;
+                           });
 
             displacement_bcs[boundary_name].emplace_back(boundary_dofs,
                                                          boundary,

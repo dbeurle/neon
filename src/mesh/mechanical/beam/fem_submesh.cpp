@@ -42,12 +42,12 @@ void fem_submesh::update_internal_variables(double const time_step_size)
         profile = std::make_unique<geometry::rectangular_bar>(1.0, 1.0);
     }
 
-    auto [A, As1, As2] = variables->get(variable::scalar::cross_sectional_area,
-                                        variable::scalar::shear_area_1,
-                                        variable::scalar::shear_area_2);
+    auto& A = variables->get(variable::scalar::cross_sectional_area);
+    auto& As1 = variables->get(variable::scalar::shear_area_1);
+    auto& As2 = variables->get(variable::scalar::shear_area_2);
 
-    auto [area_moment_1, area_moment_2] = variables->get(variable::scalar::second_moment_area_1,
-                                                         variable::scalar::second_moment_area_2);
+    auto& area_moment_1 = variables->get(variable::scalar::second_moment_area_1);
+    auto& area_moment_2 = variables->get(variable::scalar::second_moment_area_2);
 
     // Loop over all elements and quadrature points to compute the profile
     // properties for each quadrature point in the beam

@@ -27,6 +27,8 @@ public:
     {
     }
 
+    virtual ~constitutive_model() = default;
+
     /// Update required internal variables and tangent matrix at quadrature points
     /// \param time_step_size Time step size (or load increment if quasi-static)
     virtual void update_internal_variables(double const time_step_size) = 0;
