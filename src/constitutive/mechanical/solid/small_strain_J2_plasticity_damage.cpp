@@ -34,24 +34,17 @@ small_strain_J2_plasticity_damage::~small_strain_J2_plasticity_damage() = defaul
 void small_strain_J2_plasticity_damage::update_internal_variables(double const time_step_size)
 {
     // Retrieve the internal variables
-    auto [plastic_strains,
-          strains,
-          cauchy_stresses,
-          back_stresses,
-          accumulated_kinematic_stresses] = variables->get(variable::second::linearised_plastic_strain,
-                                                           variable::second::linearised_strain,
-                                                           variable::second::cauchy_stress,
-                                                           variable::second::back_stress,
-                                                           variable::second::kinematic_hardening);
+    auto& plastic_strains = variables->get(variable::second::linearised_plastic_strain);
+    auto& strains = variables->get(variable::second::linearised_strain);
+    auto& accumulated_plastic_strains = variables->get(variable::scalar::effective_plastic_strain);
+    auto& accumulated_kinematic_stresses = variables->get(variable::second::kinematic_hardening);
 
-    // Retrieve the accumulated internal variables
-    auto [accumulated_plastic_strains,
-          von_mises_stresses,
-          scalar_damages,
-          energy_release_rates] = variables->get(variable::scalar::effective_plastic_strain,
-                                                 variable::scalar::von_mises_stress,
-                                                 variable::scalar::damage,
-                                                 variable::scalar::energy_release_rate);
+    auto& cauchy_stresses = variables->get(variable::second::cauchy_stress);
+    auto& back_stresses = variables->get(variable::second::back_stress);
+    auto& von_mises_stresses = variables->get(variable::scalar::von_mises_stress);
+
+    auto& energy_release_rates = variables->get(variable::scalar::energy_release_rate);
+    auto& scalar_damages = variables->get(variable::scalar::damage);
 
     auto& tangent_operators = variables->get(variable::fourth::tangent_operator);
 

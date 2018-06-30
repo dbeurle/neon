@@ -23,14 +23,12 @@ namespace neon::diffusion::boundary
 class newton_convection : public surface_load<surface_interpolation>
 {
 public:
-    /**
-     * Construct the boundary condition
-     * @param sf A surface interpolation
-     * @param node_indices
-     * @param times A list of times and values
-     * @param heat_flux A list of heat fluxes
-     * @param external_temperature A list of heat transfer coefficients
-     */
+    /// Construct the boundary condition
+    /// \param sf A surface interpolation
+    /// \param node_indices
+    /// \param times A list of times and values
+    /// \param heat_flux A list of heat fluxes
+    /// \param external_temperature A list of heat transfer coefficients
     explicit newton_convection(std::unique_ptr<surface_interpolation>&& sf,
                                indices node_indices,
                                indices dof_indices,
@@ -39,12 +37,10 @@ public:
                                json const& heat_flux,
                                json const& heat_transfer_coefficient);
 
-    /**
-     * Compute the element stiffness matrix contributing to the mixed boundary condition
-       \f{align*}{
-         k_{ab} &= \int_{\Gamma} N_a \lambda N_b d\Gamma
-       \f}
-     */
+    /// Compute the element stiffness matrix contributing to the mixed boundary condition
+    ///   \f{align*}{
+    ///     k_{ab} &= \int_{\Gamma} N_a \lambda N_b d\Gamma
+    ///   \f}
     [[nodiscard]] std::pair<index_view, matrix> external_stiffness(std::int64_t const element,
                                                                    double const load_factor) const;
 

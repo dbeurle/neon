@@ -11,7 +11,7 @@ class hermite : public line_interpolation
 public:
     hermite(line_quadrature::point const p);
 
-    virtual int nodes() const override final { return 2; }
+    int nodes() const override final { return 2; }
 
     /// \return element length
     double compute_measure(matrix const& nodal_coordinates) const;

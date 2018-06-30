@@ -33,17 +33,16 @@ public:
                                 json const& material_data,
                                 unit_sphere_quadrature::point const p);
 
-    virtual void update_internal_variables(double const time_step_size) override;
+    virtual ~affine_microsphere() = default;
 
-    [[nodiscard]] virtual material_property const& intrinsic_material() const noexcept override final
+    void update_internal_variables(double const time_step_size) override;
+
+    [[nodiscard]] material_property const& intrinsic_material() const noexcept override final
     {
         return material;
     }
 
-    [[nodiscard]] virtual bool is_finite_deformation() const noexcept override final
-    {
-        return true;
-    }
+    [[nodiscard]] bool is_finite_deformation() const noexcept override final { return true; }
 
 protected:
     /**

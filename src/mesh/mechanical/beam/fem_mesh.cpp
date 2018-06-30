@@ -105,7 +105,7 @@ void fem_mesh::allocate_dirichlet_boundary(std::string const& boundary_type,
             std::transform(begin(boundary_dofs),
                            end(boundary_dofs),
                            begin(boundary_dofs),
-                           [&](auto const dof) {
+                           [&, dof_offset = std::ref(dof_offset)](auto const dof) {
                                return dof + dof_offset + (boundary_type == "displacement" ? 0 : 3);
                            });
 

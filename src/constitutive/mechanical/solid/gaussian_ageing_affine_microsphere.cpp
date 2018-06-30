@@ -80,34 +80,29 @@ gaussian_ageing_affine_microsphere::gaussian_ageing_affine_microsphere(
 
 void gaussian_ageing_affine_microsphere::update_internal_variables(double const time_step_size)
 {
-    auto [active_shear_modulus,
-          inactive_shear_modulus,
-          reduction_factor,
-          active_segments,
-          inactive_segments] = variables->get(variable::scalar::active_shear_modulus,
-                                              variable::scalar::inactive_shear_modulus,
-                                              variable::scalar::reduction_factor,
-                                              variable::scalar::active_segments,
-                                              variable::scalar::inactive_segments);
+    // Polymer network values
+    auto& active_shear_modulus = variables->get(variable::scalar::active_shear_modulus);
+    auto& inactive_shear_modulus = variables->get(variable::scalar::inactive_shear_modulus);
+    auto& reduction_factor = variables->get(variable::scalar::reduction_factor);
+    auto& active_segments = variables->get(variable::scalar::active_segments);
+    auto& inactive_segments = variables->get(variable::scalar::inactive_segments);
 
     // accumulated integral values from time integration
-    auto [moduli1,
-          moduli2,
-          moduli3] = variables->get(variable::vector::first_ageing_moduli,
-                                    variable::vector::second_ageing_moduli,
-                                    variable::vector::third_ageing_moduli);
+    auto& moduli1 = variables->get(variable::vector::first_ageing_moduli);
+    auto& moduli2 = variables->get(variable::vector::second_ageing_moduli);
+    auto& moduli3 = variables->get(variable::vector::third_ageing_moduli);
 
-    auto [sphere1, sphere2, sphere3] = variables->get(variable::vector::first_previous,
-                                                      variable::vector::second_previous,
-                                                      variable::vector::third_previous);
+    auto& sphere1 = variables->get(variable::vector::first_previous);
+    auto& sphere2 = variables->get(variable::vector::second_previous);
+    auto& sphere3 = variables->get(variable::vector::third_previous);
 
-    auto& moduli1_old = variables->get_old(variable::vector::first_ageing_moduli);
-    auto& moduli2_old = variables->get_old(variable::vector::second_ageing_moduli);
-    auto& moduli3_old = variables->get_old(variable::vector::third_ageing_moduli);
+    auto const& moduli1_old = variables->get_old(variable::vector::first_ageing_moduli);
+    auto const& moduli2_old = variables->get_old(variable::vector::second_ageing_moduli);
+    auto const& moduli3_old = variables->get_old(variable::vector::third_ageing_moduli);
 
-    auto& sphere1_old = variables->get_old(variable::vector::first_previous);
-    auto& sphere2_old = variables->get_old(variable::vector::second_previous);
-    auto& sphere3_old = variables->get_old(variable::vector::third_previous);
+    auto const& sphere1_old = variables->get_old(variable::vector::first_previous);
+    auto const& sphere2_old = variables->get_old(variable::vector::second_previous);
+    auto const& sphere3_old = variables->get_old(variable::vector::third_previous);
 
     auto& cauchy_stresses = variables->get(variable::second::cauchy_stress);
 
