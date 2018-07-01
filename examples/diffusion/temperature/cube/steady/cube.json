@@ -11,7 +11,7 @@
         "SpecificHeat" : 390.0
     }],
     "SimulationCases" : [{
-        "Name" : "LinearGradient",
+        "Name" : "linear_temperature_gradient",
         "Module" : "HeatDiffusion",
         "Solution" : "Equilibrium",
         "Time" : {
