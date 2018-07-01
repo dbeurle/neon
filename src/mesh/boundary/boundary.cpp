@@ -36,7 +36,7 @@ boundary::boundary(json const& boundary, std::string const& name, double const g
 
 bool boundary::is_active(double const time) const
 {
-    // Check if the time
+    // Check if the time is within the bounds
     auto const initial_time = time_load.front().first;
     auto const final_time = time_load.back().first;
 

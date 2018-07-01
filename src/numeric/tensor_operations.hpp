@@ -247,10 +247,8 @@ namespace d2
     // clang-format on
 }
 
-/**
- * Compute the fourth order symmetric identity tensor in Voigt notation according to
- * \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
- */
+/// Compute the fourth order symmetric identity tensor in Voigt notation according to
+/// \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
 [[nodiscard]] inline matrix3 fourth_order_identity()
 {
     // clang-format off
@@ -261,11 +259,9 @@ namespace d2
 }
 }
 
-/**
- * Compute the deviatoric tensor in Voigt notation according to
- * \f$ \mathbb{P} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) -
- * \frac{1}{3}\delta_{ij} \delta_{kl} \f$
- */
+/// Compute the deviatoric tensor in Voigt notation according to
+/// \f$ \mathbb{P} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) -
+/// \frac{1}{3}\delta_{ij} \delta_{kl} \f$
 [[nodiscard]] inline matrix6 deviatoric()
 {
     // clang-format off
@@ -278,10 +274,8 @@ namespace d2
     // clang-format on
 }
 
-/**
- * Compute the fourth order symmetric identity tensor in Voigt notation according to
- * \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
- */
+/// Compute the fourth order symmetric identity tensor in Voigt notation according to
+/// \f$ \mathbb{I} = \frac{1}{2}(\delta_{ik} \delta_{jl} + \delta_{il} \delta_{jk}) \f$
 [[nodiscard]] inline matrix6 fourth_order_identity()
 {
     // clang-format off
@@ -329,11 +323,9 @@ namespace kinetic
 {
 namespace detail
 {
-/**
- * Convert second order tensor to Voigt notation according to
- * \f$ \begin{bmatrix} \sigma_{11} \\ \sigma_{22} \\ \sigma_{12} \end{bmatrix} = \begin{bmatrix}
- * \sigma_{11} & \sigma_{12}  \\ \sigma_{21} & \sigma_{22} \end{bmatrix} \f$
- */
+/// Convert second order tensor to Voigt notation according to
+/// \f$ \begin{bmatrix} \sigma_{11} \\ \sigma_{22} \\ \sigma_{12} \end{bmatrix} = \begin{bmatrix}
+/// \sigma_{11} & \sigma_{12}  \\ \sigma_{21} & \sigma_{22} \end{bmatrix} \f$
 [[nodiscard]] inline vector3 to(matrix2 const& a)
 {
     return (vector3() << a(0, 0), a(1, 1), a(0, 1)).finished();

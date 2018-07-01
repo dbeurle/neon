@@ -100,7 +100,7 @@ public:
 
         // Perform the computation of the external load vector
         auto const f_ext = sf->quadrature().integrate(vector::Zero(X.cols()).eval(),
-                                                      [&](auto const& femval, auto const l) -> vector {
+                                                      [&](auto const& femval, auto const) -> vector {
                                                           auto const& [N, dN] = femval;
 
                                                           return N * jacobian_determinant(X * dN);

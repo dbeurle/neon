@@ -48,8 +48,7 @@ void finite_strain_J2_plasticity::update_internal_variables(double const time_st
                                             variable::second::hencky_strain_elastic,
                                             variable::second::cauchy_stress);
 
-    auto const old_deformation_gradients = variables->get_old(
-        variable::second::deformation_gradient);
+    auto const old_deformation_gradients = variables->get_old(variable::second::deformation_gradient);
 
     auto const J_list = variables->get(variable::scalar::DetF);
 

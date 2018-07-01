@@ -51,8 +51,8 @@ protected:
      * macro stress tensor according to
      * \f{align*}{
        \boldsymbol{\tau} &= p \boldsymbol{g}^{-1} + \mathbb{P} : \bar{\boldsymbol{\tau}} \f}
-     * @param pressure Hydrostatic pressure
-     * @param macro_stress Stress tensor from unit sphere homogenisation
+     * \param pressure Hydrostatic pressure
+     * \param macro_stress Stress tensor from unit sphere homogenisation
      */
     [[nodiscard]] matrix3 compute_kirchhoff_stress(double const pressure,
                                                    matrix3 const& macro_stress) const;
@@ -65,49 +65,49 @@ protected:
      \mathbb{I} - \frac{2}{3}
      (\bar{\boldsymbol{\tau}} \otimes \boldsymbol{g}^{-1} + \boldsymbol{g}^{-1} \otimes
      \bar{\boldsymbol{\tau}}) \right] : \mathbb{P} \f}
-     * @param J Determinant of deformation gradient
-     * @param K Shear modulus
-     * @param macro_C Macromoduli from unit sphere
-     * @param macro_stress Macrostress from unit sphere
+     * \param J Determinant of deformation gradient
+     * \param K Shear modulus
+     * \param macro_C Macromoduli from unit sphere
+     * \param macro_stress Macrostress from unit sphere
      */
     [[nodiscard]] matrix6 compute_material_tangent(double const J,
                                                    double const K,
                                                    matrix6 const& macro_C,
                                                    matrix3 const& macro_stress) const;
 
-    /**
-     * Compute the macro stress using the unit sphere homogenisation
-     * technique for a given F and N and perform the deviatoric projection
-     * @param F_unimodular Unimodular decomposition of the deformation gradient
-     * @param shear_modulus The material shear modulus
-     * @param N number of segments per chain
-     * @return Kirchhoff stress tensor
-     */
+    /// Compute the macro stress using the unit sphere homogenisation
+    /// technique for a given F and N and perform the deviatoric projection
+    /// \param F_unimodular Unimodular decomposition of the deformation gradient
+    /// \param shear_modulus The material shear modulus
+    /// \param N number of segments per chain
+    /// \return Kirchhoff stress tensor
     [[nodiscard]] matrix3 compute_macro_stress(matrix3 const& F_unimodular,
                                                double const shear_modulus,
                                                double const N) const;
 
-    /**
-     * Compute the material tangent matrix using the unit sphere homogenisation
-     * technique for a given F and N
-     * @param F_unimodular Unimodular decomposition of the deformation gradient
-     * @param shear_modulus The material shear modulus
-     * @param N number of segments per chain
-     * @return Macromoduli from unit sphere homogenisation
-     */
+    /// Compute the material tangent matrix using the unit sphere homogenisation
+    /// technique for a given F and N
+    /// \param F_unimodular Unimodular decomposition of the deformation gradient
+    /// \param shear_modulus The material shear modulus
+    /// \param N number of segments per chain
+    /// \return Macromoduli from unit sphere homogenisation
     [[nodiscard]] matrix6 compute_macro_moduli(matrix3 const& F_unimodular,
                                                double const shear_modulus,
                                                double const N) const;
 
 protected:
-    unit_sphere_quadrature unit_sphere; /// Unit sphere quadrature rule
-
-    matrix6 const IoI = voigt::I_outer_I();                      /// Outer product
-    matrix6 const I = voigt::kinematic::fourth_order_identity(); /// Fourth order identity
-    matrix6 const P = voigt::kinetic::deviatoric();              /// Deviatoric fourth order tensor
+    /// Unit sphere quadrature rule
+    unit_sphere_quadrature unit_sphere;
+    /// Outer product
+    matrix6 const IoI = voigt::I_outer_I();
+    /// Fourth order identity
+    matrix6 const I = voigt::kinematic::fourth_order_identity();
+    /// Deviatoric fourth order tensor
+    matrix6 const P = voigt::kinetic::deviatoric();
 
 private:
-    micromechanical_elastomer material; //!< Material with micromechanical parameters
+    /// Material with micromechanical parameters
+    micromechanical_elastomer material;
 };
 
 /** \} */

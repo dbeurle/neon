@@ -79,7 +79,7 @@ matrix3 gaussian_affine_microsphere::compute_macro_stress(matrix3 const& F_unimo
 {
     return 3.0 * shear_modulus
            * unit_sphere.integrate(matrix3::Zero().eval(),
-                                   [&](auto const& coordinates, auto const l) -> matrix3 {
+                                   [&](auto const& coordinates, auto const) -> matrix3 {
                                        auto const& [r, _] = coordinates;
 
                                        vector3 const t = deformed_tangent(F_unimodular, r);
