@@ -56,7 +56,7 @@ matrix3 affine_microsphere::compute_kirchhoff_stress(double const pressure,
                                                      matrix3 const& macro_stress) const
 {
     // clang-format off
-    return pressure * matrix3::Identity() + voigt::kinetic::from(P * voigt::kinetic::to(macro_stress));
+    return pressure * matrix3::Identity() + macro_stress - 1.0 / 3.0 * macro_stress.trace() * matrix3::Identity();
     // clang-format on
 }
 
