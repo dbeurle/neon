@@ -16,8 +16,7 @@ isotropic_linear_elasticity::isotropic_linear_elasticity(std::shared_ptr<interna
                                                          plane const state)
     : constitutive_model(variables), material(material_data), state(state)
 {
-    variables->add(variable::second::linearised_strain,
-                   variable::scalar::von_mises_stress);
+    variables->add(variable::second::linearised_strain, variable::scalar::von_mises_stress);
 
     names.emplace("linearised_strain");
     names.emplace("von_mises_stress");
@@ -35,9 +34,8 @@ void isotropic_linear_elasticity::update_internal_variables(double const time_st
     // std::cout << "Performing the internal variable updates" << std::endl;
 
     // Extract the internal variables
-    auto [elastic_strains,
-          cauchy_stresses] = variables->get(variable::second::linearised_strain,
-                                            variable::second::cauchy_stress);
+    auto [elastic_strains, cauchy_stresses] = variables->get(variable::second::linearised_strain,
+                                                             variable::second::cauchy_stress);
 
     auto& von_mises_stresses = variables->get(variable::scalar::von_mises_stress);
 
@@ -55,7 +53,7 @@ void isotropic_linear_elasticity::update_internal_variables(double const time_st
     }
 
     // Compute Cauchy stress from the linear elastic strains
-    cauchy_stresses = view::zip(tangents, elastic_strains) | view::transform([this](auto const& tpl) {
+    cauchy_stresses = view::zip(tangents, elastic_strains) | view::transform([](auto const& tpl) {
                           auto const& [C, elastic_strain] = tpl;
                           return voigt::kinetic::from(C * voigt::kinematic::to(elastic_strain));
                       });

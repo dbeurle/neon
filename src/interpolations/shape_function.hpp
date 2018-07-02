@@ -25,6 +25,8 @@ public:
     {
     }
 
+    virtual ~shape_function() = default;
+
     /// \return Number of nodes in the interpolation function
     virtual int nodes() const = 0;
 
@@ -49,8 +51,9 @@ protected:
 };
 
 template <typename quadrature_t>
-void shape_function<quadrature_t>::compute_extrapolation_matrix(
-    matrix const N, matrix const local_nodal_coordinates, matrix const local_quadrature_coordinates)
+void shape_function<quadrature_t>::compute_extrapolation_matrix(matrix const N,
+                                                                matrix const local_nodal_coordinates,
+                                                                matrix const local_quadrature_coordinates)
 {
     // Take short names for consistency with algorithm
 

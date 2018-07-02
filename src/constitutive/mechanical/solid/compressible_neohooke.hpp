@@ -25,23 +25,22 @@ namespace neon::mechanical::solid
 class compressible_neohooke : public constitutive_model
 {
 public:
-    /**
-     * @param variables Reference to internal state variable store
-     * @param material_data Json object with material data
-     */
+    /// \param variables Reference to internal state variable store
+    /// \param material_data Json object with material data
     explicit compressible_neohooke(std::shared_ptr<internal_variables_t>& variables,
                                    json const& material_data);
 
-    ~compressible_neohooke() = default;
+    virtual ~compressible_neohooke() = default;
 
-    virtual void update_internal_variables(double const time_step_size) override final;
+    void update_internal_variables(double const time_step_size) override final;
 
-    virtual material_property const& intrinsic_material() const override final { return material; };
+    material_property const& intrinsic_material() const override final { return material; };
 
-    virtual bool is_finite_deformation() const override final { return true; };
+    bool is_finite_deformation() const override final { return true; };
 
 private:
-    isotropic_elastic_property material; //!< Elastic model where C1 = mu/2 and C2 = bulk-modulus / 2
+    /// Elastic model where C1 = mu/2 and C2 = bulk-modulus / 2
+    isotropic_elastic_property material;
 };
 /** \} */
 }

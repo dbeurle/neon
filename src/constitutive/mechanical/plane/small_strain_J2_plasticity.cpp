@@ -34,16 +34,12 @@ void small_strain_J2_plasticity::update_internal_variables(double const time_ste
     auto const shear_modulus = material.shear_modulus();
 
     // Extract the internal variables
-    auto [plastic_strains,
-          strains,
-          cauchy_stresses] = variables->get(variable::second::linearised_plastic_strain,
-                                            variable::second::linearised_strain,
-                                            variable::second::cauchy_stress);
+    auto& plastic_strains = variables->get(variable::second::linearised_plastic_strain);
+    auto& strains = variables->get(variable::second::linearised_strain);
+    auto& accumulated_plastic_strains = variables->get(variable::scalar::effective_plastic_strain);
 
-    // Retrieve the accumulated internal variables
-    auto [accumulated_plastic_strains,
-          von_mises_stresses] = variables->get(variable::scalar::effective_plastic_strain,
-                                               variable::scalar::von_mises_stress);
+    auto& cauchy_stresses = variables->get(variable::second::cauchy_stress);
+    auto& von_mises_stresses = variables->get(variable::scalar::von_mises_stress);
 
     auto& tangent_operators = variables->get(variable::fourth::tangent_operator);
 

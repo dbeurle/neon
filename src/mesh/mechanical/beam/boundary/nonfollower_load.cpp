@@ -30,7 +30,7 @@ nonfollower_load_boundary::nonfollower_load_boundary(
                     std::transform(begin(node_indices),
                                    end(node_indices),
                                    begin(node_indices),
-                                   [&](auto const node) {
+                                   [&, dof_offset = std::ref(dof_offset)](auto const node) {
                                        return node * 6 + dof_offset + (type == "force" ? 0 : 3);
                                    });
 

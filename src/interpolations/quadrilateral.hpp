@@ -6,13 +6,15 @@
 
 namespace neon
 {
-/** A finite element with 4 nodal points and an isoparametric formulation */
+/// A finite element with 4 nodal points and an isoparametric formulation
 class quadrilateral4 : public surface_interpolation
 {
 public:
-    quadrilateral4(quadrilateral_quadrature::point const p);
+    explicit quadrilateral4(quadrilateral_quadrature::point const p);
 
-    virtual int nodes() const override final { return 4; }
+    virtual ~quadrilateral4() = default;
+
+    int nodes() const override final { return 4; }
 
     [[nodiscard]] double compute_measure(matrix const& nodal_coordinates) const;
 
@@ -31,11 +33,13 @@ protected:
     void precompute_shape_functions();
 };
 
-/** A finite element with 8 nodal points and an isoparametric formulation */
+/// A finite element with 8 nodal points and an isoparametric formulation
 class quadrilateral8 : public surface_interpolation
 {
 public:
-    quadrilateral8(quadrilateral_quadrature::point const p);
+    explicit quadrilateral8(quadrilateral_quadrature::point const p);
+
+    virtual ~quadrilateral8() = default;
 
     int nodes() const override final { return 8; }
 
@@ -45,11 +49,13 @@ protected:
     void precompute_shape_functions();
 };
 
-/** A finite element with 8 nodal points and an isoparametric formulation */
+/// A finite element with 8 nodal points and an isoparametric formulation
 class quadrilateral9 : public surface_interpolation
 {
 public:
-    quadrilateral9(quadrilateral_quadrature::point const p);
+    explicit quadrilateral9(quadrilateral_quadrature::point const p);
+
+    virtual ~quadrilateral9() = default;
 
     int nodes() const override final { return 9; }
 

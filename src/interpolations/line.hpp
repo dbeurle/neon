@@ -10,9 +10,11 @@ namespace neon
 class line2 : public line_interpolation
 {
 public:
-    line2(line_quadrature::point const p);
+    explicit line2(line_quadrature::point const p);
 
-    virtual int nodes() const override final { return 2; }
+    virtual ~line2() = default;
+
+    int nodes() const override final { return 2; }
 
     /// \return Element length
     double compute_measure(matrix const& nodal_coordinates) const;
@@ -32,9 +34,11 @@ protected:
 class line3 : public line_interpolation
 {
 public:
-    line3(line_quadrature::point const p);
+    explicit line3(line_quadrature::point const p);
 
-    virtual int nodes() const override final { return 3; }
+    virtual ~line3() = default;
+
+    int nodes() const override final { return 3; }
 
     /// \return Element length
     double compute_measure(matrix const& nodal_coordinates) const;
