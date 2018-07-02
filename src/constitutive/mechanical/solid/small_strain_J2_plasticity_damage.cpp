@@ -211,8 +211,7 @@ double small_strain_J2_plasticity_damage::perform_radial_return(matrix3& cauchy_
     // ensure that the damage does not exceed one
     if (y(14) > 1)
     {
-        std::cout << "Damage is greater than one\n";
-        std::cout << "Consider decreasing the load\n";
+        std::cout << "Damage is greater than one\nConsider decreasing the load\n";
         throw computational_error("Radial return failure\n");
     }
 
