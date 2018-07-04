@@ -7,7 +7,7 @@ RUN dnf update -y
 RUN dnf install -y  wget bzip2 patch lcov git mercurial cmake \
                     gcc-c++ openblas-devel MUMPS-devel \
                     boost-devel vtk-devel hwloc-devel scotch-devel \
-                    tbb-devel arpack-devel
+                    tbb-devel arpack-devel libomp-devel
 
 RUN pip install lcov_cobertura
 
