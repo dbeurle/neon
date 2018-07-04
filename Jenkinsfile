@@ -63,7 +63,7 @@ pipeline {
                         fi
                         cd build
                         rm -rf *
-                        export CXX=clang+
+                        export CXX=clang++
                         cmake -DCMAKE_BUILD_TYPE=Release ..
                         make all
                         export PATH=$PATH:$(pwd)
