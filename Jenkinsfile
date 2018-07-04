@@ -41,7 +41,7 @@ pipeline {
                         cd build
                         rm -rf *
                         export CXX=clang++
-                        cmake -DCMAKE_BUILD_TYPE=RelWithDebug -DENABLE_COVERAGE=1 ..
+                        cmake -DCMAKE_BUILD_TYPE=RelWithDebug ..
                         make all
                         export PATH=$PATH:$(pwd)
                         ctest
