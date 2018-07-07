@@ -94,6 +94,10 @@ Now we are going to create the build directory and compile.  Navigate back to th
 
 `$ mkdir build && cd build`
 
+We can create the compilation environment and setup optimisations using `CMake` with
+
+`cmake -DCMAKE_BUILD_TYPE=Release ..`
+
 Finally compiling with
 
 `$ make all -jN`
