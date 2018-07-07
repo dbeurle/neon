@@ -11,7 +11,7 @@ target_compile_options(neon PUBLIC $<$<CONFIG:RELEASE>:-O3>)
 set_target_properties(neon PROPERTIES CXX_STANDARD 17
                                       CXX_STANDARD_REQUIRED YES
                                       CXX_EXTENSIONS NO
-                           COMPILE_FLAGS "-Wall -Werror"
+                           COMPILE_FLAGS "-Wall"
                            LINK_FLAGS "-fprofile-arcs")
 
 if (ENABLE_LTO)
