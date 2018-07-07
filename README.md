@@ -74,7 +74,7 @@ in the build directory.
 
 Install dependencies through the package manager:
 
-`$ sudo apt install cmake git mercurial zlib1g-dev libcurl4-openssl-dev libvtk6-dev libtbb-dev libboost-filesystem-dev libmumps-seq-dev libopenblas-dev libarpack2-dev libscotch-dev hwloc libhwloc-dev libgfortran-8-dev`
+`$ sudo apt install cmake git mercurial zlib1g-dev libcurl4-openssl-dev libvtk6-dev libtbb-dev libboost-filesystem-dev libmumps-seq-dev libopenblas-dev libarpack2-dev libscotch-dev hwloc libhwloc-dev gfortran`
 
 Then clone the repository and add
 
