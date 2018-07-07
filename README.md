@@ -21,7 +21,7 @@ This will pull down the base image and then clone the git repository inside the 
 
 Once this is completed, enter the following commands to enter the docker container
 
-- `sudo docker run -i -t neon /bin/bash`
+- `$ sudo docker run -i -t neon /bin/bash`
 
 The instructions in the section below can now be followed with the copy of the repository inside the docker container without worrying about dependencies.
 
@@ -66,7 +66,7 @@ If you have an NVIDIA graphics card, then you can use the CUDA enabled iterative
 
 For checking the successful compilation of the program, invoke the test suite by executing
 
-- `ctest`
+- `$ ctest`
 
 in the build directory.
 
@@ -86,7 +86,7 @@ and enter the repository
 
 After this compiles and fails to install, enter the commands to install and link the libraries
 
-`cd pastix_5.2.3/build && sudo make install && sudo ln -s /usr/local/lib/libpastix.so /usr/lib/libpastix.so`
+`$ cd pastix_5.2.3/build && sudo make install && sudo ln -s /usr/local/lib/libpastix.so /usr/lib/libpastix.so`
 
 Provide the `sudo` password when prompted.
 
@@ -96,7 +96,7 @@ Now we are going to create the build directory and compile.  Navigate back to th
 
 We can create the compilation environment and setup optimisations using `CMake` with
 
-`cmake -DCMAKE_BUILD_TYPE=Release ..`
+`$ cmake -DCMAKE_BUILD_TYPE=Release ..`
 
 Finally compiling with
 
@@ -110,7 +110,7 @@ You can then install using
 
 and run the test suite with
 
-`ctest`
+`$ ctest`
 
 to ensure the program is behaving as expected.
 
