@@ -39,6 +39,9 @@ if (ENABLE_COVERAGE)
 endif()
 
 if (ENABLE_TESTS)
+    # Required for integration tests
+    include(FindPythonInterp)
+
     include(CTest)
     add_subdirectory(tests)
     add_subdirectory(examples)
