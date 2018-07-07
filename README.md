@@ -88,15 +88,27 @@ After this compiles and fails to install, enter the commands to install and link
 
 `cd pastix_5.2.3/build && sudo make install && sudo ln -s /usr/local/lib/libpastix.so /usr/lib/libpastix.so`
 
-Provide the `sudo` password when prompted.  Go back to the top `neon` directory and create and enter the `build` directory
+Provide the `sudo` password when prompted.
+
+Now we are going to create the build directory and compile.  Navigate back to the `neon` directory and create and enter the `build` directory
 
 `$ mkdir build && cd build`
 
-and finally compiling with
+Finally compiling with
 
 `$ make all -jN`
 
 where `N` is the number of parallel build jobs you want to run.
+
+You can then install using 
+
+`$ sudo make install`
+
+and run the test suite with
+
+`ctest`
+
+to ensure the program is behaving as expected.
 
 ## Licensing
 
