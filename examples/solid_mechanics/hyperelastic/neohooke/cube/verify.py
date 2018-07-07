@@ -1,4 +1,4 @@
-# Script inspired by 
+# Script inspired by
 # https://stackoverflow.com/questions/21630987/probing-sampling-interpolating
 # -vtk-data-using-python-tvtk-or-mayavi
 
@@ -45,9 +45,9 @@ def interpolate_over_line(line, reader):
     # Get the data from the VTK-object (probe) to an numpy array
     q = vtk_to_numpy(probe.GetOutput().GetPointData().GetArray(displacement))
 
-    samples_on_line = probe.GetOutput().GetNumberOfPoints() 
+    samples_on_line = probe.GetOutput().GetNumberOfPoints()
 
-    # Initialise the points on the line    
+    # Initialise the points on the line
     x = np.zeros(samples_on_line)
     y = np.zeros(samples_on_line)
     z = np.zeros(samples_on_line)
@@ -84,16 +84,16 @@ if displacement in field_requests:
 
     if not is_close(max([max(sublist) for sublist in results]), 0.5):
         print('Maximum displacement incorrect', file=sys.stderr)
-        sys.exit()
+        sys.exit(1)
 
     m, b = np.polyfit(points[:, 2], results[:, 2], 1)
-       
+
     if not is_close(m, 0.5, 1.0e-7) and not is_close(b, 0.0, 1.0e-7):
         print('Displacement gradient is incorrect', file=sys.stderr)
-        sys.exit()
+        sys.exit(1)
 
 else:
     print('displacement not in output file', file=sys.stderr)
-    sys.exit()
+    sys.exit(1)
 
 print('All checks passed')
