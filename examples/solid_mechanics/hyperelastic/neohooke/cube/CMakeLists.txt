@@ -1,19 +1,15 @@
 
-# Copy across the required input and mesh files
-configure_file("cube.json"
-               "${CMAKE_CURRENT_BINARY_DIR}/cube.json"
-               COPYONLY)
-
+# Copy across the mesh asset
 configure_file("cube.mesh"
                "${CMAKE_CURRENT_BINARY_DIR}/cube.mesh"
                COPYONLY)
 
-configure_file("verify.py"
-               "${CMAKE_CURRENT_BINARY_DIR}/verify.py"
-               COPYONLY)
+# Run the simulation
+add_test(NAME neohooke_cube
+         COMMAND ${CMAKE_BINARY_DIR}/neonfe ${CMAKE_CURRENT_SOURCE_DIR}/cube.json)
 
-add_test(neohooke_cube
-         ${CMAKE_BINARY_DIR}/neonfe cube.json)
+# Verify using known solution
+add_test(NAME neohooke_cube_verify
+         COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/verify.py visualisation/cube_1.vtu displacement)
 
-# add_test(neohooke_cube_verify
-#          ${PYTHON_EXECUTABLE} check.py visualisation/cube_1.vtu displacement)
+set_tests_properties(neohooke_cube_verify PROPERTIES DEPENDS neohooke_cube)
