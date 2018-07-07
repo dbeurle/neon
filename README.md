@@ -9,6 +9,8 @@ A non-linear finite element code.  This project is still under development and i
 
 ## Building
 
+Before using the package, the code needs to be compiled and installed on the local system.  There are two ways of accomplishing this task; using a docker image in a secure environment with the dependencies already handled, or compiling this on the host operating system.
+
 ### Docker
 
 Go to the top level directory in the git repository and enter
@@ -34,8 +36,8 @@ The external dependencies are:
 
 Other dependencies are pulled in during build time with `CMake` and include
 
- - Eigen
- - range-v3
+ - Eigen for linear algebra
+ - range-v3 for range support
  - Termcolor for colour terminal support
  - Catch for unit testing
 
@@ -72,15 +74,15 @@ in the build directory.
 
 Install dependencies through the package manager:
 
-`$ sudo apt install cmake git mercurial zlib1g-dev libcurl4-openssl-dev libvtk6-dev libtbb-dev libboost-filesystem-dev libmumps-seq-dev libopenblas-dev libarpack2-dev libscotch-dev hwloc libhwloc-dev libgfortran-7-dev`
+`$ sudo apt install cmake git mercurial zlib1g-dev libcurl4-openssl-dev libvtk6-dev libtbb-dev libboost-filesystem-dev libmumps-seq-dev libopenblas-dev libarpack2-dev libscotch-dev hwloc libhwloc-dev libgfortran-8-dev`
 
 Then clone the repository and add
 
-`$ git clone <neon>`
+`$ git clone https://github.com/dbeurle/neon.git`
 
 and enter the repository
 
-`$ cd neon/docker-base && sh install_pastix.sh`
+`$ cd neon/docker && sh install_pastix.sh`
 
 After this compiles and fails to install, enter the commands to install and link the libraries
 
@@ -90,11 +92,7 @@ Provide the `sudo` password when prompted.  Go back to the top `neon` directory 
 
 `$ mkdir build && cd build`
 
-let `CMake` know want to use `g++-7` as a C++ compiler
-
-`$ export CXX=g++-7; cmake ..`
-
-finally compiling with
+and finally compiling with
 
 `$ make all -jN`
 
@@ -103,3 +101,11 @@ where `N` is the number of parallel build jobs you want to run.
 ## Licensing
 
 See the LICENSE.md file for the project license and the licenses of the included dependencies.
+
+## Contributions
+
+Many thanks to the contributors of ideas, code and theoretical discussions to
+* Shadi Alameddin
+* Shannon Beurle
+
+If you are missing please open an issue and I'll happily add you to the list.
