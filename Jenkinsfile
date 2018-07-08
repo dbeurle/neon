@@ -47,26 +47,23 @@ pipeline {
                     }
                     post {
                         success {
-                            steps {
-                                sh '''
+                            sh '''
                                 cd build
                                 ls -R
                                 make xml_coverage
-                                '''
-                            }
-                            steps{
-                                cobertura (autoUpdateHealth: false,
-                                autoUpdateStability: false,
-                                coberturaReportFile: 'build/coverage.xml',
-                                conditionalCoverageTargets: '70, 0, 0',
-                                failUnhealthy: false,
-                                failUnstable: false,
-                                lineCoverageTargets: '80, 0, 0',
-                                maxNumberOfBuilds: 0,
-                                methodCoverageTargets: '80, 0, 0',
-                                onlyStable: false,
-                                sourceEncoding: 'ASCII',
-                                zoomCoverageChart: false)
+                            '''
+                            cobertura(autoUpdateHealth: false,
+                                      autoUpdateStability: false,
+                                      coberturaReportFile: 'build/coverage.xml',
+                                      conditionalCoverageTargets: '70, 0, 0',
+                                      failUnhealthy: false,
+                                      failUnstable: false,
+                                      lineCoverageTargets: '80, 0, 0',
+                                      maxNumberOfBuilds: 0,
+                                      methodCoverageTargets: '80, 0, 0',
+                                      onlyStable: false,
+                                      sourceEncoding: 'ASCII',
+                                      zoomCoverageChart: false)
                             }
                         }
                     }
