@@ -104,7 +104,7 @@ Finally compiling with
 
 where `N` is the number of parallel build jobs you want to run.
 
-You can then install using 
+You can then install using
 
 `$ sudo make install`
 
