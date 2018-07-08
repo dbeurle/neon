@@ -11,3 +11,6 @@ add_custom_target(coverage
                                                       '${CMAKE_SOURCE_DIR}/tests*' -o coverage.info)
                   # COMMAND genhtml coverage.info --output-directory coverage_output
                   # COMMAND firefox coverage_output/index.html)
+
+add_custom_target(xml_coverage
+                  COMMAND gcovr --filter ${CMAKE_SOURCE_DIR}/src --root ${CMAKE_SOURCE_DIR} --xml > ${CMAKE_BINARY_DIR}/coverage.xml)
