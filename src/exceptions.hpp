@@ -32,7 +32,7 @@ class KeyNotFoundInMap : public Exception
 public:
     KeyNotFoundInMap(KeyTp missing_key) : missing_key(missing_key) {}
 
-    const char* what() const noexcept
+    char const* what() const noexcept
     {
         std::cout << "\n!! Error: Key " << missing_key << " not found in an internal datastructure\n";
         return nullptr;

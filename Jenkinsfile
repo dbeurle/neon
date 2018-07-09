@@ -139,8 +139,27 @@ pipeline {
                         make all
                         export PATH=$PATH:$(pwd)
                         ctest
-                        make coverage
                         '''
+                    }
+                    post {
+                        success {
+                            sh '''
+                                cd build
+                                make xml_coverage
+                            '''
+                            cobertura(autoUpdateHealth: false,
+                                      autoUpdateStability: false,
+                                      coberturaReportFile: 'build/coverage.xml',
+                                      conditionalCoverageTargets: '70, 0, 0',
+                                      failUnhealthy: false,
+                                      failUnstable: false,
+                                      lineCoverageTargets: '80, 0, 0',
+                                      maxNumberOfBuilds: 0,
+                                      methodCoverageTargets: '80, 0, 0',
+                                      onlyStable: false,
+                                      sourceEncoding: 'ASCII',
+                                      zoomCoverageChart: false)
+                        }
                     }
                 }
                 stage('gcc release') {
