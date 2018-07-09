@@ -23,8 +23,8 @@ isotropic_elastic_property::isotropic_elastic_property(json const& material_data
     }
     else if (material_data.count("ElasticModulus") && material_data.count("PoissonsRatio"))
     {
-        auto const E = material_data["ElasticModulus"].get<double>();
-        auto const nu = material_data["PoissonsRatio"].get<double>();
+        double const E = material_data["ElasticModulus"];
+        double const nu = material_data["PoissonsRatio"];
 
         if (nu >= 0.5)
         {

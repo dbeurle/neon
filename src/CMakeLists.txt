@@ -57,7 +57,7 @@ target_link_libraries(neon
                       PUBLIC
                       OpenMP::OpenMP_CXX
                       PRIVATE
-                      ${Boost_LIBRARIES}
+                      Boost::filesystem
                       ${MUMPS_LIBRARY}
                       ${BLAS_LIBRARIES}
                       ${VTK_LIBRARIES}

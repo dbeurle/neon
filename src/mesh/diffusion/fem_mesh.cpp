@@ -73,15 +73,14 @@ void fem_mesh::allocate_boundary_conditions(json const& mesh_data, basic_mesh co
     {
         std::string const& boundary_name = boundary["Name"];
 
-        if (!boundary.count("Time"))
+        if (boundary.find("Time") == boundary.end())
         {
             throw std::domain_error("BoundaryCondition requires a \"Time\" field.");
         }
 
-        if (auto const& boundary_type = boundary["Type"].get<std::string>();
-            boundary_type == "Temperature")
+        if (std::string const& boundary_type = boundary["Type"]; boundary_type == "Temperature")
         {
-            if (!boundary.count("Value"))
+            if (boundary.find("Value") == boundary.end())
             {
                 throw std::domain_error("BoundaryCondition \"" + boundary_type
                                         + "\" requires a \"Value\" field.");
@@ -94,14 +93,14 @@ void fem_mesh::allocate_boundary_conditions(json const& mesh_data, basic_mesh co
         }
         else if (boundary_type == "HeatFlux" || boundary_type == "NewtonCooling")
         {
-            if (boundary_type == "HeatFlux" && !boundary.count("Value"))
+            if (boundary_type == "HeatFlux" && boundary.find("Value") == boundary.end())
             {
                 throw std::domain_error("BoundaryCondition \"" + boundary_type
                                         + "\" requires a \"Value\" field.");
             }
             else if (boundary_type == "NewtonCooling"
-                     && (!boundary.count("HeatTransferCoefficient")
-                         || !boundary.count("AmbientTemperature")))
+                     && (boundary.find("HeatTransferCoefficient") == boundary.end()
+                         || boundary.find("AmbientTemperature") == boundary.end()))
             {
                 throw std::domain_error("BoundaryCondition \"" + boundary_type
                                         + "\" requires a \"HeatTransferCoefficient\" and "

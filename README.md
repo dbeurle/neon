@@ -9,6 +9,8 @@ A non-linear finite element code.  This project is still under development and i
 
 ## Building
 
+Before using the package, the code needs to be compiled and installed on the local system.  There are two ways of accomplishing this task; using a docker image in a secure environment with the dependencies already handled, or compiling this on the host operating system.
+
 ### Docker
 
 Go to the top level directory in the git repository and enter
@@ -19,7 +21,7 @@ This will pull down the base image and then clone the git repository inside the 
 
 Once this is completed, enter the following commands to enter the docker container
 
-- `sudo docker run -i -t neon /bin/bash`
+- `$ sudo docker run -i -t neon /bin/bash`
 
 The instructions in the section below can now be followed with the copy of the repository inside the docker container without worrying about dependencies.
 
@@ -34,8 +36,8 @@ The external dependencies are:
 
 Other dependencies are pulled in during build time with `CMake` and include
 
- - Eigen
- - range-v3
+ - Eigen for linear algebra
+ - range-v3 for range support
  - Termcolor for colour terminal support
  - Catch for unit testing
 
@@ -64,49 +66,62 @@ If you have an NVIDIA graphics card, then you can use the CUDA enabled iterative
 
 For checking the successful compilation of the program, invoke the test suite by executing
 
-- `ctest`
+- `$ ctest`
 
 in the build directory.
 
-#### Ubuntu 16.04
+#### Ubuntu 18.04
 
 Install dependencies through the package manager:
 
-`$ sudo apt install cmake git mercurical libz-dev libcurl3-dev libvtk6-dev libtbb-dev libboost-filesystem-dev libmumps-seq-dev libopenblas-dev libarpack2-dev, libscotch-dev, hwloc libhwloc-dev libgfortran-7-dev`
-
-Update to compatible CMake (https://cmake.org/download/).
-
-On 16.04 you need a C++17 compatible compiler:
-
-`$ sudo add-apt-repository ppa:ubuntu-toolchain-r/test`
-`$ sudo apt install g++-7`
+`$ sudo apt install cmake git mercurial zlib1g-dev libcurl4-openssl-dev libvtk6-dev libtbb-dev libboost-filesystem-dev libmumps-seq-dev libopenblas-dev libarpack2-dev libscotch-dev hwloc libhwloc-dev gfortran`
 
 Then clone the repository and add
 
-`$ git clone <neon>`
+`$ git clone https://github.com/dbeurle/neon.git`
 
 and enter the repository
 
-`$ cd neon/docker-base && sh install_pastix.sh`
+`$ cd neon/docker && sh install_pastix.sh`
 
 After this compiles and fails to install, enter the commands to install and link the libraries
 
-`cd pastix_5.2.3/build && sudo make install && sudo ln -s /usr/local/lib/libpastix.so /usr/lib/libpastix.so`
+`$ cd pastix_5.2.3/build && sudo make install && sudo ln -s /usr/local/lib/libpastix.so /usr/lib/libpastix.so`
 
-Provide the `sudo` password when prompted.  Go back to the top `neon` directory and create and enter the `build` directory
+Provide the `sudo` password when prompted.
+
+Now we are going to create the build directory and compile.  Navigate back to the `neon` directory and create and enter the `build` directory
 
 `$ mkdir build && cd build`
 
-let `CMake` know want to use `g++-7` as a C++ compiler
+We can create the compilation environment and setup optimisations using `CMake` with
 
-`$ export CXX=g++-7; cmake ..`
+`$ cmake -DCMAKE_BUILD_TYPE=Release ..`
 
-finally compiling with
+Finally compiling with
 
 `$ make all -jN`
 
 where `N` is the number of parallel build jobs you want to run.
 
+You can then install using
+
+`$ sudo make install`
+
+and run the test suite with
+
+`$ ctest`
+
+to ensure the program is behaving as expected.
+
 ## Licensing
 
 See the LICENSE.md file for the project license and the licenses of the included dependencies.
+
+## Contributions
+
+Many thanks to the contributors of ideas, code and theoretical discussions to
+* Shadi Alameddin
+* Shannon Beurle
+
+If you are missing please open an issue and I'll happily add you to the list.

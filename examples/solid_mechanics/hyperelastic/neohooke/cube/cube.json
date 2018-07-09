@@ -1,0 +1,72 @@
+{
+    "Name" : "Toy cube model",
+    "Cores" : 2,
+    "Part": [{
+        "Name" : "cube",
+        "Material" : "rubber"
+    }],
+    "Material" : [{
+        "Name" : "rubber",
+        "ElasticModulus" : 10.0e6,
+        "PoissonsRatio" : 0.49
+    }],
+    "SimulationCases" : [{
+        "Name" : "Load",
+        "Module" : "SolidMechanics",
+        "Solution" : "Equilibrium",
+        "NonlinearOptions" : {
+            "ResidualTolerance" : 1.0e-3,
+            "DisplacementTolerance" : 1.0e-3
+        },
+        "Time" : {
+            "Period" : 1.0,
+            "Increments" : {
+                "Initial" : 1.0,
+                "Minimum" : 0.001,
+                "Maximum" : 1.0,
+                "Adaptive" : true
+            }
+        },
+        "Mesh" : [{
+            "Name" : "cube",
+            "ConstitutiveModel" : {
+                "Name" : "NeoHooke"
+            },
+            "ElementOptions" : {
+                "Quadrature" : "Full"
+            },
+            "BoundaryConditions" : [{
+                "Name" : "Xsym",
+                "Type" : "Displacement",
+                "Time" : [0.0, 1.0],
+                "x" : [0.0, 0.0]
+            },
+            {
+                "Name" : "Ysym",
+                "Type" : "Displacement",
+                "Time" : [0.0, 1.0],
+                "y" : [0.0, 0.0]
+            },
+            {
+                "Name" : "Zsym",
+                "Type" : "Displacement",
+                "Time" : [0.0, 1.0],
+                "z" : [0.0, 0.0]
+            },
+            {
+                "Name" : "ZLoad",
+                "Type" : "Displacement",
+                "Time" : [0.0, 1.0],
+                "z" : [0.0, 0.5]
+            }],
+            "Visualisation" : {
+                "Fields" : ["displacement", "deformation_gradient", "cauchy_stress"]
+            }
+        }],
+        "LinearSolver" : {
+            "Type" : "Iterative",
+            "MaxIterations" : 2000,
+            "Tolerance"  : 1.0e-8
+        }
+    }]
+}

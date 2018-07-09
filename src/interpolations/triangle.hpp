@@ -12,7 +12,7 @@ class triangle3 : public surface_interpolation
 public:
     triangle3(triangle_quadrature::point const p);
 
-    virtual int nodes() const override final { return 3; }
+    int nodes() const override final { return 3; }
 
     double compute_measure(matrix const& nodal_coordinates) const;
 
@@ -33,7 +33,7 @@ class triangle6 : public surface_interpolation
 public:
     triangle6(triangle_quadrature::point const p);
 
-    virtual int nodes() const override final { return 6; }
+    int nodes() const override final { return 6; }
 
     /**
      * Compute the area of the element using Gaussian integration

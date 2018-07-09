@@ -40,7 +40,7 @@ void fem_static_matrix::compute_sparsity_pattern()
             {
                 for (std::int64_t q{0}; q < dof_view.size(); ++q)
                 {
-                    doublets.emplace_back(p, q);
+                    doublets.emplace_back(dof_view(p), dof_view(q));
                 }
             }
         }
@@ -99,6 +99,10 @@ void fem_static_matrix::compute_external_force(double const load_factor)
 
 void fem_static_matrix::solve()
 {
+    mesh.update_internal_variables(d);
+
+    mesh.write(0, 0.0);
+
     std::cout << std::string(4, ' ') << "Linear equation system has " << mesh.active_dofs()
               << " degrees of freedom\n";
 
@@ -110,7 +114,9 @@ void fem_static_matrix::solve()
 
     solver->solve(K, d, f);
 
-    // file_io.write(0, 0.0, d);
+    mesh.update_internal_variables(d);
+
+    mesh.write(1, 1.0);
 }
 
 void fem_static_matrix::assemble_stiffness()
@@ -124,13 +130,13 @@ void fem_static_matrix::assemble_stiffness()
     for (auto const& submesh : mesh.meshes())
     {
         tbb::parallel_for(std::int64_t{0}, submesh.elements(), [&](auto const element) {
-            auto const [dofs, ke] = submesh.tangent_stiffness(element);
+            auto const [dof_view, ke] = submesh.tangent_stiffness(element);
 
-            for (std::int64_t a{0}; a < dofs.size(); a++)
+            for (std::int64_t a{0}; a < dof_view.size(); a++)
             {
-                for (std::int64_t b{0}; b < dofs.size(); b++)
+                for (std::int64_t b{0}; b < dof_view.size(); b++)
                 {
-                    K.coefficient_update(dofs(a), dofs(b), ke(a, b));
+                    K.coefficient_update(dof_view(a), dof_view(b), ke(a, b));
                 }
             }
         });

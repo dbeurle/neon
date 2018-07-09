@@ -86,6 +86,11 @@ public:
     {
     }
 
+    virtual ~surface_load() = default;
+
+    surface_load(surface_load&& other) = default;
+    surface_load& operator=(surface_load const&) = default;
+
     /// Compute the external force due to a neumann type boundary condition.
     /// This computes the following integral on a boundary element
     /// \param element Surface element to compute external force on
@@ -100,7 +105,7 @@ public:
 
         // Perform the computation of the external load vector
         auto const f_ext = sf->quadrature().integrate(vector::Zero(X.cols()).eval(),
-                                                      [&](auto const& femval, auto const l) -> vector {
+                                                      [&](auto const& femval, auto const) -> vector {
                                                           auto const& [N, dN] = femval;
 
                                                           return N * jacobian_determinant(X * dN);
@@ -147,6 +152,11 @@ public:
           sf(std::move(sf))
     {
     }
+
+    virtual ~volume_load() = default;
+
+    volume_load(volume_load&& other) = default;
+    volume_load& operator=(volume_load const&) = default;
 
     virtual std::pair<index_view, vector> external_force(std::int64_t const element,
                                                          double const load_factor) const override

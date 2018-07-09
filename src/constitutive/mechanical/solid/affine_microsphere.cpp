@@ -56,7 +56,7 @@ matrix3 affine_microsphere::compute_kirchhoff_stress(double const pressure,
                                                      matrix3 const& macro_stress) const
 {
     // clang-format off
-    return pressure * matrix3::Identity() + voigt::kinetic::from(P * voigt::kinetic::to(macro_stress));
+    return pressure * matrix3::Identity() + macro_stress - 1.0 / 3.0 * macro_stress.trace() * matrix3::Identity();
     // clang-format on
 }
 
@@ -84,7 +84,7 @@ matrix3 affine_microsphere::compute_macro_stress(matrix3 const& F_unimodular,
 {
     return shear_modulus
            * unit_sphere.integrate(matrix3::Zero().eval(),
-                                   [&](auto const& coordinates, auto const& l) -> matrix3 {
+                                   [&](auto const& coordinates, auto const) -> matrix3 {
                                        auto const& [r, _] = coordinates;
 
                                        vector3 const t = deformed_tangent(F_unimodular, r);
@@ -100,7 +100,7 @@ matrix6 affine_microsphere::compute_macro_moduli(matrix3 const& F_unimodular,
 {
     return shear_modulus
            * unit_sphere.integrate(matrix6::Zero().eval(),
-                                   [&](auto const& coordinates, auto const& l) -> matrix6 {
+                                   [&](auto const& coordinates, auto const) -> matrix6 {
                                        auto const& [r, _] = coordinates;
 
                                        vector3 const t = deformed_tangent(F_unimodular, r);

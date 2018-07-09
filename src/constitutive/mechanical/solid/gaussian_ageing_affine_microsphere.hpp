@@ -31,6 +31,8 @@ public:
                                                 json const& material_data,
                                                 unit_sphere_quadrature::point const rule);
 
+    virtual ~gaussian_ageing_affine_microsphere() = default;
+
     virtual void update_internal_variables(double const time_step_size) override;
 
 private:

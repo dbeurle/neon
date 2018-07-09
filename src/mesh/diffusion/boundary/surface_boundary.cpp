@@ -13,7 +13,7 @@ boundary_mesh::boundary_mesh(std::shared_ptr<material_coordinates>& material_coo
                              json const& boundary,
                              json const& mesh_data)
 {
-    if (auto const& type = boundary["Type"].get<std::string>(); type == "HeatFlux")
+    if (std::string const& type = boundary["Type"]; type == "HeatFlux")
     {
         for (auto const& mesh : submeshes)
         {

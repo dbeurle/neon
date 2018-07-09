@@ -99,7 +99,9 @@ nonfollower_load_boundary::nonfollower_load_boundary(
                     std::transform(begin(node_indices),
                                    end(node_indices),
                                    begin(node_indices),
-                                   [&](auto const node) { return node * 3 + dof_offset; });
+                                   [&, dof_offset = std::ref(dof_offset)](auto const node) {
+                                       return node * 3 + dof_offset;
+                                   });
 
                     nodal_values.emplace_back(node_indices, boundary_data, dof_name, generate_time_step);
                 }
