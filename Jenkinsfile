@@ -45,7 +45,6 @@ pipeline {
                         make all
                         export PATH=$PATH:$(pwd)
                         ctest
-
                         '''
                     }
                 }
@@ -93,11 +92,6 @@ pipeline {
                         '''
                     }
                 }
-            }
-        }
-        stage('gcc build') {
-            failFast true
-            parallel {
                 stage('gcc debug') {
                     agent {
                         dockerfile {
