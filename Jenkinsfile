@@ -48,8 +48,8 @@ pipeline {
                     post {
                         success {
                             sh '''
+                                pip3 install gcovr
                                 cd build
-                                ls -R
                                 make xml_coverage
                             '''
                             cobertura(autoUpdateHealth: false,
