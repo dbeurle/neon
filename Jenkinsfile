@@ -48,7 +48,6 @@ pipeline {
                     post {
                         success {
                             sh '''
-                                pip3 install --user gcovr
                                 cd build
                                 make xml_coverage
                             '''
