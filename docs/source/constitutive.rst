@@ -1,28 +1,28 @@
 *******************
-Constitutive models
+Constitutive Models
 *******************
 
 Constitutive models play an important role in the solution of the equations of motion.  They are required to close the system such that the system is solvable.  These models relate quantities of displacement to the stress in the body.  Each model of material deformation requires some material properties and can effect the solution time, stability and accuracy of the overall finite element simulation.
 
 All of the units are assumed to be consistent and it is the user's responsibility to make sure this happens.
 
-Isotropic linear elasticity
+Isotropic Linear Elasticity
 ===========================
 
-The simplest form of constitutive model for linear materials is the isotropic linear elasticity model.  This is specified using the ``"IsotropicLinearElasticity"``.  The required parameters are
+The simplest form of constitutive model for linear materials is the isotropic linear elasticity model.  This is specified using  ``"IsotropicLinearElasticity"``.  The required parameters are
 
  * ``"PoissonsRatio"`` for the Poisson's Ratio of the material
  * ``"ElasticModulus"`` for the elasticity modulus (slope of stress-strain curve)
 
-In addition, the elasticity constants can also be specified using the ``"ShearModulus"`` and the ``"BulkModulus"`` if this is more convenient to the user.
+In addition, the elasticity constants can also be specified using  ``"ShearModulus"`` and ``"BulkModulus"`` if this is more convenient for the user.
 
-This model can be used by specifying ::
+The model is specified by ::
 
     "ConstitutiveModel" : {
         "Name" : "IsotropicLinearElasticity"
     }
 
-Small strain J2 plasticity
+Small Strain J2 Plasticity
 ==========================
 
 The small strain J2 plasticity model introduces material non-linearity into the finite element formulation.  This model extends the ``"IsotropicLinearElasticity"`` model to include:
@@ -39,7 +39,7 @@ This model is used by specifying ::
 
 where the finite strain version of the J2 model is not required.  Further modifications to the J2 model are given in subsequent subsections.
 
-Isotropic Chaboche damage
+Isotropic Chaboche Damage
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This non-linear isotropic ductile damage model is based on the ``"J2Plasticity"`` model. It is mainly controlled by the following material parameters:
@@ -61,12 +61,12 @@ This model is used by specifying ::
 
 This constitutive model is implemented only in an infinitesimal strain framework.
 
-Neo-Hooke elasticity
+Neo-Hooke Elasticity
 ====================
 
-A common hyperelastic material model is the Neo-Hooke model which is a analogous to the linear elasticity model for finite strains.  The model is based on the compressible formulation is not incompressible.  Only two material parameters required are
+The Neo-Hooke model is a common hyperelastic material model which can be used to model non-linear elasticity behaviour.  Only two material parameters required, which are
 
-    * ``"PoissonsRatio"`` for the Poisson's Ratio of the material
+    * ``"PoissonsRatio"`` for the Poisson's ratio of the material
     * ``"ElasticModulus"`` for the elasticity modulus (slope of stress-strain curve)
 
 alternatively the material parameters
@@ -82,12 +82,12 @@ This model is used by specifying ::
         "Name" : "Neohooke"
     }
 
-Note that this constitutive model invokes the finite strain solver that requires an incremental approach and additional Newton-Raphson solver iterations.
+Note that this constitutive model invokes the finite strain solver, which requires an incremental approach and additional Newton-Raphson solver iterations.
 
-Affine microsphere
+Affine Microsphere
 ==================
 
-The affine microsphere model uses a Langevin statistical mechanics model of the polymer chains and derives a continuum model suitable for a finite element implementation.  This model uses numerical integration over a unit sphere to compute this homogenisation and requires a quadrature rule to be specified.  Note that higher order rules increase the computation time.  This model is suited to larger deformations than the Neo-Hooke model.
+The affine microsphere model uses a Langevin statistical mechanics model for polymer chains and derives a continuum model suitable for a finite element implementation.  This model uses numerical integration over a unit sphere to compute this homogenisation and requires a quadrature rule to be specified.  Note that higher order rules increase the computation time.  This model is suited to larger deformations than the Neo-Hooke model.
 
 Material parameters are
 
@@ -111,7 +111,7 @@ The model is used by specifying ::
     }
 
 
-Gaussian affine microsphere
+Gaussian Affine Microsphere
 ===========================
 
 The Gaussian affine microsphere model re-derives the affine microsphere model using a Gaussian chain description.  This significantly reduces complexity of the model.

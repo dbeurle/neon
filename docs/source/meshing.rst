@@ -8,7 +8,7 @@ Neon uses a utility ``gmshreader`` to perform the conversion from Gmsh ``.msh`` 
 The mesh file produced must be in the same directory as the executable when reading the input file.  The examples show the use of this, including the original Gmsh geometry and mesh data.
 
 
-Element options
+Element Options
 ---------------
 
 The evaluation of the integrals in the finite element method use numerical quadrature rules specialised for each element.  For computational efficiency reasons, these could be under-integrated or fully-integrated.  However, in the current state reduced integration rules produce a rank-deficient element stiffness matrix and are therefore not recommended for use until stabilisation is applied.  For each mesh type, the element options can be specified ::

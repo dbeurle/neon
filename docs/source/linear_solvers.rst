@@ -1,4 +1,4 @@
-Linear solvers
+Linear Solvers
 ==============
 
 Linear solvers make up the largest part of the solution time in the finite element and we provide many options to the user.  Large scale systems should use iterative solvers as their memory usage is very small in comparison to their direct solver brethren.
