@@ -1,7 +1,7 @@
 pipeline {
     agent any
     stages {
-        stage('formatting') {
+        stage('clang format') {
             agent {
                 dockerfile {
                     filename 'docker/Dockerfile'
@@ -14,30 +14,30 @@ pipeline {
                 '''
             }
         }
+        stage('clang tidy') {
+            agent {
+                dockerfile {
+                    filename 'docker/Dockerfile'
+                    additionalBuildArgs '--pull'
+                }
+            }
+            steps {
+                sh '''
+                if [ ! -d "build" ]; then
+                mkdir build;
+                fi
+                cd build
+                rm -rf *
+                export CXX=clang++
+                cmake -DEXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Release ..
+                cd ..
+                python /usr/share/clang/run-clang-tidy.py -checks=-* -p build
+                '''
+            }
+        }
         stage('build') {
             failFast true
             parallel {
-                stage('clang tidy') {
-                    agent {
-                        dockerfile {
-                            filename 'docker/Dockerfile'
-                            additionalBuildArgs '--pull'
-                        }
-                    }
-                    steps {
-                        sh '''
-                        if [ ! -d "build" ]; then
-                        mkdir build;
-                        fi
-                        cd build
-                        rm -rf *
-                        export CXX=clang++
-                        cmake -DEXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Release ..
-                        cd ..
-                        python /usr/share/clang/run-clang-tidy.py -checks=-* -p build
-                        '''
-                    }
-                }
                 stage('clang debug') {
                     agent {
                         dockerfile {
