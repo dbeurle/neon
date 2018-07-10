@@ -4,7 +4,7 @@ FROM fedora:28
 # Install any needed packages specified in dependencies.txt
 RUN dnf update -y
 
-RUN dnf install -y wget bzip2 patch lcov git mercurial cmake clang gcc-c++ openblas-devel MUMPS-devel boost-devel vtk-devel hwloc-devel scotch-devel tbb-devel arpack-devel libomp-devel
+RUN dnf install -y wget bzip2 patch lcov git mercurial cmake clang clang-tools-extra gcc-c++ openblas-devel MUMPS-devel boost-devel vtk-devel hwloc-devel scotch-devel tbb-devel arpack-devel libomp-devel
 
 RUN pip3 install gcovr
 
