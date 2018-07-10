@@ -4,6 +4,27 @@ pipeline {
         stage('clang build') {
             failFast true
             parallel {
+                stage('clang tidy') {
+                    agent {
+                        dockerfile {
+                            filename 'docker/Dockerfile'
+                            additionalBuildArgs '--pull'
+                        }
+                    }
+                    steps {
+                        sh '''
+                        if [ ! -d "build" ]; then
+                        mkdir build;
+                        fi
+                        cd build
+                        rm -rf *
+                        export CXX=clang++
+                        cmake -DCMAKE_BUILD_TYPE=Release ..
+                        cd ..
+                        python /usr/share/clang/run-clang-tidy.py -checks=-* -p build
+                        '''
+                    }
+                }
                 stage('clang debug') {
                     agent {
                         dockerfile {
