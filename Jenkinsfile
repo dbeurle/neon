@@ -19,7 +19,7 @@ pipeline {
                         cd build
                         rm -rf *
                         export CXX=clang++
-                        cmake -DCMAKE_BUILD_TYPE=Release ..
+                        cmake -DEXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Release ..
                         cd ..
                         python /usr/share/clang/run-clang-tidy.py -checks=-* -p build
                         '''
