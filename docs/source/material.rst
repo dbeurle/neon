@@ -1,7 +1,7 @@
-Material properties
+Material Properties
 ===================
 
-Constitutive models are used to model a material and require a number of material parameters.  These properties are tied closely to the constitutive model.  As an example, it is possible that multiple bodies have the same material parameters but different constitutive models.  To handle this particular case, each ``Material`` definition has a unique identifier ``Name``.  For example ::
+Constitutive models are used to model a material and require a number of material parameters.  These properties are tied closely to the constitutive model.  As an example, it is possible for multiple bodies to have the same material parameters but different constitutive models.  To handle this particular case, each ``Material`` definition has a unique identifier ``Name``.  For example ::
 
     "Material" : [{
         "Name" : "steel"

@@ -1,5 +1,5 @@
 *******************
-Boundary conditions
+Boundary Conditions
 *******************
 
 An essential part of defining the model is the specification of appropriate boundary conditions.  Boundary conditions are applied to the mesh and included in the mathematical description of the system.  There are a few different types of boundary conditions, which are specialised for each particular type of simulation.
@@ -41,7 +41,7 @@ This may be used to generate block loading where each block follows a specific s
 and the time steps are generated automatically based on the given boundary condition parameters.
 
 
-Essential (Dirichlet) type
+Essential (Dirichlet) Type
 ==========================
 
 These boundary conditions are required to ensure there is no rigid body motion of the system under load.
@@ -53,12 +53,12 @@ Solid mechanics ``"Displacement"`` specified with degree of freedom ``"x"``, ``"
 Thermal         ``"Temperature"`` specified by ``"Value" : []``
 =============== ============================================
 
-Natural (Neumann) type
+Natural (Neumann) Type
 ======================
 
 In contrast to Dirichlet boundary conditions, Neumann boundary conditions specify a derivative over a boundary.  These can be used to model tractions, pressure, heat flux, gravitational loads and internal heat generation.  Because of their diverse meaning, this section will be split into each simulation type possible.
 
-Solid mechanics
+Solid Mechanics
 ~~~~~~~~~~~~~~~
 
 =============== ============================================

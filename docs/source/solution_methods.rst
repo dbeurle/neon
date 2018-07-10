@@ -1,13 +1,13 @@
 ****************
-Solution methods
+Solution Methods
 ****************
 
-Linear equilibrium and transient
+Linear Equilibrium and Transient
 ================================
 
 Solving linear problems involves one invocation of a linear solver and one assembly step and is therefore inexpensive to perform.  These routines are automatically selected based on the problem and deserve no special discussion.
 
-Non-linear equilibrium
+Non-linear Equilibrium
 ======================
 
 In the non-linear finite element framework, the solution of the non-linear equations requires linearisation and an incremental approach to determine the solution.  This means that multiple invocations of a linear solver are required to reach a specified equilibrium.
@@ -26,7 +26,7 @@ The iterative nature of a non-linear problem requires the use of tolerances to d
 Methods to improve the properties of the Newton-Raphson could be implemented on top of the current non-linear solvers, such as line search.
 
 
-Non-linear implicit dynamic
+Non-linear Implicit Dynamic
 ===========================
 
 The code to solve the implicit dynamic problem has been implemented but not yet tested.  If required, please provide a test case to the developers.
