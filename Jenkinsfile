@@ -1,7 +1,20 @@
 pipeline {
     agent any
     stages {
-        stage('clang build') {
+        stage('formatting') {
+            agent {
+                dockerfile {
+                    filename 'docker/Dockerfile'
+                    additionalBuildArgs '--pull'
+                }
+            }
+            steps {
+                sh '''
+                python .run-clang-tidy.py -r src
+                '''
+            }
+        }
+        stage('build') {
             failFast true
             parallel {
                 stage('clang tidy') {
