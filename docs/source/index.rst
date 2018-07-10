@@ -12,5 +12,6 @@ neon user documentation
    boundary_conditions
    solution_methods
    linear_solvers
+   test_suite
    license
    contact
