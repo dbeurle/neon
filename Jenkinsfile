@@ -10,6 +10,7 @@ pipeline {
             }
             steps {
                 sh '''
+                ls
                 python .run-clang-tidy.py -r src
                 '''
             }
