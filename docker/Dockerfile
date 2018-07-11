@@ -10,7 +10,8 @@ RUN dnf install -y clang clang-tools-extra libomp-devel gcc-c++
 # Scientific libraries
 RUN dnf install -y openblas-devel MUMPS-devel boost-devel vtk-devel hwloc-devel scotch-devel tbb-devel arpack-devel
 # Coverage scripts
-RUN pip3 install gcovr cpp-coveralls pyyaml
+RUN pip3 install gcovr cpp-coveralls
+RUN pip install pyyaml
 
 # Copy the current directory contents into the container at root directory /
 COPY docker/add_libraries.diff docker/cmake_patch.diff docker/install_pastix.sh /
