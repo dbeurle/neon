@@ -11,7 +11,7 @@ pipeline {
             steps {
                 sh '''
                 ls
-                python .run-clang-tidy.py -r src
+                python .run-clang-format.py -r src
                 '''
             }
         }
