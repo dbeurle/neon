@@ -81,6 +81,8 @@ protected:
 
     double displacement_norm;
     double force_norm;
+    /// Norm of the residual vector at the first iteration
+    double norm_initial_residual = 1;
 
     /// Maximum number of Newton Raphson iterations before cutback
     int maximum_iterations = 10;
@@ -386,7 +388,9 @@ void fem_static_matrix<fem_mesh_type>::update_relative_norms()
         displacement_norm = delta_d.norm() / displacement.norm();
         force_norm = is_approx(std::max(f_ext.norm(), f_int.norm()), 0.0)
                          ? 1.0
-                         : minus_residual.norm() / std::max(f_ext.norm(), f_int.norm());
+                         : minus_residual.norm()
+                               / std::max(norm_initial_residual,
+                                          std::max(f_ext.norm(), f_int.norm()));
     }
     else
     {
@@ -415,7 +419,11 @@ void fem_static_matrix<fem_mesh_type>::perform_equilibrium_iterations()
 
         minus_residual = f_ext - f_int;
 
-        if (current_iteration == 0) apply_displacement_boundaries();
+        if (current_iteration == 0)
+        {
+            apply_displacement_boundaries();
+            norm_initial_residual = minus_residual.norm();
+        }
 
         enforce_dirichlet_conditions(Kt, minus_residual);
 
