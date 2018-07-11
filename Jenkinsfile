@@ -1,7 +1,43 @@
 pipeline {
     agent any
     stages {
-        stage('clang build') {
+        stage('clang format') {
+            agent {
+                dockerfile {
+                    filename 'docker/Dockerfile'
+                    additionalBuildArgs '--pull'
+                }
+            }
+            steps {
+                sh '''
+                python .run-clang-format.py -r src
+                '''
+            }
+        }
+        stage('clang tidy') {
+            agent {
+                dockerfile {
+                    filename 'docker/Dockerfile'
+                    additionalBuildArgs '--pull'
+                }
+            }
+            steps {
+                sh '''
+                if [ ! -d "build" ]; then
+                mkdir build;
+                fi
+                cd build
+                rm -rf *
+                export CXX=clang++
+                cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Release ..
+                make
+                make eigen3 termcolor catch range-v3 json
+                cd ..
+                python /usr/share/clang/run-clang-tidy.py -checks=-*,bugprone-integer-division -p build/
+                '''
+            }
+        }
+        stage('build') {
             failFast true
             parallel {
                 stage('clang debug') {

@@ -18,6 +18,7 @@ foreach(test
              mesh
              nodal_coordinates
              nodal_variables
+             sequence
              tensor
              time_stepping
              time_integrators
