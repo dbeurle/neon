@@ -87,7 +87,8 @@ public:
     {
     }
 
-    /** \brief Constructor; computes generalized eigenvalues of given matrix with respect to another matrix.
+    /** \brief Constructor; computes generalized eigenvalues of given matrix with respect to another
+     * matrix.
      *
      * \param[in] A Self-adjoint matrix whose eigenvalues / eigenvectors will
      *    computed. By default, the upper triangular part is used, but can be changed
@@ -104,9 +105,9 @@ public:
      * \param[in] tolerance What tolerance to find the eigenvalues to. Default is 0, which
      *    means machine precision.
      *
-     * This constructor calls compute(const MatrixType&, const MatrixType&, Index, string, int, RealScalar)
-     * to compute the eigenvalues of the matrix \p A with respect to \p B. The eigenvectors are computed if
-     * \p options equals #ComputeEigenvectors.
+     * This constructor calls compute(const MatrixType&, const MatrixType&, Index, string, int,
+     * RealScalar) to compute the eigenvalues of the matrix \p A with respect to \p B. The
+     * eigenvectors are computed if \p options equals #ComputeEigenvectors.
      *
      */
     ArpackGeneralizedSelfAdjointEigenSolver(const MatrixType& A,
@@ -162,7 +163,8 @@ public:
         compute(A, nbrEigenvalues, eigs_sigma, options, tolerance);
     }
 
-    /** \brief Computes generalized eigenvalues / eigenvectors of given matrix using the external ARPACK library.
+    /** \brief Computes generalized eigenvalues / eigenvectors of given matrix using the external
+     * ARPACK library.
      *
      * \param[in]  A  Selfadjoint matrix whose eigendecomposition is to be computed.
      * \param[in]  B  Selfadjoint matrix for generalized eigenvalues.
@@ -179,10 +181,10 @@ public:
      *
      * \returns    Reference to \c *this
      *
-     * This function computes the generalized eigenvalues of \p A with respect to \p B using ARPACK. The eigenvalues()
-     * function can be used to retrieve them.  If \p options equals #ComputeEigenvectors,
-     * then the eigenvectors are also computed and can be retrieved by
-     * calling eigenvectors().
+     * This function computes the generalized eigenvalues of \p A with respect to \p B using ARPACK.
+     * The eigenvalues() function can be used to retrieve them.  If \p options equals
+     * #ComputeEigenvectors, then the eigenvectors are also computed and can be retrieved by calling
+     * eigenvectors().
      *
      */
     ArpackGeneralizedSelfAdjointEigenSolver& compute(const MatrixType& A,

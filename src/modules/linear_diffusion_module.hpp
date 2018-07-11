@@ -24,7 +24,9 @@ template <typename femMatrix_Tp>
 class linear_diffusion_module : public abstract_module
 {
 public:
-    explicit linear_diffusion_module(basic_mesh const& mesh, json const& material, json const& simulation)
+    explicit linear_diffusion_module(basic_mesh const& mesh,
+                                     json const& material,
+                                     json const& simulation)
         : fem_mesh(mesh, material, simulation["Mesh"][0]), fem_matrix(fem_mesh, simulation)
     {
     }

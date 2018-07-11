@@ -10,7 +10,6 @@ pipeline {
             }
             steps {
                 sh '''
-                ls
                 python .run-clang-format.py -r src
                 '''
             }
