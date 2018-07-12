@@ -92,6 +92,27 @@ unit_sphere_quadrature::unit_sphere_quadrature(point const p)
         }
         case point::BO61:
         {
+            // Weightings for unit sphere
+            constexpr auto weight1 = 0.00795844204678;
+            constexpr auto weight2 = 0.0105155242892;
+            constexpr auto weight3 = 0.0100119364272;
+            constexpr auto weight4 = 0.00690477957966;
+
+            w.resize(61);
+
+            std::fill(begin(w), std::next(begin(w), 10), weight1);
+            std::fill(std::next(begin(w), 10), std::next(begin(w), 16), weight2);
+            std::fill(std::next(begin(w), 16), std::next(begin(w), 31), weight3);
+            std::fill(std::next(begin(w), 31), end(w), weight4);
+
+            clist = {{0, 0, 0, 1},
+                     {1, 0.996972891319, 0, -0.077749945174},
+                     {2, -0.982581060536, -0.178228496639, 0.052621881972},
+                     {3, 0.783068336711, 0.621935399592, -0.000582043422},
+                     {4, 0.495365041556, 0.804616360278, 0.327423255707},
+                     {5, -0.268566696162, -0.734252990559, 0.62349376546},
+                     {6, -0.518797826849, 0.854890674061, 0.003278758983}};
+
             throw std::domain_error("Sphere integration rule BO61 not yet implemented");
             break;
         }
@@ -99,7 +120,7 @@ unit_sphere_quadrature::unit_sphere_quadrature(point const p)
         {
             // 900 quadrature point scheme on the unit sphere.  This should only
             // be used for model verification or validation due to the computational
-            // complexity
+            // expense
 
             // Compute using a non-linear optimisation technique and made available
             // Accessed 09.10.2017 http://www.personal.soton.ac.uk/jf1w07/nodes/nodes.html
