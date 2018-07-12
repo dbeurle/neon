@@ -89,7 +89,7 @@ void linear_static_matrix<fem_mesh_type>::solve()
 
     fem_mesh.update_internal_variables(d);
 
-    // fem_mesh.write(adaptive_load.step(), adaptive_load.time());
+    fem_mesh.write(adaptive_load.step(), adaptive_load.time());
 }
 
 template <typename fem_mesh_type>
