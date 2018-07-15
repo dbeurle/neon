@@ -6,19 +6,22 @@ namespace neon::geometry
 {
 std::unique_ptr<profile> make_profile(json const& profile_data)
 {
-    if (profile_data.count("Geometry") == 0)
+    if (profile_data.find("profile") == profile_data.end())
     {
-        throw std::domain_error("Please provide a \"Geometry\" section");
+        throw std::domain_error("Please provide a \"profile\" field");
     }
 
-    if (profile_data["Geometry"] == "Rectangle")
+    if (profile_data["profile"] == "rectangle")
     {
-        return std::make_unique<rectangular_bar>(1.0, 1.0);
+        return std::make_unique<rectangle>(profile_data);
     }
-    else if (profile_data["Geometry"] == "HollowRectangle")
+    else if (profile_data["profile"] == "circle")
     {
-        return std::make_unique<hollow_rectangular_bar>(1.0, 1.0);
+        return std::make_unique<circle>(profile_data);
     }
+
+    throw std::domain_error("A valid profile was not specified.  Valid profiles are \"rectangle\"");
+
     return nullptr;
 }
 }

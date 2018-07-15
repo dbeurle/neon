@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "io/json_forward.hpp"
+
 #include <cmath>
 #include <utility>
 
@@ -12,18 +14,6 @@ namespace neon::geometry
 class profile
 {
 public:
-    /// Construct using base parameters
-    /// \param I_1 Second moment of area (1)
-    /// \param I_2 Second moment of area (2)
-    /// \param A Cross-sectional area
-    /// \param A_1 Shear area (1)
-    /// \param A_2 Shear area (2)
-    explicit profile(double const I_1,
-                     double const I_2,
-                     double const A,
-                     double const A_1,
-                     double const A_2);
-
     std::pair<double, double> second_moment_area() const noexcept;
 
     /// \return First and second shear area
@@ -34,34 +24,45 @@ public:
 
 protected:
     /// Area moment of inertia (first coordinate)
-    double I_1;
+    double I_x{0.0};
     /// Area moment of inertia (second coordinate)
-    double I_2;
+    double I_y{0.0};
+    /// Mixed moment of area about first and second coordinate
+    double I_xy{0.0};
 
     /// Section area
-    double m_area;
+    double A{0.0};
 
     /// Shear area (first coordinate)
-    double A_1;
-    /// Shear area (first coordinate)
-    double A_2;
+    double A_x{0.0};
+    /// Shear area (second coordinate)
+    double A_y{0.0};
+
+    /// Rotational polar moment of Area
+    double J{0.0};
 };
 
-/// rectangular_bar computes the second moment of area for a rectangular bar
-/// where a width and a height is specified.
-class rectangular_bar : public profile
+/// rectangle computes the second moment of area for a rectangular bar
+/// for a specified width and height.
+class rectangle : public profile
 {
 public:
-    explicit rectangular_bar(double const width, double const height);
+    explicit rectangle(json const& section_data);
 };
 
-/// hollow_rectangular_bar computes the second moment of area for a rectangular bar
+class circle : public profile
+{
+public:
+    explicit circle(json const& section_data);
+};
+
+/// hollow_rectangle computes the second moment of area for a rectangular bar
 /// with a hollow internal structure where a width and a height is specified.
-class hollow_rectangular_bar : public profile
-{
-public:
-    hollow_rectangular_bar(double const width, double const height);
-};
+// class hollow_rectangle : public profile
+// {
+// public:
+//     hollow_rectangle(double const width, double const height);
+// };
 
 class section
 {
