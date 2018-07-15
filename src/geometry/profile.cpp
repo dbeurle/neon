@@ -56,7 +56,7 @@ circle::circle(json const& section_data)
                                 "section");
     }
 
-    auto constexpr pi = std::acos(-1.0);
+    auto const pi = std::acos(-1.0);
 
     I_x = I_y = pi * std::pow(diameter, 4) / 64.0;
     A = A_x = A_y = pi * std::pow(diameter, 2) / 4.0;
