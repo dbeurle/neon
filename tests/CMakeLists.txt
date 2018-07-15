@@ -8,6 +8,7 @@ foreach(test
              constitutive
              dof_numbering
              gauss_quadrature
+             geometry_profile
              linear_beam_theory
              linear_solvers
              eigen_solvers

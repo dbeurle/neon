@@ -4,6 +4,7 @@
 #include "mesh/dof_allocator.hpp"
 #include "interpolations/interpolation_factory.hpp"
 #include "math/transform_expand.hpp"
+#include "geometry/profile_factory.hpp"
 
 #include <tbb/parallel_for.h>
 #include <Eigen/Geometry>
@@ -39,7 +40,8 @@ void fem_submesh::update_internal_variables(double const time_step_size)
 {
     for (auto& profile : profiles)
     {
-        profile = std::make_unique<geometry::rectangular_bar>(1.0, 1.0);
+        json profile_data{{"profile", "rectangle"}, {"width", 1.0}, {"height", 1.0}};
+        profile = geometry::make_profile(profile_data);
     }
 
     auto& A = variables->get(variable::scalar::cross_sectional_area);
