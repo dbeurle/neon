@@ -12,32 +12,38 @@ TEST_CASE("Geometry factory")
 {
     SECTION("Name validation")
     {
-        REQUIRE_THROWS_AS(make_profile(json::parse("{\"proile\": \"rectangle\"}")),
+        REQUIRE_THROWS_AS(geometry::make_profile(json::parse("{\"proile\": \"rectangle\"}")),
                           std::domain_error);
-        REQUIRE_THROWS_AS(make_profile(json::parse("{\"profile\": \"rect\"}")), std::domain_error);
+        REQUIRE_THROWS_AS(geometry::make_profile(json::parse("{\"profile\": \"rect\"}")),
+                          std::domain_error);
     }
 }
 TEST_CASE("Dimensional values")
 {
     SECTION("Rectangle")
     {
-        json profile_data{{"profile", "rectangle"}, {"wdth", 2.0}, {"height", 0.3}};
-        REQUIRE_THROWS_AS(make_profile(profile_data), std::domain_error);
+        REQUIRE_THROWS_AS(geometry::make_profile(
+                              json{{"profile", "rectangle"}, {"wdth", 2.0}, {"height", 0.3}}),
+                          std::domain_error);
 
-        json profile_data{{"profile", "rectangle"}, {"width", 2.0}, {"hight", 0.3}};
-        REQUIRE_THROWS_AS(make_profile(profile_data), std::domain_error);
+        REQUIRE_THROWS_AS(geometry::make_profile(
+                              json{{"profile", "rectangle"}, {"width", 2.0}, {"hight", 0.3}}),
+                          std::domain_error);
 
-        json profile_data{{"profile", "rectangle"}, {"width", -2.0}, {"height", 0.3}};
-        REQUIRE_THROWS_AS(make_profile(profile_data), std::domain_error);
+        REQUIRE_THROWS_AS(geometry::make_profile(
+                              json{{"profile", "rectangle"}, {"width", -2.0}, {"height", 0.3}}),
+                          std::domain_error);
 
-        json profile_data{{"profile", "rectangle"}, {"width", 2.0}, {"height", -0.3}};
-        REQUIRE_THROWS_AS(make_profile(profile_data), std::domain_error);
+        REQUIRE_THROWS_AS(geometry::make_profile(
+                              json{{"profile", "rectangle"}, {"width", 2.0}, {"height", -0.3}}),
+                          std::domain_error);
     }
     SECTION("Circle")
     {
-        json profile_data{{"profile", "circle"}, {"dimeter", 2.0}};
-        REQUIRE_THROWS_AS(make_profile(profile_data), std::domain_error);
+        REQUIRE_THROWS_AS(geometry::make_profile(json{{"profile", "circle"}, {"dimeter", 2.0}}),
+                          std::domain_error);
 
-        json profile_data{{"profile", "circle"}, {"diameter", -2.0}};
-        REQUIRE_THROWS_AS(make_profile(profile_data), std::domain_error);
+        REQUIRE_THROWS_AS(geometry::make_profile(json{{"profile", "circle"}, {"diameter", -2.0}}),
+                          std::domain_error);
     }
+}
