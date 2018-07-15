@@ -14,12 +14,13 @@ namespace neon::geometry
 class profile
 {
 public:
+    /// \return first and second moments of inertia (I_x, I_y)
     std::pair<double, double> second_moment_area() const noexcept;
 
-    /// \return First and second shear area
+    /// \return first and second shear areas (A_x, A_y)
     std::pair<double, double> shear_area() const noexcept;
 
-    /// \return Cross-section area
+    /// \return cross-section area
     double area() const noexcept;
 
 protected:
