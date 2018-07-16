@@ -5,7 +5,6 @@
 
 // A collection of functions that can be used to test a cube mesh
 // including a mesh and input data
-
 inline std::string cube_mesh_json()
 {
     return "{\"Elements\":[{\"Indices\":[9,10,11,12,13,14,15,16,17],\"Name\":\"bottom\","
