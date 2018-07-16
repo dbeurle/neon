@@ -4,8 +4,8 @@ services:
     - docker
 env:
     - BUILD_TYPE=RelWithDebInfo
-    - BUILD_TYPE=Release
-    - BUILD_TYPE=Debug
+    # - BUILD_TYPE=Release
+    # - BUILD_TYPE=Debug
 before_install:
     # Encrypted key setup
     - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
