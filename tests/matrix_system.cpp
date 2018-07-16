@@ -8,7 +8,7 @@
 #include "numeric/doublet.hpp"
 #include "io/json.hpp"
 
-#include "CubeJson.hpp"
+#include "fixtures/cube_mesh.hpp"
 
 using neon::json;
 
@@ -46,9 +46,9 @@ TEST_CASE("Nonlinear system equilibrium solver test")
 
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh
-    neon::basic_mesh basic_mesh(json::parse(cube_mesh_json()));
+    neon::basic_mesh basic_mesh(json::parse(json_cube_mesh()));
 
-    neon::nodal_coordinates nodal_coordinates(json::parse(cube_mesh_json()));
+    neon::nodal_coordinates nodal_coordinates(json::parse(json_cube_mesh()));
 
     auto simulation_data = json::parse(simulation_data_json());
 

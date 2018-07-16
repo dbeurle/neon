@@ -4,16 +4,14 @@
 #include "mesh/basic_mesh.hpp"
 #include "mesh/element_topology.hpp"
 #include "mesh/node_ordering_adapter.hpp"
-
 #include "mesh/material_coordinates.hpp"
 #include "mesh/mechanical/solid/fem_mesh.hpp"
 #include "mesh/mechanical/solid/fem_submesh.hpp"
-
 #include "io/json.hpp"
 
-#include <range/v3/view.hpp>
+#include "fixtures/cube_mesh.hpp"
 
-#include "CubeJson.hpp"
+#include <range/v3/view.hpp>
 
 using namespace neon;
 using namespace ranges;
@@ -24,9 +22,9 @@ TEST_CASE("Basic mesh test")
 {
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh
-    basic_mesh basic_mesh(json::parse(cube_mesh_json()));
+    basic_mesh basic_mesh(json::parse(json_cube_mesh()));
 
-    nodal_coordinates nodal_coordinates(json::parse(cube_mesh_json()));
+    nodal_coordinates nodal_coordinates(json::parse(json_cube_mesh()));
 
     auto constexpr number_of_nodes = 64;
 
@@ -120,8 +118,8 @@ TEST_CASE("Solid submesh test")
     // test the functionality of the basic mesh
 
     // Create the test objects
-    basic_mesh basic_mesh(json::parse(cube_mesh_json()));
-    nodal_coordinates nodal_coordinates(json::parse(cube_mesh_json()));
+    basic_mesh basic_mesh(json::parse(json_cube_mesh()));
+    nodal_coordinates nodal_coordinates(json::parse(json_cube_mesh()));
 
     auto& submeshes = basic_mesh.meshes("cube");
 
@@ -210,8 +208,8 @@ TEST_CASE("Solid mesh test")
     auto simulation_data = json::parse(simulation_data_json());
 
     // Create the test objects
-    basic_mesh basic_mesh(json::parse(cube_mesh_json()));
-    nodal_coordinates nodal_coordinates(json::parse(cube_mesh_json()));
+    basic_mesh basic_mesh(json::parse(json_cube_mesh()));
+    nodal_coordinates nodal_coordinates(json::parse(json_cube_mesh()));
 
     REQUIRE(!simulation_data["Name"].empty());
 

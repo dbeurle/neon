@@ -9,9 +9,9 @@
 #include "mesh/diffusion/boundary/newton_convection.hpp"
 #include "io/json.hpp"
 
-#include <memory>
+#include "fixtures/cube_mesh.hpp"
 
-#include "CubeJson.hpp"
+#include <memory>
 
 using namespace neon;
 
