@@ -3,16 +3,12 @@
 
 #include "linear_solver.hpp"
 
-#include <Eigen/Sparse>
-
 #include <Eigen/PaStiXSupport>
 
 namespace neon
 {
-/**
- * PaStiXLDLT is a supernodal direct solver with multithreading support.  This
- * performs the LDLT Cholesky factorisation of a symmetric system
- */
+/// PaStiXLDLT is a supernodal direct solver with multithreading support.  This
+/// performs the LDLT Cholesky factorisation of a symmetric system
 class PaStiXLDLT : public direct_linear_solver
 {
 public:
@@ -24,10 +20,8 @@ private:
     Eigen::PastixLDLT<Eigen::SparseMatrix<double>, Eigen::Upper> ldlt;
 };
 
-/**
- * PaStiXLU is a supernodal direct solver with multithreading support.  This
- * performs the LU factorisation of a square matrix system
- */
+/// PaStiXLU is a supernodal direct solver with multithreading support.  This
+/// performs the LU factorisation of a square matrix system
 class PaStiXLU : public direct_linear_solver
 {
 public:

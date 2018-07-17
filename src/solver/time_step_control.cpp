@@ -9,17 +9,15 @@ namespace neon
 {
 time_step_control::time_step_control(json const& time_data)
 {
-    if (!time_data.count("Start"))
+    if (time_data.find("Start") == time_data.end())
     {
         throw std::domain_error("Start time not specified in input (\"Start\")\n");
     }
-
-    if (!time_data.count("End"))
+    if (time_data.find("End") == time_data.end())
     {
         throw std::domain_error("End time not specified in input (\"End\")\n");
     }
-
-    if (!time_data.count("StepSize"))
+    if (time_data.find("StepSize") == time_data.end())
     {
         throw std::domain_error("\"StepSize\" not specified in input\n");
     }

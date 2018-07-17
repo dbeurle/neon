@@ -44,7 +44,7 @@ simulation_parser::~simulation_parser() = default;
 
 void simulation_parser::parse()
 {
-    auto start = std::chrono::high_resolution_clock::now();
+    auto start = std::chrono::steady_clock::now();
 
     this->print_banner();
 
@@ -73,7 +73,7 @@ void simulation_parser::parse()
             return material["Name"] == part["Material"];
         });
 
-        auto const read_start = std::chrono::high_resolution_clock::now();
+        auto const read_start = std::chrono::steady_clock::now();
 
         std::ifstream mesh_input_stream(part["Name"].get<std::string>() + ".mesh");
 
@@ -81,7 +81,7 @@ void simulation_parser::parse()
 
         mesh_input_stream >> mesh_file;
 
-        auto const read_end = std::chrono::high_resolution_clock::now();
+        auto const read_end = std::chrono::steady_clock::now();
 
         std::cout << std::string(4, ' ') << "Parsed " << part["Name"] << " mesh from file in "
                   << std::chrono::duration<double>(read_end - read_start).count() << "s\n";
@@ -90,9 +90,7 @@ void simulation_parser::parse()
 
         std::cout << std::string(4, ' ') << "Allocated internal storage for " << part["Name"]
                   << " in "
-                  << std::chrono::duration<double>(std::chrono::high_resolution_clock::now()
-                                                   - read_end)
-                         .count()
+                  << std::chrono::duration<double>(std::chrono::steady_clock::now() - read_end).count()
                   << "s\n";
     }
 
@@ -120,7 +118,7 @@ void simulation_parser::parse()
     }
     build_simulation_tree();
 
-    auto const end = std::chrono::high_resolution_clock::now();
+    auto const end = std::chrono::steady_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
 
     std::cout << termcolor::bold << termcolor::green << std::string(2, ' ')

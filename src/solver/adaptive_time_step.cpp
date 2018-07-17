@@ -2,13 +2,10 @@
 #include "adaptive_time_step.hpp"
 
 #include "numeric/float_compare.hpp"
+#include "io/json.hpp"
 
 #include <exception>
 #include <termcolor/termcolor.hpp>
-
-#include <range/v3/algorithm/max_element.hpp>
-
-#include "io/json.hpp"
 
 namespace neon
 {
@@ -21,7 +18,8 @@ adaptive_time_step::adaptive_time_step(json const& increment_data,
     // Remove the first entry if zero
     if (is_approx(time_queue.top(), 0.0)) time_queue.pop();
 
-    parse_input(increment_data, *ranges::max_element(mandatory_time_history));
+    parse_input(increment_data,
+                *std::max_element(begin(mandatory_time_history), end(mandatory_time_history)));
 }
 
 void adaptive_time_step::update_convergence_state(bool const is_converged)
@@ -136,20 +134,26 @@ void adaptive_time_step::parse_input(json const& increment_data, double const ma
 
 void adaptive_time_step::check_increment_data(json const& increment_data)
 {
-    if (!increment_data.count("Period"))
+    if (increment_data.find("Period") == increment_data.end())
+    {
         throw std::runtime_error("Time data requires a \"Period\" value\n");
-
-    if (!increment_data.count("Increments"))
+    }
+    if (increment_data.find("Increments") == increment_data.end())
+    {
         throw std::runtime_error("\"Increments\" not provided!\n");
-
-    if (!increment_data["Increments"].count("Initial"))
+    }
+    if (increment_data["Increments"].find("Initial") == increment_data["Increments"].end())
+    {
         throw std::runtime_error("Increment-Initial data not provided!\n");
-
-    if (!increment_data["Increments"].count("Minimum"))
+    }
+    if (increment_data["Increments"].find("Minimum") == increment_data["Increments"].end())
+    {
         throw std::runtime_error("Increment-Minimum data not provided!\n");
-
-    if (!increment_data["Increments"].count("Maximum"))
+    }
+    if (increment_data["Increments"].find("Maximum") == increment_data["Increments"].end())
+    {
         throw std::runtime_error("Increment-Maximum data not provided!\n");
+    }
 }
 
 bool adaptive_time_step::is_highly_nonlinear() const

@@ -9,10 +9,10 @@ namespace neon
 class time_step_control
 {
 public:
-    /** Constructor for static solution */
+    /// Constructor for static solution
     time_step_control() = default;
 
-    /** Constructor for dynamic solution */
+    /// Constructor for dynamic solution
     time_step_control(json const& time_data);
 
     [[nodiscard]] double current_time_step_size() const noexcept { return time_step_size; }

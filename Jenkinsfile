@@ -57,7 +57,7 @@ pipeline {
                         cmake -DCMAKE_BUILD_TYPE=Debug ..
                         make all
                         export PATH=$PATH:$(pwd)
-                        ctest
+                        ctest --output-on-failure
                         '''
                     }
                 }
@@ -79,7 +79,7 @@ pipeline {
                         cmake -DCMAKE_BUILD_TYPE=RelWithDebug ..
                         make all
                         export PATH=$PATH:$(pwd)
-                        ctest
+                        ctest --output-on-failure
                         '''
                     }
                 }
@@ -101,7 +101,7 @@ pipeline {
                         cmake -DCMAKE_BUILD_TYPE=Release ..
                         make all
                         export PATH=$PATH:$(pwd)
-                        ctest
+                        ctest --output-on-failure
                         '''
                     }
                 }
@@ -123,7 +123,7 @@ pipeline {
                         cmake -DCMAKE_BUILD_TYPE=Debug ..
                         make all
                         export PATH=$PATH:$(pwd)
-                        ctest
+                        ctest --output-on-failure
                         '''
                     }
                 }
@@ -145,7 +145,7 @@ pipeline {
                         cmake -DCMAKE_BUILD_TYPE=RelWithDebug -DENABLE_COVERAGE=1 ..
                         make all
                         export PATH=$PATH:$(pwd)
-                        ctest
+                        ctest --output-on-failure
                         '''
                     }
                     post {
@@ -187,7 +187,7 @@ pipeline {
                         cmake -DCMAKE_BUILD_TYPE=Release ..
                         make all
                         export PATH=$PATH:$(pwd)
-                        ctest
+                        ctest --output-on-failure
                         '''
                     }
                 }
