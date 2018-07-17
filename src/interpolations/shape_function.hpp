@@ -86,6 +86,10 @@ void shape_function<quadrature_t>::compute_extrapolation_matrix(matrix const N,
     extrapolation = N_plus * (matrix::Identity(m, m) - xi_hat * xi_hat_plus) + xi * xi_hat_plus;
 }
 
+extern template class shape_function<numerical_quadrature<double>>;
+extern template class shape_function<surface_quadrature>;
+extern template class shape_function<volume_quadrature>;
+
 using line_interpolation = shape_function<numerical_quadrature<double>>;
 using surface_interpolation = shape_function<surface_quadrature>;
 using volume_interpolation = shape_function<volume_quadrature>;

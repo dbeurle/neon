@@ -25,7 +25,6 @@ newmark_beta_integrator::newmark_beta_integrator(json const& time_solver_data)
         {
             throw std::runtime_error("IterationOptions - ViscousDamping was not set\n");
         }
-
         if (time_solver_data["IntegrationOptions"]["BetaParameter"].is_null())
         {
             throw std::runtime_error("IterationOptions - BetaParameter was not set\n");

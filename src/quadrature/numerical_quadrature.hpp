@@ -8,12 +8,10 @@
 
 namespace neon
 {
-/**
- * numerical_quadrature is a variadic class that defines a generic numerical
- * quadrature class that encapsulates the coordinates, weightings and a method
- * to perform the integration for a functor that accepts a quadrature point
- * index.
- */
+/// numerical_quadrature is a variadic class that defines a generic numerical
+/// quadrature class that encapsulates the coordinates, weightings and a method
+/// to perform the integration for a function that accepts a quadrature point
+/// index.
 template <typename... Xi>
 class numerical_quadrature
 {
@@ -29,11 +27,10 @@ public:
     /// \param f - A lambda function that accepts an femValue and quadrature point
     /// \return The numerically integrated matrix
     template <typename matrix_type, typename Functor>
-    matrix_type integrate(matrix_type operand, Functor&& f) const
-    {
+    [[nodiscard]] matrix_type integrate(matrix_type operand, Functor&& f) const {
         for (std::size_t l{0}; l < points(); ++l)
         {
-            operand.noalias() += f(femvals[l], l) * w[l];
+            operand.noalias() += f(femvals[l], l) * m_weights[l];
         }
         return operand;
     }
@@ -47,7 +44,7 @@ public:
     {
         for (std::size_t l{0}; l < points(); ++l)
         {
-            integral.noalias() += f(femvals[l], l) * w[l];
+            integral.noalias() += f(femvals[l], l) * m_weights[l];
         }
     }
 
@@ -60,7 +57,7 @@ public:
     {
         for (std::size_t l{0}; l < points(); ++l)
         {
-            integral.noalias() += f(femvals[l], l) * w[l];
+            integral.noalias() += f(femvals[l], l) * m_weights[l];
         }
     }
 
@@ -69,56 +66,58 @@ public:
     /// \param f - A lambda function that accepts an femValue and quadrature point
     /// \return The numerically integrated scalar
     template <typename function>
-    double integrate(double integral, function&& f) const
-    {
+    [[nodiscard]] double integrate(double integral, function&& f) const {
         for (std::size_t l{0}; l < points(); ++l)
         {
-            integral += f(femvals[l], l) * w[l];
+            integral += f(femvals[l], l) * m_weights[l];
         }
         return integral;
     }
 
     template <typename function>
-    void for_each(function&& eval_func) const
+    void for_each(function&& f) const
     {
         for (std::size_t l{0}; l < points(); ++l)
         {
-            eval_func(femvals[l], l);
+            f(femvals[l], l);
         }
     }
 
-    /**
-     * Evaluate a shape function and derivatives for the populated quadrature
-     * points
-     * @param f - A lambda function that accepts a quadrature coordinate tuple
-     */
-    template <typename Functor>
-    void evaluate(Functor&& f)
+    /// Evaluate a shape function and derivatives for the quadrature points
+    /// \param f - A lambda function that accepts a quadrature coordinate tuple
+    template <typename function>
+    void evaluate(function&& f)
     {
         femvals.clear();
         femvals.reserve(points());
-        for (auto const& coordinate : clist)
+        for (auto const& coordinate : m_coordinates)
         {
             femvals.emplace_back(f(coordinate));
         }
     }
 
-    /** @return The number of quadrature points */
-    auto points() const { return w.size(); }
+    /// \return The number of quadrature points
+    [[nodiscard]] auto points() const noexcept { return m_weights.size(); }
 
-    /** @return The quadrature weights for this scheme */
-    auto const& weights() const { return w; }
+    /// \return The quadrature weights for this scheme
+    [[nodiscard]] auto const& weights() const noexcept { return m_weights; }
 
-    /** @return A list of tuples representing the index and the coordinates */
-    auto const& coordinates() const { return clist; }
+    /// \return A list of tuples representing the index and the coordinates
+    [[nodiscard]] auto const& coordinates() const noexcept { return m_coordinates; }
 
 protected:
-    std::vector<double> w;              //!< Quadrature weightings
-    std::vector<coordinate_type> clist; //!< Quadrature coordinates
+    /// Quadrature weightings
+    std::vector<double> m_weights;
+    /// Quadrature coordinates
+    std::vector<coordinate_type> m_coordinates;
 
-    std::vector<fem_value_type> femvals; //!< Shape functions and their derivatives
-                                         //!< evaluated at the quadrature points
+    /// Shape functions and their derivatives evaluated at the quadrature points
+    std::vector<fem_value_type> femvals;
 };
+
+extern template class numerical_quadrature<double>;
+extern template class numerical_quadrature<double, double>;
+extern template class numerical_quadrature<double, double, double>;
 
 using surface_quadrature = numerical_quadrature<double, double>;
 using volume_quadrature = numerical_quadrature<double, double, double>;
