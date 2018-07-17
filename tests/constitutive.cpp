@@ -150,7 +150,6 @@ TEST_CASE("Microsphere model error test")
                                                               ": \"Affine\"}}")),
                           std::domain_error);
     }
-
     SECTION("Type not specified correctly")
     {
         // clang-format off
@@ -160,7 +159,6 @@ TEST_CASE("Microsphere model error test")
         REQUIRE_THROWS_AS(make_constitutive_model(variables, json::parse("{}"), json::parse(input)),
                           std::domain_error);
     }
-
     SECTION("Exception for quadrature scheme")
     {
         // clang-format off

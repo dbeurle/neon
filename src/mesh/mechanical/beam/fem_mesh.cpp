@@ -4,6 +4,7 @@
 #include "math/block_sequence.hpp"
 #include "mesh/basic_mesh.hpp"
 #include "mesh/dof_allocator.hpp"
+#include "io/post/variable_string_adapter.hpp"
 #include "io/json.hpp"
 
 #include <chrono>
@@ -15,6 +16,11 @@
 
 namespace neon::mechanical::beam
 {
+static bool is_nodal_variable(std::string const& name)
+{
+    return name == "displacement" || name == "rotation";
+}
+
 fem_mesh::fem_mesh(basic_mesh const& basic_mesh,
                    json const& material_data,
                    json const& simulation_data,
@@ -22,15 +28,22 @@ fem_mesh::fem_mesh(basic_mesh const& basic_mesh,
     : coordinates(std::make_shared<material_coordinates>(basic_mesh.coordinates())),
       displacement(active_dofs() / 2),
       rotation(active_dofs() / 2),
-      generate_time_step{generate_time_step}
+      generate_time_step{generate_time_step},
+      writer(std::make_unique<io::vtk_file_output>(simulation_data["Name"],
+                                                   simulation_data["Visualisation"]))
 {
     check_boundary_conditions(simulation_data["BoundaryConditions"]);
+
+    writer->coordinates(coordinates->coordinates());
 
     for (auto const& submesh : basic_mesh.meshes(simulation_data["Name"]))
     {
         submeshes.emplace_back(material_data, simulation_data, coordinates, submesh);
+
+        writer->mesh(submesh.all_node_indices(), submesh.topology());
     }
     allocate_boundary_conditions(simulation_data, basic_mesh);
+    allocate_variable_names();
 }
 
 bool fem_mesh::is_symmetric() const { return true; }
@@ -38,7 +51,7 @@ bool fem_mesh::is_symmetric() const { return true; }
 void fem_mesh::update_internal_variables(vector const& displacement_rotation,
                                          double const time_step_size)
 {
-    auto const start = std::chrono::high_resolution_clock::now();
+    auto const start = std::chrono::steady_clock::now();
 
     displacement = displacement_rotation(block_sequence<3, 6>{0, displacement.size()});
     rotation = displacement_rotation(block_sequence<3, 6>{3, rotation.size()});
@@ -47,7 +60,7 @@ void fem_mesh::update_internal_variables(vector const& displacement_rotation,
 
     for (auto& submesh : submeshes) submesh.update_internal_variables(time_step_size);
 
-    auto const end = std::chrono::high_resolution_clock::now();
+    auto const end = std::chrono::steady_clock::now();
     std::chrono::duration<double> const elapsed_seconds = end - start;
 
     std::cout << std::string(6, ' ') << "Internal variable update took " << elapsed_seconds.count()
@@ -145,23 +158,47 @@ std::vector<double> fem_mesh::time_history() const
     return {begin(history), end(history)};
 }
 
+void fem_mesh::write(std::int32_t const time_step, double const current_time)
+{
+    // nodal variables
+    if (writer->is_output_requested("displacement"))
+    {
+        writer->field("displacement", displacement, 3);
+    }
+    if (writer->is_output_requested("rotation"))
+    {
+        writer->field("rotation", rotation, 3);
+    }
+    writer->write(time_step, current_time);
+}
+
 void fem_mesh::check_boundary_conditions(json const& boundary_data) const
 {
     for (auto const& boundary : boundary_data)
     {
         for (auto const& mandatory_field : {"Name", "Type"})
         {
-            if (!boundary.count(mandatory_field))
+            if (boundary.find(mandatory_field) == boundary.end())
             {
                 throw std::domain_error("\"" + std::string(mandatory_field)
                                         + "\" was not specified in \"BoundaryCondition\".");
             }
         }
-        if ((!boundary.count("Time")) && (!boundary.count("GenerateType")))
+        if (boundary.find("Time") == boundary.end() && boundary.find("GenerateType") == boundary.end())
         {
             throw std::domain_error("Neither \"Time\" nor \"GenerateType\" was specified in "
                                     "\"BoundaryCondition\".");
         }
+    }
+}
+
+void fem_mesh::allocate_variable_names()
+{
+    for (auto const& name : writer->outputs())
+    {
+        if (is_nodal_variable(name)) continue;
+
+        output_variables.emplace_back(variable::convert(name));
     }
 }
 }

@@ -10,10 +10,10 @@ namespace neon::mechanical
 /// Compute the local deformation gradient
 /// \f{align*}{ F_{\xi} &= \bf{x}_\xi \f}
 /// \param rhea Shape function gradients at quadrature point
-/// \param configuration Configuration of the element (coordinates)
-template <typename shape_function_derivatives, typename Configuration>
+/// \param configuration Configuration of the element (nodal coordinates)
+template <typename shape_function_derivatives, typename matrix_expression>
 [[nodiscard]] auto local_deformation_gradient(shape_function_derivatives const& rhea,
-                                              Configuration const& configuration)
+                                              matrix_expression const& configuration)
 {
     return configuration * rhea;
 }

@@ -54,9 +54,7 @@ void fem_submesh::update_internal_variables(double const time_step_size)
     // Loop over all elements and quadrature points to compute the profile
     // properties for each quadrature point in the beam
     tbb::parallel_for(std::int64_t{0}, elements(), [&, this](auto const element) {
-        sf->quadrature().for_each([&, this](auto const& femval, auto const l) {
-            [[maybe_unused]] auto const& [N, dN] = femval;
-
+        sf->quadrature().for_each([&, this](auto const&, auto const l) {
             A.at(view(element, l)) = profiles.at(element)->area();
 
             auto const [shear_area_1, shear_area_2] = profiles.at(element)->shear_area();

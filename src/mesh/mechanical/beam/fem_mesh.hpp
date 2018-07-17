@@ -4,7 +4,7 @@
 #include "mesh/boundary/dirichlet.hpp"
 #include "mesh/mechanical/beam/boundary/nonfollower_load.hpp"
 #include "mesh/mechanical/beam/fem_submesh.hpp"
-#include "mesh/nodal_variables.hpp"
+#include "io/file_output.hpp"
 
 #include <map>
 
@@ -47,8 +47,6 @@ public:
     /// Non-const access to the sub-meshes
     [[nodiscard]] auto& meshes() noexcept { return submeshes; }
 
-    vector nodal_reaction_forces() const { return vector(0); }
-
     [[nodiscard]] auto const& dirichlet_boundaries() const noexcept
     {
         return m_dirichlet_boundaries;
@@ -68,8 +66,13 @@ public:
     /// Provide const access to the discretised geometry for this mesh
     [[nodiscard]] auto const& geometry() const { return *coordinates; }
 
+    /// Write out results to file
+    void write(std::int32_t const time_step, double const current_time);
+
 protected:
     void check_boundary_conditions(json const& boundary_data) const;
+
+    void allocate_variable_names();
 
     void allocate_boundary_conditions(json const& boundary_data, basic_mesh const& basic_mesh);
 
@@ -102,6 +105,12 @@ protected:
     /// ensures the compatibility between user
     /// defined and sinusoidal boundary conditions.
     double generate_time_step;
+
+    /// File output handle
+    std::unique_ptr<io::file_output> writer;
+
+    /// Output variables
+    std::vector<variable::types> output_variables;
 };
 }
 }

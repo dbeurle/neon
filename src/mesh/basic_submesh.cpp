@@ -2,14 +2,8 @@
 #include "basic_submesh.hpp"
 
 #include "mesh/node_ordering_adapter.hpp"
-
 #include "exceptions.hpp"
-
 #include "io/json.hpp"
-
-#include <range/v3/action/join.hpp>
-#include <range/v3/action/sort.hpp>
-#include <range/v3/action/unique.hpp>
 
 #include <set>
 

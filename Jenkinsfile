@@ -105,28 +105,6 @@ pipeline {
                         '''
                     }
                 }
-                stage('clang native') {
-                    agent {
-                        dockerfile {
-                            filename 'docker/Dockerfile'
-                            additionalBuildArgs '--pull'
-                        }
-                    }
-                    steps {
-                        sh '''
-                        if [ ! -d "build" ]; then
-                            mkdir build;
-                        fi
-                        cd build
-                        rm -rf *
-                        export CXX=clang++
-                        cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_NATIVE=1 ..
-                        make all
-                        export PATH=$PATH:$(pwd)
-                        ctest
-                        '''
-                    }
-                }
                 stage('gcc debug') {
                     agent {
                         dockerfile {
@@ -207,28 +185,6 @@ pipeline {
                         rm -rf *
                         export CXX=g++
                         cmake -DCMAKE_BUILD_TYPE=Release ..
-                        make all
-                        export PATH=$PATH:$(pwd)
-                        ctest
-                        '''
-                    }
-                }
-                stage('gcc native') {
-                    agent {
-                        dockerfile {
-                            filename 'docker/Dockerfile'
-                            additionalBuildArgs '--pull'
-                        }
-                    }
-                    steps {
-                        sh '''
-                        if [ ! -d "build" ]; then
-                            mkdir build;
-                        fi
-                        cd build
-                        rm -rf *
-                        export CXX=g++
-                        cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_NATIVE=1 ..
                         make all
                         export PATH=$PATH:$(pwd)
                         ctest
