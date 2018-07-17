@@ -36,6 +36,7 @@ protected:
 
 protected:
     time_step_control time_control;
+
     double artifical_viscosity;
     double beta_parameter;
 
