@@ -31,7 +31,7 @@ public:
     /// \param u - displacement vector from initial configuration (x,y...)
     void update_current_xy_configuration(vector const& u);
 
-    [[nodiscard]] matrix3x displacement() const;
+    [[deprecated]][[nodiscard]] matrix3x displacement() const;
 
     [[nodiscard]] vector displacement_vector() const;
 
