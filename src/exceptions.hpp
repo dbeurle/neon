@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include <iostream>
 #include <stdexcept>
 
 namespace neon
@@ -13,32 +12,5 @@ namespace neon
 struct computational_error : public std::domain_error
 {
     using std::domain_error::domain_error;
-};
-
-class Exception : public std::exception
-{
-public:
-    Exception() = default;
-
-    void setInputFileName(std::string const& fn) { input_file = fn; }
-
-protected:
-    std::string input_file;
-};
-
-template <typename KeyTp>
-class KeyNotFoundInMap : public Exception
-{
-public:
-    KeyNotFoundInMap(KeyTp missing_key) : missing_key(missing_key) {}
-
-    char const* what() const noexcept
-    {
-        std::cout << "\n!! Error: Key " << missing_key << " not found in an internal datastructure\n";
-        return nullptr;
-    }
-
-protected:
-    KeyTp missing_key;
 };
 }

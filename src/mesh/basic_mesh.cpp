@@ -22,8 +22,10 @@ std::vector<basic_submesh> const& basic_mesh::meshes(std::string const& name) co
 {
     auto const found = meshes_map.find(name);
 
-    if (found == meshes_map.end()) throw KeyNotFoundInMap<std::string>(name);
-
+    if (found == meshes_map.end())
+    {
+        throw std::domain_error("Mesh name " + name + " does not exist in the mesh store");
+    }
     return found->second;
 }
 }
