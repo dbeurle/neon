@@ -15,6 +15,7 @@
 #include "interpolations/tetrahedron.hpp"
 #include "interpolations/triangle.hpp"
 #include "interpolations/prism.hpp"
+#include "interpolations/pyramid.hpp"
 
 #include "interpolations/interpolation_factory.hpp"
 #include "mesh/element_topology.hpp"
@@ -1085,6 +1086,24 @@ TEST_CASE("Prism quadrature scheme test", "[prism_quadrature]")
     {
         REQUIRE(make_volume_interpolation(element_topology::prism6, full())->nodes() == 6);
         REQUIRE(make_volume_interpolation(element_topology::prism15, full())->nodes() == 15);
+    }
+}
+TEST_CASE("Pyramid quadrature scheme test")
+{
+    SECTION("Pyramid quadrature values")
+    {
+        // Check 1 and 6 point rule
+        pyramid_quadrature p1(pyramid_quadrature::point::one);
+        pyramid_quadrature p8(pyramid_quadrature::point::eight);
+        pyramid_quadrature p27(pyramid_quadrature::point::twenty_seven);
+
+        REQUIRE(p1.points() == 1);
+        REQUIRE(p8.points() == 8);
+        REQUIRE(p27.points() == 27);
+
+        REQUIRE(ranges::accumulate(p1.weights(), 0.0) == Approx(4.0 / 3.0));
+        REQUIRE(ranges::accumulate(p8.weights(), 0.0) == Approx(4.0 / 3.0));
+        REQUIRE(ranges::accumulate(p27.weights(), 0.0) == Approx(4.0 / 3.0));
     }
 }
 TEST_CASE("Unit sphere quadrature scheme test", "[unit_sphere_quadrature]")
