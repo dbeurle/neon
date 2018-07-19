@@ -194,7 +194,7 @@ void fem_mesh::write(std::int32_t const time_step, double const current_time)
     // nodal variables
     if (writer->is_output_requested("displacement"))
     {
-        writer->field("displacement", coordinates->displacement_vector(), 3);
+        writer->field("displacement", coordinates->displacement(), 3);
     }
     if (writer->is_output_requested("reaction_force"))
     {
