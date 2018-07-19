@@ -19,10 +19,8 @@ namespace neon::mechanical::solid
 class nonaffine_microsphere : public affine_microsphere
 {
 public:
-    /**
-     * @param variables Reference to internal state variable store
-     * @param material_data Json object with material data
-     */
+    /// \param variables Reference to internal state variable store
+    /// \param material_data Json object with material data
     explicit nonaffine_microsphere(std::shared_ptr<internal_variables_t>& variables,
                                    json const& material_data,
                                    unit_sphere_quadrature::point const rule);
@@ -106,11 +104,15 @@ protected:
     matrix6 compute_o_dot_product(vector3 const& n) const;
 
 private:
-    micromechanical_elastomer material; //!< Material with micromechanical parameters
+    /// Material with micromechanical parameters
+    micromechanical_elastomer material;
 
-    double non_affine_stretch_parameter{9.0}; //!< Three-dimensional locking characteristics (p)
-    double effective_tube_geometry{9.0};      //!< Additional constraint stiffness (U)
-    double non_affine_tube_parameter{1.0};    //!< Shape of constraint stress (q)
+    /// Three-dimensional locking characteristics (p)
+    double non_affine_stretch_parameter{9.0};
+    /// Additional constraint stiffness (U)
+    double effective_tube_geometry{9.0};
+    /// Shape of constraint stress (q)
+    double non_affine_tube_parameter{1.0};
 };
 
 /** \} */
