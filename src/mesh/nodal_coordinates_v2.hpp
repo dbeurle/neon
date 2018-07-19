@@ -63,7 +63,7 @@ nodal_coordinates<N>::nodal_coordinates(json const& mesh_file)
 
     X.resize(N, nodes);
 
-    for (std::int64_t node{0}; node < nodes; ++node)
+    for (std::size_t node{0}; node < nodes; ++node)
     {
         for (auto i{0}; i < N; ++i)
         {
