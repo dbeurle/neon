@@ -2,11 +2,13 @@
 #include "small_strain_J2_plasticity.hpp"
 
 #include "constitutive/internal_variables.hpp"
-#include "numeric/mechanics"
 #include "exceptions.hpp"
+#include "numeric/mechanics"
 
 #include <range/v3/view/transform.hpp>
 #include <tbb/parallel_for.h>
+
+#include <iostream>
 
 namespace neon::mechanical::solid
 {

@@ -1,20 +1,19 @@
 
 #include "constitutive/mechanical/plane/finite_strain_J2_plasticity.hpp"
 
-#include "exceptions.hpp"
 #include "constitutive/internal_variables.hpp"
-
+#include "constitutive/mechanical/detail/J2_plasticity.hpp"
+#include "exceptions.hpp"
 #include "numeric/float_compare.hpp"
 #include "numeric/log_tensor_derivative.hpp"
-
 #include "numeric/mechanics"
-
-#include "constitutive/mechanical/detail/J2_plasticity.hpp"
 
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/zip.hpp>
 
 #include <unsupported/Eigen/MatrixFunctions>
+
+#include <iostream>
 
 namespace neon::mechanical::plane
 {

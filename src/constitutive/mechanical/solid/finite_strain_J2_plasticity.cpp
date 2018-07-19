@@ -11,6 +11,8 @@
 
 #include <unsupported/Eigen/MatrixFunctions>
 
+#include <iostream>
+
 namespace neon::mechanical::solid
 {
 finite_strain_J2_plasticity::finite_strain_J2_plasticity(std::shared_ptr<internal_variables_t>& variables,
