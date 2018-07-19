@@ -60,6 +60,8 @@ using vector4 = Eigen::Vector4d;
 using vector5 = Eigen::Matrix<double, 5, 1>;
 /// Fixed size vector of length six
 using vector6 = Eigen::Matrix<double, 6, 1>;
+/// Fixed size vector of length nine
+using vector9 = Eigen::Matrix<double, 9, 1>;
 /// Fixed size vector of length sixteen
 using vector16 = Eigen::Matrix<double, 16, 1>;
 }
