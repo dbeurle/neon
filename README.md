@@ -110,7 +110,7 @@ You can then install using
 
 and run the test suite with
 
-`$ ctest`
+`$ ctest -jN`
 
 to ensure the program is behaving as expected.
 
@@ -122,7 +122,7 @@ See the LICENSE.md file for the project license and the licenses of the included
 
 Many thanks to the contributors of ideas, code and theoretical discussions:
 * Shadi Alameddin (code reviews, verification, bug reports, theoretical and code contributions, damage model)
-* Shannon Beurle (documentation, quality, beam properties and tests)
+* Shannon Beurle (documentation, quality, beam section properties and tests)
 * Patricio Rodrigeuz (pyramid shape functions and quadrature)
 
 If you are missing please open an issue and I'll happily add you to the list.
