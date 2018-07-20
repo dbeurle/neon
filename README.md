@@ -120,8 +120,9 @@ See the LICENSE.md file for the project license and the licenses of the included
 
 ## Contributions
 
-Many thanks to the contributors of ideas, code and theoretical discussions to
-* Shadi Alameddin
-* Shannon Beurle
+Many thanks to the contributors of ideas, code and theoretical discussions:
+* Shadi Alameddin (code reviews, verification, bug reports, theoretical and code contributions, damage model)
+* Shannon Beurle (documentation, quality, beam properties and tests)
+* Patricio Rodrigeuz (pyramid shape functions and quadrature)
 
 If you are missing please open an issue and I'll happily add you to the list.
