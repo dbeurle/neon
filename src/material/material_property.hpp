@@ -7,10 +7,8 @@
 
 namespace neon
 {
-/**
- * A base class for the material properties.  This holds the common material
- * properties for each material such as a density.
- */
+/// A base class for the material properties.  This holds the common material
+/// properties for each material such as a density.
 class material_property
 {
 public:
@@ -20,10 +18,10 @@ public:
 
     std::string const& name() const { return material_name; }
 
-    /** @return the density if specified in the material data */
+    /// \return the density if specified in the material data
     double initial_density() const;
 
-    /** @return the specific heat if specified in the material data */
+    /// \return the specific heat if specified in the material data
     double specific_heat() const;
 
 protected:
