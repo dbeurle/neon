@@ -1,6 +1,6 @@
 {
     "Name" : "Toy cube model",
-    "Cores" : 2,
+    "Cores" : 1,
     "Part": [{
         "Name" : "cube",
         "Material" : "rubber"
