@@ -12,7 +12,7 @@ namespace neon
 class material_property
 {
 public:
-    material_property(json const& intrinsic_material_data);
+    explicit material_property(json const& intrinsic_material_data);
 
     virtual ~material_property() = default;
 

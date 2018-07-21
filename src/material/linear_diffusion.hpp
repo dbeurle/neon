@@ -12,7 +12,7 @@ namespace neon
 class linear_diffusion : public material_property
 {
 public:
-    linear_diffusion(json const& material_data);
+    explicit linear_diffusion(json const& material_data);
 
     [[nodiscard]] auto diffusivity_coefficient() const noexcept
     {

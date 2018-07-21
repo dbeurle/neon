@@ -11,7 +11,7 @@ namespace neon
 class isotropic_elastic_plastic_damage : public isotropic_elastic_plastic
 {
 public:
-    isotropic_elastic_plastic_damage(json const& material_data);
+    explicit isotropic_elastic_plastic_damage(json const& material_data);
 
     [[nodiscard]] double softening_multiplier() const noexcept { return gamma; }
 
