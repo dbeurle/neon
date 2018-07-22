@@ -35,7 +35,7 @@ simulation_parser::simulation_parser(std::string const& input_file_name)
 
     if (extension != ".json")
     {
-        throw std::domain_error("Extension \"" + extension + "\" is not supported, use \".neon\"");
+        throw std::domain_error("Extension \"" + extension + "\" is not supported, use \".json\"");
     }
     this->parse();
 }
