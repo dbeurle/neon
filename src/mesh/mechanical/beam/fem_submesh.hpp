@@ -134,29 +134,33 @@ protected:
     /// \return The 12x12 element rotation matrix
     [[nodiscard]] matrix12 rotation_matrix(std::int32_t const element) const;
 
+    /// Perform input checks and allocate normal and tangent vectors
+    /// Throws \p std::domain_error if inputs do not exist or match expectations
+    void allocate_normal_and_tangent(json const& profile_data);
+
 protected:
-    /// Line shape function (linear, quadratic, cubic)
+    /// Line shape function
     std::unique_ptr<line_interpolation> sf;
 
     /// Coordinates of each mesh
     std::shared_ptr<material_coordinates> coordinates;
-
-    /// Element geometry profiles
-    std::vector<std::unique_ptr<geometry::profile>> profiles;
 
     /// View wrapper into internal variables
     variable_view view;
     /// Internal variables (geometry and constitutive)
     std::shared_ptr<internal_variable_type> variables;
 
+    /// Constitutive model
     std::unique_ptr<isotropic_linear> cm;
 
     /// Local-global element indices map
     indices dof_indices;
 
-    /// Element tangent vectors
-    std::vector<vector3> tangents;
-    /// Element orientiations
-    std::vector<vector3> orientations;
+    /// Element geometry profiles
+    std::unique_ptr<geometry::profile> profile;
+    /// Segment tangent vector
+    vector3 tangent;
+    /// Segment first normal
+    vector3 normal;
 };
 }
