@@ -53,9 +53,7 @@ void affine_microsphere::update_internal_variables(double const time_step_size)
 matrix3 affine_microsphere::compute_kirchhoff_stress(double const pressure,
                                                      matrix3 const& macro_stress) const
 {
-    // clang-format off
-    return pressure * matrix3::Identity() + macro_stress - 1.0 / 3.0 * macro_stress.trace() * matrix3::Identity();
-    // clang-format on
+    return pressure * matrix3::Identity() + deviatoric(macro_stress);
 }
 
 matrix6 affine_microsphere::compute_material_tangent(double const J,

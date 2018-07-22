@@ -14,7 +14,7 @@ namespace neon
 class micromechanical_elastomer : public isotropic_elastic_property
 {
 public:
-    micromechanical_elastomer(json const& material_data);
+    explicit micromechanical_elastomer(json const& material_data);
 
     /// \return The number of segments per polymer chain
     [[nodiscard]] auto segments_per_chain() const noexcept { return N; }
@@ -29,7 +29,7 @@ protected:
 class ageing_micromechanical_elastomer : public micromechanical_elastomer
 {
 public:
-    ageing_micromechanical_elastomer(json const& material_data);
+    explicit ageing_micromechanical_elastomer(json const& material_data);
 
     /// \return Bond length for a carbon-carbon bond
     [[nodiscard]] double bond_length() const noexcept { return C_bond_length; }

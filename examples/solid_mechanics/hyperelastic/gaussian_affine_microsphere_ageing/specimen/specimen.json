@@ -1,6 +1,6 @@
 {
     "Name" : "SpecimenAgeing",
-    "Cores" : 2,
+    "Cores" : 1,
     "Part": [{
         "Name" : "specimen",
         "Material" : "rubber"
