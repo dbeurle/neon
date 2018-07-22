@@ -14,6 +14,9 @@ class basic_mesh;
 
 namespace mechanical::beam
 {
+/// fem_mesh is the discretised space for C0 beam finite elements.  It handles
+/// the submeshes for each structural section (profile, material etc) and
+/// is responsible for populating the submeshes and boundary conditions.
 class fem_mesh
 {
 public:
