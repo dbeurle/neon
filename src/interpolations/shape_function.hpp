@@ -40,9 +40,9 @@ protected:
     /// to be averaged to the nodal points without ill-effects when using a
     /// least squares (for example with quadratric tetrahedron elements)
     /// developed in \cite Durand2014
-    void compute_extrapolation_matrix(matrix const N,
-                                      matrix const local_nodal_coordinates,
-                                      matrix const local_quadrature_coordinates);
+    void compute_extrapolation_matrix(matrix const& N,
+                                      matrix const& local_nodal_coordinates,
+                                      matrix const& local_quadrature_coordinates);
 
 protected:
     matrix extrapolation; //!< Quadrature point to nodal point mapping
@@ -50,10 +50,11 @@ protected:
     std::unique_ptr<quadrature_type> numerical_quadrature;
 };
 
-template <typename quadrature_t>
-void shape_function<quadrature_t>::compute_extrapolation_matrix(matrix const N,
-                                                                matrix const local_nodal_coordinates,
-                                                                matrix const local_quadrature_coordinates)
+template <typename QuadratureType>
+void shape_function<QuadratureType>::compute_extrapolation_matrix(
+    matrix const& N,
+    matrix const& local_nodal_coordinates,
+    matrix const& local_quadrature_coordinates)
 {
     // Take short names for consistency with algorithm
 
