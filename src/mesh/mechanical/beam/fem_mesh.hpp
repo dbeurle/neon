@@ -28,6 +28,7 @@ public:
 public:
     fem_mesh(basic_mesh const& basic_mesh,
              json const& material_data,
+             json const& profile_data,
              json const& simulation_data,
              double const generate_time_step);
 
@@ -97,6 +98,9 @@ protected:
     std::map<std::string, nonfollower_load_boundary> nonfollower_loads;
 
     std::unordered_map<std::string, int> const dof_table{{"x", 0}, {"y", 1}, {"z", 2}};
+
+    /// Profiles available for the submeshes
+    std::map<std::string, geometry::profile> profiles;
 
     /// Displacement and rotation vector (u1, u2, u3, r1, r2, r3)
     vector displacement, rotation;

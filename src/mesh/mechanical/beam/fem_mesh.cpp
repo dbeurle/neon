@@ -23,6 +23,7 @@ static bool is_nodal_variable(std::string const& name)
 
 fem_mesh::fem_mesh(basic_mesh const& basic_mesh,
                    json const& material_data,
+                   json const& profile_data,
                    json const& simulation_data,
                    double const generate_time_step)
     : coordinates(std::make_shared<material_coordinates>(basic_mesh.coordinates())),
@@ -32,6 +33,8 @@ fem_mesh::fem_mesh(basic_mesh const& basic_mesh,
       writer(std::make_unique<io::vtk_file_output>(simulation_data["Name"],
                                                    simulation_data["Visualisation"]))
 {
+    std::cout << profile_data << std::endl;
+
     check_boundary_conditions(simulation_data["BoundaryConditions"]);
 
     writer->coordinates(coordinates->coordinates());
