@@ -11,7 +11,6 @@
 
 #include <boost/filesystem.hpp>
 #include <termcolor/termcolor.hpp>
-#include <range/v3/algorithm/find.hpp>
 #include <range/v3/algorithm/find_if.hpp>
 
 namespace neon
@@ -66,7 +65,7 @@ void simulation_parser::parse()
     auto const material_names = this->parse_material_names(root["Material"]);
     auto const part_names = this->parse_part_names(root["Part"], material_names);
 
-    // Add in the parts and populate the mesh stores
+    // Read in the mesh from file and allocate the mesh cache
     for (auto const& part : root["Part"])
     {
         auto const material = *ranges::find_if(root["Material"], [&part](auto const& material) {
@@ -99,7 +98,7 @@ void simulation_parser::parse()
         // Ensure the required fields exist
         for (auto required_field : {"Name", "Time", "Solution", "LinearSolver"})
         {
-            if (!simulation.count(required_field))
+            if (simulation.find(required_field) == simulation.end())
             {
                 throw std::domain_error("A simulation case needs a \"" + std::string(required_field)
                                         + "\" field\n");
@@ -109,9 +108,10 @@ void simulation_parser::parse()
         assert(simulation["Mesh"].size() == 1);
 
         // Make sure the simulation mesh exists in the mesh store
-        if (mesh_store.find(simulation["Mesh"][0]["Name"]) == mesh_store.end())
+        if (mesh_store.find(simulation["Mesh"].front()["Name"]) == mesh_store.end())
         {
-            throw std::domain_error("Mesh name \"" + simulation["Mesh"][0]["Name"].get<std::string>()
+            throw std::domain_error("Mesh name \""
+                                    + simulation["Mesh"].front()["Name"].get<std::string>()
                                     + "\" was not found in the mesh store");
         }
     }
@@ -254,7 +254,7 @@ std::unordered_set<std::string> simulation_parser::parse_part_names(
             throw std::domain_error("Part: Name is missing");
         }
 
-        if (ranges::find(material_names, part["Material"].get<std::string>()) == material_names.end())
+        if (material_names.find(part["Material"].get<std::string>()) == material_names.end())
         {
             throw std::domain_error("The part material was not found in the provided "
                                     "materials\n");
