@@ -15,7 +15,7 @@ std::unique_ptr<abstract_module> make_module(
     json const& simulation,
     std::map<std::string, std::pair<basic_mesh, json>> const& mesh_store)
 {
-    auto const& mesh_data = simulation["Mesh"][0];
+    auto const& mesh_data = simulation["Mesh"].front();
 
     auto const& simulation_mesh = mesh_store.find(mesh_data["Name"].get<std::string>());
 
@@ -49,7 +49,11 @@ std::unique_ptr<abstract_module> make_module(
     }
     else if (module_type == "Beam")
     {
-        return std::make_unique<beam_module>(mesh, material, simulation);
+        if (simulation.find("profile") == simulation.end())
+        {
+            throw std::domain_error("Beam analysis requires a global \"profile\" section");
+        }
+        return std::make_unique<beam_module>(mesh, material, simulation["profile"].front(), simulation);
     }
     else if (module_type == "HeatDiffusion")
     {
