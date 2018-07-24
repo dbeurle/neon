@@ -2,6 +2,7 @@
 #include "simulation_parser.hpp"
 
 #include "exceptions.hpp"
+#include "geometry/profile_factory.hpp"
 #include "modules/abstract_module.hpp"
 #include "modules/module_factory.hpp"
 
@@ -62,8 +63,9 @@ void simulation_parser::parse()
         threads = root["Cores"];
     }
 
-    auto const material_names = this->parse_material_names(root["Material"]);
+    auto const material_names = this->allocate_material_names(root["Material"]);
     auto const part_names = this->parse_part_names(root["Part"], material_names);
+    auto const profile_names = this->allocate_profile_names(root["profile"]);
 
     // Read in the mesh from file and allocate the mesh cache
     for (auto const& part : root["Part"])
@@ -104,8 +106,11 @@ void simulation_parser::parse()
                                         + "\" field\n");
             }
         }
-        // Multibody simulations not (yet) supported
-        assert(simulation["Mesh"].size() == 1);
+
+        if (simulation["Mesh"].size() != 1)
+        {
+            throw std::domain_error("Multibody simulation are not yet supported");
+        }
 
         // Make sure the simulation mesh exists in the mesh store
         if (mesh_store.find(simulation["Mesh"].front()["Name"]) == mesh_store.end())
@@ -159,7 +164,7 @@ void simulation_parser::build_simulation_tree()
         }
     }
 
-    // Print out continuation data if applicable
+    // Print out continuation status if applicable
     for (auto const& [name, queue] : multistep_simulations)
     {
         if (!queue.empty())
@@ -179,7 +184,9 @@ void simulation_parser::find_children(std::string const& parent_name,
 {
     for (auto const& simulation : root["SimulationCases"])
     {
-        if (simulation.find("Inherits") != simulation.end()) continue;
+        if (simulation.find("Inherits") == simulation.end()) continue;
+
+        std::cout << "inherit not found" << std::endl;
 
         if (simulation["Inherits"].get<std::string>() == next_parent_name)
         {
@@ -222,9 +229,9 @@ void simulation_parser::check_input_fields() const
     }
 }
 
-std::unordered_set<std::string> simulation_parser::parse_material_names(json const& materials) const
+std::set<std::string> simulation_parser::allocate_material_names(json const& materials) const
 {
-    std::unordered_set<std::string> material_names;
+    std::set<std::string> material_names;
 
     for (auto const& material : root["Material"])
     {
@@ -235,16 +242,15 @@ std::unordered_set<std::string> simulation_parser::parse_material_names(json con
 
         auto const [it, inserted] = material_names.emplace(material["Name"].get<std::string>());
 
-        if (!inserted) throw std::domain_error("Material was not parsed correctly");
+        if (!inserted) throw std::domain_error("Material name is not unique");
     }
     return material_names;
 }
 
-std::unordered_set<std::string> simulation_parser::parse_part_names(
-    json const& parts,
-    std::unordered_set<std::string> const& material_names) const
+std::set<std::string> simulation_parser::parse_part_names(json const& parts,
+                                                          std::set<std::string> const& material_names) const
 {
-    std::unordered_set<std::string> part_names;
+    std::set<std::string> part_names;
 
     // Load in all the part names and error check
     for (auto const& part : root["Part"])
@@ -265,5 +271,28 @@ std::unordered_set<std::string> simulation_parser::parse_part_names(
         if (!inserted) throw std::domain_error("Part is defined more than once");
     }
     return part_names;
+}
+
+std::set<std::string> simulation_parser::allocate_profile_names(json const& profiles)
+{
+    std::set<std::string> profile_names;
+
+    for (auto const& profile : root["profile"])
+    {
+        if (profile.find("name") == profile.end())
+        {
+            throw std::domain_error("A unique profile name is missing");
+        }
+        if (profile.find("type") == profile.end())
+        {
+            throw std::domain_error("A unique type is missing for the profile.  See the user "
+                                    "documentation for allowable types and their parameters.");
+        }
+        auto const [it, inserted] = profile_names.emplace(profile["name"].get<std::string>());
+        if (!inserted) throw std::domain_error("profile name is not unique");
+
+        profile_store.emplace(profile["name"].get<std::string>(), geometry::make_profile(profile));
+    }
+    return profile_names;
 }
 }
