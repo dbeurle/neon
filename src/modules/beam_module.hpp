@@ -29,8 +29,8 @@ public:
 public:
     explicit beam_module(basic_mesh const& mesh,
                          json const& material_data,
-                         json const& profile_data,
-                         json const& simulation_data);
+                         json const& simulation_data,
+                         std::map<std::string, std::unique_ptr<geometry::profile>> const& profile_store);
 
     virtual ~beam_module() = default;
 

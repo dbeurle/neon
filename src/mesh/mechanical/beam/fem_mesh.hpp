@@ -28,15 +28,18 @@ public:
 public:
     fem_mesh(basic_mesh const& basic_mesh,
              json const& material_data,
-             json const& profile_data,
              json const& simulation_data,
-             double const generate_time_step);
+             double const generate_time_step,
+             std::map<std::string, std::unique_ptr<geometry::profile>> const& profile_store);
 
     /// The number of active degrees of freedom in this mesh
-    [[nodiscard]] auto active_dofs() const { return traits::dofs_per_node * coordinates->size(); }
+    [[nodiscard]] auto active_dofs() const noexcept
+    {
+        return traits::dofs_per_node * coordinates->size();
+    }
 
     /// Checks the boundary conditions and constitutive model to ensure
-    /// resulting matrix from this mesh is symmetric.  \sa LinearSolver
+    /// resulting matrix from this mesh is symmetric.
     [[nodiscard]] bool is_symmetric() const;
 
     /// Deform the body by updating the displacement x = X + u

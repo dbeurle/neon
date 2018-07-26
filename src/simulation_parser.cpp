@@ -138,7 +138,7 @@ void simulation_parser::start()
     {
         for (auto const& simulation : simulations)
         {
-            modules.emplace_back(make_module(simulation, mesh_store));
+            modules.emplace_back(make_module(simulation, mesh_store, profile_store));
         }
     }
     for (auto const& module : modules)

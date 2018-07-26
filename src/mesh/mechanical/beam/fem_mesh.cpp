@@ -23,9 +23,9 @@ static bool is_nodal_variable(std::string const& name)
 
 fem_mesh::fem_mesh(basic_mesh const& basic_mesh,
                    json const& material_data,
-                   json const& profile_data,
                    json const& simulation_data,
-                   double const generate_time_step)
+                   double const generate_time_step,
+                   std::map<std::string, std::unique_ptr<geometry::profile>> const& profile_store)
     : coordinates(std::make_shared<material_coordinates>(basic_mesh.coordinates())),
       displacement(active_dofs() / 2),
       rotation(active_dofs() / 2),
@@ -33,11 +33,11 @@ fem_mesh::fem_mesh(basic_mesh const& basic_mesh,
       writer(std::make_unique<io::vtk_file_output>(simulation_data["Name"],
                                                    simulation_data["Visualisation"]))
 {
-    std::cout << profile_data << std::endl;
-
     check_boundary_conditions(simulation_data["BoundaryConditions"]);
 
     writer->coordinates(coordinates->coordinates());
+
+    std::cout << "simulation name is: " << simulation_data["Name"] << std::endl;
 
     for (auto const& submesh : basic_mesh.meshes(simulation_data["Name"]))
     {
@@ -61,7 +61,10 @@ void fem_mesh::update_internal_variables(vector const& displacement_rotation,
 
     coordinates->update_current_configuration(displacement);
 
-    for (auto& submesh : submeshes) submesh.update_internal_variables(time_step_size);
+    for (auto& submesh : submeshes)
+    {
+        submesh.update_internal_variables(time_step_size);
+    }
 
     auto const end = std::chrono::steady_clock::now();
     std::chrono::duration<double> const elapsed_seconds = end - start;
