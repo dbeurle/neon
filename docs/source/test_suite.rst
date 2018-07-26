@@ -1,4 +1,4 @@
 Test Suite
 ==========
 
-adsf
+The test suite for neon ensures that the generated errors are thrown correctly.

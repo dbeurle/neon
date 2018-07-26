@@ -7,6 +7,7 @@ neon user documentation
 
    introduction
    meshing
+   section_properties
    material
    constitutive
    boundary_conditions
