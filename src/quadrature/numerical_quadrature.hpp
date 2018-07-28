@@ -52,8 +52,8 @@ public:
     /// \param integral Value for the numerical integration (accumulated into)
     /// \param f A lambda function that accepts an femValue and quadrature point
     /// \return The numerically integrated matrix
-    template <typename function>
-    void integrate_inplace(Eigen::Map<matrix> integral, function&& f) const
+    template <typename matrix_type, typename function>
+    void integrate_inplace(Eigen::Map<matrix_type> integral, function&& f) const
     {
         for (std::size_t l{0}; l < points(); ++l)
         {

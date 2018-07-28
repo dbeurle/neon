@@ -9,6 +9,8 @@
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/zip.hpp>
 
+#include <iostream>
+
 namespace neon::mechanical::plane
 {
 isotropic_linear_elasticity::isotropic_linear_elasticity(std::shared_ptr<internal_variables_t>& variables,

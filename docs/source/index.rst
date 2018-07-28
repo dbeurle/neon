@@ -7,7 +7,9 @@ neon user documentation
 
    introduction
    meshing
+   section_properties
    material
+   procedures
    constitutive
    boundary_conditions
    solution_methods

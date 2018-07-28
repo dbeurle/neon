@@ -57,7 +57,7 @@ TEST_CASE("Updating material coordinates")
     {
         single_triangle.update_current_configuration(test_displacements);
 
-        REQUIRE((single_triangle.displacement() - matrix3::Ones()).norm()
+        REQUIRE((single_triangle.displacement() - vector9::Ones()).norm()
                 == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Test element initial and current configuration")

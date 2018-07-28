@@ -18,6 +18,8 @@ namespace beam
 }
 }
 
+/// beam_module holds the mesh and the matrix assembler for a linear C0
+/// finite element beam formulation
 class beam_module : public abstract_module
 {
 public:
@@ -25,7 +27,10 @@ public:
     using matrix_type = fem::linear_static_matrix<mesh_type>;
 
 public:
-    beam_module(basic_mesh const& mesh, json const& material, json const& simulation);
+    explicit beam_module(basic_mesh const& mesh,
+                         json const& material_data,
+                         json const& simulation_data,
+                         std::map<std::string, std::unique_ptr<geometry::profile>> const& profile_store);
 
     virtual ~beam_module() = default;
 
@@ -33,12 +38,12 @@ public:
 
     beam_module(beam_module&&) = default;
 
-    virtual void perform_simulation() override final { fem_matrix.solve(); }
+    void perform_simulation() override final { fem_matrix.solve(); }
 
 protected:
-    /// Mesh for plane types
+    /// Beam finite element mesh
     mesh_type fem_mesh;
-    /// Nonlinear solver routines
+    /// Linear solver routines
     matrix_type fem_matrix;
 };
 }

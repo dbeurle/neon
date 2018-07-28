@@ -1,8 +1,8 @@
 
 #include <catch.hpp>
 
-#include "quadrature/hexahedron_quadrature.hpp"
 #include "quadrature/line_quadrature.hpp"
+#include "quadrature/hexahedron_quadrature.hpp"
 #include "quadrature/prism_quadrature.hpp"
 #include "quadrature/quadrilateral_quadrature.hpp"
 #include "quadrature/tetrahedron_quadrature.hpp"
@@ -15,6 +15,7 @@
 #include "interpolations/tetrahedron.hpp"
 #include "interpolations/triangle.hpp"
 #include "interpolations/prism.hpp"
+#include "interpolations/pyramid.hpp"
 
 #include "interpolations/interpolation_factory.hpp"
 #include "mesh/element_topology.hpp"
@@ -706,6 +707,15 @@ TEST_CASE("Hexahedron quadrature scheme test", "[hexahedron_quadrature]")
         REQUIRE(hex27.local_quadrature_extrapolation().rows() == 27);
         REQUIRE(hex27.local_quadrature_extrapolation().cols() == 27);
     }
+    SECTION("Virtual methods check")
+    {
+        REQUIRE(make_volume_interpolation(element_topology::hexahedron8, full())->nodes() == 8);
+        REQUIRE(make_volume_interpolation(element_topology::hexahedron20, full())->nodes() == 20);
+        REQUIRE(make_volume_interpolation(element_topology::hexahedron27, full())->nodes() == 27);
+    }
+}
+TEST_CASE("Hexahedron volume evaluation")
+{
     SECTION("hexahedron27 volume evaluation")
     {
         SECTION("Six point rule")
@@ -746,12 +756,6 @@ TEST_CASE("Hexahedron quadrature scheme test", "[hexahedron_quadrature]")
 
             REQUIRE(hex27.compute_measure(x) == Approx(8.0));
         }
-    }
-    SECTION("Virtual methods check")
-    {
-        REQUIRE(make_volume_interpolation(element_topology::hexahedron8, full())->nodes() == 8);
-        REQUIRE(make_volume_interpolation(element_topology::hexahedron20, full())->nodes() == 20);
-        REQUIRE(make_volume_interpolation(element_topology::hexahedron27, full())->nodes() == 27);
     }
 }
 TEST_CASE("Tetrahedron quadrature scheme test", "[tetrahedron_quadrature]")
@@ -1085,6 +1089,24 @@ TEST_CASE("Prism quadrature scheme test", "[prism_quadrature]")
     {
         REQUIRE(make_volume_interpolation(element_topology::prism6, full())->nodes() == 6);
         REQUIRE(make_volume_interpolation(element_topology::prism15, full())->nodes() == 15);
+    }
+}
+TEST_CASE("Pyramid quadrature scheme test")
+{
+    SECTION("Pyramid quadrature values")
+    {
+        // Check 1 and 6 point rule
+        pyramid_quadrature p1(pyramid_quadrature::point::one);
+        pyramid_quadrature p8(pyramid_quadrature::point::eight);
+        pyramid_quadrature p27(pyramid_quadrature::point::twenty_seven);
+
+        REQUIRE(p1.points() == 1);
+        REQUIRE(p8.points() == 8);
+        REQUIRE(p27.points() == 27);
+
+        REQUIRE(ranges::accumulate(p1.weights(), 0.0) == Approx(4.0 / 3.0));
+        REQUIRE(ranges::accumulate(p8.weights(), 0.0) == Approx(4.0 / 3.0));
+        REQUIRE(ranges::accumulate(p27.weights(), 0.0) == Approx(4.0 / 3.0));
     }
 }
 TEST_CASE("Unit sphere quadrature scheme test", "[unit_sphere_quadrature]")

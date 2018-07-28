@@ -1,13 +1,15 @@
 
 #include "mesh/mechanical/beam/fem_submesh.hpp"
 
+#include "geometry/profile_factory.hpp"
 #include "mesh/dof_allocator.hpp"
 #include "interpolations/interpolation_factory.hpp"
-#include "math/transform_expand.hpp"
-#include "geometry/profile_factory.hpp"
+#include "numeric/float_compare.hpp"
 
 #include <tbb/parallel_for.h>
 #include <Eigen/Geometry>
+
+#include <iostream>
 
 namespace neon::mechanical::beam
 {
@@ -18,15 +20,18 @@ fem_submesh::fem_submesh(json const& material_data,
     : basic_submesh(submesh),
       sf(make_line_interpolation(topology(), simulation_data)),
       coordinates(coordinates),
-      profiles(elements() * sf->quadrature().points()),
       view(sf->quadrature().points()),
       variables(std::make_shared<internal_variable_type>(elements() * sf->quadrature().points())),
       cm(std::make_unique<isotropic_linear>(variables, material_data))
 {
-    dof_allocator(node_indices, dof_indices, traits::dof_order);
+    if (simulation_data.find("section") == simulation_data.end())
+    {
+        throw std::domain_error("A \"section\" must be provided for beam analysis");
+    }
 
-    orientations.resize(elements(), vector3::UnitX());
-    tangents.resize(elements(), vector3::UnitZ());
+    allocate_normal_and_tangent(simulation_data["section"].front());
+
+    dof_allocator(node_indices, dof_indices, traits::dof_order);
 
     variables->add(variable::second::cauchy_stress,
                    variable::scalar::shear_area_1,
@@ -34,16 +39,12 @@ fem_submesh::fem_submesh(json const& material_data,
                    variable::scalar::cross_sectional_area,
                    variable::scalar::second_moment_area_1,
                    variable::scalar::second_moment_area_2);
+
+    profile = geometry::make_profile(json{{"profile", "rectangle"}, {"width", 1.0}, {"height", 1.0}});
 }
 
 void fem_submesh::update_internal_variables(double const time_step_size)
 {
-    for (auto& profile : profiles)
-    {
-        json profile_data{{"profile", "rectangle"}, {"width", 1.0}, {"height", 1.0}};
-        profile = geometry::make_profile(profile_data);
-    }
-
     auto& A = variables->get(variable::scalar::cross_sectional_area);
     auto& As1 = variables->get(variable::scalar::shear_area_1);
     auto& As2 = variables->get(variable::scalar::shear_area_2);
@@ -55,13 +56,13 @@ void fem_submesh::update_internal_variables(double const time_step_size)
     // properties for each quadrature point in the beam
     tbb::parallel_for(std::int64_t{0}, elements(), [&, this](auto const element) {
         sf->quadrature().for_each([&, this](auto const&, auto const l) {
-            A.at(view(element, l)) = profiles.at(element)->area();
+            A.at(view(element, l)) = profile->area();
 
-            auto const [shear_area_1, shear_area_2] = profiles.at(element)->shear_area();
+            auto const [shear_area_1, shear_area_2] = profile->shear_area();
             As1.at(view(element, l)) = shear_area_1;
             As2.at(view(element, l)) = shear_area_2;
 
-            auto const [I1, I2] = profiles.at(element)->second_moment_area();
+            auto const [I1, I2] = profile->second_moment_area();
             area_moment_1.at(view(element, l)) = I1;
             area_moment_2.at(view(element, l)) = I2;
         });
@@ -89,15 +90,15 @@ std::pair<index_view, matrix const&> fem_submesh::tangent_stiffness(std::int32_t
 matrix const& fem_submesh::bending_stiffness(matrix const& configuration,
                                              std::int32_t const element) const
 {
-    static thread_local matrix2x B_b(2, 6 * sf->nodes());
-    static thread_local matrix k_b(6 * sf->nodes(), 6 * sf->nodes());
+    static thread_local matrix2x B_bending(2, 6 * sf->nodes());
+    static thread_local matrix k_bending(6 * sf->nodes(), 6 * sf->nodes());
 
-    B_b.setZero();
-    k_b.setZero();
+    B_bending.setZero();
+    k_bending.setZero();
 
-    auto const& D_b = variables->get(variable::second::bending_stiffness);
+    auto const& D_bending = variables->get(variable::second::bending_stiffness);
 
-    sf->quadrature().integrate_inplace(k_b, [&, this](auto const& femval, auto const l) {
+    sf->quadrature().integrate_inplace(k_bending, [&, this](auto const& femval, auto const l) {
         auto const& [N, dN] = femval;
 
         double const jacobian = configuration.row(0) * dN;
@@ -106,25 +107,25 @@ matrix const& fem_submesh::bending_stiffness(matrix const& configuration,
         {
             auto const offset = i * 6;
 
-            B_b(0, 3 + offset) = B_b(1, 4 + offset) = dN(i, l) / jacobian;
+            B_bending(0, 3 + offset) = B_bending(1, 4 + offset) = dN(i, l) / jacobian;
         }
 
-        return B_b.transpose() * D_b.at(view(element, l)) * B_b * jacobian;
+        return B_bending.transpose() * D_bending.at(view(element, l)) * B_bending * jacobian;
     });
-    return k_b;
+    return k_bending;
 }
 
 matrix const& fem_submesh::shear_stiffness(matrix const& configuration, std::int32_t const element) const
 {
-    static thread_local matrix2x B_s(2, 6 * sf->nodes());
-    static thread_local matrix k_s(6 * sf->nodes(), 6 * sf->nodes());
+    static thread_local matrix2x B_shear(2, 6 * sf->nodes());
+    static thread_local matrix k_shear(6 * sf->nodes(), 6 * sf->nodes());
 
-    B_s.setZero();
-    k_s.setZero();
+    B_shear.setZero();
+    k_shear.setZero();
 
-    auto const& D_s = variables->get(variable::second::shear_stiffness);
+    auto const& D_shear = variables->get(variable::second::shear_stiffness);
 
-    sf->quadrature().integrate_inplace(k_s, [&, this](auto const& femval, auto const l) {
+    sf->quadrature().integrate_inplace(k_shear, [&, this](auto const& femval, auto const l) {
         auto const& [N, dN] = femval;
 
         double const jacobian = configuration.row(0) * dN;
@@ -133,28 +134,27 @@ matrix const& fem_submesh::shear_stiffness(matrix const& configuration, std::int
         {
             auto const offset = i * 6;
 
-            B_s(0, 0 + offset) = B_s(1, 1 + offset) = dN(i, l) / jacobian;
+            B_shear(0, 0 + offset) = B_shear(1, 1 + offset) = dN(i, l) / jacobian;
 
-            B_s(0, 4 + offset) = -N(i, l);
-            B_s(1, 3 + offset) = N(i, l);
+            B_shear(0, 4 + offset) = -N(i, l);
+            B_shear(1, 3 + offset) = N(i, l);
         }
-
-        return B_s.transpose() * D_s.at(view(element, l)) * B_s * jacobian;
+        return B_shear.transpose() * D_shear.at(view(element, l)) * B_shear * jacobian;
     });
-    return k_s;
+    return k_shear;
 }
 
 matrix const& fem_submesh::axial_stiffness(matrix const& configuration, std::int32_t const element) const
 {
-    static thread_local vector B_a(6 * sf->nodes());
-    static thread_local matrix k_a(6 * sf->nodes(), 6 * sf->nodes());
+    static thread_local vector B_axial(6 * sf->nodes());
+    static thread_local matrix k_axial(6 * sf->nodes(), 6 * sf->nodes());
 
-    B_a.setZero();
-    k_a.setZero();
+    B_axial.setZero();
+    k_axial.setZero();
 
-    auto const D_a = variables->get(variable::scalar::axial_stiffness);
+    auto const D_axial = variables->get(variable::scalar::axial_stiffness);
 
-    sf->quadrature().integrate_inplace(k_a, [&, this](auto const& femval, auto const l) {
+    sf->quadrature().integrate_inplace(k_axial, [&, this](auto const& femval, auto const l) {
         auto const& [N, dN] = femval;
 
         double const jacobian = configuration.row(0) * dN;
@@ -163,26 +163,26 @@ matrix const& fem_submesh::axial_stiffness(matrix const& configuration, std::int
         {
             auto const offset = i * 6;
 
-            B_a(2 + offset) = dN(i, l) / jacobian;
+            B_axial(2 + offset) = dN(i, l) / jacobian;
         }
 
-        return B_a * D_a.at(view(element, l)) * B_a.transpose() * jacobian;
+        return B_axial * D_axial.at(view(element, l)) * B_axial.transpose() * jacobian;
     });
-    return k_a;
+    return k_axial;
 }
 
 matrix const& fem_submesh::torsional_stiffness(matrix const& configuration,
                                                std::int32_t const element) const
 {
-    static thread_local vector B_t(6 * sf->nodes());
-    static thread_local matrix k_t(6 * sf->nodes(), 6 * sf->nodes());
+    static thread_local vector B_torsion(6 * sf->nodes());
+    static thread_local matrix k_torsion(6 * sf->nodes(), 6 * sf->nodes());
 
-    B_t.setZero();
-    k_t.setZero();
+    B_torsion.setZero();
+    k_torsion.setZero();
 
-    auto const D_t = variables->get(variable::scalar::torsional_stiffness);
+    auto const D_torsion = variables->get(variable::scalar::torsional_stiffness);
 
-    sf->quadrature().integrate_inplace(k_t, [&, this](auto const& femval, auto const l) {
+    sf->quadrature().integrate_inplace(k_torsion, [&, this](auto const& femval, auto const l) {
         auto const& [N, dN] = femval;
 
         double const jacobian = configuration.row(0) * dN;
@@ -191,12 +191,12 @@ matrix const& fem_submesh::torsional_stiffness(matrix const& configuration,
         {
             auto const offset = i * 6;
 
-            B_t(5 + offset) = dN(i, l) / jacobian;
+            B_torsion(5 + offset) = dN(i, l) / jacobian;
         }
 
-        return B_t * D_t.at(view(element, l)) * B_t.transpose() * jacobian;
+        return B_torsion * D_torsion.at(view(element, l)) * B_torsion.transpose() * jacobian;
     });
-    return k_t;
+    return k_torsion;
 }
 
 matrix12 fem_submesh::rotation_matrix(std::int32_t const element) const
@@ -204,13 +204,11 @@ matrix12 fem_submesh::rotation_matrix(std::int32_t const element) const
     matrix3 rotation;
 
     // Local coordinate (x1)
-    rotation.col(0) = orientations.at(element);
-
-    // Local coordinate (x3)
-    rotation.col(2) = tangents.at(element);
-
+    rotation.col(0) = normal;
     // Local coordinate (x2)
-    rotation.col(1) = rotation.col(0).cross(rotation.col(2)).normalized().cwiseAbs();
+    rotation.col(1) = normal.cross(tangent);
+    // Local coordinate (x3)
+    rotation.col(2) = tangent;
 
     matrix12 element_rotation = matrix12::Zero();
 
@@ -220,5 +218,44 @@ matrix12 fem_submesh::rotation_matrix(std::int32_t const element) const
     element_rotation.block<3, 3>(9, 9) = rotation;
 
     return element_rotation;
+}
+
+void fem_submesh::allocate_normal_and_tangent(json const& profile_data)
+{
+    if (profile_data.find("tangent") == profile_data.end())
+    {
+        throw std::domain_error("A \"tangent\" vector must be specified in the \"section\"");
+    }
+    if (profile_data.find("normal") == profile_data.end())
+    {
+        throw std::domain_error("A \"normal\" vector must be specified in the \"section\"");
+    }
+
+    auto const& tangent_vector = profile_data["tangent"];
+    auto const& normal_vector = profile_data["normal"];
+
+    if (!tangent_vector.is_array() || tangent_vector.size() != 3)
+    {
+        throw std::domain_error("A \"tangent\" vector must be specified using three (3) "
+                                "coordinates [x, y, z]");
+    }
+    if (!normal_vector.is_array() || normal_vector.size() != 3)
+    {
+        throw std::domain_error("A \"normal\" vector must be specified using three (3) coordinates "
+                                "[x, y, z]");
+    }
+
+    tangent(0) = tangent_vector[0];
+    tangent(1) = tangent_vector[1];
+    tangent(2) = tangent_vector[2];
+
+    normal(0) = normal_vector[0];
+    normal(1) = normal_vector[1];
+    normal(2) = normal_vector[2];
+
+    if (is_approx(normal.dot(tangent), 0.0))
+    {
+        throw std::domain_error("normal and tangent vectors must be orthogonal");
+    }
 }
 }

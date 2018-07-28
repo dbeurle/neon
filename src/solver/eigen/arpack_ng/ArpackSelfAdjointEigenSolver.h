@@ -31,6 +31,7 @@
 #include <cctype>
 #include <cstdlib>
 #include <string>
+#include <iostream>
 
 namespace arpack
 {

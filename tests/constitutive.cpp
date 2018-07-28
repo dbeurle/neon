@@ -16,6 +16,8 @@
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 
+#include <iostream>
+
 std::string json_input_file()
 {
     return "{\"Name\": \"rubber\", \"ElasticModulus\": 2.0, \"PoissonsRatio\": 0.45}";

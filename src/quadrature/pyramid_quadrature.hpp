@@ -5,22 +5,22 @@
 
 namespace neon
 {
-class line_quadrature : public numerical_quadrature<double>
+class pyramid_quadrature : public volume_quadrature
 {
 public:
-    /// Available quadrature rules
+    /// Available quadrature rules for this element type
     enum class point {
         /// First order
         one,
         /// Third order
-        two,
+        eight,
         /// Fifth order
-        three,
+        twenty_seven,
         /// Seventh order
-        four
+        sixty_four
     };
 
 public:
-    explicit line_quadrature(point const p);
+    explicit pyramid_quadrature(point const p);
 };
 }

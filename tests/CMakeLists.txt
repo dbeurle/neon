@@ -44,7 +44,7 @@ foreach(test
     set_target_properties(${test}_test PROPERTIES CXX_STANDARD 17
                                                   CXX_STANDARD_REQUIRED YES
                                                   CXX_EXTENSIONS NO
-                                       COMPILE_FLAGS "-Wall -Werror")
+                                       COMPILE_FLAGS "-Wall")
 
     if(ENABLE_COVERAGE)
         set_target_properties(${test}_test PROPERTIES COMPILE_FLAGS "--coverage")

@@ -11,6 +11,8 @@
 
 #include <tbb/parallel_for.h>
 
+#include <iostream>
+
 namespace neon::mechanical::plane
 {
 small_strain_J2_plasticity::small_strain_J2_plasticity(std::shared_ptr<internal_variables_t>& variables,

@@ -2,6 +2,7 @@
 #include "simulation_parser.hpp"
 
 #include "exceptions.hpp"
+#include "geometry/profile_factory.hpp"
 #include "modules/abstract_module.hpp"
 #include "modules/module_factory.hpp"
 
@@ -11,7 +12,6 @@
 
 #include <boost/filesystem.hpp>
 #include <termcolor/termcolor.hpp>
-#include <range/v3/algorithm/find.hpp>
 #include <range/v3/algorithm/find_if.hpp>
 
 namespace neon
@@ -35,7 +35,7 @@ simulation_parser::simulation_parser(std::string const& input_file_name)
 
     if (extension != ".json")
     {
-        throw std::domain_error("Extension \"" + extension + "\" is not supported, use \".neon\"");
+        throw std::domain_error("Extension \"" + extension + "\" is not supported, use \".json\"");
     }
     this->parse();
 }
@@ -44,7 +44,7 @@ simulation_parser::~simulation_parser() = default;
 
 void simulation_parser::parse()
 {
-    auto start = std::chrono::steady_clock::now();
+    auto const start = std::chrono::steady_clock::now();
 
     this->print_banner();
 
@@ -58,15 +58,16 @@ void simulation_parser::parse()
 
     this->check_input_fields();
 
-    if (root.count("Cores"))
+    if (root.find("Cores") != root.end())
     {
         threads = root["Cores"];
     }
 
-    auto const material_names = this->parse_material_names(root["Material"]);
+    auto const material_names = this->allocate_material_names(root["Material"]);
     auto const part_names = this->parse_part_names(root["Part"], material_names);
+    auto const profile_names = this->allocate_profile_names(root["profile"]);
 
-    // Add in the parts and populate the mesh stores
+    // Read in the mesh from file and allocate the mesh cache
     for (auto const& part : root["Part"])
     {
         auto const material = *ranges::find_if(root["Material"], [&part](auto const& material) {
@@ -78,7 +79,6 @@ void simulation_parser::parse()
         std::ifstream mesh_input_stream(part["Name"].get<std::string>() + ".mesh");
 
         json mesh_file;
-
         mesh_input_stream >> mesh_file;
 
         auto const read_end = std::chrono::steady_clock::now();
@@ -100,26 +100,30 @@ void simulation_parser::parse()
         // Ensure the required fields exist
         for (auto required_field : {"Name", "Time", "Solution", "LinearSolver"})
         {
-            if (!simulation.count(required_field))
+            if (simulation.find(required_field) == simulation.end())
             {
-                throw std::runtime_error("A simulation case needs a \""
-                                         + std::string(required_field) + "\" field\n");
+                throw std::domain_error("A simulation case needs a \"" + std::string(required_field)
+                                        + "\" field\n");
             }
         }
-        // Multibody simulations not (yet) supported
-        assert(simulation["Mesh"].size() == 1);
+
+        if (simulation["Mesh"].size() != 1)
+        {
+            throw std::domain_error("Multibody simulation are not yet supported");
+        }
 
         // Make sure the simulation mesh exists in the mesh store
-        if (mesh_store.find(simulation["Mesh"][0]["Name"]) == mesh_store.end())
+        if (mesh_store.find(simulation["Mesh"].front()["Name"]) == mesh_store.end())
         {
-            throw std::runtime_error("Mesh name \"" + simulation["Mesh"][0]["Name"].get<std::string>()
-                                     + "\" was not found in the mesh store");
+            throw std::domain_error("Mesh name \""
+                                    + simulation["Mesh"].front()["Name"].get<std::string>()
+                                    + "\" was not found in the mesh store");
         }
     }
     build_simulation_tree();
 
     auto const end = std::chrono::steady_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::chrono::duration<double> const elapsed_seconds = end - start;
 
     std::cout << termcolor::bold << termcolor::green << std::string(2, ' ')
               << "Preprocessing complete in " << elapsed_seconds.count() << "s\n"
@@ -128,16 +132,19 @@ void simulation_parser::parse()
 
 void simulation_parser::start()
 {
-    // Allocate the modules storage, which automatically checks for correct input
-    // and throws the appropriate exception when an error is detected
+    // Construct the modules and automatically check for correct input.
+    // Throws the appropriate exception when an error is detected.
     for (auto const& [name, simulations] : multistep_simulations)
     {
         for (auto const& simulation : simulations)
         {
-            modules.emplace_back(make_module(simulation, mesh_store));
+            modules.emplace_back(make_module(simulation, mesh_store, profile_store));
         }
     }
-    for (auto const& module : modules) module->perform_simulation();
+    for (auto const& module : modules)
+    {
+        module->perform_simulation();
+    }
 }
 
 void simulation_parser::build_simulation_tree()
@@ -147,19 +154,27 @@ void simulation_parser::build_simulation_tree()
     // Build a list of all the load steps for a given mesh
     for (auto const& simulation : root["SimulationCases"])
     {
-        if (!simulation.count("Inherits"))
+        if (simulation.find("Inherits") == simulation.end())
         {
-            multistep_simulations[simulation["Name"]].emplace_front(simulation);
-            find_children(simulation["Name"], simulation["Name"]);
+            std::string const& simulation_name = simulation["Name"];
+
+            multistep_simulations[simulation_name].emplace_front(simulation);
+
+            find_children(simulation_name, simulation_name);
         }
     }
 
+    // Print out continuation status if applicable
     for (auto const& [name, queue] : multistep_simulations)
     {
-        std::cout << std::string(4, ' ') << "Simulation \"" << name << "\" is continued by:\n";
-        for (auto const& item : queue)
+        if (!queue.empty())
         {
-            std::cout << std::string(4, ' ') << item["Name"] << std::endl;
+            std::cout << std::string(4, ' ') << "Simulation \"" << name << "\" is continued by:\n";
+
+            for (auto const& item : queue)
+            {
+                std::cout << std::string(4, ' ') << item["Name"] << std::endl;
+            }
         }
     }
 }
@@ -169,7 +184,9 @@ void simulation_parser::find_children(std::string const& parent_name,
 {
     for (auto const& simulation : root["SimulationCases"])
     {
-        if (!simulation.count("Inherits")) continue;
+        if (simulation.find("Inherits") == simulation.end()) continue;
+
+        std::cout << "inherit not found" << std::endl;
 
         if (simulation["Inherits"].get<std::string>() == next_parent_name)
         {
@@ -194,57 +211,56 @@ void simulation_parser::print_banner() const
 void simulation_parser::check_input_fields() const
 {
     // Check the important fields exist before anything else is done
-    if (!root.count("Part"))
+    if (root.find("Part") == root.end())
     {
-        throw std::runtime_error("Part is not in input file");
+        throw std::domain_error("Part is not in input file");
     }
-    if (!root.count("Name"))
+    if (root.find("Name") == root.end())
     {
-        throw std::runtime_error("Name is not in input file");
+        throw std::domain_error("Name is not in input file");
     }
-    if (!root.count("Material"))
+    if (root.find("Material") == root.end())
     {
-        throw std::runtime_error("Material is not in input file");
+        throw std::domain_error("Material is not in input file");
     }
-    if (!root.count("SimulationCases"))
+    if (root.find("SimulationCases") == root.end())
     {
-        throw std::runtime_error("SimulationCases is not in input file");
+        throw std::domain_error("SimulationCases is not in input file");
     }
 }
 
-std::unordered_set<std::string> simulation_parser::parse_material_names(json const& materials) const
+std::set<std::string> simulation_parser::allocate_material_names(json const& materials) const
 {
-    std::unordered_set<std::string> material_names;
+    std::set<std::string> material_names;
 
     for (auto const& material : root["Material"])
     {
-        if (!material.count("Name"))
+        if (material.find("Name") == material.end())
         {
-            throw std::runtime_error("Material: Name is missing");
+            throw std::domain_error("Material: Name is missing");
         }
 
         auto const [it, inserted] = material_names.emplace(material["Name"].get<std::string>());
 
-        if (!inserted) throw std::domain_error("Material");
+        if (!inserted) throw std::domain_error("Material name is not unique");
     }
     return material_names;
 }
 
-std::unordered_set<std::string> simulation_parser::parse_part_names(
-    json const& parts,
-    std::unordered_set<std::string> const& material_names) const
+std::set<std::string> simulation_parser::parse_part_names(json const& parts,
+                                                          std::set<std::string> const& material_names) const
 {
-    std::unordered_set<std::string> part_names;
+    std::set<std::string> part_names;
 
     // Load in all the part names and error check
     for (auto const& part : root["Part"])
     {
-        if (!part.count("Name"))
+        if (part.find("Name") == part.end())
         {
             throw std::domain_error("Part: Name is missing");
         }
 
-        if (ranges::find(material_names, part["Material"].get<std::string>()) == material_names.end())
+        if (material_names.find(part["Material"].get<std::string>()) == material_names.end())
         {
             throw std::domain_error("The part material was not found in the provided "
                                     "materials\n");
@@ -255,5 +271,28 @@ std::unordered_set<std::string> simulation_parser::parse_part_names(
         if (!inserted) throw std::domain_error("Part is defined more than once");
     }
     return part_names;
+}
+
+std::set<std::string> simulation_parser::allocate_profile_names(json const& profiles)
+{
+    std::set<std::string> profile_names;
+
+    for (auto const& profile : root["profile"])
+    {
+        if (profile.find("name") == profile.end())
+        {
+            throw std::domain_error("A unique profile name is missing");
+        }
+        if (profile.find("type") == profile.end())
+        {
+            throw std::domain_error("A unique type is missing for the profile.  See the user "
+                                    "documentation for allowable types and their parameters.");
+        }
+        auto const [it, inserted] = profile_names.emplace(profile["name"].get<std::string>());
+        if (!inserted) throw std::domain_error("profile name is not unique");
+
+        profile_store.emplace(profile["name"].get<std::string>(), geometry::make_profile(profile));
+    }
+    return profile_names;
 }
 }

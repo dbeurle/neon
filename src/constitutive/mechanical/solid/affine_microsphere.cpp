@@ -23,11 +23,9 @@ affine_microsphere::affine_microsphere(std::shared_ptr<internal_variables_t>& va
 void affine_microsphere::update_internal_variables(double const time_step_size)
 {
     auto& tangent_operators = variables->get(variable::fourth::tangent_operator);
-
-    auto const& deformation_gradients = variables->get(variable::second::deformation_gradient);
-
     auto& cauchy_stresses = variables->get(variable::second::cauchy_stress);
 
+    auto const& deformation_gradients = variables->get(variable::second::deformation_gradient);
     auto const& det_deformation_gradients = variables->get(variable::scalar::DetF);
 
     auto const K{material.bulk_modulus()};
@@ -55,9 +53,7 @@ void affine_microsphere::update_internal_variables(double const time_step_size)
 matrix3 affine_microsphere::compute_kirchhoff_stress(double const pressure,
                                                      matrix3 const& macro_stress) const
 {
-    // clang-format off
-    return pressure * matrix3::Identity() + macro_stress - 1.0 / 3.0 * macro_stress.trace() * matrix3::Identity();
-    // clang-format on
+    return pressure * matrix3::Identity() + deviatoric(macro_stress);
 }
 
 matrix6 affine_microsphere::compute_material_tangent(double const J,
