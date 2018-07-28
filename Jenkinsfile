@@ -61,28 +61,6 @@ pipeline {
                         '''
                     }
                 }
-                stage('clang release with debug') {
-                    agent {
-                        dockerfile {
-                            filename 'docker/Dockerfile'
-                            additionalBuildArgs '--pull'
-                        }
-                    }
-                    steps {
-                        sh '''
-                        if [ ! -d "build" ]; then
-                            mkdir build;
-                        fi
-                        cd build
-                        rm -rf *
-                        export CXX=clang++
-                        cmake -DCMAKE_BUILD_TYPE=RelWithDebug ..
-                        make all
-                        export PATH=$PATH:$(pwd)
-                        ctest --output-on-failure
-                        '''
-                    }
-                }
                 stage('clang release') {
                     agent {
                         dockerfile {
