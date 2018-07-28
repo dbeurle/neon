@@ -45,9 +45,9 @@ file_output::file_output(std::string const& file_name, json const& visualisation
     }
     if (visualisation_data.find("Fields") != visualisation_data.end())
     {
-        for (std::string const& field : visualisation_data["Fields"])
+        for (auto const& field : visualisation_data["Fields"])
         {
-            output_variables.insert(field);
+            output_variables.insert(field.get<std::string>());
         }
     }
     else
