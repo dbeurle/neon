@@ -14,7 +14,7 @@ namespace neon::io
 /// \return vtkSmartPointer containing a vtkDoubleArray
 template <int rows>
 vtkSmartPointer<vtkDoubleArray> vtk_displacement(matrixdx<rows> const& input_data,
-                                                 std::string const array_name = "displacement")
+                                                 std::string const& array_name = "displacement")
 {
     static_assert(rows != Eigen::Dynamic, "The number of rows must be compile-time fixed");
 
@@ -45,7 +45,7 @@ vtkSmartPointer<vtkDoubleArray> vtk_displacement(matrixdx<rows> const& input_dat
 /// \return vtkSmartPointer containing a vtkDoubleArray
 inline vtkSmartPointer<vtkDoubleArray> vtk_array(vector const& vectorised_tuples,
                                                  std::int32_t const tuple_size,
-                                                 std::string const array_name)
+                                                 std::string const& array_name)
 {
     auto vtk_double_array = vtkSmartPointer<vtkDoubleArray>::New();
 

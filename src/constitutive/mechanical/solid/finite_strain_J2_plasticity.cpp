@@ -168,8 +168,8 @@ std::tuple<vector3, std::array<matrix3, 3>, bool, std::array<int, 3>> finite_str
         throw computational_error("Eigenvalue solver failed in finite plasticity routine\n");
     }
 
-    vector3 const x = eigen_solver.eigenvalues();
-    matrix3 const v = eigen_solver.eigenvectors();
+    vector3 const& x = eigen_solver.eigenvalues();
+    matrix3 const& v = eigen_solver.eigenvectors();
 
     // Eigenprojections
     std::array<matrix3, 3> E = {{v.col(0) * v.col(0).transpose(),

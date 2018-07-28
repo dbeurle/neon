@@ -27,7 +27,7 @@
 
 namespace neon::io
 {
-file_output::file_output(std::string file_name, json const& visualisation_data)
+file_output::file_output(std::string const& file_name, json const& visualisation_data)
     : file_name(file_name)
 {
     if (visualisation_data.is_null())
@@ -62,7 +62,7 @@ bool file_output::is_output_requested(std::string const& name) const
     return output_variables.find(name) != end(output_variables);
 }
 
-vtk_file_output::vtk_file_output(std::string file_name, json const& visualisation_data)
+vtk_file_output::vtk_file_output(std::string const& file_name, json const& visualisation_data)
     : file_output(file_name, visualisation_data),
       unstructured_mesh(vtkSmartPointer<vtkUnstructuredGrid>::New())
 {

@@ -2,11 +2,11 @@
 #include "newton_convection.hpp"
 
 #include "math/jacobian_determinant.hpp"
+#include "io/json.hpp"
 
 #include <range/v3/view/transform.hpp>
 #include <range/v3/view/zip.hpp>
-
-#include "io/json.hpp"
+#include <utility>
 
 namespace neon::diffusion::boundary
 {
@@ -18,8 +18,8 @@ newton_convection::newton_convection(std::unique_ptr<surface_interpolation>&& sf
                                      json const& heat_flux,
                                      json const& heat_transfer_coefficient)
     : surface_load<surface_interpolation>(std::move(sf),
-                                          node_indices,
-                                          dof_indices,
+                                          std::move(node_indices),
+                                          std::move(dof_indices),
                                           mesh_coordinates,
                                           times,
                                           heat_flux)

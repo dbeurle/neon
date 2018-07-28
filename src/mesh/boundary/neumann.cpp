@@ -1,6 +1,8 @@
 
 #include "neumann.hpp"
 
+#include <utility>
+
 namespace neon
 {
 neumann::neumann(indices node_indices,
@@ -9,8 +11,8 @@ neumann::neumann(indices node_indices,
                  json const& times,
                  json const& loads)
     : vector_contribution{times, loads},
-      node_indices{node_indices},
-      dof_indices{dof_indices},
+      node_indices{std::move(node_indices)},
+      dof_indices{std::move(dof_indices)},
       coordinates{coordinates}
 {
 }
@@ -22,8 +24,8 @@ neumann::neumann(indices node_indices,
                  std::string const& name,
                  double const generate_time_step)
     : vector_contribution{boundary, name, generate_time_step},
-      node_indices{node_indices},
-      dof_indices{dof_indices},
+      node_indices{std::move(node_indices)},
+      dof_indices{std::move(dof_indices)},
       coordinates{coordinates}
 {
 }
