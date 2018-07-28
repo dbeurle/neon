@@ -10,8 +10,14 @@
         "ElasticModulus" : 200.0e9,
         "PoissonsRatio" : 0.3
     }],
+    "profile" : [{
+        "name" : "steel_bar",
+        "type" : "rectangle",
+        "width" : 200,
+        "height" : 200
+    }],
     "SimulationCases" : [{
-        "Name" : "Uniaxial",
+        "Name" : "cantilever_force",
 		"Module" : "Beam",
         "Solution" : "Equilibrium",
         "Time" : {
@@ -54,6 +60,12 @@
                 "x" : [0.0, 1000.0],
                 "y" : [0.0, 2000.0],
                 "z" : [0.0, 2000.0]
+            }],
+            "section" : [{
+                "name" : "base",
+                "profile" : "steel_bar",
+                "tangent" : [1.0, 0.0, 0.0],
+                "normal" : [0.0, 1.0, 0.0]
             }],
             "Visualisation" : {
                 "Fields" : ["displacement", "rotation"]
