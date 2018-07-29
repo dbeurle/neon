@@ -6,10 +6,8 @@
 
 namespace neon::diffusion
 {
-/**
- * isotropic_diffusion computes the isotropic constitutive matrix for linear
- * and isotropic diffusion problems.
- */
+/// isotropic_diffusion computes the isotropic constitutive matrix for linear
+/// and isotropic diffusion problems.
 class isotropic_diffusion : public constitutive_model
 {
 public:
