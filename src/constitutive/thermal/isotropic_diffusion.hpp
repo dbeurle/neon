@@ -17,7 +17,7 @@ public:
 
     material_property const& intrinsic_material() const override { return material; }
 
-    bool is_finite_deformation() const override { return false; }
+    bool is_finite_deformation() const override final { return false; }
 
 protected:
     linear_diffusion material;
