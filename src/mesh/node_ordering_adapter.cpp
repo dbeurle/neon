@@ -250,6 +250,22 @@ indices convert_to_vtk(indices node_indices, element_topology const topology)
 
             break;
         }
+        case element_topology::pyramid13:
+        {
+            node_indices.row(1).swap(node_indices.row(2));
+            node_indices.row(4).swap(node_indices.row(2));
+            node_indices.row(6).swap(node_indices.row(3));
+            node_indices.row(12).swap(node_indices.row(4));
+
+            node_indices.row(12).swap(node_indices.row(5));
+            node_indices.row(12).swap(node_indices.row(7));
+            node_indices.row(12).swap(node_indices.row(8));
+            node_indices.row(12).swap(node_indices.row(9));
+            node_indices.row(12).swap(node_indices.row(10));
+            node_indices.row(12).swap(node_indices.row(11));
+
+            break;
+        }
         case element_topology::prism15:
         {
             // -1 face
