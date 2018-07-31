@@ -170,6 +170,6 @@ TEST_CASE("Diffusion material")
     linear_diffusion material(material_data);
 
     REQUIRE(material.initial_density() == Approx(7800.0));
-    REQUIRE(material.conductivity_coefficient() == Approx(300.0));
-    REQUIRE(material.specific_heat_coefficient() == Approx(280.0));
+    REQUIRE(material.conductivity() == Approx(300.0));
+    REQUIRE(material.specific_heat() == Approx(280.0));
 }

@@ -65,7 +65,9 @@ public:
 //     hollow_rectangle(double const width, double const height);
 // };
 
-class section
+class hollow_circle : public profile
 {
+public:
+    explicit hollow_circle(json const& section_data);
 };
 }

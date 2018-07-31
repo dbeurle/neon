@@ -19,7 +19,7 @@ namespace neon::io
 class file_output
 {
 public:
-    explicit file_output(std::string file_name, json const& visualisation_data);
+    explicit file_output(std::string const& file_name, json const& visualisation_data);
 
     /// Virtual destructor to finish writing out the time step mapping
     virtual ~file_output() = default;
@@ -60,7 +60,7 @@ protected:
 class vtk_file_output : public io::file_output
 {
 public:
-    explicit vtk_file_output(std::string file_name, json const& visualisation_data);
+    explicit vtk_file_output(std::string const& file_name, json const& visualisation_data);
 
     virtual ~vtk_file_output();
 

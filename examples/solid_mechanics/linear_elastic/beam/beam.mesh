@@ -1,7 +1,7 @@
 {
    "Elements" : [
       {
-         "Name" : "beam",
+         "Name" : "base",
          "NodalConnectivity" : [
             [ 0, 2 ],
             [ 2, 3 ],

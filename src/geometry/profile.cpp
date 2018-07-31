@@ -33,7 +33,7 @@ rectangle::rectangle(json const& section_data)
     if (height <= 0.0)
     {
         throw std::domain_error("\"height\" must have a positive value for \"rectangle\" in "
-                                "section");
+                                "profile");
     }
 
     I_x = width * std::pow(height, 3) / 12.0;
@@ -45,7 +45,7 @@ circle::circle(json const& section_data)
 {
     if (section_data.find("diameter") == section_data.end())
     {
-        throw std::domain_error("\"diameter\" was not specified for \"circle\" in section");
+        throw std::domain_error("\"diameter\" was not specified for \"circle\" in profile");
     }
 
     double const diameter = section_data["diameter"];
@@ -53,13 +53,54 @@ circle::circle(json const& section_data)
     if (diameter <= 0.0)
     {
         throw std::domain_error("\"diameter\" must have a positive value for \"circle\" in "
-                                "section");
+                                "profile");
     }
 
     auto const pi = std::acos(-1.0);
 
     I_x = I_y = pi * std::pow(diameter, 4) / 64.0;
     A = A_x = A_y = pi * std::pow(diameter, 2) / 4.0;
+    J = I_x * 2.0;
+}
+
+hollow_circle::hollow_circle(json const& section_data)
+{
+    if (section_data.find("outer_diameter") == section_data.end())
+    {
+        throw std::domain_error("\"outer_diameter\" was not specified for \"hollow_circle\" in "
+                                "profile");
+    }
+    if (section_data.find("inner_diameter") == section_data.end())
+    {
+        throw std::domain_error("\"inner_diameter\" was not specified for \"hollow_circle\" in "
+                                "profile");
+    }
+
+    double const outer_diameter = section_data["outer_diameter"];
+    double const inner_diameter = section_data["inner_diameter"];
+
+    if (outer_diameter <= 0.0)
+    {
+        throw std::domain_error("\"outer_diameter\" must have a positive value for "
+                                "\"hollow_circle\" in profile");
+    }
+    if (inner_diameter <= 0.0)
+    {
+        throw std::domain_error("\"inner_diameter\" must have a positive value for "
+                                "\"hollow_circle\" in profile");
+    }
+
+    if (inner_diameter >= outer_diameter)
+    {
+        throw std::domain_error("\"inner_diameter\" value must be less than \"outer_diameter\" "
+                                "value for \"hollow_circle\" in profile");
+    }
+
+    auto const pi = std::acos(-1.0);
+
+    A = A_x = A_y = pi * (std::pow(outer_diameter, 2) - std::pow(inner_diameter, 2)) / 4.0;
+    I_x = I_y = pi * (std::pow(outer_diameter, 4) - std::pow(inner_diameter, 4)) / 64.0;
+    I_xy = 0.0;
     J = I_x * 2.0;
 }
 

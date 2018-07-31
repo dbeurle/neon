@@ -29,13 +29,17 @@ public:
     fem_mesh(basic_mesh const& basic_mesh,
              json const& material_data,
              json const& simulation_data,
-             double const generate_time_step);
+             double const generate_time_step,
+             std::map<std::string, std::unique_ptr<geometry::profile>> const& profile_store);
 
     /// The number of active degrees of freedom in this mesh
-    [[nodiscard]] auto active_dofs() const { return traits::dofs_per_node * coordinates->size(); }
+    [[nodiscard]] auto active_dofs() const noexcept
+    {
+        return traits::dofs_per_node * coordinates->size();
+    }
 
     /// Checks the boundary conditions and constitutive model to ensure
-    /// resulting matrix from this mesh is symmetric.  \sa LinearSolver
+    /// resulting matrix from this mesh is symmetric.
     [[nodiscard]] bool is_symmetric() const;
 
     /// Deform the body by updating the displacement x = X + u
@@ -97,6 +101,9 @@ protected:
     std::map<std::string, nonfollower_load_boundary> nonfollower_loads;
 
     std::unordered_map<std::string, int> const dof_table{{"x", 0}, {"y", 1}, {"z", 2}};
+
+    /// Profiles available for the submeshes
+    std::map<std::string, geometry::profile> profiles;
 
     /// Displacement and rotation vector (u1, u2, u3, r1, r2, r3)
     vector displacement, rotation;

@@ -7,15 +7,18 @@
 
 #include "modules/linear_diffusion_module.hpp"
 
+#include "geometry/profile.hpp"
+
 #include "io/json.hpp"
 
 namespace neon
 {
 std::unique_ptr<abstract_module> make_module(
     json const& simulation,
-    std::map<std::string, std::pair<basic_mesh, json>> const& mesh_store)
+    std::map<std::string, std::pair<basic_mesh, json>> const& mesh_store,
+    std::map<std::string, std::unique_ptr<geometry::profile>> const& profile_store)
 {
-    auto const& mesh_data = simulation["Mesh"][0];
+    auto const& mesh_data = simulation["Mesh"].front();
 
     auto const& simulation_mesh = mesh_store.find(mesh_data["Name"].get<std::string>());
 
@@ -31,7 +34,7 @@ std::unique_ptr<abstract_module> make_module(
 
     if (module_type == "SolidMechanics")
     {
-        if (!simulation.count("NonlinearOptions"))
+        if (simulation.find("NonlinearOptions") == simulation.end())
         {
             throw std::domain_error("\"NonlinearOptions\" needs to be present for a "
                                     "SolidMechanics simulation");
@@ -40,7 +43,7 @@ std::unique_ptr<abstract_module> make_module(
     }
     else if (module_type == "PlaneStrain")
     {
-        if (!simulation.count("NonlinearOptions"))
+        if (simulation.find("NonlinearOptions") == simulation.end())
         {
             throw std::domain_error("\"NonlinearOptions\" needs to be present for a "
                                     "PlaneStrain simulation");
@@ -49,7 +52,7 @@ std::unique_ptr<abstract_module> make_module(
     }
     else if (module_type == "Beam")
     {
-        return std::make_unique<beam_module>(mesh, material, simulation);
+        return std::make_unique<beam_module>(mesh, material, simulation, profile_store);
     }
     else if (module_type == "HeatDiffusion")
     {
