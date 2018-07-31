@@ -13,6 +13,7 @@ std::unordered_map<int, element_topology> const gmsh_converter{{1, element_topol
                                                                {4, element_topology::tetrahedron4},
                                                                {5, element_topology::hexahedron8},
                                                                {6, element_topology::prism6},
+                                                               {7, element_topology::pyramid5},
                                                                {8, element_topology::line3},
                                                                {9, element_topology::triangle6},
                                                                {11, element_topology::tetrahedron10},
@@ -21,8 +22,9 @@ std::unordered_map<int, element_topology> const gmsh_converter{{1, element_topol
                                                                {13, element_topology::prism18},
                                                                {15, element_topology::point},
                                                                {16, element_topology::quadrilateral8},
+                                                               {17, element_topology::hexahedron20},
                                                                {18, element_topology::prism15},
-                                                               {17, element_topology::hexahedron20}};
+                                                               {19, element_topology::pyramid13}};
 
 std::unordered_map<element_topology, VTKCellType> const
     vtk_converter{{element_topology::line2, VTK_LINE},
@@ -33,6 +35,7 @@ std::unordered_map<element_topology, VTKCellType> const
                   {element_topology::tetrahedron4, VTK_TETRA},
                   {element_topology::hexahedron8, VTK_HEXAHEDRON},
                   {element_topology::prism6, VTK_WEDGE},
+                  {element_topology::pyramid5, VTK_PYRAMID},
                   {element_topology::triangle6, VTK_QUADRATIC_TRIANGLE},
                   {element_topology::tetrahedron10, VTK_QUADRATIC_TETRA},
                   {element_topology::prism15, VTK_QUADRATIC_WEDGE},
@@ -54,6 +57,7 @@ void convert_from_gmsh(indices& node_indices, element_topology const topology)
             node_indices.row(5).swap(node_indices.row(8));
             node_indices.row(8).swap(node_indices.row(9));
             node_indices.row(6).swap(node_indices.row(9));
+
             [[fallthrough]];
         }
         case element_topology::tetrahedron4:
@@ -61,6 +65,19 @@ void convert_from_gmsh(indices& node_indices, element_topology const topology)
             node_indices.row(0).swap(node_indices.row(3));
             node_indices.row(0).swap(node_indices.row(2));
             node_indices.row(0).swap(node_indices.row(1));
+
+            break;
+        }
+        case element_topology::pyramid13:
+        {
+            node_indices.row(5).swap(node_indices.row(1));
+            node_indices.row(2).swap(node_indices.row(5));
+            node_indices.row(3).swap(node_indices.row(8));
+            node_indices.row(5).swap(node_indices.row(4));
+            node_indices.row(5).swap(node_indices.row(10));
+            node_indices.row(6).swap(node_indices.row(8));
+            node_indices.row(11).swap(node_indices.row(10));
+            node_indices.row(12).swap(node_indices.row(12));
 
             break;
         }

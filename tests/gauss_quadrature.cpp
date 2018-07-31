@@ -1128,6 +1128,26 @@ TEST_CASE("Pyramid quadrature scheme test")
         REQUIRE(element.local_quadrature_extrapolation().cols() == 1);
         REQUIRE(element.local_quadrature_extrapolation().allFinite());
     }
+    SECTION("Thirteen node evaluation")
+    {
+        pyramid13 element(pyramid_quadrature::point::eight);
+
+        REQUIRE(element.nodes() == 13);
+        REQUIRE(element.quadrature().points() == 8);
+
+        element.quadrature().for_each([&](auto const& femval, auto const& l) {
+            auto const& [N, rhea] = femval;
+
+            REQUIRE(N.sum() == Approx(1.0));
+
+            REQUIRE(rhea.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            REQUIRE(rhea.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
+        });
+        REQUIRE(element.local_quadrature_extrapolation().rows() == 13);
+        REQUIRE(element.local_quadrature_extrapolation().cols() == 8);
+        REQUIRE(element.local_quadrature_extrapolation().allFinite());
+    }
     SECTION("Five node volume - one point")
     {
         pyramid5 element(pyramid_quadrature::point::one);
@@ -1146,8 +1166,8 @@ TEST_CASE("Pyramid quadrature scheme test")
     {
         pyramid5 element(pyramid_quadrature::point::eight);
 
-        auto const base = 1.0;
-        auto const height = 1.0;
+        auto constexpr base = 1.0;
+        auto constexpr height = 1.0;
 
         matrix3x x(3, 5);
         x << 0.0, base, base, 0.0, height / 2.0, //
@@ -1155,6 +1175,17 @@ TEST_CASE("Pyramid quadrature scheme test")
             0.0, 0.0, 0.0, 0.0, height;
 
         REQUIRE(element.compute_measure(x) == Approx(1.0 / 3.0));
+    }
+    SECTION("Thirteen node volume - eight point")
+    {
+        pyramid13 element(pyramid_quadrature::point::eight);
+
+        matrix3x x(3, 13);
+        x << 1.0, 0.0, -1.0, -1.0, -1.0, 0.0, 1.0, 1.0, 0.5, -0.5, -0.5, 0.5, 0.0, //
+            1.0, 1.0, 1.0, 0.0, -1.0, -1.0, -1.0, 0.0, 0.5, 0.5, -0.5, -0.5, 0.0,  //
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.5, 0.5, 1.0;
+
+        REQUIRE(element.compute_measure(x) == Approx(4.0 / 3.0));
     }
 }
 TEST_CASE("Unit sphere quadrature scheme test", "[unit_sphere_quadrature]")
