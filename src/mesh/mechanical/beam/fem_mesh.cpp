@@ -109,7 +109,7 @@ void fem_mesh::allocate_dirichlet_boundary(std::string const& boundary_type,
 
     for (auto const& [dof_key, dof_offset] : dof_table)
     {
-        if (boundary.count(dof_key))
+        if (boundary.find(dof_key) != boundary.end())
         {
             auto boundary_dofs = unique_dof_allocator<traits::dofs_per_node>(
                 basic_mesh.meshes(boundary_name));
