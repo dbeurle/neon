@@ -96,13 +96,13 @@ public:
         }
     }
 
-    /// \return The number of quadrature points
+    /// \return number of quadrature points
     [[nodiscard]] auto points() const noexcept { return m_weights.size(); }
 
-    /// \return The quadrature weights for this scheme
+    /// \return quadrature weights for this scheme
     [[nodiscard]] auto const& weights() const noexcept { return m_weights; }
 
-    /// \return A list of tuples representing the index and the coordinates
+    /// \return list of tuples representing the index and the coordinates
     [[nodiscard]] auto const& coordinates() const noexcept { return m_coordinates; }
 
 protected:
