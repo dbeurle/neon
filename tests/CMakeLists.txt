@@ -41,7 +41,6 @@ foreach(test
 
     target_include_directories(${test}_test PUBLIC ${CMAKE_SOURCE_DIR}/src
                                                    fixtures
-                                                   ${CATCH_INCLUDE_DIR}
                                                    ${EIGEN_INCLUDE_DIR}
                                                    ${VTK_INCLUDE_DIRS}
                                                    ${RV3_INCLUDE_DIR})
