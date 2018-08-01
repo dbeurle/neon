@@ -13,21 +13,21 @@ namespace neon
 class nodal_value : public boundary
 {
 public:
-    explicit nodal_value(std::vector<std::int32_t> unique_dofs, json const& times, json const& loads);
+    explicit nodal_value(std::vector<std::int32_t> dof_indices, json const& times, json const& loads);
 
-    explicit nodal_value(std::vector<std::int32_t> unique_dofs,
+    explicit nodal_value(std::vector<std::int32_t> dof_indices,
                          json const& boundary_data,
                          std::string const& name,
                          double const generate_time_step);
 
-    /// \return View of the unique dof indices for this boundary
+    /// \return view of the unique dof indices for this boundary
     [[nodiscard]] std::vector<std::int32_t> const& dof_view() const noexcept;
 
-    /// Get the value depending on the loading factor
+    /// \return boundary value depending on the loading factor
     [[nodiscard]] double value_view(double const load_factor = 1.0) const;
 
 protected:
     /// Unique dof indices to apply the value
-    std::vector<std::int32_t> unique_dofs;
+    std::vector<std::int32_t> dof_indices;
 };
 }

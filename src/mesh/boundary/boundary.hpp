@@ -8,10 +8,8 @@
 
 namespace neon
 {
-/**
- * boundary is a base class for boundary conditions which performs the load
- * interpolation logic.
- */
+/// boundary is a base class for boundary conditions which performs the load
+/// interpolation logic.
 class boundary
 {
 public:
@@ -43,13 +41,11 @@ protected:
     /// Allocate and check the time/load boundary values
     void allocate_time_load(json const& times, json const& loads);
 
-    /**
-     * Generate boundary values that follows a sinusoidal wave with fixed time step. This may be
-     * used to generate block loading where each block follows a specific sinusoidal wave.
-     * @param JSON boundary object
-     * @param dofs {x,y,z}
-     * @param time step
-     */
+    /// Generate boundary values that follows a sinusoidal wave with fixed time step. This may be
+    /// used to generate block loading where each block follows a specific sinusoidal wave.
+    /// \param JSON boundary object
+    /// \param dofs {x,y,z}
+    /// \param time step
     void generate_sinusoidal(json const& boundary,
                              std::string const& name,
                              double const generate_time_step);
