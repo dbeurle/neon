@@ -32,13 +32,16 @@ foreach(test
 
     add_dependencies(${test}_test neon catch_main cube_fixture)
 
-    target_link_libraries(${test}_test PRIVATE catch_main cube_fixture neon OpenMP::OpenMP_CXX)
+    target_link_libraries(${test}_test PRIVATE catch_main
+                                               cube_fixture
+                                               neon
+                                               Catch2::Catch
+                                               OpenMP::OpenMP_CXX)
 
     target_include_directories(${test}_test PUBLIC ${CMAKE_SOURCE_DIR}/src
                                                    fixtures
                                                    ${CATCH_INCLUDE_DIR}
                                                    ${EIGEN_INCLUDE_DIR}
-                                                   ${CATCH_INCLUDE_DIR}
                                                    ${VTK_INCLUDE_DIRS}
                                                    ${RV3_INCLUDE_DIR})
 
