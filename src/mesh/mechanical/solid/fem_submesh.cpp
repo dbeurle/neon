@@ -117,14 +117,14 @@ matrix fem_submesh::material_tangent_stiffness(matrix3x const& x, std::int32_t c
     matrix B = matrix::Zero(6, local_dofs);
 
     return sf->quadrature().integrate(kmat, [&](auto const& femval, auto const& l) -> matrix {
-        auto const& [N, rhea] = femval;
+        auto const& [N, dN] = femval;
 
         auto const& D = tangent_operators[view(element, l)];
 
-        matrix3 const Jacobian = local_deformation_gradient(rhea, x);
+        matrix3 const Jacobian = local_deformation_gradient(dN, x);
 
         // Compute the symmetric gradient operator
-        fem::sym_gradient<3>(B, (rhea * Jacobian.inverse()).transpose());
+        fem::sym_gradient<3>(B, (dN * Jacobian.inverse()).transpose());
 
         return B.transpose() * D * B * Jacobian.determinant();
     });
@@ -134,11 +134,12 @@ vector fem_submesh::internal_nodal_force(matrix3x const& x, std::int32_t const e
 {
     auto const& cauchy_stresses = variables->get(variable::second::cauchy_stress);
 
-    auto const [m, n] = std::make_pair(nodes_per_element(), dofs_per_node());
+    auto const m = nodes_per_element();
+    auto const n = dofs_per_node();
 
     matrix fint_matrix = sf->quadrature()
                              .integrate(matrix::Zero(m, n).eval(),
-                                        [&](auto const& femval, auto const& l) -> matrix {
+                                        [&](auto const& femval, auto const l) -> matrix {
                                             auto const& [N, dN] = femval;
 
                                             matrix3 const Jacobian = local_deformation_gradient(dN,

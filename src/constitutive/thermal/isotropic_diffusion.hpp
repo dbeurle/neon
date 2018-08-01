@@ -6,10 +6,8 @@
 
 namespace neon::diffusion
 {
-/**
- * isotropic_diffusion computes the isotropic constitutive matrix for linear
- * and isotropic diffusion problems.
- */
+/// isotropic_diffusion computes the isotropic constitutive matrix for linear
+/// and isotropic diffusion problems.
 class isotropic_diffusion : public constitutive_model
 {
 public:
@@ -19,7 +17,7 @@ public:
 
     material_property const& intrinsic_material() const override { return material; }
 
-    bool is_finite_deformation() const override { return false; }
+    bool is_finite_deformation() const override final { return false; }
 
 protected:
     linear_diffusion material;

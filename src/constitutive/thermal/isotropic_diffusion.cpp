@@ -12,9 +12,9 @@ isotropic_diffusion::isotropic_diffusion(std::shared_ptr<internal_variables_t>& 
 
     for (auto& k : variables->get(variable::second::conductivity))
     {
-        k = material.conductivity_coefficient() * matrix3::Identity();
+        k = material.conductivity() * matrix3::Identity();
     }
 }
 
-void isotropic_diffusion::update_internal_variables(double const time_step_size) {}
+void isotropic_diffusion::update_internal_variables(double const) {}
 }

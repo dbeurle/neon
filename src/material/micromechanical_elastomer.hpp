@@ -45,7 +45,7 @@ public:
                                        double const active_segments,
                                        double const inactive_segments) const;
 
-    [[nodiscard]] vector5 integrate(vector5 z, double const time_step_size) const;
+    [[nodiscard]] vector5 integrate(vector5 const& z, double const time_step_size) const;
 
 protected:
     /// Scission probability

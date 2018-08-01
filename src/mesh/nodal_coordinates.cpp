@@ -4,9 +4,11 @@
 #include "exceptions.hpp"
 #include "io/json.hpp"
 
+#include <utility>
+
 namespace neon
 {
-nodal_coordinates::nodal_coordinates(matrix3x coordinates) : X(coordinates) {}
+nodal_coordinates::nodal_coordinates(matrix3x coordinates) : X(std::move(coordinates)) {}
 
 nodal_coordinates::nodal_coordinates(json const& mesh_file)
 {

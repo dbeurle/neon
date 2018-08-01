@@ -89,18 +89,18 @@ double pyramid5::compute_measure(matrix3x const& nodal_coordinates) const
     });
 }
 
-pyramid12::pyramid12(pyramid_quadrature::point const p)
+pyramid13::pyramid13(pyramid_quadrature::point const p)
     : volume_interpolation(std::make_unique<pyramid_quadrature>(p))
 {
     this->precompute_shape_functions();
 }
 
-void pyramid12::precompute_shape_functions()
+void pyramid13::precompute_shape_functions()
 {
     using coordinate_type = std::tuple<int, double, double, double>;
 
-    // Initialize nodal coordinates array as Xi, Eta, Zeta
-    std::array<coordinate_type, 12> constexpr local_coordinates{{{0, 1.0, 0.0, -1.0},
+    // Initialise nodal coordinates array as Xi, Eta, Zeta
+    std::array<coordinate_type, 13> constexpr local_coordinates{{{0, 1.0, 0.0, -1.0},
                                                                  {1, 0.0, 1.0, -1.0},
                                                                  {2, 0.0, 0.0, -1.0},
                                                                  {3, 0.5, 0.5, -1.0},
@@ -113,7 +113,8 @@ void pyramid12::precompute_shape_functions()
                                                                  //
                                                                  {9, 1.0, 0.0, 1.0},
                                                                  {10, 0.0, 1.0, 1.0},
-                                                                 {11, 0.0, 0.0, 1.0}}};
+                                                                 {11, 0.0, 0.0, 1.0},
+                                                                 {12, 0.0, 0.0, 1.0}}};
 
     matrix N_matrix(numerical_quadrature->points(), nodes());
     matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 4);
@@ -121,8 +122,8 @@ void pyramid12::precompute_shape_functions()
     numerical_quadrature->evaluate([&](auto const& coordinate) {
         auto const& [l, u1, u2, u3] = coordinate;
 
-        vector N(12);
-        matrix rhea(12, 3);
+        vector N(13);
+        matrix rhea(13, 3);
 
         N(0) = -(u1 + u2 - 1) * (u1 - u3 + 1) * (u2 - u3 + 1) / (4 * (u3 - 1));
         N(1) = (u1 - u3 + 1) * (u1 + u3 - 1) * (u2 - u3 + 1) / (2 * (u3 - 1));
@@ -136,6 +137,7 @@ void pyramid12::precompute_shape_functions()
         N(9) = u3 * (u1 + u3 - 1) * (u2 - u3 + 1) / (u3 - 1);
         N(10) = -u3 * (u1 + u3 - 1) * (u2 + u3 - 1) / (u3 - 1);
         N(11) = u3 * (u1 - u3 + 1) * (u2 + u3 - 1) / (u3 - 1);
+        N(12) = u3 * (2 * u3 - 1);
 
         rhea(0, 0) = -(2 * u1 * u2 - 2 * u1 * u3 + 2 * u1 + std::pow(u2, 2) - 2 * u2 * u3 + u2
                        + std::pow(u3, 2) - u3)
@@ -157,6 +159,8 @@ void pyramid12::precompute_shape_functions()
         rhea(9, 0) = u3 * (u2 - u3 + 1) / (u3 - 1);
         rhea(10, 0) = -u3 * (u2 + u3 - 1) / (u3 - 1);
         rhea(11, 0) = u3 * (u2 + u3 - 1) / (u3 - 1);
+        rhea(12, 0) = 0.0;
+
         rhea(0, 1) = -(std::pow(u1, 2) + 2 * u1 * u2 - 2 * u1 * u3 + u1 - 2 * u2 * u3 + 2 * u2
                        + std::pow(u3, 2) - u3)
                      / (4 * u3 - 4);
@@ -177,6 +181,8 @@ void pyramid12::precompute_shape_functions()
         rhea(9, 1) = u3 * (u1 + u3 - 1) / (u3 - 1);
         rhea(10, 1) = -u3 * (u1 + u3 - 1) / (u3 - 1);
         rhea(11, 1) = u3 * (u1 - u3 + 1) / (u3 - 1);
+        rhea(12, 1) = 0.0;
+
         rhea(0, 2) = -(u1 + u2 - 1) * (-u1 * u2 * u3 + u1 * u2 * (u3 - 1) + std::pow(u3 - 1, 2))
                      / (4 * std::pow(u3 - 1, 2));
         rhea(1, 2) = (-std::pow(u1, 2) * u2 / 2 - u2 * std::pow(u3, 2) / 2 + u2 * u3 - u2 / 2
@@ -218,6 +224,8 @@ void pyramid12::precompute_shape_functions()
                          * (u3 * (u1 - u3 + 1) - u3 * (u2 + u3 - 1) + (u1 - u3 + 1) * (u2 + u3 - 1)))
                   / std::pow(u3 - 1, 2);
 
+        rhea(12, 2) = 4 * u3 - 1;
+
         local_quadrature_coordinates(l, 0) = u1;
         local_quadrature_coordinates(l, 1) = u2;
         local_quadrature_coordinates(l, 2) = u3;
@@ -239,9 +247,9 @@ void pyramid12::precompute_shape_functions()
     compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
 }
 
-double pyramid12::compute_measure(matrix3x const& nodal_coordinates) const
+double pyramid13::compute_measure(matrix3x const& nodal_coordinates) const
 {
-    return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
+    return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto) {
         auto const& [N, dN] = femval;
 
         matrix3 const jacobian = nodal_coordinates * dN;
