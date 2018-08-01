@@ -8,9 +8,11 @@
 #include "numeric/float_compare.hpp"
 
 #include <cmath>
+#include <iostream>
+
 #include <cuda_runtime.h>
 
-/** Exception for bad computation in CUDA kernel */
+/// Exception for bad computation in CUDA kernel
 class cuda_error : public std::domain_error
 {
     using std::domain_error::domain_error;
