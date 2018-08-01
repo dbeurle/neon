@@ -1,7 +1,8 @@
 
 add_library(catch_main STATIC test_main.cpp)
-add_dependencies(catch_main catch)
-target_include_directories(catch_main PRIVATE ${CATCH_INCLUDE_DIR})
+# add_dependencies(catch_main catch)
+# target_include_directories(catch_main PRIVATE ${CATCH_INCLUDE_DIR})
+target_link_libraries(catch_main PUBLIC Catch2::Catch)
 
 add_library(cube_fixture STATIC fixtures/cube_mesh.cpp)
 
