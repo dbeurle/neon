@@ -5,10 +5,12 @@
 
 #include <Eigen/Sparse>
 
-#include "numeric/doublet.hpp"
+#include <complex>
 
 namespace neon
 {
-/// Type alias for the row major sparse matrix type
+/// Type alias for row major real-valued sparse matrix
 using sparse_matrix = Eigen::SparseMatrix<double, Eigen::RowMajor>;
+/// Type alias for row major complex-valued sparse matrix
+using complex_sparse_matrix = Eigen::SparseMatrix<std::complex<double>, Eigen::RowMajor>;
 }
