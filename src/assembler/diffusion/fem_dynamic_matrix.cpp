@@ -3,6 +3,7 @@
 
 #include "assembler/homogeneous_dirichlet.hpp"
 #include "solver/linear/linear_solver.hpp"
+#include "numeric/doublet.hpp"
 #include "io/json.hpp"
 
 #include <termcolor/termcolor.hpp>
