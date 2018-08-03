@@ -4,6 +4,7 @@
 #include "exceptions.hpp"
 #include "solver/linear/linear_solver_factory.hpp"
 #include "assembler/homogeneous_dirichlet.hpp"
+#include "numeric/doublet.hpp"
 #include "io/json.hpp"
 
 #include <tbb/parallel_for.h>

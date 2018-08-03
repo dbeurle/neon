@@ -30,7 +30,7 @@ pipeline {
                 rm -rf *
                 export CXX=clang++
                 cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Release ..
-                make eigen3 termcolor catch range-v3 json
+                make eigen3 termcolor range-v3 json
                 cd ..
                 python run-clang-tidy.py -header-filter=$(pwd)/src/.* -checks=-*,bugprone-integer-division,bugprone-assert-side-effect,readability-function-size,bugprone-incorrect-roundings,bugprone-misplaced-widening-cast,performance-*,-performance-noexcept-move-constructor -warnings-as-errors='*' -p $(pwd)/build/
                 '''
