@@ -42,17 +42,49 @@ public:
 };
 
 /// jacobi_svd uses the Jacobi method for computing the singular values and is
-/// not recommended for large decompositions.  For larger systems please see the
+/// not recommended for large decompositions. For larger systems please see the
 /// GPU accelerated algorithms.
 
-/// This class first reduces the input matrix to bi-diagonal form and then performs a divide-and-conquer diagonalization.
-/// Small blocks are diagonalized using class JacobiSVD. Default switching size is 16.
+/// This class first reduces the input matrix to bi-diagonal form and then performs a
+/// divide-and-conquer diagonalization. Small blocks are diagonalized using class JacobiSVD. Default
+/// switching size is 16.
 class bdc_svd : public svd
 {
 public:
     bdc_svd() = default;
 
     bdc_svd(col_matrix const& A);
+
+    void compute(col_matrix const& A) override;
+
+    void compute(col_matrix const& A, int const n) override;
+
+    void compute(col_matrix const& A, double const tolerance) override;
+
+    col_matrix const& left() const noexcept override;
+
+    col_matrix const& right() const noexcept override;
+
+    vector const& values() const noexcept override;
+
+    void solve(vector& x, vector& b) const noexcept override;
+
+private:
+    Eigen::BDCSVD<col_matrix> A_decomposiion;
+    col_matrix left_vectors;
+    col_matrix right_vectors;
+    vector singular_values;
+};
+
+/// Implementation of the truncated Singular Value Decomposition, using
+/// randomized algorithms as described in 'finding structure with randomness'
+/// \cite halko2011finding.
+class randomised_svd : public svd
+{
+public:
+    randomised_svd() = default;
+
+    randomised_svd(col_matrix const& A);
 
     void compute(col_matrix const& A) override;
 

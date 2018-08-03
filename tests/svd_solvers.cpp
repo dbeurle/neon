@@ -56,18 +56,20 @@ TEST_CASE("svd solver test suite")
     sparse_matrix A = create_sparse_matrix();
     vector b = create_right_hand_side();
 
-    SECTION("singular values and singular vectors")
-    {
-        matrix A(4, 8);
-        // clang-format off
-        A << 1, 0, 0, 1, 0, 0, 0, 0,
-             1, 0, 0, 1, 0, 0, 0, 0,
-             0, 0, 0, 0, 0, 1, 0, 1,
-             0, 1, 0, 0, 0, 0, 1, 0;
-        // clang-format on
+    matrix B(4, 8);
+    // clang-format off
+    B << 1, 0, 0, 1, 0, 0, 0, 0,
+    1, 0, 0, 1, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 1, 0, 1,
+    0, 1, 0, 0, 0, 0, 1, 0;
+    // clang-format on
 
+    matrix m = matrix::Random(1e5, 50);
+
+    SECTION("bdc svd: singular values and singular vectors")
+    {
         bdc_svd svd_decomposition;
-        svd_decomposition.compute(A);
+        svd_decomposition.compute(B);
 
         vector values(4);
         values << 2, 1.414213, 1.414213, 0;
@@ -81,10 +83,40 @@ TEST_CASE("svd solver test suite")
 
         REQUIRE(svd_decomposition.values().size() == 4);
 
-        svd_decomposition.compute(A, 2);
+        svd_decomposition.compute(B, 5);
+        REQUIRE(svd_decomposition.values().size() == 4);
+
+        svd_decomposition.compute(B, 2);
         REQUIRE(svd_decomposition.values().size() == 2);
 
-        svd_decomposition.compute(A, 1e-1);
+        svd_decomposition.compute(B, 1e-1);
+        REQUIRE(svd_decomposition.values().size() == 3);
+    }
+
+    SECTION("randomised svd: singular values and singular vectors")
+    {
+        randomised_svd svd_decomposition;
+        svd_decomposition.compute(B);
+
+        vector values(4);
+        values << 2, 1.414213, 1.414213, 0;
+        vector left(4);
+        vector left_different_order(4);
+
+        left << -std::sqrt(0.5), -std::sqrt(0.5), 0, 0;
+        left_different_order << -std::sqrt(0.5), 0, -std::sqrt(0.5), 0;
+        REQUIRE((values - svd_decomposition.values()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE((svd_decomposition.left().col(0) - left).norm() == Approx(0.0).margin(ZERO_MARGIN));
+
+        REQUIRE(svd_decomposition.values().size() == 4);
+
+        svd_decomposition.compute(B, 5);
+        REQUIRE(svd_decomposition.values().size() == 4);
+
+        svd_decomposition.compute(B, 2);
+        REQUIRE(svd_decomposition.values().size() == 2);
+
+        svd_decomposition.compute(B, 1e-1);
         REQUIRE(svd_decomposition.values().size() == 3);
     }
 
@@ -100,8 +132,6 @@ TEST_CASE("svd solver test suite")
 
     SECTION("svd timing")
     {
-        matrix m = matrix::Random(50000, 50);
-
         auto const start = std::chrono::steady_clock::now();
 
         bdc_svd svd_decomposition(m);
@@ -110,11 +140,30 @@ TEST_CASE("svd solver test suite")
                                  * svd_decomposition.right().transpose();
 
         matrix approximation_error = m - m_reconstructed;
-        std::cout << "approximation error due to svd " << approximation_error.norm() << "\n";
+        std::cout << "approximation error due to bdc_svd " << approximation_error.norm() << "\n";
 
         auto const end = std::chrono::steady_clock::now();
         std::chrono::duration<double> const elapsed_seconds = end - start;
 
-        std::cout << "SVD test case took " << elapsed_seconds.count() << "s\n";
+        std::cout << "BDC SVD test case took " << elapsed_seconds.count() << "s\n";
+
+        // randomised_svd
+        auto const start_rand = std::chrono::steady_clock::now();
+
+        randomised_svd randomised_svd_decomposition;
+        randomised_svd_decomposition.compute(m, 5);
+
+        m_reconstructed = randomised_svd_decomposition.left()
+                          * randomised_svd_decomposition.values().asDiagonal()
+                          * randomised_svd_decomposition.right().transpose();
+
+        approximation_error = m - m_reconstructed;
+        std::cout << "approximation error due to randomised_svd " << approximation_error.norm()
+                  << "\n";
+
+        auto const end_rand = std::chrono::steady_clock::now();
+        std::chrono::duration<double> const elapsed_seconds_rand = end_rand - start_rand;
+
+        std::cout << "Randomised SVD test case took " << elapsed_seconds_rand.count() << "s\n";
     }
 }
