@@ -25,6 +25,8 @@ A rectangular profile can be specified by defining ``rectangle`` as the profile 
 Circle
 ------
 
+.. image:: assets/circle.svg
+
 A circular profile can be specified using ``circle``.  The ``diameter`` is required in this case.  For example ::
 
     "profiles" : [{
@@ -35,6 +37,8 @@ A circular profile can be specified using ``circle``.  The ``diameter`` is requi
 
 Hollow Circle
 -------------
+
+.. image:: assets/hollow_circle.svg
 
 Likewise, a hollow circular profile, (e.g. a pipe) can be specified using ``hollow_circle``.  An ``inner_diameter`` and ``outer_diameter`` are required, and the ``inner_diameter`` must be a smaller value than the ``outer_diameter``.  ::
 
