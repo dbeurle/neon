@@ -4,8 +4,7 @@
 #include "mesh/node_ordering_adapter.hpp"
 #include "io/json.hpp"
 
-#include <exception>
-
+// TODO Remove once the override is fixed upstream
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Winconsistent-missing-override"
@@ -24,6 +23,7 @@
 #endif
 
 #include <boost/filesystem.hpp>
+#include <stdexcept>
 
 namespace neon::io
 {
