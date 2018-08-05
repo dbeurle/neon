@@ -39,12 +39,21 @@ fem_mesh::fem_mesh(basic_mesh const& basic_mesh,
 
     std::cout << "simulation name is: " << simulation_data["Name"] << std::endl;
 
-    for (auto const& submesh : basic_mesh.meshes(simulation_data["Name"]))
+    for (auto const& section : simulation_data["sections"])
     {
-        submeshes.emplace_back(material_data, simulation_data, coordinates, submesh);
+        if (section.find("name") == section.end())
+        {
+            throw std::domain_error("A section is missing a \"name\" field");
+        }
 
-        writer->mesh(submesh.all_node_indices(), submesh.topology());
+        for (auto const& submesh : basic_mesh.meshes(section["name"].get<std::string>()))
+        {
+            submeshes.emplace_back(material_data, simulation_data, section, coordinates, submesh);
+
+            writer->mesh(submesh.all_node_indices(), submesh.topology());
+        }
     }
+
     allocate_boundary_conditions(simulation_data, basic_mesh);
     allocate_variable_names();
 }

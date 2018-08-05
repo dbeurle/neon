@@ -15,6 +15,7 @@ namespace neon::mechanical::beam
 {
 fem_submesh::fem_submesh(json const& material_data,
                          json const& simulation_data,
+                         json const& section_data,
                          std::shared_ptr<material_coordinates>& coordinates,
                          basic_submesh const& submesh)
     : basic_submesh(submesh),
@@ -24,12 +25,7 @@ fem_submesh::fem_submesh(json const& material_data,
       variables(std::make_shared<internal_variable_type>(elements() * sf->quadrature().points())),
       cm(std::make_unique<isotropic_linear>(variables, material_data))
 {
-    if (simulation_data.find("section") == simulation_data.end())
-    {
-        throw std::domain_error("A \"section\" must be provided for beam analysis");
-    }
-
-    allocate_normal_and_tangent(simulation_data["section"].front());
+    allocate_normal_and_tangent(section_data);
 
     dof_allocator(node_indices, dof_indices, traits::dof_order);
 
@@ -40,7 +36,8 @@ fem_submesh::fem_submesh(json const& material_data,
                    variable::scalar::second_moment_area_1,
                    variable::scalar::second_moment_area_2);
 
-    profile = geometry::make_profile(json{{"profile", "rectangle"}, {"width", 1.0}, {"height", 1.0}});
+    profile = geometry::make_profile(
+        json{{"name", "rect"}, {"type", "rectangle"}, {"width", 1.0}, {"height", 1.0}});
 }
 
 void fem_submesh::update_internal_variables(double const time_step_size)
@@ -220,19 +217,19 @@ matrix12 fem_submesh::rotation_matrix(std::int32_t const element) const
     return element_rotation;
 }
 
-void fem_submesh::allocate_normal_and_tangent(json const& profile_data)
+void fem_submesh::allocate_normal_and_tangent(json const& section_data)
 {
-    if (profile_data.find("tangent") == profile_data.end())
+    if (section_data.find("tangent") == section_data.end())
     {
         throw std::domain_error("A \"tangent\" vector must be specified in the \"section\"");
     }
-    if (profile_data.find("normal") == profile_data.end())
+    if (section_data.find("normal") == section_data.end())
     {
         throw std::domain_error("A \"normal\" vector must be specified in the \"section\"");
     }
 
-    auto const& tangent_vector = profile_data["tangent"];
-    auto const& normal_vector = profile_data["normal"];
+    auto const& tangent_vector = section_data["tangent"];
+    auto const& normal_vector = section_data["normal"];
 
     if (!tangent_vector.is_array() || tangent_vector.size() != 3)
     {
@@ -253,7 +250,7 @@ void fem_submesh::allocate_normal_and_tangent(json const& profile_data)
     normal(1) = normal_vector[1];
     normal(2) = normal_vector[2];
 
-    if (is_approx(normal.dot(tangent), 0.0))
+    if (!is_approx(normal.dot(tangent), 0.0))
     {
         throw std::domain_error("normal and tangent vectors must be orthogonal");
     }

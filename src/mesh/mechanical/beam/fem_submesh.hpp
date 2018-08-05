@@ -38,6 +38,7 @@ public:
     /// Constructor providing the material coordinates reference
     explicit fem_submesh(json const& material_data,
                          json const& simulation_data,
+                         json const& section_data,
                          std::shared_ptr<material_coordinates>& coordinates,
                          basic_submesh const& submesh);
 
