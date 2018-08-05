@@ -220,8 +220,6 @@ TEST_CASE("Solid mesh test")
 
     REQUIRE(fem_mesh.active_dofs() == 192);
 
-    int constexpr number_of_nodes = 64;
-    int constexpr number_of_dofs = number_of_nodes * 3;
     int constexpr number_of_local_dofs = 8 * 3;
 
     // Check that we only have one mesh group as we only have homogenous
