@@ -82,7 +82,7 @@ protected:
      * \f{align*}{
      * \mathbf{D}_b &= \begin{bmatrix} E I_1 & 0 \\ 0 & E I_2 \end{bmatrix} \f}
      */
-    [[nodiscard]] matrix const& bending_stiffness(matrix const& configuration,
+    [[nodiscard]] matrix const& bending_stiffness(matrix3x const& configuration,
                                                   std::int32_t const element) const;
 
     /**
@@ -101,7 +101,7 @@ protected:
      *     \mathbf{D}_s &= \begin{bmatrix} \mu A_1 & 0 \\ 0 & \mu A_1 \end{bmatrix}
      * \f}
      */
-    [[nodiscard]] matrix const& shear_stiffness(matrix const& configuration,
+    [[nodiscard]] matrix const& shear_stiffness(matrix3x const& configuration,
                                                 std::int32_t const element) const;
 
     /**
@@ -115,7 +115,7 @@ protected:
      *     \mathbf{B}_a &= \begin{bmatrix} 0 & 0 & N_c^{'} & 0 & 0 & 0 \end{bmatrix}
      * \f}
      */
-    [[nodiscard]] matrix const& axial_stiffness(matrix const& configuration,
+    [[nodiscard]] matrix const& axial_stiffness(matrix3x const& configuration,
                                                 std::int32_t const element) const;
 
     /**
@@ -127,13 +127,8 @@ protected:
      *
      * \f{align*}{\mathbf{B}_t &= \begin{bmatrix} 0 & 0 & 0 & 0 & 0 & N_c^{'} \end{bmatrix} \f}
      */
-    [[nodiscard]] matrix const& torsional_stiffness(matrix const& configuration,
+    [[nodiscard]] matrix const& torsional_stiffness(matrix3x const& configuration,
                                                     std::int32_t const element) const;
-
-    /// Compute the rotation matrix for a specified element
-    /// \param element
-    /// \return The 12x12 element rotation matrix
-    [[nodiscard]] matrix12 rotation_matrix(std::int32_t const element) const;
 
     /// Perform input checks and allocate normal and tangent vectors
     /// Throws \p std::domain_error if inputs do not exist or match expectations
@@ -163,5 +158,8 @@ protected:
     vector3 tangent;
     /// Segment first normal
     vector3 normal;
+
+    /// Rotation matrix for elements
+    matrix12 rotation_matrix;
 };
 }

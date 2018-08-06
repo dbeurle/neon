@@ -2,6 +2,7 @@
 #include "mesh/mechanical/beam/fem_submesh.hpp"
 
 #include "geometry/profile_factory.hpp"
+#include "math/jacobian_determinant.hpp"
 #include "mesh/dof_allocator.hpp"
 #include "interpolations/interpolation_factory.hpp"
 #include "numeric/float_compare.hpp"
@@ -74,17 +75,15 @@ std::pair<index_view, matrix const&> fem_submesh::tangent_stiffness(std::int32_t
 
     auto const& configuration = coordinates->initial_configuration(local_node_view(element));
 
-    matrix12 const T = rotation_matrix(element);
-
-    ke = T
+    ke = rotation_matrix
          * (bending_stiffness(configuration, element) + shear_stiffness(configuration, element)
             + axial_stiffness(configuration, element) + torsional_stiffness(configuration, element))
-         * T.transpose();
+         * rotation_matrix.transpose();
 
     return {local_dof_view(element), ke};
 }
 
-matrix const& fem_submesh::bending_stiffness(matrix const& configuration,
+matrix const& fem_submesh::bending_stiffness(matrix3x const& configuration,
                                              std::int32_t const element) const
 {
     static thread_local matrix2x B_bending(2, 6 * sf->nodes());
@@ -98,21 +97,22 @@ matrix const& fem_submesh::bending_stiffness(matrix const& configuration,
     sf->quadrature().integrate_inplace(k_bending, [&, this](auto const& femval, auto const l) {
         auto const& [N, dN] = femval;
 
-        double const jacobian = configuration.row(0) * dN;
+        auto const j = jacobian_determinant(configuration * dN);
 
         for (int i = 0; i < sf->nodes(); ++i)
         {
             auto const offset = i * 6;
 
-            B_bending(0, 3 + offset) = B_bending(1, 4 + offset) = dN(i, l) / jacobian;
+            B_bending(0, 3 + offset) = B_bending(1, 4 + offset) = dN(i, l) / j;
         }
 
-        return B_bending.transpose() * D_bending.at(view(element, l)) * B_bending * jacobian;
+        return B_bending.transpose() * D_bending.at(view(element, l)) * B_bending * j;
     });
     return k_bending;
 }
 
-matrix const& fem_submesh::shear_stiffness(matrix const& configuration, std::int32_t const element) const
+matrix const& fem_submesh::shear_stiffness(matrix3x const& configuration,
+                                           std::int32_t const element) const
 {
     static thread_local matrix2x B_shear(2, 6 * sf->nodes());
     static thread_local matrix k_shear(6 * sf->nodes(), 6 * sf->nodes());
@@ -125,23 +125,24 @@ matrix const& fem_submesh::shear_stiffness(matrix const& configuration, std::int
     sf->quadrature().integrate_inplace(k_shear, [&, this](auto const& femval, auto const l) {
         auto const& [N, dN] = femval;
 
-        double const jacobian = configuration.row(0) * dN;
+        auto const j = jacobian_determinant(configuration * dN);
 
         for (int i = 0; i < sf->nodes(); ++i)
         {
             auto const offset = i * 6;
 
-            B_shear(0, 0 + offset) = B_shear(1, 1 + offset) = dN(i, l) / jacobian;
+            B_shear(0, 0 + offset) = B_shear(1, 1 + offset) = dN(i, l) / j;
 
             B_shear(0, 4 + offset) = -N(i, l);
             B_shear(1, 3 + offset) = N(i, l);
         }
-        return B_shear.transpose() * D_shear.at(view(element, l)) * B_shear * jacobian;
+        return B_shear.transpose() * D_shear.at(view(element, l)) * B_shear * j;
     });
     return k_shear;
 }
 
-matrix const& fem_submesh::axial_stiffness(matrix const& configuration, std::int32_t const element) const
+matrix const& fem_submesh::axial_stiffness(matrix3x const& configuration,
+                                           std::int32_t const element) const
 {
     static thread_local vector B_axial(6 * sf->nodes());
     static thread_local matrix k_axial(6 * sf->nodes(), 6 * sf->nodes());
@@ -154,21 +155,21 @@ matrix const& fem_submesh::axial_stiffness(matrix const& configuration, std::int
     sf->quadrature().integrate_inplace(k_axial, [&, this](auto const& femval, auto const l) {
         auto const& [N, dN] = femval;
 
-        double const jacobian = configuration.row(0) * dN;
+        auto const j = jacobian_determinant(configuration * dN);
 
         for (int i = 0; i < sf->nodes(); ++i)
         {
             auto const offset = i * 6;
 
-            B_axial(2 + offset) = dN(i, l) / jacobian;
+            B_axial(2 + offset) = dN(i, l) / j;
         }
 
-        return B_axial * D_axial.at(view(element, l)) * B_axial.transpose() * jacobian;
+        return B_axial * D_axial.at(view(element, l)) * B_axial.transpose() * j;
     });
     return k_axial;
 }
 
-matrix const& fem_submesh::torsional_stiffness(matrix const& configuration,
+matrix const& fem_submesh::torsional_stiffness(matrix3x const& configuration,
                                                std::int32_t const element) const
 {
     static thread_local vector B_torsion(6 * sf->nodes());
@@ -182,39 +183,18 @@ matrix const& fem_submesh::torsional_stiffness(matrix const& configuration,
     sf->quadrature().integrate_inplace(k_torsion, [&, this](auto const& femval, auto const l) {
         auto const& [N, dN] = femval;
 
-        double const jacobian = configuration.row(0) * dN;
+        auto const j = jacobian_determinant(configuration * dN);
 
         for (int i = 0; i < sf->nodes(); ++i)
         {
             auto const offset = i * 6;
 
-            B_torsion(5 + offset) = dN(i, l) / jacobian;
+            B_torsion(5 + offset) = dN(i, l) / j;
         }
 
-        return B_torsion * D_torsion.at(view(element, l)) * B_torsion.transpose() * jacobian;
+        return B_torsion * D_torsion.at(view(element, l)) * B_torsion.transpose() * j;
     });
     return k_torsion;
-}
-
-matrix12 fem_submesh::rotation_matrix(std::int32_t const element) const
-{
-    matrix3 rotation;
-
-    // Local coordinate (x1)
-    rotation.col(0) = normal;
-    // Local coordinate (x2)
-    rotation.col(1) = normal.cross(tangent);
-    // Local coordinate (x3)
-    rotation.col(2) = tangent;
-
-    matrix12 element_rotation = matrix12::Zero();
-
-    element_rotation.block<3, 3>(0, 0) = rotation;
-    element_rotation.block<3, 3>(3, 3) = rotation;
-    element_rotation.block<3, 3>(6, 6) = rotation;
-    element_rotation.block<3, 3>(9, 9) = rotation;
-
-    return element_rotation;
 }
 
 void fem_submesh::allocate_normal_and_tangent(json const& section_data)
@@ -229,13 +209,15 @@ void fem_submesh::allocate_normal_and_tangent(json const& section_data)
     }
 
     auto const& tangent_vector = section_data["tangent"];
-    auto const& normal_vector = section_data["normal"];
 
     if (!tangent_vector.is_array() || tangent_vector.size() != 3)
     {
         throw std::domain_error("A \"tangent\" vector must be specified using three (3) "
                                 "coordinates [x, y, z]");
     }
+
+    auto const& normal_vector = section_data["normal"];
+
     if (!normal_vector.is_array() || normal_vector.size() != 3)
     {
         throw std::domain_error("A \"normal\" vector must be specified using three (3) coordinates "
@@ -254,5 +236,21 @@ void fem_submesh::allocate_normal_and_tangent(json const& section_data)
     {
         throw std::domain_error("normal and tangent vectors must be orthogonal");
     }
+
+    matrix3 rotation;
+
+    // Local coordinate (x1)
+    rotation.col(0) = normal;
+    // Local coordinate (x2)
+    rotation.col(1) = normal.cross(tangent);
+    // Local coordinate (x3)
+    rotation.col(2) = tangent;
+
+    rotation_matrix = matrix12::Zero();
+
+    rotation_matrix.block<3, 3>(0, 0) = rotation;
+    rotation_matrix.block<3, 3>(3, 3) = rotation;
+    rotation_matrix.block<3, 3>(6, 6) = rotation;
+    rotation_matrix.block<3, 3>(9, 9) = rotation;
 }
 }
