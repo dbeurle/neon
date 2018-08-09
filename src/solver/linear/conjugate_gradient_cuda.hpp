@@ -32,12 +32,16 @@ public:
 protected:
     void find_compute_device();
 
-    // Device side pointers
-    std::int32_t* d_col{nullptr}; /// Column pointer
-    std::int32_t* d_row{nullptr}; /// Row pointer (compressed)
-    double* d_val{nullptr};       /// Nonzero coefficients of A
+protected:
+    /// Device column pointer
+    std::int32_t* d_col{nullptr};
+    /// Device row pointer (compressed)
+    std::int32_t* d_row{nullptr};
+    /// Device non-zero coefficients of A
+    double* d_val{nullptr};
 
-    double* d_x{nullptr}; /// Solution vector
+    /// Device solution vector
+    double* d_x{nullptr};
 
     cublasHandle_t cublasHandle = 0;
     cusparseHandle_t cusparseHandle = 0;
@@ -48,7 +52,8 @@ private:
 
 private:
     double *d_r{nullptr}, *d_p{nullptr}, *d_Ap{nullptr}, *d_y{nullptr}, *d_z{nullptr};
-    double* d_M_inv{nullptr}; /// Diagonal preconditioner storage
+    /// Device diagonal preconditioner storage
+    double* d_M_inv{nullptr};
 };
 
 /// Implementation of the Bi-Conjugate Gradient Stabilised (BiCGStab) algorithm
@@ -67,7 +72,8 @@ private:
 
 private:
     double *d_r{nullptr}, *d_r0, *d_t, *d_s_hat, *d_s, *d_p, *d_p_hat, *d_v;
-    double* d_M_inv; /// Diagonal preconditioner storage
+    /// Diagonal preconditioner storage
+    double* d_M_inv;
 };
 }
 #endif

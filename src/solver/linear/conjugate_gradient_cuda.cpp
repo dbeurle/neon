@@ -116,8 +116,8 @@ void conjugate_gradient_cuda::solve(sparse_matrix const& A, vector& x, vector co
 {
     this->allocate_device_memory(A, x, b);
 
-    constexpr double one = 1.0;
-    constexpr double zero = 0.0;
+    double constexpr one = 1.0;
+    double constexpr zero = 0.0;
 
     auto const N = A.cols();
 
