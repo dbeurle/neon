@@ -14,6 +14,7 @@ foreach(test
              linear_beam_theory
              linear_solvers
              eigen_solvers
+             svd_solvers
              jacobian_determinant
              material
              material_coordinates
