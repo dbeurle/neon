@@ -56,7 +56,7 @@ TEST_CASE("svd solver test suite")
     sparse_matrix A = create_sparse_matrix();
     vector b = create_right_hand_side();
 
-    matrix B(4, 8);
+    col_matrix B(4, 8);
     // clang-format off
     B << 1, 0, 0, 1, 0, 0, 0, 0,
     1, 0, 0, 1, 0, 0, 0, 0,
@@ -64,7 +64,7 @@ TEST_CASE("svd solver test suite")
     0, 1, 0, 0, 0, 0, 1, 0;
     // clang-format on
 
-    matrix m = matrix::Random(1e5, 50);
+    col_matrix m = col_matrix::Random(1e5, 50);
 
     SECTION("bdc svd: singular values and singular vectors")
     {
@@ -136,10 +136,11 @@ TEST_CASE("svd solver test suite")
 
         bdc_svd svd_decomposition(m);
 
-        matrix m_reconstructed = svd_decomposition.left() * svd_decomposition.values().asDiagonal()
-                                 * svd_decomposition.right().transpose();
+        col_matrix m_reconstructed = svd_decomposition.left()
+                                     * svd_decomposition.values().asDiagonal()
+                                     * svd_decomposition.right().transpose();
 
-        matrix approximation_error = m - m_reconstructed;
+        col_matrix approximation_error = m - m_reconstructed;
         std::cout << "approximation error due to bdc_svd " << approximation_error.norm() << "\n";
 
         auto const end = std::chrono::steady_clock::now();
