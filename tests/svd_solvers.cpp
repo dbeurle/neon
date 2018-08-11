@@ -4,8 +4,8 @@
 #include "numeric/dense_matrix.hpp"
 #include "numeric/sparse_matrix.hpp"
 #include "solver/svd/svd.hpp"
-
 #include "io/json.hpp"
+
 #include <iostream>
 #include <cmath>
 #include <chrono>
@@ -28,7 +28,7 @@ sparse_matrix create_sparse_matrix()
                                                     {2, 2, 2.0}};
 
     sparse_matrix A(3, 3);
-    A.setFromTriplets(std::begin(triplets), std::end(triplets));
+    A.setFromTriplets(begin(triplets), end(triplets));
     A.finalize();
     return A;
 }
@@ -83,10 +83,10 @@ TEST_CASE("svd solver test suite")
 
         REQUIRE(svd_decomposition.values().size() == 4);
 
-        svd_decomposition.compute(B, 5);
+        svd_decomposition.compute(B, 5l);
         REQUIRE(svd_decomposition.values().size() == 4);
 
-        svd_decomposition.compute(B, 2);
+        svd_decomposition.compute(B, 2l);
         REQUIRE(svd_decomposition.values().size() == 2);
 
         svd_decomposition.compute(B, 1e-1);
@@ -110,10 +110,10 @@ TEST_CASE("svd solver test suite")
 
         REQUIRE(svd_decomposition.values().size() == 4);
 
-        svd_decomposition.compute(B, 5);
+        svd_decomposition.compute(B, 5l);
         REQUIRE(svd_decomposition.values().size() == 4);
 
-        svd_decomposition.compute(B, 2);
+        svd_decomposition.compute(B, 2l);
         REQUIRE(svd_decomposition.values().size() == 2);
 
         svd_decomposition.compute(B, 1e-1);
@@ -151,7 +151,7 @@ TEST_CASE("svd solver test suite")
         auto const start_rand = std::chrono::steady_clock::now();
 
         randomised_svd randomised_svd_decomposition;
-        randomised_svd_decomposition.compute(m, 5);
+        randomised_svd_decomposition.compute(m, 5l);
 
         m_reconstructed = randomised_svd_decomposition.left()
                           * randomised_svd_decomposition.values().asDiagonal()

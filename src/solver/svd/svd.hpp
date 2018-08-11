@@ -19,8 +19,10 @@ public:
     /// compute thin SVD decomposition of a matrix A
     virtual void compute(col_matrix const& A) = 0;
 
-    /// compute thin SVD decomposition of a matrix A with n being the maximum number of singular vectors
-    virtual void compute(col_matrix const& A, int const n) = 0;
+    /// Compute thin SVD decomposition
+    /// \param A Input matrix
+    /// \param n Maximum number of singular vectors
+    virtual void compute(col_matrix const& A, std::int64_t const n) = 0;
 
     /// compute thin SVD decomposition of a matrix A with a tolerance on the singular values
     /// A singular value will be considered nonzero if its value is strictly greater than
@@ -38,16 +40,17 @@ public:
 
     /// A least-squares solution of A*x = b
     /// linear compination of columns of A
-    virtual void solve(vector& x, vector& b) const noexcept = 0;
+    virtual void solve(vector& x, vector const& b) const noexcept = 0;
+
+protected:
+    col_matrix left_vectors;
+    col_matrix right_vectors;
+    vector singular_values;
 };
 
-/// jacobi_svd uses the Jacobi method for computing the singular values and is
-/// not recommended for large decompositions. For larger systems please see the
-/// GPU accelerated algorithms.
-
-/// This class first reduces the input matrix to bi-diagonal form and then performs a
-/// divide-and-conquer diagonalization. Small blocks are diagonalized using class JacobiSVD. Default
-/// switching size is 16.
+/// bdc_svd first reduces the input matrix to bi-diagonal form and then performs a
+/// divide-and-conquer diagonalization. Small blocks are diagonalized using class
+/// JacobiSVD. Default switching size is 16.
 class bdc_svd : public svd
 {
 public:
@@ -57,7 +60,7 @@ public:
 
     void compute(col_matrix const& A) override;
 
-    void compute(col_matrix const& A, int const n) override;
+    void compute(col_matrix const& A, std::int64_t const n) override;
 
     void compute(col_matrix const& A, double const tolerance) override;
 
@@ -67,13 +70,10 @@ public:
 
     vector const& values() const noexcept override;
 
-    void solve(vector& x, vector& b) const noexcept override;
+    void solve(vector& x, vector const& b) const noexcept override;
 
 private:
-    Eigen::BDCSVD<col_matrix> A_decomposiion;
-    col_matrix left_vectors;
-    col_matrix right_vectors;
-    vector singular_values;
+    Eigen::BDCSVD<col_matrix> decomposition;
 };
 
 /// Implementation of the truncated Singular Value Decomposition, using
@@ -88,7 +88,7 @@ public:
 
     void compute(col_matrix const& A) override;
 
-    void compute(col_matrix const& A, int const n) override;
+    void compute(col_matrix const& A, std::int64_t const n) override;
 
     void compute(col_matrix const& A, double const tolerance) override;
 
@@ -98,12 +98,9 @@ public:
 
     vector const& values() const noexcept override;
 
-    void solve(vector& x, vector& b) const noexcept override;
+    void solve(vector& x, vector const& b) const noexcept override;
 
 private:
-    Eigen::BDCSVD<col_matrix> A_decomposiion;
-    col_matrix left_vectors;
-    col_matrix right_vectors;
-    vector singular_values;
+    Eigen::BDCSVD<col_matrix> decomposition;
 };
 }
