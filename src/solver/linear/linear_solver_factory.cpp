@@ -100,8 +100,8 @@ std::unique_ptr<linear_solver> make_linear_solver(json const& solver_data, bool 
         }
         else
         {
-            if (solver_data.find("Tolerance") != solver_data.find()
-                && solver_data.find("MaxIterations") != solver_data.find())
+            if (solver_data.find("Tolerance") != solver_data.end()
+                && solver_data.find("MaxIterations") != solver_data.end())
             {
                 return std::make_unique<conjugate_gradient_cuda>(solver_data["Tolerance"].get<double>(),
                                                                  solver_data["MaxIterations"]
