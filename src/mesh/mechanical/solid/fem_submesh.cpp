@@ -266,8 +266,8 @@ void fem_submesh::update_Jacobian_determinants()
 
 std::pair<vector, vector> fem_submesh::nodal_averaged_variable(variable::second const tensor_name) const
 {
-    vector count = vector::Zero(coordinates->size() * 9);
-    vector value = count;
+    vector count = vector::Zero(coordinates->size() * 9),
+           value = vector::Zero(coordinates->size() * 9);
 
     auto const& tensor_list = variables->get(tensor_name);
 
