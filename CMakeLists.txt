@@ -30,6 +30,7 @@ find_package(TBB REQUIRED)
 find_package(VTK COMPONENTS vtkIOXML REQUIRED)
 
 if (ENABLE_OCL)
+    find_package(OpenCL REQUIRED)
     find_package(ViennaCL CONFIG)
     add_definitions(-DENABLE_OCL)
 endif()

@@ -7,7 +7,8 @@
 #include "dmatrix_vector_product.hpp"
 #include "numeric/float_compare.hpp"
 
-#define VIENNACL_HAVE_EIGEN 1
+#define VIENNACL_HAVE_EIGEN
+#define VIENNACL_WITH_OPENCL
 
 #include <viennacl/vector.hpp>
 #include <viennacl/compressed_matrix.hpp>
@@ -20,7 +21,10 @@
 
 namespace neon
 {
-conjugate_gradient_ocl::conjugate_gradient_ocl() : iterative_linear_solver() {}
+conjugate_gradient_ocl::conjugate_gradient_ocl() : iterative_linear_solver()
+{
+    viennacl::ocl::set_context_device_type(0, viennacl::ocl::gpu_tag());
+}
 
 conjugate_gradient_ocl::conjugate_gradient_ocl(double const residual_tolerance)
     : conjugate_gradient_ocl()
@@ -41,36 +45,37 @@ conjugate_gradient_ocl::conjugate_gradient_ocl(double const residual_tolerance,
     this->max_iterations = max_iterations;
 }
 
-conjugate_gradient_ocl::~conjugate_gradient_ocl() {}
+conjugate_gradient_ocl::~conjugate_gradient_ocl() = default;
 
 void conjugate_gradient_ocl::solve(sparse_matrix const& A, vector& x, vector const& b)
 {
     using vcl_sparse_matrix = viennacl::compressed_matrix<double>;
     using vcl_vector = viennacl::vector<double>;
 
+    viennacl::linalg::cg_tag conjugate_gradient(residual_tolerance, max_iterations);
+
     vcl_sparse_matrix vcl_A(A.rows(), A.cols());
-    vcl_vector vcl_x(x.size());
-    vcl_vector vcl_b(b.size());
+    vcl_vector vcl_b(b.rows());
 
     // Copy from Eigen objects to ViennaCL objects
     viennacl::copy(A, vcl_A);
-    viennacl::copy(x, vcl_x);
     viennacl::copy(b, vcl_b);
 
-    // Compute ILUT preconditioners for CPU and for GPU objects:
-    // 10 entries, rel. tol. 1e-5
-    viennacl::linalg::ilut_tag ilut_conf(10, 1e-5);
-
-    // preconditioner for ViennaCL objects:
-    viennacl::linalg::ilut_precond<vcl_sparse_matrix> vcl_ilut(vcl_A, ilut_conf);
+    viennacl::linalg::jacobi_precond<vcl_sparse_matrix> vcl_jacobi(vcl_A,
+                                                                   viennacl::linalg::jacobi_tag());
 
     // Conjugate gradient solver without preconditioner on GPU
-    vcl_x = viennacl::linalg::solve(vcl_A, vcl_b, viennacl::linalg::cg_tag());
-    // Conjugate gradient solver using ILUT preconditioner on GPU
-    vcl_x = viennacl::linalg::solve(vcl_A, vcl_b, viennacl::linalg::cg_tag(), vcl_ilut);
+    vcl_vector const vcl_x = viennacl::linalg::solve(vcl_A, vcl_b, conjugate_gradient, vcl_jacobi);
 
     // Copy back to host
     viennacl::copy(vcl_x, x);
+
+    viennacl::backend::finish();
+
+    std::cout << std::string(6, ' ')
+              << "Conjugate Gradient iterations: " << conjugate_gradient.iters() << " (max. "
+              << max_iterations << "), estimated error: " << conjugate_gradient.error() << " (min. "
+              << residual_tolerance << ")\n";
 }
 }
 #endif

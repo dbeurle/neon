@@ -58,6 +58,11 @@ if (ENABLE_CUDA)
 
 endif()
 
+if (ENABLE_OCL)
+    target_link_libraries(neon PRIVATE ${VIENNACL_LIBRARIES} OpenCL::OpenCL)
+    target_include_directories(neon PUBLIC ${VIENNACL_INCLUDE_DIRS})
+endif()
+
 target_link_libraries(neon
                       PUBLIC
                       OpenMP::OpenMP_CXX
