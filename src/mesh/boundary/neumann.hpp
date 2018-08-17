@@ -153,7 +153,7 @@ public:
 
     virtual ~volume_load() = default;
 
-    volume_load(volume_load&& other) = default;
+    volume_load(volume_load&&) = default;
 
     volume_load& operator=(volume_load const&) = default;
 

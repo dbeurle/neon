@@ -3,6 +3,12 @@
 
 #ifdef ENABLE_CUDA
 #include "conjugate_gradient_cuda.hpp"
+#include "biconjugate_gradient_stabilised_cuda.hpp"
+#endif
+
+#ifdef ENABLE_OCL
+#include "conjugate_gradient_ocl.hpp"
+#include "biconjugate_gradient_stabilised_ocl.hpp"
 #endif
 
 #include "MUMPS.hpp"
@@ -35,7 +41,8 @@ std::unique_ptr<linear_solver> make_linear_solver(json const& solver_data, bool 
     }
     else if (solver_name == "Iterative")
     {
-        if (solver_data.count("Tolerance") && solver_data.count("MaxIterations"))
+        if (solver_data.find("Tolerance") != solver_data.end()
+            && solver_data.find("MaxIterations") != solver_data.end())
         {
             if (is_symmetric)
             {
@@ -46,7 +53,7 @@ std::unique_ptr<linear_solver> make_linear_solver(json const& solver_data, bool 
                 biconjugate_gradient_stabilised>(solver_data["Tolerance"].get<double>(),
                                                  solver_data["MaxIterations"].get<int>());
         }
-        else if (solver_data.count("Tolerance"))
+        else if (solver_data.find("Tolerance") != solver_data.end())
         {
             if (is_symmetric)
             {
@@ -55,7 +62,7 @@ std::unique_ptr<linear_solver> make_linear_solver(json const& solver_data, bool 
             return std::make_unique<biconjugate_gradient_stabilised>(
                 solver_data["Tolerance"].get<double>());
         }
-        else if (solver_data.count("MaxIterations"))
+        else if (solver_data.find("MaxIterations") != solver_data.end())
         {
             if (is_symmetric)
             {
@@ -71,24 +78,25 @@ std::unique_ptr<linear_solver> make_linear_solver(json const& solver_data, bool 
         }
     }
 
-    else if (solver_name == "IterativeGPU")
+    else if (solver_name == "IterativeCUDA")
     {
 #ifdef ENABLE_CUDA
 
         if (!is_symmetric)
         {
-            if (solver_data.count("Tolerance") && solver_data.count("MaxIterations"))
+            if (solver_data.find("Tolerance") != solver_data.end()
+                && solver_data.find("MaxIterations") != solver_data.end())
             {
                 return std::make_unique<
                     biconjugate_gradient_stabilised_cuda>(solver_data["Tolerance"].get<double>(),
                                                           solver_data["MaxIterations"].get<int>());
             }
-            else if (solver_data.count("Tolerance"))
+            else if (solver_data.find("Tolerance") != solver_data.end())
             {
                 return std::make_unique<biconjugate_gradient_stabilised_cuda>(
                     solver_data["Tolerance"].get<double>());
             }
-            else if (solver_data.count("MaxIterations"))
+            else if (solver_data.find("MaxIterations") != solver_data.end())
             {
                 return std::make_unique<biconjugate_gradient_stabilised_cuda>(
                     solver_data["MaxIterations"].get<int>());
@@ -97,18 +105,19 @@ std::unique_ptr<linear_solver> make_linear_solver(json const& solver_data, bool 
         }
         else
         {
-            if (solver_data.count("Tolerance") && solver_data.count("MaxIterations"))
+            if (solver_data.find("Tolerance") != solver_data.end()
+                && solver_data.find("MaxIterations") != solver_data.end())
             {
                 return std::make_unique<conjugate_gradient_cuda>(solver_data["Tolerance"].get<double>(),
                                                                  solver_data["MaxIterations"]
                                                                      .get<int>());
             }
-            else if (solver_data.count("Tolerance"))
+            else if (solver_data.find("Tolerance") != solver_data.end())
             {
                 return std::make_unique<conjugate_gradient_cuda>(
                     solver_data["Tolerance"].get<double>());
             }
-            else if (solver_data.count("MaxIterations"))
+            else if (solver_data.find("MaxIterations") != solver_data.end())
             {
                 return std::make_unique<conjugate_gradient_cuda>(
                     solver_data["MaxIterations"].get<int>());
@@ -117,8 +126,58 @@ std::unique_ptr<linear_solver> make_linear_solver(json const& solver_data, bool 
         }
 
 #else
-        throw std::domain_error("conjugate_gradient_cuda is only available when neon is "
-                                "configured with -DENABLE_CUDA=ON\n");
+        throw std::domain_error("IterativeCUDA is only available when neon is "
+                                "configured with -DENABLE_CUDA=1\n");
+#endif
+    }
+    else if (solver_name == "IterativeOCL")
+    {
+#ifdef ENABLE_OCL
+        if (!is_symmetric)
+        {
+            if (solver_data.find("Tolerance") != solver_data.end()
+                && solver_data.find("MaxIterations") != solver_data.end())
+            {
+                return std::make_unique<
+                    biconjugate_gradient_stabilised_ocl>(solver_data["Tolerance"].get<double>(),
+                                                         solver_data["MaxIterations"].get<int>());
+            }
+            else if (solver_data.find("Tolerance") != solver_data.end())
+            {
+                return std::make_unique<biconjugate_gradient_stabilised_ocl>(
+                    solver_data["Tolerance"].get<double>());
+            }
+            else if (solver_data.find("MaxIterations") != solver_data.end())
+            {
+                return std::make_unique<biconjugate_gradient_stabilised_ocl>(
+                    solver_data["MaxIterations"].get<int>());
+            }
+            return std::make_unique<biconjugate_gradient_stabilised_ocl>();
+        }
+        else
+        {
+            if (solver_data.find("Tolerance") != solver_data.end()
+                && solver_data.find("MaxIterations") != solver_data.end())
+            {
+                return std::make_unique<conjugate_gradient_ocl>(solver_data["Tolerance"].get<double>(),
+                                                                solver_data["MaxIterations"].get<int>());
+            }
+            else if (solver_data.find("Tolerance") != solver_data.end())
+            {
+                return std::make_unique<conjugate_gradient_ocl>(
+                    solver_data["Tolerance"].get<double>());
+            }
+            else if (solver_data.find("MaxIterations") != solver_data.end())
+            {
+                return std::make_unique<conjugate_gradient_ocl>(
+                    solver_data["MaxIterations"].get<int>());
+            }
+            return std::make_unique<conjugate_gradient_ocl>();
+        }
+
+#else
+        throw std::domain_error("IterativeOCL is only available when neon is "
+                                "configured with -DENABLE_OCL=1\n");
 #endif
     }
     else
