@@ -5,7 +5,7 @@
 
 #include "assembler/sparsity_pattern.hpp"
 #include "assembler/homogeneous_dirichlet.hpp"
-#include "solver/eigen/eigen_solver.hpp"
+#include "solver/eigen/eigenvalue_solver.hpp"
 
 #include <chrono>
 #include <iostream>
@@ -21,7 +21,7 @@ public:
     using mesh_type = fem_mesh_type;
 
 public:
-    fem_buckling_matrix(mesh_type& mesh) : mesh(mesh), eigenvalues(5) {}
+    fem_buckling_matrix(mesh_type& mesh) : mesh(mesh), solver(5) {}
 
     /// Compute the eigenvalue for the buckling load and the corresponding
     /// buckling mode.
@@ -36,7 +36,7 @@ protected:
     /// Stiffness matrix
     sparse_matrix K;
     /// Eigenvalue solver
-    eigen_solver eigenvalues;
+    eigenvalue_solver solver;
 };
 
 template <typename fem_mesh_type>
@@ -47,7 +47,7 @@ void fem_buckling_matrix<fem_mesh_type>::solve()
 
     // fem::apply_dirichlet_conditions(K, mesh);
 
-    auto [values, vectors] = eigenvalues.solve(K);
+    // solver.solve(K);
 
     // file_io.write(0, 0.0, d);
 }

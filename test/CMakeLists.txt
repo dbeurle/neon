@@ -12,7 +12,7 @@ foreach(test
              geometry_profile
              linear_beam_theory
              linear_solvers
-             eigen_solvers
+             eigenvalue_solvers
              svd_solvers
              jacobian_determinant
              material
