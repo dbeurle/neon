@@ -50,7 +50,7 @@ if (ENABLE_TESTS)
     include(FindPythonInterp)
 
     include(CTest)
-    add_subdirectory(tests)
+    add_subdirectory(test)
     add_subdirectory(examples)
 endif()
 
