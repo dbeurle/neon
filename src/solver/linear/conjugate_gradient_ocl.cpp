@@ -12,7 +12,6 @@
 
 #include <viennacl/vector.hpp>
 #include <viennacl/compressed_matrix.hpp>
-#include <viennacl/linalg/ilu.hpp>
 #include <viennacl/linalg/jacobi_precond.hpp>
 #include <viennacl/linalg/cg.hpp>
 
@@ -52,7 +51,7 @@ void conjugate_gradient_ocl::solve(sparse_matrix const& A, vector& x, vector con
     using vcl_sparse_matrix = viennacl::compressed_matrix<double>;
     using vcl_vector = viennacl::vector<double>;
 
-    viennacl::linalg::cg_tag conjugate_gradient(residual_tolerance, max_iterations);
+    viennacl::linalg::cg_tag solver_tag(residual_tolerance, max_iterations);
 
     vcl_sparse_matrix vcl_A(A.rows(), A.cols());
     vcl_vector vcl_b(b.rows());
@@ -64,18 +63,17 @@ void conjugate_gradient_ocl::solve(sparse_matrix const& A, vector& x, vector con
     viennacl::linalg::jacobi_precond<vcl_sparse_matrix> vcl_jacobi(vcl_A,
                                                                    viennacl::linalg::jacobi_tag());
 
-    // Conjugate gradient solver without preconditioner on GPU
-    vcl_vector const vcl_x = viennacl::linalg::solve(vcl_A, vcl_b, conjugate_gradient, vcl_jacobi);
+    // Conjugate gradient solver with preconditioner on GPU
+    vcl_vector const vcl_x = viennacl::linalg::solve(vcl_A, vcl_b, solver_tag, vcl_jacobi);
 
     // Copy back to host
     viennacl::copy(vcl_x, x);
 
     viennacl::backend::finish();
 
-    std::cout << std::string(6, ' ')
-              << "Conjugate Gradient iterations: " << conjugate_gradient.iters() << " (max. "
-              << max_iterations << "), estimated error: " << conjugate_gradient.error() << " (min. "
-              << residual_tolerance << ")\n";
+    std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << solver_tag.iters()
+              << " (max. " << max_iterations << "), estimated error: " << solver_tag.error()
+              << " (min. " << residual_tolerance << ")\n";
 }
 }
 #endif
