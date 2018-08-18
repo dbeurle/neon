@@ -1,5 +1,8 @@
-Linear Solvers
-==============
+Solvers
+=======
+
+Linear systems
+--------------
 
 Linear solvers typically take up the largest portion of the solution time in the finite element method.  Very large scale systems of million degrees of freedom should use iterative solvers as their memory usage is small in comparison to their direct solver brethren.  For problems where it is possible to use a direct solver then this is the suggested default.
 
@@ -59,3 +62,19 @@ An example of an iterative solver definition ::
      }
 
 All linear solvers use double floating point precision which may incur performance penalties on GPU devices.
+
+Eigenvalue problems
+-------------------
+
+The solution of an eigenvalue problem arises in natural frequency analysis in structural dynamics.  Usually only the solution of a few eigenvalues are required and is computationally feasible.  These eigenvalues and eigenvectors correspond to the natural frequency and the mode shape of the structure for natural frequency analysis.  For the linear elastic buckling load of a structure, the eigenvalues provide the limit load and the deformed shape.
+
+Unlike direct methods for linear systems, eigenvalues have to be solved for in an iterative fashion.  There are several different algorithms available depending on the problem.
+
+An example of an eigenvalue solver definition ::
+
+     "eigenvalue_solver" {
+         "type" : "lanczos",
+         "values" : 15
+     }
+
+where the ``"type"`` field indicates what algorithm to use and ``"values"`` determines how many eigenvalues are to be solved for.  This should be much less than the total number of degrees of freedom in the system.
