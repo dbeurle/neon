@@ -1,7 +1,7 @@
 
 #include <catch.hpp>
 
-#include "solver/eigen/eigen_solver.hpp"
+#include "solver/eigen/eigenvalue_solver.hpp"
 #include "io/json.hpp"
 
 using namespace neon;
