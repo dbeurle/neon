@@ -1,6 +1,6 @@
 *.vtu
 *.pvd
 build/*
-docs/latex
-docs/html
-docs/build
+doc/latex
+doc/html
+doc/build
