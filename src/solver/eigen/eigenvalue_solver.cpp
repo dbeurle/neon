@@ -88,7 +88,7 @@ void power_iteration::solve(sparse_matrix const& A)
     vector eigenvector(A.rows());
     viennacl::copy(vcl_eigenvectors, eigenvector);
 
-    m_eigenvectors.col(0) = eigenvector;
+    m_eigenvectors.col(0) = eigenvector.normalized();
 }
 
 void power_iteration::solve(sparse_matrix const& A, sparse_matrix const& B)
@@ -96,12 +96,15 @@ void power_iteration::solve(sparse_matrix const& A, sparse_matrix const& B)
     throw std::runtime_error("Method not implemented " + std::string(__FUNCTION__));
 }
 
-lanzcos_solver::lanzcos_solver(std::int64_t const values_to_extract) : eigenvalue_solver(1) {}
+lanzcos_solver::lanzcos_solver(std::int64_t const values_to_extract)
+    : eigenvalue_solver(values_to_extract)
+{
+}
 
 void lanzcos_solver::solve(sparse_matrix const& A)
 {
     viennacl::linalg::lanczos_tag lanczos_tag(0.85,
-                                              15,
+                                              values_to_extract,
                                               viennacl::linalg::lanczos_tag::partial_reorthogonalization,
                                               200);
 
@@ -117,6 +120,11 @@ void lanzcos_solver::solve(sparse_matrix const& A)
 
     std::copy(begin(vcl_eigenvalues), end(vcl_eigenvalues), m_eigenvalues.data());
     viennacl::copy(vcl_eigenvectors, m_eigenvectors);
+
+    for (std::int64_t column{}; column < values_to_extract; ++column)
+    {
+        m_eigenvectors.col(column) = m_eigenvectors.col(column).normalized().eval();
+    }
 }
 
 void lanzcos_solver::solve(sparse_matrix const& A, sparse_matrix const& B) {}

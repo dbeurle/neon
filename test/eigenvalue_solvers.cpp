@@ -4,14 +4,14 @@
 #include "solver/eigen/eigenvalue_solver.hpp"
 #include "io/json.hpp"
 
-using namespace neon;
+#include <iostream>
 
 constexpr auto ZERO_MARGIN = 1.0e-5;
 
 /// Create a SPD matrix for solver testing
-sparse_matrix create_diagonal_sparse_matrix(int const N)
+neon::sparse_matrix create_diagonal_sparse_matrix(int const N)
 {
-    sparse_matrix A(N, N);
+    neon::sparse_matrix A(N, N);
 
     for (int i = 0; i < N; ++i)
     {
@@ -22,9 +22,9 @@ sparse_matrix create_diagonal_sparse_matrix(int const N)
     return A;
 }
 
-sparse_matrix create_sparse_identity(int const N)
+neon::sparse_matrix create_sparse_identity(int const N)
 {
-    sparse_matrix A(N, N);
+    neon::sparse_matrix A(N, N);
 
     for (int i = 0; i < N; ++i)
     {
@@ -35,16 +35,59 @@ sparse_matrix create_sparse_identity(int const N)
     return A;
 }
 
-TEST_CASE("Eigenvalue solver test suite")
+TEST_CASE("Arpack eigenvalues")
 {
-    sparse_matrix A = create_diagonal_sparse_matrix(100);
-    sparse_matrix I = create_sparse_identity(100);
+    neon::eigenvalue_solver solver{10};
 
-    eigenvalue_solver eigen{10};
+    solver.solve(create_diagonal_sparse_matrix(50), create_sparse_identity(50));
 
-    eigen.solve(A, I);
-
-    auto const& values = eigen.eigenvalues();
+    auto const& values = solver.eigenvalues();
+    auto const& vectors = solver.eigenvectors();
 
     REQUIRE(values.size() == 10);
+
+    REQUIRE(vectors.rows() == 50);
+    REQUIRE(vectors.cols() == 10);
+
+    for (int i = 0; i < 10; i++)
+    {
+        // Expected eigenvalues
+        REQUIRE(values(i) == Approx(41.0 + i));
+        // Unit vectors
+        REQUIRE(vectors.col(i).norm() == Approx(1.0));
+    }
+}
+TEST_CASE("Power iteration eigenvalue")
+{
+    neon::power_iteration solver{1};
+
+    solver.solve(create_diagonal_sparse_matrix(10));
+
+    auto const& values = solver.eigenvalues();
+    auto const& vectors = solver.eigenvectors();
+
+    REQUIRE(values.size() == 1);
+
+    // Expected largest eigenvalue
+    REQUIRE(values(0) == Approx(10.0));
+    REQUIRE(vectors.col(0).norm() == Approx(1.0));
+}
+TEST_CASE("Lanczos iteration eigenvalue")
+{
+    neon::lanzcos_solver solver{10};
+
+    solver.solve(create_diagonal_sparse_matrix(50));
+
+    auto const& values = solver.eigenvalues();
+    auto const& vectors = solver.eigenvectors();
+
+    REQUIRE(values.size() == 10);
+
+    for (int i = 0; i < 10; i++)
+    {
+        // Expected eigenvalues
+        REQUIRE(values(i) == Approx(50.0 - i));
+        // Unit vectors
+        REQUIRE(vectors.col(i).norm() == Approx(1.0));
+    }
 }
