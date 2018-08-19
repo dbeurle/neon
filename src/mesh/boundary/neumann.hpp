@@ -45,10 +45,8 @@ public:
 protected:
     /// Indices for the nodal coordinates
     indices node_indices;
-
     /// Indices for the degrees of freedom
     indices dof_indices;
-
     /// Coordinates for the boundary element group
     std::shared_ptr<material_coordinates> coordinates;
 };
@@ -105,7 +103,7 @@ public:
 
         // Perform the computation of the external load vector
         auto const f_ext = sf->quadrature().integrate(vector::Zero(X.cols()).eval(),
-                                                      [&](auto const& femval, auto const) -> vector {
+                                                      [&](auto const& femval, auto) -> vector {
                                                           auto const& [N, dN] = femval;
 
                                                           return N * jacobian_determinant(X * dN);
@@ -155,7 +153,8 @@ public:
 
     virtual ~volume_load() = default;
 
-    volume_load(volume_load&& other) = default;
+    volume_load(volume_load&&) = default;
+
     volume_load& operator=(volume_load const&) = default;
 
     virtual std::pair<index_view, vector> external_force(std::int64_t const element,
@@ -167,7 +166,7 @@ public:
 
         // Perform the computation of the external load vector
         auto const f_ext = sf->quadrature().integrate(vector::Zero(X.cols()).eval(),
-                                                      [&](auto const& femval, auto const l) -> vector {
+                                                      [&](auto const& femval, auto) -> vector {
                                                           auto const& [N, dN] = femval;
 
                                                           return N * jacobian_determinant(X * dN);

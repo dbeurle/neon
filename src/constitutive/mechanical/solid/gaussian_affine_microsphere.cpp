@@ -58,14 +58,14 @@ matrix3 gaussian_affine_microsphere::compute_kirchhoff_stress(double const press
 
 matrix6 gaussian_affine_microsphere::compute_material_tangent(double const J,
                                                               double const K,
-                                                              matrix6 const& macro_C,
+                                                              matrix6 const& macro_tangent,
                                                               matrix3 const& macro_stress) const
 {
     auto const pressure = J * volumetric_free_energy_dJ(J, K);
     auto const kappa = std::pow(J, 2) * volumetric_free_energy_second_d2J(J, K);
 
     // clang-format off
-    matrix6 const D = macro_C
+    matrix6 const D = macro_tangent
                     + 2.0 / 3.0 * macro_stress.trace() * voigt::kinematic::identity()
                     - 2.0 / 3.0 * (outer_product(macro_stress, matrix3::Identity()) +
                                    outer_product(matrix3::Identity(), macro_stress));
@@ -79,7 +79,7 @@ matrix3 gaussian_affine_microsphere::compute_macro_stress(matrix3 const& F_unimo
 {
     return 3.0 * shear_modulus
            * unit_sphere.integrate(matrix3::Zero().eval(),
-                                   [&](auto const& coordinates, auto const) -> matrix3 {
+                                   [&](auto const& coordinates, auto) -> matrix3 {
                                        auto const& [r, _] = coordinates;
 
                                        vector3 const t = deformed_tangent(F_unimodular, r);

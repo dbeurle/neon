@@ -13,7 +13,7 @@ neon user documentation
    constitutive
    boundary_conditions
    solution_methods
-   linear_solvers
+   solvers
    test_suite
    license
    contact

@@ -13,4 +13,10 @@ struct computational_error : public std::domain_error
 {
     using std::domain_error::domain_error;
 };
+
+/// Exception type for computation error in CUDA kernel calls
+struct cuda_error : public std::domain_error
+{
+    using std::domain_error::domain_error;
+};
 }

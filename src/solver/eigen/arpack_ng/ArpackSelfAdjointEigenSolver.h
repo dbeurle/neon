@@ -384,9 +384,6 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
     static_assert(sizeof(int) < sizeof(typename MatrixType::Index),
                   "Integer size too large for arpack-ng");
 
-    std::cout << "Size of Index is " << sizeof(typename MatrixType::Index) << std::endl;
-    std::cout << "Size of StorageIndex is " << sizeof(typename MatrixType::StorageIndex) << std::endl;
-
     bool isBempty = (B.rows() == 0) || (B.cols() == 0);
 
     // For clarity, all parameters match their ARPACK name
@@ -435,8 +432,6 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
     // Now we determine the mode to use
     int mode = (bmat[0] == 'G') + 1;
 
-    std::cout << "Mode = " << mode << "\n";
-
     if (eigs_sigma.substr(0, 2) == "SM"
         || !(std::isalpha(eigs_sigma[0]) && std::isalpha(eigs_sigma[1])))
     {
@@ -456,9 +451,6 @@ ArpackGeneralizedSelfAdjointEigenSolver<MatrixType, MatrixSolver, BisSPD>& Arpac
     // Note that this indicates that nev != n, and we cannot compute
     // all eigenvalues of a matrix
     int ncv = std::min(std::max(2 * nev, 20), n);
-
-    std::cout << "ncv = " << ncv << "\n";
-    std::cout << "nev = " << nev << "\n";
 
     // The working n x ncv matrix, also store the final eigenvectors (if computed)
     Array<Scalar, Dynamic, Dynamic> arnoldi_basis_vectors(n, ncv);

@@ -18,7 +18,7 @@ TEST_CASE("2x2")
 TEST_CASE("3x2")
 {
     neon::matrix32 const random_jacobian = neon::matrix32::Random();
-    double const j = jacobian_determinant(random_jacobian);
+    // double const j = jacobian_determinant(random_jacobian);
 }
 TEST_CASE("3x1")
 {

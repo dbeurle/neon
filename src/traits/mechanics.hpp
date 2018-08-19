@@ -8,6 +8,46 @@
 
 namespace neon::mechanical
 {
+/// Specialisation of momentum equation for geometrical assumptions
+enum class type {
+    /// C1 beam theory (Hermite basis)
+    euler_beam,
+    /// C0 beam theory
+    beam,
+    shell,
+    axisymmetric,
+    plane_stress,
+    plane_strain,
+    continuum
+};
+
+enum class material { linear, nonlinear };
+
+/// Deformation assumption
+enum class deformation {
+    /// Small displacements and rotations
+    small,
+    /// Finite displacements and rotations
+    finite
+};
+
+enum class method {
+    /// Linear perturbation is required and residual needs to be check manually
+    linear,
+    /// Nonlinear (incremental) solution of system
+    incremental,
+    /// Latin method
+    latin
+};
+
+/// Frame
+enum class lagrangian {
+    /// Formulate integrals in reference configuration
+    total,
+    /// Formulate integrals in current configuration
+    updated
+};
+
 /// Theoretical specialisations / approximations of Newton's laws.
 enum class theory { plane_stress, plane_strain, axisymmetric, solid, shell, beam };
 

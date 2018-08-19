@@ -11,7 +11,7 @@
         "PoissonsRatio" : 0.3
     }],
     "profile" : [{
-        "name" : "steel_bar",
+        "name" : "square200",
         "type" : "rectangle",
         "width" : 200,
         "height" : 200
@@ -57,13 +57,11 @@
                 "Name" : "load",
                 "Type" : "force",
                 "Time" : [0.0, 1.0],
-                "x" : [0.0, 1000.0],
-                "y" : [0.0, 2000.0],
-                "z" : [0.0, 2000.0]
+                "z" : [0.0, 15000.0]
             }],
-            "section" : [{
+            "sections" : [{
                 "name" : "base",
-                "profile" : "steel_bar",
+                "profile" : "square200",
                 "tangent" : [1.0, 0.0, 0.0],
                 "normal" : [0.0, 1.0, 0.0]
             }],

@@ -1,7 +1,6 @@
 
 add_library(catch_main STATIC test_main.cpp)
-add_dependencies(catch_main catch)
-target_include_directories(catch_main PRIVATE ${CATCH_INCLUDE_DIR})
+target_link_libraries(catch_main PUBLIC Catch2::Catch)
 
 add_library(cube_fixture STATIC fixtures/cube_mesh.cpp)
 
@@ -13,7 +12,7 @@ foreach(test
              geometry_profile
              linear_beam_theory
              linear_solvers
-             eigen_solvers
+             eigenvalue_solvers
              svd_solvers
              jacobian_determinant
              material
@@ -32,13 +31,15 @@ foreach(test
 
     add_dependencies(${test}_test neon catch_main cube_fixture)
 
-    target_link_libraries(${test}_test PRIVATE catch_main cube_fixture neon OpenMP::OpenMP_CXX)
+    target_link_libraries(${test}_test PRIVATE catch_main
+                                               cube_fixture
+                                               neon
+                                               Catch2::Catch
+                                               OpenMP::OpenMP_CXX)
 
     target_include_directories(${test}_test PUBLIC ${CMAKE_SOURCE_DIR}/src
                                                    fixtures
-                                                   ${CATCH_INCLUDE_DIR}
                                                    ${EIGEN_INCLUDE_DIR}
-                                                   ${CATCH_INCLUDE_DIR}
                                                    ${VTK_INCLUDE_DIRS}
                                                    ${RV3_INCLUDE_DIR})
 
