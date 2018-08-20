@@ -1,8 +1,8 @@
 
 FROM fedora:28
 
-# Install any needed packages specified in dependencies.txt
 RUN dnf update -y
+
 # Utilities
 RUN dnf install -y wget bzip2 patch git mercurial cmake lcov
 # Compilers
@@ -13,6 +13,6 @@ RUN dnf install -y openblas-devel MUMPS-devel boost-devel vtk-devel hwloc-devel 
 RUN pip3 install gcovr cpp-coveralls
 RUN pip install pyyaml
 
-# Copy the current directory contents into the container at root directory /
+# Compile and install PaStiX 5
 COPY docker/add_libraries.diff docker/cmake_patch.diff docker/install_pastix.sh /
 RUN sh install_pastix.sh
