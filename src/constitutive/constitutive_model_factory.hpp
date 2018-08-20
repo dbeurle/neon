@@ -12,14 +12,14 @@
 
 namespace neon
 {
-namespace mechanical::solid
+namespace mechanics::solid
 {
 std::unique_ptr<constitutive_model> make_constitutive_model(
     std::shared_ptr<internal_variables_t>& variables,
     json const& material_data,
     json const& simulation_data);
 }
-namespace mechanical::plane
+namespace mechanics::plane
 {
 std::unique_ptr<constitutive_model> make_constitutive_model(
     std::shared_ptr<internal_variables_t>& variables,

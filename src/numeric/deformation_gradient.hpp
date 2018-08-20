@@ -5,7 +5,7 @@
 
 /// \file deformation_gradient.hpp
 
-namespace neon::mechanical
+namespace neon::mechanics
 {
 /// Compute the local deformation gradient
 /// \f{align*}{ F_{\xi} &= \bf{x}_\xi \f}

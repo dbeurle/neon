@@ -3,7 +3,7 @@
 
 namespace neon
 {
-namespace mechanical
+namespace mechanics
 {
 namespace solid
 {

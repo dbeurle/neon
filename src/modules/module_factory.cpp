@@ -58,15 +58,15 @@ std::unique_ptr<abstract_module> make_module(
     {
         if (solution_type == "Equilibrium")
         {
-            return std::make_unique<linear_diffusion_module<diffusion::fem_static_matrix>>(mesh,
-                                                                                           material,
-                                                                                           simulation);
+            return std::make_unique<linear_diffusion_module<diffusion::static_matrix>>(mesh,
+                                                                                       material,
+                                                                                       simulation);
         }
         else if (solution_type == "Transient")
         {
-            return std::make_unique<linear_diffusion_module<diffusion::fem_dynamic_matrix>>(mesh,
-                                                                                            material,
-                                                                                            simulation);
+            return std::make_unique<linear_diffusion_module<diffusion::dynamic_matrix>>(mesh,
+                                                                                        material,
+                                                                                        simulation);
         }
         throw std::domain_error("Solution " + solution_type
                                 + " is not recognised.  Use \"Equilibrium\" or \"Transient\"\n");

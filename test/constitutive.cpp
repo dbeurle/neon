@@ -2,11 +2,11 @@
 #include <catch.hpp>
 
 #include "constitutive/internal_variables.hpp"
-#include "constitutive/mechanical/solid/affine_microsphere.hpp"
-#include "constitutive/mechanical/solid/compressible_neohooke.hpp"
-#include "constitutive/mechanical/solid/small_strain_J2_plasticity.hpp"
-#include "constitutive/mechanical/detail/J2_plasticity.hpp"
-#include "constitutive/mechanical/plane/isotropic_linear_elasticity.hpp"
+#include "constitutive/mechanics/solid/affine_microsphere.hpp"
+#include "constitutive/mechanics/solid/compressible_neohooke.hpp"
+#include "constitutive/mechanics/solid/small_strain_J2_plasticity.hpp"
+#include "constitutive/mechanics/detail/J2_plasticity.hpp"
+#include "constitutive/mechanics/plane/isotropic_linear_elasticity.hpp"
 #include "constitutive/thermal/isotropic_diffusion.hpp"
 #include "constitutive/constitutive_model_factory.hpp"
 #include "material/isotropic_elastic_plastic.hpp"
@@ -37,7 +37,7 @@ using namespace neon;
 
 TEST_CASE("No constitutive model error test")
 {
-    using namespace neon::mechanical::solid;
+    using namespace neon::mechanics::solid;
 
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
@@ -46,7 +46,7 @@ TEST_CASE("No constitutive model error test")
 }
 TEST_CASE("Constitutive model no name error test")
 {
-    using namespace neon::mechanical::solid;
+    using namespace neon::mechanics::solid;
 
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
@@ -57,7 +57,7 @@ TEST_CASE("Constitutive model no name error test")
 }
 TEST_CASE("Constitutive model invalid name error test")
 {
-    using namespace neon::mechanical::solid;
+    using namespace neon::mechanics::solid;
 
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
@@ -69,7 +69,7 @@ TEST_CASE("Constitutive model invalid name error test")
 }
 TEST_CASE("Neo-Hookean model")
 {
-    using namespace neon::mechanical::solid;
+    using namespace neon::mechanics::solid;
 
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
@@ -139,7 +139,7 @@ TEST_CASE("Neo-Hookean model")
 }
 TEST_CASE("Microsphere model error test")
 {
-    using namespace neon::mechanical::solid;
+    using namespace neon::mechanics::solid;
 
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
@@ -173,7 +173,7 @@ TEST_CASE("Microsphere model error test")
 }
 TEST_CASE("Gaussian affine microsphere model")
 {
-    using namespace neon::mechanical::solid;
+    using namespace neon::mechanics::solid;
 
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
@@ -259,7 +259,7 @@ TEST_CASE("Gaussian affine microsphere model")
 }
 TEST_CASE("Gaussian affine microsphere model with ageing")
 {
-    using namespace neon::mechanical::solid;
+    using namespace neon::mechanics::solid;
 
     auto variables = std::make_shared<internal_variables_t>(1);
 
@@ -457,7 +457,7 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
 }
 TEST_CASE("Gaussian affine microsphere model with crosslinking only")
 {
-    using namespace neon::mechanical::solid;
+    using namespace neon::mechanics::solid;
 
     std::cout << "Constant cross-linking stress check\n";
 
@@ -617,7 +617,7 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
 }
 TEST_CASE("Affine microsphere model")
 {
-    using namespace neon::mechanical::solid;
+    using namespace neon::mechanics::solid;
 
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
@@ -702,7 +702,7 @@ TEST_CASE("Affine microsphere model")
 }
 TEST_CASE("NonAffine microsphere model")
 {
-    using namespace neon::mechanical::solid;
+    using namespace neon::mechanics::solid;
 
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
@@ -807,7 +807,7 @@ TEST_CASE("NonAffine microsphere model")
 }
 TEST_CASE("Plane stress linear elasticity factory error")
 {
-    using namespace neon::mechanical::plane;
+    using namespace neon::mechanics::plane;
 
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
@@ -819,7 +819,7 @@ TEST_CASE("Plane stress linear elasticity factory error")
 }
 TEST_CASE("Plane stress elasticity model")
 {
-    using namespace neon::mechanical::plane;
+    using namespace neon::mechanics::plane;
 
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
@@ -939,7 +939,7 @@ TEST_CASE("Plane stress elasticity model")
 }
 TEST_CASE("Plane strain elasticity model")
 {
-    using namespace neon::mechanical::plane;
+    using namespace neon::mechanics::plane;
 
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
@@ -1057,7 +1057,7 @@ TEST_CASE("Plane strain elasticity model")
 }
 TEST_CASE("Solid mechanics elasticity model")
 {
-    using namespace neon::mechanical::solid;
+    using namespace neon::mechanics::solid;
 
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
@@ -1213,7 +1213,7 @@ TEST_CASE("Solid mechanics elasticity model")
 }
 TEST_CASE("Solid mechanics J2 plasticity model factory errors")
 {
-    using namespace neon::mechanical::solid;
+    using namespace neon::mechanics::solid;
 
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
@@ -1240,7 +1240,7 @@ TEST_CASE("Solid mechanics J2 plasticity model factory errors")
 }
 TEST_CASE("Solid mechanics J2 plasticity model")
 {
-    using namespace neon::mechanical::solid;
+    using namespace neon::mechanics::solid;
 
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
@@ -1292,8 +1292,8 @@ TEST_CASE("Solid mechanics J2 plasticity model")
     {
         neon::isotropic_elastic_plastic material{material_data};
 
-        REQUIRE(neon::mechanical::evaluate_J2_yield_function(material, 100.0e6, 0.0) <= 0.0);
-        REQUIRE(neon::mechanical::evaluate_J2_yield_function(material, 300.0e6, 0.0) > 0.0);
+        REQUIRE(neon::mechanics::evaluate_J2_yield_function(material, 100.0e6, 0.0) <= 0.0);
+        REQUIRE(neon::mechanics::evaluate_J2_yield_function(material, 300.0e6, 0.0) > 0.0);
     }
     SECTION("No load")
     {
@@ -1405,7 +1405,7 @@ TEST_CASE("Solid mechanics J2 plasticity model")
 }
 TEST_CASE("Solid mechanics J2 plasticity damage model")
 {
-    using namespace neon::mechanical::solid;
+    using namespace neon::mechanics::solid;
 
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
@@ -1577,7 +1577,7 @@ TEST_CASE("Thermal isotropic model")
 
 // TEST_CASE("Finite J2 plasticity model", "[finite_strain_J2_plasticity]")
 // {
-//     using namespace neon::mechanical::solid;
+//     using namespace neon::mechanics::solid;
 //
 //     // Create a json reader object from a string
 //     std::string

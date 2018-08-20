@@ -2,7 +2,7 @@
 #include <catch.hpp>
 
 #include "mesh/basic_mesh.hpp"
-#include "mesh/mechanical/beam/fem_submesh.hpp"
+#include "mesh/mechanics/beam/submesh.hpp"
 
 #include "io/json.hpp"
 
@@ -157,7 +157,7 @@ std::string simple_beam_element()
 //
 //     for (auto const& submesh : beam_mesh.meshes("beam"))
 //     {
-//         neon::mechanical::beam::fem_submesh mesh(json::parse("{\"Name\" : \"steel\", \
+//         neon::mechanics::beam::submesh mesh(json::parse("{\"Name\" : \"steel\", \
 //                                                               \"ElasticModulus\" : 200.0e9, \
 //                                                               \"PoissonsRatio\" : 0.3 \
 //                                                               }"),

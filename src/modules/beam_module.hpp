@@ -4,11 +4,11 @@
 #include "abstract_module.hpp"
 
 #include "assembler/linear_static_matrix.hpp"
-#include "mesh/mechanical/beam/fem_mesh.hpp"
+#include "mesh/mechanics/beam/mesh.hpp"
 
 namespace neon
 {
-namespace mechanical
+namespace mechanics
 {
 /// This namespace groups together all of the classes and functions associated
 /// with beam formulation in finite elements.  These include constitutive models,
@@ -23,7 +23,7 @@ namespace beam
 class beam_module : public abstract_module
 {
 public:
-    using mesh_type = mechanical::beam::fem_mesh;
+    using mesh_type = mechanics::beam::mesh;
     using matrix_type = fem::linear_static_matrix<mesh_type>;
 
 public:

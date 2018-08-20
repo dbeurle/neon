@@ -3,8 +3,8 @@
 
 #include "mesh/basic_mesh.hpp"
 #include "mesh/material_coordinates.hpp"
-#include "mesh/mechanical/solid/fem_mesh.hpp"
-#include "assembler/mechanical/fem_static_matrix.hpp"
+#include "mesh/mechanics/solid/mesh.hpp"
+#include "assembler/mechanics/static_matrix.hpp"
 #include "numeric/doublet.hpp"
 #include "io/json.hpp"
 
@@ -41,8 +41,8 @@ TEST_CASE("Doublet class")
 }
 TEST_CASE("Nonlinear system equilibrium solver test")
 {
-    using fem_mesh = neon::mechanical::solid::fem_mesh;
-    using fem_static_matrix = neon::mechanical::fem_static_matrix<fem_mesh>;
+    using fem_mesh = neon::mechanics::solid::mesh;
+    using fem_static_matrix = neon::mechanics::fem_static_matrix<fem_mesh>;
 
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh

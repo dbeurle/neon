@@ -3,9 +3,9 @@
 
 #include "abstract_module.hpp"
 
-#include "assembler/diffusion/fem_dynamic_matrix.hpp"
-#include "assembler/diffusion/fem_static_matrix.hpp"
-#include "mesh/diffusion/fem_mesh.hpp"
+#include "assembler/diffusion/dynamic_matrix.hpp"
+#include "assembler/diffusion/static_matrix.hpp"
+#include "mesh/diffusion/mesh.hpp"
 
 namespace neon
 {
@@ -36,7 +36,7 @@ public:
     void perform_simulation() override final { fem_matrix.solve(); }
 
 protected:
-    diffusion::fem_mesh fem_mesh;
+    diffusion::mesh fem_mesh;
     femMatrix_Tp fem_matrix;
 };
 }
