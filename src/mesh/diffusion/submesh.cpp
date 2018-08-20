@@ -17,9 +17,9 @@
 namespace neon::diffusion
 {
 submesh::submesh(json const& material_data,
-                         json const& mesh_data,
-                         std::shared_ptr<material_coordinates>& coordinates,
-                         basic_submesh const& submesh)
+                 json const& mesh_data,
+                 std::shared_ptr<material_coordinates>& coordinates,
+                 basic_submesh const& submesh)
     : basic_submesh(submesh),
       coordinates(coordinates),
       sf(make_volume_interpolation(topology(), mesh_data)),
