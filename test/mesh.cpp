@@ -5,8 +5,8 @@
 #include "mesh/element_topology.hpp"
 #include "mesh/node_ordering_adapter.hpp"
 #include "mesh/material_coordinates.hpp"
-#include "mesh/mechanical/solid/fem_mesh.hpp"
-#include "mesh/mechanical/solid/fem_submesh.hpp"
+#include "mesh/mechanics/solid/mesh.hpp"
+#include "mesh/mechanics/solid/submesh.hpp"
 #include "io/json.hpp"
 
 #include "fixtures/cube_mesh.hpp"
@@ -112,7 +112,7 @@ TEST_CASE("Basic mesh test")
 }
 TEST_CASE("Solid submesh test")
 {
-    using namespace mechanical::solid;
+    using namespace mechanics::solid;
 
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh
@@ -129,10 +129,10 @@ TEST_CASE("Solid submesh test")
 
     auto mesh_coordinates = std::make_shared<material_coordinates>(nodal_coordinates.coordinates());
 
-    mechanical::solid::fem_submesh fem_submesh(json::parse(material_data_json()),
-                                               json::parse(simulation_data_json()),
-                                               mesh_coordinates,
-                                               submesh);
+    mechanics::solid::submesh fem_submesh(json::parse(material_data_json()),
+                                          json::parse(simulation_data_json()),
+                                          mesh_coordinates,
+                                          submesh);
 
     int constexpr number_of_nodes = 64;
     int constexpr number_of_dofs = number_of_nodes * 3;
@@ -200,7 +200,7 @@ TEST_CASE("Solid submesh test")
 }
 TEST_CASE("Solid mesh test")
 {
-    using mechanical::solid::fem_mesh;
+    using mechanics::solid::mesh;
 
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh
@@ -213,10 +213,10 @@ TEST_CASE("Solid mesh test")
 
     REQUIRE(!simulation_data["Name"].empty());
 
-    fem_mesh fem_mesh(basic_mesh,
-                      material_data,
-                      simulation_data,
-                      simulation_data["Time"]["Increments"]["Initial"]);
+    mesh fem_mesh(basic_mesh,
+                  material_data,
+                  simulation_data,
+                  simulation_data["Time"]["Increments"]["Initial"]);
 
     REQUIRE(fem_mesh.active_dofs() == 192);
 

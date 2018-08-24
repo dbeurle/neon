@@ -6,7 +6,7 @@
 #include <array>
 #include <type_traits>
 
-namespace neon::mechanical
+namespace neon::mechanics
 {
 /// Specialisation of momentum equation for geometrical assumptions
 enum class type {

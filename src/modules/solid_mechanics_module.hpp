@@ -3,17 +3,17 @@
 
 #include "abstract_module.hpp"
 
-#include "assembler/mechanical/fem_static_matrix.hpp"
-#include "assembler/mechanical/fem_buckling_matrix.hpp"
+#include "assembler/mechanics/static_matrix.hpp"
+#include "assembler/mechanics/buckling_matrix.hpp"
 
-#include "mesh/mechanical/solid/fem_mesh.hpp"
+#include "mesh/mechanics/solid/mesh.hpp"
 
 namespace neon
 {
 /// This namespace groups together all of the classes and functions associated
 /// with solid mechanics finite elements.  The sub-namespaces implement mechanics
 /// such as solid, plate, beam, axisymmetric etc
-namespace mechanical
+namespace mechanics
 {
 /// This namespace groups together all of the classes and functions associated
 /// with three-dimensional solid mechanics finite elements.  These include
@@ -28,8 +28,8 @@ namespace solid
 class solid_mechanics_module : public abstract_module
 {
 public:
-    using mesh_type = mechanical::solid::fem_mesh;
-    using matrix_type = mechanical::fem_static_matrix<mesh_type>;
+    using mesh_type = mechanics::solid::mesh;
+    using matrix_type = mechanics::fem_static_matrix<mesh_type>;
 
 public:
     solid_mechanics_module(basic_mesh const& mesh, json const& material, json const& simulation);
@@ -44,7 +44,7 @@ public:
 
 protected:
     /// Mesh for solid types
-    mechanical::solid::fem_mesh fem_mesh;
+    mechanics::solid::mesh fem_mesh;
     /// Nonlinear solver routines
     matrix_type fem_matrix;
 };
@@ -55,8 +55,8 @@ protected:
 class solid_mechanics_linear_buckling_module : public abstract_module
 {
 public:
-    using mesh_type = mechanical::solid::fem_mesh;
-    using matrix_type = mechanical::fem_buckling_matrix<mesh_type>;
+    using mesh_type = mechanics::solid::mesh;
+    using matrix_type = mechanics::fem_buckling_matrix<mesh_type>;
 
 public:
     solid_mechanics_linear_buckling_module(basic_mesh const& mesh,

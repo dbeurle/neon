@@ -3,12 +3,12 @@
 
 #include "abstract_module.hpp"
 
-#include "assembler/mechanical/fem_static_matrix.hpp"
-#include "mesh/mechanical/plane/fem_mesh.hpp"
+#include "assembler/mechanics/static_matrix.hpp"
+#include "mesh/mechanics/plane/mesh.hpp"
 
 namespace neon
 {
-namespace mechanical
+namespace mechanics
 {
 /// This namespace groups together all of the classes and functions associated
 /// with plane strain finite elements.  These include constitutive models,
@@ -21,8 +21,8 @@ namespace plane_strain
 class plane_strain_module : public abstract_module
 {
 public:
-    using mesh_type = mechanical::plane::fem_mesh;
-    using matrix_type = mechanical::fem_static_matrix<mesh_type>;
+    using mesh_type = mechanics::plane::mesh;
+    using matrix_type = mechanics::fem_static_matrix<mesh_type>;
 
 public:
     plane_strain_module(basic_mesh const& mesh, json const& material, json const& simulation);

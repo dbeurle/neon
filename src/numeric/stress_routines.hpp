@@ -5,7 +5,7 @@
 
 /// \file stress_routines.hpp
 
-namespace neon::mechanical
+namespace neon::mechanics
 {
 namespace detail
 {

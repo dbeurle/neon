@@ -1,19 +1,19 @@
 
 #include "constitutive_model_factory.hpp"
 
-#include "mechanical/solid/small_strain_J2_plasticity.hpp"
-#include "mechanical/solid/small_strain_J2_plasticity_damage.hpp"
-#include "mechanical/solid/finite_strain_J2_plasticity.hpp"
+#include "mechanics/solid/small_strain_J2_plasticity.hpp"
+#include "mechanics/solid/small_strain_J2_plasticity_damage.hpp"
+#include "mechanics/solid/finite_strain_J2_plasticity.hpp"
 
-#include "mechanical/solid/gaussian_affine_microsphere.hpp"
-#include "mechanical/solid/gaussian_ageing_affine_microsphere.hpp"
-#include "mechanical/solid/affine_microsphere.hpp"
-#include "mechanical/solid/nonaffine_microsphere.hpp"
-#include "mechanical/solid/compressible_neohooke.hpp"
+#include "mechanics/solid/gaussian_affine_microsphere.hpp"
+#include "mechanics/solid/gaussian_ageing_affine_microsphere.hpp"
+#include "mechanics/solid/affine_microsphere.hpp"
+#include "mechanics/solid/nonaffine_microsphere.hpp"
+#include "mechanics/solid/compressible_neohooke.hpp"
 
-#include "mechanical/plane/isotropic_linear_elasticity.hpp"
-#include "mechanical/plane/small_strain_J2_plasticity.hpp"
-#include "mechanical/plane/finite_strain_J2_plasticity.hpp"
+#include "mechanics/plane/isotropic_linear_elasticity.hpp"
+#include "mechanics/plane/small_strain_J2_plasticity.hpp"
+#include "mechanics/plane/finite_strain_J2_plasticity.hpp"
 
 #include "thermal/isotropic_diffusion.hpp"
 
@@ -21,7 +21,7 @@
 
 #include <stdexcept>
 
-namespace neon::mechanical::solid
+namespace neon::mechanics::solid
 {
 std::unique_ptr<constitutive_model> make_constitutive_model(
     std::shared_ptr<internal_variables_t>& variables,
@@ -161,7 +161,7 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
 }
 }
 
-namespace neon::mechanical::plane
+namespace neon::mechanics::plane
 {
 std::unique_ptr<constitutive_model> make_constitutive_model(
     std::shared_ptr<internal_variables_t>& variables,

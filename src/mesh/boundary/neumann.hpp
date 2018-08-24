@@ -42,6 +42,16 @@ public:
 
     [[nodiscard]] auto elements() const noexcept { return node_indices.cols(); }
 
+    [[nodiscard]] auto local_dof_view(std::int64_t const element) const noexcept
+    {
+        return dof_indices(Eigen::placeholders::all, element);
+    }
+
+    [[nodiscard]] auto local_node_view(std::int64_t const element) const noexcept
+    {
+        return node_indices(Eigen::placeholders::all, element);
+    }
+
 protected:
     /// Indices for the nodal coordinates
     indices node_indices;

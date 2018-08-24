@@ -27,20 +27,6 @@ find_library(
 set(MUMPS_INCLUDE_DIRS ${MUMPS_INCLUDE_DIR})
 set(MUMPS_LIBRARIES ${MUMPS_LIBRARY})
 
-# debug library on windows
-# same naming convention as in qt (appending debug library with d)
-# boost is using the same "hack" as us with "optimized" and "debug"
-# if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-# 	find_library(
-# 		MUMPS_LIBRARY_DEBUG
-# 		NAMES jsoncppd
-# 		DOC "jsoncpp debug library"
-# 	)
-#
-# 	set(MUMPS_LIBRARIES optimized ${MUMPS_LIBRARIES} debug ${MUMPS_LIBRARY_DEBUG})
-#
-# endif()
-
 # find MUMPS_INCLUDE_PREFIX
 find_path(
 	MUMPS_INCLUDE_PREFIX

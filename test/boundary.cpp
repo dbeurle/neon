@@ -5,7 +5,7 @@
 #include "quadrature/triangle_quadrature.hpp"
 #include "mesh/basic_submesh.hpp"
 #include "mesh/boundary/boundary.hpp"
-#include "mesh/mechanical/solid/boundary/nonfollower_load.hpp"
+#include "mesh/mechanics/solid/boundary/nonfollower_load.hpp"
 #include "mesh/diffusion/boundary/newton_convection.hpp"
 #include "io/json.hpp"
 
@@ -71,7 +71,7 @@ TEST_CASE("boundary unit test", "[boundary]")
 }
 TEST_CASE("Traction test for triangle", "[Traction]")
 {
-    using namespace neon::mechanical::solid;
+    using namespace neon::mechanics::solid;
 
     // Build a right angled triangle
     matrix3x coordinates(3, 3);
@@ -123,7 +123,7 @@ TEST_CASE("Traction test for triangle", "[Traction]")
 }
 TEST_CASE("Pressure test for triangle", "[Pressure]")
 {
-    using namespace neon::mechanical::solid;
+    using namespace neon::mechanics::solid;
 
     // Build a right angled triangle
     matrix3x coordinates(3, 3);
@@ -180,7 +180,7 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
 TEST_CASE("Traction test for mixed mesh", "[nonfollower_load_boundary]")
 {
     // Test construction of a mixed quadrilateral and triangle mesh
-    using namespace neon::mechanical::solid;
+    using namespace neon::mechanics::solid;
 
     matrix3x coordinates(3, 5);
     coordinates << 0.0, 1.0, 1.0, 0.0, 2.0, //
