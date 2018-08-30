@@ -58,47 +58,47 @@ void simulation_parser::parse()
 
     this->check_input_fields();
 
-    if (root.find("Cores") != root.end())
+    if (root.find("cores") != root.end())
     {
-        threads = root["Cores"];
+        threads = root["cores"];
     }
 
-    auto const material_names = this->allocate_material_names(root["Material"]);
-    auto const part_names = this->parse_part_names(root["Part"], material_names);
-    auto const profile_names = this->allocate_profile_names(root["profile"]);
+    auto const material_names = this->allocate_material_names(root["materials"]);
+    auto const part_names = this->parse_part_names(root["parts"], material_names);
+    auto const profile_names = this->allocate_profile_names(root["profiles"]);
 
     // Read in the mesh from file and allocate the mesh cache
-    for (auto const& part : root["Part"])
+    for (auto const& part : root["parts"])
     {
-        auto const material = *ranges::find_if(root["Material"], [&part](auto const& material) {
-            return material["Name"] == part["Material"];
+        auto const material = *ranges::find_if(root["materials"], [&part](auto const& material) {
+            return material["name"] == part["material"];
         });
 
         auto const read_start = std::chrono::steady_clock::now();
 
-        std::ifstream mesh_input_stream(part["Name"].get<std::string>() + ".mesh");
+        std::ifstream mesh_input_stream(part["name"].get<std::string>() + ".mesh");
 
         json mesh_file;
         mesh_input_stream >> mesh_file;
 
         auto const read_end = std::chrono::steady_clock::now();
 
-        std::cout << std::string(4, ' ') << "Parsed " << part["Name"] << " mesh from file in "
+        std::cout << std::string(4, ' ') << "Parsed " << part["name"] << " mesh from file in "
                   << std::chrono::duration<double>(read_end - read_start).count() << "s\n";
 
-        mesh_store.try_emplace(part["Name"], mesh_file, material);
+        mesh_store.try_emplace(part["name"], mesh_file, material);
 
-        std::cout << std::string(4, ' ') << "Allocated internal storage for " << part["Name"]
+        std::cout << std::string(4, ' ') << "Allocated internal storage for " << part["name"]
                   << " in "
                   << std::chrono::duration<double>(std::chrono::steady_clock::now() - read_end).count()
                   << "s\n";
     }
 
     // Build a list of all the load steps for a given mesh
-    for (auto const& simulation : root["SimulationCases"])
+    for (auto const& simulation : root["steps"])
     {
         // Ensure the required fields exist
-        for (auto required_field : {"Name", "Time", "Solution", "LinearSolver"})
+        for (auto required_field : {"name", "time", "solution", "linear_solver"})
         {
             if (simulation.find(required_field) == simulation.end())
             {
@@ -107,16 +107,16 @@ void simulation_parser::parse()
             }
         }
 
-        if (simulation["Mesh"].size() != 1)
+        if (simulation["meshes"].size() != 1)
         {
             throw std::domain_error("Multibody simulation are not yet supported");
         }
 
         // Make sure the simulation mesh exists in the mesh store
-        if (mesh_store.find(simulation["Mesh"].front()["Name"]) == mesh_store.end())
+        if (mesh_store.find(simulation["meshes"].front()["name"]) == mesh_store.end())
         {
             throw std::domain_error("Mesh name \""
-                                    + simulation["Mesh"].front()["Name"].get<std::string>()
+                                    + simulation["meshes"].front()["name"].get<std::string>()
                                     + "\" was not found in the mesh store");
         }
     }
@@ -152,11 +152,11 @@ void simulation_parser::build_simulation_tree()
     // For each simulation step, the total number of subsequent relationships
     // need to be determined, such that an analysis can be performed in order
     // Build a list of all the load steps for a given mesh
-    for (auto const& simulation : root["SimulationCases"])
+    for (auto const& simulation : root["steps"])
     {
-        if (simulation.find("Inherits") == simulation.end())
+        if (simulation.find("inherits") == simulation.end())
         {
-            std::string const& simulation_name = simulation["Name"];
+            std::string const& simulation_name = simulation["name"];
 
             multistep_simulations[simulation_name].emplace_front(simulation);
 
@@ -173,7 +173,7 @@ void simulation_parser::build_simulation_tree()
 
             for (auto const& item : queue)
             {
-                std::cout << std::string(4, ' ') << item["Name"] << std::endl;
+                std::cout << std::string(4, ' ') << item["name"] << std::endl;
             }
         }
     }
@@ -182,17 +182,17 @@ void simulation_parser::build_simulation_tree()
 void simulation_parser::find_children(std::string const& parent_name,
                                       std::string const& next_parent_name)
 {
-    for (auto const& simulation : root["SimulationCases"])
+    for (auto const& simulation : root["steps"])
     {
-        if (simulation.find("Inherits") == simulation.end()) continue;
+        if (simulation.find("inherits") == simulation.end()) continue;
 
         std::cout << "inherit not found" << std::endl;
 
-        if (simulation["Inherits"].get<std::string>() == next_parent_name)
+        if (simulation["inherits"].get<std::string>() == next_parent_name)
         {
             multistep_simulations[parent_name].push_back(simulation);
             // Recursive step
-            find_children(parent_name, simulation["Name"]);
+            find_children(parent_name, simulation["name"]);
         }
     }
 }
@@ -211,21 +211,21 @@ void simulation_parser::print_banner() const
 void simulation_parser::check_input_fields() const
 {
     // Check the important fields exist before anything else is done
-    if (root.find("Part") == root.end())
+    if (root.find("name") == root.end())
     {
-        throw std::domain_error("Part is not in input file");
+        throw std::domain_error("\"name\" is not in input file");
     }
-    if (root.find("Name") == root.end())
+    if (root.find("materials") == root.end())
     {
-        throw std::domain_error("Name is not in input file");
+        throw std::domain_error("\"materials\" is not in input file");
     }
-    if (root.find("Material") == root.end())
+    if (root.find("parts") == root.end())
     {
-        throw std::domain_error("Material is not in input file");
+        throw std::domain_error("\"parts\" is not in input file");
     }
-    if (root.find("SimulationCases") == root.end())
+    if (root.find("steps") == root.end())
     {
-        throw std::domain_error("SimulationCases is not in input file");
+        throw std::domain_error("\"steps\" is not in input file");
     }
 }
 
@@ -233,42 +233,46 @@ std::set<std::string> simulation_parser::allocate_material_names(json const& mat
 {
     std::set<std::string> material_names;
 
-    for (auto const& material : root["Material"])
+    for (auto const& material : materials)
     {
-        if (material.find("Name") == material.end())
+        if (material.find("name") == material.end())
         {
-            throw std::domain_error("Material: Name is missing");
+            throw std::domain_error("\"material\" is missing the \"name\" field");
         }
 
-        auto const [it, inserted] = material_names.emplace(material["Name"].get<std::string>());
+        auto const [it, inserted] = material_names.emplace(material["name"].get<std::string>());
 
-        if (!inserted) throw std::domain_error("Material name is not unique");
+        if (!inserted) throw std::domain_error("The material name must be unique");
     }
     return material_names;
 }
 
-std::set<std::string> simulation_parser::parse_part_names(json const& parts,
-                                                          std::set<std::string> const& material_names) const
+std::set<std::string> simulation_parser::parse_part_names(
+    json const& parts,
+    std::set<std::string> const& material_names) const
 {
     std::set<std::string> part_names;
 
     // Load in all the part names and error check
-    for (auto const& part : root["Part"])
+    for (auto const& part : parts)
     {
-        if (part.find("Name") == part.end())
+        if (part.find("name") == part.end())
         {
-            throw std::domain_error("Part: Name is missing");
+            throw std::domain_error("\"part\" : {\"name\" : \"\"} is missing");
         }
 
-        if (material_names.find(part["Material"].get<std::string>()) == material_names.end())
+        if (material_names.find(part["material"].get<std::string>()) == material_names.end())
         {
             throw std::domain_error("The part material was not found in the provided "
                                     "materials\n");
         }
 
-        auto const [it, inserted] = part_names.emplace(part["Name"].get<std::string>());
+        auto const [it, inserted] = part_names.emplace(part["name"].get<std::string>());
 
-        if (!inserted) throw std::domain_error("Part is defined more than once");
+        if (!inserted)
+        {
+            throw std::domain_error("A part is defined more than once");
+        }
     }
     return part_names;
 }
@@ -277,7 +281,7 @@ std::set<std::string> simulation_parser::allocate_profile_names(json const& prof
 {
     std::set<std::string> profile_names;
 
-    for (auto const& profile : root["profile"])
+    for (auto const& profile : profiles)
     {
         if (profile.find("name") == profile.end())
         {
@@ -289,7 +293,11 @@ std::set<std::string> simulation_parser::allocate_profile_names(json const& prof
                                     "documentation for allowable types and their parameters.");
         }
         auto const [it, inserted] = profile_names.emplace(profile["name"].get<std::string>());
-        if (!inserted) throw std::domain_error("profile name is not unique");
+
+        if (!inserted)
+        {
+            throw std::domain_error("profile name is not unique");
+        }
 
         profile_store.emplace(profile["name"].get<std::string>(), geometry::make_profile(profile));
     }

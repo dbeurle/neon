@@ -9,8 +9,8 @@ beam_module::beam_module(basic_mesh const& mesh,
                          std::map<std::string, std::unique_ptr<geometry::profile>> const& profile_store)
     : fem_mesh(mesh,
                material_data,
-               simulation_data["Mesh"].front(),
-               simulation_data["Time"]["Increments"]["Initial"],
+               simulation_data["meshes"].front(),
+               simulation_data["time"]["increments"]["initial"],
                profile_store),
       fem_matrix(fem_mesh, simulation_data)
 {

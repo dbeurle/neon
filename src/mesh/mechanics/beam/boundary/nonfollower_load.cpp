@@ -15,7 +15,7 @@ nonfollower_load_boundary::nonfollower_load_boundary(
     std::unordered_map<std::string, int> const& dof_table,
     double const generate_time_step)
 {
-    if (std::string const& type = boundary_data["Type"]; type == "moment" || type == "force")
+    if (std::string const& type = boundary_data["type"]; type == "moment" || type == "force")
     {
         for (auto const& [dof_name, dof_offset] : dof_table)
         {
@@ -34,7 +34,10 @@ nonfollower_load_boundary::nonfollower_load_boundary(
                                        return node * 6 + dof_offset + (type == "force" ? 0 : 3);
                                    });
 
-                    nodal_values.emplace_back(node_indices, boundary_data, dof_name, generate_time_step);
+                    nodal_values.emplace_back(node_indices,
+                                              boundary_data,
+                                              dof_name,
+                                              generate_time_step);
                 }
             }
         }

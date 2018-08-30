@@ -13,32 +13,32 @@ using namespace neon;
 micromechanical_elastomer::micromechanical_elastomer(json const& material_data)
     : isotropic_elastic_property(material_data)
 {
-    if (!material_data.count("SegmentsPerChain"))
+    if (!material_data.count("segments_per_chain"))
     {
-        throw std::domain_error("SegmentsPerChain not specified in material data\n");
+        throw std::domain_error("segments_per_chain not specified in material data\n");
     }
-    N = material_data["SegmentsPerChain"];
+    N = material_data["segments_per_chain"];
 }
 
 ageing_micromechanical_elastomer::ageing_micromechanical_elastomer(json const& material_data)
     : micromechanical_elastomer(material_data)
 {
     auto exception_string = [](std::string&& field) {
-        return "\"" + field + "\" is not specified in \"Material\" data";
+        return "\"" + field + "\" is not specified in \"material\" data";
     };
 
-    if (material_data.find("ScissionProbability") == end(material_data))
+    if (material_data.find("scission_probability") == end(material_data))
     {
-        throw std::domain_error(exception_string("ScissionProbability"));
+        throw std::domain_error(exception_string("scission_probability"));
     }
 
-    if (material_data.find("RecombinationProbability") == end(material_data))
+    if (material_data.find("recombination_probability") == end(material_data))
     {
-        throw std::domain_error(exception_string("RecombinationProbability"));
+        throw std::domain_error(exception_string("recombination_probability"));
     }
 
-    scission = material_data["ScissionProbability"];
-    recombination = material_data["RecombinationProbability"];
+    scission = material_data["scission_probability"];
+    recombination = material_data["recombination_probability"];
 
     if (scission < 0.0 || recombination < 0.0)
     {
@@ -59,7 +59,8 @@ double ageing_micromechanical_elastomer::creation_rate(double const active_shear
     return alpha * inactive_shear_modulus + 4 * eta * active_shear_modulus;
 }
 
-vector5 ageing_micromechanical_elastomer::integrate(vector5 const& z, double const time_step_size) const
+vector5 ageing_micromechanical_elastomer::integrate(vector5 const& z,
+                                                    double const time_step_size) const
 {
     // Define the right hand side of the ageing evolution equations
     return runge_kutta_fourth_order(0.0, time_step_size, z, [=](double const t, vector5 y) -> vector5 {

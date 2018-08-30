@@ -14,21 +14,21 @@ isotropic_elastic_property::isotropic_elastic_property(json const& material_data
     //   1)  Elastic modulus and Poisson ratio
     //   2)  Bulk modulus and shear modulus
 
-    if (material_data.count("BulkModulus") && material_data.count("ShearModulus"))
+    if (material_data.count("bulk_modulus") && material_data.count("shear_modulus"))
     {
         // Fill the elastic modulus and Poisson's ratio from the bulk and shear
         // moduli
-        K = material_data["BulkModulus"];
-        G = material_data["ShearModulus"];
+        K = material_data["bulk_modulus"];
+        G = material_data["shear_modulus"];
     }
-    else if (material_data.count("ElasticModulus") && material_data.count("PoissonsRatio"))
+    else if (material_data.count("elastic_modulus") && material_data.count("poissons_ratio"))
     {
-        double const E = material_data["ElasticModulus"];
-        double const nu = material_data["PoissonsRatio"];
+        double const E = material_data["elastic_modulus"];
+        double const nu = material_data["poissons_ratio"];
 
         if (nu >= 0.5)
         {
-            throw std::domain_error("\"PoissonsRatio\" must be less than or equal to 0.5");
+            throw std::domain_error("\"poissons_ratio\" must be less than or equal to 0.5");
         }
 
         K = E / (3.0 * (1.0 - 2.0 * nu));
@@ -36,8 +36,8 @@ isotropic_elastic_property::isotropic_elastic_property(json const& material_data
     }
     else
     {
-        throw std::domain_error("\"ElasticModulus\" and \"PoissonsRatio\" or "
-                                "\"BulkModulus\" and \"ShearModulus\" need to be "
+        throw std::domain_error("\"elastic_modulus\" and \"poissons_ratio\" or "
+                                "\"bulk_modulus\" and \"shear_modulus\" need to be "
                                 "specified as material properties");
     }
 }

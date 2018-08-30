@@ -27,15 +27,13 @@ public:
                      basic_submesh const& submesh);
 
     /// \return list of global degrees of freedom for an element
-    [[nodiscard]] index_view local_dof_view(std::int64_t const element) const {
+    [[nodiscard]] index_view local_dof_view(std::int64_t const element) const noexcept
+    {
         return local_node_view(element);
     }
 
-        /// \return The internal variable store
-        [[nodiscard]] auto const& internal_variables() const
-    {
-        return *variables;
-    }
+    /// \return The internal variable store
+    [[nodiscard]] auto const& internal_variables() const { return *variables; }
 
     void save_internal_variables(bool const have_converged);
 

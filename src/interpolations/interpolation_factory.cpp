@@ -18,16 +18,16 @@ namespace neon
 {
 static bool is_reduced_integration(json const& mesh_data)
 {
-    return mesh_data["ElementOptions"]["Quadrature"].is_null()
+    return mesh_data["element_options"]["quadrature"].is_null()
                ? false
-               : mesh_data["ElementOptions"]["Quadrature"].get<std::string>() == "Reduced";
+               : mesh_data["element_options"]["quadrature"].get<std::string>() == "reduced";
 }
 
 static void check_element_options(json const& mesh_data)
 {
-    if (mesh_data.find("ElementOptions") == mesh_data.end())
+    if (mesh_data.find("element_options") == mesh_data.end())
     {
-        throw std::runtime_error("Missing \"Part\": \"ElementOptions\"");
+        throw std::runtime_error("Missing \"part\": {\"element_options\" : {}}");
     }
 }
 

@@ -9,17 +9,17 @@ namespace neon
 {
 linear_diffusion::linear_diffusion(json const& material_data) : material_property(material_data)
 {
-    if (material_data.find("Conductivity") != material_data.end())
+    if (material_data.find("conductivity") != material_data.end())
     {
-        m_conductivity = material_data["Conductivity"];
+        m_conductivity = material_data["conductivity"];
     }
-    if (material_data.find("SpecificHeat") != material_data.end())
+    if (material_data.find("specific_heat") != material_data.end())
     {
-        m_specific_heat = material_data["SpecificHeat"];
+        m_specific_heat = material_data["specific_heat"];
     }
     else
     {
-        throw std::domain_error("\"Diffusivity\" needs to be specified as a material "
+        throw std::domain_error("\"conductivity\" and  needs to be specified as a material "
                                 "property");
     }
 }
