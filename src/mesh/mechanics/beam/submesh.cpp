@@ -83,8 +83,7 @@ std::pair<index_view, matrix const&> submesh::tangent_stiffness(std::int32_t con
     return {local_dof_view(element), ke};
 }
 
-matrix const& submesh::bending_stiffness(matrix3x const& configuration,
-                                         std::int32_t const element) const
+matrix const& submesh::bending_stiffness(matrix3x const& configuration, std::int32_t const element) const
 {
     static thread_local matrix2x B_bending(2, 6 * sf->nodes());
     static thread_local matrix k_bending(6 * sf->nodes(), 6 * sf->nodes());

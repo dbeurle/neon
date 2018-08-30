@@ -247,9 +247,8 @@ std::set<std::string> simulation_parser::allocate_material_names(json const& mat
     return material_names;
 }
 
-std::set<std::string> simulation_parser::parse_part_names(
-    json const& parts,
-    std::set<std::string> const& material_names) const
+std::set<std::string> simulation_parser::parse_part_names(json const& parts,
+                                                          std::set<std::string> const& material_names) const
 {
     std::set<std::string> part_names;
 
