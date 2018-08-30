@@ -6,7 +6,7 @@
 #include "mesh/basic_submesh.hpp"
 #include "mesh/boundary/boundary.hpp"
 #include "mesh/mechanics/solid/boundary/nonfollower_load.hpp"
-#include "mesh/diffusion/boundary/newton_convection.hpp"
+#include "mesh/diffusion/heat/boundary/newton_convection.hpp"
 #include "io/json.hpp"
 
 #include "fixtures/cube_mesh.hpp"
