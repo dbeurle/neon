@@ -5,7 +5,7 @@
 
 #include "assembler/diffusion/dynamic_matrix.hpp"
 #include "assembler/diffusion/static_matrix.hpp"
-#include "mesh/diffusion/mesh.hpp"
+#include "mesh/diffusion/heat/mesh.hpp"
 
 namespace neon
 {
