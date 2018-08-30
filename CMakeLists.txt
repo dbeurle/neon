@@ -29,10 +29,11 @@ find_package(OpenMP REQUIRED)
 find_package(TBB REQUIRED)
 find_package(VTK COMPONENTS vtkIOXML REQUIRED)
 
+find_package(OpenCL REQUIRED)
+find_package(ViennaCL CONFIG)
+add_definitions(-DENABLE_OCL)
+
 if (ENABLE_OCL)
-    find_package(OpenCL REQUIRED)
-    find_package(ViennaCL CONFIG)
-    add_definitions(-DENABLE_OCL)
 endif()
 
 if (ENABLE_CUDA)
