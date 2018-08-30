@@ -60,7 +60,7 @@ PenaltyBreakBeforeFirstCallParameter: 1000000
 PenaltyBreakComment: 300
 PenaltyBreakFirstLessLess: 120
 PenaltyBreakString: 50
-PenaltyExcessCharacter: 15
+PenaltyExcessCharacter: 10
 PenaltyReturnTypeOnItsOwnLine: 1000000
 PointerAlignment: Left
 ReflowComments:  true
