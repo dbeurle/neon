@@ -19,7 +19,7 @@ nonfollower_load_boundary::nonfollower_load_boundary(
     {
         for (auto const& [dof_name, dof_offset] : dof_table)
         {
-            if (boundary_data.count(dof_name))
+            if (boundary_data.find(dof_name) != boundary_end.end())
             {
                 for (auto const& mesh : submeshes)
                 {
@@ -34,10 +34,7 @@ nonfollower_load_boundary::nonfollower_load_boundary(
                                        return node * 6 + dof_offset + (type == "force" ? 0 : 3);
                                    });
 
-                    nodal_values.emplace_back(node_indices,
-                                              boundary_data,
-                                              dof_name,
-                                              generate_time_step);
+                    nodal_values.emplace_back(node_indices, boundary_data, dof_name, generate_time_step);
                 }
             }
         }

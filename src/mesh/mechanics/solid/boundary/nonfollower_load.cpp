@@ -88,7 +88,7 @@ nonfollower_load_boundary::nonfollower_load_boundary(
     {
         for (auto const& [dof_name, dof_offset] : dof_table)
         {
-            if (boundary_data.count(dof_name))
+            if (boundary_data.find(dof_name) != boundary_data.end())
             {
                 for (auto const& mesh : submeshes)
                 {
