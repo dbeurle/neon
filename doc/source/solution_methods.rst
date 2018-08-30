@@ -16,14 +16,14 @@ To perform the solution stage, neon implements the full Newton-Raphson method su
 
 The iterative nature of a non-linear problem requires the use of tolerances to determine if the results are sufficiently converged.  For this, non-linear simulation cases need to specify the relative displacement, force residuals and the maximum number of Newton-Raphson iterations to perform before a cutback.  For additional control, the relative or absolute tolerances can be chosen based on the physics of the problem ::
 
-    "NonlinearOptions" : {
-        "DisplacementTolerance" : 1.0e-5,
-        "ResidualTolerance" : 1.0e-4,
-        "AbsoluteTolerance" : true,
-        "NewtonRaphsonIterations" : 15
+    "nonlinear_options" : {
+        "displacement_tolerance" : 1.0e-5,
+        "residual_tolerance" : 1.0e-4,
+        "absolute_tolerance" : true,
+        "newton_raphson_iterations" : 15
     }
 
-Methods to improve the properties of the Newton-Raphson could be implemented on top of the current non-linear solvers, such as line search.
+Methods to improve the properties of the Newton-Raphson could be implemented on top of the current non-linear solvers, such as line searching algorithms to improve convergence properties.
 
 
 Non-linear Implicit Dynamic
