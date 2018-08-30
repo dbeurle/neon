@@ -32,20 +32,20 @@ file_output::file_output(std::string const& file_name, json const& visualisation
 {
     if (visualisation_data.is_null())
     {
-        throw std::domain_error("Visualisation data must be specified");
+        throw std::domain_error("visualisation field must be specified");
     }
     if (file_name.empty())
     {
-        throw std::domain_error("Name field must be specified");
+        throw std::domain_error("\"name\" field for file IO must be specified");
     }
 
-    if (visualisation_data.find("WriteEvery") != visualisation_data.end())
+    if (visualisation_data.find("write_every") != visualisation_data.end())
     {
-        write_every = visualisation_data["WriteEvery"];
+        write_every = visualisation_data["write_every"];
     }
-    if (visualisation_data.find("Fields") != visualisation_data.end())
+    if (visualisation_data.find("fields") != visualisation_data.end())
     {
-        for (auto const& field : visualisation_data["Fields"])
+        for (auto const& field : visualisation_data["fields"])
         {
             output_variables.insert(field.get<std::string>());
         }

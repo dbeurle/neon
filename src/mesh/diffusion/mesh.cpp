@@ -19,11 +19,11 @@ namespace neon::diffusion
 {
 mesh::mesh(basic_mesh const& basic_mesh, json const& material_data, json const& mesh_data)
     : coordinates(std::make_shared<material_coordinates>(basic_mesh.coordinates())),
-      writer(std::make_unique<io::vtk_file_output>(mesh_data["Name"], mesh_data["Visualisation"]))
+      writer(std::make_unique<io::vtk_file_output>(mesh_data["name"], mesh_data["Visualisation"]))
 {
-    check_boundary_conditions(mesh_data["BoundaryConditions"]);
+    check_boundary_conditions(mesh_data["boundaries"]);
 
-    std::string const& simulation_name = mesh_data["Name"];
+    std::string const& simulation_name = mesh_data["name"];
 
     writer->coordinates(coordinates->coordinates());
 
@@ -66,45 +66,45 @@ void mesh::save_internal_variables(bool const have_converged)
 
 void mesh::allocate_boundary_conditions(json const& mesh_data, basic_mesh const& basic_mesh)
 {
-    auto const& boundary_data = mesh_data["BoundaryConditions"];
+    auto const& boundary_data = mesh_data["boundaries"];
 
     // Populate the boundary meshes
     for (auto const& boundary : boundary_data)
     {
-        std::string const& boundary_name = boundary["Name"];
+        std::string const& boundary_name = boundary["name"];
 
-        if (boundary.find("Time") == boundary.end())
+        if (boundary.find("time") == boundary.end())
         {
-            throw std::domain_error("BoundaryCondition requires a \"Time\" field.");
+            throw std::domain_error("boundary requires a \"time\" field.");
         }
 
-        if (std::string const& boundary_type = boundary["Type"]; boundary_type == "Temperature")
+        if (std::string const& boundary_type = boundary["Type"]; boundary_type == "temperature")
         {
-            if (boundary.find("Value") == boundary.end())
+            if (boundary.find("value") == boundary.end())
             {
-                throw std::domain_error("BoundaryCondition \"" + boundary_type
-                                        + "\" requires a \"Value\" field.");
+                throw std::domain_error("boundary \"" + boundary_type
+                                        + "\" requires a \"value\" field.");
             }
 
             dirichlet_bcs[boundary_name].emplace_back(unique_dof_allocator<1>(
                                                           basic_mesh.meshes(boundary_name)),
-                                                      boundary["Time"],
-                                                      boundary["Value"]);
+                                                      boundary["time"],
+                                                      boundary["value"]);
         }
-        else if (boundary_type == "HeatFlux" || boundary_type == "NewtonCooling")
+        else if (boundary_type == "flux" || boundary_type == "newton_cooling")
         {
-            if (boundary_type == "HeatFlux" && boundary.find("Value") == boundary.end())
+            if (boundary_type == "flux" && boundary.find("value") == boundary.end())
             {
-                throw std::domain_error("BoundaryCondition \"" + boundary_type
-                                        + "\" requires a \"Value\" field.");
+                throw std::domain_error("boundary \"" + boundary_type
+                                        + "\" requires a \"value\" field.");
             }
-            else if (boundary_type == "NewtonCooling"
-                     && (boundary.find("HeatTransferCoefficient") == boundary.end()
-                         || boundary.find("AmbientTemperature") == boundary.end()))
+            else if (boundary_type == "newton_cooling"
+                     && (boundary.find("heat_transfer_coefficient") == boundary.end()
+                         || boundary.find("ambient_temperature") == boundary.end()))
             {
-                throw std::domain_error("BoundaryCondition \"" + boundary_type
-                                        + "\" requires a \"HeatTransferCoefficient\" and "
-                                          "\"AmbientTemperature\" "
+                throw std::domain_error("boundary \"" + boundary_type
+                                        + "\" requires a \"heat_transfer_coefficient\" and "
+                                          "\"ambient_temperature\" "
                                           "field.");
             }
             boundary_meshes[boundary_name].emplace_back(coordinates,
@@ -114,10 +114,10 @@ void mesh::allocate_boundary_conditions(json const& mesh_data, basic_mesh const&
         }
         else
         {
-            throw std::domain_error("BoundaryCondition \"" + boundary_type
+            throw std::domain_error("boundary \"" + boundary_type
                                     + "\" is not recognised.  For thermal simulations "
-                                      "\"Temperature\", \"HeatFlux\" "
-                                      "and \"NewtonCooling\" are valid.");
+                                      "\"temperature\", \"flux\" "
+                                      "and \"newton_cooling\" are valid.");
         }
     }
 }
@@ -126,12 +126,12 @@ void mesh::check_boundary_conditions(json const& boundary_data) const
 {
     for (auto const& boundary : boundary_data)
     {
-        for (auto const& required_field : {"Name", "Type"})
+        for (auto const& required_field : {"name", "Type"})
         {
             if (boundary.find(required_field) == boundary.end())
             {
                 throw std::domain_error("Missing " + std::string(required_field)
-                                        + " in BoundaryConditions\n");
+                                        + " in boundaries\n");
             }
         }
     }

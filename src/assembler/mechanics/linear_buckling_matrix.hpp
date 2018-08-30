@@ -12,16 +12,16 @@
 
 namespace neon::mechanics
 {
-/// fem_buckling_matrix assembles and solves the eigenvalue buckling problem
+/// linear_buckling_matrix assembles and solves the eigenvalue buckling problem
 /// for linear constitutive models only.
-template <typename fem_mesh_type>
-class fem_buckling_matrix
+template <typename MeshType>
+class linear_buckling_matrix
 {
 public:
-    using mesh_type = fem_mesh_type;
+    using mesh_type = MeshType;
 
 public:
-    fem_buckling_matrix(mesh_type& mesh) : mesh(mesh), solver(5) {}
+    linear_buckling_matrix(mesh_type& mesh) : mesh(mesh), solver(5) {}
 
     /// Compute the eigenvalue for the buckling load and the corresponding
     /// buckling mode.
@@ -39,8 +39,8 @@ protected:
     eigenvalue_solver solver;
 };
 
-template <typename fem_mesh_type>
-void fem_buckling_matrix<fem_mesh_type>::solve()
+template <typename MeshType>
+void linear_buckling_matrix<MeshType>::solve()
 {
     // Solve the eigenvalue problem for the first eigenvalue only
     assemble_stiffness();
@@ -52,12 +52,12 @@ void fem_buckling_matrix<fem_mesh_type>::solve()
     // file_io.write(0, 0.0, d);
 }
 
-template <typename fem_mesh_type>
-void fem_buckling_matrix<fem_mesh_type>::assemble_stiffness()
+template <typename MeshType>
+void linear_buckling_matrix<MeshType>::assemble_stiffness()
 {
     fem::compute_sparsity_pattern(K, mesh);
 
-    auto const start = std::chrono::high_resolution_clock::now();
+    auto const start = std::chrono::steady_clock::now();
 
     K.coeffs() = 0.0;
 
@@ -77,7 +77,7 @@ void fem_buckling_matrix<fem_mesh_type>::assemble_stiffness()
         }
     }
 
-    auto const end = std::chrono::high_resolution_clock::now();
+    auto const end = std::chrono::steady_clock::now();
 
     std::chrono::duration<double> const elapsed_seconds = end - start;
 

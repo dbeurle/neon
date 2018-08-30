@@ -7,7 +7,7 @@ namespace neon
 {
 basic_mesh::basic_mesh(json const& mesh_file) : nodal_coordinates(mesh_file)
 {
-    if (!mesh_file.count("Elements"))
+    if (mesh_file.find("Elements") == mesh_file.end())
     {
         throw std::domain_error("The mesh file is missing the \"Elements\" field");
     }

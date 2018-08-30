@@ -27,14 +27,14 @@ mesh::mesh(basic_mesh const& basic_mesh,
     : coordinates(std::make_shared<material_coordinates>(basic_mesh.coordinates())),
       reaction_forces{coordinates->size() * traits::dofs_per_node},
       generate_time_step{generate_time_step},
-      writer(std::make_unique<io::vtk_file_output>(simulation_data["Name"],
-                                                   simulation_data["Visualisation"]))
+      writer(std::make_unique<io::vtk_file_output>(simulation_data["name"],
+                                                   simulation_data["visualisation"]))
 {
-    check_boundary_conditions(simulation_data["BoundaryConditions"]);
+    check_boundary_conditions(simulation_data["boundaries"]);
 
     writer->coordinates(coordinates->coordinates());
 
-    for (auto const& submesh : basic_mesh.meshes(simulation_data["Name"]))
+    for (auto const& submesh : basic_mesh.meshes(simulation_data["name"]))
     {
         submeshes.emplace_back(material_data, simulation_data, coordinates, submesh);
 
@@ -80,16 +80,17 @@ void mesh::save_internal_variables(bool const have_converged)
 
 bool mesh::is_nonfollower_load(std::string const& boundary_type) const
 {
-    return boundary_type == "Traction" || boundary_type == "Pressure" || boundary_type == "BodyForce";
+    return boundary_type == "traction" || boundary_type == "pressure"
+           || boundary_type == "body_force";
 }
 
 void mesh::allocate_boundary_conditions(json const& simulation_data, basic_mesh const& basic_mesh)
 {
     // Populate the boundary conditions and their corresponding mesh
-    for (auto const& boundary : simulation_data["BoundaryConditions"])
+    for (auto const& boundary : simulation_data["boundaries"])
     {
-        std::string const& boundary_name = boundary["Name"];
-        std::string const& boundary_type = boundary["Type"];
+        std::string const& boundary_name = boundary["name"];
+        std::string const& boundary_type = boundary["type"];
 
         if (boundary_type == "Displacement")
         {
@@ -107,14 +108,14 @@ void mesh::allocate_boundary_conditions(json const& simulation_data, basic_mesh 
         }
         else
         {
-            throw std::domain_error("BoundaryCondition \"" + boundary_type + "\" is not recognised");
+            throw std::domain_error("boundary \"" + boundary_type + "\" is not recognised");
         }
     }
 }
 
 void mesh::allocate_displacement_boundary(json const& boundary, basic_mesh const& basic_mesh)
 {
-    std::string const& boundary_name = boundary["Name"];
+    std::string const& boundary_name = boundary["name"];
 
     for (auto const& [dof_key, dof_offset] : dof_table)
     {
@@ -173,18 +174,18 @@ void mesh::check_boundary_conditions(json const& boundary_data) const
 {
     for (auto const& boundary : boundary_data)
     {
-        for (auto const& mandatory_field : {"Name", "Type"})
+        for (auto const& mandatory_field : {"name", "type"})
         {
             if (!boundary.count(mandatory_field))
             {
                 throw std::domain_error("\"" + std::string(mandatory_field)
-                                        + "\" was not specified in \"BoundaryCondition\".");
+                                        + "\" was not specified in \"boundary\".");
             }
         }
-        if ((!boundary.count("Time")) && (!boundary.count("GenerateType")))
+        if ((!boundary.count("Time")) && (!boundary.count("Generatetype")))
         {
-            throw std::domain_error("Neither \"Time\" nor \"GenerateType\" was specified in "
-                                    "\"BoundaryCondition\".");
+            throw std::domain_error("Neither \"Time\" nor \"Generatetype\" was specified in "
+                                    "\"boundary\".");
         }
     }
 }
@@ -254,7 +255,7 @@ void mesh::allocate_variable_names()
                     {
                         throw std::domain_error("Internal variables do not have the requested "
                                                 "scalar variable ("
-                                                + std::to_string(static_cast<short>(output)) + ")");
+                                                + std::to_string(static_cast<int>(output)) + ")");
                     }
                 }
                 else if constexpr (std::is_same_v<T, variable::second>)
@@ -265,7 +266,7 @@ void mesh::allocate_variable_names()
                     {
                         throw std::domain_error("Internal variables do not have the requested "
                                                 "second order tensor variable ("
-                                                + std::to_string(static_cast<short>(output)) + ")");
+                                                + std::to_string(static_cast<int>(output)) + ")");
                     }
                 }
             },

@@ -18,7 +18,7 @@ nonfollower_load_boundary::nonfollower_load_boundary(
     std::unordered_map<std::string, int> const& dof_table,
     double const generate_time_step)
 {
-    if (std::string const& type = boundary_data["Type"]; type == "Traction")
+    if (std::string const& type = boundary_data["type"]; type == "traction")
     {
         for (auto const& [dof_name, dof_offset] : dof_table)
         {
@@ -39,7 +39,7 @@ nonfollower_load_boundary::nonfollower_load_boundary(
             }
         }
     }
-    else if (type == "Pressure")
+    else if (type == "pressure")
     {
         for (auto const& mesh : submeshes)
         {
@@ -59,11 +59,11 @@ nonfollower_load_boundary::nonfollower_load_boundary(
                                          node_indices,
                                          dof_indices,
                                          material_coordinates,
-                                         boundary_data["Time"],
-                                         boundary_data["Value"]);
+                                         boundary_data["time"],
+                                         boundary_data["value"]);
         }
     }
-    else if (type == "BodyForce")
+    else if (type == "body_force")
     {
         for (auto const& [dof_name, dof_offset] : dof_table)
         {
@@ -103,15 +103,18 @@ nonfollower_load_boundary::nonfollower_load_boundary(
                                        return node * 3 + dof_offset;
                                    });
 
-                    nodal_values.emplace_back(node_indices, boundary_data, dof_name, generate_time_step);
+                    nodal_values.emplace_back(node_indices,
+                                              boundary_data,
+                                              dof_name,
+                                              generate_time_step);
                 }
             }
         }
     }
     else
     {
-        throw std::domain_error("Need to specify a boundary type \"Traction\", \"Pressure\" or "
-                                "\"BodyForce\"");
+        throw std::domain_error("Need to specify a boundary type \"traction\", \"pressure\" or "
+                                "\"body_force\"");
     }
 }
 }

@@ -2,9 +2,7 @@
 #pragma once
 
 #include "constitutive/constitutive_model.hpp"
-
 #include "numeric/dense_matrix.hpp"
-
 #include "material/isotropic_elastic_property.hpp"
 
 namespace neon::mechanics::plane
@@ -15,18 +13,16 @@ public:
     enum class plane { stress, strain };
 
 public:
-    /** Provide an internal variable class to be populated by the constitutive model */
+    /// Provide an internal variable class to be populated by the constitutive model
     explicit isotropic_linear_elasticity(std::shared_ptr<internal_variables_t>& variables,
                                          json const& material_data,
                                          plane const state);
 
     ~isotropic_linear_elasticity();
 
-    /**
-     * Update the required internal variables and tangent matrix at quadrature
-     * points
-     * @param time_step_size Time step size (or load increment if quasi-static)
-     */
+    /// Update the required internal variables and tangent matrix at quadrature
+    /// points
+    /// @param time_step_size Time step size (or load increment if quasi-static)
     virtual void update_internal_variables(double const time_step_size);
 
     /** @return A base class reference to the common material properties */

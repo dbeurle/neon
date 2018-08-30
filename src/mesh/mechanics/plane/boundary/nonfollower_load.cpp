@@ -15,7 +15,7 @@ nonfollower_load_boundary::nonfollower_load_boundary(
     std::unordered_map<std::string, int> const& dof_table,
     double const generate_time_step)
 {
-    if (std::string const& type = boundary["Type"]; type == "Traction")
+    if (std::string const& type = boundary["type"]; type == "traction")
     {
         for (auto it = dof_table.begin(); it != dof_table.end(); ++it)
         {
@@ -38,7 +38,7 @@ nonfollower_load_boundary::nonfollower_load_boundary(
             }
         }
     }
-    else if (type == "BodyForce")
+    else if (type == "body_force")
     {
         for (auto it = dof_table.begin(); it != dof_table.end(); ++it)
         {
@@ -63,9 +63,9 @@ nonfollower_load_boundary::nonfollower_load_boundary(
     }
     else
     {
-        throw std::domain_error("Need to specify a boundary type \"Traction\", "
-                                "\"Pressure\" or "
-                                "\"BodyForce\"");
+        throw std::domain_error("Need to specify a boundary type \"traction\", "
+                                "\"pressure\" or "
+                                "\"body_force\"");
     }
 }
 }

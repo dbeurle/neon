@@ -135,19 +135,20 @@ vector submesh::internal_nodal_force(matrix2x const& x, std::int64_t const eleme
 
     vector fint = vector::Zero(m * n);
 
-    sf->quadrature().integrate_inplace(Eigen::Map<row_matrix>(fint.data(), m, n),
-                                       [&](auto const& femval, auto const l) {
-                                           auto const& [N, dN] = femval;
+    sf->quadrature()
+        .integrate_inplace(Eigen::Map<row_matrix>(fint.data(), m, n),
+                           [&](auto const& femval, auto const l) {
+                               auto const& [N, dN] = femval;
 
-                                           matrix2 const Jacobian = local_deformation_gradient(dN, x);
+                               matrix2 const Jacobian = local_deformation_gradient(dN, x);
 
-                                           auto const& cauchy_stress = cauchy_stresses[view(element, l)];
+                               auto const& cauchy_stress = cauchy_stresses[view(element, l)];
 
-                                           // Compute the symmetric gradient operator
-                                           auto const Bt = dN * Jacobian.inverse();
+                               // Compute the symmetric gradient operator
+                               auto const Bt = dN * Jacobian.inverse();
 
-                                           return Bt * cauchy_stress * Jacobian.determinant();
-                                       });
+                               return Bt * cauchy_stress * Jacobian.determinant();
+                           });
     return fint;
 }
 

@@ -13,7 +13,7 @@ boundary_mesh::boundary_mesh(std::shared_ptr<material_coordinates>& material_coo
                              json const& boundary,
                              json const& mesh_data)
 {
-    if (std::string const& type = boundary["Type"]; type == "HeatFlux")
+    if (std::string const& type = boundary["type"]; type == "flux")
     {
         for (auto const& mesh : submeshes)
         {
@@ -21,21 +21,21 @@ boundary_mesh::boundary_mesh(std::shared_ptr<material_coordinates>& material_coo
                                          mesh.all_node_indices(),
                                          mesh.all_node_indices(),
                                          material_coordinates,
-                                         boundary["Time"],
-                                         boundary["Value"]);
+                                         boundary["time"],
+                                         boundary["value"]);
         }
     }
-    else if (type == "NewtonCooling")
+    else if (type == "newton_cooling")
     {
         for (auto const& mesh : submeshes)
         {
             // Create the heat flux from the heat transfer coefficient and the
             // ambient temperature
             json heat_flux;
-            for (std::size_t i{0}; i < boundary["HeatTransferCoefficient"].size(); ++i)
+            for (std::size_t i{0}; i < boundary["heat_transfer_coefficient"].size(); ++i)
             {
-                heat_flux.emplace_back(boundary["HeatTransferCoefficient"][i].get<double>()
-                                       * boundary["AmbientTemperature"][i].get<double>());
+                heat_flux.emplace_back(boundary["heat_transfer_coefficient"][i].get<double>()
+                                       * boundary["ambient_temperature"][i].get<double>());
             }
 
             stiffness_load_boundaries.emplace_back(make_surface_interpolation(mesh.topology(),
@@ -43,9 +43,9 @@ boundary_mesh::boundary_mesh(std::shared_ptr<material_coordinates>& material_coo
                                                    mesh.all_node_indices(),
                                                    mesh.all_node_indices(),
                                                    material_coordinates,
-                                                   boundary["Time"],
+                                                   boundary["time"],
                                                    heat_flux,
-                                                   boundary["HeatTransferCoefficient"]);
+                                                   boundary["heat_transfer_coefficient"]);
         }
     }
 }
