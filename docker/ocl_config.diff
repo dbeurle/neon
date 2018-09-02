@@ -1,0 +1,11 @@
+--- silent.cfg.orig     2018-09-02 17:51:09.405390396 +0200
++++ silent.cfg  2018-09-02 17:51:50.631637181 +0200
+@@ -6,7 +6,7 @@
+ # snpat       - the serial number pattern (ABCD-01234567)
+
+ # accept EULA, valid values are: {accept, decline}
+-ACCEPT_EULA=decline
++ACCEPT_EULA=accept
+
+ # install mode for RPM system, valid values are: {RPM, NONRPM}
+ INSTALL_MODE=RPM
