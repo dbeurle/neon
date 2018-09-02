@@ -3,6 +3,7 @@
 
 #include "mesh/basic_mesh.hpp"
 #include "mesh/material_coordinates.hpp"
+#include "assembler/mechanics/latin_matrix.hpp"
 #include "mesh/mechanics/solid/mesh.hpp"
 #include "assembler/mechanics/static_matrix.hpp"
 #include "numeric/doublet.hpp"
@@ -61,6 +62,31 @@ TEST_CASE("Nonlinear system equilibrium solver test")
     {
         // Create the system and solve it
         static_matrix matrix(mesh, json::parse(simulation_data_json()));
+        matrix.solve();
+    }
+}
+TEST_CASE("LATIN solver test")
+{
+    using fem_mesh = neon::mechanics::solid::mesh;
+    using latin_matrix = neon::mechanics::latin_matrix<fem_mesh>;
+
+    // Read in a cube mesh from the json input file and use this to
+    // test the functionality of the basic mesh
+    neon::basic_mesh basic_mesh(json::parse(json_cube_mesh()));
+
+    neon::nodal_coordinates nodal_coordinates(json::parse(json_cube_mesh()));
+
+    auto simulation_data = json::parse(simulation_data_json());
+
+    fem_mesh mesh(basic_mesh,
+                  json::parse(material_data_json()),
+                  simulation_data,
+                  simulation_data["Time"]["Increments"]["Initial"]);
+
+    SECTION("Correct behaviour")
+    {
+        // Create the system and solve it
+        latin_matrix matrix(mesh, json::parse(simulation_data_json()));
         matrix.solve();
     }
 }
