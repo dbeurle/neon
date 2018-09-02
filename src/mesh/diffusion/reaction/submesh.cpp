@@ -17,7 +17,7 @@
 /// Compute the local Jacobian matrix \f$ \bf{x}_\xi \f$
 /// \param rhea Shape function gradients at quadrature point
 /// \param configuration Configuration of the element (coordinates)
-inline matrix3 local_jacobian(matrix const& rhea, matrix3x const& configuration) const
+inline neon::matrix3 local_jacobian(neon::matrix const& rhea, neon::matrix3x const& configuration)
 {
     return configuration * rhea;
 }

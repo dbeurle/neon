@@ -32,7 +32,7 @@ public:
     [[nodiscard]] auto const& load_interface() const noexcept { return load_boundaries; }
 
 protected:
-    std::vector<specie_flux> load_boundaries;
+    std::vector<flux> load_boundaries;
 };
 }
 }
