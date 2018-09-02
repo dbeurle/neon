@@ -180,6 +180,8 @@ TEST_CASE("svd solver test suite")
         // ViennaCL
         auto const start_viennacl = std::chrono::steady_clock::now();
 
+        viennacl::ocl::set_context_device_type(0, viennacl::ocl::cpu_tag());
+
         // viennacl::ocl::set_context_device_type(0, viennacl::ocl::gpu_tag());
         using vcl_float_matrix = viennacl::matrix<float>;
         vcl_float_matrix vcl_C = viennacl::zero_matrix<float>(rows, cols);
