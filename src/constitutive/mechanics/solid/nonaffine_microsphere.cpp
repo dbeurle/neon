@@ -17,11 +17,11 @@ nonaffine_microsphere::nonaffine_microsphere(std::shared_ptr<internal_variables_
                                              unit_sphere_quadrature::point const rule)
     : affine_microsphere(variables, material_data, rule), material(material_data)
 {
-    if (!material_data.count("NonAffineStretchParameter"))
+    if (material_data.find("nonaffine_stretch_parameter") == material_data.end())
     {
-        throw std::domain_error("\"NonAffineStretchParameter\" not specified in material data\n");
+        throw std::domain_error("\"nonaffine_stretch_parameter\" not specified in material data\n");
     }
-    non_affine_stretch_parameter = material_data["NonAffineStretchParameter"];
+    non_affine_stretch_parameter = material_data["nonaffine_stretch_parameter"];
 }
 
 void nonaffine_microsphere::update_internal_variables(double const time_step_size)

@@ -19,7 +19,7 @@ linear_diffusion::linear_diffusion(json const& material_data) : material_propert
     }
     else
     {
-        throw std::domain_error("\"conductivity\" and  needs to be specified as a material "
+        throw std::domain_error("\"specific_heat\" needs to be specified as a material "
                                 "property");
     }
 }
