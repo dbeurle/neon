@@ -26,8 +26,8 @@
 
 using namespace neon;
 
-json full() { return json::parse("{\"ElementOptions\" : {\"Quadrature\" : \"Full\"}}"); }
-json reduced() { return json::parse("{\"ElementOptions\" : {\"Quadrature\" : \"Reduced\"}}"); }
+json full() { return json::parse("{\"element_options\" : {\"quadrature\" : \"full\"}}"); }
+json reduced() { return json::parse("{\"element_options\" : {\"quadrature\" : \"reduced\"}}"); }
 
 constexpr auto ZERO_MARGIN = 1.0e-5;
 
