@@ -15,12 +15,12 @@ TEST_CASE("Basic material")
 {
     SECTION("No name on construction")
     {
-        REQUIRE_THROWS_AS(material_property(json::parse("{\"Nasame\": \"steel\"}")),
+        REQUIRE_THROWS_AS(material_property(json::parse("{\"nasame\": \"steel\"}")),
                           std::domain_error);
     }
     SECTION("Density and specific heat exception")
     {
-        material_property basic_material(json::parse("{\"Name\": \"steel\"}"));
+        material_property basic_material(json::parse("{\"name\": \"steel\"}"));
 
         REQUIRE_THROWS_AS(basic_material.initial_density(), std::domain_error);
         REQUIRE_THROWS_AS(basic_material.specific_heat(), std::domain_error);
@@ -30,7 +30,7 @@ TEST_CASE("Linear elastic material")
 {
     SECTION("Linear elastic properties")
     {
-        json material_data{{"Name", "steel"}, {"ElasticModulus", 200.0e9}, {"PoissonsRatio", 0.3}};
+        json material_data{{"name", "steel"}, {"elastic_modulus", 200.0e9}, {"poissons_ratio", 0.3}};
 
         isotropic_elastic_property linear_elastic(material_data);
 
@@ -53,7 +53,7 @@ TEST_CASE("Linear elastic material")
     }
     SECTION("Incompressible elastic properties")
     {
-        json material_data{{"Name", "steel"}, {"BulkModulus", 200.0e9}, {"ShearModulus", 100.0e6}};
+        json material_data{{"name", "steel"}, {"bulk_modulus", 200.0e9}, {"shear_modulus", 100.0e6}};
 
         isotropic_elastic_property linear_elastic(material_data);
 
@@ -62,17 +62,17 @@ TEST_CASE("Linear elastic material")
     }
     SECTION("Incorrect elastic properties")
     {
-        json material_data{{"Name", "steel"}, {"ElasticModulus", 200.0e9}, {"PssonsRatio", 0.3}};
+        json material_data{{"name", "steel"}, {"elastic_modulus", 200.0e9}, {"PssonsRatio", 0.3}};
 
         REQUIRE_THROWS_AS(isotropic_elastic_property(material_data), std::domain_error);
     }
 }
 TEST_CASE("Perfect plastic material")
 {
-    json material_data{{"Name", "steel"},
-                       {"ElasticModulus", 200.0e9},
-                       {"PoissonsRatio", 0.3},
-                       {"YieldStress", 200.0e6}};
+    json material_data{{"name", "steel"},
+                       {"elastic_modulus", 200.0e9},
+                       {"poissons_ratio", 0.3},
+                       {"yield_stress", 200.0e6}};
 
     isotropic_elastic_plastic perfect_plastic_elastic(material_data);
 
@@ -86,12 +86,12 @@ TEST_CASE("Perfect plastic material")
 }
 TEST_CASE("Isotropic hardening")
 {
-    json material_data{{"Name", "steel"},
-                       {"ElasticModulus", 200.0e9},
-                       {"PoissonsRatio", 0.3},
-                       {"YieldStress", 200.0e6},
-                       {"IsotropicHardeningModulus", 400.0e6},
-                       {"IsotropicKinematicModulus", 100.0e6}};
+    json material_data{{"name", "steel"},
+                       {"elastic_modulus", 200.0e9},
+                       {"poissons_ratio", 0.3},
+                       {"yield_stress", 200.0e6},
+                       {"isotropic_hardening_modulus", 400.0e6},
+                       {"isotropic_kinematic_modulus", 100.0e6}};
 
     isotropic_elastic_plastic iso_plastic_elastic(material_data);
 
@@ -107,23 +107,23 @@ TEST_CASE("Isotropic hardening")
 }
 TEST_CASE("Missing yield stress")
 {
-    json material_data{{"Name", "steel"},
-                       {"ElasticModulus", 200.0e9},
-                       {"PoissonsRatio", 0.3},
+    json material_data{{"name", "steel"},
+                       {"elastic_modulus", 200.0e9},
+                       {"poissons_ratio", 0.3},
                        {"YieldStrs", 200.0e6},
-                       {"IsotropicHardeningModulus", 400.0e6},
-                       {"IsotropicKinematicModulus", 100.0e6}};
+                       {"isotropic_hardening_modulus", 400.0e6},
+                       {"isotropic_kinematic_modulus", 100.0e6}};
 
     REQUIRE_THROWS_AS(isotropic_elastic_plastic(material_data), std::domain_error);
 }
 TEST_CASE("Micromechanical elastomer")
 {
-    json material_data{{"Name", "rubber"},
-                       {"ElasticModulus", 10.0e6},
-                       {"PoissonsRatio", 0.45},
-                       {"SegmentsPerChain", 70},
-                       {"RecombinationProbability", 1.0e-6},
-                       {"ScissionProbability", 1.0e-6}};
+    json material_data{{"name", "rubber"},
+                       {"elastic_modulus", 10.0e6},
+                       {"poissons_ratio", 0.45},
+                       {"segments_per_chain", 70},
+                       {"recombination_probability", 1.0e-6},
+                       {"scission_probability", 1.0e-6}};
 
     ageing_micromechanical_elastomer network(material_data);
 
@@ -162,10 +162,10 @@ TEST_CASE("Micromechanical elastomer")
 }
 TEST_CASE("Diffusion material")
 {
-    json material_data{{"Name", "steel"},
-                       {"Density", 7800.0},
-                       {"Conductivity", 300.0},
-                       {"SpecificHeat", 280.0}};
+    json material_data{{"name", "steel"},
+                       {"density", 7800.0},
+                       {"conductivity", 300.0},
+                       {"specific_heat", 280.0}};
 
     linear_diffusion material(material_data);
 
