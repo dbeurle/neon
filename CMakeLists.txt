@@ -12,6 +12,7 @@ option(ENABLE_TESTS "Enable the test suite of the unit tests examples" ON)
 option(ENABLE_NATIVE "Optimise for current architecture" OFF)
 option(ENABLE_PROFILE "Set compiler flag for profiling" OFF)
 option(ENABLE_COVERAGE "Set compiler flag for coverage analysis" OFF)
+option(ENABLE_FAST_MATH "Compiler optimisations for floating point math" OFF)
 
 set(EXTERNAL_PROJECTS_DIR "${PROJECT_SOURCE_DIR}/external")
 add_subdirectory(${EXTERNAL_PROJECTS_DIR}/json)

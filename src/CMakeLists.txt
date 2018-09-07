@@ -25,6 +25,10 @@ if (ENABLE_NATIVE)
     target_compile_options(neon PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-march=native -mtune=native>)
 endif()
 
+if (ENABLE_FAST_MATH)
+    target_compile_options(neon PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-ffast-math)
+endif()
+
 if(ENABLE_COVERAGE)
     set_target_properties(neon PROPERTIES COMPILE_FLAGS "--coverage")
     target_link_libraries(neon PRIVATE --coverage)
