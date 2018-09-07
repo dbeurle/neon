@@ -55,7 +55,7 @@ TEST_CASE("Nonlinear system equilibrium solver test")
     fem_mesh mesh(basic_mesh,
                   json::parse(material_data_json()),
                   simulation_data,
-                  simulation_data["Time"]["Increments"]["Initial"]);
+                  simulation_data["time"]["increments"]["initial"]);
 
     SECTION("Correct behaviour")
     {

@@ -147,15 +147,15 @@ void adaptive_time_step::check_increment_data(json const& increment_data)
 
     if (increments_data.find("initial") == increments_data.end())
     {
-        throw std::domain_error("Increment-initial data not provided!\n");
+        throw std::domain_error("increment initial value not provided!\n");
     }
     if (increments_data.find("minimum") == increments_data.end())
     {
-        throw std::domain_error("Increment-minimum data not provided!\n");
+        throw std::domain_error("increment minimum value not provided!\n");
     }
     if (increments_data.find("maximum") == increments_data.end())
     {
-        throw std::domain_error("Increment-Maximum data not provided!\n");
+        throw std::domain_error("increment maximum value not provided!\n");
     }
 }
 

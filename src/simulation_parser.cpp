@@ -151,7 +151,7 @@ void simulation_parser::build_simulation_tree()
 {
     // For each simulation step, the total number of subsequent relationships
     // need to be determined, such that an analysis can be performed in order
-    // Build a list of all the load steps for a given mesh
+    // TODO Replace with a directed graph
     for (auto const& simulation : root["steps"])
     {
         if (simulation.find("inherits") == simulation.end())
@@ -242,7 +242,10 @@ std::set<std::string> simulation_parser::allocate_material_names(json const& mat
 
         auto const [it, inserted] = material_names.emplace(material["name"].get<std::string>());
 
-        if (!inserted) throw std::domain_error("The material name must be unique");
+        if (!inserted)
+        {
+            throw std::domain_error("The material name must be unique");
+        }
     }
     return material_names;
 }
