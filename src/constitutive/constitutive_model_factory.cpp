@@ -125,7 +125,7 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
     {
         return std::make_unique<isotropic_linear_elasticity>(variables, material_data);
     }
-    else if (model_name == "J2Plasticity")
+    else if (model_name == "J2_plasticity")
     {
         if (constitutive_model.find("finite_strain") == constitutive_model.end())
         {
@@ -195,7 +195,7 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
                                                              material_data,
                                                              isotropic_linear_elasticity::plane::stress);
     }
-    else if (model_name == "J2Plasticity")
+    else if (model_name == "J2_plasticity")
     {
         if (constitutive_model.find("finite_strain") == constitutive_model.end())
         {

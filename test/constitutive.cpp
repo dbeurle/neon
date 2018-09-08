@@ -11,21 +11,21 @@
 #include "constitutive/constitutive_model_factory.hpp"
 #include "material/isotropic_elastic_plastic.hpp"
 #include "exceptions.hpp"
+#include "numeric/dense_matrix.hpp"
 #include "io/json.hpp"
 
-#include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 
 #include <iostream>
 
 std::string json_input_file()
 {
-    return "{\"Name\": \"rubber\", \"ElasticModulus\": 2.0, \"PoissonsRatio\": 0.45}";
+    return "{\"name\": \"rubber\", \"elastic_modulus\": 2.0, \"poissons_ratio\": 0.45}";
 }
 
 std::string json_thermal_diffusion()
 {
-    return "{\"Name\": \"steel\", \"Conductivity\": 386.0, \"Density\": 7800.0, \"SpecificHeat\": "
+    return "{\"name\": \"steel\", \"Conductivity\": 386.0, \"Density\": 7800.0, \"SpecificHeat\": "
            "390.0}";
 }
 
@@ -52,7 +52,7 @@ TEST_CASE("Constitutive model no name error test")
 
     REQUIRE_THROWS_AS(make_constitutive_model(variables,
                                               json::parse("{}"),
-                                              json::parse("{\"ConstitutiveModel\" : {}}")),
+                                              json::parse("{\"constitutive\" : {}}")),
                       std::domain_error);
 }
 TEST_CASE("Constitutive model invalid name error test")
@@ -63,8 +63,8 @@ TEST_CASE("Constitutive model invalid name error test")
 
     REQUIRE_THROWS_AS(make_constitutive_model(variables,
                                               json::parse("{}"),
-                                              json::parse("{\"ConstitutiveModel\" : "
-                                                          "{\"Name\":\"PurpleMonkey\"}}")),
+                                              json::parse("{\"constitutive\" : "
+                                                          "{\"name\":\"PurpleMonkey\"}}")),
                       std::domain_error);
 }
 TEST_CASE("Neo-Hookean model")
@@ -79,8 +79,8 @@ TEST_CASE("Neo-Hookean model")
 
     auto neo_hooke = make_constitutive_model(variables,
                                              json::parse(json_input_file()),
-                                             json::parse("{\"ConstitutiveModel\" : {\"Name\": "
-                                                         "\"NeoHooke\"} }"));
+                                             json::parse("{\"constitutive\" : {\"name\": "
+                                                         "\"neohooke\"} }"));
 
     // Get the tensor variables
     auto [F_list, cauchy_stresses] = variables->get(variable::second::deformation_gradient,
@@ -147,15 +147,15 @@ TEST_CASE("Microsphere model error test")
     {
         REQUIRE_THROWS_AS(make_constitutive_model(variables,
                                                   json::parse("{}"),
-                                                  json::parse("{\"ConstitutiveModel\" : {\"Name\": "
-                                                              "\"Microsphere\", \"Tyasdpe\" "
-                                                              ": \"Affine\"}}")),
+                                                  json::parse("{\"constitutive\" : {\"name\": "
+                                                              "\"microsphere\", \"Tyasdpe\" "
+                                                              ": \"affine\"}}")),
                           std::domain_error);
     }
     SECTION("Type not specified correctly")
     {
         // clang-format off
-        auto const input{"{\"ConstitutiveModel\":{\"Name\":\"Microsphere\",\"Type\": \"Afwsfine\"}}"};
+        auto const input{"{\"constitutive\":{\"name\":\"microsphere\",\"type\": \"Afwsfine\"}}"};
         // clang-format on
 
         REQUIRE_THROWS_AS(make_constitutive_model(variables, json::parse("{}"), json::parse(input)),
@@ -164,7 +164,7 @@ TEST_CASE("Microsphere model error test")
     SECTION("Exception for quadrature scheme")
     {
         // clang-format off
-        auto const input{"{\"ConstitutiveModel\":{\"Name\":\"Microsphere\",\"Type\": \"Affine\",\"Statistics\":\"Gaussian\"}}"};
+        auto const input{"{\"constitutive\":{\"name\":\"microsphere\",\"type\": \"affine\",\"statistics\":\"gaussian\"}}"};
         // clang-format on
 
         REQUIRE_THROWS_AS(make_constitutive_model(variables, json::parse("{}"), json::parse(input)),
@@ -183,15 +183,14 @@ TEST_CASE("Gaussian affine microsphere model")
     variables->add(variable::scalar::DetF);
 
     auto affine = make_constitutive_model(variables,
-                                          json::parse("{\"Name\" : \"rubber\", "
-                                                      "\"ElasticModulus\" : 10.0e6, "
-                                                      "\"PoissonsRatio\" : 0.45, "
-                                                      "\"SegmentsPerChain\" : 50}"),
-                                          json::parse("{\"ConstitutiveModel\" : {\"Name\": "
-                                                      "\"Microsphere\", \"Type\" "
-                                                      ": \"Affine\", \"Statistics\":\"Gaussian\",  "
-                                                      "\"Quadrature\" : "
-                                                      "\"BO21\"}}"));
+                                          json::parse("{\"name\" : \"rubber\", "
+                                                      "\"elastic_modulus\" : 10.0e6, "
+                                                      "\"poissons_ratio\" : 0.45, "
+                                                      "\"segments_per_chain\" : 50}"),
+                                          json::parse("{\"constitutive\" : {\"name\": "
+                                                      "\"microsphere\", \"type\" "
+                                                      ": \"affine\", \"statistics\":\"gaussian\",  "
+                                                      "\"wuadrature\" : \"BO21\"}}"));
 
     auto [F_list, cauchy_stresses] = variables->get(variable::second::deformation_gradient,
                                                     variable::second::cauchy_stress);
@@ -268,17 +267,17 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
 
     variables->add(variable::scalar::DetF);
 
-    auto const material_data{"{\"Name\" : \"rubber\","
-                             "\"ShearModulus\" : 2.0e6,"
-                             "\"BulkModulus\" : 100e6,"
-                             "\"SegmentsPerChain\" : 50,"
-                             "\"ScissionProbability\" : 1.0e-5,"
-                             "\"RecombinationProbability\" : 1.0e-5}"};
+    auto const material_data{"{\"name\" : \"rubber\","
+                             "\"shear_modulus\" : 2.0e6,"
+                             "\"bulk_modulus\" : 100e6,"
+                             "\"segments_per_chain\" : 50,"
+                             "\"scission_probability\" : 1.0e-5,"
+                             "\"recombination_probability\" : 1.0e-5}"};
 
-    auto const constitutive_data{"{\"ConstitutiveModel\" : {\"Name\": \"Microsphere\","
-                                 "\"Type\":\"Affine\","
-                                 "\"Statistics\":\"Gaussian\","
-                                 "\"Quadrature\":\"BO21\","
+    auto const constitutive_data{"{\"constitutive\" : {\"name\": \"microsphere\","
+                                 "\"type\":\"affine\","
+                                 "\"statistics\":\"gaussian\","
+                                 "\"wuadrature\":\"BO21\","
                                  "\"Ageing\":\"BAND\"}}"};
 
     auto affine = make_constitutive_model(variables,
@@ -468,17 +467,17 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
 
     variables->add(variable::scalar::DetF);
 
-    auto const material_data{"{\"Name\" : \"rubber\","
-                             "\"ShearModulus\" : 2.0e6,"
-                             "\"BulkModulus\" : 100e6,"
-                             "\"SegmentsPerChain\" : 50,"
-                             "\"ScissionProbability\" : 0.0,"
-                             "\"RecombinationProbability\" : 1.0e-5}"};
+    auto const material_data{"{\"name\" : \"rubber\","
+                             "\"shear_modulus\" : 2.0e6,"
+                             "\"bulk_modulus\" : 100e6,"
+                             "\"segments_per_chain\" : 50,"
+                             "\"scission_probability\" : 0.0,"
+                             "\"recombination_probability\" : 1.0e-5}"};
 
-    auto const constitutive_data{"{\"ConstitutiveModel\" : {\"Name\": \"Microsphere\","
-                                 "\"Type\":\"Affine\","
-                                 "\"Statistics\":\"Gaussian\","
-                                 "\"Quadrature\":\"BO21\","
+    auto const constitutive_data{"{\"constitutive\" : {\"name\": \"microsphere\","
+                                 "\"type\":\"affine\","
+                                 "\"statistics\":\"gaussian\","
+                                 "\"wuadrature\":\"BO21\","
                                  "\"Ageing\":\"BAND\"}}"};
 
     auto affine = make_constitutive_model(variables,
@@ -627,14 +626,14 @@ TEST_CASE("Affine microsphere model")
     variables->add(variable::scalar::DetF);
 
     auto affine = make_constitutive_model(variables,
-                                          json::parse("{\"Name\" : \"rubber\", "
-                                                      "\"ElasticModulus\" : 10.0e6, "
-                                                      "\"PoissonsRatio\" : 0.45, "
-                                                      "\"SegmentsPerChain\" : 50}"),
-                                          json::parse("{\"ConstitutiveModel\" : {\"Name\": "
-                                                      "\"Microsphere\", \"Type\" "
-                                                      ": \"Affine\", \"Statistics\":\"Langevin\", "
-                                                      "\"Quadrature\" : \"BO21\"}}"));
+                                          json::parse("{\"name\" : \"rubber\", "
+                                                      "\"elastic_modulus\" : 10.0e6, "
+                                                      "\"poissons_ratio\" : 0.45, "
+                                                      "\"segments_per_chain\" : 50}"),
+                                          json::parse("{\"constitutive\" : {\"name\": "
+                                                      "\"microsphere\", \"type\" "
+                                                      ": \"affine\", \"statistics\":\"langevin\", "
+                                                      "\"wuadrature\" : \"BO21\"}}"));
 
     auto [F_list, cauchy_stresses] = variables->get(variable::second::deformation_gradient,
                                                     variable::second::cauchy_stress);
@@ -711,14 +710,14 @@ TEST_CASE("NonAffine microsphere model")
     variables->add(variable::scalar::DetF);
 
     auto affine = make_constitutive_model(variables,
-                                          json::parse("{\"Name\" : \"rubber\", "
-                                                      "\"ElasticModulus\" : 10.0e6, "
-                                                      "\"PoissonsRatio\" : 0.45, "
+                                          json::parse("{\"name\" : \"rubber\", "
+                                                      "\"elastic_modulus\" : 10.0e6, "
+                                                      "\"poissons_ratio\" : 0.45, "
                                                       "\"NonAffineStretchParameter\":1.0, "
-                                                      "\"SegmentsPerChain\" : 50}"),
-                                          json::parse("{\"ConstitutiveModel\" : {\"Name\": "
-                                                      "\"Microsphere\", \"Type\" "
-                                                      ": \"NonAffine\", \"Quadrature\" : "
+                                                      "\"segments_per_chain\" : 50}"),
+                                          json::parse("{\"constitutive\" : {\"name\": "
+                                                      "\"microsphere\", \"type\" "
+                                                      ": \"nonaffine\", \"wuadrature\" : "
                                                       "\"BO21\"}}"));
 
     // Get the tensor variables
@@ -736,16 +735,16 @@ TEST_CASE("NonAffine microsphere model")
     SECTION("exception")
     {
         REQUIRE_THROWS_AS(make_constitutive_model(variables,
-                                                  json::parse("{\"Name\" : \"rubber\", "
-                                                              "\"ElasticModulus\" : 10.0e6, "
-                                                              "\"PoissonsRatio\" : 0.45, "
+                                                  json::parse("{\"name\" : \"rubber\", "
+                                                              "\"elastic_modulus\" : 10.0e6, "
+                                                              "\"poissons_ratio\" : 0.45, "
                                                               "\"NonAffineStrearameter\":1."
                                                               "0, "
-                                                              "\"SegmentsPerChain\" : 50}"),
-                                                  json::parse("{\"ConstitutiveModel\" : "
-                                                              "{\"Name\": "
-                                                              "\"Microsphere\", \"Type\" "
-                                                              ": \"NonAffine\", \"Quadrature\" "
+                                                              "\"segments_per_chain\" : 50}"),
+                                                  json::parse("{\"constitutive\" : "
+                                                              "{\"name\": "
+                                                              "\"microsphere\", \"type\" "
+                                                              ": \"nonaffine\", \"wuadrature\" "
                                                               ": "
                                                               "\"BO21\"}}")),
                           std::domain_error);
@@ -813,8 +812,8 @@ TEST_CASE("Plane stress linear elasticity factory error")
 
     REQUIRE_THROWS_AS(make_constitutive_model(variables,
                                               json::parse("{\"Badkey\" : \"donkey\"}"),
-                                              json::parse("{\"ConstitutiveModel\" : {\"Name\" : "
-                                                          "\"PlaneStrain\"}}")),
+                                              json::parse("{\"constitutive\" : {\"name\" : "
+                                                          "\"plane_strain\"}}")),
                       std::domain_error);
 }
 TEST_CASE("Plane stress elasticity model")
@@ -829,11 +828,11 @@ TEST_CASE("Plane stress elasticity model")
                    variable::scalar::DetF);
 
     auto elastic_model = make_constitutive_model(variables,
-                                                 json::parse("{\"Name\": \"steel\", "
-                                                             "\"ElasticModulus\": 200.0e3, "
-                                                             "\"PoissonsRatio\": 0.3}"),
-                                                 json::parse("{\"ConstitutiveModel\" : {\"Name\" : "
-                                                             "\"PlaneStress\"}}"));
+                                                 json::parse("{\"name\": \"steel\", "
+                                                             "\"elastic_modulus\": 200.0e3, "
+                                                             "\"poissons_ratio\": 0.3}"),
+                                                 json::parse("{\"constitutive\" : {\"name\" : "
+                                                             "\"plane_stress\"}}"));
 
     // Get the tensor variables
     auto [displacement_gradients,
@@ -949,11 +948,11 @@ TEST_CASE("Plane strain elasticity model")
                    variable::scalar::DetF);
 
     auto elastic_model = make_constitutive_model(variables,
-                                                 json::parse("{\"Name\": \"steel\", "
-                                                             "\"ElasticModulus\": 200.0e3, "
-                                                             "\"PoissonsRatio\": 0.3}"),
-                                                 json::parse("{\"ConstitutiveModel\" : {\"Name\" : "
-                                                             "\"PlaneStrain\"}}"));
+                                                 json::parse("{\"name\": \"steel\", "
+                                                             "\"elastic_modulus\": 200.0e3, "
+                                                             "\"poissons_ratio\": 0.3}"),
+                                                 json::parse("{\"constitutive\" : {\"name\" : "
+                                                             "\"plane_strain\"}}"));
 
     // Get the tensor variables
     auto [displacement_gradients,
@@ -1067,11 +1066,11 @@ TEST_CASE("Solid mechanics elasticity model")
                    variable::scalar::DetF);
 
     auto elastic_model = make_constitutive_model(variables,
-                                                 json::parse("{\"Name\": \"steel\", "
-                                                             "\"ElasticModulus\": 200.0e3, "
-                                                             "\"PoissonsRatio\": 0.3}"),
-                                                 json::parse("{\"ConstitutiveModel\" : {\"Name\" : "
-                                                             "\"IsotropicLinearElasticity\"}}"));
+                                                 json::parse("{\"name\": \"steel\", "
+                                                             "\"elastic_modulus\": 200.0e3, "
+                                                             "\"poissons_ratio\": 0.3}"),
+                                                 json::parse("{\"constitutive\" : {\"name\" : "
+                                                             "\"isotropic_linear_elasticity\"}}"));
 
     // Get the tensor variables
     auto [displacement_gradients,
@@ -1221,20 +1220,21 @@ TEST_CASE("Solid mechanics J2 plasticity model factory errors")
     {
         REQUIRE_THROWS_AS(make_constitutive_model(variables,
                                                   json::parse("{}"),
-                                                  json::parse("{\"ConstitutiveModel\" : {\"Name\" "
+                                                  json::parse("{\"constitutive\" : {\"name\" "
                                                               ": "
-                                                              "\"J2Plasticity\"}}")),
+                                                              "\"J2_plasticity\"}}")),
                           std::domain_error);
     }
     SECTION("Damage model not specified correctly")
     {
         REQUIRE_THROWS_AS(make_constitutive_model(variables,
                                                   json::parse("{}"),
-                                                  json::parse("{\"ConstitutiveModel\" : {\"Name\" "
+                                                  json::parse("{\"constitutive\" : {\"name\" "
                                                               ": "
-                                                              "\"J2Plasticity\", "
-                                                              "\"Damage\" : \"IsotropicChaboche\", "
-                                                              "\"FiniteStrain\" : true}}")),
+                                                              "\"J2_plasticity\", "
+                                                              "\"damage\" : "
+                                                              "\"isotropic_chaboche\", "
+                                                              "\"finite_strain\" : true}}")),
                           std::domain_error);
     }
 }
@@ -1248,15 +1248,15 @@ TEST_CASE("Solid mechanics J2 plasticity model")
     variables->add(variable::second::displacement_gradient, variable::second::cauchy_stress);
     variables->add(variable::scalar::DetF);
 
-    auto const material_data = json::parse("{\"Name\": \"steel\", "
-                                           "\"ElasticModulus\": 200.0e9, "
-                                           "\"PoissonsRatio\": 0.3, "
-                                           "\"YieldStress\": 200.0e6, "
-                                           "\"IsotropicHardeningModulus\": 400.0e6}");
+    auto const material_data = json::parse("{\"name\": \"steel\", "
+                                           "\"elastic_modulus\": 200.0e9, "
+                                           "\"poissons_ratio\": 0.3, "
+                                           "\"yield_stress\": 200.0e6, "
+                                           "\"isotropic_hardening_modulus\": 400.0e6}");
 
-    auto const constitutive_data = json::parse("{\"ConstitutiveModel\" : "
-                                               "{\"Name\" : \"J2Plasticity\", "
-                                               "\"FiniteStrain\" : false}}");
+    auto const constitutive_data = json::parse("{\"constitutive\" : "
+                                               "{\"name\" : \"J2_plasticity\", "
+                                               "\"finite_strain\" : false}}");
 
     auto small_strain_J2_plasticity = make_constitutive_model(variables,
                                                               material_data,
@@ -1412,22 +1412,22 @@ TEST_CASE("Solid mechanics J2 plasticity damage model")
     variables->add(variable::second::displacement_gradient, variable::second::cauchy_stress);
     variables->add(variable::scalar::DetF);
 
-    auto const material_input{"{\"Name\":\"steel\","
-                              "\"ElasticModulus\":134.0e3,"
-                              "\"PoissonsRatio\":0.3,"
-                              "\"YieldStress\":85,"
-                              "\"KinematicHardeningModulus\": 5500,"
-                              "\"SofteningMultiplier\" : 250,"
-                              "\"PlasticityViscousExponent\" : 2.5,"
-                              "\"PlasticityViscousDenominator\" : 1220,"
-                              "\"DamageViscousExponent\" : 2,"
-                              "\"DamageViscousDenominator\" : 0.6"
+    auto const material_input{"{\"name\":\"steel\","
+                              "\"elastic_modulus\":134.0e3,"
+                              "\"poissons_ratio\":0.3,"
+                              "\"yield_stress\":85,"
+                              "\"kinematic_hardening_modulus\": 5500,"
+                              "\"softening_multiplier\" : 250,"
+                              "\"plasticity_viscous_exponent\" : 2.5,"
+                              "\"plasticity_viscous_denominator\" : 1220,"
+                              "\"damage_viscous_exponent\" : 2,"
+                              "\"damage_viscous_denominator\" : 0.6"
                               "}"};
 
-    auto const constitutive_input{"{\"ConstitutiveModel\" : "
-                                  "{\"Name\" : \"J2Plasticity\","
-                                  "\"Damage\" : \"IsotropicChaboche\", "
-                                  "\"FiniteStrain\" : false}}"};
+    auto const constitutive_input{"{\"constitutive\" : "
+                                  "{\"name\" : \"J2_plasticity\","
+                                  "\"damage\" : \"isotropic_chaboche\", "
+                                  "\"finite_strain\" : false}}"};
 
     auto small_strain_J2_plasticity_damage = make_constitutive_model(variables,
                                                                      json::parse(material_input),
@@ -1559,8 +1559,8 @@ TEST_CASE("Thermal isotropic model")
 
     auto thermal = make_constitutive_model(variables,
                                            json::parse(json_thermal_diffusion()),
-                                           json::parse("{\"ConstitutiveModel\" : {\"Name\": "
-                                                       "\"IsotropicDiffusion\"} }"));
+                                           json::parse("{\"constitutive\" : {\"name\": "
+                                                       "\"isotropic_diffusion\"} }"));
 
     thermal->update_internal_variables(1.0);
 
@@ -1581,12 +1581,13 @@ TEST_CASE("Thermal isotropic model")
 //
 //     // Create a json reader object from a string
 //     std::string
-//         input_data = "{\"Name\": \"steel\", \"ElasticModulus\": 200.0e9, \"PoissonsRatio\": 0.3,
+//         input_data = "{\"name\": \"steel\", \"elastic_modulus\": 200.0e9, \"poissons_ratio\": 0.3,
 //         "
-//                      "\"YieldStress\": 200.0e6, \"IsotropicHardeningModulus\": 400.0e6}";
+//                      "\"yield_stress\": 200.0e6, \"isotropic_hardening_modulus\": 400.0e6}";
 //
-//     std::string simulation_input = "{\"ConstitutiveModel\" : {\"Name\" : \"small_strain_J2_plasticity\", "
-//                                    "\"FiniteStrain\":true}}";
+//     std::string simulation_input = "{\"constitutive\" : {\"name\" :
+//     \"small_strain_J2_plasticity\", "
+//                                    "\"finite_strain\":true}}";
 //
 //     Json::Value material_data, simulation_data;
 //
@@ -1601,7 +1602,8 @@ TEST_CASE("Thermal isotropic model")
 //     variables->add(variable::second::deformation_gradient,
 //     variable::second::cauchy_stress); variables->add(variable::scalar::DetF);
 //
-//     auto small_strain_J2_plasticity = make_constitutive_model(variables, material_data, simulation_data);
+//     auto small_strain_J2_plasticity = make_constitutive_model(variables, material_data,
+//     simulation_data);
 //
 //     // Get the tensor variables
 //     auto[F_list, cauchy_stresses] =
