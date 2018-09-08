@@ -17,3 +17,8 @@ RUN pip install pyyaml
 # Compile and install PaStiX 5
 COPY docker/add_libraries.diff docker/cmake_patch.diff docker/install_pastix.sh /
 RUN sh install_pastix.sh
+
+# Get OpenCL package
+RUN wget http://registrationcenter-download.intel.com/akdlm/irc_nas/12556/opencl_runtime_16.1.2_x64_rh_6.4.0.37.tgz && tar -xf opencl_runtime_16.1.2_x64_rh_6.4.0.37.tgz opencl_runtime && cd opencl_runtime
+COPY docker/silent.config /opencl_runtime
+RUN sh install.sh --silent silent.cfg
