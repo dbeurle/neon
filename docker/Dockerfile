@@ -20,6 +20,6 @@ RUN sh install_pastix.sh
 
 # Get OpenCL package
 RUN wget http://registrationcenter-download.intel.com/akdlm/irc_nas/12556/opencl_runtime_16.1.2_x64_rh_6.4.0.37.tgz
-RUN tar -xf opencl_runtime_16.1.2_x64_rh_6.4.0.37.tgz && cd opencl_runtime_16.1.2_x64_rh_6.4.0.37
+RUN tar -xf opencl_runtime_16.1.2_x64_rh_6.4.0.37.tgz
 COPY docker/silent.config /opencl_runtime_16.1.2_x64_rh_6.4.0.37
-RUN sh install.sh --silent silent.cfg
+RUN cd opencl_runtime_16.1.2_x64_rh_6.4.0.37 && sh install.sh --silent silent.cfg
