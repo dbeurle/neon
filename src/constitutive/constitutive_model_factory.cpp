@@ -50,7 +50,7 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
     {
         if (constitutive_model.find("type") == constitutive_model.end())
         {
-            throw std::domain_error("Missing \"type\" as \"affine\" or \"Nonaffine\" in "
+            throw std::domain_error("Missing \"type\" as \"affine\" or \"nonaffine\" in "
                                     "microsphere model");
         }
 
@@ -112,13 +112,13 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
                 return std::make_unique<affine_microsphere>(variables, material_data, entry->second);
             }
         }
-        else if (model_type == "Nonaffine")
+        else if (model_type == "nonaffine")
         {
             return std::make_unique<nonaffine_microsphere>(variables, material_data, entry->second);
         }
         else
         {
-            throw std::domain_error("microsphere model options are \"affine\" or \"Nonaffine\"");
+            throw std::domain_error("microsphere model options are \"affine\" or \"nonaffine\"");
         }
     }
     else if (model_name == "isotropic_linear_elasticity")
@@ -157,7 +157,7 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
     }
     throw std::domain_error("The model name " + model_name + " is not recognised\n"
                             + "Supported models are \"neohooke\", \"microsphere\" "
-                              "and \"small_strain_J2_plasticity\"\n");
+                              "and \"J2_plasticity\"\n");
     return nullptr;
 }
 }

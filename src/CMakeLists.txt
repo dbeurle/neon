@@ -25,6 +25,10 @@ if (ENABLE_NATIVE)
     target_compile_options(neon PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-march=native -mtune=native>)
 endif()
 
+if (ENABLE_FAST_MATH)
+    target_compile_options(neon PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-ffast-math)
+endif()
+
 if(ENABLE_COVERAGE)
     set_target_properties(neon PROPERTIES COMPILE_FLAGS "--coverage")
     target_link_libraries(neon PRIVATE --coverage)
@@ -55,13 +59,10 @@ if (ENABLE_CUDA)
                                        ${CUDA_CUBLAS_LIBRARIES}
                                        ${CUDA_cusolver_LIBRARY})
     target_include_directories(neon PUBLIC ${CUDA_INCLUDE_DIRS})
-
 endif()
 
-if (ENABLE_OCL)
-    target_link_libraries(neon PRIVATE ${VIENNACL_LIBRARIES} OpenCL::OpenCL)
-    target_include_directories(neon PUBLIC ${VIENNACL_INCLUDE_DIRS})
-endif()
+target_link_libraries(neon PRIVATE OpenCL::OpenCL)
+target_include_directories(neon PUBLIC ${VIENNACL_INCLUDE_DIRS})
 
 target_link_libraries(neon
                       PUBLIC

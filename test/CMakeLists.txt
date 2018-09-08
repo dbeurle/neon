@@ -7,6 +7,7 @@ add_library(cube_fixture STATIC fixtures/cube_mesh.cpp)
 foreach(test
              boundary
              constitutive
+             compute_device
              dof_numbering
              gauss_quadrature
              geometry_profile

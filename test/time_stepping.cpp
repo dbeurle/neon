@@ -10,9 +10,9 @@ using namespace neon;
 
 TEST_CASE("adaptive time control")
 {
-    json time_data = {{"Period", 1.0},
-                      {"Increments",
-                       {{"Initial", 1.0}, {"Minimum", 0.1}, {"Maximum", 1.0}, {"Adaptive", true}}}};
+    json time_data = {{"period", 1.0},
+                      {"increments",
+                       {{"initial", 1.0}, {"minimum", 0.1}, {"maximum", 1.0}, {"adaptive", true}}}};
 
     adaptive_time_step load(time_data, {0.0, 1.0});
 
@@ -34,23 +34,23 @@ TEST_CASE("adaptive time control")
             load.update_convergence_state(false);
             REQUIRE(load.step_time() < last_good_load_factor);
         }
-        REQUIRE_THROWS_AS(load.update_convergence_state(false), std::runtime_error);
+        REQUIRE_THROWS_AS(load.update_convergence_state(false), std::domain_error);
     }
 }
 TEST_CASE("Simple time control")
 {
-    SECTION("exceptional behaviour")
+    SECTION("input fuzzing")
     {
-        REQUIRE_THROWS_AS(time_step_control({{"Ed", 1.0}, {"Start", 0.0}, {"StepSize", 0.1}}),
+        REQUIRE_THROWS_AS(time_step_control({{"Ed", 1.0}, {"start", 0.0}, {"step_size", 0.1}}),
                           std::domain_error);
-        REQUIRE_THROWS_AS(time_step_control({{"End", 1.0}, {"Stat", 0.0}, {"StepSize", 0.1}}),
+        REQUIRE_THROWS_AS(time_step_control({{"end", 1.0}, {"Stat", 0.0}, {"step_size", 0.1}}),
                           std::domain_error);
-        REQUIRE_THROWS_AS(time_step_control({{"End", 1.0}, {"Start", 0.0}, {"Stepize", 0.1}}),
+        REQUIRE_THROWS_AS(time_step_control({{"end", 1.0}, {"start", 0.0}, {"Stepize", 0.1}}),
                           std::domain_error);
     }
     SECTION("increments")
     {
-        time_step_control times({{"End", 1.0}, {"Start", 0.0}, {"StepSize", 0.1}});
+        time_step_control times({{"end", 1.0}, {"start", 0.0}, {"step_size", 0.1}});
 
         REQUIRE(times.current_time_step_size() == Approx(0.1));
         REQUIRE(times.number_of_time_steps() == 10);

@@ -25,7 +25,7 @@ std::string json_input_file()
 
 std::string json_thermal_diffusion()
 {
-    return "{\"name\": \"steel\", \"Conductivity\": 386.0, \"Density\": 7800.0, \"SpecificHeat\": "
+    return "{\"name\": \"steel\", \"conductivity\": 386.0, \"density\": 7800.0, \"specific_heat\": "
            "390.0}";
 }
 
@@ -137,13 +137,13 @@ TEST_CASE("Neo-Hookean model")
         }
     }
 }
-TEST_CASE("Microsphere model error test")
+TEST_CASE("microsphere model error test")
 {
     using namespace neon::mechanics::solid;
 
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
-    SECTION("Type not specified")
+    SECTION("type not specified")
     {
         REQUIRE_THROWS_AS(make_constitutive_model(variables,
                                                   json::parse("{}"),
@@ -152,7 +152,7 @@ TEST_CASE("Microsphere model error test")
                                                               ": \"affine\"}}")),
                           std::domain_error);
     }
-    SECTION("Type not specified correctly")
+    SECTION("type not specified correctly")
     {
         // clang-format off
         auto const input{"{\"constitutive\":{\"name\":\"microsphere\",\"type\": \"Afwsfine\"}}"};
@@ -190,7 +190,7 @@ TEST_CASE("Gaussian affine microsphere model")
                                           json::parse("{\"constitutive\" : {\"name\": "
                                                       "\"microsphere\", \"type\" "
                                                       ": \"affine\", \"statistics\":\"gaussian\",  "
-                                                      "\"wuadrature\" : \"BO21\"}}"));
+                                                      "\"quadrature\" : \"BO21\"}}"));
 
     auto [F_list, cauchy_stresses] = variables->get(variable::second::deformation_gradient,
                                                     variable::second::cauchy_stress);
@@ -209,7 +209,7 @@ TEST_CASE("Gaussian affine microsphere model")
         REQUIRE(affine->is_finite_deformation());
         REQUIRE(affine->intrinsic_material().name() == "rubber");
     }
-    SECTION("Affine model under no load")
+    SECTION("affine model under no load")
     {
         // Fill with identity matrix
         for (auto& F : F_list) F = neon::matrix3::Identity();
@@ -230,7 +230,7 @@ TEST_CASE("Gaussian affine microsphere model")
             REQUIRE(cauchy_stress.norm() == Approx(0.0).margin(ZERO_MARGIN));
         }
     }
-    SECTION("Affine model under uniaxial load")
+    SECTION("affine model under uniaxial load")
     {
         for (auto& F : F_list)
         {
@@ -277,8 +277,8 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
     auto const constitutive_data{"{\"constitutive\" : {\"name\": \"microsphere\","
                                  "\"type\":\"affine\","
                                  "\"statistics\":\"gaussian\","
-                                 "\"wuadrature\":\"BO21\","
-                                 "\"Ageing\":\"BAND\"}}"};
+                                 "\"quadrature\":\"BO21\","
+                                 "\"ageing\":\"BAND\"}}"};
 
     auto affine = make_constitutive_model(variables,
                                           json::parse(material_data),
@@ -477,8 +477,8 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
     auto const constitutive_data{"{\"constitutive\" : {\"name\": \"microsphere\","
                                  "\"type\":\"affine\","
                                  "\"statistics\":\"gaussian\","
-                                 "\"wuadrature\":\"BO21\","
-                                 "\"Ageing\":\"BAND\"}}"};
+                                 "\"quadrature\":\"BO21\","
+                                 "\"ageing\":\"BAND\"}}"};
 
     auto affine = make_constitutive_model(variables,
                                           json::parse(material_data),
@@ -614,7 +614,7 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
         }
     }
 }
-TEST_CASE("Affine microsphere model")
+TEST_CASE("affine microsphere model")
 {
     using namespace neon::mechanics::solid;
 
@@ -633,7 +633,7 @@ TEST_CASE("Affine microsphere model")
                                           json::parse("{\"constitutive\" : {\"name\": "
                                                       "\"microsphere\", \"type\" "
                                                       ": \"affine\", \"statistics\":\"langevin\", "
-                                                      "\"wuadrature\" : \"BO21\"}}"));
+                                                      "\"quadrature\" : \"BO21\"}}"));
 
     auto [F_list, cauchy_stresses] = variables->get(variable::second::deformation_gradient,
                                                     variable::second::cauchy_stress);
@@ -652,7 +652,7 @@ TEST_CASE("Affine microsphere model")
         REQUIRE(affine->is_finite_deformation());
         REQUIRE(affine->intrinsic_material().name() == "rubber");
     }
-    SECTION("Affine model under no load")
+    SECTION("affine model under no load")
     {
         // Fill with identity matrix
         for (auto& F : F_list) F = neon::matrix3::Identity();
@@ -673,7 +673,7 @@ TEST_CASE("Affine microsphere model")
             REQUIRE(cauchy_stress.norm() == Approx(0.0).margin(ZERO_MARGIN));
         }
     }
-    SECTION("Affine model under uniaxial load")
+    SECTION("affine model under uniaxial load")
     {
         for (auto& F : F_list)
         {
@@ -699,7 +699,7 @@ TEST_CASE("Affine microsphere model")
         }
     }
 }
-TEST_CASE("NonAffine microsphere model")
+TEST_CASE("Nonaffine microsphere model")
 {
     using namespace neon::mechanics::solid;
 
@@ -713,11 +713,11 @@ TEST_CASE("NonAffine microsphere model")
                                           json::parse("{\"name\" : \"rubber\", "
                                                       "\"elastic_modulus\" : 10.0e6, "
                                                       "\"poissons_ratio\" : 0.45, "
-                                                      "\"NonAffineStretchParameter\":1.0, "
+                                                      "\"nonaffine_stretch_parameter\":1.0, "
                                                       "\"segments_per_chain\" : 50}"),
                                           json::parse("{\"constitutive\" : {\"name\": "
                                                       "\"microsphere\", \"type\" "
-                                                      ": \"nonaffine\", \"wuadrature\" : "
+                                                      ": \"nonaffine\", \"quadrature\" : "
                                                       "\"BO21\"}}"));
 
     // Get the tensor variables
@@ -738,13 +738,13 @@ TEST_CASE("NonAffine microsphere model")
                                                   json::parse("{\"name\" : \"rubber\", "
                                                               "\"elastic_modulus\" : 10.0e6, "
                                                               "\"poissons_ratio\" : 0.45, "
-                                                              "\"NonAffineStrearameter\":1."
+                                                              "\"nonaffine_Strearameter\":1."
                                                               "0, "
                                                               "\"segments_per_chain\" : 50}"),
                                                   json::parse("{\"constitutive\" : "
                                                               "{\"name\": "
                                                               "\"microsphere\", \"type\" "
-                                                              ": \"nonaffine\", \"wuadrature\" "
+                                                              ": \"nonaffine\", \"quadrature\" "
                                                               ": "
                                                               "\"BO21\"}}")),
                           std::domain_error);
@@ -755,7 +755,7 @@ TEST_CASE("NonAffine microsphere model")
         REQUIRE(affine->is_finite_deformation());
         REQUIRE(affine->intrinsic_material().name() == "rubber");
     }
-    SECTION("NonAffine model under no load")
+    SECTION("Nonaffine model under no load")
     {
         // Fill with identity matrix
         for (auto& F : F_list) F = neon::matrix3::Identity();
@@ -777,7 +777,7 @@ TEST_CASE("NonAffine microsphere model")
             REQUIRE(cauchy_stress.norm() == Approx(0.0).margin(ZERO_MARGIN));
         }
     }
-    SECTION("NonAffine model under uniaxial load")
+    SECTION("Nonaffine model under uniaxial load")
     {
         for (auto& F : F_list)
         {
@@ -1216,7 +1216,7 @@ TEST_CASE("Solid mechanics J2 plasticity model factory errors")
 
     auto variables = std::make_shared<internal_variables_t>(internal_variable_size);
 
-    SECTION("FiniteStrain not specified")
+    SECTION("finite_strain not specified")
     {
         REQUIRE_THROWS_AS(make_constitutive_model(variables,
                                                   json::parse("{}"),
@@ -1585,8 +1585,7 @@ TEST_CASE("Thermal isotropic model")
 //         "
 //                      "\"yield_stress\": 200.0e6, \"isotropic_hardening_modulus\": 400.0e6}";
 //
-//     std::string simulation_input = "{\"constitutive\" : {\"name\" :
-//     \"small_strain_J2_plasticity\", "
+//     std::string simulation_input = "{\"constitutive\" : {\"name\" : \"small_strain_J2_plasticity\", "
 //                                    "\"finite_strain\":true}}";
 //
 //     Json::Value material_data, simulation_data;
