@@ -10,6 +10,7 @@ pipeline {
             }
             steps {
                 sh '''
+                clinfo
                 clpeak
                 python .run-clang-format.py -r src
                 '''
