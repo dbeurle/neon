@@ -39,7 +39,20 @@ std::unique_ptr<abstract_module> make_module(
             throw std::domain_error("\"NonlinearOptions\" needs to be present for a "
                                     "SolidMechanics simulation");
         }
-        return std::make_unique<solid_mechanics_module>(mesh, material, simulation);
+        if (solution_type == "Equilibrium")
+        {
+            return std::make_unique<
+                solid_mechanics_module<mechanics::static_matrix<mechanics::solid::mesh>>>(mesh,
+                                                                                          material,
+                                                                                          simulation);
+        }
+        else if (solution_type == "Latin")
+        {
+            return std::make_unique<
+                solid_mechanics_module<mechanics::latin_matrix<mechanics::solid::mesh>>>(mesh,
+                                                                                         material,
+                                                                                         simulation);
+        }
     }
     else if (module_type == "PlaneStrain")
     {
