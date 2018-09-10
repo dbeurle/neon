@@ -1,60 +1,60 @@
 {
-    "Name" : "Dirichlet heat",
+    "name" : "Dirichlet heat",
     "Cores" : 1,
     "Part": [{
-        "Name" : "cube",
+        "name" : "cube",
         "Material" : "steel"
     }],
     "Material" : [{
-        "Name" : "steel",
+        "name" : "steel",
         "Conductivity" : 386.0,
         "SpecificHeat" : 390.0,
         "Density" : 7800.0
     }],
-    "SimulationCases" : [{
-        "Name" : "TransientConstantHeat",
-        "Module" : "HeatDiffusion",
-        "Solution" : "Transient",
-        "Time" : {
-            "Period" : 1000.0,
+    "steps" : [{
+        "name" : "TransientConstantHeat",
+        "module" : "HeatDiffusion",
+        "solution" : "Transient",
+        "time" : {
+            "period" : 1000.0,
             "Method" : "ImplicitEuler",
-            "Increments" : {
-                "Initial" : 2.0,
-                "Minimum" : 0.00001,
-                "Maximum" : 1.0,
-                "Adaptive" : true
+            "increments" : {
+                "initial" : 2.0,
+                "minimum" : 0.00001,
+                "maximum" : 1.0,
+                "adaptive" : true
             }
         },
-        "Mesh" : [{
-            "Name" : "cube",
-            "ConstitutiveModel" : {
-                "Name" : "IsotropicDiffusion"
+        "meshes" : [{
+            "name" : "cube",
+            "constitutive" : {
+                "name" : "IsotropicDiffusion"
             },
-            "ElementOptions" : {
-                "Quadrature" : "Full"
+            "element_options" : {
+                "quadrature" : "full"
             },
-            "InitialConditions" : {
+            "initialConditions" : {
                 "Uniform" : 298.0
             },
-            "BoundaryConditions" : [{
-                "Name" : "cold",
-                "Type" : "Temperature",
-                "Time" : [0.0, 1000.0],
+            "boundaries" : [{
+                "name" : "cold",
+                "type" : "Temperature",
+                "time" : [0.0, 1000.0],
                 "Value" : [200.0, 200.0]
             },
             {
-                "Name" : "hot",
-                "Type" : "HeatFlux",
-                "Time" : [0.0, 1000.0],
+                "name" : "hot",
+                "type" : "HeatFlux",
+                "time" : [0.0, 1000.0],
                 "Value" :  [1000.0, 1000.0]
             }],
             "Visualisation" : {
-                "Fields" : ["temperature"],
+                "fields" : ["temperature"],
                 "WriteEvery" : 10
             }
         }],
-        "LinearSolver" : {
-            "Type" : "Iterative"
+        "linear_solver" : {
+            "type" : "Iterative"
         }
     }]
 }

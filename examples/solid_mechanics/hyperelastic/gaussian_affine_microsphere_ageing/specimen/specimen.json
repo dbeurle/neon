@@ -1,82 +1,82 @@
 {
-    "Name" : "SpecimenAgeing",
-    "Cores" : 1,
-    "Part": [{
-        "Name" : "specimen",
-        "Material" : "rubber"
+    "name" : "SpecimenAgeing",
+    "cores" : 1,
+    "parts": [{
+        "name" : "specimen",
+        "material" : "rubber"
     }],
-    "Material" : [{
-        "Name" : "rubber",
-        "ElasticModulus" : 10.0e6,
-        "PoissonsRatio" : 0.45,
-        "SegmentsPerChain" : 60,
-        "ScissionProbability" : 5.2e-6,
-        "RecombinationProbability" : 5.3e-7
+    "materials" : [{
+        "name" : "rubber",
+        "elastic_modulus" : 10.0e6,
+        "poissons_ratio" : 0.45,
+        "segments_per_chain" : 60,
+        "scission_probability" : 5.2e-6,
+        "recombination_probability" : 5.3e-7
     }],
-    "SimulationCases" : [{
-        "Name" : "ramped_load",
-        "Module" : "SolidMechanics",
-        "Solution" : "Equilibrium",
-        "NonlinearOptions" : {
-            "DisplacementTolerance" : 1.0e-3,
-            "ResidualTolerance" : 1.0e-3,
-            "AbsoluteTolerance" : true,
-            "NewtonRaphsonIterations" : 15
+    "steps" : [{
+        "name" : "ramped_load",
+        "module" : "solid_mechanics",
+        "solution" : "equilibrium",
+        "nonlinear_options" : {
+            "displacement_tolerance" : 1.0e-3,
+            "residual_tolerance" : 1.0e-3,
+            "absolute_tolerance" : true,
+            "newton_raphson_iterations" : 15
         },
-        "Time" : {
-            "Period" : 101.0,
-            "Increments" : {
-                "Initial" : 0.5,
-                "Minimum" : 0.1,
-                "Maximum" : 10.0,
-                "Adaptive" : true
+        "time" : {
+            "period" : 101.0,
+            "increments" : {
+                "initial" : 0.5,
+                "minimum" : 0.1,
+                "maximum" : 10.0,
+                "adaptive" : true
             }
         },
-        "Mesh" : [{
-            "Name" : "specimen",
-            "ConstitutiveModel" : {
-                "Name" : "Microsphere",
-                "Type" : "Affine",
-                "Statistics" : "Gaussian",
-                "Quadrature" : "BO21",
-                "Ageing" : "BAND"
+        "meshes" : [{
+            "name" : "specimen",
+            "constitutive" : {
+                "name" : "microsphere",
+                "type" : "affine",
+                "statistics" : "gaussian",
+                "quadrature" : "BO21",
+                "ageing" : "BAND"
             },
-            "ElementOptions" : {
-                "Quadrature" : "Full"
+            "element_options" : {
+                "quadrature" : "full"
             },
-            "BoundaryConditions" : [{
-                "Name" : "x-sym",
-                "Type" : "Displacement",
-                "Time" : [0.0, 101.0],
+            "boundaries" : [{
+                "name" : "x-sym",
+                "type" : "displacement",
+                "time" : [0.0, 101.0],
                 "x" : [0.0, 0.0]
             },
             {
-                "Name" : "z-sym",
-                "Type" : "Displacement",
-                "Time" : [0.0, 101.0],
+                "name" : "z-sym",
+                "type" : "displacement",
+                "time" : [0.0, 101.0],
                 "z" : [0.0, 0.0]
             },
             {
-                "Name" : "base",
-                "Type" : "Displacement",
-                "Time" : [0.0, 101.0],
+                "name" : "base",
+                "type" : "displacement",
+                "time" : [0.0, 101.0],
                 "y" : [0.0, 0.0]
             },
             {
-                "Name" : "load",
-                "Type" : "Displacement",
-                "Time" : [0.0, 1.0, 100.0],
+                "name" : "load",
+                "type" : "displacement",
+                "time" : [0.0, 1.0, 100.0],
                 "y" : [0.0, 0.01, 0.01]
             }],
-            "Visualisation" : {
-                "Fields" : ["displacement", "deformation_gradient", "cauchy_stress",
+            "visualisation" : {
+                "fields" : ["displacement", "deformation_gradient", "cauchy_stress",
                     "active_shear_modulus", "inactive_shear_modulus", "active_segments",
                     "inactive_segments"],
                     "WriteEvery": 1
             }
         }],
-        "LinearSolver" : {
-            "Type" : "PaStiX"
+        "linear_solver" : {
+            "type" : "PaStiX"
         }
     }]
 }

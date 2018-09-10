@@ -60,6 +60,10 @@ std::unique_ptr<abstract_module> make_module(
             }
             return std::make_unique<solid_mechanics_module>(mesh, material, simulation);
         }
+        else
+        {
+            throw std::domain_error("\"solution\" is not valid.  Please use \"equilibrium\"");
+        }
     }
     else if (module_type == "plane_strain")
     {

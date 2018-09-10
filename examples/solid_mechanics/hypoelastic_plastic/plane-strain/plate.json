@@ -1,67 +1,67 @@
 {
-    "Name" : "PlaneStrainExample",
+    "name" : "PlaneStrainExample",
     "Cores" : 1,
     "Part": [{
-        "Name" : "plate",
+        "name" : "plate",
         "Material" : "steel"
     }],
     "Material" : [{
-        "Name" : "steel",
-        "ElasticModulus" : 200.0e3,
+        "name" : "steel",
+        "elastic_modulus" : 200.0e3,
         "IsotropicHardeningModulus" : 200.0,
-        "YieldStress" : 200.0,
-        "PoissonsRatio" : 0.3
+        "yield_stress" : 200.0,
+        "poissons_ratio" : 0.3
     }],
-    "SimulationCases" : [{
-        "Name" : "SimpleLoading",
-        "Module" : "PlaneStrain",
-        "Solution" : "Equilibrium",
-        "NonlinearOptions" : {
-            "DisplacementTolerance" : 1.0e-4,
-            "ResidualTolerance" : 1.0e-4
+    "steps" : [{
+        "name" : "SimpleLoading",
+        "module" : "PlaneStrain",
+        "solution" : "equilibrium",
+        "nonlinear_options" : {
+            "displacement_tolerance" : 1.0e-4,
+            "residual_tolerance" : 1.0e-4
         },
-        "Time" : {
-            "Period" : 1.0,
-            "Increments" : {
-                "Initial" : 1.0,
-                "Minimum" : 1.0,
-                "Maximum" : 1.0,
-                "Adaptive" : true
+        "time" : {
+            "period" : 1.0,
+            "increments" : {
+                "initial" : 1.0,
+                "minimum" : 1.0,
+                "maximum" : 1.0,
+                "adaptive" : true
             }
         },
-		"Mesh" : [{
-            "Name" : "plate",
-            "ConstitutiveModel" : {
-                "Name" : "PlaneStrain",
-                "FiniteStrain" : false
+		"meshes" : [{
+            "name" : "plate",
+            "constitutive" : {
+                "name" : "PlaneStrain",
+                "finite_strain" : false
             },
-            "ElementOptions" : {
-                "Quadrature" : "Full"
+            "element_options" : {
+                "quadrature" : "full"
             },
-            "BoundaryConditions" : [{
-                "Name" : "x-sym",
-                "Type" : "Displacement",
-                "Time" : [0.0, 1.0],
+            "boundaries" : [{
+                "name" : "x-sym",
+                "type" : "displacement",
+                "time" : [0.0, 1.0],
                 "x" : [0.0, 0.0]
             },
             {
-                "Name" : "y-sym",
-                "Type" : "Displacement",
-                "Time" : [0.0, 1.0],
+                "name" : "y-sym",
+                "type" : "displacement",
+                "time" : [0.0, 1.0],
                 "y" : [0.0, 0.0]
             },
             {
-                "Name" : "x-disp",
-                "Type" : "Traction",
-                "Time" : [0.0, 1.0],
+                "name" : "x-disp",
+                "type" : "Traction",
+                "time" : [0.0, 1.0],
                 "x" : [0.0, 150.0]
             }],
-            "Visualisation" : {
-                "Fields" : ["displacement", "reaction_force", "linearised_strain", "cauchy_stress", "von_mises_stress"]
+            "visualisation" : {
+                "fields" : ["displacement", "reaction_force", "linearised_strain", "cauchy_stress", "von_mises_stress"]
             }
         }],
-		"LinearSolver" :  {
-		    "Type" : "PaStiX"
+		"linear_solver" :  {
+		    "type" : "PaStiX"
         }
     }]
 }

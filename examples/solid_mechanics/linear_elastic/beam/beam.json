@@ -1,14 +1,14 @@
 {
-    "Name" : "BeamLoad",
+    "name" : "BeamLoad",
     "Cores" : 4,
     "Part": [{
-        "Name" : "beam",
+        "name" : "beam",
         "Material" : "steel"
     }],
     "Material" : [{
-        "Name" : "steel",
-        "ElasticModulus" : 200.0e9,
-        "PoissonsRatio" : 0.3
+        "name" : "steel",
+        "elastic_modulus" : 200.0e9,
+        "poissons_ratio" : 0.3
     }],
     "profile" : [{
         "name" : "square200",
@@ -16,47 +16,47 @@
         "width" : 200,
         "height" : 200
     }],
-    "SimulationCases" : [{
-        "Name" : "cantilever_force",
-		"Module" : "Beam",
-        "Solution" : "Equilibrium",
-        "Time" : {
-            "Period" : 1.0,
-            "Increments" : {
-                "Initial" : 1.0,
-                "Minimum" : 0.00001,
-                "Maximum" : 1.0,
-                "Adaptive" : true
+    "steps" : [{
+        "name" : "cantilever_force",
+		"module" : "Beam",
+        "solution" : "equilibrium",
+        "time" : {
+            "period" : 1.0,
+            "increments" : {
+                "initial" : 1.0,
+                "minimum" : 0.00001,
+                "maximum" : 1.0,
+                "adaptive" : true
             }
         },
-		"Mesh" : [{
-            "Name" : "beam",
-            "ConstitutiveModel" : {
-                "Name" : "LinearIsotropic"
+		"meshes" : [{
+            "name" : "beam",
+            "constitutive" : {
+                "name" : "LinearIsotropic"
             },
-            "ElementOptions" : {
-                "Quadrature" : "Reduced"
+            "element_options" : {
+                "quadrature" : "Reduced"
             },
-            "BoundaryConditions" : [{
-                "Name" : "fix",
-                "Type" : "displacement",
-                "Time" : [0.0, 1.0],
+            "boundaries" : [{
+                "name" : "fix",
+                "type" : "displacement",
+                "time" : [0.0, 1.0],
                 "x" : [0.0, 0.0],
                 "y" : [0.0, 0.0],
                 "z" : [0.0, 0.0]
             },
             {
-                "Name" : "fix",
-                "Type" : "rotation",
-                "Time" : [0.0, 1.0],
+                "name" : "fix",
+                "type" : "rotation",
+                "time" : [0.0, 1.0],
                 "x" : [0.0, 0.0],
                 "y" : [0.0, 0.0],
                 "z" : [0.0, 0.0]
             },
             {
-                "Name" : "load",
-                "Type" : "force",
-                "Time" : [0.0, 1.0],
+                "name" : "load",
+                "type" : "force",
+                "time" : [0.0, 1.0],
                 "z" : [0.0, 15000.0]
             }],
             "sections" : [{
@@ -65,12 +65,12 @@
                 "tangent" : [1.0, 0.0, 0.0],
                 "normal" : [0.0, 1.0, 0.0]
             }],
-            "Visualisation" : {
-                "Fields" : ["displacement", "rotation"]
+            "visualisation" : {
+                "fields" : ["displacement", "rotation"]
             }
         }],
-		"LinearSolver" :  {
-		    "Type" : "PaStiX"
+		"linear_solver" :  {
+		    "type" : "PaStiX"
         }
     }]
 }

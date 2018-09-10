@@ -1,54 +1,67 @@
 {
-    "Name" : "Dirichlet heat",
+    "name" : "Dirichlet heat",
     "Cores" : 1,
     "Part": [{
-        "Name" : "cube",
+        "name" : "cube",
         "Material" : "steel"
     }],
     "Material" : [{
-        "Name" : "steel",
+        "name" : "steel",
         "Conductivity" : 386.0,
         "SpecificHeat" : 390.0
     }],
-    "SimulationCases" : [{
-        "Name" : "simple_cube",
-        "Module" : "HeatDiffusion",
-        "Solution" : "Equilibrium",
-        "Time" : {
-            "Period" : 1.0,
-            "Increments" : {
-                "Initial" : 1.0,
-                "Minimum" : 0.00001,
-                "Maximum" : 1.0,
-                "Adaptive" : true
+    "steps" : [{
+        "name" : "simple_cube",
+        "module" : "HeatDiffusion",
+        "solution" : "equilibrium",
+        "time" : {
+            "period" : 1.0,
+            "increments" : {
+                "initial" : 1.0,
+                "minimum" : 0.00001,
+                "maximum" : 1.0,
+                "adaptive" : true
             }
         },
-        "Mesh" : [{
-            "Name" : "cube",
-            "ConstitutiveModel" : {
-                "Name" : "IsotropicDiffusion"
+        "meshes" : [{
+            "name" : "cube",
+            "constitutive" : {
+                "name" : "IsotropicDiffusion"
             },
-            "ElementOptions" : {
-                "Quadrature" : "Full"
+            "element_options" : {
+                "quadrature" : "full"
             },
-            "BoundaryConditions" : [{
-                "Name" : "cold",
-                "Type" : "Temperature",
-                "Time" : [0.0, 1.0],
+            "boundaries" : [{
+                "name" : "cold",
+                "type" : "Temperature",
+                "time" : [0.0, 1.0],
                 "Value" : [10.0, 10.0]
             },
             {
-                "Name" : "hot",
-                "Type" : "HeatFlux",
-                "Time" : [0.0, 1.0],
+                "name" : "hot",
+                "type" : "HeatFlux",
+                "time" : [0.0, 1.0],
                 "Value" : [1500.0, 1500.0]
             }],
             "Visualisation" : {
-                "Fields" : ["temperature"]
+                "fields" : ["temperature"]
             }
         }],
-        "LinearSolver" : {
-            "Type" : "PaStiX"
+        "linear_solver" : {
+            "type" : "iterative",
+            "device" : "cpu",
+            "backend" : {
+               "type" : "opencl",
+               "platform" : 0,
+               "device" : 0
+            }
+        },
+        "linear_solver" : {
+            "type" : "iterative",
+            "device" : "gpu",
+            "backend" : {
+               "type" : "cuda"
+            }
         }
     }]
 }

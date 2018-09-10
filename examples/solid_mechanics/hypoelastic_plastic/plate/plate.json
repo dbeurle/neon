@@ -32,7 +32,7 @@
 		"meshes" : [{
             "name" : "plate",
             "constitutive" : {
-                "name" : "J2Plasticity",
+                "name" : "J2_plasticity",
                 "finite_strain" : false
             },
             "element_options" : {

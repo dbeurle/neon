@@ -1,74 +1,74 @@
 {
-    "Name" : "J2PlasticityTetrahedral",
+    "name" : "J2PlasticityTetrahedral",
     "Cores" : 1,
     "Part": [{
-        "Name" : "cube",
+        "name" : "cube",
         "Material" : "steel"
     }],
     "Material" : [{
-        "Name" : "steel",
+        "name" : "steel",
         "ElasticModulus" : 210.0e9,
         "IsotropicHardeningModulus" : 400.0e6,
-        "YieldStress" : 200.0e6,
-        "PoissonsRatio" : 0.3
+        "yield_stress" : 200.0e6,
+        "poissons_ratio" : 0.3
     }],
-    "SimulationCases" : [{
-        "Name" : "UniaxialLoad",
-		"Module" : "SolidMechanics",
-        "Solution" : "Equilibrium",
-        "NonlinearOptions" : {
-            "DisplacementTolerance" : 1.0e-3,
-            "ResidualTolerance" : 1.0e-3
+    "steps" : [{
+        "name" : "UniaxialLoad",
+		"module" : "solid_mechanics",
+        "solution" : "equilibrium",
+        "nonlinear_options" : {
+            "displacement_tolerance" : 1.0e-3,
+            "residual_tolerance" : 1.0e-3
         },
-        "Time" : {
-            "Period" : 1.0,
-            "Increments" : {
-                "Initial" : 1.0,
-                "Minimum" : 1e-5,
-                "Maximum" : 1.0,
-                "Adaptive" : true
+        "time" : {
+            "period" : 1.0,
+            "increments" : {
+                "initial" : 1.0,
+                "minimum" : 1e-5,
+                "maximum" : 1.0,
+                "adaptive" : true
             }
         },
-		"Mesh" : [{
-            "Name" : "cube",
-            "ConstitutiveModel" : {
-                "Name" : "J2Plasticity",
-                "FiniteStrain" : false
+		"meshes" : [{
+            "name" : "cube",
+            "constitutive" : {
+                "name" : "J2_plasticity",
+                "finite_strain" : false
             },
-            "ElementOptions" : {
-                "Quadrature" : "Full"
+            "element_options" : {
+                "quadrature" : "full"
             },
-            "BoundaryConditions" : [{
-                "Name" : "Xsym",
-                "Type" : "Displacement",
-                "Time" : [0.0, 1.0],
+            "boundaries" : [{
+                "name" : "Xsym",
+                "type" : "displacement",
+                "time" : [0.0, 1.0],
                 "x" : [0.0, 0.0]
             },
             {
-                "Name" : "Ysym",
-                "Type" : "Displacement",
-                "Time" : [0.0, 1.0],
+                "name" : "Ysym",
+                "type" : "displacement",
+                "time" : [0.0, 1.0],
                 "y" : [0.0, 0.0]
             },
             {
-                "Name" : "Zsym",
-                "Type" : "Displacement",
-                "Time" : [0.0, 1.0],
+                "name" : "Zsym",
+                "type" : "displacement",
+                "time" : [0.0, 1.0],
                 "z" : [0.0, 0.0]
             },
             {
-                "Name" : "ZLoad",
-				"Type" : "Displacement",
-                "Time" : [0.0, 1.0],
+                "name" : "ZLoad",
+				"type" : "displacement",
+                "time" : [0.0, 1.0],
                 "z" : [0.0, 1.0e-3]
             }],
             "Visualisation" : {
-                "Fields" : ["displacement", "linearised_strain", "linearised_plastic_strain",
+                "fields" : ["displacement", "linearised_strain", "linearised_plastic_strain",
                     "cauchy_stress", "von_mises_stress", "effective_plastic_strain"]
             }
         }],
-		"LinearSolver" : {
-		    "Type" : "PaStiX"
+		"linear_solver" : {
+		    "type" : "PaStiX"
         }
     }]
 }

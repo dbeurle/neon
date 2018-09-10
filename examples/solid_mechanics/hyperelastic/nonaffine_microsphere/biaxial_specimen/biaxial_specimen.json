@@ -1,82 +1,82 @@
 {
-    "Name" : "Biaxial-nonaffine",
+    "name" : "Biaxial-nonaffine",
     "Cores" : 2,
     "Part": [{
-        "Name" : "biaxial_specimen",
+        "name" : "biaxial_specimen",
         "Material" : "rubber"
     }],
     "Material" : [{
-        "Name" : "rubber",
+        "name" : "rubber",
         "ElasticModulus" : 0.4,
-        "PoissonsRatio" : 0.48,
+        "poissons_ratio" : 0.48,
         "NonAffineStretchParameter" : 0.1,
         "SegmentsPerChain" : 50
     }],
-    "SimulationCases" : [{
-        "Name" : "BiaxialDisplacement",
-        "Module" : "SolidMechanics",
-        "Solution" : "Equilibrium",
-        "NonlinearOptions" : {
-            "ResidualTolerance" : 1.0e-3,
-            "DisplacementTolerance" : 1.0e-3
+    "steps" : [{
+        "name" : "BiaxialDisplacement",
+        "module" : "solid_mechanics",
+        "solution" : "equilibrium",
+        "nonlinear_options" : {
+            "residual_tolerance" : 1.0e-3,
+            "displacement_tolerance" : 1.0e-3
         },
-        "Time" : {
-            "Period" : 1.0,
-            "Increments" : {
-                "Initial" : 1.0,
-                "Minimum" : 1e-3,
-                "Maximum" : 1.0,
-                "Adaptive" : true
+        "time" : {
+            "period" : 1.0,
+            "increments" : {
+                "initial" : 1.0,
+                "minimum" : 1e-3,
+                "maximum" : 1.0,
+                "adaptive" : true
             }
         },
-        "Mesh" : [{
-            "Name" : "biaxial_specimen",
-            "ConstitutiveModel" : {
-                "Name" : "Microsphere",
-                "Type" : "NonAffine",
-                "Quadrature" : "BO33"
+        "meshes" : [{
+            "name" : "biaxial_specimen",
+            "constitutive" : {
+                "name" : "Microsphere",
+                "type" : "NonAffine",
+                "quadrature" : "BO33"
             },
-            "ElementOptions" : {
-                "Quadrature" : "Full"
+            "element_options" : {
+                "quadrature" : "full"
             },
-            "BoundaryConditions" :
+            "boundaries" :
             [{
-                "Name" : "x-sym",
-                "Type" : "Displacement",
-                "Time" : [0.0, 1.0],
+                "name" : "x-sym",
+                "type" : "displacement",
+                "time" : [0.0, 1.0],
                 "x" : [0.0, 0.0]
             },
             {
-                "Name" : "y-sym",
-                "Type" : "Displacement",
-                "Time" : [0.0, 1.0],
+                "name" : "y-sym",
+                "type" : "displacement",
+                "time" : [0.0, 1.0],
                 "y" : [0.0, 0.0]
             },
             {
-                "Name" : "z-sym",
-                "Type" : "Displacement",
-                "Time" : [0.0, 1.0],
+                "name" : "z-sym",
+                "type" : "displacement",
+                "time" : [0.0, 1.0],
                 "z" : [0.0, 0.0]
             },
             {
-                "Name" : "x-load",
-                "Type" : "Displacement",
-                "Time" : [0.0, 1.0],
+                "name" : "x-load",
+                "type" : "displacement",
+                "time" : [0.0, 1.0],
                 "x" : [0.0, 6.0]
             },
             {
-                "Name" : "y-load",
-                "Type" : "Displacement",
-                "Time" : [0.0, 1.0],
+                "name" : "y-load",
+                "type" : "displacement",
+                "time" : [0.0, 1.0],
                 "y" : [0.0, 6.0]
             }],
             "Visualisation" : {
-                "Fields" : ["displacement", "deformation_gradient", "cauchy_stress"],
+                "fields" : ["displacement", "deformation_gradient", "cauchy_stress"],
                 "WriteEvery": 1
             }
         }],
-        "LinearSolver" : {
-            "Type" : "Iterative"
+        "linear_solver" : {
+            "type" : "Iterative"
         }
     }]
 }
