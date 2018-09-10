@@ -1,18 +1,18 @@
 {
     "name" : "Dirichlet heat",
-    "Cores" : 1,
-    "Part": [{
+    "cores" : 1,
+    "parts": [{
         "name" : "cube",
-        "Material" : "steel"
+        "material" : "steel"
     }],
-    "Material" : [{
+    "materials" : [{
         "name" : "steel",
-        "Conductivity" : 386.0,
-        "SpecificHeat" : 390.0
+        "conductivity" : 386.0,
+        "specific_heat" : 390.0
     }],
     "steps" : [{
         "name" : "simple_cube",
-        "module" : "HeatDiffusion",
+        "module" : "heat_diffusion",
         "solution" : "equilibrium",
         "time" : {
             "period" : 1.0,
@@ -26,24 +26,24 @@
         "meshes" : [{
             "name" : "cube",
             "constitutive" : {
-                "name" : "IsotropicDiffusion"
+                "name" : "isotropic_diffusion"
             },
             "element_options" : {
                 "quadrature" : "full"
             },
             "boundaries" : [{
                 "name" : "cold",
-                "type" : "Temperature",
+                "type" : "temperature",
                 "time" : [0.0, 1.0],
-                "Value" : [10.0, 10.0]
+                "value" : [10.0, 10.0]
             },
             {
                 "name" : "hot",
-                "type" : "HeatFlux",
+                "type" : "flux",
                 "time" : [0.0, 1.0],
-                "Value" : [1500.0, 1500.0]
+                "value" : [1500.0, 1500.0]
             }],
-            "Visualisation" : {
+            "visualisation" : {
                 "fields" : ["temperature"]
             }
         }],
@@ -54,13 +54,6 @@
                "type" : "opencl",
                "platform" : 0,
                "device" : 0
-            }
-        },
-        "linear_solver" : {
-            "type" : "iterative",
-            "device" : "gpu",
-            "backend" : {
-               "type" : "cuda"
             }
         }
     }]

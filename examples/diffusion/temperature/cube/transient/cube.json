@@ -1,23 +1,23 @@
 {
     "name" : "Dirichlet heat",
-    "Cores" : 1,
-    "Part": [{
+    "cores" : 1,
+    "parts": [{
         "name" : "cube",
-        "Material" : "steel"
+        "material" : "steel"
     }],
-    "Material" : [{
+    "materials" : [{
         "name" : "steel",
-        "Conductivity" : 386.0,
-        "SpecificHeat" : 390.0,
-        "Density" : 7800.0
+        "conductivity" : 386.0,
+        "specific_heat" : 390.0,
+        "density" : 7800.0
     }],
     "steps" : [{
         "name" : "TransientConstantHeat",
-        "module" : "HeatDiffusion",
-        "solution" : "Transient",
+        "module" : "heat_diffusion",
+        "solution" : "transient",
         "time" : {
             "period" : 1000.0,
-            "Method" : "ImplicitEuler",
+            "method" : "implicit_euler",
             "increments" : {
                 "initial" : 2.0,
                 "minimum" : 0.00001,
@@ -28,33 +28,33 @@
         "meshes" : [{
             "name" : "cube",
             "constitutive" : {
-                "name" : "IsotropicDiffusion"
+                "name" : "isotropic_diffusion"
             },
             "element_options" : {
                 "quadrature" : "full"
             },
-            "initialConditions" : {
-                "Uniform" : 298.0
+            "initial_conditions" : {
+                "uniform" : 298.0
             },
             "boundaries" : [{
                 "name" : "cold",
-                "type" : "Temperature",
+                "type" : "temperature",
                 "time" : [0.0, 1000.0],
-                "Value" : [200.0, 200.0]
+                "value" : [200.0, 200.0]
             },
             {
                 "name" : "hot",
-                "type" : "HeatFlux",
+                "type" : "flux",
                 "time" : [0.0, 1000.0],
-                "Value" :  [1000.0, 1000.0]
+                "value" :  [1000.0, 1000.0]
             }],
-            "Visualisation" : {
+            "visualisation" : {
                 "fields" : ["temperature"],
-                "WriteEvery" : 10
+                "write_every" : 10
             }
         }],
         "linear_solver" : {
-            "type" : "Iterative"
+            "type" : "iterative"
         }
     }]
 }

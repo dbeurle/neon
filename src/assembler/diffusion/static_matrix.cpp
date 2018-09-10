@@ -17,7 +17,7 @@ static_matrix::static_matrix(mesh_type& mesh, json const& simulation_data)
     : mesh(mesh),
       f(vector::Zero(mesh.active_dofs())),
       d(vector::Zero(mesh.active_dofs())),
-      solver(make_linear_solver(simulation_data["LinearSolver"]))
+      solver(make_linear_solver(simulation_data["linear_solver"]))
 {
 }
 

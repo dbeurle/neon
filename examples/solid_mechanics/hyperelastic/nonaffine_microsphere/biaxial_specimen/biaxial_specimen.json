@@ -70,7 +70,7 @@
                 "time" : [0.0, 1.0],
                 "y" : [0.0, 6.0]
             }],
-            "Visualisation" : {
+            "visualisation" : {
                 "fields" : ["displacement", "deformation_gradient", "cauchy_stress"],
                 "WriteEvery": 1
             }
