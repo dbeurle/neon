@@ -5,7 +5,7 @@ pipeline {
             agent {
                 dockerfile {
                     filename 'docker/Dockerfile'
-                    additionalBuildArgs '--pull --device=/dev/dri:/dev/dri'
+                    additionalBuildArgs '--pull'
                 }
             }
             steps {
@@ -20,7 +20,7 @@ pipeline {
             agent {
                 dockerfile {
                     filename 'docker/Dockerfile'
-                    additionalBuildArgs '--pull --device=/dev/dri:/dev/dri'
+                    additionalBuildArgs '--pull'
                 }
             }
             steps {
@@ -45,7 +45,7 @@ pipeline {
                     agent {
                         dockerfile {
                             filename 'docker/Dockerfile'
-                            additionalBuildArgs '--pull --device=/dev/dri:/dev/dri'
+                            additionalBuildArgs '--pull'
                         }
                     }
                     steps {
@@ -67,7 +67,7 @@ pipeline {
                     agent {
                         dockerfile {
                             filename 'docker/Dockerfile'
-                            additionalBuildArgs '--pull --device=/dev/dri:/dev/dri'
+                            additionalBuildArgs '--pull'
                         }
                     }
                     steps {
@@ -89,7 +89,7 @@ pipeline {
                     agent {
                         dockerfile {
                             filename 'docker/Dockerfile'
-                            additionalBuildArgs '--pull --device=/dev/dri:/dev/dri'
+                            additionalBuildArgs '--pull'
                         }
                     }
                     steps {
@@ -111,7 +111,7 @@ pipeline {
                     agent {
                         dockerfile {
                             filename 'docker/Dockerfile'
-                            additionalBuildArgs '--pull --device=/dev/dri:/dev/dri'
+                            additionalBuildArgs '--pull'
                         }
                     }
                     steps {
@@ -153,7 +153,7 @@ pipeline {
                     agent {
                         dockerfile {
                             filename 'docker/Dockerfile'
-                            additionalBuildArgs '--pull --device=/dev/dri:/dev/dri'
+                            additionalBuildArgs '--pull'
                         }
                     }
                     steps {
