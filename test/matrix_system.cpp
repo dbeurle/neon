@@ -42,7 +42,7 @@ TEST_CASE("Doublet class")
 TEST_CASE("Nonlinear system equilibrium solver test")
 {
     using fem_mesh = neon::mechanics::solid::mesh;
-    using fem_static_matrix = neon::mechanics::fem_static_matrix<fem_mesh>;
+    using static_matrix = neon::mechanics::static_matrix<fem_mesh>;
 
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh
@@ -60,7 +60,7 @@ TEST_CASE("Nonlinear system equilibrium solver test")
     SECTION("Correct behaviour")
     {
         // Create the system and solve it
-        fem_static_matrix matrix(mesh, json::parse(simulation_data_json()));
+        static_matrix matrix(mesh, json::parse(simulation_data_json()));
         matrix.solve();
     }
 }
