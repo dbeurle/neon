@@ -4,6 +4,7 @@
 #include "abstract_module.hpp"
 
 #include "assembler/mechanics/static_matrix.hpp"
+#include "assembler/mechanics/latin_matrix.hpp"
 
 #include "assembler/mechanics/linear_buckling_matrix.hpp"
 #include "assembler/mechanics/natural_frequency_matrix.hpp"
@@ -27,12 +28,9 @@ namespace solid
 
 /// solid_mechanics_module is responsible for handling the setup and simulation
 ///  of the class for three dimensional solid mechanics problems.
+template <typename matrix_type>
 class solid_mechanics_module : public abstract_module
 {
-public:
-    using mesh_type = mechanics::solid::mesh;
-    using matrix_type = mechanics::static_matrix<mesh_type>;
-
 public:
     solid_mechanics_module(basic_mesh const& mesh, json const& material, json const& simulation);
 
@@ -50,6 +48,8 @@ protected:
     /// Nonlinear solver routines
     matrix_type fem_matrix;
 };
+extern template class solid_mechanics_module<mechanics::static_matrix<mechanics::solid::mesh>>;
+extern template class solid_mechanics_module<mechanics::latin_matrix<mechanics::solid::mesh>>;
 
 /// linear_buckling_module is responsible for handling the setup
 /// and simulation of the class for three dimensional linear (eigenvalue)
