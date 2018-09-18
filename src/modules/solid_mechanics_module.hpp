@@ -32,10 +32,6 @@ template <typename matrix_type>
 class solid_mechanics_module : public abstract_module
 {
 public:
-    using mesh_type = mechanics::solid::mesh;
-    using matrix_type = mechanics::static_matrix<mesh_type>;
-
-public:
     solid_mechanics_module(basic_mesh const& mesh, json const& material, json const& simulation);
 
     virtual ~solid_mechanics_module() = default;
