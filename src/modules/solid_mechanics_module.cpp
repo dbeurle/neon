@@ -3,9 +3,10 @@
 
 namespace neon
 {
-solid_mechanics_module::solid_mechanics_module(basic_mesh const& mesh,
-                                               json const& material,
-                                               json const& simulation)
+template <typename matrix_type>
+solid_mechanics_module<matrix_type>::solid_mechanics_module(basic_mesh const& mesh,
+                                                            json const& material,
+                                                            json const& simulation)
     : fem_mesh(mesh,
                material,
                simulation["meshes"].front(),
@@ -13,6 +14,8 @@ solid_mechanics_module::solid_mechanics_module(basic_mesh const& mesh,
       fem_matrix(fem_mesh, simulation)
 {
 }
+template class solid_mechanics_module<mechanics::static_matrix<mechanics::solid::mesh>>;
+template class solid_mechanics_module<mechanics::latin_matrix<mechanics::solid::mesh>>;
 
 linear_buckling_module::linear_buckling_module(basic_mesh const& mesh,
                                                json const& material,
