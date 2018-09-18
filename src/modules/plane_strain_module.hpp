@@ -22,7 +22,7 @@ class plane_strain_module : public abstract_module
 {
 public:
     using mesh_type = mechanics::plane::mesh;
-    using matrix_type = mechanics::fem_static_matrix<mesh_type>;
+    using matrix_type = mechanics::static_matrix<mesh_type>;
 
 public:
     plane_strain_module(basic_mesh const& mesh, json const& material, json const& simulation);
