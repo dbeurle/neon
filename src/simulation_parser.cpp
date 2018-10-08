@@ -78,6 +78,11 @@ void simulation_parser::parse()
 
         std::ifstream mesh_input_stream(part["name"].get<std::string>() + ".mesh");
 
+        if (!mesh_input_stream.is_open())
+        {
+            throw std::domain_error("Please provide a .mesh file for the part");
+        }
+
         json mesh_file;
         mesh_input_stream >> mesh_file;
 
