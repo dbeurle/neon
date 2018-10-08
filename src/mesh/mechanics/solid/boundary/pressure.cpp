@@ -10,7 +10,7 @@ namespace neon::mechanics::solid
 std::pair<index_view, vector> pressure::external_force(std::int64_t const element,
                                                        double const load_factor) const
 {
-    auto const node_view = node_indices(Eigen::placeholders::all, element);
+    auto const node_view = node_indices(Eigen::all, element);
 
     auto const X = coordinates->initial_configuration(node_view);
 
@@ -35,7 +35,7 @@ std::pair<index_view, vector> pressure::external_force(std::int64_t const elemen
                                                 });
 
     // Map the matrix back to a vector for the assembly operator
-    return {dof_indices(Eigen::placeholders::all, element),
+    return {dof_indices(Eigen::all, element),
             Eigen::Map<matrix>(f_ext.data(), X.cols() * 3, 1)};
 }
 }

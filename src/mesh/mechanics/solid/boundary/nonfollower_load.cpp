@@ -49,8 +49,8 @@ nonfollower_load_boundary::nonfollower_load_boundary(
 
             for (indices::Index i{0}; i < node_indices.cols(); ++i)
             {
-                transform_expand_view(node_indices(Eigen::placeholders::all, i),
-                                      dof_indices(Eigen::placeholders::all, i),
+                transform_expand_view(node_indices(Eigen::all, i),
+                                      dof_indices(Eigen::all, i),
                                       traits<theory::solid, discretisation::linear, true>::dof_order);
             }
 

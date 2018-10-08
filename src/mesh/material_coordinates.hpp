@@ -15,14 +15,14 @@ public:
     template <typename indices_type>
     auto const initial_configuration(indices_type const local_nodes) const
     {
-        return X(Eigen::placeholders::all, local_nodes);
+        return X(Eigen::all, local_nodes);
     }
 
     /// \return element current configuration based on the local node numbers
     template <typename indices_type>
     auto const current_configuration(indices_type const local_nodes) const
     {
-        return x(Eigen::placeholders::all, local_nodes);
+        return x(Eigen::all, local_nodes);
     }
 
     /// \param u - displacement vector from initial configuration (x,y,z...)

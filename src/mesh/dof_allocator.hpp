@@ -44,8 +44,8 @@ void dof_allocator(indices_type const& node_indices,
 
     for (typename indices_type::Index i{0}; i < node_indices.cols(); ++i)
     {
-        transform_expand_view(node_indices(Eigen::placeholders::all, i),
-                              dof_indices(Eigen::placeholders::all, i),
+        transform_expand_view(node_indices(Eigen::all, i),
+                              dof_indices(Eigen::all, i),
                               dof_order);
     }
 }

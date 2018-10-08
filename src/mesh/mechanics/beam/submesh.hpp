@@ -54,7 +54,7 @@ public:
     /// \return A view of degrees of freedom for an element
     [[nodiscard]] auto const local_dof_view(std::int64_t const element) const
     {
-        return dof_indices(Eigen::placeholders::all, element);
+        return dof_indices(Eigen::all, element);
     }
 
     /// \return The internal variable store

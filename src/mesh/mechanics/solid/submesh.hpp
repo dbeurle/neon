@@ -34,7 +34,7 @@ public:
     /// \return view of degrees of freedom for an element
     [[nodiscard]] auto const local_dof_view(std::int32_t const element) const
     {
-        return dof_indices(Eigen::placeholders::all, element);
+        return dof_indices(Eigen::all, element);
     }
 
     /// \return internal variables at the quadrature point

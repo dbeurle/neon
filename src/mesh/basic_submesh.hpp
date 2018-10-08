@@ -27,7 +27,7 @@ public:
     /// \return a list of the element node indices
     auto local_node_view(std::int64_t const element) const -> index_view
     {
-        return node_indices(Eigen::placeholders::all, element);
+        return node_indices(Eigen::all, element);
     }
 
     /// \return a list of unique node indices

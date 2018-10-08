@@ -13,7 +13,7 @@ TEST_CASE("Scalar variable")
     REQUIRE(one.size() == 10);
 
     one.update(neon::vector::Ones(10).eval());
-    REQUIRE(one.view(Eigen::placeholders::all).sum() == 10);
+    REQUIRE(one.view(Eigen::all).sum() == 10);
 }
 
 TEST_CASE("Vector 2 variable")
@@ -24,7 +24,7 @@ TEST_CASE("Vector 2 variable")
     REQUIRE(two.size() == 10);
 
     two.update(neon::vector::Ones(20).eval());
-    REQUIRE(two.view(Eigen::placeholders::all).sum() == 20);
+    REQUIRE(two.view(Eigen::all).sum() == 20);
 }
 
 TEST_CASE("Vector 3 variable")
@@ -35,7 +35,7 @@ TEST_CASE("Vector 3 variable")
     REQUIRE(three.size() == 10);
 
     three.update(neon::vector::Ones(30).eval());
-    REQUIRE(three.view(Eigen::placeholders::all).sum() == 30);
+    REQUIRE(three.view(Eigen::all).sum() == 30);
 }
 
 TEST_CASE("Vector 6 variable")
@@ -46,5 +46,5 @@ TEST_CASE("Vector 6 variable")
     REQUIRE(six.size() == 10);
 
     six.update(neon::vector::Ones(60).eval());
-    REQUIRE(six.view(Eigen::placeholders::all).sum() == 60);
+    REQUIRE(six.view(Eigen::all).sum() == 60);
 }
