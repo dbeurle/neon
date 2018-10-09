@@ -1,0 +1,76 @@
+{
+    "name" : "Toy cube model",
+    "cores" : 2,
+    "parts": [{
+        "name" : "cube",
+        "material" : "rubber"
+    }],
+    "materials" : [{
+        "name" : "rubber",
+        "elastic_modulus" : 10.0e6,
+        "poissons_ratio" : 0.49
+    }],
+    "steps" : [{
+        "name" : "load",
+        "module" : "solid_mechanics",
+        "solution" : "equilibrium",
+        "nonlinear_options" : {
+            "residual_tolerance" : 1.0e-3,
+            "displacement_tolerance" : 1.0e-3
+        },
+        "time" : {
+            "period" : 1.0,
+            "increments" : {
+                "initial" : 1.0,
+                "minimum" : 0.001,
+                "maximum" : 1.0,
+                "adaptive" : true
+            }
+        },
+        "meshes" : [{
+            "name" : "cube",
+            "constitutive" : {
+                "name" : "neohooke"
+            },
+            "element_options" : {
+                "quadrature" : "full"
+            },
+            "boundaries" : [{
+                "name" : "rotation_axis",
+                "type" : "displacement",
+                "time" : [0.0, 1.0],
+                "x" : [0.0, 0.0],
+                "y" : [0.0, 0.0],
+                "z" : [0.0, 0.0]
+            },
+            {
+                "name" : "upper_left",
+                "type" : "displacement",
+                "time" : [0.0, 1.0],
+                "x" : [0.0, 0.0],
+                "z" : [0.0, 0.2]
+            },
+            {
+                "name" : "upper_right",
+                "type" : "displacement",
+                "time" : [0.0, 1.0],
+                "z" : [0.0, 0.2]
+            },
+            {
+                "name" : "lower_right",
+                "type" : "displacement",
+                "time" : [0.0, 1.0],
+                "z" : [0.0, 0.0]
+            }],
+            "visualisation" : {
+                "fields" : ["displacement", "deformation_gradient", "cauchy_stress"]
+            }
+        }],
+        "linear_solver" : {
+            "type" : "iterative",
+            "device" : "cpu",
+            "maximum_iterations" : 2000,
+            "tolerance"  : 1.0e-8
+        }
+    }]
+}
