@@ -1,6 +1,8 @@
 
 #include "interpolation_factory.hpp"
 
+#include "interpolations/shape_function.hpp"
+
 #include "interpolations/hexahedron.hpp"
 #include "interpolations/prism.hpp"
 #include "interpolations/tetrahedron.hpp"
