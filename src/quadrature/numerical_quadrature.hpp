@@ -26,8 +26,9 @@ public:
     /// \param integral - Initial value for the numerical integration
     /// \param f - A lambda function that accepts an femValue and quadrature point
     /// \return The numerically integrated matrix
-    template <typename matrix_type, typename Functor>
-    [[nodiscard]] matrix_type integrate(matrix_type operand, Functor&& f) const {
+    template <typename MatrixType, typename Callable>
+    [[nodiscard]] MatrixType integrate(MatrixType operand, Callable&& f) const noexcept
+    {
         for (std::size_t l{0}; l < points(); ++l)
         {
             operand.noalias() += f(femvals[l], l) * m_weights[l];
@@ -39,8 +40,8 @@ public:
     /// \param integral Value for the numerical integration (accumulated into)
     /// \param f A lambda function that accepts an femValue and quadrature point
     /// \return The numerically integrated matrix
-    template <typename function>
-    void integrate_inplace(matrix& integral, function&& f) const
+    template <typename Callable>
+    void integrate_inplace(matrix& integral, Callable&& f) const noexcept
     {
         for (std::size_t l{0}; l < points(); ++l)
         {
@@ -52,8 +53,8 @@ public:
     /// \param integral Value for the numerical integration (accumulated into)
     /// \param f A lambda function that accepts an femValue and quadrature point
     /// \return The numerically integrated matrix
-    template <typename matrix_type, typename function>
-    void integrate_inplace(Eigen::Map<matrix_type> integral, function&& f) const
+    template <typename MatrixType, typename Callable>
+    void integrate_inplace(Eigen::Map<MatrixType> integral, Callable&& f) const noexcept
     {
         for (std::size_t l{0}; l < points(); ++l)
         {
@@ -65,8 +66,9 @@ public:
     /// \param integral - Initial value for the numerical integration
     /// \param f - A lambda function that accepts an femValue and quadrature point
     /// \return The numerically integrated scalar
-    template <typename function>
-    [[nodiscard]] double integrate(double integral, function&& f) const {
+    template <typename Callable>
+    [[nodiscard]] double integrate(double integral, Callable&& f) const noexcept
+    {
         for (std::size_t l{0}; l < points(); ++l)
         {
             integral += f(femvals[l], l) * m_weights[l];
@@ -74,19 +76,22 @@ public:
         return integral;
     }
 
-    template <typename function>
-    void for_each(function&& f) const
+    /// Evaluate the function \p function at each integration point
+    /// \tparam A callable type
+    template <typename Callable>
+    void for_each(Callable&& function) const
     {
         for (std::size_t l{0}; l < points(); ++l)
         {
-            f(femvals[l], l);
+            function(femvals[l], l);
         }
     }
 
     /// Evaluate a shape function and derivatives for the quadrature points
+    /// Throws std::out_of_memory
     /// \param f - A lambda function that accepts a quadrature coordinate tuple
-    template <typename function>
-    void evaluate(function&& f)
+    template <typename Callable>
+    void evaluate(Callable&& f)
     {
         femvals.clear();
         femvals.reserve(points());
