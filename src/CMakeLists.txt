@@ -1,5 +1,5 @@
 
-file(GLOB_RECURSE NEON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "*.cpp")
+file(GLOB_RECURSE NEON_SOURCES "*.cpp")
 
 # Remove the main file to make a library
 list(REMOVE_ITEM NEON_SOURCES "neon.cpp")
