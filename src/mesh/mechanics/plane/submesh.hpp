@@ -36,7 +36,7 @@ public:
 
     [[nodiscard]] index_view local_dof_view(std::int64_t const element) const noexcept
     {
-        return dof_list(Eigen::placeholders::all, element);
+        return dof_list(Eigen::all, element);
     }
 
     [[nodiscard]] auto const& internal_variables() const { return *variables; }

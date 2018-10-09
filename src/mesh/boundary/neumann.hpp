@@ -44,12 +44,12 @@ public:
 
     [[nodiscard]] auto local_dof_view(std::int64_t const element) const noexcept
     {
-        return dof_indices(Eigen::placeholders::all, element);
+        return dof_indices(Eigen::all, element);
     }
 
     [[nodiscard]] auto local_node_view(std::int64_t const element) const noexcept
     {
-        return node_indices(Eigen::placeholders::all, element);
+        return node_indices(Eigen::all, element);
     }
 
 protected:
@@ -107,7 +107,7 @@ public:
     virtual std::pair<index_view, vector> external_force(std::int64_t const element,
                                                          double const load_factor) const override
     {
-        auto const node_view = node_indices(Eigen::placeholders::all, element);
+        auto const node_view = node_indices(Eigen::all, element);
 
         auto const X = coordinates->initial_configuration(node_view);
 
@@ -119,7 +119,7 @@ public:
                                                           return N * jacobian_determinant(X * dN);
                                                       });
 
-        return {dof_indices(Eigen::placeholders::all, element),
+        return {dof_indices(Eigen::all, element),
                 interpolate_prescribed_load(load_factor) * f_ext};
     }
 
@@ -170,7 +170,7 @@ public:
     virtual std::pair<index_view, vector> external_force(std::int64_t const element,
                                                          double const load_factor) const override
     {
-        auto const node_view = node_indices(Eigen::placeholders::all, element);
+        auto const node_view = node_indices(Eigen::all, element);
 
         auto const X = coordinates->initial_configuration(node_view);
 
@@ -182,7 +182,7 @@ public:
                                                           return N * jacobian_determinant(X * dN);
                                                       });
 
-        return {dof_indices(Eigen::placeholders::all, element),
+        return {dof_indices(Eigen::all, element),
                 interpolate_prescribed_load(load_factor) * f_ext};
     }
 

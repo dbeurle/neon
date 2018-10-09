@@ -36,28 +36,31 @@
                 "quadrature" : "full"
             },
             "boundaries" : [{
-                "name" : "Xsym",
+                "name" : "rotation_axis",
                 "type" : "displacement",
                 "time" : [0.0, 1.0],
-                "x" : [0.0, 0.0]
-            },
-            {
-                "name" : "Ysym",
-                "type" : "displacement",
-                "time" : [0.0, 1.0],
-                "y" : [0.0, 0.0]
-            },
-            {
-                "name" : "Zsym",
-                "type" : "displacement",
-                "time" : [0.0, 1.0],
+                "x" : [0.0, 0.0],
+                "y" : [0.0, 0.0],
                 "z" : [0.0, 0.0]
             },
             {
-                "name" : "ZLoad",
+                "name" : "upper_left",
                 "type" : "displacement",
                 "time" : [0.0, 1.0],
-                "z" : [0.0, 0.5]
+                "x" : [0.0, 0.0],
+                "z" : [0.0, 0.2]
+            },
+            {
+                "name" : "upper_right",
+                "type" : "displacement",
+                "time" : [0.0, 1.0],
+                "z" : [0.0, 0.2]
+            },
+            {
+                "name" : "lower_right",
+                "type" : "displacement",
+                "time" : [0.0, 1.0],
+                "z" : [0.0, 0.0]
             }],
             "visualisation" : {
                 "fields" : ["displacement", "deformation_gradient", "cauchy_stress"]
