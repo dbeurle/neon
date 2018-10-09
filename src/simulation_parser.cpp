@@ -58,9 +58,18 @@ void simulation_parser::parse()
 
     this->check_input_fields();
 
-    if (root.find("cores") != root.end())
+    if (root.find("cores") != end(root))
     {
         threads = root["cores"];
+    }
+
+    if (root.find("materials") == end(root))
+    {
+        throw std::domain_error("\"materials\" field does not exist in input file.");
+    }
+    if (root.find("parts") == end(root))
+    {
+        throw std::domain_error("\"parts\" field does not exist in input file.");
     }
 
     auto const material_names = this->allocate_material_names(root["materials"]);
