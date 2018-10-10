@@ -50,11 +50,9 @@ Transfinite Surface "*";
 Recombine Surface "*";
 Transfinite Volume "*";
 
-//Physical Surface("top") = {20};
-//Physical Surface("bottom") = {16};
-//Physical Surface("sides") = {14, 24, 18, 22};
 Physical Volume("cube") = {26};
-Physical Surface("Zsym") = {22};
-Physical Surface("Xsym") = {18};
-Physical Surface("Ysym") = {16};
-Physical Surface("YLoad") = {20};
+
+Physical Surface("z-load") = {22};
+Physical Surface("x-sym") = {18};
+Physical Surface("y-sym") = {16};
+Physical Surface("z-sym") = {24};

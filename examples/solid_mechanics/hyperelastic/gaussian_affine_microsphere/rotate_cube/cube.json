@@ -40,28 +40,28 @@
                 "quadrature" : "full"
             },
             "boundaries" : [{
-                "name" : "Xsym",
+                "name" : "x-sym",
                 "type" : "displacement",
                 "time" : [0.0, 1.0],
                 "y" : [0.0, 0.0]
             },
             {
-                "name" : "Ysym",
+                "name" : "y-sym",
                 "type" : "displacement",
                 "time" : [0.0, 1.0],
                 "z" : [0.0, 0.0]
             },
             {
-                "name" : "Zsym",
+                "name" : "z-sym",
                 "type" : "displacement",
                 "time" : [0.0, 1.0],
                 "x" : [0.0, 0.0]
             },
             {
-                "name" : "YLoad",
+                "name" : "z-load",
                 "type" : "displacement",
                 "time" : [0.0, 1.0],
-                "z" : [0.0, 0.5]
+                "x" : [0.0, 0.5]
             }],
             "visualisation" : {
                 "fields" : ["displacement", "deformation_gradient", "cauchy_stress"]
