@@ -35,7 +35,6 @@ std::pair<index_view, vector> pressure::external_force(std::int64_t const elemen
                                                 });
 
     // Map the matrix back to a vector for the assembly operator
-    return {dof_indices(Eigen::all, element),
-            Eigen::Map<matrix>(f_ext.data(), X.cols() * 3, 1)};
+    return {dof_indices(Eigen::all, element), Eigen::Map<matrix>(f_ext.data(), X.cols() * 3, 1)};
 }
 }

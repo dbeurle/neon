@@ -119,8 +119,7 @@ public:
                                                           return N * jacobian_determinant(X * dN);
                                                       });
 
-        return {dof_indices(Eigen::all, element),
-                interpolate_prescribed_load(load_factor) * f_ext};
+        return {dof_indices(Eigen::all, element), interpolate_prescribed_load(load_factor) * f_ext};
     }
 
 protected:
@@ -182,8 +181,7 @@ public:
                                                           return N * jacobian_determinant(X * dN);
                                                       });
 
-        return {dof_indices(Eigen::all, element),
-                interpolate_prescribed_load(load_factor) * f_ext};
+        return {dof_indices(Eigen::all, element), interpolate_prescribed_load(load_factor) * f_ext};
     }
 
 protected:
