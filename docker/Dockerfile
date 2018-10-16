@@ -1,4 +1,3 @@
-
 FROM fedora:28
 
 RUN dnf update -y
@@ -8,6 +7,7 @@ RUN dnf install -y wget bzip2 patch git mercurial cmake lcov
 RUN dnf install -y clang clang-tools-extra libomp-devel gcc-c++
 # Scientific libraries
 RUN dnf install -y openblas-devel MUMPS-devel boost-devel vtk-devel hwloc-devel scotch-devel tbb-devel arpack-devel catch-devel viennacl-devel
+
 # Coverage scripts
 RUN pip3 install gcovr cpp-coveralls && pip install pyyaml
 

@@ -6,6 +6,13 @@
 #include "solver/svd/svd.hpp"
 #include "io/json.hpp"
 
+#define VIENNACL_HAVE_EIGEN
+#define VIENNACL_WITH_OPENCL
+
+#include "viennacl/linalg/svd.hpp"
+#include <viennacl/compressed_matrix.hpp>
+#include "viennacl/matrix.hpp"
+
 #include <iostream>
 #include <cmath>
 #include <chrono>
@@ -64,7 +71,10 @@ TEST_CASE("svd solver test suite")
     0, 1, 0, 0, 0, 0, 1, 0;
     // clang-format on
 
-    col_matrix m = col_matrix::Random(1e5, 50);
+    int64_t rows = 1e4;
+    int64_t cols = 50;
+    col_matrix m = col_matrix::Random(rows, cols);
+    Eigen::MatrixXf C = m.cast<float>();
 
     SECTION("bdc svd: singular values and singular vectors")
     {
@@ -166,5 +176,36 @@ TEST_CASE("svd solver test suite")
         std::chrono::duration<double> const elapsed_seconds_rand = end_rand - start_rand;
 
         std::cout << "Randomised SVD test case took " << elapsed_seconds_rand.count() << "s\n";
+
+        // ViennaCL
+        auto const start_viennacl = std::chrono::steady_clock::now();
+
+        viennacl::ocl::set_context_device_type(0, viennacl::ocl::cpu_tag());
+
+        // viennacl::ocl::set_context_device_type(0, viennacl::ocl::gpu_tag());
+        using vcl_float_matrix = viennacl::matrix<float>;
+        vcl_float_matrix vcl_C = viennacl::zero_matrix<float>(rows, cols);
+        vcl_float_matrix vcl_U = viennacl::zero_matrix<float>(rows, rows);
+        vcl_float_matrix vcl_V = viennacl::zero_matrix<float>(cols, cols);
+
+        viennacl::copy(C, vcl_C);
+
+        auto const end_viennacl = std::chrono::steady_clock::now();
+        std::chrono::duration<double> const elapsed_seconds_viennacl = end_viennacl - start_viennacl;
+        std::cout << "Viennacl SVD constructors and copy to device took "
+                  << elapsed_seconds_viennacl.count() << "s\n";
+
+        auto const start_viennacl_svd = std::chrono::steady_clock::now();
+
+        viennacl::linalg::svd(vcl_C, vcl_U, vcl_V);
+        viennacl::vector_base<float> D(vcl_C.handle(),
+                                       std::min(vcl_C.size1(), vcl_C.size2()),
+                                       0,
+                                       vcl_C.internal_size2() + 1);
+
+        auto const end_viennacl_svd = std::chrono::steady_clock::now();
+        std::chrono::duration<double> const elapsed_seconds_viennacl_svd = end_viennacl_svd
+                                                                           - start_viennacl_svd;
+        std::cout << "Viennacl SVD test case took " << elapsed_seconds_viennacl_svd.count() << "s\n";
     }
 }
