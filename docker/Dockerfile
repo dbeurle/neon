@@ -16,8 +16,8 @@ COPY docker/add_libraries.diff docker/cmake_patch.diff docker/install_pastix.sh 
 RUN sh install_pastix.sh
 
 # OpenCL runtimes
-RUN dnf install -y ocl-icd clpeak clinfo opencl-headers
+RUN dnf install -y pocl clpeak clinfo opencl-headers
 # Intel Xeon OpenCL runtime
-RUN wget http://registrationcenter-download.intel.com/akdlm/irc_nas/12556/opencl_runtime_16.1.2_x64_rh_6.4.0.37.tgz && tar -xf opencl_runtime_16.1.2_x64_rh_6.4.0.37.tgz
-COPY docker/silent.cfg /opencl_runtime_16.1.2_x64_rh_6.4.0.37
-RUN cd opencl_runtime_16.1.2_x64_rh_6.4.0.37 && sh install.sh --silent silent.cfg
+# RUN wget http://registrationcenter-download.intel.com/akdlm/irc_nas/12556/opencl_runtime_16.1.2_x64_rh_6.4.0.37.tgz && tar -xf opencl_runtime_16.1.2_x64_rh_6.4.0.37.tgz
+# COPY docker/silent.cfg /opencl_runtime_16.1.2_x64_rh_6.4.0.37
+# RUN cd opencl_runtime_16.1.2_x64_rh_6.4.0.37 && sh install.sh --silent silent.cfg
