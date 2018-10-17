@@ -48,7 +48,7 @@ if (ENABLE_TESTS)
     # Required for integration tests
     include(FindPythonInterp)
 
-    include(CTest)
+    enable_testing()
     add_subdirectory(test)
     add_subdirectory(examples)
 endif()
