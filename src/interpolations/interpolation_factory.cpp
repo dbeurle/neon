@@ -27,7 +27,7 @@ static bool is_reduced_integration(json const& mesh_data)
 
 static void check_element_options(json const& mesh_data)
 {
-    if (mesh_data.find("element_options") == mesh_data.end())
+    if (mesh_data.find("element_options") == end(mesh_data))
     {
         throw std::runtime_error("Missing \"part\": {\"element_options\" : {}}");
     }
