@@ -5,7 +5,6 @@ pipeline {
             agent {
                 dockerfile {
                     filename 'docker/Dockerfile'
-                    label 'build_image'
                     additionalBuildArgs '--pull'
                     args '--device=/dev/dri:/dev/dri'
                 }
