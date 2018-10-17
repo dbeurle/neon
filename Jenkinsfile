@@ -5,13 +5,14 @@ pipeline {
             agent {
                 dockerfile {
                     filename 'docker/Dockerfile'
-                    label 'build_image'
                     additionalBuildArgs '--pull'
                     args '--device=/dev/dri:/dev/dri'
                 }
             }
             steps {
                 sh '''
+                clinfo
+                clpeak
                 python .run-clang-format.py -r src
                 '''
             }
@@ -21,7 +22,6 @@ pipeline {
                 dockerfile {
                     filename 'docker/Dockerfile'
                     additionalBuildArgs '--pull'
-                    label 'build_image'
                     args '--device=/dev/dri:/dev/dri'
                 }
             }
@@ -48,7 +48,6 @@ pipeline {
                         dockerfile {
                             filename 'docker/Dockerfile'
                             additionalBuildArgs '--pull'
-                            label 'build_image'
                             args '--device=/dev/dri:/dev/dri'
                         }
                     }
@@ -72,7 +71,6 @@ pipeline {
                         dockerfile {
                             filename 'docker/Dockerfile'
                             additionalBuildArgs '--pull'
-                            label 'build_image'
                             args '--device=/dev/dri:/dev/dri'
                         }
                     }
@@ -96,7 +94,6 @@ pipeline {
                         dockerfile {
                             filename 'docker/Dockerfile'
                             additionalBuildArgs '--pull'
-                            label 'build_image'
                             args '--device=/dev/dri:/dev/dri'
                         }
                     }
@@ -120,7 +117,6 @@ pipeline {
                         dockerfile {
                             filename 'docker/Dockerfile'
                             additionalBuildArgs '--pull'
-                            label 'build_image'
                             args '--device=/dev/dri:/dev/dri'
                         }
                     }
@@ -164,7 +160,6 @@ pipeline {
                         dockerfile {
                             filename 'docker/Dockerfile'
                             additionalBuildArgs '--pull'
-                            label 'build_image'
                             args '--device=/dev/dri:/dev/dri'
                         }
                     }
