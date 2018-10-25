@@ -23,17 +23,14 @@ namespace neon
  * \param [in out] output_view Contiguous view of input data to be transformed
  * \param order Storage e.g. {0, 1, 2}
  */
-template <class input_view_type, class output_view_type, typename order_type>
-void transform_expand_view(input_view_type input_view,
-                           output_view_type output_view,
-                           order_type const& order)
+template <class InputView, class OutputView, typename OrderType>
+void transform_expand_view(InputView input_view, OutputView output_view, OrderType const& order)
 {
     using index_type = decltype(output_view.size());
 
     static_assert(std::is_integral<index_type>::value, "The size of the view needs to be an integer");
 
-    static_assert(sizeof(typename input_view_type::value_type)
-                      >= sizeof(typename output_view_type::value_type),
+    static_assert(sizeof(typename InputView::value_type) >= sizeof(typename OutputView::value_type),
                   "The value type for the output range must be greater than or equal to input "
                   "range");
 
