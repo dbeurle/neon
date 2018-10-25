@@ -27,7 +27,7 @@ set(test_names boundary
                time_integrators
                trapezoidal)
 
-foreach(test_name test_names)
+foreach(test_name IN LISTS test_names)
 
     add_executable(${test_name}_test ${test_name}.cpp)
     add_dependencies(${test_name}_test neon catch_main cube_fixture)
