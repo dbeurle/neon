@@ -6,6 +6,7 @@
 #include "constitutive/constitutive_model.hpp"
 #include "constitutive/internal_variables.hpp"
 #include "interpolations/shape_function.hpp"
+#include "math/view.hpp"
 #include "traits/mechanics.hpp"
 
 #include <memory>
@@ -118,7 +119,7 @@ private:
     /// Shape function
     std::unique_ptr<surface_interpolation> sf;
 
-    variable_view view;
+    stride_view<> view;
     std::shared_ptr<internal_variables_t> variables;
 
     /// Constitutive model

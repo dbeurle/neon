@@ -1,7 +1,7 @@
 
 #include "mesh.hpp"
 
-#include "math/block_sequence.hpp"
+#include "math/view.hpp"
 #include "mesh/basic_mesh.hpp"
 #include "mesh/dof_allocator.hpp"
 #include "io/post/variable_string_adapter.hpp"

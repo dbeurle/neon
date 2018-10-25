@@ -2,7 +2,7 @@
 #include <catch.hpp>
 
 #include "numeric/index_types.hpp"
-#include "math/transform_expand.hpp"
+#include "math/view.hpp"
 
 #include <range/v3/view/set_algorithm.hpp>
 #include <memory>
