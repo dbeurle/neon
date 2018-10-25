@@ -13,29 +13,6 @@
 
 namespace neon
 {
-/// variable_view is a tiny wrapper around the linear indexing into the
-/// internal variable storage given an element quadrature point and an element
-/// number.  \sa internal_variables
-class variable_view
-{
-public:
-    variable_view() = default;
-
-    /// Construct with number of quadrature points per element
-    variable_view(std::size_t const quadrature_points) : quadrature_points(quadrature_points) {}
-
-    /// \return view index into the vector
-    std::size_t operator()(std::size_t const element, std::size_t const quadrature_point) const
-        noexcept
-    {
-        return quadrature_points * element + quadrature_point;
-    }
-
-private:
-    /// Quadrature points per element
-    std::size_t quadrature_points{0};
-};
-
 /// internal_variables stores the internal variables associated with the element
 /// quadrature points.  These variables are duplicated and commited to memory
 /// when the data is converged to avoid polluting the variable history in the

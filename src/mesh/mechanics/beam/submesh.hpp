@@ -9,6 +9,7 @@
 
 #include "constitutive/mechanics/beam/isotropic_linear.hpp"
 #include "material/isotropic_elastic_property.hpp"
+#include "math/view.hpp"
 
 #include "geometry/profile.hpp"
 #include "traits/mechanics.hpp"
@@ -142,7 +143,7 @@ protected:
     std::shared_ptr<material_coordinates> coordinates;
 
     /// View wrapper into internal variables
-    variable_view view;
+    stride_view<> view;
     /// Internal variables (geometry and constitutive)
     std::shared_ptr<internal_variable_type> variables;
 

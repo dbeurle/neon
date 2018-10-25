@@ -31,6 +31,7 @@ submesh::submesh(json const& material_data,
     : basic_submesh(submesh),
       coordinates(coordinates),
       sf(make_volume_interpolation(topology(), mesh_data)),
+      view(sf->quadrature().points()),
       variables(std::make_shared<internal_variables_t>(elements() * sf->quadrature().points())),
       cm(make_constitutive_model(variables, material_data, mesh_data))
 {
