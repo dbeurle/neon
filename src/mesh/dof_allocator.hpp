@@ -2,7 +2,7 @@
 #pragma once
 
 #include "numeric/index_types.hpp"
-#include "math/transform_expand.hpp"
+#include "math/view.hpp"
 
 #include <algorithm>
 #include <set>

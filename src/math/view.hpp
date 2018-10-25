@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <type_traits>
 
 /// \file view.hpp
@@ -24,7 +25,7 @@ namespace neon
  * \param order Storage e.g. {0, 1, 2}
  */
 template <class InputView, class OutputView, typename OrderType>
-void transform_expand_view(InputView input_view, OutputView output_view, OrderType const& order)
+inline void transform_expand_view(InputView input_view, OutputView output_view, OrderType const& order)
 {
     using index_type = decltype(output_view.size());
 
@@ -54,7 +55,7 @@ public:
 
 public:
     /// Construct with the stride size
-    variable_view(Index const stride) : stride(stride) {}
+    stride_view(Index const stride) : stride(stride) {}
 
     /// \return index into the linear storage
     auto operator()(Index const first_index, Index const second_index) const noexcept -> Index
