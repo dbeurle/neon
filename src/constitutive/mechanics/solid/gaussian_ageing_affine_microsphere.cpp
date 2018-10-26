@@ -27,12 +27,8 @@ gaussian_ageing_affine_microsphere::gaussian_ageing_affine_microsphere(
                    variable::scalar::inactive_segments,
                    variable::scalar::reduction_factor);
 
-    variables->add(variable::vector::first_ageing_moduli,
-                   variable::vector::second_ageing_moduli,
-                   variable::vector::third_ageing_moduli,
-                   variable::vector::first_previous,
-                   variable::vector::second_previous,
-                   variable::vector::third_previous);
+    variables->add(variable::vector::accumulated_ageing_integral,
+                   variable::vector::previous_integrand);
 
     names.emplace("active_shear_modulus");
     names.emplace("inactive_shear_modulus");
@@ -40,27 +36,11 @@ gaussian_ageing_affine_microsphere::gaussian_ageing_affine_microsphere(
     names.emplace("inactive_segments");
     names.emplace("reduction_factor");
 
-    for (auto& values : variables->get(variable::vector::first_ageing_moduli))
+    for (auto& values : variables->get(variable::vector::accumulated_ageing_integral))
     {
         values.resize(unit_sphere.points(), 0.0);
     }
-    for (auto& values : variables->get(variable::vector::second_ageing_moduli))
-    {
-        values.resize(unit_sphere.points(), 0.0);
-    }
-    for (auto& values : variables->get(variable::vector::third_ageing_moduli))
-    {
-        values.resize(unit_sphere.points(), 0.0);
-    }
-    for (auto& values : variables->get(variable::vector::first_previous))
-    {
-        values.resize(unit_sphere.points(), 0.0);
-    }
-    for (auto& values : variables->get(variable::vector::second_previous))
-    {
-        values.resize(unit_sphere.points(), 0.0);
-    }
-    for (auto& values : variables->get(variable::vector::third_previous))
+    for (auto& values : variables->get(variable::vector::previous_integrand))
     {
         values.resize(unit_sphere.points(), 0.0);
     }
@@ -88,42 +68,29 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
     auto& inactive_segments = variables->get(variable::scalar::inactive_segments);
 
     // accumulated integral values from time integration
-    auto& moduli1 = variables->get(variable::vector::first_ageing_moduli);
-    auto& moduli2 = variables->get(variable::vector::second_ageing_moduli);
-    auto& moduli3 = variables->get(variable::vector::third_ageing_moduli);
+    auto& moduli = variables->get(variable::vector::accumulated_ageing_integral);
+    auto& last_evaluation = variables->get(variable::vector::previous_integrand);
 
-    auto& sphere1 = variables->get(variable::vector::first_previous);
-    auto& sphere2 = variables->get(variable::vector::second_previous);
-    auto& sphere3 = variables->get(variable::vector::third_previous);
-
-    auto const& moduli1_old = variables->get_old(variable::vector::first_ageing_moduli);
-    auto const& moduli2_old = variables->get_old(variable::vector::second_ageing_moduli);
-    auto const& moduli3_old = variables->get_old(variable::vector::third_ageing_moduli);
-
-    auto const& sphere1_old = variables->get_old(variable::vector::first_previous);
-    auto const& sphere2_old = variables->get_old(variable::vector::second_previous);
-    auto const& sphere3_old = variables->get_old(variable::vector::third_previous);
-
-    auto& cauchy_stresses = variables->get(variable::second::cauchy_stress);
-
-    auto const& det_F = variables->get(variable::scalar::DetF);
+    auto const& moduli_old = variables->get_old(variable::vector::accumulated_ageing_integral);
+    auto const& last_evaluation_old = variables->get_old(variable::vector::previous_integrand);
 
     auto const& deformation_gradients = variables->get(variable::second::deformation_gradient);
+    auto const& det_F = variables->get(variable::scalar::DetF);
 
+    auto& cauchy_stresses = variables->get(variable::second::cauchy_stress);
     auto& tangent_operators = variables->get(variable::fourth::tangent_operator);
 
     auto const K{material.bulk_modulus()};
 
     tbb::parallel_for(std::size_t{0}, deformation_gradients.size(), [&, this](auto const l) {
+        // unimodular deformation gradient
         matrix3 const F_bar = unimodular(deformation_gradients[l]);
 
-        auto& modulus1 = moduli1[l];
-        auto& modulus2 = moduli2[l];
-        auto& modulus3 = moduli3[l];
+        auto& modulus = moduli[l];
+        auto& last_h = last_evaluation[l];
 
-        auto const& modulus1_old = moduli1_old[l];
-        auto const& modulus2_old = moduli2_old[l];
-        auto const& modulus3_old = moduli3_old[l];
+        auto const& modulus_old = moduli_old[l];
+        auto const& last_h_old = last_evaluation_old[l];
 
         if (!is_approx(time_step_size, 0.0))
         {
@@ -159,49 +126,24 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
                                                               active_segments[l],
                                                               inactive_segments[l]);
 
-            auto const sphere1_eval = evaluate_integrand_first(creation_rate,
-                                                               reduction_factor[l],
-                                                               micro_stretch);
+            auto const integrand_eval = evaluate_integrand(creation_rate,
+                                                           reduction_factor[l],
+                                                           micro_stretch);
 
-            auto const sphere2_eval = evaluate_integrand_second(creation_rate,
-                                                                reduction_factor[l],
-                                                                micro_stretch);
+            modulus[index] = integrate_history(modulus_old[index],
+                                               last_h_old[index],
+                                               integrand_eval,
+                                               last_time_step_size);
 
-            auto const sphere3_eval = evaluate_integrand_third(creation_rate,
-                                                               reduction_factor[l],
-                                                               micro_stretch);
-
-            modulus1.at(index) = integrate_history(modulus1_old.at(index),
-                                                   sphere1_old[l].at(index),
-                                                   sphere1_eval,
-                                                   last_time_step_size);
-
-            modulus2.at(index) = integrate_history(modulus2_old.at(index),
-                                                   sphere2_old[l].at(index),
-                                                   sphere2_eval,
-                                                   last_time_step_size);
-
-            modulus3.at(index) = integrate_history(modulus3_old.at(index),
-                                                   sphere3_old[l].at(index),
-                                                   sphere3_eval,
-                                                   last_time_step_size);
-
-            sphere1[l].at(index) = sphere1_eval;
-            sphere2[l].at(index) = sphere2_eval;
-            sphere3[l].at(index) = sphere3_eval;
+            last_h[index] = integrand_eval;
         });
 
         matrix3 const macro_stress = compute_macro_stress(F_bar,
-                                                          modulus1,
-                                                          modulus2,
+                                                          modulus,
                                                           active_segments[l],
                                                           reduction_factor[l]);
 
-        matrix6 const macro_moduli = compute_macro_moduli(F_bar,
-                                                          modulus2,
-                                                          modulus3,
-                                                          active_segments[l],
-                                                          reduction_factor[l]);
+        matrix6 const macro_moduli = compute_macro_moduli(F_bar, reduction_factor[l], time_step_size);
 
         auto const J = det_F[l];
 
@@ -214,97 +156,44 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
 }
 
 matrix3 gaussian_ageing_affine_microsphere::compute_macro_stress(matrix3 const& F_bar,
-                                                                 std::vector<double> const& modulus1,
-                                                                 std::vector<double> const& modulus2,
+                                                                 std::vector<double> const& modulus,
                                                                  double const active_segments,
                                                                  double const reduction_factor) const
 {
     return 3.0 * reduction_factor
-           * unit_sphere
-                 .integrate(matrix3::Zero().eval(), [&](auto const& coordinates, auto const index) -> matrix3 {
-                     auto const& [r, _] = coordinates;
+           * unit_sphere.integrate(matrix3::Zero().eval(),
+                                   [&](auto const& coordinates, auto const index) -> matrix3 {
+                                       auto const& [r, _] = coordinates;
 
-                     vector3 const t = deformed_tangent(F_bar, r);
+                                       vector3 const t = deformed_tangent(F_bar, r);
 
-                     auto const micro_stretch = compute_microstretch(t);
-
-                     auto const shear_modulus = material.shear_modulus() + modulus1.at(index)
-                                                - 0.5
-                                                      * compute_prefactor_first(micro_stretch,
-                                                                                active_segments)
-                                                      * modulus2.at(index);
-
-                     return shear_modulus * outer_product(t, t);
-                 });
+                                       return (material.shear_modulus() + modulus[index])
+                                              * outer_product(t, t);
+                                   });
 }
 
 matrix6 gaussian_ageing_affine_microsphere::compute_macro_moduli(matrix3 const& F_bar,
-                                                                 std::vector<double> const& modulus2,
-                                                                 std::vector<double> const& modulus3,
-                                                                 double const active_segments,
-                                                                 double const reduction_factor) const
+                                                                 double const reduction_factor,
+                                                                 double const time_step_size) const
 {
-    return 3.0 * reduction_factor
-           * unit_sphere
-                 .integrate(matrix6::Zero().eval(), [&](auto const& coordinates, auto const index) -> matrix6 {
-                     auto const& [r, _] = coordinates;
+    return -3.0 / 2.0 * reduction_factor * time_step_size
+           * unit_sphere.integrate(matrix6::Zero().eval(),
+                                   [&](auto const& coordinates, auto) -> matrix6 {
+                                       auto const& [r, _] = coordinates;
 
-                     vector3 const t = deformed_tangent(F_bar, r);
+                                       vector3 const t = deformed_tangent(F_bar, r);
 
-                     auto const micro_stretch = compute_microstretch(t);
+                                       auto const micro_stretch = compute_microstretch(t);
 
-                     auto const shear_modulus = -1.0 / 2.0
-                                                    * compute_prefactor_second(micro_stretch,
-                                                                               active_segments)
-                                                    * modulus2.at(index)
-                                                + compute_prefactor_first(micro_stretch,
-                                                                          active_segments)
-                                                      * modulus3.at(index);
-
-                     return shear_modulus * std::pow(micro_stretch, -1) * outer_product(t, t, t, t);
-                 });
+                                       return std::pow(micro_stretch, -3) * outer_product(t, t, t, t);
+                                   });
 }
 
-double gaussian_ageing_affine_microsphere::evaluate_integrand_first(double const creation_rate,
-                                                                    double const reduction_factor,
-                                                                    double const micro_stretch) const
+double gaussian_ageing_affine_microsphere::evaluate_integrand(double const creation_rate,
+                                                              double const reduction_factor,
+                                                              double const micro_stretch) const
 {
     return creation_rate / (micro_stretch * reduction_factor);
-}
-
-double gaussian_ageing_affine_microsphere::evaluate_integrand_second(double const creation_rate,
-                                                                     double const reduction_factor,
-                                                                     double const micro_stretch) const
-{
-    return creation_rate / (std::pow(micro_stretch, 2) * reduction_factor);
-}
-
-double gaussian_ageing_affine_microsphere::evaluate_integrand_third(double const creation_rate,
-                                                                    double const reduction_factor,
-                                                                    double const micro_stretch) const
-{
-    return creation_rate / (std::pow(micro_stretch, 3) * reduction_factor);
-}
-
-double gaussian_ageing_affine_microsphere::compute_prefactor_first(double const micro_stretch,
-                                                                   double const active_segments) const
-{
-    auto const b = material.bond_length();
-    // auto const N = material.segments_per_chain();
-    auto const N = active_segments;
-
-    return micro_stretch
-           - std::pow(micro_stretch, -1) * std::log(3.0 / (2.0 * M_PI * N * std::pow(b, 2)));
-}
-
-double gaussian_ageing_affine_microsphere::compute_prefactor_second(double const micro_stretch,
-                                                                    double const active_segments) const
-{
-    auto const b = material.bond_length();
-    // auto const N = material.segments_per_chain();
-    auto const N = active_segments;
-
-    return 3.0 + std::pow(micro_stretch, -2) * std::log(3.0 / (2.0 * M_PI * N * std::pow(b, 2)));
 }
 
 double gaussian_ageing_affine_microsphere::integrate_history(double const modulus,

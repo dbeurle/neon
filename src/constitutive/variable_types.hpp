@@ -3,6 +3,8 @@
 
 #include <variant>
 
+/// \file variable_types.hpp
+
 /// Define namespace for variable enumeration types
 namespace neon::variable
 {
@@ -50,15 +52,10 @@ enum class scalar : short {
 
 /// Names for vector values using a std::vector type
 enum class vector : short {
-    /// Primary ageing shear modulus
-    first_ageing_moduli,
-    /// Secondary ageing shear modulus
-    second_ageing_moduli,
-    /// Tertiary ageing shear modulus
-    third_ageing_moduli,
-    first_previous,
-    second_previous,
-    third_previous
+    /// Accumulated ageing shear modulus integral
+    accumulated_ageing_integral,
+    /// Previous function evaluation for trapezoidal discretisation
+    previous_integrand
 };
 
 /// Second order tensor internal variables types
