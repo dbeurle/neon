@@ -148,19 +148,14 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
     }
     SECTION("uniaxial load")
     {
-        for (auto& F : F_list)
-        {
-            F(0, 0) = 1.0;
-            F(1, 1) = 1.0;
-            F(2, 2) = 1.0;
-        }
+        std::fill(begin(F_list), end(F_list), matrix3::Identity());
 
         affine->update_internal_variables(1.0);
 
         for (auto& cauchy_stress : cauchy_stresses)
         {
             std::cout << cauchy_stress << "\n\n";
-            REQUIRE(cauchy_stress.norm() > 0.0);
+            REQUIRE(cauchy_stress.norm() == Approx(0.0).margin(ZERO_MARGIN));
         }
 
         std::cout << "setting to stretch 1.1\n";
