@@ -21,7 +21,7 @@ namespace neon::mechanics::solid
 /// over a unit sphere using a Gaussian statistical description.
 ///
 /// Warning: This method is highly experimental and is a proof-of-concept
-/// implementation.
+/// implementation ;)
 class gaussian_ageing_affine_microsphere : public gaussian_affine_microsphere
 {
 public:
@@ -37,46 +37,19 @@ public:
 
 private:
     [[nodiscard]] matrix3 compute_macro_stress(matrix3 const& F_bar,
-                                               std::vector<double> const& modulus1,
-                                               std::vector<double> const& modulus2,
+                                               std::vector<double> const& modulus,
                                                double const active_segments,
                                                double const reduction_factor) const;
 
     [[nodiscard]] matrix6 compute_macro_moduli(matrix3 const& F_bar,
-                                               std::vector<double> const& modulus2,
-                                               std::vector<double> const& modulus3,
-                                               double const active_segments,
-                                               double const reduction_factor) const;
+                                               double const reduction_factor,
+                                               double const time_step_size) const;
 
     /// Compute the force contribution to the secondary modulus
     /// \return evaluated integrand
-    [[nodiscard]] double evaluate_integrand_first(double const creation_rate,
-                                                  double const reduction_factor,
-                                                  double const micro_stretch) const;
-
-    /// Compute the energy contribution to the secondary modulus
-    /// \return evaluated integrand
-    [[nodiscard]] double evaluate_integrand_second(double const creation_rate,
-                                                   double const reduction_factor,
-                                                   double const micro_stretch) const;
-
-    /// Compute the energy contribution to the secondary modulus
-    /// \return evaluated integrand
-    [[nodiscard]] double evaluate_integrand_third(double const creation_rate,
-                                                  double const reduction_factor,
-                                                  double const micro_stretch) const;
-
-    /// Compute the integral prefactor that involves the free energy and the constant contribution
-    /// from the statistical mechanical chain formation
-    /// \return factor value
-    [[nodiscard]] double compute_prefactor_first(double const micro_stretch,
-                                                 double const active_segments) const;
-
-    /// Compute the integral prefactor that involves the free energy and the constant contribution
-    /// from the statistical mechanical chain formation
-    /// \return factor value
-    [[nodiscard]] double compute_prefactor_second(double const micro_stretch,
-                                                  double const active_segments) const;
+    [[nodiscard]] double evaluate_integrand(double const creation_rate,
+                                            double const reduction_factor,
+                                            double const micro_stretch) const;
 
     /// Integrate the time history and return the integrated value
     [[nodiscard]] double integrate_history(double const modulus,
