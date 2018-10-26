@@ -8,10 +8,10 @@
     "materials" : [{
         "name" : "rubber",
         "elastic_modulus" : 10.0e6,
-        "poissons_ratio" : 0.45,
-        "segments_per_chain" : 60,
-        "scission_probability" : 5.2e-6,
-        "recombination_probability" : 5.3e-7
+        "poissons_ratio" : 0.48,
+        "segments_per_chain" : 70,
+        "scission_probability" : 5.0e-6,
+        "recombination_probability" : 1.0e-6
     }],
     "steps" : [{
         "name" : "ramped_load",
@@ -24,11 +24,11 @@
             "newton_raphson_iterations" : 15
         },
         "time" : {
-            "period" : 101.0,
+            "period" : 10000.0,
             "increments" : {
                 "initial" : 0.5,
                 "minimum" : 0.1,
-                "maximum" : 10.0,
+                "maximum" : 100.0,
                 "adaptive" : true
             }
         },
@@ -47,32 +47,33 @@
             "boundaries" : [{
                 "name" : "x-sym",
                 "type" : "displacement",
-                "time" : [0.0, 101.0],
+                "time" : [0.0, 10000.0],
                 "x" : [0.0, 0.0]
             },
             {
                 "name" : "z-sym",
                 "type" : "displacement",
-                "time" : [0.0, 101.0],
+                "time" : [0.0, 10000.0],
                 "z" : [0.0, 0.0]
             },
             {
                 "name" : "base",
                 "type" : "displacement",
-                "time" : [0.0, 101.0],
+                "time" : [0.0, 10000.0],
                 "y" : [0.0, 0.0]
             },
             {
                 "name" : "load",
                 "type" : "displacement",
-                "time" : [0.0, 1.0, 100.0],
-                "y" : [0.0, 0.01, 0.01]
+                "time" : [0.0, 1.0, 9999.0],
+                "y" : [0.0, 0.02, 0.02]
             }],
             "visualisation" : {
-                "fields" : ["displacement", "deformation_gradient", "cauchy_stress",
-                    "active_shear_modulus", "inactive_shear_modulus", "active_segments",
-                    "inactive_segments"],
-                    "WriteEvery": 1
+                "fields" : ["displacement", "deformation_gradient",
+                            "cauchy_stress", "active_shear_modulus",
+                            "inactive_shear_modulus", "active_segments",
+                            "inactive_segments"],
+                "write_every": 1
             }
         }],
         "linear_solver" : {
