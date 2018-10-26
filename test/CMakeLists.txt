@@ -5,7 +5,12 @@ target_link_libraries(catch_main PUBLIC Catch2::Catch)
 add_library(cube_fixture STATIC fixtures/cube_mesh.cpp)
 
 set(test_names boundary
-               constitutive
+               #
+               hyperelastic_constitutive
+               hyperelastic_plastic_constitutive
+               small_strain_constitutive
+               diffusion_constitutive
+               #
                compute_device
                dof_numbering
                gauss_quadrature
