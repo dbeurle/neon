@@ -1,5 +1,5 @@
 
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #include "quadrature/line_quadrature.hpp"
 #include "quadrature/hexahedron_quadrature.hpp"

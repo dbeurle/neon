@@ -1,5 +1,5 @@
 
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #include "numeric/dense_matrix.hpp"
 #include "numeric/sparse_matrix.hpp"

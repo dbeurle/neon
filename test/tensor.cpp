@@ -1,10 +1,8 @@
 
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #include "numeric/tensor_operations.hpp"
-
 #include "numeric/spectral_decomposition.hpp"
-
 #include "numeric/log_tensor_derivative.hpp"
 
 using namespace neon;

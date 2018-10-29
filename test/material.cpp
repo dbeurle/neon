@@ -1,5 +1,5 @@
 
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #include "material/isotropic_elastic_plastic.hpp"
 #include "material/isotropic_elastic_property.hpp"
