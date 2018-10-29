@@ -1,5 +1,5 @@
 
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #include "constitutive/internal_variables.hpp"
 #include "constitutive/mechanics/solid/small_strain_J2_plasticity.hpp"

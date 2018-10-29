@@ -1,5 +1,5 @@
 
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #include "solver/eigen/eigenvalue_solver.hpp"
 #include "io/json.hpp"

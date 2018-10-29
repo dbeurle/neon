@@ -33,13 +33,11 @@ add_subdirectory(${EXTERNAL_PROJECTS_DIR}/termcolor)
 find_package(ARPACK REQUIRED)
 find_package(BLAS REQUIRED)
 find_package(Boost 1.40 COMPONENTS filesystem REQUIRED)
-find_package(Catch2 REQUIRED)
 find_package(HwLoc REQUIRED)
 find_package(MUMPS REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(TBB REQUIRED)
 find_package(VTK COMPONENTS vtkIOXML REQUIRED)
-
 find_package(OpenCL REQUIRED)
 find_package(ViennaCL CONFIG)
 add_definitions(-DENABLE_OCL)
@@ -55,6 +53,9 @@ if (ENABLE_COVERAGE)
 endif()
 
 if (ENABLE_TESTS)
+
+    find_package(Catch2 REQUIRED)
+
     # Required for integration tests
     include(FindPythonInterp)
 
