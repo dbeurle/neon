@@ -1,5 +1,5 @@
 
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #include "interpolations/triangle.hpp"
 #include "quadrature/triangle_quadrature.hpp"

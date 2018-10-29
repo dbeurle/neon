@@ -1,5 +1,5 @@
 
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #include "numeric/index_types.hpp"
 #include "math/view.hpp"

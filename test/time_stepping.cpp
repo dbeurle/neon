@@ -1,5 +1,5 @@
 
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #include "solver/adaptive_time_step.hpp"
 #include "solver/time_step_control.hpp"

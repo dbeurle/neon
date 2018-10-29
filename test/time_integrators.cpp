@@ -1,5 +1,5 @@
 
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #include "solver/time/runge_kutta_integration.hpp"
 #include "solver/time/euler_integration.hpp"
