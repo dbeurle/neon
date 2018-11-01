@@ -6,12 +6,16 @@
 #include "solver/svd/svd.hpp"
 #include "io/json.hpp"
 
+#ifdef ENABLE_OPENCL
+
 #define VIENNACL_HAVE_EIGEN
 #define VIENNACL_WITH_OPENCL
 
 #include "viennacl/linalg/svd.hpp"
 #include <viennacl/compressed_matrix.hpp>
 #include "viennacl/matrix.hpp"
+
+#endif
 
 #include <iostream>
 #include <cmath>
@@ -177,6 +181,9 @@ TEST_CASE("svd solver test suite")
 
         std::cout << "Randomised SVD test case took " << elapsed_seconds_rand.count() << "s\n";
 
+        // TODO Wrap this in a factory method and its own class
+#ifdef ENABLE_OPENCL
+
         // ViennaCL
         auto const start_viennacl = std::chrono::steady_clock::now();
 
@@ -207,5 +214,6 @@ TEST_CASE("svd solver test suite")
         std::chrono::duration<double> const elapsed_seconds_viennacl_svd = end_viennacl_svd
                                                                            - start_viennacl_svd;
         std::cout << "Viennacl SVD test case took " << elapsed_seconds_viennacl_svd.count() << "s\n";
+#endif
     }
 }
