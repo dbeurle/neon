@@ -15,14 +15,17 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
+# Performance options
 option(ENABLE_LTO "Enable link time optimisations" OFF)
-option(ENABLE_CUDA "Enable CUDA linear solver" OFF)
-option(ENABLE_OCL "Enable OpenCL accelerated linear solver" OFF)
-option(ENABLE_TESTS "Enable the test suite of the unit tests examples" ON)
 option(ENABLE_NATIVE "Optimise for current architecture" OFF)
+option(ENABLE_FAST_MATH "Compiler optimisations for floating point math" OFF)
+# Metrics
+option(ENABLE_TESTS "Enable the test suite of the unit tests examples" ON)
 option(ENABLE_PROFILE "Set compiler flag for profiling" OFF)
 option(ENABLE_COVERAGE "Set compiler flag for coverage analysis" OFF)
-option(ENABLE_FAST_MATH "Compiler optimisations for floating point math" OFF)
+# Specialised accelerators
+option(ENABLE_CUDA "Enable acceleratedCUDA solvers" OFF)
+option(ENABLE_OPENCL "Enable OpenCL accelerated solvers" OFF)
 
 set(EXTERNAL_PROJECTS_DIR "${PROJECT_SOURCE_DIR}/external")
 add_subdirectory(${EXTERNAL_PROJECTS_DIR}/json)
@@ -38,9 +41,13 @@ find_package(MUMPS REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(TBB REQUIRED)
 find_package(VTK COMPONENTS vtkIOXML REQUIRED)
-find_package(OpenCL REQUIRED)
-find_package(ViennaCL CONFIG)
-add_definitions(-DENABLE_OCL)
+
+if (ENABLE_OPENCL)
+    find_package(OpenCL REQUIRED)
+    find_package(ViennaCL CONFIG)
+
+    add_definitions(-DENABLE_OPENCL)
+endif()
 
 if (ENABLE_CUDA)
     enable_language(CUDA)
@@ -53,7 +60,6 @@ if (ENABLE_COVERAGE)
 endif()
 
 if (ENABLE_TESTS)
-
     find_package(Catch2 REQUIRED)
 
     # Required for integration tests
