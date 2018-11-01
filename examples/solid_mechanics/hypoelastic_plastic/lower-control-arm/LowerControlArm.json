@@ -5,7 +5,7 @@
         "name" : "LowerControlArm",
         "Material" : "steel"
     }],
-    "material" : [{
+    "materials" : [{
         "name" : "steel",
         "elastic_modulus" : 200.0e3,
         "IsotropicHardeningModulus" : 400.0,
