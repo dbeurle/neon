@@ -34,6 +34,7 @@ add_subdirectory(${EXTERNAL_PROJECTS_DIR}/range-v3)
 add_subdirectory(${EXTERNAL_PROJECTS_DIR}/termcolor)
 
 find_package(ARPACK REQUIRED)
+find_package(Pastix REQUIRED)
 find_package(BLAS REQUIRED)
 find_package(Boost 1.40 COMPONENTS filesystem REQUIRED)
 find_package(HwLoc REQUIRED)
@@ -45,7 +46,6 @@ find_package(VTK COMPONENTS vtkIOXML REQUIRED)
 if (ENABLE_OPENCL)
     find_package(OpenCL REQUIRED)
     find_package(ViennaCL CONFIG)
-
     add_definitions(-DENABLE_OPENCL)
 endif()
 
