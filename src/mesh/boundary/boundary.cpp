@@ -21,16 +21,16 @@ boundary::boundary(json const& times, json const& loads) { allocate_time_load(ti
 
 boundary::boundary(json const& boundary, std::string const& name, double const generate_time_step)
 {
-    if (boundary.find("GenerateType") != boundary.end())
+    if (boundary.find("generate_type") != boundary.end())
     {
-        if (std::string const& type = boundary["GenerateType"]; type == "Sinusoidal")
+        if (std::string const& type = boundary["generate_type"]; type == "sinusoidal")
         {
             generate_sinusoidal(boundary, name, generate_time_step);
         }
     }
     else
     {
-        allocate_time_load(boundary["Time"], boundary[name]);
+        allocate_time_load(boundary["time"], boundary[name]);
     }
 }
 
@@ -90,19 +90,19 @@ void boundary::generate_sinusoidal(json const& boundary,
 {
     using namespace ranges;
 
-    for (auto const& mandatory_field : {"Period", "Phase", "NumberOfCycles"})
+    for (auto const& mandatory_field : {"period", "phase", "number_of_cycles"})
     {
         if (!boundary.count(mandatory_field))
         {
             throw std::domain_error("\"" + std::string(mandatory_field)
-                                    + "\" was not specified in \"BoundaryCondition\".");
+                                    + "\" was not specified in \"boundaries\".");
         }
     }
 
     std::vector<double> const amplitude = boundary[name];
-    std::vector<double> const period = boundary["Period"];
-    std::vector<double> const number_of_cycles = boundary["NumberOfCycles"];
-    std::vector<double> const phase = boundary["Phase"];
+    std::vector<double> const period = boundary["period"];
+    std::vector<double> const number_of_cycles = boundary["number_of_cycles"];
+    std::vector<double> const phase = boundary["phase"];
 
     if (!((amplitude.size() == period.size()) && (period.size() == phase.size())
           && (phase.size() == number_of_cycles.size())))
@@ -150,7 +150,7 @@ void boundary::allocate_time_load(json const& times, json const& loads)
 
     if (times.size() < 2)
     {
-        throw std::domain_error("\"Time\" is not a vector of at least two elements");
+        throw std::domain_error("\"time\" is not a vector of at least two elements");
     }
 
     if (loads.size() < 2)

@@ -16,174 +16,133 @@
 #include "io/json.hpp"
 
 #include <exception>
+#include <set>
 
 namespace neon
 {
+template <typename ConjugateGradient, typename BiConjugateGradient>
+std::unique_ptr<linear_solver> make_iterative_solver(json const& solver_data, bool const is_symmetric)
+{
+    if (solver_data.find("tolerance") != end(solver_data)
+        && solver_data.find("maximum_iterations") != end(solver_data))
+    {
+        double const tolerance = solver_data["tolerance"];
+        std::int32_t const maximum_iterations = solver_data["maximum_iterations"];
+
+        if (is_symmetric)
+        {
+            return std::make_unique<ConjugateGradient>(tolerance, maximum_iterations);
+        }
+        return std::make_unique<BiConjugateGradient>(tolerance, maximum_iterations);
+    }
+    else if (solver_data.find("tolerance") != end(solver_data))
+    {
+        double const tolerance = solver_data["tolerance"];
+        if (is_symmetric)
+        {
+            return std::make_unique<ConjugateGradient>(tolerance);
+        }
+        return std::make_unique<BiConjugateGradient>(tolerance);
+    }
+    else if (solver_data.find("maximum_iterations") != end(solver_data))
+    {
+        std::int32_t const maximum_iterations = solver_data["maximum_iterations"];
+        if (is_symmetric)
+        {
+            return std::make_unique<ConjugateGradient>(maximum_iterations);
+        }
+        return std::make_unique<BiConjugateGradient>(maximum_iterations);
+    }
+    if (is_symmetric)
+    {
+        return std::make_unique<ConjugateGradient>();
+    }
+    return std::make_unique<BiConjugateGradient>();
+}
+
 std::unique_ptr<linear_solver> make_linear_solver(json const& solver_data, bool const is_symmetric)
 {
-    std::string const& solver_name = solver_data["Type"];
+    if (solver_data.find("type") == end(solver_data))
+    {
+        throw std::domain_error("A \"linear_solver\" \"type\" must be specified");
+    }
+
+    std::string const& solver_name = solver_data["type"];
+
+    {
+        std::set<std::string> names{"PaStiX", "MUMPS", "direct", "iterative"};
+
+        if (!std::binary_search(begin(names), end(names), solver_name))
+        {
+            throw std::domain_error("Linear solver " + solver_name
+                                    + " is not recognised.  Please use \"PaStiX\", "
+                                      "\"MUMPS\", \"direct\" or \"iterative\"");
+        }
+    }
 
     if (solver_name == "PaStiX")
     {
-        if (is_symmetric) return std::make_unique<PaStiXLDLT>();
+        if (is_symmetric)
+        {
+            return std::make_unique<PaStiXLDLT>();
+        }
         return std::make_unique<PaStiXLU>();
     }
     else if (solver_name == "MUMPS")
     {
-        if (is_symmetric) return std::make_unique<MUMPSLLT>();
+        if (is_symmetric)
+        {
+            return std::make_unique<MUMPSLLT>();
+        }
         return std::make_unique<MUMPSLU>();
     }
-    else if (solver_name == "Direct")
+    else if (solver_name == "direct")
     {
-        if (is_symmetric) return std::make_unique<SparseLLT>();
+        if (is_symmetric)
+        {
+            return std::make_unique<SparseLLT>();
+        }
 
         return std::make_unique<SparseLU>();
     }
-    else if (solver_name == "Iterative")
+    else if (solver_name == "iterative")
     {
-        if (solver_data.find("Tolerance") != solver_data.end()
-            && solver_data.find("MaxIterations") != solver_data.end())
+        // If a device isn't specified use a multithreaded CPU implementation
+        if (solver_data.find("device") == end(solver_data) || solver_data["device"] == "cpu")
         {
-            if (is_symmetric)
-            {
-                return std::make_unique<conjugate_gradient>(solver_data["Tolerance"].get<double>(),
-                                                            solver_data["MaxIterations"].get<int>());
-            }
-            return std::make_unique<
-                biconjugate_gradient_stabilised>(solver_data["Tolerance"].get<double>(),
-                                                 solver_data["MaxIterations"].get<int>());
+            return make_iterative_solver<conjugate_gradient,
+                                         biconjugate_gradient_stabilised>(solver_data, is_symmetric);
         }
-        else if (solver_data.find("Tolerance") != solver_data.end())
+        else if (solver_data["device"] == "gpu")
         {
-            if (is_symmetric)
+            if (solver_data.find("backend") == end(solver_data))
             {
-                return std::make_unique<conjugate_gradient>(solver_data["Tolerance"].get<double>());
+                throw std::domain_error("The gpu linear solvers require a \"backend\" object to "
+                                        "describe the gpu framework to use.");
             }
-            return std::make_unique<biconjugate_gradient_stabilised>(
-                solver_data["Tolerance"].get<double>());
-        }
-        else if (solver_data.find("MaxIterations") != solver_data.end())
-        {
-            if (is_symmetric)
-            {
-                return std::make_unique<conjugate_gradient>(solver_data["MaxIterations"].get<int>());
-            }
-            return std::make_unique<biconjugate_gradient_stabilised>(
-                solver_data["MaxIterations"].get<int>());
-        }
-        else
-        {
-            if (is_symmetric) return std::make_unique<conjugate_gradient>();
-            return std::make_unique<biconjugate_gradient_stabilised>();
-        }
-    }
-
-    else if (solver_name == "IterativeCUDA")
-    {
-#ifdef ENABLE_CUDA
-
-        if (!is_symmetric)
-        {
-            if (solver_data.find("Tolerance") != solver_data.end()
-                && solver_data.find("MaxIterations") != solver_data.end())
-            {
-                return std::make_unique<
-                    biconjugate_gradient_stabilised_cuda>(solver_data["Tolerance"].get<double>(),
-                                                          solver_data["MaxIterations"].get<int>());
-            }
-            else if (solver_data.find("Tolerance") != solver_data.end())
-            {
-                return std::make_unique<biconjugate_gradient_stabilised_cuda>(
-                    solver_data["Tolerance"].get<double>());
-            }
-            else if (solver_data.find("MaxIterations") != solver_data.end())
-            {
-                return std::make_unique<biconjugate_gradient_stabilised_cuda>(
-                    solver_data["MaxIterations"].get<int>());
-            }
-            return std::make_unique<biconjugate_gradient_stabilised_cuda>();
-        }
-        else
-        {
-            if (solver_data.find("Tolerance") != solver_data.end()
-                && solver_data.find("MaxIterations") != solver_data.end())
-            {
-                return std::make_unique<conjugate_gradient_cuda>(solver_data["Tolerance"].get<double>(),
-                                                                 solver_data["MaxIterations"]
-                                                                     .get<int>());
-            }
-            else if (solver_data.find("Tolerance") != solver_data.end())
-            {
-                return std::make_unique<conjugate_gradient_cuda>(
-                    solver_data["Tolerance"].get<double>());
-            }
-            else if (solver_data.find("MaxIterations") != solver_data.end())
-            {
-                return std::make_unique<conjugate_gradient_cuda>(
-                    solver_data["MaxIterations"].get<int>());
-            }
-            return std::make_unique<conjugate_gradient_cuda>();
         }
 
-#else
-        throw std::domain_error("IterativeCUDA is only available when neon is "
-                                "configured with -DENABLE_CUDA=1\n");
-#endif
-    }
-    else if (solver_name == "IterativeOCL")
-    {
-#ifdef ENABLE_OCL
-        if (!is_symmetric)
-        {
-            if (solver_data.find("Tolerance") != solver_data.end()
-                && solver_data.find("MaxIterations") != solver_data.end())
-            {
-                return std::make_unique<
-                    biconjugate_gradient_stabilised_ocl>(solver_data["Tolerance"].get<double>(),
-                                                         solver_data["MaxIterations"].get<int>());
-            }
-            else if (solver_data.find("Tolerance") != solver_data.end())
-            {
-                return std::make_unique<biconjugate_gradient_stabilised_ocl>(
-                    solver_data["Tolerance"].get<double>());
-            }
-            else if (solver_data.find("MaxIterations") != solver_data.end())
-            {
-                return std::make_unique<biconjugate_gradient_stabilised_ocl>(
-                    solver_data["MaxIterations"].get<int>());
-            }
-            return std::make_unique<biconjugate_gradient_stabilised_ocl>();
-        }
-        else
-        {
-            if (solver_data.find("Tolerance") != solver_data.end()
-                && solver_data.find("MaxIterations") != solver_data.end())
-            {
-                return std::make_unique<conjugate_gradient_ocl>(solver_data["Tolerance"].get<double>(),
-                                                                solver_data["MaxIterations"].get<int>());
-            }
-            else if (solver_data.find("Tolerance") != solver_data.end())
-            {
-                return std::make_unique<conjugate_gradient_ocl>(
-                    solver_data["Tolerance"].get<double>());
-            }
-            else if (solver_data.find("MaxIterations") != solver_data.end())
-            {
-                return std::make_unique<conjugate_gradient_ocl>(
-                    solver_data["MaxIterations"].get<int>());
-            }
-            return std::make_unique<conjugate_gradient_ocl>();
-        }
-
-#else
-        throw std::domain_error("IterativeOCL is only available when neon is "
-                                "configured with -DENABLE_OCL=1\n");
-#endif
+        // Alias the possible solvers
+        // #if defined ENABLE_CUDA
+        //         using cg_type = conjugate_gradient_cuda;
+        // #elif defined ENABLE_OCL
+        //         using cg_type = conjugate_gradient_ocl;
+        // #else
+        //         using cg_type = conjugate_gradient;
+        // #endif
+        //
+        // #if defined ENABLE_CUDA
+        //         using bicg_type = biconjugate_gradient_stabilised_cuda;
+        // #elif defined ENABLE_OCL
+        //         using bicg_type = biconjugate_gradient_stabilised_ocl;
+        // #else
+        //         using bicg_type = biconjugate_gradient_stabilised;
+        // #endif
     }
     else
     {
         throw std::domain_error("Did not find a linear solver type.  Did you try specifying "
-                                "\"Type\" for the linear solver name?\n");
+                                "\"type\" for the linear solver name?\n");
     }
     return nullptr;
 }

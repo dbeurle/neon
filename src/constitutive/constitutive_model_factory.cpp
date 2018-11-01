@@ -28,74 +28,73 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
     json const& material_data,
     json const& mesh_data)
 {
-    if (!mesh_data.count("ConstitutiveModel"))
+    if (mesh_data.find("constitutive") == mesh_data.end())
     {
-        throw std::domain_error("Missing \"ConstitutiveModel\" in \"Mesh\"");
+        throw std::domain_error("Missing \"constitutive\" in \"mesh\"");
     }
 
-    auto const& constitutive_model = mesh_data["ConstitutiveModel"];
+    auto const& constitutive_model = mesh_data["constitutive"];
 
-    if (!constitutive_model.count("Name"))
+    if (constitutive_model.find("name") == constitutive_model.end())
     {
-        throw std::domain_error("Missing \"Name\" in \"ConstitutiveModel\"");
+        throw std::domain_error("Missing \"name\" in \"constitutive\"");
     }
 
-    auto const& model_name = constitutive_model["Name"].get<std::string>();
+    auto const& model_name = constitutive_model["name"].get<std::string>();
 
-    if (model_name == "NeoHooke" || model_name == "CompressibleNeoHooke")
+    if (model_name == "neohooke" || model_name == "compressible_neohooke")
     {
         return std::make_unique<compressible_neohooke>(variables, material_data);
     }
-    else if (model_name == "Microsphere")
+    else if (model_name == "microsphere")
     {
-        if (!constitutive_model.count("Type"))
+        if (constitutive_model.find("type") == constitutive_model.end())
         {
-            throw std::domain_error("Missing \"Type\" as \"Affine\" or \"NonAffine\" in "
-                                    "Microsphere model");
+            throw std::domain_error("Missing \"type\" as \"affine\" or \"nonaffine\" in "
+                                    "microsphere model");
         }
 
-        if (!constitutive_model.count("Quadrature"))
+        if (constitutive_model.find("quadrature") == constitutive_model.end())
         {
-            throw std::domain_error("Missing \"Quadrature\" as \"BO21\", \"BO33\" or \"FM900\" in "
-                                    "Microsphere model");
+            throw std::domain_error("Missing \"quadrature\" as \"BO21\", \"BO33\" or \"FM900\" in "
+                                    "microsphere model");
         }
 
-        auto const& model_type = constitutive_model["Type"].get<std::string>();
+        auto const& model_type = constitutive_model["type"].get<std::string>();
 
         std::map<std::string, unit_sphere_quadrature::point> const str_to_enum =
             {{"BO21", unit_sphere_quadrature::point::BO21},
              {"BO33", unit_sphere_quadrature::point::BO33},
              {"FM900", unit_sphere_quadrature::point::FM900}};
 
-        auto const entry = str_to_enum.find(constitutive_model["Quadrature"].get<std::string>());
+        auto const entry = str_to_enum.find(constitutive_model["quadrature"].get<std::string>());
 
         if (entry == str_to_enum.end())
         {
-            throw std::domain_error("\"Quadrature\" field must be \"BO21\", \"BO33\" or "
+            throw std::domain_error("\"quadrature\" field must be \"BO21\", \"BO33\" or "
                                     "\"FM900\"");
         }
-        if (model_type == "Affine")
+        if (model_type == "affine")
         {
-            if (!constitutive_model.count("Statistics"))
+            if (constitutive_model.find("statistics") == constitutive_model.end())
             {
-                throw std::domain_error("Missing \"Statistics\" as \"Gaussian\" or \"Langevin\" in "
-                                        "the "
-                                        "Microsphere model");
+                throw std::domain_error("Missing \"statistics\" as \"gaussian\" or \"langevin\" in "
+                                        "the microsphere model");
             }
 
-            auto const& chain_type = constitutive_model["Statistics"].get<std::string>();
+            auto const& chain_type = constitutive_model["statistics"].get<std::string>();
 
-            if (chain_type != "Gaussian" && chain_type != "Langevin")
+            if (chain_type != "gaussian" && chain_type != "langevin")
             {
-                throw std::domain_error("\"Statistics\" for the Microsphere model must be either "
-                                        "\"Gaussian\" or \"Langevin\"");
+                throw std::domain_error("\"statistics\" for the microsphere model must be either "
+                                        "\"gaussian\" or \"langevin\"");
             }
 
-            if (chain_type == "Gaussian")
+            if (chain_type == "gaussian")
             {
-                if (constitutive_model.count("Ageing"))
+                if (constitutive_model.find("ageing") != constitutive_model.end())
                 {
-                    if (constitutive_model["Ageing"].get<std::string>() != "BAND")
+                    if (constitutive_model["ageing"].get<std::string>() != "BAND")
                     {
                         throw std::domain_error("The only microsphere ageing model supported is "
                                                 "\"BAND\"");
@@ -108,55 +107,57 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
                                                                      material_data,
                                                                      entry->second);
             }
-            else if (chain_type == "Langevin")
+            else if (chain_type == "langevin")
             {
                 return std::make_unique<affine_microsphere>(variables, material_data, entry->second);
             }
         }
-        else if (model_type == "NonAffine")
+        else if (model_type == "nonaffine")
         {
             return std::make_unique<nonaffine_microsphere>(variables, material_data, entry->second);
         }
         else
         {
-            throw std::domain_error("Microsphere model options are \"Affine\" or \"Nonaffine\"");
+            throw std::domain_error("microsphere model options are \"affine\" or \"nonaffine\"");
         }
     }
-    else if (model_name == "IsotropicLinearElasticity")
+    else if (model_name == "isotropic_linear_elasticity")
     {
         return std::make_unique<isotropic_linear_elasticity>(variables, material_data);
     }
-    else if (model_name == "J2Plasticity")
+    else if (model_name == "J2_plasticity")
     {
-        if (!constitutive_model.count("FiniteStrain"))
+        if (constitutive_model.find("finite_strain") == constitutive_model.end())
         {
             throw std::domain_error("\"small_strain_J2_plasticity\" must have a boolean value for "
-                                    "\"FiniteStrain\"");
+                                    "\"finite_strain\"");
         }
 
-        if (constitutive_model.count("Damage"))
+        if (constitutive_model.find("damage") != constitutive_model.end())
         {
-            if (mesh_data["ConstitutiveModel"]["FiniteStrain"].get<bool>())
+            if (mesh_data["constitutive"]["finite_strain"].get<bool>())
             {
-                throw std::domain_error("\"J2PlasticityDamage\" is not implemented for "
-                                        "\"FiniteStrain\"");
+                throw std::domain_error("\"damage\" is not yet implemented for "
+                                        "\"finite_strain\"");
             }
 
-            auto const& damage_type = constitutive_model["Damage"].get<std::string>();
+            std::string const& damage_type = constitutive_model["damage"];
 
-            if (damage_type == "IsotropicChaboche")
+            if (damage_type == "isotropic_chaboche")
+            {
                 return std::make_unique<small_strain_J2_plasticity_damage>(variables, material_data);
+            }
         }
 
-        if (mesh_data["ConstitutiveModel"]["FiniteStrain"].get<bool>())
+        if (mesh_data["constitutive"]["finite_strain"].get<bool>())
         {
             return std::make_unique<finite_strain_J2_plasticity>(variables, material_data);
         }
         return std::make_unique<small_strain_J2_plasticity>(variables, material_data);
     }
     throw std::domain_error("The model name " + model_name + " is not recognised\n"
-                            + "Supported models are \"NeoHooke\", \"Microsphere\" "
-                              "and \"small_strain_J2_plasticity\"\n");
+                            + "Supported models are \"neohooke\", \"microsphere\" "
+                              "and \"J2_plasticity\"\n");
     return nullptr;
 }
 }
@@ -168,48 +169,48 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
     json const& material_data,
     json const& mesh_data)
 {
-    if (!mesh_data.count("ConstitutiveModel"))
+    if (mesh_data.find("constitutive") == mesh_data.end())
     {
-        throw std::domain_error("Missing \"ConstitutiveModel\" in \"Mesh\"");
+        throw std::domain_error("Missing \"constitutive\" in \"mesh\"");
     }
 
-    auto const& constitutive_model = mesh_data["ConstitutiveModel"];
+    auto const& constitutive_model = mesh_data["constitutive"];
 
-    if (!constitutive_model.count("Name"))
+    if (constitutive_model.find("name") == constitutive_model.end())
     {
-        throw std::domain_error("Missing \"Name\" in \"ConstitutiveModel\"");
+        throw std::domain_error("Missing \"name\" in \"constitutive\"");
     }
 
-    auto const& model_name = constitutive_model["Name"].get<std::string>();
+    std::string const& model_name = constitutive_model["name"];
 
-    if (model_name == "PlaneStrain")
+    if (model_name == "plane_strain")
     {
         return std::make_unique<isotropic_linear_elasticity>(variables,
                                                              material_data,
                                                              isotropic_linear_elasticity::plane::strain);
     }
-    else if (model_name == "PlaneStress")
+    else if (model_name == "plane_stress")
     {
         return std::make_unique<isotropic_linear_elasticity>(variables,
                                                              material_data,
                                                              isotropic_linear_elasticity::plane::stress);
     }
-    else if (model_name == "J2Plasticity")
+    else if (model_name == "J2_plasticity")
     {
-        if (!constitutive_model.count("FiniteStrain"))
+        if (constitutive_model.find("finite_strain") == constitutive_model.end())
         {
             throw std::domain_error("\"small_strain_J2_plasticity\" must have a boolean value for "
-                                    "\"FiniteStrain\"");
+                                    "\"finite_strain\"");
         }
 
-        if (mesh_data["ConstitutiveModel"]["FiniteStrain"].get<bool>())
+        if (mesh_data["constitutive"]["finite_strain"].get<bool>())
         {
             return std::make_unique<finite_strain_J2_plasticity>(variables, material_data);
         }
         return std::make_unique<small_strain_J2_plasticity>(variables, material_data);
     }
     throw std::domain_error("The model name " + model_name + " is not recognised\n"
-                            + "Supported models are \"PlaneStrain\" and \"PlaneStress\"\n");
+                            + "Supported models are \"plane_strain\" and \"plane_stress\"\n");
     return nullptr;
 }
 }
@@ -221,26 +222,26 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
     json const& material_data,
     json const& mesh_data)
 {
-    if (!mesh_data.count("ConstitutiveModel"))
+    if (mesh_data.find("constitutive") == mesh_data.end())
     {
-        throw std::domain_error("A \"ConstitutiveModel\" was not specified in \"Mesh\"");
+        throw std::domain_error("A \"constitutive\" was not specified in \"mesh\"");
     }
 
-    auto const& constitutive_model = mesh_data["ConstitutiveModel"];
+    auto const& constitutive_model = mesh_data["constitutive"];
 
-    if (!constitutive_model.count("Name"))
+    if (constitutive_model.find("name") == constitutive_model.end())
     {
-        throw std::domain_error("\"ConstitutiveModel\" requires a \"Name\" field");
+        throw std::domain_error("\"constitutive\" requires a \"name\" field");
     }
 
-    if (constitutive_model["Name"].get<std::string>() == "IsotropicDiffusion")
+    if (constitutive_model["name"].get<std::string>() == "isotropic_diffusion")
     {
         return std::make_unique<isotropic_diffusion>(variables, material_data);
     }
 
-    throw std::domain_error("The model name " + constitutive_model["Name"].get<std::string>()
+    throw std::domain_error("The model name " + constitutive_model["name"].get<std::string>()
                             + " is not recognised\n"
-                            + "The supported model is \"IsotropicDiffusion\"\n");
+                            + "The supported model is \"isotropic_diffusion\"\n");
 
     return nullptr;
 }

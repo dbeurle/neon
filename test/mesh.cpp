@@ -1,5 +1,5 @@
 
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #include "mesh/basic_mesh.hpp"
 #include "mesh/element_topology.hpp"
@@ -211,12 +211,12 @@ TEST_CASE("Solid mesh test")
     basic_mesh basic_mesh(json::parse(json_cube_mesh()));
     nodal_coordinates nodal_coordinates(json::parse(json_cube_mesh()));
 
-    REQUIRE(!simulation_data["Name"].empty());
+    REQUIRE(!simulation_data["name"].empty());
 
     mesh fem_mesh(basic_mesh,
                   material_data,
                   simulation_data,
-                  simulation_data["Time"]["Increments"]["Initial"]);
+                  simulation_data["time"]["increments"]["initial"]);
 
     REQUIRE(fem_mesh.active_dofs() == 192);
 

@@ -6,10 +6,13 @@ pipeline {
                 dockerfile {
                     filename 'docker/Dockerfile'
                     additionalBuildArgs '--pull'
+                    args '--device=/dev/dri:/dev/dri'
                 }
             }
             steps {
                 sh '''
+                clinfo
+                clpeak
                 python .run-clang-format.py -r src
                 '''
             }
@@ -19,6 +22,7 @@ pipeline {
                 dockerfile {
                     filename 'docker/Dockerfile'
                     additionalBuildArgs '--pull'
+                    args '--device=/dev/dri:/dev/dri'
                 }
             }
             steps {
@@ -44,6 +48,7 @@ pipeline {
                         dockerfile {
                             filename 'docker/Dockerfile'
                             additionalBuildArgs '--pull'
+                            args '--device=/dev/dri:/dev/dri'
                         }
                     }
                     steps {
@@ -66,6 +71,7 @@ pipeline {
                         dockerfile {
                             filename 'docker/Dockerfile'
                             additionalBuildArgs '--pull'
+                            args '--device=/dev/dri:/dev/dri'
                         }
                     }
                     steps {
@@ -88,6 +94,7 @@ pipeline {
                         dockerfile {
                             filename 'docker/Dockerfile'
                             additionalBuildArgs '--pull'
+                            args '--device=/dev/dri:/dev/dri'
                         }
                     }
                     steps {
@@ -110,6 +117,7 @@ pipeline {
                         dockerfile {
                             filename 'docker/Dockerfile'
                             additionalBuildArgs '--pull'
+                            args '--device=/dev/dri:/dev/dri'
                         }
                     }
                     steps {
@@ -152,6 +160,7 @@ pipeline {
                         dockerfile {
                             filename 'docker/Dockerfile'
                             additionalBuildArgs '--pull'
+                            args '--device=/dev/dri:/dev/dri'
                         }
                     }
                     steps {

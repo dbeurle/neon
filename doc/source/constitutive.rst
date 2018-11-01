@@ -9,32 +9,32 @@ All of the units are assumed to be consistent and it is the user's responsibilit
 Isotropic Linear Elasticity
 ===========================
 
-The simplest form of constitutive model for linear materials is the isotropic linear elasticity model.  This is specified using  ``"IsotropicLinearElasticity"``.  The required parameters are
+The simplest form of constitutive model for linear materials is the isotropic linear elasticity model.  This is specified using  ``"isotropic_linear_elasticity"``.  The required parameters are
 
- * ``"PoissonsRatio"`` for the Poisson's Ratio of the material
- * ``"ElasticModulus"`` for the elasticity modulus (slope of stress-strain curve)
+ * ``"poissons_ratio"`` for the Poisson's Ratio of the material
+ * ``"elastic_modulus"`` for the elasticity modulus (slope of stress-strain curve)
 
-In addition, the elasticity constants can also be specified using  ``"ShearModulus"`` and ``"BulkModulus"`` if this is more convenient for the user.
+In addition, the elasticity constants can also be specified using  ``"shear_modulus"`` and ``"bulk_modulus"`` if this is more convenient for the user.
 
 The model is specified by ::
 
-    "ConstitutiveModel" : {
-        "Name" : "IsotropicLinearElasticity"
+    "constitutive" : {
+        "name" : "isotropic_linear_elasticity"
     }
 
 Small Strain J2 Plasticity
 ==========================
 
-The small strain J2 plasticity model introduces material non-linearity into the finite element formulation.  This model extends the ``"IsotropicLinearElasticity"`` model to include:
+The small strain J2 plasticity model introduces material non-linearity into the finite element formulation.  This model extends the ``"isotropic_linear_elasticity"`` model to include:
 
 * ``"YieldStress"`` stress when the material begins plastic flow
 * ``"IsotropicHardeningModulus"`` the hardening modulus of the material
 
 This model is used by specifying ::
 
-    "ConstitutiveModel" : {
-        "Name" : "J2Plasticity",
-        "FiniteStrain" : false
+    "constitutive" : {
+        "name" : "J2Plasticity",
+        "finite_strain" : false
     }
 
 where the finite strain version of the J2 model is not required.  Further modifications to the J2 model are given in subsequent subsections.
@@ -44,19 +44,19 @@ Isotropic Chaboche Damage
 
 This non-linear isotropic ductile damage model is based on the ``"J2Plasticity"`` model. It is mainly controlled by the following material parameters:
 
-* ``"KinematicHardeningModulus"`` the kinematic hardening modulus of the material
-* ``"SofteningMultiplier"``  a scaling factor multiplied by the back stress in the plastic yield function
-* ``"PlasticityViscousExponent"`` :math:`n`: relates the plastic multiplier to the plastic yield function exponentially
-* ``"PlasticityViscousDenominator"`` :math:`K`: scales the plastic yield function :math:`\dot{\lambda}_{vp} = \langle \frac{f_{vp}}{K} \rangle^{n}`
-* ``"DamageViscousExponent"`` :math:`s`: relates the damage multiplier to the damage yield function exponentially
-* ``"DamageViscousDenominator"`` :math:`S`: scales the damage yield function :math:`\dot{\lambda}_{d} = \langle \frac{f_{d}}{S} \rangle^{s}`
+* ``"kinematic_hardening_modulus"`` the kinematic hardening modulus of the material
+* ``"softening_multiplier"``  a scaling factor multiplied by the back stress in the plastic yield function
+* ``"plasticity_viscous_exponent"`` :math:`n`: relates the plastic multiplier to the plastic yield function exponentially
+* ``"plasticity_viscous_denominator"`` :math:`K`: scales the plastic yield function :math:`\dot{\lambda}_{vp} = \langle \frac{f_{vp}}{K} \rangle^{n}`
+* ``"damage_viscous_exponent"`` :math:`s`: relates the damage multiplier to the damage yield function exponentially
+* ``"damage_viscous_denominator"`` :math:`S`: scales the damage yield function :math:`\dot{\lambda}_{d} = \langle \frac{f_{d}}{S} \rangle^{s}`
 
 This model is used by specifying ::
 
-    "ConstitutiveModel" : {
-          "Name" : "J2Plasticity",
-          "Damage" : "IsotropicChaboche",
-          "FiniteStrain" : false
+    "constitutive" : {
+          "name" : "J2Plasticity",
+          "damage" : "isotropic_chaboche",
+          "finite_strain" : false
       }
 
 This constitutive model is implemented only in an infinitesimal strain framework.
@@ -64,22 +64,22 @@ This constitutive model is implemented only in an infinitesimal strain framework
 Neo-Hooke Elasticity
 ====================
 
-The Neo-Hooke model is a common hyperelastic material model which can be used to model non-linear elasticity behaviour.  Only two material parameters required, which are
+The Neo-Hooke model is a common hyperelastic material model which can be used to model non-linear elasticity.  Only two material parameters required, which are
 
-    * ``"PoissonsRatio"`` for the Poisson's ratio of the material
-    * ``"ElasticModulus"`` for the elasticity modulus (slope of stress-strain curve)
+    * ``"poissons_ratio"`` for the Poisson's ratio of the material
+    * ``"elastic_modulus"`` for the elasticity modulus (slope of stress-strain curve)
 
 alternatively the material parameters
 
-    * ``"BulkModulus"``
-    * ``"ShearModulus"``
+    * ``"bulk_modulus"``
+    * ``"shear_modulus"``
 
-can be used, where the ``"BulkModulus"`` acts as the penalty parameter for volumetric strain.
+can be used, where the ``"bulk_modulus"`` acts as the penalty parameter for volumetric strain term.
 
 This model is used by specifying ::
 
-    "ConstitutiveModel" : {
-        "Name" : "Neohooke"
+    "constitutive" : {
+        "name" : "neohooke"
     }
 
 Note that this constitutive model invokes the finite strain solver, which requires an incremental approach and additional Newton-Raphson solver iterations.
@@ -91,9 +91,9 @@ The affine microsphere model uses a Langevin statistical mechanics model for pol
 
 Material parameters are
 
-    * ``"BulkModulus"``
-    * ``"ShearModulus"``
-    * ``"SegmentsPerChain"`` Number of segments per chain (experimental)
+    * ``"bulk_modulus"``
+    * ``"shear_modulus"``
+    * ``"segments_per_chain"`` Number of segments per chain (experimental)
 
 To specify the unit sphere quadrature rules
 
@@ -103,24 +103,24 @@ To specify the unit sphere quadrature rules
 
 The model is used by specifying ::
 
-    "ConstitutiveModel" : {
-        "Name" : "Microsphere",
-        "Type" : "Affine",
-        "Statistics" : "Langevin",
-        "Quadrature" : "BO21"
+    "constitutive" : {
+        "name" : "microsphere",
+        "type" : "affine",
+        "statistics" : "langevin",
+        "quadrature" : "BO21"
     }
 
 
 Gaussian Affine Microsphere
 ===========================
 
-The Gaussian affine microsphere model re-derives the affine microsphere model using a Gaussian chain description.  This significantly reduces complexity of the model.
+The Gaussian affine microsphere model re-derives the affine microsphere model using a Gaussian chain description and significantly reduces the complexity of the model.
 
 Material parameters are
 
-    * ``"BulkModulus"``
-    * ``"ShearModulus"``
-    * ``"SegmentsPerChain"`` Number of segments per chain (not required)
+    * ``"bulk_modulus"``
+    * ``"shear_modulus"``
+    * ``"segments_per_chain"`` Number of segments per chain (not required)
 
 To specify the unit sphere quadrature rules
 
@@ -130,9 +130,9 @@ To specify the unit sphere quadrature rules
 
 The model is used by specifying ::
 
-    "ConstitutiveModel" : {
-        "Name" : "Microsphere",
-        "Type" : "Affine",
-        "Statistics" : "Gaussian",
-        "Quadrature" : "BO21"
+    "constitutive" : {
+        "name" : "microsphere",
+        "type" : "affine",
+        "statistics" : "gaussian",
+        "quadrature" : "BO21"
     }

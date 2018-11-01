@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "mesh/diffusion/submesh.hpp"
+#include "mesh/diffusion/heat/submesh.hpp"
 
-#include "mesh/diffusion/boundary/surface_boundary.hpp"
+#include "mesh/diffusion/heat/boundary/surface_boundary.hpp"
 #include "mesh/boundary/dirichlet.hpp"
 #include "io/file_output.hpp"
 

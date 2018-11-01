@@ -15,11 +15,11 @@ nonfollower_load_boundary::nonfollower_load_boundary(
     std::unordered_map<std::string, int> const& dof_table,
     double const generate_time_step)
 {
-    if (std::string const& type = boundary_data["Type"]; type == "moment" || type == "force")
+    if (std::string const& type = boundary_data["type"]; type == "moment" || type == "force")
     {
         for (auto const& [dof_name, dof_offset] : dof_table)
         {
-            if (boundary_data.count(dof_name))
+            if (boundary_data.find(dof_name) != boundary_data.end())
             {
                 for (auto const& mesh : submeshes)
                 {

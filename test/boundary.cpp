@@ -1,12 +1,12 @@
 
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #include "interpolations/triangle.hpp"
 #include "quadrature/triangle_quadrature.hpp"
 #include "mesh/basic_submesh.hpp"
 #include "mesh/boundary/boundary.hpp"
 #include "mesh/mechanics/solid/boundary/nonfollower_load.hpp"
-#include "mesh/diffusion/boundary/newton_convection.hpp"
+#include "mesh/diffusion/heat/boundary/newton_convection.hpp"
 #include "io/json.hpp"
 
 #include "fixtures/cube_mesh.hpp"
@@ -17,7 +17,7 @@ using namespace neon;
 
 constexpr auto ZERO_MARGIN = 1.0e-5;
 
-TEST_CASE("boundary unit test", "[boundary]")
+TEST_CASE("boundary unit test")
 {
     std::vector<double> times{0.0, 1.0, 2.0, 3.0};
     SECTION("Check time data saved correctly")
@@ -121,7 +121,7 @@ TEST_CASE("Traction test for triangle", "[Traction]")
         REQUIRE((dof_list.col(0) - dofs).sum() == 0);
     }
 }
-TEST_CASE("Pressure test for triangle", "[Pressure]")
+TEST_CASE("Pressure test for triangle")
 {
     using namespace neon::mechanics::solid;
 
@@ -177,7 +177,7 @@ TEST_CASE("Pressure test for triangle", "[Pressure]")
         REQUIRE((dof_list.col(0) - dofs).sum() == 0);
     }
 }
-TEST_CASE("Traction test for mixed mesh", "[nonfollower_load_boundary]")
+TEST_CASE("Traction test for mixed mesh")
 {
     // Test construction of a mixed quadrilateral and triangle mesh
     using namespace neon::mechanics::solid;
@@ -200,18 +200,18 @@ TEST_CASE("Traction test for mixed mesh", "[nonfollower_load_boundary]")
     indices known_dofs_quad(4, 1);
     known_dofs_quad << 1, 4, 7, 10;
 
-    auto simulation_data = json::parse("{\"BoundaryConditions\" : [ "
-                                       "{\"Name\" : \"Ysym\", "
-                                       "\"Type\" : \"Traction\", "
-                                       "\"Time\" : [0.0, 1.0],"
+    auto simulation_data = json::parse("{\"boundaries\" : [ "
+                                       "{\"name\" : \"Ysym\", "
+                                       "\"type\" : \"traction\", "
+                                       "\"time\" : [0.0, 1.0],"
                                        "\"y\" : [0.0, 1.0e-3]} ], "
-                                       "\"ConstitutiveModel\" : {\"Name\":\"NeoHooke\"}, "
-                                       "\"ElementOptions\" : {\"Quadrature\" : \"Full\"}, "
-                                       "\"Name\" : \"cube\"}");
+                                       "\"constitutive\" : {\"name\":\"neohooke\"}, "
+                                       "\"element_options\" : {\"quadrature\" : \"full\"}, "
+                                       "\"name\" : \"cube\"}");
 
-    auto boundary = json::parse("{\"Time\":[0.0, "
-                                "1.0],\"Type\":\"Traction\",\"y\":[0.0, "
-                                "1.0e-3]}");
+    auto boundary_data = json::parse("{\"time\" : [0.0, 1.0],"
+                                     "\"type\" : \"traction\","
+                                     "\"y\" : [0.0, 1.0e-3]}");
 
     std::vector<basic_submesh> submeshes = {tri_mesh, quad_mesh};
 
@@ -229,7 +229,7 @@ TEST_CASE("Traction test for mixed mesh", "[nonfollower_load_boundary]")
     nonfollower_load_boundary loads(mesh_coordinates,
                                     submeshes,
                                     simulation_data,
-                                    boundary,
+                                    boundary_data,
                                     {{"x", 0}, {"y", 1}, {"z", 2}},
                                     1.0);
     // Check the triangle element

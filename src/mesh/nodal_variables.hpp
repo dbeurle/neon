@@ -27,7 +27,7 @@ public:
     template <typename indices_type>
     auto const view(indices_type const local_indices) const
     {
-        return u(Eigen::placeholders::all, local_indices);
+        return u(Eigen::all, local_indices);
     }
 
     /// Obtain the underlying storage

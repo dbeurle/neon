@@ -1,69 +1,69 @@
 {
-    "Name" : "J2PlasticityDamage",
-    "Cores" : 1,
-    "Part": [{
-        "Name" : "beam",
-        "Material" : "steel"
+    "name" : "J2PlasticityDamage",
+    "cores" : 1,
+    "parts": [{
+        "name" : "beam",
+        "material" : "steel"
     }],
-    "Material" : [{
-        "Name" : "steel",
-        "ElasticModulus": 134.0e3,
-        "YieldStress": 85,
-        "PoissonsRatio": 0.3,
-        "KinematicHardeningModulus": 5500,
+    "materials" : [{
+        "name" : "steel",
+        "elastic_modulus": 134.0e3,
+        "yield_stress": 85,
+        "poissons_ratio": 0.3,
+        "kinematic_hardening_modulus": 5500,
         "IsotropicHardeningModulus": 5500,
-        "SofteningMultiplier" : 250,
-        "PlasticityViscousExponent" : 2.5,
-        "PlasticityViscousDenominator" : 1220,
-        "DamageViscousExponent" : 2,
-        "DamageViscousDenominator" : 0.6
+        "softening_multiplier" : 250,
+        "plasticity_viscous_exponent" : 2.5,
+        "plasticity_viscous_denominator" : 1220,
+        "damage_viscous_exponent" : 2,
+        "damage_viscous_denominator" : 0.6
     }],
-    "SimulationCases" : [{
-        "Name" : "Uniaxial",
-        "Module" : "SolidMechanics",
-        "Solution" : "Equilibrium",
-        "NonlinearOptions" : {
-            "ResidualTolerance" : 1e-3,
-            "DisplacementTolerance" : 1e-3
+    "steps" : [{
+        "name" : "Uniaxial",
+        "module" : "solid_mechanics",
+        "solution" : "equilibrium",
+        "nonlinear_options" : {
+            "residual_tolerance" : 1e-3,
+            "displacement_tolerance" : 1e-3
         },
-        "Time" : {
-            "Period" : 30,
-            "Increments" : {
-                "Initial" : 0.1,
-                "Minimum" : 0.01,
-                "Maximum" : 0.1,
-                "Adaptive" : false
+        "time" : {
+            "period" : 30,
+            "increments" : {
+                "initial" : 0.1,
+                "minimum" : 0.01,
+                "maximum" : 0.1,
+                "adaptive" : false
             }
         },
-        "Mesh" : [{
-            "Name" : "beam",
-            "ConstitutiveModel" : {
-                "Name" : "J2Plasticity",
-                "Damage" : "IsotropicChaboche",
-                "FiniteStrain" : false
+        "meshes" : [{
+            "name" : "beam",
+            "constitutive" : {
+                "name" : "J2_plasticity",
+                "damage" : "isotropic_chaboche",
+                "finite_strain" : false
             },
-            "ElementOptions" : {
-                "Quadrature" : "Full"
+            "element_options" : {
+                "quadrature" : "full"
             },
-            "BoundaryConditions" : [{
-                "Name" : "Clamped",
-                "Type" : "Displacement",
-                "Time" : [0.0, 30],
+            "boundaries" : [{
+                "name" : "Clamped",
+                "type" : "displacement",
+                "time" : [0.0, 30],
                 "x" : [0.0, 0.0],
                 "y" : [0.0, 0.0],
                 "z" : [0.0, 0.0]
             },
             {
-                "Name" : "x-fixed",
-                "Type" : "Displacement",
+                "name" : "x-fixed",
+                "type" : "displacement",
                 "x" : [0.12, 0.10],
-                "GenerateType" : "Sinusoidal",
-                "Period" : [10,10],
-                "Phase" : [0,0],
-                "NumberOfCycles" : [2,1]
+                "GenerateType" : "sinusoidal",
+                "period" : [10,10],
+                "phase" : [0,0],
+                "number_of_cycles" : [2,1]
             }],
-            "Visualisation" : {
-                "Fields" : ["displacement", "linearised_strain",
+            "visualisation" : {
+                "fields" : ["displacement", "linearised_strain",
                             "linearised_plastic_strain", "cauchy_stress",
                             "von_mises_stress", "effective_plastic_strain",
                             "displacement_gradient", "damage",
@@ -71,8 +71,8 @@
                             "kinematic_hardening", "displacement_gradient"]
             }
         }],
-		"LinearSolver" : {
-		    "Type" : "PaStiX"
+		"linear_solver" : {
+		    "type" : "PaStiX"
         }
     }]
 }

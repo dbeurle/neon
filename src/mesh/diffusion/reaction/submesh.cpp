@@ -14,7 +14,15 @@
 
 #include <termcolor/termcolor.hpp>
 
-namespace neon::diffusion
+/// Compute the local Jacobian matrix \f$ \bf{x}_\xi \f$
+/// \param rhea Shape function gradients at quadrature point
+/// \param configuration Configuration of the element (coordinates)
+inline neon::matrix3 local_jacobian(neon::matrix const& rhea, neon::matrix3x const& configuration)
+{
+    return configuration * rhea;
+}
+
+namespace neon::diffusion::reaction
 {
 submesh::submesh(json const& material_data,
                  json const& mesh_data,
@@ -23,6 +31,7 @@ submesh::submesh(json const& material_data,
     : basic_submesh(submesh),
       coordinates(coordinates),
       sf(make_volume_interpolation(topology(), mesh_data)),
+      view(sf->quadrature().points()),
       variables(std::make_shared<internal_variables_t>(elements() * sf->quadrature().points())),
       cm(make_constitutive_model(variables, material_data, mesh_data))
 {

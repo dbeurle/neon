@@ -178,55 +178,55 @@ std::string json_cube_mesh()
 
 std::string material_data_json()
 {
-    return "{\"Name\" : \"steel\",\"ElasticModulus\" : 200.0e6, \"PoissonsRatio\" "
-           ": 0.45, \"Density\" : 7800.0 }";
+    return "{\"name\" : \"steel\",\"elastic_modulus\" : 200.0e6, \"poissons_ratio\" "
+           ": 0.45, \"density\" : 7800.0 }";
 }
 
 std::string simulation_data_json()
 {
-    return "{ \"BoundaryConditions\" : [ "
+    return "{ \"boundaries\" : [ "
            //
-           "{\"Name\" : \"bottom\", "
-           "\"Type\" : \"Displacement\","
-           "\"Time\" : [0.0, 1.0],"
+           "{\"name\" : \"bottom\", "
+           "\"type\" : \"displacement\","
+           "\"time\" : [0.0, 1.0],"
            "\"x\" : [0.0, 0.0], \"y\" : [0.0, 0.0], \"z\" : [0.0, 0.0]}, "
            //
-           "{\"Name\" : \"top\", "
-           "\"Type\" : \"Displacement\","
-           "\"Time\" : [0.0, 1.0],"
+           "{\"name\" : \"top\", "
+           "\"type\" : \"displacement\","
+           "\"time\" : [0.0, 1.0],"
            "\"z\" : [0.0, 1.0e-3]}],"
            //
-           "\"ConstitutiveModel\" : {\"Name\":\"NeoHooke\"}, "
-           "\"ElementOptions\" : {\"Quadrature\" : \"Full\"}, "
-           "\"Name\" : \"cube\", "
+           "\"constitutive\" : {\"name\":\"neohooke\"}, "
+           "\"element_options\" : {\"quadrature\" : \"full\"}, "
+           "\"name\" : \"cube\", "
            //
-           "\"Visualisation\" : {\"Fields\" : [\"displacement\", \"cauchy_stress\"]},"
+           "\"visualisation\" : {\"fields\" : [\"displacement\", \"cauchy_stress\"]},"
            //
-           "\"NonlinearOptions\" : { "
-           "\"DisplacementTolerance\" : 1.0e-5, "
-           "\"ResidualTolerance\" : 0.001},"
+           "\"nonlinear_options\" : { "
+           "\"displacement_tolerance\" : 1.0e-5, "
+           "\"residual_tolerance\" : 0.001},"
            //
-           "\"Time\" : {\"Period\" : 1.0, \"Increments\": { "
-           "\"Initial\" : 1.0, \"Minimum\" : 0.001, \"Maximum\" : 10.0, \"Adaptive\" : true }},"
-           "\"LinearSolver\" : {\"Type\" : \"Iterative\"}}";
+           "\"time\" : {\"period\" : 1.0, \"increments\": { "
+           "\"initial\" : 1.0, \"minimum\" : 0.001, \"maximum\" : 10.0, \"adaptive\" : true }},"
+           "\"linear_solver\" : {\"type\" : \"iterative\"}}";
 }
 
 std::string simulation_data_traction_json()
 {
-    return "{ \"BoundaryConditions\" : [ "
+    return "{ \"boundaries\" : [ "
            //
-           "{\"Name\" : \"Ysym\", "
-           "\"Type\" : \"Traction\", "
-           "\"Time\" : [0.0, 1.0],"
+           "{\"name\" : \"Ysym\", "
+           "\"type\" : \"traction\", "
+           "\"time\" : [0.0, 1.0],"
            "\"y\" : [0.0, 1.0e-3]} ], "
            //
-           "\"ConstitutiveModel\" : {\"Name\":\"NeoHooke\"}, "
-           "\"ElementOptions\" : {\"Quadrature\" : \"Full\"}, "
-           "\"Name\" : \"cube\"}";
+           "\"constitutive\" : {\"name\":\"neohooke\"}, "
+           "\"element_options\" : {\"quadrature\" : \"full\"}, "
+           "\"name\" : \"cube\"}";
 }
 
 std::string solver_data_json()
 {
-    return "{\"Type\" : \"Iterative\", \"MaxIterations\" : 1000, "
-           " \"Tolerance\" : 1e-6 }";
+    return "{\"type\" : \"iterative\", \"maximum_iterations\" : 1000, "
+           " \"tolerance\" : 1e-6 }";
 }

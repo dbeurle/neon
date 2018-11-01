@@ -5,21 +5,19 @@
 
 #include "assembler/diffusion/dynamic_matrix.hpp"
 #include "assembler/diffusion/static_matrix.hpp"
-#include "mesh/diffusion/mesh.hpp"
+#include "mesh/diffusion/heat/mesh.hpp"
 
 namespace neon
 {
-//! This namespace groups together all of the classes and functions associated
-//! with three-dimensional diffusion type finite elements.  These include
-//! constitutive models, matrix systems, meshes, element stiffness matrices etc.
+/// This namespace groups together all of the classes and functions associated
+/// with three-dimensional diffusion type finite elements.  These include
+/// constitutive models, matrix systems, meshes, element stiffness matrices etc.
 namespace diffusion
 {
 }
 
-/**
- * linear_diffusionModule is responsible for the construction and solution method
- * of a linear diffusion problem
- */
+/// linear_diffusion_module is responsible for the construction and solution method
+/// of a linear diffusion problem
 template <typename femMatrix_Tp>
 class linear_diffusion_module : public abstract_module
 {
@@ -27,7 +25,7 @@ public:
     explicit linear_diffusion_module(basic_mesh const& mesh,
                                      json const& material,
                                      json const& simulation)
-        : fem_mesh(mesh, material, simulation["Mesh"][0]), fem_matrix(fem_mesh, simulation)
+        : fem_mesh(mesh, material, simulation["meshes"].front()), fem_matrix(fem_mesh, simulation)
     {
     }
 

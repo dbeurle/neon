@@ -14,13 +14,19 @@
 namespace neon::diffusion
 {
 dynamic_matrix::dynamic_matrix(mesh_type& mesh, json const& simulation_data)
-    : static_matrix(mesh, simulation_data), time_solver(simulation_data["Time"])
+    : static_matrix(mesh, simulation_data), time_solver(simulation_data["time"])
 {
-    if (simulation_data.find("InitialConditions") != simulation_data.end()
-        && simulation_data["InitialConditions"].find("Uniform") != simulation_data.end())
+    if (simulation_data.find("initial_conditions") != simulation_data.end()
+        && simulation_data["initial_conditions"].find("uniform")
+               != simulation_data["initial_conditions"].end())
     {
-        d = simulation_data["InitialConditions"]["Uniform"].get<double>()
+        d = simulation_data["initial_conditions"]["uniform"].get<double>()
             * vector::Ones(mesh.active_dofs());
+    }
+    else
+    {
+        // throw std::domain_error(
+        //     "\"initial_conditions\" must be provided for a transient simulation.");
     }
 }
 

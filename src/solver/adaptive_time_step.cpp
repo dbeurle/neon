@@ -67,13 +67,13 @@ void adaptive_time_step::update_convergence_state(bool const is_converged)
 
         if (current_time > final_time)
         {
-            throw std::runtime_error("Minimum increment is not small enough to resolve "
-                                     "the time step\n");
+            throw std::domain_error("minimum increment is not small enough to resolve "
+                                    "the time step\n");
         }
         if (current_time < 0.0)
         {
-            throw std::runtime_error("Step has reduced below the final time for the "
-                                     "last load case\n");
+            throw std::domain_error("Step has reduced below the final time for the "
+                                    "last load case\n");
         }
 
         std::cout << "\n"
@@ -86,8 +86,8 @@ void adaptive_time_step::update_convergence_state(bool const is_converged)
 
         if (consecutive_unconverged == increment_limit)
         {
-            throw std::runtime_error("Too many reductions.  Convergence not judged "
-                                     "likely\n");
+            throw std::domain_error("Too many reductions.  Convergence not judged "
+                                    "likely\n");
         }
     }
 }
@@ -110,16 +110,16 @@ void adaptive_time_step::parse_input(json const& increment_data, double const ma
     check_increment_data(increment_data);
 
     // Initial factor determined by input
-    initial_time = increment_data["Increments"]["Initial"];
+    initial_time = increment_data["increments"]["initial"];
 
-    bool const is_adaptive_increment = increment_data["Increments"]["Adaptive"];
+    bool const is_adaptive_increment = increment_data["increments"]["adaptive"];
 
-    minimum_increment = is_adaptive_increment ? increment_data["Increments"]["Minimum"].get<double>()
+    minimum_increment = is_adaptive_increment ? increment_data["increments"]["minimum"].get<double>()
                                               : initial_time;
-    maximum_increment = is_adaptive_increment ? increment_data["Increments"]["Maximum"].get<double>()
+    maximum_increment = is_adaptive_increment ? increment_data["increments"]["maximum"].get<double>()
                                               : initial_time;
 
-    final_time = increment_data["Period"];
+    final_time = increment_data["period"];
 
     if (maximum_mandatory_time > final_time)
     {
@@ -134,25 +134,28 @@ void adaptive_time_step::parse_input(json const& increment_data, double const ma
 
 void adaptive_time_step::check_increment_data(json const& increment_data)
 {
-    if (increment_data.find("Period") == increment_data.end())
+    if (increment_data.find("period") == increment_data.end())
     {
-        throw std::runtime_error("Time data requires a \"Period\" value\n");
+        throw std::domain_error("Time data requires a \"period\" value\n");
     }
-    if (increment_data.find("Increments") == increment_data.end())
+    if (increment_data.find("increments") == increment_data.end())
     {
-        throw std::runtime_error("\"Increments\" not provided!\n");
+        throw std::domain_error("\"increments\" not provided!\n");
     }
-    if (increment_data["Increments"].find("Initial") == increment_data["Increments"].end())
+
+    auto const& increments_data = increment_data["increments"];
+
+    if (increments_data.find("initial") == increments_data.end())
     {
-        throw std::runtime_error("Increment-Initial data not provided!\n");
+        throw std::domain_error("increment initial value not provided!\n");
     }
-    if (increment_data["Increments"].find("Minimum") == increment_data["Increments"].end())
+    if (increments_data.find("minimum") == increments_data.end())
     {
-        throw std::runtime_error("Increment-Minimum data not provided!\n");
+        throw std::domain_error("increment minimum value not provided!\n");
     }
-    if (increment_data["Increments"].find("Maximum") == increment_data["Increments"].end())
+    if (increments_data.find("maximum") == increments_data.end())
     {
-        throw std::runtime_error("Increment-Maximum data not provided!\n");
+        throw std::domain_error("increment maximum value not provided!\n");
     }
 }
 

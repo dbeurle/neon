@@ -2,7 +2,7 @@
 #pragma once
 
 #include "io/file_output.hpp"
-#include "mesh/diffusion/mesh.hpp"
+#include "mesh/diffusion/heat/mesh.hpp"
 #include "numeric/sparse_matrix.hpp"
 
 namespace neon

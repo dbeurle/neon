@@ -1,77 +1,77 @@
 {
-    "Name" : "Plate",
-    "Cores" : 8,
-    "Part": [{
-        "Name" : "plate",
-        "Material" : "steel"
+    "name" : "Plate",
+    "cores" : 8,
+    "parts": [{
+        "name" : "plate",
+        "material" : "steel"
     }],
-    "Material" : [{
-        "Name" : "steel",
-        "ElasticModulus" : 200.0e3,
-        "IsotropicHardeningModulus" : 200.0,
-        "YieldStress" : 200.0,
-        "PoissonsRatio" : 0.3
+    "materials" : [{
+        "name" : "steel",
+        "elastic_modulus" : 200.0e3,
+        "isotropic_hardening_modulus" : 200.0,
+        "yield_stress" : 200.0,
+        "poissons_ratio" : 0.3
     }],
-    "SimulationCases" : [{
-        "Name" : "Uniaxial",
-		"Module" : "SolidMechanics",
-        "Solution" : "Equilibrium",
-        "NonlinearOptions" : {
-            "DisplacementTolerance" : 1.0e-4,
-            "ResidualTolerance" : 1.0e-4
+    "steps" : [{
+        "name" : "Uniaxial",
+		"module" : "solid_mechanics",
+        "solution" : "equilibrium",
+        "nonlinear_options" : {
+            "displacement_tolerance" : 1.0e-4,
+            "residual_tolerance" : 1.0e-4
         },
-        "Time" : {
-            "Period" : 1.0,
-            "Increments" : {
-                "Initial" : 1.0,
-                "Minimum" : 0.00001,
-                "Maximum" : 1.0,
-                "Adaptive" : true
+        "time" : {
+            "period" : 1.0,
+            "increments" : {
+                "initial" : 1.0,
+                "minimum" : 0.00001,
+                "maximum" : 1.0,
+                "adaptive" : true
             }
         },
-		"Mesh" : [{
-            "Name" : "plate",
-            "ConstitutiveModel" : {
-                "Name" : "J2Plasticity",
-                "FiniteStrain" : false
+		"meshes" : [{
+            "name" : "plate",
+            "constitutive" : {
+                "name" : "J2_plasticity",
+                "finite_strain" : false
             },
-            "ElementOptions" : {
-                "Quadrature" : "Full"
+            "element_options" : {
+                "quadrature" : "full"
             },
-            "BoundaryConditions" : [{
-                "Name" : "x-sym",
-                "Type" : "Displacement",
-                "Time" : [0.0, 1.0],
+            "boundaries" : [{
+                "name" : "x-sym",
+                "type" : "displacement",
+                "time" : [0.0, 1.0],
                 "x" : [0.0, 0.0]
             },
             {
-                "Name" : "y-sym",
-                "Type" : "Displacement",
-                "Time" : [0.0, 1.0],
+                "name" : "y-sym",
+                "type" : "displacement",
+                "time" : [0.0, 1.0],
                 "y" : [0.0, 0.0]
             },
             {
-                "Name" : "z-sym",
-                "Type" : "Displacement",
-                "Time" : [0.0, 1.0],
+                "name" : "z-sym",
+                "type" : "displacement",
+                "time" : [0.0, 1.0],
                 "z" : [0.0, 0.0]
             },
             {
-                "Name" : "load",
-                "Type" : "Traction",
-                "Time" : [0.0, 1.0],
+                "name" : "load",
+                "type" : "traction",
+                "time" : [0.0, 1.0],
                 "x" : [0.0, -150.0]
             }],
-            "Visualisation" : {
-                "Fields" : ["displacement", "linearised_strain", "linearised_plastic_strain",
+            "visualisation" : {
+                "fields" : ["displacement", "linearised_strain", "linearised_plastic_strain",
                             "cauchy_stress", "von_mises_stress", "effective_plastic_strain",
                             "reaction_force"]
             }
         }],
-		"LinearSolver" :  {
-		    "Type" : "Iterative",
-            "MaxIterations" : 3000,
-    	    "Tolerance"  : 1.0e-8
+		"linear_solver" :  {
+		    "type" : "MUMPS",
+            "maximum_iterations" : 3000,
+    	    "tolerance"  : 1.0e-8
         }
     }]
 }

@@ -74,7 +74,8 @@ An example of an eigenvalue solver definition ::
 
      "eigenvalue_solver" {
          "type" : "lanczos",
-         "values" : 15
+         "values" : 15,
+         "sort" : "lowest"
      }
 
 where the ``"type"`` field indicates what algorithm to use and ``"values"`` determines how many eigenvalues are to be solved for.  This should be much less than the total number of degrees of freedom in the system.

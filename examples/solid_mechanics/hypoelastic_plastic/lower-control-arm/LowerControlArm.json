@@ -1,65 +1,65 @@
 {
-    "Name" : "J2Plasticity",
+    "name" : "J2_plasticity",
     "cores" : 4,
-    "part": [{
-        "Name" : "LowerControlArm",
-        "Material" : "steel"
+    "parts": [{
+        "name" : "LowerControlArm",
+        "material" : "steel"
     }],
-    "material" : [{
-        "Name" : "steel",
-        "ElasticModulus" : 200.0e3,
-        "IsotropicHardeningModulus" : 400.0,
-        "YieldStress" : 200.0,
-        "PoissonsRatio" : 0.3
+    "materials" : [{
+        "name" : "steel",
+        "elastic_modulus" : 200.0e3,
+        "isotropic_hardening_modulus" : 400.0,
+        "yield_stress" : 200.0,
+        "poissons_ratio" : 0.3
     }],
-    "SimulationCases" : [{
-        "Name" : "TipDisplacement",
-		"Module" : "SolidMechanics",
-        "Solution" : "Equilibrium",
-        "NonlinearOptions" : {
-            "DisplacementTolerance" : 1.0e-4,
-            "ResidualTolerance" : 1.0e-4
+    "steps" : [{
+        "name" : "TipDisplacement",
+		"module" : "solid_mechanics",
+        "solution" : "equilibrium",
+        "nonlinear_options" : {
+            "displacement_tolerance" : 1.0e-4,
+            "residual_tolerance" : 1.0e-4
         },
-        "Time" : {
-            "Period" : 1.0,
-            "Increments" : {
-                "Initial" : 1.0,
-                "Minimum" : 0.01,
-                "Maximum" : 1.0,
-                "Adaptive" : true
+        "time" : {
+            "period" : 1.0,
+            "increments" : {
+                "initial" : 1.0,
+                "minimum" : 0.01,
+                "maximum" : 1.0,
+                "adaptive" : true
             }
         },
-		"Mesh" :
+		"meshes" :
         [{
-            "Name" : "LowerControlArm",
-            "ConstitutiveModel" : {
-                "Name" : "J2Plasticity",
-                "FiniteStrain" : false
+            "name" : "LowerControlArm",
+            "constitutive" : {
+                "name" : "J2_plasticity",
+                "finite_strain" : false
             },
-            "ElementOptions" : {
-                "Quadrature" : "Full"
+            "element_options" : {
+                "quadrature" : "full"
             },
-            "BoundaryConditions" : [{
-                "Name" : "Bearing",
-                "Type" : "Displacement",
-                "Time" : [0.0, 0.5, 1.0],
+            "boundaries" : [{
+                "name" : "Bearing",
+                "type" : "displacement",
+                "time" : [0.0, 0.5, 1.0],
                 "x" : [0.0, 0.0, 0.0],
                 "y" : [0.0, 0.0, 0.0],
                 "z" : [0.0, 0.0, 0.0]
             },
             {
-                "Name" : "Load",
-                "Type" : "Displacement",
-                "Time" : [0.0, 0.5, 1.0],
+                "name" : "Load",
+                "type" : "displacement",
+                "time" : [0.0, 0.5, 1.0],
                 "x" : [0.0, 0.15, 0.3]
             }],
-            "Visualisation" : {
-                "Fields" : ["displacement", "linearised_strain", "linearised_plastic_strain",
+            "visualisation" : {
+                "fields" : ["displacement", "linearised_strain", "linearised_plastic_strain",
                             "cauchy_stress", "von_mises_stress", "effective_plastic_strain"]
             }
         }],
-		"LinearSolver" : {
-		    "Type" : "PaStiX"
+		"linear_solver" : {
+		    "type" : "PaStiX"
         }
     }]
 }

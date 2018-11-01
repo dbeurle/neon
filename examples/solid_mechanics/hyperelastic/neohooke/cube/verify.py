@@ -47,7 +47,7 @@ def interpolate_over_line(line, reader):
 
     samples_on_line = probe.GetOutput().GetNumberOfPoints()
 
-    # Initialise the points on the line
+    # initialise the points on the line
     x = np.zeros(samples_on_line)
     y = np.zeros(samples_on_line)
     z = np.zeros(samples_on_line)
@@ -83,13 +83,13 @@ if displacement in field_requests:
     points, results = interpolate_over_line(line, reader)
 
     if not is_close(max([max(sublist) for sublist in results]), 0.5):
-        print('Maximum displacement incorrect', file=sys.stderr)
+        print('maximum displacement incorrect', file=sys.stderr)
         sys.exit(1)
 
     m, b = np.polyfit(points[:, 2], results[:, 2], 1)
 
     if not is_close(m, 0.5, 1.0e-7) and not is_close(b, 0.0, 1.0e-7):
-        print('Displacement gradient is incorrect', file=sys.stderr)
+        print('displacement gradient is incorrect', file=sys.stderr)
         sys.exit(1)
 
 else:

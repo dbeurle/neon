@@ -32,7 +32,7 @@ public:
     explicit newton_convection(std::unique_ptr<surface_interpolation>&& sf,
                                indices node_indices,
                                indices dof_indices,
-                               std::shared_ptr<material_coordinates>& mesh_coordinates,
+                               std::shared_ptr<material_coordinates>& coordinates,
                                json const& times,
                                json const& heat_flux,
                                json const& heat_transfer_coefficient);

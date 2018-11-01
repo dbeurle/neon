@@ -24,14 +24,14 @@ namespace neon::mechanics
 /// Newton-Raphson method for the solution of nonlinear equations.
 /// This class is responsible for the assembly of the process stiffness matrix,
 /// residual force vector and solution of the incremental displacement.
-template <class fem_mesh_type>
-class fem_static_matrix
+template <class MeshType>
+class static_matrix
 {
 public:
-    using mesh_type = fem_mesh_type;
+    using mesh_type = MeshType;
 
 public:
-    explicit fem_static_matrix(mesh_type& fem_mesh, json const& simulation);
+    explicit static_matrix(mesh_type& fem_mesh, json const& simulation);
 
     /// Solve the nonlinear system of equations
     void solve();
@@ -104,33 +104,33 @@ protected:
     std::unique_ptr<linear_solver> solver;
 };
 
-template <class fem_mesh_type>
-fem_static_matrix<fem_mesh_type>::fem_static_matrix(mesh_type& fem_mesh, json const& simulation)
+template <class MeshType>
+static_matrix<MeshType>::static_matrix(mesh_type& fem_mesh, json const& simulation)
     : fem_mesh(fem_mesh),
-      adaptive_load(simulation["Time"], fem_mesh.time_history()),
-      solver(make_linear_solver(simulation["LinearSolver"], fem_mesh.is_symmetric()))
+      adaptive_load(simulation["time"], fem_mesh.time_history()),
+      solver(make_linear_solver(simulation["linear_solver"], fem_mesh.is_symmetric()))
 {
-    if (!simulation["NonlinearOptions"].count("DisplacementTolerance"))
+    auto const& nonlinear_options = simulation["nonlinear_options"];
+
+    if (nonlinear_options.find("displacement_tolerance") == nonlinear_options.end())
     {
-        throw std::domain_error("DisplacementTolerance not specified in "
-                                "NonlinearOptions");
+        throw std::domain_error("displacement_tolerance not specified in nonlinear_options");
     }
-    if (!simulation["NonlinearOptions"].count("ResidualTolerance"))
+    if (nonlinear_options.find("residual_tolerance") == nonlinear_options.end())
     {
-        throw std::domain_error("ResidualTolerance not specified in "
-                                "NonlinearOptions");
+        throw std::domain_error("residual_tolerance not specified in nonlinear_options");
     }
-    if (simulation["NonlinearOptions"].count("NewtonRaphsonIterations"))
+    if (nonlinear_options.find("newton_raphson_iterations") != nonlinear_options.end())
     {
-        maximum_iterations = simulation["NonlinearOptions"]["NewtonRaphsonIterations"];
+        maximum_iterations = nonlinear_options["newton_raphson_iterations"];
     }
-    if (simulation["NonlinearOptions"].count("AbsoluteTolerance"))
+    if (nonlinear_options.find("absolute_tolerance") != nonlinear_options.end())
     {
         use_relative_norm = false;
     }
 
-    residual_tolerance = simulation["NonlinearOptions"]["ResidualTolerance"];
-    displacement_tolerance = simulation["NonlinearOptions"]["DisplacementTolerance"];
+    residual_tolerance = nonlinear_options["residual_tolerance"];
+    displacement_tolerance = nonlinear_options["displacement_tolerance"];
 
     f_int = f_ext = displacement = displacement_old = delta_d = vector::Zero(fem_mesh.active_dofs());
 
@@ -140,8 +140,8 @@ fem_static_matrix<fem_mesh_type>::fem_static_matrix(mesh_type& fem_mesh, json co
               << " degrees of freedom\n";
 }
 
-template <class fem_mesh_type>
-void fem_static_matrix<fem_mesh_type>::solve()
+template <class MeshType>
+void static_matrix<MeshType>::solve()
 {
     try
     {
@@ -184,8 +184,8 @@ void fem_static_matrix<fem_mesh_type>::solve()
     }
 }
 
-template <class fem_mesh_type>
-void fem_static_matrix<fem_mesh_type>::compute_internal_force()
+template <class MeshType>
+void static_matrix<MeshType>::compute_internal_force()
 {
     f_int.setZero();
 
@@ -200,8 +200,8 @@ void fem_static_matrix<fem_mesh_type>::compute_internal_force()
     }
 }
 
-template <class fem_mesh_type>
-void fem_static_matrix<fem_mesh_type>::compute_external_force()
+template <class MeshType>
+void static_matrix<MeshType>::compute_external_force()
 {
     auto const start = std::chrono::steady_clock::now();
 
@@ -238,8 +238,8 @@ void fem_static_matrix<fem_mesh_type>::compute_external_force()
               << "s\n";
 }
 
-template <class fem_mesh_type>
-void fem_static_matrix<fem_mesh_type>::assemble_stiffness()
+template <class MeshType>
+void static_matrix<MeshType>::assemble_stiffness()
 {
     if (!is_sparsity_computed)
     {
@@ -273,8 +273,8 @@ void fem_static_matrix<fem_mesh_type>::assemble_stiffness()
               << elapsed_seconds.count() << "s\n";
 }
 
-template <class fem_mesh_type>
-void fem_static_matrix<fem_mesh_type>::enforce_dirichlet_conditions(sparse_matrix& A, vector& b) const
+template <class MeshType>
+void static_matrix<MeshType>::enforce_dirichlet_conditions(sparse_matrix& A, vector& b) const
 {
     for (auto const& [name, boundaries] : fem_mesh.dirichlet_boundaries())
     {
@@ -316,8 +316,8 @@ void fem_static_matrix<fem_mesh_type>::enforce_dirichlet_conditions(sparse_matri
     }
 }
 
-template <class fem_mesh_type>
-void fem_static_matrix<fem_mesh_type>::apply_displacement_boundaries()
+template <class MeshType>
+void static_matrix<MeshType>::apply_displacement_boundaries()
 {
     Eigen::SparseVector<double> prescribed_increment(displacement.size());
 
@@ -347,14 +347,14 @@ void fem_static_matrix<fem_mesh_type>::apply_displacement_boundaries()
     displacement += prescribed_increment;
 }
 
-template <class fem_mesh_type>
-bool fem_static_matrix<fem_mesh_type>::is_iteration_converged() const
+template <class MeshType>
+bool static_matrix<MeshType>::is_iteration_converged() const
 {
     return displacement_norm <= displacement_tolerance && force_norm <= residual_tolerance;
 }
 
-template <class fem_mesh_type>
-void fem_static_matrix<fem_mesh_type>::print_convergence_progress() const
+template <class MeshType>
+void static_matrix<MeshType>::print_convergence_progress() const
 {
     std::cout << std::string(6, ' ') << termcolor::bold;
     if (displacement_norm <= displacement_tolerance)
@@ -379,8 +379,8 @@ void fem_static_matrix<fem_mesh_type>::print_convergence_progress() const
     std::cout << termcolor::bold << "Residual force norm " << force_norm << termcolor::reset << "\n";
 }
 
-template <class fem_mesh_type>
-void fem_static_matrix<fem_mesh_type>::update_relative_norms()
+template <class MeshType>
+void static_matrix<MeshType>::update_relative_norms()
 {
     if (use_relative_norm)
     {
@@ -398,8 +398,8 @@ void fem_static_matrix<fem_mesh_type>::update_relative_norms()
     }
 }
 
-template <class fem_mesh_type>
-void fem_static_matrix<fem_mesh_type>::perform_equilibrium_iterations()
+template <class MeshType>
+void static_matrix<MeshType>::perform_equilibrium_iterations()
 {
     displacement = displacement_old;
 

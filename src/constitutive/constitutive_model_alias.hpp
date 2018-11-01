@@ -21,5 +21,10 @@ namespace diffusion
 {
 /// Alias for a diffusion type for a general 3D material model
 using constitutive_model = neon::constitutive_model<3, 3>;
+
+namespace reaction
+{
+using constitutive_model = neon::constitutive_model<3, 3>;
+}
 }
 }

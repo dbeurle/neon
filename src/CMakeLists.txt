@@ -1,7 +1,6 @@
 
-file(GLOB_RECURSE NEON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "*.cpp")
-
 # Remove the main file to make a library
+file(GLOB_RECURSE NEON_SOURCES "*.cpp")
 list(REMOVE_ITEM NEON_SOURCES "neon.cpp")
 
 add_library(neon ${NEON_SOURCES})
@@ -23,6 +22,10 @@ endif()
 
 if (ENABLE_NATIVE)
     target_compile_options(neon PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-march=native -mtune=native>)
+endif()
+
+if (ENABLE_FAST_MATH)
+    target_compile_options(neon PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-ffast-math)
 endif()
 
 if(ENABLE_COVERAGE)
@@ -57,8 +60,10 @@ if (ENABLE_CUDA)
     target_include_directories(neon PUBLIC ${CUDA_INCLUDE_DIRS})
 endif()
 
-target_link_libraries(neon PRIVATE OpenCL::OpenCL)
-target_include_directories(neon PUBLIC ${VIENNACL_INCLUDE_DIRS})
+if (ENABLE_OPENCL)
+    target_link_libraries(neon PRIVATE OpenCL::OpenCL)
+    target_include_directories(neon PUBLIC ${VIENNACL_INCLUDE_DIRS})
+endif()
 
 target_link_libraries(neon
                       PUBLIC
@@ -69,5 +74,5 @@ target_link_libraries(neon
                       ${BLAS_LIBRARIES}
                       ${VTK_LIBRARIES}
                       ${TBB_LIBRARIES}
-                      pastix
+                      ${PASTIX_LIBRARIES}
                       ${ARPACK_LIBRARY})

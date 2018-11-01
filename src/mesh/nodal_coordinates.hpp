@@ -27,7 +27,7 @@ public:
     template <typename indices_type>
     [[nodiscard]] auto coordinates(indices_type const local_node_view) const noexcept
     {
-        return X(Eigen::placeholders::all, local_node_view);
+        return X(Eigen::all, local_node_view);
     }
 
 protected:

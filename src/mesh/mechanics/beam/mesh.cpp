@@ -1,7 +1,7 @@
 
 #include "mesh.hpp"
 
-#include "math/block_sequence.hpp"
+#include "math/view.hpp"
 #include "mesh/basic_mesh.hpp"
 #include "mesh/dof_allocator.hpp"
 #include "io/post/variable_string_adapter.hpp"
@@ -30,14 +30,14 @@ mesh::mesh(basic_mesh const& basic_mesh,
       displacement(active_dofs() / 2),
       rotation(active_dofs() / 2),
       generate_time_step{generate_time_step},
-      writer(std::make_unique<io::vtk_file_output>(simulation_data["Name"],
+      writer(std::make_unique<io::vtk_file_output>(simulation_data["name"],
                                                    simulation_data["Visualisation"]))
 {
-    check_boundary_conditions(simulation_data["BoundaryConditions"]);
+    check_boundary_conditions(simulation_data["boundaries"]);
 
     writer->coordinates(coordinates->coordinates());
 
-    std::cout << "simulation name is: " << simulation_data["Name"] << std::endl;
+    std::cout << "simulation name is: " << simulation_data["name"] << std::endl;
 
     for (auto const& section : simulation_data["sections"])
     {
@@ -89,10 +89,10 @@ bool mesh::is_nonfollower_load(std::string const& boundary_type) const
 void mesh::allocate_boundary_conditions(json const& simulation_data, basic_mesh const& basic_mesh)
 {
     // Populate the boundary conditions and their corresponding mesh
-    for (auto const& boundary_data : simulation_data["BoundaryConditions"])
+    for (auto const& boundary_data : simulation_data["boundaries"])
     {
-        std::string const& boundary_name = boundary_data["Name"];
-        std::string const& boundary_type = boundary_data["Type"];
+        std::string const& boundary_name = boundary_data["name"];
+        std::string const& boundary_type = boundary_data["type"];
 
         if (boundary_type == "displacement" || boundary_type == "rotation")
         {
@@ -110,7 +110,7 @@ void mesh::allocate_boundary_conditions(json const& simulation_data, basic_mesh 
         }
         else
         {
-            throw std::domain_error("BoundaryCondition \"" + boundary_type + "\" is not recognised");
+            throw std::domain_error("boundary \"" + boundary_type + "\" is not recognised");
         }
     }
 }
@@ -119,7 +119,7 @@ void mesh::allocate_dirichlet_boundary(std::string const& boundary_type,
                                        json const& boundary,
                                        basic_mesh const& basic_mesh)
 {
-    std::string const& boundary_name = boundary["Name"];
+    std::string const& boundary_name = boundary["name"];
 
     for (auto const& [dof_key, dof_offset] : dof_table)
     {
@@ -190,18 +190,19 @@ void mesh::check_boundary_conditions(json const& boundary_data) const
 {
     for (auto const& boundary : boundary_data)
     {
-        for (auto const& mandatory_field : {"Name", "Type"})
+        for (auto const& mandatory_field : {"name", "type"})
         {
             if (boundary.find(mandatory_field) == boundary.end())
             {
                 throw std::domain_error("\"" + std::string(mandatory_field)
-                                        + "\" was not specified in \"BoundaryCondition\".");
+                                        + "\" was not specified in \"boundary\".");
             }
         }
-        if (boundary.find("Time") == boundary.end() && boundary.find("GenerateType") == boundary.end())
+        if (boundary.find("time") == boundary.end()
+            && boundary.find("generate_type") == boundary.end())
         {
-            throw std::domain_error("Neither \"Time\" nor \"GenerateType\" was specified in "
-                                    "\"BoundaryCondition\".");
+            throw std::domain_error("Neither \"time\" nor \"generate_type\" was specified in "
+                                    "\"boundary\".");
         }
     }
 }
