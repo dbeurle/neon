@@ -1,14 +1,14 @@
 {
     "name" : "J2_plasticity",
     "cores" : 4,
-    "part": [{
+    "parts": [{
         "name" : "LowerControlArm",
-        "Material" : "steel"
+        "material" : "steel"
     }],
     "materials" : [{
         "name" : "steel",
         "elastic_modulus" : 200.0e3,
-        "IsotropicHardeningModulus" : 400.0,
+        "isotropic_hardening_modulus" : 400.0,
         "yield_stress" : 200.0,
         "poissons_ratio" : 0.3
     }],
