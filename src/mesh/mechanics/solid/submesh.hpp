@@ -53,10 +53,10 @@ public:
     [[nodiscard]] auto const& constitutive() const { return *cm; }
 
     /// \return tangent consistent stiffness matrix
-    [[nodiscard]] std::pair<index_view, matrix> tangent_stiffness(std::int32_t const element) const;
+    [[nodiscard]] std::pair<index_view, matrix const&> tangent_stiffness(std::int32_t const element) const;
 
     /// \return internal element force
-    [[nodiscard]] std::pair<index_view, vector> internal_force(std::int32_t const element) const;
+    [[nodiscard]] std::pair<index_view, vector const&> internal_force(std::int32_t const element) const;
 
     /// \return consistent mass matrix \sa diagonal_mass
     [[nodiscard]] std::pair<index_view, matrix> consistent_mass(std::int32_t const element) const;
@@ -92,8 +92,8 @@ protected:
        \f}
      * Where B is the gradient operator in the finite element discretization
      */
-    [[nodiscard]] matrix geometric_tangent_stiffness(matrix3x const& configuration,
-                                                     std::int32_t const element) const;
+    [[nodiscard]] matrix const& geometric_tangent_stiffness(matrix3x const& configuration,
+                                                            std::int32_t const element) const;
 
     /**
      * Compute the material tangent stiffness using the formula
@@ -101,8 +101,8 @@ protected:
      * k_{mat} &= I_{2x2} \int_{V} B_I^{T} \sigma B_{J} dV
      * \f}
      */
-    [[nodiscard]] matrix material_tangent_stiffness(matrix3x const& configuration,
-                                                    std::int32_t const element) const;
+    [[nodiscard]] matrix const& material_tangent_stiffness(matrix3x const& configuration,
+                                                           std::int32_t const element) const;
 
     /**
      * Compute the internal force vector using the formula
@@ -111,8 +111,8 @@ protected:
      * \f}
      * @return the internal nodal force vector
      */
-    [[nodiscard]] vector internal_nodal_force(matrix3x const& configuration,
-                                              std::int32_t const element) const;
+    [[nodiscard]] vector const& internal_nodal_force(matrix3x const& configuration,
+                                                     std::int32_t const element) const;
 
 private:
     std::shared_ptr<material_coordinates> coordinates;

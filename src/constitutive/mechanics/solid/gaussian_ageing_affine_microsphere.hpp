@@ -38,11 +38,10 @@ public:
 private:
     [[nodiscard]] matrix3 compute_macro_stress(matrix3 const& F_bar,
                                                std::vector<double> const& modulus,
-                                               double const active_segments,
                                                double const reduction_factor) const;
 
     [[nodiscard]] matrix6 compute_macro_moduli(matrix3 const& F_bar,
-                                               double const reduction_factor,
+                                               double const creation_rate,
                                                double const time_step_size) const;
 
     /// Compute the force contribution to the secondary modulus

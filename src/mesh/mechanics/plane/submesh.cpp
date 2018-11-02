@@ -59,21 +59,23 @@ void submesh::save_internal_variables(bool const have_converged)
     }
 }
 
-std::pair<index_view, matrix> submesh::tangent_stiffness(std::int64_t const element) const
+std::pair<index_view, matrix const&> submesh::tangent_stiffness(std::int32_t const element) const
 {
     auto const x = geometry::project_to_plane(
         coordinates->current_configuration(local_node_view(element)));
 
-    matrix ke = material_tangent_stiffness(x, element);
+    static thread_local matrix k_e;
 
-    if (!cm->is_finite_deformation()) return {local_dof_view(element), ke};
+    k_e = material_tangent_stiffness(x, element);
 
-    ke.noalias() += geometric_tangent_stiffness(x, element);
+    if (!cm->is_finite_deformation()) return {local_dof_view(element), k_e};
 
-    return {local_dof_view(element), ke};
+    k_e.noalias() += geometric_tangent_stiffness(x, element);
+
+    return {local_dof_view(element), k_e};
 }
 
-std::pair<index_view, vector> submesh::internal_force(std::int64_t const element) const
+std::pair<index_view, vector const&> submesh::internal_force(std::int32_t const element) const
 {
     auto const x = geometry::project_to_plane(
         coordinates->current_configuration(local_node_view(element)));
@@ -81,77 +83,80 @@ std::pair<index_view, vector> submesh::internal_force(std::int64_t const element
     return {local_dof_view(element), internal_nodal_force(x, element)};
 }
 
-matrix submesh::geometric_tangent_stiffness(matrix2x const& x, std::int64_t const element) const
+matrix const& submesh::geometric_tangent_stiffness(matrix2x const& x, std::int32_t const element) const
 {
     auto const& cauchy_stresses = variables->get(variable::second::cauchy_stress);
 
-    auto const n = nodes_per_element();
+    static thread_local matrix k_geo(nodes_per_element(), nodes_per_element());
+    static thread_local matrix k_geo_full;
 
-    matrix const kgeo = sf->quadrature()
-                            .integrate(matrix::Zero(n, n).eval(),
-                                       [&](auto const& femval, auto const& l) -> matrix {
-                                           auto const& [N, rhea] = femval;
+    sf->quadrature().integrate_inplace(k_geo, [&](auto const& N_dN, auto const l) {
+        auto const& [N, rhea] = N_dN;
 
-                                           matrix2 const Jacobian = local_deformation_gradient(rhea,
-                                                                                               x);
+        matrix2 const Jacobian = local_deformation_gradient(rhea, x);
 
-                                           auto const cauchy = cauchy_stresses[view(element, l)];
+        auto const cauchy = cauchy_stresses[view(element, l)];
 
-                                           // Compute the symmetric gradient operator
-                                           auto const L = (rhea * Jacobian.inverse()).transpose();
+        // Compute the symmetric gradient operator
+        auto const L = local_gradient(rhea, Jacobian);
 
-                                           return L.transpose() * cauchy * L * Jacobian.determinant();
-                                       });
+        return L.transpose() * cauchy * L * Jacobian.determinant();
+    });
+    k_geo_full = identity_expansion(k_geo, dofs_per_node());
 
-    return identity_expansion(kgeo, dofs_per_node());
+    return k_geo_full;
 }
 
-matrix submesh::material_tangent_stiffness(matrix2x const& x, std::int64_t const element) const
+matrix const& submesh::material_tangent_stiffness(matrix2x const& x, std::int32_t const element) const
 {
     auto const local_dofs = nodes_per_element() * dofs_per_node();
 
+    static thread_local matrix k_mat(local_dofs, local_dofs);
+
+    k_mat.setZero();
+
     auto const& tangent_operators = variables->get(variable::fourth::tangent_operator);
 
-    return sf->quadrature().integrate(matrix::Zero(local_dofs, local_dofs).eval(),
-                                      [&](auto const& femval, auto const& l) -> matrix {
-                                          auto const& [N, rhea] = femval;
+    sf->quadrature().integrate_inplace(k_mat, [&](auto const& N_dN, auto const l) {
+        auto const& [N, dN] = N_dN;
 
-                                          auto const& D = tangent_operators[view(element, l)];
+        auto const& D = tangent_operators[view(element, l)];
 
-                                          matrix2 const Jacobian{local_deformation_gradient(rhea, x)};
+        matrix2 const J = local_deformation_gradient(dN, x);
 
-                                          auto const B = fem::sym_gradient<2>(
-                                              (rhea * Jacobian.inverse()).transpose());
+        auto const B = fem::sym_gradient<2>(local_gradient(dN, J));
 
-                                          return B.transpose() * D * B * Jacobian.determinant();
-                                      });
+        return B.transpose() * D * B * J.determinant();
+    });
+    return k_mat;
 }
 
-vector submesh::internal_nodal_force(matrix2x const& x, std::int64_t const element) const
+vector const& submesh::internal_nodal_force(matrix2x const& x, std::int32_t const element) const
 {
+    static thread_local vector f_int(nodes_per_element() * dofs_per_node());
+
+    f_int.setZero();
+
     auto const& cauchy_stresses = variables->get(variable::second::cauchy_stress);
 
-    auto const [m, n] = std::make_tuple(nodes_per_element(), dofs_per_node());
+    sf->quadrature()
+        .integrate_inplace(Eigen::Map<row_matrix>(f_int.data(), nodes_per_element(), dofs_per_node()),
+                           [&](auto const& N_dN, auto const l) {
+                               auto const& [N, dN] = N_dN;
 
-    vector fint = vector::Zero(m * n);
+                               matrix2 const Jacobian = local_deformation_gradient(dN, x);
 
-    sf->quadrature().integrate_inplace(Eigen::Map<row_matrix>(fint.data(), m, n),
-                                       [&](auto const& femval, auto const l) {
-                                           auto const& [N, dN] = femval;
+                               matrix2 const& cauchy_stress = cauchy_stresses[view(element, l)];
 
-                                           matrix2 const Jacobian = local_deformation_gradient(dN, x);
+                               // symmetric gradient operator
+                               auto const Bt = dN * Jacobian.inverse();
 
-                                           auto const& cauchy_stress = cauchy_stresses[view(element, l)];
-
-                                           // Compute the symmetric gradient operator
-                                           auto const Bt = dN * Jacobian.inverse();
-
-                                           return Bt * cauchy_stress * Jacobian.determinant();
-                                       });
-    return fint;
+                               return Bt * cauchy_stress * Jacobian.determinant();
+                           });
+    return f_int;
 }
 
-std::pair<index_view, matrix> submesh::consistent_mass(std::int64_t const element) const
+std::pair<index_view, matrix> submesh::consistent_mass(std::int32_t const element) const
 {
     auto const X = coordinates->initial_configuration(local_node_view(element));
     return {local_dof_view(element), X};
@@ -169,7 +174,7 @@ std::pair<index_view, matrix> submesh::consistent_mass(std::int64_t const elemen
     // return {local_dof_view(element), identity_expansion(m, dofs_per_node())};
 }
 
-std::pair<index_view, vector> submesh::diagonal_mass(std::int64_t const element) const
+std::pair<index_view, vector> submesh::diagonal_mass(std::int32_t const element) const
 {
     auto const& [dofs, consistent_m] = this->consistent_mass(element);
 

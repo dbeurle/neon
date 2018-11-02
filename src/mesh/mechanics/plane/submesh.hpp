@@ -35,7 +35,7 @@ public:
 
     submesh(submesh&&) = default;
 
-    [[nodiscard]] index_view local_dof_view(std::int64_t const element) const noexcept
+    [[nodiscard]] index_view local_dof_view(std::int32_t const element) const noexcept
     {
         return dof_list(Eigen::all, element);
     }
@@ -51,16 +51,16 @@ public:
     [[nodiscard]] auto const& constitutive() const { return *cm; }
 
     /// \return the tangent consistent stiffness matrix
-    [[nodiscard]] std::pair<index_view, matrix> tangent_stiffness(std::int64_t const element) const;
+    [[nodiscard]] std::pair<index_view, matrix const&> tangent_stiffness(std::int32_t const element) const;
 
     /// \return the internal element force
-    [[nodiscard]] std::pair<index_view, vector> internal_force(std::int64_t const element) const;
+    [[nodiscard]] std::pair<index_view, vector const&> internal_force(std::int32_t const element) const;
 
     /// \return the consistent mass matrix \sa diagonal_mass
-    [[nodiscard]] std::pair<index_view, matrix> consistent_mass(std::int64_t const element) const;
+    [[nodiscard]] std::pair<index_view, matrix> consistent_mass(std::int32_t const element) const;
 
     /// \return the consistent mass matrix \sa diagonal_mass
-    [[nodiscard]] std::pair<index_view, vector> diagonal_mass(std::int64_t const element) const;
+    [[nodiscard]] std::pair<index_view, vector> diagonal_mass(std::int32_t const element) const;
 
     /// Update the internal variables for the mesh group
     /// \sa update_deformation_measures()
@@ -75,10 +75,10 @@ public:
         variable::scalar const scalar_name) const;
 
 protected:
-    /** Update the strain measures defined by the constitutive model */
+    /// Update the strain measures defined by the constitutive model
     void update_deformation_measures();
 
-    /** Computes the Jacobian determinants and check if negative */
+    /// Computes the Jacobian determinants and check if negative
     void update_Jacobian_determinants();
 
     /**
@@ -91,8 +91,8 @@ protected:
        \f}
      * Where B is the gradient operator in the finite element discretization
      */
-    [[nodiscard]] matrix geometric_tangent_stiffness(matrix2x const& configuration,
-                                                     std::int64_t const element) const;
+    [[nodiscard]] matrix const& geometric_tangent_stiffness(matrix2x const& configuration,
+                                                            std::int32_t const element) const;
 
     /**
      * Compute the material tangent stiffness using the formula
@@ -100,8 +100,8 @@ protected:
      * k_{mat} &= I_{2x2} \int_{V} B_I^{T} \sigma B_{J} dV
      * \f}
      */
-    [[nodiscard]] matrix material_tangent_stiffness(matrix2x const& configuration,
-                                                    std::int64_t const element) const;
+    [[nodiscard]] matrix const& material_tangent_stiffness(matrix2x const& configuration,
+                                                           std::int32_t const element) const;
 
     /**
      * Compute the internal force vector using the formula
@@ -110,8 +110,8 @@ protected:
      * \f}
      * @return the internal nodal force vector
      */
-    [[nodiscard]] vector internal_nodal_force(matrix2x const& configuration,
-                                              std::int64_t const element) const;
+    [[nodiscard]] vector const& internal_nodal_force(matrix2x const& configuration,
+                                                     std::int32_t const element) const;
 
 private:
     std::shared_ptr<material_coordinates> coordinates;
