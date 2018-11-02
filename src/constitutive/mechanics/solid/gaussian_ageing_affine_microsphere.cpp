@@ -115,35 +115,28 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
             last_time_step_size = time_step_size;
         }
 
+        auto const creation_rate = material.creation_rate(active_shear_modulus[l],
+                                                          inactive_shear_modulus[l],
+                                                          active_segments[l],
+                                                          inactive_segments[l]);
+
         // Partially integrate secondary modulus
         unit_sphere.for_each([&](auto const& coordinates, auto const index) {
             auto const& [r, _] = coordinates;
 
-            auto const micro_stretch = compute_microstretch(deformed_tangent(F_bar, r));
+            auto const stretch = compute_microstretch(deformed_tangent(F_bar, r));
 
-            auto const creation_rate = material.creation_rate(active_shear_modulus[l],
-                                                              inactive_shear_modulus[l],
-                                                              active_segments[l],
-                                                              inactive_segments[l]);
-
-            auto const integrand_eval = evaluate_integrand(creation_rate,
-                                                           reduction_factor[l],
-                                                           micro_stretch);
+            last_h[index] = evaluate_integrand(creation_rate, reduction_factor[l], stretch);
 
             modulus[index] = integrate_history(modulus_old[index],
                                                last_h_old[index],
-                                               integrand_eval,
+                                               last_h[index],
                                                last_time_step_size);
-
-            last_h[index] = integrand_eval;
         });
 
-        matrix3 const macro_stress = compute_macro_stress(F_bar,
-                                                          modulus,
-                                                          active_segments[l],
-                                                          reduction_factor[l]);
+        matrix3 const macro_stress = compute_macro_stress(F_bar, modulus, reduction_factor[l]);
 
-        matrix6 const macro_moduli = compute_macro_moduli(F_bar, reduction_factor[l], time_step_size);
+        matrix6 const macro_moduli = compute_macro_moduli(F_bar, creation_rate, last_time_step_size);
 
         auto const J = det_F[l];
 
@@ -157,7 +150,6 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
 
 matrix3 gaussian_ageing_affine_microsphere::compute_macro_stress(matrix3 const& F_bar,
                                                                  std::vector<double> const& modulus,
-                                                                 double const active_segments,
                                                                  double const reduction_factor) const
 {
     return 3.0 * reduction_factor
@@ -173,19 +165,19 @@ matrix3 gaussian_ageing_affine_microsphere::compute_macro_stress(matrix3 const& 
 }
 
 matrix6 gaussian_ageing_affine_microsphere::compute_macro_moduli(matrix3 const& F_bar,
-                                                                 double const reduction_factor,
+                                                                 double const creation_rate,
                                                                  double const time_step_size) const
 {
-    return -3.0 / 2.0 * reduction_factor * time_step_size
+    return -3.0 / 2.0 * creation_rate * time_step_size
            * unit_sphere.integrate(matrix6::Zero().eval(),
                                    [&](auto const& coordinates, auto) -> matrix6 {
                                        auto const& [r, _] = coordinates;
 
                                        vector3 const t = deformed_tangent(F_bar, r);
 
-                                       auto const micro_stretch = compute_microstretch(t);
+                                       auto const stretch = compute_microstretch(t);
 
-                                       return std::pow(micro_stretch, -3) * outer_product(t, t, t, t);
+                                       return std::pow(stretch, -3) * outer_product(t, t, t, t);
                                    });
 }
 
