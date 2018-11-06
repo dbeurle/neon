@@ -1,0 +1,83 @@
+{
+    "name" : "SpecimenAgeing",
+    "cores" : 2,
+    "parts": [{
+        "name" : "specimen",
+        "material" : "rubber"
+    }],
+    "materials" : [{
+        "name" : "rubber",
+        "elastic_modulus" : 10.0e6,
+        "poissons_ratio" : 0.48,
+        "segments_per_chain" : 70,
+        "scission_probability" : 3.5e-5,
+        "recombination_probability" : 1.0e-5
+    }],
+    "steps" : [{
+        "name" : "ramped_load",
+        "module" : "solid_mechanics",
+        "solution" : "equilibrium",
+        "nonlinear_options" : {
+            "displacement_tolerance" : 1.0e-3,
+            "residual_tolerance" : 1.0e-3,
+            "newton_raphson_iterations" : 15
+        },
+        "time" : {
+            "period" : 1000.0,
+            "increments" : {
+                "initial" : 0.5,
+                "minimum" : 0.1,
+                "maximum" : 200.0,
+                "adaptive" : true
+            }
+        },
+        "meshes" : [{
+            "name" : "specimen",
+            "constitutive" : {
+                "name" : "microsphere",
+                "type" : "affine",
+                "statistics" : "gaussian",
+                "quadrature" : "BO21",
+                "ageing" : "BAND"
+            },
+            "element_options" : {
+                "quadrature" : "full"
+            },
+            "boundaries" : [{
+                "name" : "x-sym",
+                "type" : "displacement",
+                "time" : [0.0, 1000.0],
+                "x" : [0.0, 0.0]
+            },
+            {
+                "name" : "y-sym",
+                "type" : "displacement",
+                "time" : [0.0, 1000.0],
+                "y" : [0.0, 0.0]
+            },
+            {
+                "name" : "z-sym",
+                "type" : "displacement",
+                "time" : [0.0, 1000.0],
+                "z" : [0.0, 0.0]
+            },
+            {
+                "name" : "load",
+                "type" : "displacement",
+                "time" : [0.0, 1.0, 997.0, 998.0, 999.0],
+                "y" : [0.0, 1.0e-2, 1.0e-2, 0.6e-2, 0.4e-2]
+            }],
+            "visualisation" : {
+                "fields" : ["displacement", "deformation_gradient",
+                            "cauchy_stress", "active_shear_modulus",
+                            "inactive_shear_modulus", "active_segments",
+                            "inactive_segments"],
+                "write_every": 1
+            }
+        }],
+        "linear_solver" : {
+            "type" : "iterative",
+            "maximum_iterations" : 3000
+        }
+    }]
+}
