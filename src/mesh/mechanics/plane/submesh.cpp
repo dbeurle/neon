@@ -112,19 +112,21 @@ matrix submesh::material_tangent_stiffness(matrix2x const& x, std::int64_t const
 
     auto const& tangent_operators = variables->get(variable::fourth::tangent_operator);
 
-    return sf->quadrature().integrate(matrix::Zero(local_dofs, local_dofs).eval(),
-                                      [&](auto const& femval, auto const& l) -> matrix {
-                                          auto const& [N, rhea] = femval;
+    matrix B = matrix::Zero(4, local_dofs);
 
-                                          auto const& D = tangent_operators[view(element, l)];
+    return sf->quadrature()
+        .integrate(matrix::Zero(local_dofs, local_dofs).eval(),
+                   [&](auto const& femval, auto const& l) -> matrix {
+                       auto const& [N, rhea] = femval;
 
-                                          matrix2 const Jacobian{local_deformation_gradient(rhea, x)};
+                       auto const& D = tangent_operators[view(element, l)];
 
-                                          auto const B = fem::sym_gradient<2>(
-                                              (rhea * Jacobian.inverse()).transpose());
+                       matrix2 const Jacobian{local_deformation_gradient(rhea, x)};
 
-                                          return B.transpose() * D * B * Jacobian.determinant();
-                                      });
+                       fem::sym_gradient<2>(B, (rhea * Jacobian.inverse()).transpose());
+
+                       return B.transpose() * D * B * Jacobian.determinant();
+                   });
 }
 
 vector submesh::internal_nodal_force(matrix2x const& x, std::int64_t const element) const
