@@ -193,7 +193,7 @@ void static_matrix<MeshType>::compute_internal_force()
     {
         for (std::int64_t element{0}; element < submesh.elements(); ++element)
         {
-            auto const [dofs, fe_int] = submesh.internal_force(element);
+            auto const& [dofs, fe_int] = submesh.internal_force(element);
 
             f_int(dofs) += fe_int;
         }
@@ -403,6 +403,8 @@ void static_matrix<MeshType>::perform_equilibrium_iterations()
 {
     displacement = displacement_old;
 
+    fem_mesh.update_internal_variables(displacement, adaptive_load.increment());
+
     // Full Newton-Raphson iteration to solve nonlinear equations
     auto current_iteration{0};
     while (current_iteration < maximum_iterations)
@@ -430,8 +432,7 @@ void static_matrix<MeshType>::perform_equilibrium_iterations()
 
         displacement += delta_d;
 
-        fem_mesh.update_internal_variables(displacement,
-                                           current_iteration == 0 ? adaptive_load.increment() : 0.0);
+        fem_mesh.update_internal_variables(displacement, 0.0);
 
         update_relative_norms();
 
