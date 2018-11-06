@@ -23,7 +23,7 @@ void compressible_neohooke::update_internal_variables(double const time_step_siz
     auto& tangent_operators = variables->get(variable::fourth::tangent_operator);
     auto const& determinants = variables->get(variable::scalar::DetF);
 
-    // Compute stresses
+    // compute stresses
     std::transform(begin(deformation_gradients),
                    end(deformation_gradients),
                    begin(determinants),
@@ -40,6 +40,7 @@ void compressible_neohooke::update_internal_variables(double const time_step_siz
                        return (lambda * std::log(J) * I + shear_modulus * (B - I)) / J;
                    });
 
+    // compute material tangent operators
     std::transform(begin(determinants),
                    end(determinants),
                    begin(tangent_operators),
