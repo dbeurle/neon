@@ -60,7 +60,12 @@ if (ENABLE_COVERAGE)
 endif()
 
 if (ENABLE_TESTS)
-    find_package(Catch2 REQUIRED)
+    find_package(Catch2 2.3)
+
+    if (NOT ${Catch2_FOUND})
+        message(STATUS "System Catch2 not found.  Building...")
+        add_subdirectory(${EXTERNAL_PROJECTS_DIR}/catch2)
+    endif()
 
     # Required for integration tests
     include(FindPythonInterp)
