@@ -33,7 +33,6 @@ class solid_mechanics_module : public abstract_module
 {
 public:
     using mesh_type = mechanics::solid::mesh;
-    using matrix_type = mechanics::static_matrix<mesh_type>;
 
 public:
     solid_mechanics_module(basic_mesh const& mesh, json const& material, json const& simulation);
@@ -48,7 +47,7 @@ public:
 
 protected:
     /// Mesh for solid types
-    mechanics::solid::mesh fem_mesh;
+    mesh_type fem_mesh;
     /// Nonlinear solver routines
     matrix_type fem_matrix;
 };
