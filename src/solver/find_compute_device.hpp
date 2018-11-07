@@ -27,7 +27,7 @@ bool has_cuda_device();
 
 #endif
 
-#ifdef ENABLE_OCL
+#ifdef ENABLE_OPENCL
 
 /// Check if a functional OpenCL CPU runtime exists
 /// Throws an \p invalid_device if no device is found

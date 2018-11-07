@@ -20,7 +20,7 @@ bool neon::has_cuda_device()
 
 #endif
 
-#ifdef ENABLE_OCL
+#ifdef ENABLE_OPENCL
 
 #include "CL/cl.hpp"
 
