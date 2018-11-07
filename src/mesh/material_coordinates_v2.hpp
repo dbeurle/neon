@@ -42,7 +42,7 @@ public:
 
     [[nodiscard]] value_type displacement() const { return x - X; }
 
-        [[nodiscard]] vector displacement_vector() const
+    [[nodiscard]] vector displacement_vector() const
     {
         return Eigen::Map<vector>(displacement().data(), displacement().size());
     }

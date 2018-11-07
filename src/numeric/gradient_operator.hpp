@@ -72,3 +72,12 @@ inline void sym_gradient(matrix& B, matrix const& L)
     }
 }
 }
+
+namespace neon
+{
+template <typename MatrixType, typename StaticMatrix>
+[[nodiscard]] auto local_gradient(MatrixType const& dN, StaticMatrix const& Jacobian) noexcept
+{
+    return (dN * Jacobian.inverse()).transpose();
+}
+}

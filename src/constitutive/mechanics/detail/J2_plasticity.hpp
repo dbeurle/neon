@@ -19,7 +19,8 @@ template <class material_type>
 [[nodiscard]] double evaluate_J2_yield_function(material_type const& material,
                                                 double const von_mises_stress,
                                                 double const accumulated_plastic_strain,
-                                                double const plastic_increment = 0.0) {
+                                                double const plastic_increment = 0.0)
+{
     return von_mises_stress - 3.0 * material.shear_modulus() * plastic_increment
            - material.yield_stress(accumulated_plastic_strain + plastic_increment);
 }
