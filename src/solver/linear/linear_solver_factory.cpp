@@ -6,7 +6,7 @@
 #include "biconjugate_gradient_stabilised_cuda.hpp"
 #endif
 
-#ifdef ENABLE_OCL
+#ifdef ENABLE_OPENCL
 #include "conjugate_gradient_ocl.hpp"
 #include "biconjugate_gradient_stabilised_ocl.hpp"
 #endif
@@ -102,7 +102,6 @@ std::unique_ptr<linear_solver> make_linear_solver(json const& solver_data, bool 
         {
             return std::make_unique<SparseLLT>();
         }
-
         return std::make_unique<SparseLU>();
     }
     else if (solver_name == "iterative")
@@ -120,24 +119,34 @@ std::unique_ptr<linear_solver> make_linear_solver(json const& solver_data, bool 
                 throw std::domain_error("The gpu linear solvers require a \"backend\" object to "
                                         "describe the gpu framework to use.");
             }
-        }
+            if (solver_data["backend"].find("type") == end(solver_data["backend"]))
+            {
+                throw std::domain_error("\"backend\" requires a \"type\" option to be either "
+                                        "\"cuda\" or \"opencl\"");
+            }
 
-        // Alias the possible solvers
-        // #if defined ENABLE_CUDA
-        //         using cg_type = conjugate_gradient_cuda;
-        // #elif defined ENABLE_OCL
-        //         using cg_type = conjugate_gradient_ocl;
-        // #else
-        //         using cg_type = conjugate_gradient;
-        // #endif
-        //
-        // #if defined ENABLE_CUDA
-        //         using bicg_type = biconjugate_gradient_stabilised_cuda;
-        // #elif defined ENABLE_OCL
-        //         using bicg_type = biconjugate_gradient_stabilised_ocl;
-        // #else
-        //         using bicg_type = biconjugate_gradient_stabilised;
-        // #endif
+            // decide on the CUDA or OpenCL backends
+            if (solver_data["backend"].find("opencl") != end(solver_data))
+            {
+#ifndef ENABLE_OPENCL
+                throw std::domain_error("The \"opencl\" option requires compiler support.  "
+                                        "Recompile with -DENABLE_OPENCL=1.");
+#endif
+                // check device availability
+            }
+            else if (solver_data["backend"].find("cuda") != end(solver_data))
+            {
+#ifndef ENABLE_CUDA
+                throw std::domain_error("The \"cuda\" option requires compiler support.  Recompile "
+                                        "with -DENABLE_CUDA=1.");
+#endif
+                // check device availability
+            }
+            else
+            {
+                throw std::domain_error("Incorrect backend option specified.");
+            }
+        }
     }
     else
     {
