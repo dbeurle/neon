@@ -1,7 +1,7 @@
 
 #pragma once
 
-#ifdef ENABLE_OCL
+#ifdef ENABLE_OPENCL
 
 #include "linear_solver.hpp"
 

@@ -9,6 +9,10 @@
 #ifdef ENABLE_OPENCL
 #include "conjugate_gradient_ocl.hpp"
 #include "biconjugate_gradient_stabilised_ocl.hpp"
+#include "solver/find_compute_device.hpp"
+#include "CL/cl.hpp"
+#define VIENNACL_WITH_OPENCL
+#include "viennacl/ocl/backend.hpp"
 #endif
 
 #include "MUMPS.hpp"
@@ -119,28 +123,41 @@ std::unique_ptr<linear_solver> make_linear_solver(json const& solver_data, bool 
                 throw std::domain_error("The gpu linear solvers require a \"backend\" object to "
                                         "describe the gpu framework to use.");
             }
-            if (solver_data["backend"].find("type") == end(solver_data["backend"]))
+
+            auto const& backend_options = solver_data["backend"];
+
+            if (backend_options.find("type") == end(backend_options))
             {
                 throw std::domain_error("\"backend\" requires a \"type\" option to be either "
                                         "\"cuda\" or \"opencl\"");
             }
 
             // decide on the CUDA or OpenCL backends
-            if (solver_data["backend"].find("opencl") != end(solver_data))
+            if (backend_options["type"] == "opencl")
             {
 #ifndef ENABLE_OPENCL
                 throw std::domain_error("The \"opencl\" option requires compiler support.  "
                                         "Recompile with -DENABLE_OPENCL=1.");
-#endif
+#else
                 // check device availability
+                auto ocl_context = find_opencl_device(backend_options);
+
+                return make_iterative_solver<conjugate_gradient_ocl,
+                                             biconjugate_gradient_stabilised_ocl>(solver_data,
+                                                                                  is_symmetric);
+#endif
             }
-            else if (solver_data["backend"].find("cuda") != end(solver_data))
+            else if (backend_options["type"] == "cuda")
             {
 #ifndef ENABLE_CUDA
                 throw std::domain_error("The \"cuda\" option requires compiler support.  Recompile "
                                         "with -DENABLE_CUDA=1.");
-#endif
+#else
                 // check device availability
+                return make_iterative_solver<conjugate_gradient_cuda,
+                                             biconjugate_gradient_stabilised_cuda>(solver_data,
+                                                                                   is_symmetric);
+#endif
             }
             else
             {

@@ -1,7 +1,7 @@
 
 #include "solver/linear/biconjugate_gradient_stabilised_ocl.hpp"
 
-#ifdef ENABLE_OCL
+#ifdef ENABLE_OPENCL
 
 #include "exceptions.hpp"
 #include "dmatrix_vector_product.hpp"
