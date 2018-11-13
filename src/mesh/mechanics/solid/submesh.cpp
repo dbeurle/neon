@@ -85,15 +85,13 @@ std::pair<index_view, vector> submesh::internal_force(std::int32_t const element
     return {local_dof_view(element), internal_nodal_force(x, element)};
 }
 
-matrix const& submesh::geometric_tangent_stiffness(matrix3x const& x, std::int32_t const element) const
+matrix submesh::geometric_tangent_stiffness(matrix3x const& x, std::int32_t const element) const
 {
     auto const& cauchy_stresses = variables->get(variable::second::cauchy_stress);
 
-    static thread_local matrix k_geo(nodes_per_element(), nodes_per_element());
-    static thread_local matrix k_geo_full;
+    thread_local matrix k_geo(nodes_per_element(), nodes_per_element());
 
     k_geo.setZero();
-    k_geo_full.setZero();
 
     sf->quadrature().integrate_inplace(k_geo, [&](auto const& N_dN, auto const l) {
         auto const& [N, dN] = N_dN;
@@ -107,16 +105,14 @@ matrix const& submesh::geometric_tangent_stiffness(matrix3x const& x, std::int32
         return L.transpose() * cauchy_stress * L * J.determinant();
     });
 
-    k_geo_full = identity_expansion(k_geo, dofs_per_node());
-    return k_geo_full;
+    return identity_expansion(k_geo, dofs_per_node());
 }
 
 matrix const& submesh::material_tangent_stiffness(matrix3x const& x, std::int32_t const element) const
 {
     auto const local_dofs = nodes_per_element() * dofs_per_node();
 
-    static thread_local matrix k_mat(local_dofs, local_dofs);
-    static thread_local matrix B(6, local_dofs);
+    thread_local matrix k_mat(local_dofs, local_dofs), B(6, local_dofs);
 
     auto const& tangent_operators = variables->get(variable::fourth::tangent_operator);
 
@@ -128,11 +124,11 @@ matrix const& submesh::material_tangent_stiffness(matrix3x const& x, std::int32_
 
         auto const& D = tangent_operators[view(element, l)];
 
-        matrix3 const Jacobian = local_deformation_gradient(dN, x);
+        matrix3 const jacobian = local_deformation_gradient(dN, x);
 
-        symmetric_gradient<3>(B, local_gradient(dN, Jacobian));
+        symmetric_gradient<3>(B, local_gradient(dN, jacobian));
 
-        return B.transpose() * D * B * Jacobian.determinant();
+        return B.transpose() * D * B * jacobian.determinant();
     });
     return k_mat;
 }

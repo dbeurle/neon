@@ -92,8 +92,8 @@ protected:
        \f}
      * Where B is the gradient operator in the finite element discretization
      */
-    [[nodiscard]] matrix const& geometric_tangent_stiffness(matrix3x const& configuration,
-                                                            std::int32_t const element) const;
+    [[nodiscard]] matrix geometric_tangent_stiffness(matrix3x const& configuration,
+                                                     std::int32_t const element) const;
 
     /**
      * Compute the material tangent stiffness using the formula
