@@ -64,7 +64,7 @@ std::pair<index_view, matrix> submesh::tangent_stiffness(std::int32_t const elem
     auto const x = geometry::project_to_plane(
         coordinates->current_configuration(local_node_view(element)));
 
-    static thread_local matrix k_e;
+    thread_local matrix k_e;
 
     k_e = material_tangent_stiffness(x, element);
 
@@ -87,8 +87,8 @@ matrix const& submesh::geometric_tangent_stiffness(matrix2x const& x, std::int32
 {
     auto const& cauchy_stresses = variables->get(variable::second::cauchy_stress);
 
-    static thread_local matrix k_geo(nodes_per_element(), nodes_per_element());
-    static thread_local matrix k_geo_full;
+    thread_local matrix k_geo(nodes_per_element(), nodes_per_element());
+    thread_local matrix k_geo_full;
 
     sf->quadrature().integrate_inplace(k_geo, [&](auto const& N_dN, auto const l) {
         auto const& [N, rhea] = N_dN;
@@ -111,7 +111,7 @@ matrix const& submesh::material_tangent_stiffness(matrix2x const& x, std::int32_
 {
     auto const local_dofs = nodes_per_element() * dofs_per_node();
 
-    static thread_local matrix k_mat(local_dofs, local_dofs);
+    thread_local matrix k_mat(local_dofs, local_dofs);
 
     k_mat.setZero();
 
@@ -136,7 +136,7 @@ matrix const& submesh::material_tangent_stiffness(matrix2x const& x, std::int32_
 
 vector const& submesh::internal_nodal_force(matrix2x const& x, std::int32_t const element) const
 {
-    static thread_local vector f_int(nodes_per_element() * dofs_per_node());
+    thread_local vector f_int(nodes_per_element() * dofs_per_node());
 
     f_int.setZero();
 
