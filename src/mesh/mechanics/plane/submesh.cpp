@@ -59,7 +59,7 @@ void submesh::save_internal_variables(bool const have_converged)
     }
 }
 
-std::pair<index_view, matrix const&> submesh::tangent_stiffness(std::int32_t const element) const
+std::pair<index_view, matrix> submesh::tangent_stiffness(std::int32_t const element) const
 {
     auto const x = geometry::project_to_plane(
         coordinates->current_configuration(local_node_view(element)));
@@ -75,7 +75,7 @@ std::pair<index_view, matrix const&> submesh::tangent_stiffness(std::int32_t con
     return {local_dof_view(element), k_e};
 }
 
-std::pair<index_view, vector const&> submesh::internal_force(std::int32_t const element) const
+std::pair<index_view, vector> submesh::internal_force(std::int32_t const element) const
 {
     auto const x = geometry::project_to_plane(
         coordinates->current_configuration(local_node_view(element)));
@@ -128,7 +128,7 @@ matrix const& submesh::material_tangent_stiffness(matrix2x const& x, std::int32_
 
                        matrix2 const Jacobian{local_deformation_gradient(rhea, x)};
 
-                       fem::sym_gradient<2>(B, (rhea * Jacobian.inverse()).transpose());
+                       symmetric_gradient<2>(B, (rhea * Jacobian.inverse()).transpose());
 
                        return B.transpose() * D * B * Jacobian.determinant();
                    });

@@ -7,7 +7,7 @@
 
 /// \file gradient_operator.hpp
 
-namespace neon::fem
+namespace neon
 {
 /** sym_gradient signals the use of
  * \f{align*}{
@@ -36,16 +36,16 @@ namespace neon::fem
  * Where \f$ N_{a,i} \f$ represents the partial derivative with respect
  * to the \f$ i \f$th dimension of the shape function in the parent domain
  */
-template <int spatial_dimension>
-inline void sym_gradient(matrix& B, matrix const& L)
+template <int SpatialDimension>
+inline void symmetric_gradient(matrix& B, matrix const& L)
 {
     auto const nodes_per_element = L.cols();
 
-    if (spatial_dimension == 3)
+    if constexpr (SpatialDimension == 3)
     {
         for (auto a = 0; a < nodes_per_element; ++a)
         {
-            auto const b = a * spatial_dimension;
+            auto const b = a * SpatialDimension;
 
             B(0, b) = L(0, a);
             B(4, b) = L(2, a);
@@ -58,11 +58,11 @@ inline void sym_gradient(matrix& B, matrix const& L)
             B(4, b + 2) = L(0, a);
         }
     }
-    else if (spatial_dimension == 2)
+    else if (SpatialDimension == 2)
     {
         for (auto a = 0; a < nodes_per_element; ++a)
         {
-            auto const b = a * spatial_dimension;
+            auto const b = a * SpatialDimension;
 
             B(0, b) = L(0, a);
             B(2, b) = L(1, a);
@@ -71,12 +71,9 @@ inline void sym_gradient(matrix& B, matrix const& L)
         }
     }
 }
-}
 
-namespace neon
-{
-template <typename MatrixType, typename StaticMatrix>
-[[nodiscard]] auto local_gradient(MatrixType const& dN, StaticMatrix const& Jacobian) noexcept
+template <typename StaticMatrix>
+[[nodiscard]] matrix local_gradient(matrix const& dN, StaticMatrix const& Jacobian) noexcept
 {
     return (dN * Jacobian.inverse()).transpose();
 }

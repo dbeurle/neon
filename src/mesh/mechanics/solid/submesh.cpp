@@ -130,8 +130,7 @@ matrix const& submesh::material_tangent_stiffness(matrix3x const& x, std::int32_
 
         matrix3 const Jacobian = local_deformation_gradient(dN, x);
 
-        // Compute the symmetric gradient operator
-        fem::sym_gradient<3>(B, local_gradient(dN, Jacobian));
+        symmetric_gradient<3>(B, local_gradient(dN, Jacobian));
 
         return B.transpose() * D * B * Jacobian.determinant();
     });
@@ -155,7 +154,7 @@ vector const& submesh::internal_nodal_force(matrix3x const& x, std::int32_t cons
                                matrix3 const& cauchy_stress = cauchy_stresses[view(element, l)];
 
                                // symmetric gradient operator
-                               auto const Bt = dN * J.inverse();
+                               matrix const Bt = dN * J.inverse();
 
                                return Bt * cauchy_stress * J.determinant();
                            });

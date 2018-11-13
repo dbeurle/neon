@@ -51,10 +51,10 @@ public:
     [[nodiscard]] auto const& constitutive() const { return *cm; }
 
     /// \return the tangent consistent stiffness matrix
-    [[nodiscard]] std::pair<index_view, matrix const&> tangent_stiffness(std::int32_t const element) const;
+    [[nodiscard]] std::pair<index_view, matrix> tangent_stiffness(std::int32_t const element) const;
 
     /// \return the internal element force
-    [[nodiscard]] std::pair<index_view, vector const&> internal_force(std::int32_t const element) const;
+    [[nodiscard]] std::pair<index_view, vector> internal_force(std::int32_t const element) const;
 
     /// \return the consistent mass matrix \sa diagonal_mass
     [[nodiscard]] std::pair<index_view, matrix> consistent_mass(std::int32_t const element) const;
