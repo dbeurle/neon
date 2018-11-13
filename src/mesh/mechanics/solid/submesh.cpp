@@ -204,8 +204,8 @@ void submesh::update_internal_variables(double const time_step_size)
 
 void submesh::update_deformation_measures()
 {
-    auto& H_list = variables->get(variable::second::displacement_gradient);
-    auto& F_list = variables->get(variable::second::deformation_gradient);
+    auto& displacement_gradients = variables->get(variable::second::displacement_gradient);
+    auto& deformation_gradients = variables->get(variable::second::deformation_gradient);
 
     tbb::parallel_for(std::int64_t{0}, elements(), [&](auto const element) {
         // Gather the material coordinates
@@ -225,8 +225,8 @@ void submesh::update_deformation_measures()
             // Displacement gradient
             matrix3 const H = (x - X) * B_0t;
 
-            H_list[view(element, l)] = H;
-            F_list[view(element, l)] = F * F_0.inverse();
+            displacement_gradients[view(element, l)] = H;
+            deformation_gradients[view(element, l)] = F * F_0.inverse();
         });
     });
 }
