@@ -100,7 +100,7 @@ matrix submesh::geometric_tangent_stiffness(matrix3x const& x, std::int32_t cons
 
         matrix3 const& cauchy_stress = cauchy_stresses[view(element, l)];
 
-        auto const L = local_gradient(dN, J);
+        matrix const L = local_gradient(dN, J);
 
         return L.transpose() * cauchy_stress * L * J.determinant();
     });
