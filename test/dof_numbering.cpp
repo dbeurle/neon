@@ -9,8 +9,6 @@
 
 using namespace neon;
 
-constexpr auto ZERO_MARGIN = 1.0e-5;
-
 std::array<std::int32_t, 3> dof_index = {0, 1, 2};
 
 TEST_CASE("index_view allocation")

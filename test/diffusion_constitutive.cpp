@@ -15,7 +15,6 @@ std::string json_thermal_diffusion()
 }
 
 constexpr auto internal_variable_size = 2;
-constexpr auto ZERO_MARGIN = 1.0e-5;
 
 using neon::json;
 

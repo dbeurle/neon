@@ -3,8 +3,6 @@
 
 #include "mesh/nodal_variables.hpp"
 
-constexpr auto ZERO_MARGIN = 1.0e-5;
-
 TEST_CASE("Scalar variable")
 {
     neon::nodal_variables<1> one(10);

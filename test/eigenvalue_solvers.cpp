@@ -6,8 +6,6 @@
 
 #include <iostream>
 
-constexpr auto ZERO_MARGIN = 1.0e-5;
-
 /// Create a SPD matrix for solver testing
 neon::sparse_matrix create_diagonal_sparse_matrix(int const N)
 {

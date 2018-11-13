@@ -18,7 +18,6 @@ std::string json_input_file()
     return "{\"name\": \"rubber\", \"elastic_modulus\": 2.0, \"poissons_ratio\": 0.45}";
 }
 
-constexpr auto internal_variable_size = 2;
 constexpr auto ZERO_MARGIN = 1.0e-5;
 
 using neon::json;
