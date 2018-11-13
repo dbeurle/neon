@@ -89,7 +89,7 @@ matrix submesh::geometric_tangent_stiffness(matrix3x const& x, std::int32_t cons
 {
     auto const& cauchy_stresses = variables->get(variable::second::cauchy_stress);
 
-    thread_local matrix k_geo(nodes_per_element(), nodes_per_element());
+    matrix k_geo(nodes_per_element(), nodes_per_element());
 
     k_geo.setZero();
 
@@ -108,11 +108,11 @@ matrix submesh::geometric_tangent_stiffness(matrix3x const& x, std::int32_t cons
     return identity_expansion(k_geo, dofs_per_node());
 }
 
-matrix const& submesh::material_tangent_stiffness(matrix3x const& x, std::int32_t const element) const
+matrix submesh::material_tangent_stiffness(matrix3x const& x, std::int32_t const element) const
 {
     auto const local_dofs = nodes_per_element() * dofs_per_node();
 
-    thread_local matrix k_mat(local_dofs, local_dofs), B(6, local_dofs);
+    matrix k_mat(local_dofs, local_dofs), B(6, local_dofs);
 
     auto const& tangent_operators = variables->get(variable::fourth::tangent_operator);
 
@@ -133,11 +133,11 @@ matrix const& submesh::material_tangent_stiffness(matrix3x const& x, std::int32_
     return k_mat;
 }
 
-vector const& submesh::internal_nodal_force(matrix3x const& x, std::int32_t const element) const
+vector submesh::internal_nodal_force(matrix3x const& x, std::int32_t const element) const
 {
     auto const& cauchy_stresses = variables->get(variable::second::cauchy_stress);
 
-    thread_local vector f_int(nodes_per_element() * dofs_per_node());
+    vector f_int(nodes_per_element() * dofs_per_node());
     f_int.setZero();
 
     sf->quadrature()

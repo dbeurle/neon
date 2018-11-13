@@ -101,8 +101,8 @@ protected:
      * k_{mat} &= I_{2x2} \int_{V} B_I^{T} \sigma B_{J} dV
      * \f}
      */
-    [[nodiscard]] matrix const& material_tangent_stiffness(matrix3x const& configuration,
-                                                           std::int32_t const element) const;
+    [[nodiscard]] matrix material_tangent_stiffness(matrix3x const& configuration,
+                                                    std::int32_t const element) const;
 
     /**
      * Compute the internal force vector using the formula
@@ -111,8 +111,8 @@ protected:
      * \f}
      * @return the internal nodal force vector
      */
-    [[nodiscard]] vector const& internal_nodal_force(matrix3x const& configuration,
-                                                     std::int32_t const element) const;
+    [[nodiscard]] vector internal_nodal_force(matrix3x const& configuration,
+                                              std::int32_t const element) const;
 
 private:
     std::shared_ptr<material_coordinates> coordinates;
