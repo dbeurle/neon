@@ -122,7 +122,7 @@ matrix submesh::material_tangent_stiffness(matrix3x const& x, std::int32_t const
     sf->quadrature().integrate_inplace(k_mat, [&](auto const& N_dN, auto const l) {
         auto const& [N, dN] = N_dN;
 
-        auto const& D = tangent_operators[view(element, l)];
+        matrix6 const& D = tangent_operators[view(element, l)];
 
         matrix3 const jacobian = local_deformation_gradient(dN, x);
 
@@ -137,8 +137,7 @@ vector submesh::internal_nodal_force(matrix3x const& x, std::int32_t const eleme
 {
     auto const& cauchy_stresses = variables->get(variable::second::cauchy_stress);
 
-    vector f_int(nodes_per_element() * dofs_per_node());
-    f_int.setZero();
+    vector f_int = vector::Zero(nodes_per_element() * dofs_per_node());
 
     sf->quadrature()
         .integrate_inplace(Eigen::Map<row_matrix>(f_int.data(), nodes_per_element(), dofs_per_node()),

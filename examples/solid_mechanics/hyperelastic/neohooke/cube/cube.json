@@ -65,7 +65,6 @@
         }],
         "linear_solver" : {
             "type" : "iterative",
-            "device" : "cpu",
             "maximum_iterations" : 2000,
             "tolerance"  : 1.0e-8
         }

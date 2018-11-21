@@ -34,15 +34,15 @@ template <int dof_size, typename BoundaryMeshType, class IndexType = std::int32_
     return dof_unique_view;
 }
 
-template <typename indices_type, typename dof_order_type>
-void dof_allocator(indices_type const& node_indices,
-                   indices_type& dof_indices,
-                   dof_order_type const dof_order)
+template <typename IndicesType, typename DofOrderType>
+void dof_allocator(IndicesType const& node_indices,
+                   IndicesType& dof_indices,
+                   DofOrderType const dof_order)
 {
     // Allocate the degree of freedom indices
     dof_indices.resize(node_indices.rows() * dof_order.size(), node_indices.cols());
 
-    for (typename indices_type::Index i{0}; i < node_indices.cols(); ++i)
+    for (typename IndicesType::Index i{0}; i < node_indices.cols(); ++i)
     {
         transform_expand_view(node_indices(Eigen::all, i), dof_indices(Eigen::all, i), dof_order);
     }
