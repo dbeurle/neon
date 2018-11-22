@@ -10,30 +10,29 @@ namespace neon
 {
 /// Performs the tensor dot product on two second order tensors in three dimensions.
 template <class MatrixLeft, class MatrixRight>
-[[nodiscard]] double double_dot(MatrixLeft const& a, MatrixRight const& b)
-{
+[[nodiscard]] double double_dot(MatrixLeft const& a, MatrixRight const& b) {
     return (a.array() * b.array()).sum();
 }
 
 namespace detail
 {
-/// \return the volumetric part of the tensor
-[[nodiscard]] inline matrix2 volumetric(matrix2 const& a)
-{
-    return matrix2::Identity() * a.trace() / 3.0;
-}
+    /// \return the volumetric part of the tensor
+    [[nodiscard]] inline matrix2 volumetric(matrix2 const& a)
+    {
+        return matrix2::Identity() * a.trace() / 3.0;
+    }
 
-/// \return the volumetric part of the tensor
-[[nodiscard]] inline matrix3 volumetric(matrix3 const& a)
-{
-    return matrix3::Identity() * a.trace() / 3.0;
-}
+    /// \return the volumetric part of the tensor
+    [[nodiscard]] inline matrix3 volumetric(matrix3 const& a)
+    {
+        return matrix3::Identity() * a.trace() / 3.0;
+    }
 
-/// \return the deviatoric part of the tensor
-[[nodiscard]] inline matrix2 deviatoric(matrix2 const& a) { return a - volumetric(a); }
+    /// \return the deviatoric part of the tensor
+    [[nodiscard]] inline matrix2 deviatoric(matrix2 const& a) { return a - volumetric(a); }
 
-/// \return the deviatoric part of the tensor
-[[nodiscard]] inline matrix3 deviatoric(matrix3 const& a) { return a - volumetric(a); }
+    /// \return the deviatoric part of the tensor
+    [[nodiscard]] inline matrix3 deviatoric(matrix3 const& a) { return a - volumetric(a); }
 }
 
 /// \return the volumetric part of the tensor
@@ -101,6 +100,22 @@ template <typename MatrixExpression>
             for (auto k = 0; k < nodal_dofs; ++k)
                 K(i * nodal_dofs + k, j * nodal_dofs + k) = H(i, j);
     return K;
+}
+
+template <int Dimension>
+inline void identity_expansion_inplace(matrix const& H_in, matrix& H_out) noexcept
+{
+    // Create the geometric part of the tangent stiffness matrix
+    for (auto i = 0; i < H_in.rows(); ++i)
+    {
+        for (auto j = 0; j < H_in.rows(); ++j)
+        {
+            for (auto k = 0; k < Dimension; ++k)
+            {
+                H_out(i * Dimension + k, j * Dimension + k) = H_in(i, j);
+            }
+        }
+    }
 }
 
 /**
