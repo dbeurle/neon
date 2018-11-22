@@ -56,9 +56,9 @@ public:
     template <typename MatrixType, typename Callable>
     void integrate_inplace(Eigen::Map<MatrixType> integral, Callable&& f) const noexcept
     {
-        for (std::size_t l{0}; l < points(); ++l)
+        for (std::size_t index{0}; index < points(); ++index)
         {
-            integral.noalias() += f(femvals[l], l) * m_weights[l];
+            integral.noalias() += f(femvals[index], index) * m_weights[index];
         }
     }
 
