@@ -103,6 +103,22 @@ template <typename MatrixExpression>
     return K;
 }
 
+template <int Dimension>
+inline void identity_expansion_inplace(matrix const& H_in, matrix& H_out) noexcept
+{
+    // Create the geometric part of the tangent stiffness matrix
+    for (auto i = 0; i < H_in.rows(); ++i)
+    {
+        for (auto j = 0; j < H_in.rows(); ++j)
+        {
+            for (auto k = 0; k < Dimension; ++k)
+            {
+                H_out(i * Dimension + k, j * Dimension + k) = H_in(i, j);
+            }
+        }
+    }
+}
+
 /**
  * Handles the representation of common tensors (deviatoric, identity, etc)
  * in Voigt notation suitable for the computation of tensor operations leveraging

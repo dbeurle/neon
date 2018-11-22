@@ -254,7 +254,7 @@ void static_matrix<MeshType>::assemble_stiffness()
     for (auto const& submesh : fem_mesh.meshes())
     {
         tbb::parallel_for(std::int64_t{0}, submesh.elements(), [&](auto const element) {
-            auto const [dofs, ke] = submesh.tangent_stiffness(element);
+            auto const& [dofs, ke] = submesh.tangent_stiffness(element);
 
             for (std::int64_t b{0}; b < dofs.size(); b++)
             {
