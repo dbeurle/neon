@@ -46,12 +46,12 @@ void small_strain_J2_plasticity::update_internal_variables(double const time_ste
               | ranges::view::transform([](auto const& H) { return 0.5 * (H + H.transpose()); });
 
     // Perform the update algorithm for each quadrature point
-    tbb::parallel_for(std::size_t{0}, strains.size(), [&](auto const l) {
-        auto const& strain = strains[l];
-        auto& plastic_strain = plastic_strains[l];
-        auto& cauchy_stress = cauchy_stresses[l];
-        auto& accumulated_plastic_strain = accumulated_plastic_strains[l];
-        auto& von_mises = von_mises_stresses[l];
+    tbb::parallel_for(std::size_t{0}, strains.size(), [&](auto const index) {
+        auto const& strain = strains[index];
+        auto& plastic_strain = plastic_strains[index];
+        auto& cauchy_stress = cauchy_stresses[index];
+        auto& accumulated_plastic_strain = accumulated_plastic_strains[index];
+        auto& von_mises = von_mises_stresses[index];
 
         // Elastic stress predictor
         cauchy_stress = compute_cauchy_stress(material.shear_modulus(),
@@ -65,7 +65,7 @@ void small_strain_J2_plasticity::update_internal_variables(double const time_ste
         // elastic modulus and continue to the next quadrature point
         if (evaluate_yield_function(von_mises, accumulated_plastic_strain) <= 0.0)
         {
-            tangent_operators[l] = C_e;
+            tangent_operators[index] = C_e;
             return;
         }
 
@@ -85,10 +85,10 @@ void small_strain_J2_plasticity::update_internal_variables(double const time_ste
 
         accumulated_plastic_strain += plastic_increment;
 
-        tangent_operators[l] = algorithmic_tangent(plastic_increment,
-                                                   accumulated_plastic_strain,
-                                                   von_mises_trial,
-                                                   normal);
+        tangent_operators[index] = algorithmic_tangent(plastic_increment,
+                                                       accumulated_plastic_strain,
+                                                       von_mises_trial,
+                                                       normal);
     });
 }
 
