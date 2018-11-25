@@ -157,7 +157,7 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
     }
     throw std::domain_error("The model name " + model_name + " is not recognised\n"
                             + "Supported models are \"neohooke\", \"microsphere\" "
-                              "and \"J2_plasticity\"\n");
+                              "\"isotropic_linear_elasticity\" and \"J2_plasticity\"\n");
     return nullptr;
 }
 }
