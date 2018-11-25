@@ -4,8 +4,6 @@
 #include "solver/eigen/eigenvalue_solver.hpp"
 #include "io/json.hpp"
 
-#include <iostream>
-
 /// Create a SPD matrix for solver testing
 neon::sparse_matrix create_diagonal_sparse_matrix(int const N)
 {
