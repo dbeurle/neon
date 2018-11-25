@@ -41,6 +41,11 @@ nonfollower_load_boundary::nonfollower_load_boundary(
     }
     else if (type == "pressure")
     {
+        if (boundary_data.find("value") == end(boundary_data))
+        {
+            throw std::domain_error("Pressure boundary condition must specify a \"value\" array");
+        }
+
         for (auto const& mesh : submeshes)
         {
             auto const& node_indices = mesh.all_node_indices();
