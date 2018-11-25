@@ -83,7 +83,7 @@ void linear_static_matrix<fem_mesh_type>::solve()
 
     assemble_stiffness();
 
-    fem::apply_dirichlet_conditions(Kt, d, f_ext, fem_mesh);
+    apply_dirichlet_conditions(Kt, d, f_ext, fem_mesh);
 
     solver->solve(Kt, d, f_ext);
 

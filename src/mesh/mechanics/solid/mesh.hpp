@@ -72,6 +72,9 @@ public:
     /// Write out results to file
     void write(std::int32_t const time_step, double const current_time);
 
+    /// Write out eigenvalues and eigenmodes to file
+    void write(vector const& eigenvalues, matrix const& eigenvectors);
+
 protected:
     void check_boundary_conditions(json const& boundary_data) const;
 

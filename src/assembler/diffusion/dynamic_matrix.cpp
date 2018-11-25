@@ -60,7 +60,7 @@ void dynamic_matrix::solve()
 
         b = M * d + time_solver.current_time_step_size() * f;
 
-        fem::apply_dirichlet_conditions(A, d, b, mesh);
+        apply_dirichlet_conditions(A, d, b, mesh);
 
         solver->solve(A, d, b);
 

@@ -29,7 +29,7 @@ void eigenvalue_solver::solve(sparse_matrix const& A)
 
     Eigen::ArpackGeneralizedSelfAdjointEigenSolver<decltype(A_col)> arpack;
 
-    arpack.compute(A_col, values_to_extract, "LM");
+    arpack.compute(A_col, values_to_extract, "SM");
 
     if (arpack.getNbrConvergedEigenValues() < values_to_extract)
     {
@@ -52,7 +52,7 @@ void eigenvalue_solver::solve(sparse_matrix const& A, sparse_matrix const& B)
 
     Eigen::ArpackGeneralizedSelfAdjointEigenSolver<decltype(A_col)> arpack;
 
-    arpack.compute(A_col, B_col, values_to_extract, "LM");
+    arpack.compute(A_col, B_col, values_to_extract, "SM");
 
     if (arpack.getNbrConvergedEigenValues() < values_to_extract)
     {

@@ -49,10 +49,19 @@ template <typename MeshType>
 void natural_frequency_matrix<MeshType>::solve()
 {
     assemble_stiffness();
+
     assemble_mass();
-    // fem::apply_dirichlet_conditions(K, mesh);
-    // solver.solve(K);
-    // file_io.write(0, 0.0, d);
+
+    apply_dirichlet_conditions(K, mesh);
+    apply_dirichlet_conditions(M, mesh);
+
+    solver.solve(K, M);
+
+    std::cout << "Eigenvalues in rad / time\n" << solver.eigenvalues().cwiseSqrt() << "\n";
+    std::cout << "Eigenvalues in cycles / time\n"
+              << solver.eigenvalues().cwiseSqrt() / 2.0 / M_PI << "\n";
+
+    mesh.write(solver.eigenvalues().cwiseSqrt(), solver.eigenvectors());
 }
 
 template <typename MeshType>
