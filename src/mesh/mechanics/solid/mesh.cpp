@@ -211,14 +211,6 @@ void mesh::write(vector const& eigenvalues, matrix const& eigenvectors)
                       3);
     }
     writer->write(0, 0.0);
-
-    for (std::int64_t index{0}; index < eigenvalues.size(); ++index)
-    {
-        writer->field("mode " + std::to_string(eigenvalues(index)),
-                      -eigenvectors.col(index).normalized(),
-                      3);
-    }
-    writer->write(1, 1.0);
 }
 
 void mesh::check_boundary_conditions(json const& boundary_data) const
