@@ -144,7 +144,7 @@ void natural_frequency_matrix<MeshType>::print_eigenvalue_table() const
 
     for (std::int64_t index{0}; index < solver.eigenvalues().size(); ++index)
     {
-        std::cout << std::string(indent, ' ') << std::setw(10) << index
+        std::cout << std::string(indent, ' ') << std::setw(10) << index + 1
                   << std::setw(17)
                   // print radians / time
                   << std::sqrt(solver.eigenvalues()(index))
