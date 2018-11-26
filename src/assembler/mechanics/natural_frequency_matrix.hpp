@@ -43,6 +43,9 @@ protected:
 
     /// Eigenvalue solver
     eigenvalue_solver solver;
+
+private:
+    void print_eigenvalue_table() const;
 };
 
 template <typename MeshType>
@@ -57,9 +60,7 @@ void natural_frequency_matrix<MeshType>::solve()
 
     solver.solve(K, M);
 
-    std::cout << "Eigenvalues in rad / time\n" << solver.eigenvalues().cwiseSqrt() << "\n";
-    std::cout << "Eigenvalues in cycles / time\n"
-              << solver.eigenvalues().cwiseSqrt() / 2.0 / M_PI << "\n";
+    print_eigenvalue_table();
 
     mesh.write(solver.eigenvalues().cwiseSqrt(), solver.eigenvectors());
 }
@@ -128,5 +129,28 @@ void natural_frequency_matrix<MeshType>::assemble_mass()
 
     std::cout << std::string(6, ' ') << "Mass matrix assembly took " << elapsed_seconds.count()
               << "s\n";
+}
+
+template <typename MeshType>
+void natural_frequency_matrix<MeshType>::print_eigenvalue_table() const
+{
+    constexpr auto indent = 6;
+    std::cout << '\n'
+              << std::string(indent, ' ') << "Eigenvalue | "
+              << "radians / time | "
+              << "cycles / time\n"
+              << std::string(indent, ' ') << std::setfill('-') << std::setw(44) << '\n'
+              << std::setfill(' ');
+
+    for (std::int64_t index{0}; index < solver.eigenvalues().size(); ++index)
+    {
+        std::cout << std::string(indent, ' ') << std::setw(10) << index
+                  << std::setw(17)
+                  // print radians / time
+                  << std::sqrt(solver.eigenvalues()(index))
+                  << std::setw(16)
+                  // print cycles / time
+                  << std::sqrt(solver.eigenvalues()(index)) / (2.0 * M_PI) << "\n";
+    }
 }
 }
