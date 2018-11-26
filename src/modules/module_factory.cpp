@@ -35,9 +35,9 @@ std::unique_ptr<abstract_module> make_module(
 
     auto const& simulation_mesh = mesh_store.find(mesh_data["name"].get<std::string>());
 
-    auto const& name = simulation["name"].get<std::string>();
-    auto const& module_type = simulation["module"].get<std::string>();
-    auto const& solution_type = simulation["solution"].get<std::string>();
+    std::string const& name = simulation["name"];
+    std::string const& module_type = simulation["module"];
+    std::string const& solution_type = simulation["solution"];
 
     std::cout << std::string(4, ' ') << "Name     \"" << name << "\"\n";
     std::cout << std::string(4, ' ') << "Module   \"" << module_type << "\"\n";
@@ -47,7 +47,7 @@ std::unique_ptr<abstract_module> make_module(
 
     if (module_type == "solid_mechanics")
     {
-        if (solution_type == "linear_buckling")
+        if (solution_type == "natural_frequency")
         {
             return std::make_unique<natural_frequency_module>(mesh, material, simulation);
         }
@@ -70,9 +70,8 @@ std::unique_ptr<abstract_module> make_module(
                                                                                          material,
                                                                                          simulation);
         }
-        {
-            throw std::domain_error("\"solution\" is not valid.  Please use \"equilibrium\"");
-        }
+
+        throw std::domain_error("\"solution\" is not valid.  Please use \"equilibrium\"");
     }
     else if (module_type == "plane_strain")
     {

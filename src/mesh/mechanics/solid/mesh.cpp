@@ -202,6 +202,17 @@ void mesh::write(std::int32_t const time_step, double const current_time)
     writer->write(time_step, current_time);
 }
 
+void mesh::write(vector const& eigenvalues, matrix const& eigenvectors)
+{
+    for (std::int64_t index{0}; index < eigenvalues.size(); ++index)
+    {
+        writer->field("mode " + std::to_string(eigenvalues(index)),
+                      eigenvectors.col(index).normalized(),
+                      3);
+    }
+    writer->write(0, 0.0);
+}
+
 void mesh::check_boundary_conditions(json const& boundary_data) const
 {
     for (auto const& boundary : boundary_data)

@@ -4,8 +4,6 @@
 #include "solver/eigen/eigenvalue_solver.hpp"
 #include "io/json.hpp"
 
-#include <iostream>
-
 /// Create a SPD matrix for solver testing
 neon::sparse_matrix create_diagonal_sparse_matrix(int const N)
 {
@@ -50,7 +48,7 @@ TEST_CASE("Arpack eigenvalues")
     for (int i = 0; i < 10; i++)
     {
         // Expected eigenvalues
-        REQUIRE(values(i) == Approx(41.0 + i));
+        REQUIRE(values(i) == Approx(i + 1.0));
         // Unit vectors
         REQUIRE(vectors.col(i).norm() == Approx(1.0));
     }

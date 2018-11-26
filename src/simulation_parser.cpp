@@ -112,7 +112,7 @@ void simulation_parser::parse()
     for (auto const& simulation : root["steps"])
     {
         // Ensure the required fields exist
-        for (auto required_field : {"name", "time", "solution", "linear_solver"})
+        for (auto required_field : {"name", "time", "solution"})
         {
             if (simulation.find(required_field) == simulation.end())
             {

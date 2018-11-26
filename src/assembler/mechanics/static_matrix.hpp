@@ -31,7 +31,7 @@ public:
     using mesh_type = MeshType;
 
 public:
-    explicit static_matrix(mesh_type& fem_mesh, json const& simulation);
+    explicit static_matrix(mesh_type& mesh, json const& simulation);
 
     /// Solve the nonlinear system of equations
     void solve();
@@ -66,7 +66,7 @@ private:
     void perform_equilibrium_iterations();
 
 protected:
-    mesh_type& fem_mesh;
+    mesh_type& mesh;
 
     adaptive_time_step adaptive_load;
 
@@ -105,10 +105,10 @@ protected:
 };
 
 template <class MeshType>
-static_matrix<MeshType>::static_matrix(mesh_type& fem_mesh, json const& simulation)
-    : fem_mesh(fem_mesh),
-      adaptive_load(simulation["time"], fem_mesh.time_history()),
-      solver(make_linear_solver(simulation["linear_solver"], fem_mesh.is_symmetric()))
+static_matrix<MeshType>::static_matrix(mesh_type& mesh, json const& simulation)
+    : mesh(mesh),
+      adaptive_load(simulation["time"], mesh.time_history()),
+      solver(make_linear_solver(simulation["linear_solver"], mesh.is_symmetric()))
 {
     auto const& nonlinear_options = simulation["nonlinear_options"];
 
@@ -132,11 +132,11 @@ static_matrix<MeshType>::static_matrix(mesh_type& fem_mesh, json const& simulati
     residual_tolerance = nonlinear_options["residual_tolerance"];
     displacement_tolerance = nonlinear_options["displacement_tolerance"];
 
-    f_int = f_ext = displacement = displacement_old = delta_d = vector::Zero(fem_mesh.active_dofs());
+    f_int = f_ext = displacement = displacement_old = delta_d = vector::Zero(mesh.active_dofs());
 
     // Perform Newton-Raphson iterations
     std::cout << "\n"
-              << std::string(4, ' ') << "Non-linear equation system has " << fem_mesh.active_dofs()
+              << std::string(4, ' ') << "Non-linear equation system has " << mesh.active_dofs()
               << " degrees of freedom\n";
 }
 
@@ -146,10 +146,10 @@ void static_matrix<MeshType>::solve()
     try
     {
         // Initialise the mesh with zero displacements
-        fem_mesh.update_internal_variables(displacement);
-        fem_mesh.update_internal_forces(f_int);
+        mesh.update_internal_variables(displacement);
+        mesh.update_internal_forces(f_int);
 
-        fem_mesh.write(adaptive_load.step(), adaptive_load.time());
+        mesh.write(adaptive_load.step(), adaptive_load.time());
 
         while (!adaptive_load.is_fully_applied())
         {
@@ -172,7 +172,7 @@ void static_matrix<MeshType>::solve()
                   << comp_error.what() << termcolor::reset << std::endl;
 
         adaptive_load.update_convergence_state(false);
-        fem_mesh.save_internal_variables(false);
+        mesh.save_internal_variables(false);
 
         displacement = displacement_old;
 
@@ -189,7 +189,7 @@ void static_matrix<MeshType>::compute_internal_force()
 {
     f_int.setZero();
 
-    for (auto const& submesh : fem_mesh.meshes())
+    for (auto const& submesh : mesh.meshes())
     {
         for (std::int64_t element{0}; element < submesh.elements(); ++element)
         {
@@ -209,7 +209,7 @@ void static_matrix<MeshType>::compute_external_force()
 
     f_ext.setZero();
 
-    for (auto const& [name, boundaries] : fem_mesh.nonfollower_boundaries())
+    for (auto const& [name, boundaries] : mesh.nonfollower_boundaries())
     {
         for (auto const& boundary : boundaries.natural_interface())
         {
@@ -243,7 +243,7 @@ void static_matrix<MeshType>::assemble_stiffness()
 {
     if (!is_sparsity_computed)
     {
-        fem::compute_sparsity_pattern(Kt, fem_mesh);
+        fem::compute_sparsity_pattern(Kt, mesh);
         is_sparsity_computed = true;
     }
 
@@ -251,7 +251,7 @@ void static_matrix<MeshType>::assemble_stiffness()
 
     Kt.coeffs() = 0.0;
 
-    for (auto const& submesh : fem_mesh.meshes())
+    for (auto const& submesh : mesh.meshes())
     {
         tbb::parallel_for(std::int64_t{0}, submesh.elements(), [&](auto const element) {
             auto const& [dofs, ke] = submesh.tangent_stiffness(element);
@@ -276,7 +276,7 @@ void static_matrix<MeshType>::assemble_stiffness()
 template <class MeshType>
 void static_matrix<MeshType>::enforce_dirichlet_conditions(sparse_matrix& A, vector& b) const
 {
-    for (auto const& [name, boundaries] : fem_mesh.dirichlet_boundaries())
+    for (auto const& [name, boundaries] : mesh.dirichlet_boundaries())
     {
         for (auto const& boundary : boundaries)
         {
@@ -321,7 +321,7 @@ void static_matrix<MeshType>::apply_displacement_boundaries()
 {
     Eigen::SparseVector<double> prescribed_increment(displacement.size());
 
-    for (auto const& [name, boundaries] : fem_mesh.dirichlet_boundaries())
+    for (auto const& [name, boundaries] : mesh.dirichlet_boundaries())
     {
         for (auto const& boundary : boundaries)
         {
@@ -403,7 +403,7 @@ void static_matrix<MeshType>::perform_equilibrium_iterations()
 {
     displacement = displacement_old;
 
-    fem_mesh.update_internal_variables(displacement, adaptive_load.increment());
+    mesh.update_internal_variables(displacement, adaptive_load.increment());
 
     // Full Newton-Raphson iteration to solve nonlinear equations
     auto current_iteration{0};
@@ -432,7 +432,7 @@ void static_matrix<MeshType>::perform_equilibrium_iterations()
 
         displacement += delta_d;
 
-        fem_mesh.update_internal_variables(displacement, 0.0);
+        mesh.update_internal_variables(displacement, 0.0);
 
         update_relative_norms();
 
@@ -457,11 +457,11 @@ void static_matrix<MeshType>::perform_equilibrium_iterations()
         displacement_old = displacement;
 
         adaptive_load.update_convergence_state(current_iteration != maximum_iterations);
-        fem_mesh.save_internal_variables(current_iteration != maximum_iterations);
+        mesh.save_internal_variables(current_iteration != maximum_iterations);
 
-        fem_mesh.update_internal_forces(f_int);
+        mesh.update_internal_forces(f_int);
 
-        fem_mesh.write(adaptive_load.step(), adaptive_load.time());
+        mesh.write(adaptive_load.step(), adaptive_load.time());
     }
 }
 }

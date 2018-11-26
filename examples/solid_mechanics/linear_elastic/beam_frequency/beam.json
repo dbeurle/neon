@@ -1,0 +1,51 @@
+{
+    "name" : "beam frequency study",
+    "cores" : 4,
+    "parts": [{
+        "name" : "beam",
+        "material" : "steel"
+    }],
+    "materials" : [{
+        "name" : "steel",
+        "elastic_modulus" : 200.0e9,
+        "poissons_ratio" : 0.3,
+        "density" : 7900.0
+    }],
+    "steps" : [{
+        "name" : "cantilever_force",
+		"module" : "solid_mechanics",
+        "solution" : "natural_frequency",
+        "time" : {
+            "period" : 1.0,
+            "increments" : {
+                "initial" : 1.0,
+                "minimum" : 0.00001,
+                "maximum" : 1.0,
+                "adaptive" : true
+            }
+        },
+		"meshes" : [{
+            "name" : "beam",
+            "constitutive" : {
+                "name" : "isotropic_linear_elasticity"
+            },
+            "element_options" : {
+                "quadrature" : "reduced"
+            },
+            "boundaries" : [{
+                "name" : "cantilever",
+                "type" : "displacement",
+                "time" : [0.0, 1.0],
+                "x" : [0.0, 0.0],
+                "y" : [0.0, 0.0],
+                "z" : [0.0, 0.0]
+            }],
+            "visualisation" : {
+                "fields" : ["displacement"]
+            }
+        }],
+		"eigen_solver" :  {
+		    "type" : "power_iteration"
+        }
+    }]
+}

@@ -111,7 +111,7 @@ void static_matrix::solve()
 
     compute_external_force();
 
-    fem::apply_dirichlet_conditions(K, d, f, mesh);
+    apply_dirichlet_conditions(K, d, f, mesh);
 
     solver->solve(K, d, f);
 
