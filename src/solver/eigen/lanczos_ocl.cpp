@@ -12,7 +12,11 @@
 
 namespace neon
 {
-lanczos_ocl::lanczos_ocl(std::int64_t const values_to_extract) : eigen_solver(values_to_extract) {}
+lanczos_ocl::lanczos_ocl(std::int64_t const values_to_extract,
+                         eigen_solver::eigen_spectrum const spectrum)
+    : eigen_solver(values_to_extract, spectrum)
+{
+}
 
 void lanczos_ocl::solve(sparse_matrix const& A)
 {

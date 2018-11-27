@@ -38,6 +38,8 @@ public:
 protected:
     std::int64_t values_to_extract{0};
 
+    eigen_spectrum m_spectrum;
+
     vector m_eigenvalues;
     col_matrix m_eigenvectors;
 };

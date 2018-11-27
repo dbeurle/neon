@@ -13,7 +13,8 @@ namespace neon
 class lanczos_ocl : public eigen_solver
 {
 public:
-    lanczos_ocl(std::int64_t const values_to_extract);
+    lanczos_ocl(std::int64_t const values_to_extract,
+                eigen_solver::eigen_spectrum const spectrum = eigen_solver::eigen_spectrum::lower);
 
     virtual void solve(sparse_matrix const& A) override final;
 

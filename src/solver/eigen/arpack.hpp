@@ -10,7 +10,8 @@ class arpack : public eigen_solver
 public:
     /// Construct an arpack eigenvalue solver
     /// \param values_to_extract Number of eigenvalues to extract
-    arpack(std::int64_t const values_to_extract);
+    arpack(std::int64_t const values_to_extract,
+           eigen_solver::eigen_spectrum const spectrum = eigen_solver::eigen_spectrum::lower);
 
     /// Solve the standard eigenvalue problem $\f (A - \lambda I) x = 0 $\f
     /// \return eigenvalues and eigenvectors

@@ -21,7 +21,10 @@ public:
     using mesh_type = MeshType;
 
 public:
-    linear_buckling_matrix(mesh_type& mesh) : mesh(mesh), solver(5) {}
+    linear_buckling_matrix(mesh_type& mesh)
+        : mesh(mesh), solver(5, eigen_solver::eigen_spectrum::lower)
+    {
+    }
 
     /// Compute the eigenvalue for the buckling load and the corresponding
     /// buckling mode.

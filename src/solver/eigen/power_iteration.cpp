@@ -14,7 +14,11 @@
 
 namespace neon
 {
-power_iteration::power_iteration(std::int64_t const values_to_extract) : eigen_solver(1) {}
+power_iteration::power_iteration(std::int64_t const values_to_extract,
+                                 eigen_solver::eigen_spectrum const spectrum)
+    : eigen_solver(1, spectrum)
+{
+}
 
 void power_iteration::solve(sparse_matrix const& A)
 {

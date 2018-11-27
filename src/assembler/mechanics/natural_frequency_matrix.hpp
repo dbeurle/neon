@@ -21,7 +21,10 @@ public:
     using mesh_type = MeshType;
 
 public:
-    natural_frequency_matrix(mesh_type&& mesh) : mesh(std::move(mesh)), solver(5) {}
+    natural_frequency_matrix(mesh_type&& mesh)
+        : mesh(std::move(mesh)), solver(5, eigen_solver::eigen_spectrum::lower)
+    {
+    }
 
     /// Compute the eigenvalues corresponding to the resonant frequency of the
     /// structure.

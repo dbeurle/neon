@@ -11,7 +11,8 @@ namespace neon
 class power_iteration : public eigen_solver
 {
 public:
-    power_iteration(std::int64_t const values_to_extract);
+    power_iteration(std::int64_t const values_to_extract,
+                    eigen_solver::eigen_spectrum const spectrum = eigen_solver::eigen_spectrum::lower);
 
     virtual void solve(sparse_matrix const& A) override final;
 
