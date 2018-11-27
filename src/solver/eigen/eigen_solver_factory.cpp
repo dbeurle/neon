@@ -13,9 +13,9 @@ std::unique_ptr<eigen_solver> make_eigen_solver(json const& solver_data)
 {
     if (solver_data.find("type") == end(solver_data))
     {
-        throw std::domain_error(
-            "Eigen solver type was not provided.  Please use \"power_iteration\", "
-            "\"arpack\" or \"lanczos\"");
+        throw std::domain_error("Eigen solver type was not provided.  Please use "
+                                "\"power_iteration\", "
+                                "\"arpack\" or \"lanczos\"");
     }
 
     std::int64_t number_of_ev = 10;
