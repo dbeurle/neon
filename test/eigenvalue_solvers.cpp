@@ -1,7 +1,11 @@
 
 #include <catch2/catch.hpp>
 
-#include "solver/eigen/eigenvalue_solver.hpp"
+#include "solver/eigen/eigen_solver.hpp"
+#include "solver/eigen/arpack.hpp"
+#include "solver/eigen/power_iteration.hpp"
+#include "solver/eigen/lanczos_ocl.hpp"
+
 #include "io/json.hpp"
 
 /// Create a SPD matrix for solver testing
@@ -33,7 +37,7 @@ neon::sparse_matrix create_sparse_identity(int const N)
 
 TEST_CASE("Arpack eigenvalues")
 {
-    neon::eigenvalue_solver solver{10};
+    neon::arpack solver{10};
 
     solver.solve(create_diagonal_sparse_matrix(50), create_sparse_identity(50));
 
@@ -70,7 +74,7 @@ TEST_CASE("Power iteration eigenvalue")
 }
 TEST_CASE("Lanczos iteration eigenvalue")
 {
-    neon::lanzcos_solver solver{10};
+    neon::lanczos_ocl solver{10};
 
     solver.solve(create_diagonal_sparse_matrix(50));
 

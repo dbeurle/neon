@@ -5,7 +5,7 @@
 
 #include "assembler/sparsity_pattern.hpp"
 #include "assembler/homogeneous_dirichlet.hpp"
-#include "solver/eigen/eigenvalue_solver.hpp"
+#include "solver/eigen/arpack.hpp"
 
 #include <chrono>
 #include <iostream>
@@ -42,7 +42,7 @@ protected:
     sparse_matrix M;
 
     /// Eigenvalue solver
-    eigenvalue_solver solver;
+    arpack solver;
 
 private:
     void print_eigenvalue_table() const;

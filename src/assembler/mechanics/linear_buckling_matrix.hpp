@@ -5,7 +5,7 @@
 
 #include "assembler/sparsity_pattern.hpp"
 #include "assembler/homogeneous_dirichlet.hpp"
-#include "solver/eigen/eigenvalue_solver.hpp"
+#include "solver/eigen/arpack.hpp"
 
 #include <chrono>
 #include <iostream>
@@ -36,7 +36,7 @@ protected:
     /// Stiffness matrix
     sparse_matrix K;
     /// Eigenvalue solver
-    eigenvalue_solver solver;
+    arpack solver;
 };
 
 template <typename MeshType>
