@@ -30,3 +30,18 @@ Non-linear Implicit Dynamic
 ===========================
 
 The code to solve the implicit dynamic problem has been implemented but not yet tested.  If required, please provide a test case to the developers.
+
+Natural Frequency
+=================
+
+The generalised Eigenvalue problem can be solved by specifying ::
+
+    "steps" : [{
+        ...
+        "solution" : "natural_frequency",
+        ...
+    }]
+
+Note that loads do not need to be specified for free vibration analysis but the restraints must be specified.  Since this solution method builds a mass matrix, the material for the mesh must specify a material density.
+
+For a selection of valid Eigenvalue solvers, please refer to the solvers section of this manual.
