@@ -5,7 +5,7 @@
 
 #include "assembler/sparsity_pattern.hpp"
 #include "assembler/homogeneous_dirichlet.hpp"
-#include "solver/eigen/eigenvalue_solver.hpp"
+#include "solver/eigen/arpack.hpp"
 
 #include <chrono>
 #include <iostream>
@@ -21,7 +21,10 @@ public:
     using mesh_type = MeshType;
 
 public:
-    natural_frequency_matrix(mesh_type&& mesh) : mesh(std::move(mesh)), solver(5) {}
+    natural_frequency_matrix(mesh_type&& mesh, std::unique_ptr<eigen_solver>&& solver)
+        : mesh(std::move(mesh)), solver{std::move(solver)}
+    {
+    }
 
     /// Compute the eigenvalues corresponding to the resonant frequency of the
     /// structure.
@@ -42,7 +45,7 @@ protected:
     sparse_matrix M;
 
     /// Eigenvalue solver
-    eigenvalue_solver solver;
+    std::unique_ptr<eigen_solver> solver;
 
 private:
     void print_eigenvalue_table() const;
@@ -58,11 +61,11 @@ void natural_frequency_matrix<MeshType>::solve()
     apply_dirichlet_conditions(K, mesh);
     apply_dirichlet_conditions(M, mesh);
 
-    solver.solve(K, M);
+    solver->solve(K, M);
 
     print_eigenvalue_table();
 
-    mesh.write(solver.eigenvalues().cwiseSqrt(), solver.eigenvectors());
+    mesh.write(solver->eigenvalues().cwiseSqrt(), solver->eigenvectors());
 }
 
 template <typename MeshType>
@@ -142,15 +145,15 @@ void natural_frequency_matrix<MeshType>::print_eigenvalue_table() const
               << std::string(indent, ' ') << std::setfill('-') << std::setw(44) << '\n'
               << std::setfill(' ');
 
-    for (std::int64_t index{0}; index < solver.eigenvalues().size(); ++index)
+    for (std::int64_t index{0}; index < solver->eigenvalues().size(); ++index)
     {
         std::cout << std::string(indent, ' ') << std::setw(10) << index + 1
                   << std::setw(17)
                   // print radians / time
-                  << std::sqrt(solver.eigenvalues()(index))
+                  << std::sqrt(solver->eigenvalues()(index))
                   << std::setw(16)
                   // print cycles / time
-                  << std::sqrt(solver.eigenvalues()(index)) / (2.0 * M_PI) << "\n";
+                  << std::sqrt(solver->eigenvalues()(index)) / (2.0 * M_PI) << "\n";
     }
 }
 }

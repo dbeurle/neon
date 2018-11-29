@@ -66,16 +66,16 @@ All linear solvers use double floating point precision which may incur performan
 Eigenvalue problems
 -------------------
 
-The solution of an eigenvalue problem arises in natural frequency analysis in structural dynamics.  Usually only the solution of a few eigenvalues are required and is computationally feasible.  These eigenvalues and eigenvectors correspond to the natural frequency and the mode shape of the structure for natural frequency analysis.  For the linear elastic buckling load of a structure, the eigenvalues provide the limit load and the deformed shape.
+The solution of an eigenvalue problem arises in natural frequency analysis and buckling analysis in structural dynamics.  Usually only the solution of a few eigenvalues are required and this becomes computationally feasible for large sparse matrices.  These eigenvalues and eigenvectors correspond to the natural frequency and the mode shape of the structure for natural frequency analysis.  For the linear elastic buckling load of a structure, the eigenvalues provide the limit load and the deformed shape.
 
 Unlike direct methods for linear systems, eigenvalues have to be solved for in an iterative fashion.  There are several different algorithms available depending on the problem.
 
 An example of an eigenvalue solver definition ::
 
-     "eigenvalue_solver" {
+     "eigen_solver" {
          "type" : "lanczos",
          "values" : 15,
-         "sort" : "lowest"
+         "spectrum" : "lower"
      }
 
-where the ``"type"`` field indicates what algorithm to use and ``"values"`` determines how many eigenvalues are to be solved for.  This should be much less than the total number of degrees of freedom in the system.
+where the ``"type"`` field indicates what algorithm to use (``"arpack"``, ``"lanczos"`` and ``"power_iteration"``) are available.  The ``"values"`` keyword determines how many eigenvalues are to be solved for.  This should be much less than the total number of degrees of freedom in the system.  Finally the ``"spectrum"`` keyword indicates from which end of the spectrum the values will be computed, where ``"lower"`` indicates Eigenvalues from the lowest frequency and ``"upper"`` computes the higher frequency Eigenvalues.

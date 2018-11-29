@@ -30,7 +30,7 @@
                 "name" : "isotropic_linear_elasticity"
             },
             "element_options" : {
-                "quadrature" : "reduced"
+                "quadrature" : "full"
             },
             "boundaries" : [{
                 "name" : "cantilever",
@@ -45,7 +45,9 @@
             }
         }],
 		"eigen_solver" :  {
-		    "type" : "power_iteration"
+		    "type" : "arpack",
+            "values" : 7,
+            "spectrum" : "lower"
         }
     }]
 }

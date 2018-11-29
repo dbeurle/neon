@@ -5,7 +5,7 @@
 
 #include "assembler/sparsity_pattern.hpp"
 #include "assembler/homogeneous_dirichlet.hpp"
-#include "solver/eigen/eigenvalue_solver.hpp"
+#include "solver/eigen/arpack.hpp"
 
 #include <chrono>
 #include <iostream>
@@ -21,7 +21,10 @@ public:
     using mesh_type = MeshType;
 
 public:
-    linear_buckling_matrix(mesh_type& mesh) : mesh(mesh), solver(5) {}
+    linear_buckling_matrix(mesh_type& mesh)
+        : mesh(mesh), solver(5, eigen_solver::eigen_spectrum::lower)
+    {
+    }
 
     /// Compute the eigenvalue for the buckling load and the corresponding
     /// buckling mode.
@@ -36,7 +39,7 @@ protected:
     /// Stiffness matrix
     sparse_matrix K;
     /// Eigenvalue solver
-    eigenvalue_solver solver;
+    arpack solver;
 };
 
 template <typename MeshType>
