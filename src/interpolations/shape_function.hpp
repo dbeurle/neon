@@ -45,7 +45,8 @@ protected:
                                       matrix const& local_quadrature_coordinates);
 
 protected:
-    matrix extrapolation; //!< Quadrature point to nodal point mapping
+    /// Quadrature point to nodal point mapping
+    matrix extrapolation;
 
     std::unique_ptr<quadrature_type> numerical_quadrature;
 };
