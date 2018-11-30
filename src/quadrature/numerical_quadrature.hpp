@@ -12,14 +12,16 @@ namespace neon
 /// quadrature class that encapsulates the coordinates, weightings and a method
 /// to perform the integration for a function that accepts a quadrature point
 /// index.
-template <typename... Xi>
+template <typename... Spaces>
 class numerical_quadrature
 {
 public:
-    using coordinate_type = std::tuple<int, Xi...>;
+    static constexpr std::size_t spatial_dimension = sizeof...(Spaces);
+
+    using coordinate_type = std::tuple<int, Spaces...>;
 
     /// Fix the size of the shape function derivative to the size of the quadrature points
-    using fem_value_type = std::tuple<vector, matrixxd<sizeof...(Xi)>>;
+    using fem_value_type = std::tuple<vector, matrixxd<spatial_dimension>>;
 
 public:
     /// Perform the numerical integration of a lambda function.
@@ -34,6 +36,20 @@ public:
             operand.noalias() += f(femvals[l], l) * m_weights[l];
         }
         return operand;
+    }
+
+    /// Perform the numerical integration of a lambda function.
+    /// \param integral - Initial value for the numerical integration
+    /// \param f - A lambda function that accepts an femValue and quadrature point
+    /// \return The numerically integrated scalar
+    template <typename Callable>
+    [[nodiscard]] double integrate(double integral, Callable&& f) const noexcept
+    {
+        for (std::size_t l{0}; l < points(); ++l)
+        {
+            integral += f(femvals[l], l) * m_weights[l];
+        }
+        return integral;
     }
 
     /// Perform the numerical integration of a lambda function.
@@ -60,20 +76,6 @@ public:
         {
             integral.noalias() += f(femvals[index], index) * m_weights[index];
         }
-    }
-
-    /// Perform the numerical integration of a lambda function.
-    /// \param integral - Initial value for the numerical integration
-    /// \param f - A lambda function that accepts an femValue and quadrature point
-    /// \return The numerically integrated scalar
-    template <typename Callable>
-    [[nodiscard]] double integrate(double integral, Callable&& f) const noexcept
-    {
-        for (std::size_t l{0}; l < points(); ++l)
-        {
-            integral += f(femvals[l], l) * m_weights[l];
-        }
-        return integral;
     }
 
     /// Evaluate the function \p function at each integration point
