@@ -33,8 +33,8 @@ triangle_quadrature::triangle_quadrature(point const p)
             break;
         }
     }
-    std::transform(begin(m_weights), end(m_weights), begin(m_weights), [](auto const i) {
-        return 0.5 * i;
+    std::transform(begin(m_weights), end(m_weights), begin(m_weights), [](auto const weight) {
+        return 0.5 * weight;
     });
 }
 }
