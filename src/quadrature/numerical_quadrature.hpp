@@ -105,10 +105,13 @@ public:
     [[nodiscard]] auto points() const noexcept { return m_weights.size(); }
 
     /// \return quadrature weights for this scheme
-    [[nodiscard]] auto const& weights() const noexcept { return m_weights; }
+    [[nodiscard]] auto weights() const noexcept -> std::vector<double> const& { return m_weights; }
 
     /// \return list of tuples representing the index and the coordinates
-    [[nodiscard]] auto const& coordinates() const noexcept { return m_coordinates; }
+    [[nodiscard]] auto coordinates() const noexcept -> auto const& { return m_coordinates; }
+
+    /// \return Degree of polynomial exactly integrated
+    [[nodiscard]] auto degree() const noexcept -> std::uint8_t { return m_degree; }
 
 protected:
     /// Quadrature weightings
@@ -118,6 +121,8 @@ protected:
 
     /// Shape functions and their derivatives evaluated at the quadrature points
     std::vector<fem_value_type> femvals;
+
+    std::uint8_t m_degree{0};
 };
 
 extern template class numerical_quadrature<double>;
