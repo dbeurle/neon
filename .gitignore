@@ -4,3 +4,7 @@ build/*
 doc/latex
 doc/html
 doc/build
+
+\.idea/
+cmake-build-debug/
+neon.srctr*
