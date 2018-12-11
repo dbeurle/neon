@@ -166,7 +166,7 @@ std::pair<index_view, matrix const&> submesh::consistent_mass(std::int32_t const
 {
     auto const& X = coordinates->initial_configuration(local_node_view(element));
 
-    auto const density_0 = cm->intrinsic_material().initial_density();
+    auto const density = cm->intrinsic_material().initial_density();
 
     thread_local matrix local_mass(nodes_per_element(), nodes_per_element());
     thread_local matrix mass(nodes_per_element() * dofs_per_node(),
@@ -178,7 +178,7 @@ std::pair<index_view, matrix const&> submesh::consistent_mass(std::int32_t const
 
                                            matrix3 const J = local_deformation_gradient(dN, X);
 
-                                           return density_0 * N * N.transpose() * J.determinant();
+                                           return density * N * N.transpose() * J.determinant();
                                        });
 
     identity_expansion_inplace<3>(local_mass, mass.setZero());
