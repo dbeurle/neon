@@ -27,10 +27,10 @@ void hexahedron8::precompute_shape_functions()
                                                                    {6, 1.0, 1.0, 1.0},
                                                                    {7, -1.0, 1.0, 1.0}}};
 
-    matrix N_matrix(numerical_quadrature->points(), nodes());
-    matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 4);
+    matrix N_matrix(m_quadrature->points(), nodes());
+    matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 4);
 
-    numerical_quadrature->evaluate([&](auto const& coordinate) {
+    m_quadrature->evaluate([&](auto const& coordinate) {
         auto const& [l, xi, eta, zeta] = coordinate;
 
         vector N(8);
@@ -68,7 +68,7 @@ void hexahedron8::precompute_shape_functions()
 
 double hexahedron8::compute_measure(matrix const& nodal_coordinates) const
 {
-    return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
+    return m_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
         auto const& [N, dN] = femval;
 
         matrix3 const Jacobian = nodal_coordinates * dN;
@@ -95,10 +95,10 @@ void hexahedron20::precompute_shape_functions()
          {12, 0.0, -1.0, 1.0},  {13, 1.0, 0.0, 1.0},  {14, 0.0, 1.0, 1.0},  {15, -1.0, 0.0, 1.0},
          {16, -1.0, -1.0, 0.0}, {17, 1.0, -1.0, 0.0}, {18, 1.0, 1.0, 0.0},  {19, -1.0, 1.0, 0.0}}};
 
-    matrix N_matrix(numerical_quadrature->points(), nodes());
-    matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 4);
+    matrix N_matrix(m_quadrature->points(), nodes());
+    matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 4);
 
-    numerical_quadrature->evaluate([&](auto const& coordinate) {
+    m_quadrature->evaluate([&](auto const& coordinate) {
         auto const& [l, xi, eta, zeta] = coordinate;
 
         vector N(20);
@@ -211,7 +211,7 @@ void hexahedron20::precompute_shape_functions()
 
 double hexahedron20::compute_measure(matrix const& nodal_coordinates) const
 {
-    return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
+    return m_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
         auto const& [N, dN] = femval;
 
         matrix3 const Jacobian = nodal_coordinates * dN;
@@ -240,10 +240,10 @@ void hexahedron27::precompute_shape_functions()
          {20, 0.0, 0.0, -1.0},  {21, 0.0, 0.0, 1.0},  {22, 0.0, -1.0, 0.0}, {23, 0.0, 1.0, 0.0},
          {24, -1.0, 0.0, 0.0},  {25, 1.0, 0.0, 0.0},  {26, 0.0, 0.0, 0.0}}};
 
-    matrix N_matrix(numerical_quadrature->points(), nodes());
-    matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 4);
+    matrix N_matrix(m_quadrature->points(), nodes());
+    matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 4);
 
-    numerical_quadrature->evaluate([&](auto const& coordinate) {
+    m_quadrature->evaluate([&](auto const& coordinate) {
         auto const& [l, xi, eta, zeta] = coordinate;
 
         vector N(27);
@@ -386,7 +386,7 @@ void hexahedron27::precompute_shape_functions()
 
 double hexahedron27::compute_measure(matrix const& nodal_coordinates) const
 {
-    return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
+    return m_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
         auto const& [N, dN] = femval;
 
         matrix3 const Jacobian = nodal_coordinates * dN;

@@ -24,10 +24,10 @@ void pyramid5::precompute_shape_functions()
                                                                 {3, 1.0, 0.0, 1.0},
                                                                 {4, 0.0, 1.0, 1.0}}};
 
-    matrix N_matrix(numerical_quadrature->points(), nodes());
-    matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 4);
+    matrix N_matrix(m_quadrature->points(), nodes());
+    matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 4);
 
-    numerical_quadrature->evaluate([&](auto const& coordinate) {
+    m_quadrature->evaluate([&](auto const& coordinate) {
         auto const& [l, u1, u2, u3] = coordinate;
 
         vector N(5);
@@ -80,7 +80,7 @@ void pyramid5::precompute_shape_functions()
 
 double pyramid5::compute_measure(matrix3x const& nodal_coordinates) const
 {
-    return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
+    return m_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
         auto const& [N, dN] = femval;
 
         matrix3 const Jacobian = nodal_coordinates * dN;
@@ -116,10 +116,10 @@ void pyramid13::precompute_shape_functions()
                                                                  {11, 0.0, 0.0, 1.0},
                                                                  {12, 0.0, 0.0, 1.0}}};
 
-    matrix N_matrix(numerical_quadrature->points(), nodes());
-    matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 4);
+    matrix N_matrix(m_quadrature->points(), nodes());
+    matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 4);
 
-    numerical_quadrature->evaluate([&](auto const& coordinate) {
+    m_quadrature->evaluate([&](auto const& coordinate) {
         auto const& [l, u1, u2, u3] = coordinate;
 
         vector N(13);
@@ -249,7 +249,7 @@ void pyramid13::precompute_shape_functions()
 
 double pyramid13::compute_measure(matrix3x const& nodal_coordinates) const
 {
-    return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto) {
+    return m_quadrature->integrate(0.0, [&](auto const& femval, auto) {
         auto const& [N, dN] = femval;
 
         matrix3 const jacobian = nodal_coordinates * dN;

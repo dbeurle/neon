@@ -16,7 +16,7 @@ triangle3::triangle3(triangle_quadrature::point const p)
 void triangle3::precompute_shape_functions()
 {
     // Initialize nodal coordinates array as r and s
-    numerical_quadrature->evaluate([&](auto const& coordinates) {
+    m_quadrature->evaluate([&](auto const& coordinates) {
         auto const& [l, r, s] = coordinates;
 
         vector N(3);
@@ -71,10 +71,10 @@ void triangle6::precompute_shape_functions()
         {5, 0.5, 0.0},
     }};
 
-    matrix N_matrix(numerical_quadrature->points(), nodes());
-    matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 3);
+    matrix N_matrix(m_quadrature->points(), nodes());
+    matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 3);
 
-    numerical_quadrature->evaluate([&](auto const& coordinate) {
+    m_quadrature->evaluate([&](auto const& coordinate) {
         auto const& [l, r, s] = coordinate;
 
         auto const t = 1.0 - r - s;
@@ -126,7 +126,7 @@ void triangle6::precompute_shape_functions()
 
 double triangle6::compute_measure(matrix const& nodal_coordinates)
 {
-    return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
+    return m_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
         auto const& [N, dN] = femval;
 
         matrix2 const Jacobian = geometry::project_to_plane(nodal_coordinates) * dN;

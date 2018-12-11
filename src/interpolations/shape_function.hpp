@@ -11,7 +11,8 @@
 namespace neon
 {
 /// Base class for a shape function.  This manages a pointer to the underlying
-/// interpolation for a given quadrature type.
+/// quadrature scheme and provides an interface for the interpolation function
+/// properties.
 template <typename QuadratureType>
 class shape_function
 {
@@ -21,7 +22,7 @@ public:
 public:
     /// Construct the shape function by consuming a quadrature implementation
     shape_function(std::unique_ptr<quadrature_type>&& quadrature_impl)
-        : numerical_quadrature(std::move(quadrature_impl))
+        : m_quadrature(std::move(quadrature_impl))
     {
     }
 
@@ -37,9 +38,9 @@ public:
     /// \return Highest monomial order in interpolation function
     auto monomial_order() const -> std::uint8_t { return m_monomial_order; }
 
-    quadrature_type const& quadrature() const { return *numerical_quadrature; };
+    quadrature_type const& quadrature() const { return *m_quadrature; };
 
-    /** Quadrature point to nodal point extrapolation matrix */
+    /// \return  Quadrature point to nodal point extrapolation matrix
     matrix const& local_quadrature_extrapolation() const { return extrapolation; }
 
 protected:
@@ -56,7 +57,7 @@ protected:
     matrix extrapolation;
 
     /// Pointer to numerical quadrature scheme
-    std::unique_ptr<quadrature_type> numerical_quadrature;
+    std::unique_ptr<quadrature_type> m_quadrature;
 
     /// Nodes per element
     std::uint8_t m_node_count{0};
@@ -76,7 +77,7 @@ void shape_function<QuadratureType>::compute_extrapolation_matrix(
 
     // Narrowing conversion but rows is expected to be greater than zero
     std::size_t const n = local_nodal_coordinates.rows();
-    auto const m{numerical_quadrature->points()};
+    auto const m{m_quadrature->points()};
 
     assert(m == static_cast<std::size_t>(local_quadrature_coordinates.rows()));
 
