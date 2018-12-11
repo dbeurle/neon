@@ -30,6 +30,13 @@ public:
     /// \return Number of nodes in the interpolation function
     virtual int nodes() const = 0;
 
+    /// \return Number of nodes in the element
+    auto number_of_nodes() const -> std::uint8_t { return m_node_count; }
+    /// \return Highest polynomial order in interpolation function
+    auto polynomial_order() const -> std::uint8_t { return m_polynomial_order; }
+    /// \return Highest monomial order in interpolation function
+    auto monomial_order() const -> std::uint8_t { return m_monomial_order; }
+
     quadrature_type const& quadrature() const { return *numerical_quadrature; };
 
     /** Quadrature point to nodal point extrapolation matrix */
@@ -48,7 +55,15 @@ protected:
     /// Quadrature point to nodal point mapping
     matrix extrapolation;
 
+    /// Pointer to numerical quadrature scheme
     std::unique_ptr<quadrature_type> numerical_quadrature;
+
+    /// Nodes per element
+    std::uint8_t m_node_count{0};
+    /// Highest order of polynomral term
+    std::uint8_t m_polynomial_order{0};
+    /// Highest order of monomial term
+    std::uint8_t m_monomial_order{0};
 };
 
 template <typename QuadratureType>
