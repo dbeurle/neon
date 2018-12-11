@@ -1,7 +1,7 @@
 
 #pragma once
 
-namespace neon::fem
+namespace neon
 {
 /// Allowable options of bilinear form
 enum class form {
@@ -12,6 +12,6 @@ enum class form {
     /// standard bilinear form (w, u)
     bilinear,
     /// gradient form (gradient(w), gradient(u))
-    bilinear_gradient,
+    bilinear_gradient
 };
 }
