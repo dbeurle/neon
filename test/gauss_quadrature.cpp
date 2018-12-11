@@ -3,7 +3,7 @@
 
 #include "quadrature/line_quadrature.hpp"
 #include "quadrature/hexahedron_quadrature.hpp"
-#include "quadrature/prism_quadrature.hpp"
+#include "quadrature/prism/prism_quadrature.hpp"
 #include "quadrature/quadrilateral_quadrature.hpp"
 #include "quadrature/tetrahedron_quadrature.hpp"
 #include "quadrature/triangle_quadrature.hpp"
