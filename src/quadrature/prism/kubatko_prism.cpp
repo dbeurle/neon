@@ -12,6 +12,7 @@ kubatko_prism::kubatko_prism(int const minimum_degree)
             m_degree = 1;
             m_weights = {4.0};
             m_coordinates = {{0, -1.0 / 3.0, -1.0 / 3.0, 0.0}};
+
             break;
         }
         case 2:
@@ -124,16 +125,20 @@ kubatko_prism::kubatko_prism(int const minimum_degree)
     std::transform(begin(m_weights), end(m_weights), begin(m_weights), [](auto const weight) {
         return weight / 4.0;
     });
+
     // mapping for r and s is (xi + 1.0) / 2.0
     // mapping for z is (zeta + 1.0) / 2.0
     std::transform(begin(m_coordinates),
                    end(m_coordinates),
                    begin(m_coordinates),
-                   [](auto const coordinate) {
-                       coordinate[1] = (coordinate[1] + 1.0) / 2.0;
-                       coordinate[2] = (coordinate[2] + 1.0) / 2.0;
-                       coordinate[3] = (coordinate[3] + 1.0) / 2.0;
-                       return coordinate;
+                   [](auto coordinate_pack) {
+                       auto& [i, x, y, z] = coordinate_pack;
+
+                       x = (x + 1.0) / 2.0;
+                       y = (y + 1.0) / 2.0;
+                       z = (z + 1.0) / 2.0;
+
+                       return coordinate_pack;
                    });
 }
 }
