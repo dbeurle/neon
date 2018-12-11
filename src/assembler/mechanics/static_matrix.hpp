@@ -382,7 +382,7 @@ void static_matrix<MeshType>::print_convergence_progress() const
 template <class MeshType>
 void static_matrix<MeshType>::update_relative_norms()
 {
-    if (use_relative_norm)
+    if (use_relative_norm && !is_approx(displacement.norm(), 0.0))
     {
         displacement_norm = delta_d.norm() / displacement.norm();
         force_norm = is_approx(std::max(f_ext.norm(), f_int.norm()), 0.0)

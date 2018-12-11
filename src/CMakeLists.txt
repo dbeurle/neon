@@ -25,7 +25,7 @@ if (ENABLE_NATIVE)
 endif()
 
 if (ENABLE_FAST_MATH)
-    target_compile_options(neon PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-ffast-math)
+    target_compile_options(neon PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-ffast-math>)
 endif()
 
 if(ENABLE_COVERAGE)
