@@ -71,10 +71,9 @@ tetrahedron_quadrature::tetrahedron_quadrature(point const p)
         }
         break;
     }
-
     // Convert the weightings to proper quadrature format
-    std::transform(begin(m_weights), end(m_weights), begin(m_weights), [](auto const i) {
-        return i / 6.0;
+    std::transform(begin(m_weights), end(m_weights), begin(m_weights), [](auto const weight) {
+        return weight / 6.0;
     });
 }
 }

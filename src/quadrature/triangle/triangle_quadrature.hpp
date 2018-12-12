@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "numerical_quadrature.hpp"
+#include "quadrature/numerical_quadrature.hpp"
 
 namespace neon
 {

@@ -2,11 +2,11 @@
 #pragma once
 
 #include "shape_function.hpp"
-#include "quadrature/triangle_quadrature.hpp"
+#include "quadrature/triangle/triangle_quadrature.hpp"
 
 namespace neon
 {
-/** Triangular 3 node element with analytic integration */
+/// Triangular 3 node element with analytic integration
 class triangle3 : public surface_interpolation
 {
 public:
@@ -28,6 +28,7 @@ protected:
     void precompute_shape_functions();
 };
 
+/// Triangular 6 node element with quadratic shape function
 class triangle6 : public surface_interpolation
 {
 public:
@@ -35,11 +36,9 @@ public:
 
     int nodes() const override final { return 6; }
 
-    /**
-     * Compute the area of the element using Gaussian integration
-     * @param nodal_coordinates element nodal coordinates
-     * @return element face area
-     */
+    /// Compute the area of the element using Gaussian integration
+    /// \param nodal_coordinates element nodal coordinates
+    /// \return element face area
     double compute_measure(matrix const& nodal_coordinates);
 
 protected:

@@ -2,7 +2,7 @@
 #pragma once
 
 #include "shape_function.hpp"
-#include "quadrature/line_quadrature.hpp"
+#include "quadrature/line/line_quadrature.hpp"
 
 namespace neon
 {

@@ -1,13 +1,13 @@
 
 #include <catch2/catch.hpp>
 
-#include "quadrature/line_quadrature.hpp"
-#include "quadrature/hexahedron_quadrature.hpp"
-#include "quadrature/prism_quadrature.hpp"
-#include "quadrature/quadrilateral_quadrature.hpp"
-#include "quadrature/tetrahedron_quadrature.hpp"
-#include "quadrature/triangle_quadrature.hpp"
-#include "quadrature/unit_sphere_quadrature.hpp"
+#include "quadrature/line/line_quadrature.hpp"
+#include "quadrature/hexahedron/hexahedron_quadrature.hpp"
+#include "quadrature/prism/prism_quadrature.hpp"
+#include "quadrature/quadrilateral/quadrilateral_quadrature.hpp"
+#include "quadrature/tetrahedron/tetrahedron_quadrature.hpp"
+#include "quadrature/triangle/triangle_quadrature.hpp"
+#include "quadrature/sphere/unit_sphere_quadrature.hpp"
 
 #include "interpolations/line.hpp"
 #include "interpolations/quadrilateral.hpp"

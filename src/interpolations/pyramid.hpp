@@ -2,7 +2,7 @@
 #pragma once
 
 #include "shape_function.hpp"
-#include "quadrature/pyramid_quadrature.hpp"
+#include "quadrature/pyramid/pyramid_quadrature.hpp"
 
 namespace neon
 {

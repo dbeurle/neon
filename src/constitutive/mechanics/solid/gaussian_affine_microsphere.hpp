@@ -5,7 +5,7 @@
 
 #include "material/micromechanical_elastomer.hpp"
 #include "numeric/tensor_operations.hpp"
-#include "quadrature/unit_sphere_quadrature.hpp"
+#include "quadrature/sphere/unit_sphere_quadrature.hpp"
 
 #include "io/json_forward.hpp"
 
