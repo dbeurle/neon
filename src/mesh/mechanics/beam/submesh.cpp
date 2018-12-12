@@ -41,7 +41,7 @@ submesh::submesh(json const& material_data,
         json{{"name", "rect"}, {"type", "rectangle"}, {"width", 1.0}, {"height", 1.0}});
 }
 
-void submesh::update_internal_variables(double const time_step_size)
+void submesh::update_internal_variables(double)
 {
     auto& A = variables->get(variable::scalar::cross_sectional_area);
     auto& As1 = variables->get(variable::scalar::shear_area_1);

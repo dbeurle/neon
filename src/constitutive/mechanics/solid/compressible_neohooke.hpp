@@ -32,7 +32,7 @@ public:
 
     virtual ~compressible_neohooke() = default;
 
-    void update_internal_variables(double const time_step_size) override final;
+    void update_internal_variables(double) override final;
 
     material_property const& intrinsic_material() const override final { return material; };
 

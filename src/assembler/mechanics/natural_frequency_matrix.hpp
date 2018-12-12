@@ -71,7 +71,7 @@ void natural_frequency_matrix<MeshType>::solve()
 template <typename MeshType>
 void natural_frequency_matrix<MeshType>::assemble_stiffness()
 {
-    fem::compute_sparsity_pattern(K, mesh);
+    compute_sparsity_pattern(K, mesh);
 
     auto const start = std::chrono::steady_clock::now();
 
@@ -103,7 +103,7 @@ void natural_frequency_matrix<MeshType>::assemble_stiffness()
 template <typename MeshType>
 void natural_frequency_matrix<MeshType>::assemble_mass()
 {
-    fem::compute_sparsity_pattern(M, mesh);
+    compute_sparsity_pattern(M, mesh);
 
     auto const start = std::chrono::steady_clock::now();
 

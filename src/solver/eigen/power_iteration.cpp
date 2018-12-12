@@ -14,8 +14,7 @@
 
 namespace neon
 {
-power_iteration::power_iteration(std::int64_t const values_to_extract,
-                                 eigen_solver::eigen_spectrum const spectrum)
+power_iteration::power_iteration(std::int64_t, eigen_solver::eigen_spectrum const spectrum)
     : eigen_solver(1, spectrum)
 {
 }
@@ -41,7 +40,7 @@ void power_iteration::solve(sparse_matrix const& A)
     m_eigenvectors.col(0) = eigenvector.normalized();
 }
 
-void power_iteration::solve(sparse_matrix const& A, sparse_matrix const& B)
+void power_iteration::solve(sparse_matrix const&, sparse_matrix const&)
 {
     throw std::runtime_error("Method not implemented " + std::string(__FUNCTION__));
 }

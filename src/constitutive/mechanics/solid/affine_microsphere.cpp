@@ -20,7 +20,7 @@ affine_microsphere::affine_microsphere(std::shared_ptr<internal_variables_t>& va
     variables->commit();
 }
 
-void affine_microsphere::update_internal_variables(double const time_step_size)
+void affine_microsphere::update_internal_variables(double)
 {
     auto& tangent_operators = variables->get(variable::fourth::tangent_operator);
     auto& cauchy_stresses = variables->get(variable::second::cauchy_stress);

@@ -29,7 +29,7 @@ public:
 
     ~finite_strain_J2_plasticity();
 
-    void update_internal_variables(double const time_step_size) override final;
+    void update_internal_variables(double) override final;
 
     material_property const& intrinsic_material() const override final { return material; }
 

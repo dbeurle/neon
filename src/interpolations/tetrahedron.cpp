@@ -11,7 +11,7 @@ tetrahedron4::tetrahedron4(tetrahedron_quadrature::point const p)
 
 void tetrahedron4::precompute_shape_functions()
 {
-    numerical_quadrature->evaluate([&](auto const& coordinate) {
+    m_quadrature->evaluate([&](auto const& coordinate) {
         auto const& [l, r, s, t] = coordinate;
 
         vector N(4);
@@ -65,10 +65,10 @@ void tetrahedron10::precompute_shape_functions()
                                                                     {8, 0.5, 0.0, 0.5},
                                                                     {9, 0.0, 0.5, 0.0}}};
 
-    matrix N_matrix(numerical_quadrature->points(), nodes());
-    matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 4);
+    matrix N_matrix(m_quadrature->points(), nodes());
+    matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 4);
 
-    numerical_quadrature->evaluate([&](auto const& coordinate) {
+    m_quadrature->evaluate([&](auto const& coordinate) {
         auto const& [l, r, s, t] = coordinate;
 
         auto const u = 1.0 - r - s - t;

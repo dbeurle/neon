@@ -16,10 +16,10 @@ void hermite::precompute_shape_functions()
     // Initialize nodal coordinates array as Xi, Eta, Zeta
     std::array<coordinates_type, 2> constexpr local_coordinates{{{0, -1.0}, {1, 1.0}}};
 
-    matrix N_matrix(numerical_quadrature->points(), nodes());
-    matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 2);
+    matrix N_matrix(m_quadrature->points(), nodes());
+    matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 2);
 
-    numerical_quadrature->evaluate([&](auto const& coordinates) {
+    m_quadrature->evaluate([&](auto const& coordinates) {
         auto const& [l, xi] = coordinates;
 
         vector N(4);

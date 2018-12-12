@@ -15,9 +15,9 @@ public:
 
     [[nodiscard]] double yield_stress(double const effective_strain) const;
 
-    [[nodiscard]] double hardening_modulus(double const effective_strain) const;
+    [[nodiscard]] double hardening_modulus(double) const;
 
-    [[nodiscard]] double kinematic_modulus(double const effective_strain) const;
+    [[nodiscard]] double kinematic_modulus(double) const;
 
 protected:
     /// Yield stress

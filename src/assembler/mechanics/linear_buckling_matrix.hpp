@@ -58,7 +58,7 @@ void linear_buckling_matrix<MeshType>::solve()
 template <typename MeshType>
 void linear_buckling_matrix<MeshType>::assemble_stiffness()
 {
-    fem::compute_sparsity_pattern(K, mesh);
+    compute_sparsity_pattern(K, mesh);
 
     auto const start = std::chrono::steady_clock::now();
 
