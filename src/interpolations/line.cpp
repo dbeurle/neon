@@ -6,7 +6,7 @@
 namespace neon
 {
 line2::line2(line_quadrature::point const p)
-    : line_interpolation(std::make_unique<line_quadrature>(p))
+    : line_interpolation(std::make_unique<line_quadrature>(p), 2)
 {
     this->precompute_shape_functions();
 }
@@ -18,7 +18,7 @@ void line2::precompute_shape_functions()
     // Initialize nodal coordinates array as Xi, Eta, Zeta
     std::array<coordinates_type, 2> constexpr local_coordinates{{{0, -1.0}, {1, 1.0}}};
 
-    matrix N_matrix(m_quadrature->points(), nodes());
+    matrix N_matrix(m_quadrature->points(), number_of_nodes());
     matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 2);
 
     m_quadrature->evaluate([&](auto const& coordinates) {
@@ -41,7 +41,7 @@ void line2::precompute_shape_functions()
     });
 
     // Compute extrapolation algorithm matrices
-    matrix local_nodal_coordinates = matrix::Ones(nodes(), 2);
+    matrix local_nodal_coordinates = matrix::Ones(number_of_nodes(), 2);
 
     for (auto const& [a, xi_a] : local_coordinates)
     {
@@ -56,7 +56,7 @@ double line2::compute_measure(matrix const& nodal_coordinates) const
 }
 
 line3::line3(line_quadrature::point const p)
-    : line_interpolation(std::make_unique<line_quadrature>(p))
+    : line_interpolation(std::make_unique<line_quadrature>(p), 3)
 {
     this->precompute_shape_functions();
 }
@@ -68,7 +68,7 @@ void line3::precompute_shape_functions()
     // Initialize nodal coordinates array as Xi, Eta, Zeta
     std::array<coordinates_type, 3> constexpr local_coordinates{{{0, -1.0}, {1, 0.0}, {2, 1.0}}};
 
-    matrix N_matrix(m_quadrature->points(), nodes());
+    matrix N_matrix(m_quadrature->points(), number_of_nodes());
     matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 2);
 
     m_quadrature->evaluate([&](auto const& coordinates) {
@@ -93,7 +93,7 @@ void line3::precompute_shape_functions()
     });
 
     // Compute extrapolation algorithm matrices
-    matrix local_nodal_coordinates = matrix::Ones(nodes(), 2);
+    matrix local_nodal_coordinates = matrix::Ones(number_of_nodes(), 2);
 
     for (auto const& [a, xi_a] : local_coordinates)
     {

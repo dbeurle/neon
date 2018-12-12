@@ -15,10 +15,6 @@ class prism6 : public volume_interpolation
 public:
     explicit prism6(prism_quadrature::point const p);
 
-    virtual ~prism6() = default;
-
-    int nodes() const override final { return 6; }
-
     double compute_measure(matrix3x const& nodal_coordinates) const;
 
 protected:
@@ -44,10 +40,6 @@ class prism15 : public volume_interpolation
 {
 public:
     explicit prism15(prism_quadrature::point const p);
-
-    virtual ~prism15() = default;
-
-    int nodes() const override final { return 15; }
 
     double compute_measure(matrix3x const& nodal_coordinates) const;
 

@@ -21,15 +21,12 @@ public:
 
 public:
     /// Construct the shape function by consuming a quadrature implementation
-    shape_function(std::unique_ptr<quadrature_type>&& quadrature_impl)
-        : m_quadrature(std::move(quadrature_impl))
+    shape_function(std::unique_ptr<quadrature_type>&& quadrature_impl, std::uint8_t node_count)
+        : m_quadrature(std::move(quadrature_impl)), m_node_count{node_count}
     {
     }
 
     virtual ~shape_function() = default;
-
-    /// \return Number of nodes in the interpolation function
-    virtual int nodes() const = 0;
 
     /// \return Number of nodes in the element
     auto number_of_nodes() const -> std::uint8_t { return m_node_count; }

@@ -12,10 +12,6 @@ class tetrahedron4 : public volume_interpolation
 public:
     explicit tetrahedron4(tetrahedron_quadrature::point const p = tetrahedron_quadrature::point::one);
 
-    virtual ~tetrahedron4() = default;
-
-    int nodes() const override final { return 4; }
-
 protected:
     /**
      * Initialize the shape functions to the following polynomials
@@ -35,10 +31,6 @@ class tetrahedron10 : public volume_interpolation
 {
 public:
     explicit tetrahedron10(tetrahedron_quadrature::point const p);
-
-    virtual ~tetrahedron10() = default;
-
-    int nodes() const override final { return 10; }
 
 protected:
     /**

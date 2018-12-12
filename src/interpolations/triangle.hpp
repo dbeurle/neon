@@ -12,14 +12,10 @@ class triangle3 : public surface_interpolation
 public:
     triangle3(triangle_quadrature::point const p);
 
-    int nodes() const override final { return 3; }
-
     double compute_measure(matrix const& nodal_coordinates) const;
 
 protected:
-    /**
-     * Initialize the shape functions to the following polynomials
-     */
+    /// Initialize the shape functions
     void precompute_shape_functions();
 };
 
@@ -29,8 +25,6 @@ class triangle6 : public surface_interpolation
 {
 public:
     triangle6(triangle_quadrature::point const p);
-
-    int nodes() const override final { return 6; }
 
     /// Compute the area of the element using numerical integration
     /// \param nodal_coordinates element nodal coordinates

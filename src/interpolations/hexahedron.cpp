@@ -8,7 +8,7 @@
 namespace neon
 {
 hexahedron8::hexahedron8(hexahedron_quadrature::point const p)
-    : volume_interpolation(std::make_unique<hexahedron_quadrature>(p))
+    : volume_interpolation(std::make_unique<hexahedron_quadrature>(p), 8)
 {
     this->precompute_shape_functions();
 }
@@ -27,7 +27,7 @@ void hexahedron8::precompute_shape_functions()
                                                                    {6, 1.0, 1.0, 1.0},
                                                                    {7, -1.0, 1.0, 1.0}}};
 
-    matrix N_matrix(m_quadrature->points(), nodes());
+    matrix N_matrix(m_quadrature->points(), number_of_nodes());
     matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 4);
 
     m_quadrature->evaluate([&](auto const& coordinate) {
@@ -55,7 +55,7 @@ void hexahedron8::precompute_shape_functions()
     });
 
     // Compute extrapolation algorithm matrices
-    matrix local_nodal_coordinates = matrix::Ones(nodes(), 4);
+    matrix local_nodal_coordinates = matrix::Ones(number_of_nodes(), 4);
 
     for (auto const& [a, xi_a, eta_a, zeta_a] : local_coordinates)
     {
@@ -78,7 +78,7 @@ double hexahedron8::compute_measure(matrix const& nodal_coordinates) const
 }
 
 hexahedron20::hexahedron20(hexahedron_quadrature::point const p)
-    : volume_interpolation(std::make_unique<hexahedron_quadrature>(p))
+    : volume_interpolation(std::make_unique<hexahedron_quadrature>(p), 20)
 {
     this->precompute_shape_functions();
 }
@@ -95,7 +95,7 @@ void hexahedron20::precompute_shape_functions()
          {12, 0.0, -1.0, 1.0},  {13, 1.0, 0.0, 1.0},  {14, 0.0, 1.0, 1.0},  {15, -1.0, 0.0, 1.0},
          {16, -1.0, -1.0, 0.0}, {17, 1.0, -1.0, 0.0}, {18, 1.0, 1.0, 0.0},  {19, -1.0, 1.0, 0.0}}};
 
-    matrix N_matrix(m_quadrature->points(), nodes());
+    matrix N_matrix(m_quadrature->points(), number_of_nodes());
     matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 4);
 
     m_quadrature->evaluate([&](auto const& coordinate) {
@@ -198,7 +198,7 @@ void hexahedron20::precompute_shape_functions()
     });
 
     // Compute extrapolation algorithm matrices
-    matrix local_nodal_coordinates = matrix::Ones(nodes(), 4);
+    matrix local_nodal_coordinates = matrix::Ones(number_of_nodes(), 4);
 
     for (auto const& [a, xi_a, eta_a, zeta_a] : local_coordinates)
     {
@@ -221,7 +221,7 @@ double hexahedron20::compute_measure(matrix const& nodal_coordinates) const
 }
 
 hexahedron27::hexahedron27(hexahedron_quadrature::point const p)
-    : volume_interpolation(std::make_unique<hexahedron_quadrature>(p))
+    : volume_interpolation(std::make_unique<hexahedron_quadrature>(p), 27)
 {
     this->precompute_shape_functions();
 }
@@ -240,7 +240,7 @@ void hexahedron27::precompute_shape_functions()
          {20, 0.0, 0.0, -1.0},  {21, 0.0, 0.0, 1.0},  {22, 0.0, -1.0, 0.0}, {23, 0.0, 1.0, 0.0},
          {24, -1.0, 0.0, 0.0},  {25, 1.0, 0.0, 0.0},  {26, 0.0, 0.0, 0.0}}};
 
-    matrix N_matrix(m_quadrature->points(), nodes());
+    matrix N_matrix(m_quadrature->points(), number_of_nodes());
     matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 4);
 
     m_quadrature->evaluate([&](auto const& coordinate) {
@@ -373,7 +373,7 @@ void hexahedron27::precompute_shape_functions()
     });
 
     // Compute extrapolation algorithm matrices
-    matrix local_nodal_coordinates = matrix::Ones(nodes(), 4);
+    matrix local_nodal_coordinates = matrix::Ones(number_of_nodes(), 4);
 
     for (auto const& [a, xi_a, eta_a, zeta_a] : local_coordinates)
     {

@@ -8,7 +8,7 @@
 namespace neon
 {
 prism6::prism6(prism_quadrature::point const p)
-    : volume_interpolation(std::make_unique<prism_quadrature>(p))
+    : volume_interpolation(std::make_unique<prism_quadrature>(p), 6)
 {
     this->precompute_shape_functions();
 }
@@ -25,7 +25,7 @@ void prism6::precompute_shape_functions()
                                                                 {4, 0.0, 1.0, 1.0},
                                                                 {5, 0.0, 0.0, 1.0}}};
 
-    matrix N_matrix(m_quadrature->points(), nodes());
+    matrix N_matrix(m_quadrature->points(), number_of_nodes());
     matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 4);
 
     m_quadrature->evaluate([&](auto const& coordinate) {
@@ -74,7 +74,7 @@ void prism6::precompute_shape_functions()
     });
 
     // Compute extrapolation algorithm matrices
-    matrix local_nodal_coordinates = matrix::Ones(nodes(), 4);
+    matrix local_nodal_coordinates = matrix::Ones(number_of_nodes(), 4);
 
     for (auto const& [a, r_a, s_a, xi_a] : local_coordinates)
     {
@@ -97,7 +97,7 @@ double prism6::compute_measure(matrix3x const& nodal_coordinates) const
 }
 
 prism15::prism15(prism_quadrature::point const p)
-    : volume_interpolation(std::make_unique<prism_quadrature>(p))
+    : volume_interpolation(std::make_unique<prism_quadrature>(p), 15)
 {
     this->precompute_shape_functions();
 }
@@ -125,7 +125,7 @@ void prism15::precompute_shape_functions()
                                                                  {13, 0.0, 0.5, 1.0},
                                                                  {14, 0.5, 0.0, 1.0}}};
 
-    matrix N_matrix(m_quadrature->points(), nodes());
+    matrix N_matrix(m_quadrature->points(), number_of_nodes());
     matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 4);
 
     m_quadrature->evaluate([&](auto const& coordinate) {
@@ -208,7 +208,7 @@ void prism15::precompute_shape_functions()
     });
 
     // Compute extrapolation algorithm matrices
-    matrix local_nodal_coordinates = matrix::Ones(nodes(), 4);
+    matrix local_nodal_coordinates = matrix::Ones(number_of_nodes(), 4);
 
     for (auto const& [a, r_a, s_a, xi_a] : local_coordinates)
     {

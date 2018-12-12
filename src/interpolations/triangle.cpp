@@ -8,7 +8,7 @@
 namespace neon
 {
 triangle3::triangle3(triangle_quadrature::point const p)
-    : surface_interpolation(std::make_unique<triangle_quadrature>(p))
+    : surface_interpolation(std::make_unique<triangle_quadrature>(p), 3)
 {
     this->precompute_shape_functions();
 }
@@ -37,7 +37,7 @@ void triangle3::precompute_shape_functions()
         return std::make_tuple(N, rhea);
     });
 
-    extrapolation = matrix::Ones(nodes(), 1);
+    extrapolation = matrix::Ones(number_of_nodes(), 1);
 }
 
 double triangle3::compute_measure(matrix const& nodal_coordinates) const
@@ -52,7 +52,7 @@ double triangle3::compute_measure(matrix const& nodal_coordinates) const
 }
 
 triangle6::triangle6(triangle_quadrature::point const p)
-    : surface_interpolation(std::make_unique<surface_quadrature>(triangle_quadrature(p)))
+    : surface_interpolation(std::make_unique<surface_quadrature>(triangle_quadrature(p)), 6)
 {
     this->precompute_shape_functions();
 }
@@ -71,7 +71,7 @@ void triangle6::precompute_shape_functions()
         {5, 0.5, 0.0},
     }};
 
-    matrix N_matrix(m_quadrature->points(), nodes());
+    matrix N_matrix(m_quadrature->points(), number_of_nodes());
     matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 3);
 
     m_quadrature->evaluate([&](auto const& coordinate) {
@@ -114,7 +114,7 @@ void triangle6::precompute_shape_functions()
     });
 
     // Compute extrapolation algorithm matkrices
-    matrix local_nodal_coordinates = matrix::Ones(nodes(), 3);
+    matrix local_nodal_coordinates = matrix::Ones(number_of_nodes(), 3);
 
     for (auto const& [a, r, s] : local_coordinates)
     {

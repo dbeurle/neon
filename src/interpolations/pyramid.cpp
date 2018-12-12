@@ -8,7 +8,7 @@
 namespace neon
 {
 pyramid5::pyramid5(pyramid_quadrature::point const p)
-    : volume_interpolation(std::make_unique<pyramid_quadrature>(p))
+    : volume_interpolation(std::make_unique<pyramid_quadrature>(p), 5)
 {
     this->precompute_shape_functions();
 }
@@ -24,7 +24,7 @@ void pyramid5::precompute_shape_functions()
                                                                 {3, 1.0, 0.0, 1.0},
                                                                 {4, 0.0, 1.0, 1.0}}};
 
-    matrix N_matrix(m_quadrature->points(), nodes());
+    matrix N_matrix(m_quadrature->points(), number_of_nodes());
     matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 4);
 
     m_quadrature->evaluate([&](auto const& coordinate) {
@@ -67,7 +67,7 @@ void pyramid5::precompute_shape_functions()
     });
 
     // Compute extrapolation algorithm matrices
-    matrix local_nodal_coordinates = matrix::Ones(nodes(), 4);
+    matrix local_nodal_coordinates = matrix::Ones(number_of_nodes(), 4);
 
     for (auto const& [a, r_a, s_a, xi_a] : local_coordinates)
     {
@@ -90,7 +90,7 @@ double pyramid5::compute_measure(matrix3x const& nodal_coordinates) const
 }
 
 pyramid13::pyramid13(pyramid_quadrature::point const p)
-    : volume_interpolation(std::make_unique<pyramid_quadrature>(p))
+    : volume_interpolation(std::make_unique<pyramid_quadrature>(p), 13)
 {
     this->precompute_shape_functions();
 }
@@ -116,7 +116,7 @@ void pyramid13::precompute_shape_functions()
                                                                  {11, 0.0, 0.0, 1.0},
                                                                  {12, 0.0, 0.0, 1.0}}};
 
-    matrix N_matrix(m_quadrature->points(), nodes());
+    matrix N_matrix(m_quadrature->points(), number_of_nodes());
     matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 4);
 
     m_quadrature->evaluate([&](auto const& coordinate) {
@@ -236,7 +236,7 @@ void pyramid13::precompute_shape_functions()
     });
 
     // Compute extrapolation algorithm matrices
-    matrix local_nodal_coordinates = matrix::Ones(nodes(), 4);
+    matrix local_nodal_coordinates = matrix::Ones(number_of_nodes(), 4);
 
     for (auto const& [a, r_a, s_a, xi_a] : local_coordinates)
     {

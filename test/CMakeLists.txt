@@ -2,6 +2,8 @@
 add_library(catch_main STATIC test_main.cpp)
 target_link_libraries(catch_main PUBLIC Catch2::Catch2)
 
+add_subdirectory(quadrature)
+
 add_library(cube_fixture STATIC fixtures/cube_mesh.cpp)
 
 set(test_names boundary
@@ -13,7 +15,6 @@ set(test_names boundary
                #
                compute_device
                dof_numbering
-               gauss_quadrature
                geometry_profile
                linear_beam_theory
                linear_solvers
@@ -51,7 +52,7 @@ foreach(test_name IN LISTS test_names)
     set_target_properties(${test_name}_test PROPERTIES CXX_STANDARD 17
                                                        CXX_STANDARD_REQUIRED YES
                                                        CXX_EXTENSIONS NO
-                                            COMPILE_FLAGS "-Wall")
+                                            COMPILE_FLAGS "-Wall -Wextra")
 
     if(ENABLE_COVERAGE)
         set_target_properties(${test_name}_test PROPERTIES COMPILE_FLAGS "--coverage")
