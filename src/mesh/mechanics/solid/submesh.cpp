@@ -172,14 +172,13 @@ std::pair<index_view, matrix const&> submesh::consistent_mass(std::int32_t const
     thread_local matrix mass(nodes_per_element() * dofs_per_node(),
                              nodes_per_element() * dofs_per_node());
 
-    sf->quadrature().integrate_inplace(local_mass.setZero(),
-                                       [&](auto const& femval, auto const& l) -> matrix {
-                                           auto const& [N, dN] = femval;
+    sf->quadrature().integrate_inplace(local_mass.setZero(), [&](auto const& femval, auto) -> matrix {
+        auto const& [N, dN] = femval;
 
-                                           matrix3 const J = local_deformation_gradient(dN, X);
+        matrix3 const J = local_deformation_gradient(dN, X);
 
-                                           return density * N * N.transpose() * J.determinant();
-                                       });
+        return density * N * N.transpose() * J.determinant();
+    });
 
     identity_expansion_inplace<3>(local_mass, mass.setZero());
 

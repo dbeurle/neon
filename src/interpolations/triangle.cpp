@@ -126,7 +126,7 @@ void triangle6::precompute_shape_functions()
 
 double triangle6::compute_measure(matrix const& nodal_coordinates)
 {
-    return m_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
+    return m_quadrature->integrate(0.0, [&](auto const& femval, auto) {
         auto const& [N, dN] = femval;
 
         matrix2 const Jacobian = geometry::project_to_plane(nodal_coordinates) * dN;

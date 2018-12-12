@@ -25,7 +25,7 @@ mesh::mesh(basic_mesh const& basic_mesh,
            json const& material_data,
            json const& simulation_data,
            double const generate_time_step,
-           std::map<std::string, std::unique_ptr<geometry::profile>> const& profile_store)
+           std::map<std::string, std::unique_ptr<geometry::profile>> const& /*profile_store*/)
     : coordinates(std::make_shared<material_coordinates>(basic_mesh.coordinates())),
       displacement(active_dofs() / 2),
       rotation(active_dofs() / 2),

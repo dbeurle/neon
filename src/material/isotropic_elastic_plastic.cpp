@@ -33,13 +33,7 @@ double isotropic_elastic_plastic::yield_stress(double const effective_strain) co
     return stress_y + effective_strain * H_iso;
 }
 
-double isotropic_elastic_plastic::hardening_modulus(double const effective_strain) const
-{
-    return H_iso;
-}
+double isotropic_elastic_plastic::hardening_modulus(double) const { return H_iso; }
 
-double isotropic_elastic_plastic::kinematic_modulus(double const effective_strain) const
-{
-    return K_iso;
-}
+double isotropic_elastic_plastic::kinematic_modulus(double) const { return K_iso; }
 }

@@ -22,7 +22,7 @@ public:
 
     virtual ~isotropic_linear_elasticity();
 
-    virtual void update_internal_variables(double const time_step_size) override;
+    virtual void update_internal_variables(double) override;
 
     [[nodiscard]] virtual material_property const& intrinsic_material() const override
     {

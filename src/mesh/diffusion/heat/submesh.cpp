@@ -75,7 +75,7 @@ std::pair<index_view, matrix> submesh::consistent_mass(std::int64_t const elemen
     auto const specific_heat = cm->intrinsic_material().specific_heat();
 
     auto m = sf->quadrature().integrate(matrix::Zero(nodes_per_element(), nodes_per_element()).eval(),
-                                        [&](auto const& femval, auto const& l) -> matrix {
+                                        [&](auto const& femval, auto) -> matrix {
                                             auto const& [N, dN] = femval;
 
                                             matrix3 const Jacobian = local_jacobian(dN, X);

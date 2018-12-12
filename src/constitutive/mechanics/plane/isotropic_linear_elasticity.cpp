@@ -29,7 +29,7 @@ isotropic_linear_elasticity::isotropic_linear_elasticity(std::shared_ptr<interna
 
 isotropic_linear_elasticity::~isotropic_linear_elasticity() = default;
 
-void isotropic_linear_elasticity::update_internal_variables(double const time_step_size)
+void isotropic_linear_elasticity::update_internal_variables(double)
 {
     using namespace ranges;
 

@@ -7,13 +7,12 @@
 
 namespace neon::mechanics::beam
 {
-nonfollower_load_boundary::nonfollower_load_boundary(
-    std::shared_ptr<material_coordinates>& material_coordinates,
-    std::vector<basic_submesh> const& submeshes,
-    json const& simulation_data,
-    json const& boundary_data,
-    std::unordered_map<std::string, int> const& dof_table,
-    double const generate_time_step)
+nonfollower_load_boundary::nonfollower_load_boundary(std::shared_ptr<material_coordinates>&,
+                                                     std::vector<basic_submesh> const& submeshes,
+                                                     json const&,
+                                                     json const& boundary_data,
+                                                     std::unordered_map<std::string, int> const& dof_table,
+                                                     double const generate_time_step)
 {
     if (std::string const& type = boundary_data["type"]; type == "moment" || type == "force")
     {

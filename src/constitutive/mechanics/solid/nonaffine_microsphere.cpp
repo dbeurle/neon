@@ -24,7 +24,7 @@ nonaffine_microsphere::nonaffine_microsphere(std::shared_ptr<internal_variables_
     non_affine_stretch_parameter = material_data["nonaffine_stretch_parameter"];
 }
 
-void nonaffine_microsphere::update_internal_variables(double const time_step_size)
+void nonaffine_microsphere::update_internal_variables(double)
 {
     auto const& deformation_gradients = variables->get(variable::second::deformation_gradient);
     auto& cauchy_stresses = variables->get(variable::second::cauchy_stress);
@@ -95,7 +95,7 @@ double nonaffine_microsphere::compute_nonaffine_stretch(matrix3 const& F_unimodu
     auto const p = non_affine_stretch_parameter;
 
     return std::pow(unit_sphere.integrate(0.0,
-                                          [&](auto const& coordinates, auto const& l) {
+                                          [&](auto const& coordinates, auto) {
                                               auto const& [r, _] = coordinates;
 
                                               vector3 const t = deformed_tangent(F_unimodular, r);
@@ -109,7 +109,7 @@ matrix3 nonaffine_microsphere::compute_h_tensor(matrix3 const& F_unimodular) con
 {
     auto const p = non_affine_stretch_parameter;
 
-    return unit_sphere.integrate(matrix3::Zero().eval(), [&](auto const& xyz, auto const& l) -> matrix3 {
+    return unit_sphere.integrate(matrix3::Zero().eval(), [&](auto const& xyz, auto) -> matrix3 {
         auto const& [r, _] = xyz;
 
         vector3 const t = deformed_tangent(F_unimodular, r);
@@ -123,31 +123,26 @@ matrix6 nonaffine_microsphere::compute_H_tensor(matrix3 const& F_unimodular) con
     auto const p = non_affine_stretch_parameter;
 
     return (p - 2.0)
-           * unit_sphere.integrate(matrix6::Zero().eval(),
-                                   [&](auto const& xyz, auto const& l) -> matrix6 {
-                                       auto const& [r, _] = xyz;
+           * unit_sphere.integrate(matrix6::Zero().eval(), [&](auto const& xyz, auto) -> matrix6 {
+                 auto const& [r, _] = xyz;
 
-                                       vector3 const t = deformed_tangent(F_unimodular, r);
+                 vector3 const t = deformed_tangent(F_unimodular, r);
 
-                                       return std::pow(compute_microstretch(t), p - 4.0)
-                                              * outer_product(t, t, t, t);
-                                   });
+                 return std::pow(compute_microstretch(t), p - 4.0) * outer_product(t, t, t, t);
+             });
 }
 
 matrix3 nonaffine_microsphere::compute_k_tensor(matrix3 const& F_unimodular) const
 {
     auto const q = non_affine_tube_parameter;
 
-    return q
-           * unit_sphere.integrate(matrix3::Zero().eval(),
-                                   [&](auto const& xyz, auto const& l) -> matrix3 {
-                                       auto const& [r, _] = xyz;
+    return q * unit_sphere.integrate(matrix3::Zero().eval(), [&](auto const& xyz, auto) -> matrix3 {
+        auto const& [r, _] = xyz;
 
-                                       vector3 const n = deformed_normal(F_unimodular, r);
+        vector3 const n = deformed_normal(F_unimodular, r);
 
-                                       return std::pow(compute_area_stretch(n), q - 2.0)
-                                              * outer_product(n, n);
-                                   });
+        return std::pow(compute_area_stretch(n), q - 2.0) * outer_product(n, n);
+    });
 }
 
 matrix6 nonaffine_microsphere::compute_K_tensor(matrix3 const& F_unimodular) const
@@ -155,15 +150,13 @@ matrix6 nonaffine_microsphere::compute_K_tensor(matrix3 const& F_unimodular) con
     auto const q = non_affine_tube_parameter;
 
     return q * (q - 2.0)
-           * unit_sphere.integrate(matrix6::Zero().eval(),
-                                   [&](auto const& xyz, auto const& l) -> matrix6 {
-                                       auto const& [r, _] = xyz;
+           * unit_sphere.integrate(matrix6::Zero().eval(), [&](auto const& xyz, auto) -> matrix6 {
+                 auto const& [r, _] = xyz;
 
-                                       vector3 const n = deformed_normal(F_unimodular, r);
+                 vector3 const n = deformed_normal(F_unimodular, r);
 
-                                       return std::pow(compute_area_stretch(n), q - 4.0)
-                                              * outer_product(n, n, n, n);
-                                   });
+                 return std::pow(compute_area_stretch(n), q - 4.0) * outer_product(n, n, n, n);
+             });
 }
 
 matrix6 nonaffine_microsphere::compute_G_tensor(matrix3 const& F_unimodular) const
@@ -171,14 +164,12 @@ matrix6 nonaffine_microsphere::compute_G_tensor(matrix3 const& F_unimodular) con
     auto const q = non_affine_tube_parameter;
 
     return 2.0 * q
-           * unit_sphere.integrate(matrix6::Zero().eval(),
-                                   [&](auto const& xyz, auto const& l) -> matrix6 {
-                                       auto const& [r, _] = xyz;
+           * unit_sphere.integrate(matrix6::Zero().eval(), [&](auto const& xyz, auto) -> matrix6 {
+                 auto const& [r, _] = xyz;
 
-                                       vector3 const n = deformed_normal(F_unimodular, r);
+                 vector3 const n = deformed_normal(F_unimodular, r);
 
-                                       return std::pow(compute_area_stretch(n), q - 2.0)
-                                              * compute_o_dot_product(n);
-                                   });
+                 return std::pow(compute_area_stretch(n), q - 2.0) * compute_o_dot_product(n);
+             });
 }
 }

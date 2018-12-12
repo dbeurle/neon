@@ -23,7 +23,7 @@ public:
 
     virtual ~small_strain_J2_plasticity();
 
-    virtual void update_internal_variables(double const time_step_size) override;
+    virtual void update_internal_variables(double) override;
 
     virtual material_property const& intrinsic_material() const override { return material; }
 

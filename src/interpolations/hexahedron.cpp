@@ -68,7 +68,7 @@ void hexahedron8::precompute_shape_functions()
 
 double hexahedron8::compute_measure(matrix const& nodal_coordinates) const
 {
-    return m_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
+    return m_quadrature->integrate(0.0, [&](auto const& femval, auto) {
         auto const& [N, dN] = femval;
 
         matrix3 const Jacobian = nodal_coordinates * dN;
@@ -211,7 +211,7 @@ void hexahedron20::precompute_shape_functions()
 
 double hexahedron20::compute_measure(matrix const& nodal_coordinates) const
 {
-    return m_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
+    return m_quadrature->integrate(0.0, [&](auto const& femval, auto) {
         auto const& [N, dN] = femval;
 
         matrix3 const Jacobian = nodal_coordinates * dN;
@@ -386,7 +386,7 @@ void hexahedron27::precompute_shape_functions()
 
 double hexahedron27::compute_measure(matrix const& nodal_coordinates) const
 {
-    return m_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
+    return m_quadrature->integrate(0.0, [&](auto const& femval, auto) {
         auto const& [N, dN] = femval;
 
         matrix3 const Jacobian = nodal_coordinates * dN;

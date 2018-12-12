@@ -44,5 +44,5 @@ void lanczos_ocl::solve(sparse_matrix const& A)
     }
 }
 
-void lanczos_ocl::solve(sparse_matrix const& A, sparse_matrix const& B) {}
+void lanczos_ocl::solve(sparse_matrix const&, sparse_matrix const&) {}
 }

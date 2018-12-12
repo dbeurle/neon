@@ -93,7 +93,7 @@ void linear_static_matrix<fem_mesh_type>::solve()
 }
 
 template <typename fem_mesh_type>
-void linear_static_matrix<fem_mesh_type>::compute_external_force(double const load_factor)
+void linear_static_matrix<fem_mesh_type>::compute_external_force(double)
 {
     auto const start = std::chrono::steady_clock::now();
 

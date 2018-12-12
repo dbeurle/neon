@@ -87,7 +87,7 @@ void prism6::precompute_shape_functions()
 
 double prism6::compute_measure(matrix3x const& nodal_coordinates) const
 {
-    return m_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
+    return m_quadrature->integrate(0.0, [&](auto const& femval, auto) {
         auto const& [N, dN] = femval;
 
         matrix3 const Jacobian = nodal_coordinates * dN;
@@ -221,7 +221,7 @@ void prism15::precompute_shape_functions()
 
 double prism15::compute_measure(matrix3x const& nodal_coordinates) const
 {
-    return m_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
+    return m_quadrature->integrate(0.0, [&](auto const& femval, auto) {
         auto const& [N, dN] = femval;
 
         matrix3 const jacobian = nodal_coordinates * dN;

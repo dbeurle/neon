@@ -14,7 +14,7 @@ compressible_neohooke::compressible_neohooke(std::shared_ptr<internal_variables_
     variables->add(variable::fourth::tangent_operator);
 }
 
-void compressible_neohooke::update_internal_variables(double const time_step_size)
+void compressible_neohooke::update_internal_variables(double)
 {
     auto [deformation_gradients,
           cauchy_stresses] = variables->get(variable::second::deformation_gradient,
