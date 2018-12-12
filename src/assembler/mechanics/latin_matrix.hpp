@@ -243,7 +243,7 @@ void latin_matrix<MeshType>::assemble_stiffness()
 {
     if (!is_sparsity_computed)
     {
-        fem::compute_sparsity_pattern(Kt, fem_mesh);
+        compute_sparsity_pattern(Kt, fem_mesh);
         is_sparsity_computed = true;
     }
 

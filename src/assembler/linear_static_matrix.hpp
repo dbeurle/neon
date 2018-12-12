@@ -15,7 +15,7 @@
 #include <iostream>
 #include <variant>
 
-namespace neon::fem
+namespace neon
 {
 /// fem_linear_static_matrix is responsible for assembling the stiffness matrix,
 /// solving the linear system of equations and dispatching the postprocessor

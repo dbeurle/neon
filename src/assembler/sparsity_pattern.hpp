@@ -8,7 +8,7 @@
 
 /// \file sparsity_pattern.hpp
 
-namespace neon::fem
+namespace neon
 {
 /// Compute the sparsity (nonzero) pattern of a sparse matrix and compress
 /// the resulting data structure.  This function requires that the mesh_type
