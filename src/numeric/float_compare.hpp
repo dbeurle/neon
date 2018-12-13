@@ -1,31 +1,32 @@
 
 #pragma once
 
-#include <cmath>
-#include <limits>
 #include <type_traits>
+
+#include <boost/math/special_functions/relative_difference.hpp>
 
 /// \file float_compare.hpp
 
 /// neon namespace
 namespace neon
 {
-/// Perform a floating point comparison using a specified number of units
-/// in the last place
+/// Perform a floating point comparison using boost for large numbers and an absolute error for smaller ones
+
 /// \tparam Floating point type
 /// \param x Value 1
 /// \param y Value 2
-/// \param ulp Number of units in last place
+/// \param absolute_tolerance
+/// \param relative_tolerance
 template <class T>
 std::enable_if_t<std::is_floating_point<T>::value, bool> is_approx(T const x,
                                                                    T const y,
-                                                                   int const ulp = 2) noexcept
+                                                                   T const absolute_tolerance = 0.0,
+                                                                   T const relative_tolerance = 1e-10) noexcept
 {
-    // Taken and modified from
-    // http://en.cppreference.com/w/cpp/types/numeric_limits/epsilon
-    // Since the numeric epsilon is defined at 1.0 then it must be scaled by
-    // the worse case (x + y) and accounted for by the ULP (units in the last place).
-    return std::abs(x - y) < std::numeric_limits<T>::epsilon() * std::abs(x + y) * ulp
-           || std::abs(x - y) < std::numeric_limits<T>::min();
+    // References:
+    // https://www.boost.org/doc/libs/1_67_0/libs/math/doc/html/math_toolkit/float_comparison.html
+    // https://www.python.org/dev/peps/pep-0485/
+    return boost::math::relative_difference(x, y) <= relative_tolerance
+           || std::abs(x - y) <= absolute_tolerance;
 }
 }
