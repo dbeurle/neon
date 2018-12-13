@@ -5,6 +5,7 @@
 
 namespace neon
 {
+/// \cite Bedrosian1992
 class pyramid_quadrature : public volume_quadrature
 {
 public:
