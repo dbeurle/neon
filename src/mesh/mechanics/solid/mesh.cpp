@@ -21,10 +21,11 @@ static bool is_nodal_variable(std::string const& name)
     return name == "displacement" || name == "reaction_force";
 }
 
-mesh::mesh(basic_mesh const& basic_mesh,
-           json const& material_data,
-           json const& simulation_data,
-           double const generate_time_step)
+template <class SubMeshType>
+mesh<SubMeshType>::mesh(basic_mesh const& basic_mesh,
+                        json const& material_data,
+                        json const& simulation_data,
+                        double const generate_time_step)
     : coordinates(std::make_shared<material_coordinates>(basic_mesh.coordinates())),
       generate_time_step{generate_time_step},
       writer(std::make_unique<io::vtk_file_output>(simulation_data["name"],
@@ -44,14 +45,16 @@ mesh::mesh(basic_mesh const& basic_mesh,
     allocate_variable_names();
 }
 
-bool mesh::is_symmetric() const
+template <class SubMeshType>
+bool mesh<SubMeshType>::is_symmetric() const
 {
     return std::all_of(begin(submeshes), end(submeshes), [](auto const& submesh) {
         return submesh.constitutive().is_symmetric();
     });
 }
 
-void mesh::update_internal_variables(vector const& u, double const time_step_size)
+template <class SubMeshType>
+void mesh<SubMeshType>::update_internal_variables(vector const& u, double const time_step_size)
 {
     auto const start = std::chrono::steady_clock::now();
 
@@ -66,18 +69,22 @@ void mesh::update_internal_variables(vector const& u, double const time_step_siz
               << "s\n";
 }
 
-void mesh::save_internal_variables(bool const have_converged)
+template <class SubMeshType>
+void mesh<SubMeshType>::save_internal_variables(bool const have_converged)
 {
     for (auto& submesh : submeshes) submesh.save_internal_variables(have_converged);
 }
 
-bool mesh::is_nonfollower_load(std::string const& boundary_type) const
+template <class SubMeshType>
+bool mesh<SubMeshType>::is_nonfollower_load(std::string const& boundary_type) const
 {
     return boundary_type == "traction" || boundary_type == "pressure"
            || boundary_type == "body_force" || boundary_type == "nodal_force";
 }
 
-void mesh::allocate_boundary_conditions(json const& simulation_data, basic_mesh const& basic_mesh)
+template <class SubMeshType>
+void mesh<SubMeshType>::allocate_boundary_conditions(json const& simulation_data,
+                                                     basic_mesh const& basic_mesh)
 {
     // Populate the boundary conditions and their corresponding mesh
     for (auto const& boundary : simulation_data["boundaries"])
@@ -106,7 +113,9 @@ void mesh::allocate_boundary_conditions(json const& simulation_data, basic_mesh 
     }
 }
 
-void mesh::allocate_displacement_boundary(json const& boundary, basic_mesh const& basic_mesh)
+template <class SubMeshType>
+void mesh<SubMeshType>::allocate_displacement_boundary(json const& boundary,
+                                                       basic_mesh const& basic_mesh)
 {
     std::string const& boundary_name = boundary["name"];
 
@@ -133,7 +142,8 @@ void mesh::allocate_displacement_boundary(json const& boundary, basic_mesh const
     }
 }
 
-std::vector<double> mesh::time_history() const
+template <class SubMeshType>
+std::vector<double> mesh<SubMeshType>::time_history() const
 {
     std::set<double> history;
 
@@ -161,7 +171,8 @@ std::vector<double> mesh::time_history() const
     return {begin(history), end(history)};
 }
 
-void mesh::write(std::int32_t const time_step, double const current_time)
+template <class SubMeshType>
+void mesh<SubMeshType>::write(std::int32_t const time_step, double const current_time)
 {
     // nodal variables
     if (writer->is_output_requested("displacement"))
@@ -202,7 +213,8 @@ void mesh::write(std::int32_t const time_step, double const current_time)
     writer->write(time_step, current_time);
 }
 
-void mesh::write(vector const& eigenvalues, matrix const& eigenvectors)
+template <class SubMeshType>
+void mesh<SubMeshType>::write(vector const& eigenvalues, matrix const& eigenvectors)
 {
     for (std::int64_t index{0}; index < eigenvalues.size(); ++index)
     {
@@ -213,7 +225,8 @@ void mesh::write(vector const& eigenvalues, matrix const& eigenvectors)
     writer->write(0, 0.0);
 }
 
-void mesh::check_boundary_conditions(json const& boundary_data) const
+template <class SubMeshType>
+void mesh<SubMeshType>::check_boundary_conditions(json const& boundary_data) const
 {
     for (auto const& boundary : boundary_data)
     {
@@ -234,7 +247,8 @@ void mesh::check_boundary_conditions(json const& boundary_data) const
     }
 }
 
-void mesh::allocate_variable_names()
+template <class SubMeshType>
+void mesh<SubMeshType>::allocate_variable_names()
 {
     for (auto const& name : writer->outputs())
     {
@@ -275,4 +289,7 @@ void mesh::allocate_variable_names()
             output_variable);
     }
 }
+
+template class mesh<mechanics::solid::submesh>;
+
 }

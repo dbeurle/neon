@@ -213,10 +213,10 @@ TEST_CASE("Solid mesh test")
 
     REQUIRE(!simulation_data["name"].empty());
 
-    mesh fem_mesh(basic_mesh,
-                  material_data,
-                  simulation_data,
-                  simulation_data["time"]["increments"]["initial"]);
+    mesh<mechanics::solid::submesh> fem_mesh(basic_mesh,
+                                             material_data,
+                                             simulation_data,
+                                             simulation_data["time"]["increments"]["initial"]);
 
     REQUIRE(fem_mesh.active_dofs() == 192);
 

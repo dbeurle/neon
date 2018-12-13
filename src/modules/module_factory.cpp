@@ -58,17 +58,13 @@ std::unique_ptr<abstract_module> make_module(
                 throw std::domain_error("\"nonlinear_options\" needs to be present for a "
                                         "solid_mechanics simulation");
             }
-            return std::make_unique<
-                solid_mechanics_module<mechanics::static_matrix<mechanics::solid::mesh>>>(mesh,
-                                                                                          material,
-                                                                                          simulation);
+            return std::make_unique<solid_mechanics_module<mechanics::static_matrix<
+                mechanics::solid::mesh<mechanics::solid::submesh>>>>(mesh, material, simulation);
         }
         else if (solution_type == "latin")
         {
-            return std::make_unique<
-                solid_mechanics_module<mechanics::latin_matrix<mechanics::solid::mesh>>>(mesh,
-                                                                                         material,
-                                                                                         simulation);
+            return std::make_unique<solid_mechanics_module<mechanics::latin_matrix<
+                mechanics::solid::mesh<mechanics::solid::submesh>>>>(mesh, material, simulation);
         }
 
         throw std::domain_error("\"solution\" is not valid.  Please use \"equilibrium\"");
