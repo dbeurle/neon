@@ -1,7 +1,7 @@
 {
    "Elements" : [
       {
-         "Name" : "Clamped",
+         "Name" : "cantilever",
          "NodalConnectivity" : [
             [ 1, 95, 305, 181 ],
             [ 181, 305, 306, 180 ],
@@ -669,7 +669,7 @@
          "Type" : 5
       },
       {
-         "Name" : "x-fixed",
+         "Name" : "load",
          "NodalConnectivity" : [
             [ 5, 185, 431, 137 ],
             [ 137, 431, 432, 138 ],

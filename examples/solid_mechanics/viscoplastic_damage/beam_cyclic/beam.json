@@ -1,17 +1,16 @@
 {
     "name" : "J2PlasticityDamage",
-    "cores" : 1,
+    "cores" : 4,
     "parts": [{
         "name" : "beam",
-        "material" : "steel"
+        "material" : "cr_mo_steel_580degree"
     }],
     "materials" : [{
-        "name" : "steel",
+        "name" : "cr_mo_steel_580degree",
         "elastic_modulus": 134.0e3,
         "yield_stress": 85,
         "poissons_ratio": 0.3,
         "kinematic_hardening_modulus": 5500,
-        "IsotropicHardeningModulus": 5500,
         "softening_multiplier" : 250,
         "plasticity_viscous_exponent" : 2.5,
         "plasticity_viscous_denominator" : 1220,
@@ -23,8 +22,9 @@
         "module" : "solid_mechanics",
         "solution" : "equilibrium",
         "nonlinear_options" : {
-            "residual_tolerance" : 1e-3,
-            "displacement_tolerance" : 1e-3
+            "residual_tolerance" : 1e-5,
+            "displacement_tolerance" : 1e-5,
+            "newton_raphson_iterations" : 40
         },
         "time" : {
             "period" : 30,
@@ -46,7 +46,7 @@
                 "quadrature" : "full"
             },
             "boundaries" : [{
-                "name" : "Clamped",
+                "name" : "cantilever",
                 "type" : "displacement",
                 "time" : [0.0, 30],
                 "x" : [0.0, 0.0],
@@ -54,10 +54,10 @@
                 "z" : [0.0, 0.0]
             },
             {
-                "name" : "x-fixed",
+                "name" : "load",
                 "type" : "displacement",
                 "x" : [0.12, 0.10],
-                "GenerateType" : "sinusoidal",
+                "generate_type" : "sinusoidal",
                 "period" : [10,10],
                 "phase" : [0,0],
                 "number_of_cycles" : [2,1]
@@ -71,8 +71,8 @@
                             "kinematic_hardening", "displacement_gradient"]
             }
         }],
-		"linear_solver" : {
-		    "type" : "PaStiX"
+    		"linear_solver" : {
+    		    "type" : "PaStiX"
         }
     }]
 }
