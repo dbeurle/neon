@@ -1007,8 +1007,8 @@ struct arpack_wrapper<double, double>
                              char* All,
                              int* select,
                              double* d,
-                             double* z,
-                             int* ldz,
+                             double*,
+                             int*,
                              double* sigma,
                              char* bmat,
                              int* n,
@@ -1099,12 +1099,12 @@ struct OP<MatrixSolver, MatrixType, Scalar, true>
 template <typename MatrixSolver, typename MatrixType, typename Scalar>
 struct OP<MatrixSolver, MatrixType, Scalar, false>
 {
-    static inline void applyOP(MatrixSolver& OP, const MatrixType& A, int n, Scalar* in, Scalar* out)
+    static inline void applyOP(MatrixSolver&, const MatrixType&, int, Scalar*, Scalar*)
     {
         eigen_assert(false && "Should never be in here...");
     }
 
-    static inline void project(MatrixSolver& OP, int n, int k, Scalar* vecs)
+    static inline void project(MatrixSolver&, int, int, Scalar*)
     {
         eigen_assert(false && "Should never be in here...");
     }
