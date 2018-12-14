@@ -12,8 +12,8 @@ SetFactory("Built-in");
 SetFactory("OpenCASCADE");
 Box(1) = {0, 0, 0, 1, 1, 10};
 //+
-Physical Surface("Clamped") = {5};
+Physical Surface("cantilever") = {5};
 //+
-Physical Surface("Zsym") = {6};
+Physical Surface("load") = {6};
 //+
 Physical Volume("beam") = {1};
