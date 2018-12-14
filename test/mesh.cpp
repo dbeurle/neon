@@ -7,6 +7,7 @@
 #include "mesh/material_coordinates.hpp"
 #include "mesh/mechanics/solid/mesh.hpp"
 #include "mesh/mechanics/solid/submesh.hpp"
+#include "mesh/mechanics/solid/latin_submesh.hpp"
 #include "io/json.hpp"
 
 #include "fixtures/cube_mesh.hpp"

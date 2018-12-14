@@ -291,5 +291,6 @@ void mesh<SubMeshType>::allocate_variable_names()
 }
 
 template class mesh<mechanics::solid::submesh>;
+template class mesh<mechanics::solid::latin_submesh>;
 
 }

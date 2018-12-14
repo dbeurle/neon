@@ -64,7 +64,7 @@ std::unique_ptr<abstract_module> make_module(
         else if (solution_type == "latin")
         {
             return std::make_unique<solid_mechanics_module<mechanics::latin_matrix<
-                mechanics::solid::mesh<mechanics::solid::submesh>>>>(mesh, material, simulation);
+                mechanics::solid::mesh<mechanics::solid::latin_submesh>>>>(mesh, material, simulation);
         }
 
         throw std::domain_error("\"solution\" is not valid.  Please use \"equilibrium\"");

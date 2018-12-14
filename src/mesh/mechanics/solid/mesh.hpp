@@ -4,6 +4,7 @@
 #include "mesh/boundary/dirichlet.hpp"
 #include "mesh/mechanics/solid/boundary/nonfollower_load.hpp"
 #include "mesh/mechanics/solid/submesh.hpp"
+#include "mesh/mechanics/solid/latin_submesh.hpp"
 #include "io/file_output.hpp"
 
 #include <map>
@@ -120,5 +121,6 @@ protected:
 };
 
 extern template class mesh<mechanics::solid::submesh>;
+extern template class mesh<mechanics::solid::latin_submesh>;
 
 }

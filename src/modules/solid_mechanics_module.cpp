@@ -20,7 +20,7 @@ solid_mechanics_module<matrix_type>::solid_mechanics_module(basic_mesh const& me
 template class solid_mechanics_module<
     mechanics::static_matrix<mechanics::solid::mesh<mechanics::solid::submesh>>>;
 template class solid_mechanics_module<
-    mechanics::latin_matrix<mechanics::solid::mesh<mechanics::solid::submesh>>>;
+    mechanics::latin_matrix<mechanics::solid::mesh<mechanics::solid::latin_submesh>>>;
 
 linear_buckling_module::linear_buckling_module(basic_mesh const& mesh,
                                                json const& material,

@@ -67,7 +67,7 @@ TEST_CASE("Nonlinear system equilibrium solver test")
 }
 TEST_CASE("LATIN solver test")
 {
-    using fem_mesh = neon::mechanics::solid::mesh<neon::mechanics::solid::submesh>;
+    using fem_mesh = neon::mechanics::solid::mesh<neon::mechanics::solid::latin_submesh>;
     using latin_matrix = neon::mechanics::latin_matrix<fem_mesh>;
 
     // Read in a cube mesh from the json input file and use this to
