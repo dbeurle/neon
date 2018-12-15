@@ -7,6 +7,7 @@
 #include "mesh/material_coordinates.hpp"
 #include "mesh/mechanics/solid/mesh.hpp"
 #include "mesh/mechanics/solid/submesh.hpp"
+#include "mesh/mechanics/solid/latin_submesh.hpp"
 #include "io/json.hpp"
 
 #include "fixtures/cube_mesh.hpp"
@@ -213,10 +214,10 @@ TEST_CASE("Solid mesh test")
 
     REQUIRE(!simulation_data["name"].empty());
 
-    mesh fem_mesh(basic_mesh,
-                  material_data,
-                  simulation_data,
-                  simulation_data["time"]["increments"]["initial"]);
+    mesh<mechanics::solid::submesh> fem_mesh(basic_mesh,
+                                             material_data,
+                                             simulation_data,
+                                             simulation_data["time"]["increments"]["initial"]);
 
     REQUIRE(fem_mesh.active_dofs() == 192);
 

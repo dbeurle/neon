@@ -32,7 +32,7 @@ template <typename matrix_type>
 class solid_mechanics_module : public abstract_module
 {
 public:
-    using mesh_type = mechanics::solid::mesh;
+    using mesh_type = typename matrix_type::mesh_type;
 
 public:
     solid_mechanics_module(basic_mesh const& mesh, json const& material, json const& simulation);
@@ -51,8 +51,10 @@ protected:
     /// Nonlinear solver routines
     matrix_type fem_matrix;
 };
-extern template class solid_mechanics_module<mechanics::static_matrix<mechanics::solid::mesh>>;
-extern template class solid_mechanics_module<mechanics::latin_matrix<mechanics::solid::mesh>>;
+extern template class solid_mechanics_module<
+    mechanics::static_matrix<mechanics::solid::mesh<mechanics::solid::submesh>>>;
+extern template class solid_mechanics_module<
+    mechanics::latin_matrix<mechanics::solid::mesh<mechanics::solid::latin_submesh>>>;
 
 /// linear_buckling_module is responsible for handling the setup
 /// and simulation of the class for three dimensional linear (eigenvalue)
@@ -60,7 +62,7 @@ extern template class solid_mechanics_module<mechanics::latin_matrix<mechanics::
 class linear_buckling_module : public abstract_module
 {
 public:
-    using mesh_type = mechanics::solid::mesh;
+    using mesh_type = mechanics::solid::mesh<mechanics::solid::submesh>;
     using matrix_type = mechanics::linear_buckling_matrix<mesh_type>;
 
 public:
@@ -87,7 +89,7 @@ protected:
 class natural_frequency_module : public abstract_module
 {
 public:
-    using mesh_type = mechanics::solid::mesh;
+    using mesh_type = mechanics::solid::mesh<mechanics::solid::submesh>;
     using matrix_type = mechanics::natural_frequency_matrix<mesh_type>;
 
 public:
