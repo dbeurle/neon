@@ -34,6 +34,14 @@ namespace detail
 {
     return lambda_e * elastic_strain.trace() * matrix3::Identity() + 2.0 * G * elastic_strain;
 }
+
+[[nodiscard]] inline matrix3 compute_cauchy_stress_scalar_damage(double const G,
+                                                                 double const lambda_e,
+                                                                 matrix3 const& elastic_strain,
+                                                                 double const damage)
+{
+    return (1 - damage) * compute_cauchy_stress(G, lambda_e, elastic_strain);
+}
 }
 
 /// Compute the von Mises stress of the stress tensor
@@ -50,5 +58,15 @@ template <typename MatrixExpression>
                                                 MatrixExpression const elastic_strain)
 {
     return detail::compute_cauchy_stress(G, lambda_e, elastic_strain.eval());
+}
+
+/// Compute the Cauchy stress tensor in damage models
+template <typename MatrixExpression>
+[[nodiscard]] inline auto compute_cauchy_stress_scalar_damage(double const G,
+                                                              double const lambda_e,
+                                                              MatrixExpression const elastic_strain,
+                                                              double const damage)
+{
+    return detail::compute_cauchy_stress_scalar_damage(G, lambda_e, elastic_strain.eval(), damage);
 }
 }
