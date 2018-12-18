@@ -37,7 +37,7 @@ void small_strain_J2_plasticity_damage::update_internal_variables(double const t
     auto& plastic_strains = variables->get(variable::second::linearised_plastic_strain);
     auto& strains = variables->get(variable::second::linearised_strain);
     auto& accumulated_plastic_strains = variables->get(variable::scalar::effective_plastic_strain);
-    auto& accumulated_kinematic_stresses = variables->get(variable::second::kinematic_hardening);
+    auto& kinematic_hardening = variables->get(variable::second::kinematic_hardening);
 
     auto& cauchy_stresses = variables->get(variable::second::cauchy_stress);
     auto& back_stresses = variables->get(variable::second::back_stress);
@@ -63,153 +63,191 @@ void small_strain_J2_plasticity_damage::update_internal_variables(double const t
         auto& energy_var = energy_release_rates[l];
 
         // Elastic stress predictor
-        cauchy_stress = compute_cauchy_stress(material.shear_modulus(),
-                                              material.lambda(),
-                                              strain - plastic_strain);
+        cauchy_stress = compute_cauchy_stress_scalar_damage(material.shear_modulus(),
+                                                            material.lambda(),
+                                                            strain - plastic_strain,
+                                                            scalar_damage);
 
-        matrix3 tau = deviatoric(cauchy_stress) / (1.0 - scalar_damage) - deviatoric(back_stress);
+        // Trial state
+        matrix3 tau = cauchy_stress - back_stress;
 
-        // Trial von Mises stress
         von_mises = von_mises_stress(tau);
 
         energy_var = 0.5
                      * double_dot(strain - plastic_strain,
-                                  compute_stress_like_matrix((1.0 - scalar_damage) * C_e,
-                                                             strain - plastic_strain));
+                                  compute_stress_like_matrix(C_e, strain - plastic_strain));
 
         // If this quadrature point is elastic, then set the tangent to the
         // elastic modulus and continue to the next quadrature point
-        if (evaluate_yield_function(von_mises, back_stress) <= 0.0
+        if (evaluate_yield_function(von_mises, back_stress, scalar_damage) <= 0.0
             && evaluate_damage_yield_function(energy_var) <= 0.0)
         {
             tangent_operators[l] = C_e;
             return;
         }
 
+        // TODO: here the normal is considered to be non-constant. However, only its magnitude is
+        // changing so only its derivative w.r.t damage is non-zero
         auto const plastic_increment = perform_radial_return(cauchy_stress,
                                                              back_stress,
                                                              scalar_damage,
-                                                             accumulated_kinematic_stresses[l],
+                                                             kinematic_hardening[l],
                                                              energy_var,
                                                              tangent_operators[l],
                                                              time_step_size,
                                                              strain - plastic_strain);
 
-        tau = deviatoric(cauchy_stress) / (1.0 - scalar_damage) - deviatoric(back_stress);
+        tau = cauchy_stress - back_stress;
 
         von_mises = von_mises_stress(tau);
 
-        plastic_strain += plastic_increment * 3.0 / 2.0 * tau / (von_mises * (1 - scalar_damage));
+        // Compute the normal direction to the yield surface
+        matrix3 const normal = std::sqrt(3.0 / 2.0) * deviatoric(tau)
+                               / (deviatoric(tau).norm() * (1 - scalar_damage));
+
+        plastic_strain += plastic_increment * normal;
 
         accumulated_plastic_strains[l] += plastic_increment / (1 - scalar_damage);
     });
 }
 
-double small_strain_J2_plasticity_damage::perform_radial_return(matrix3& cauchy_stress,
-                                                                matrix3& back_stress,
-                                                                double& scalar_damage,
-                                                                matrix3& kin_hard,
-                                                                double& energy_var,
+double small_strain_J2_plasticity_damage::perform_radial_return(matrix3& cauchy_stress_t,
+                                                                matrix3& back_stress_t,
+                                                                double& scalar_damage_t,
+                                                                matrix3& kin_hard_t,
+                                                                double& energy_var_t,
                                                                 matrix6& tangent_operator,
                                                                 double const& delta_t,
                                                                 matrix3 const& eps_e_t)
 {
     // TODO: initial guess could be computed base on a frozen yield surface (at
-    // the increment n) to obtain good convergence. check computational methods for plasticity book
+    // the preceding time increment) to obtain good convergence. check "computational methods for plasticity" book
 
-    vector16 y;
-    y << 0.0, 0.0, voigt::kinetic::to(cauchy_stress), voigt::kinetic::to(back_stress),
-        scalar_damage, energy_var;
+    vector16 solution;
+    solution << 0.0, 0.0, voigt::kinetic::to(cauchy_stress_t), voigt::kinetic::to(back_stress_t),
+        scalar_damage_t, energy_var_t;
 
-    // The residual
-    vector16 f = vector16::Ones();
+    vector16 residual = vector16::Ones();
 
-    int iterations = 0, max_iterations = 25;
+    matrix16 jacobian = matrix16::Zero();
+    jacobian(0, 0) = jacobian(1, 1) = jacobian(14, 14) = jacobian(15, 15) = 1.0;
+    jacobian.block<6, 6>(2, 2) = voigt::kinetic::fourth_order_identity();
+    jacobian.block<6, 6>(8, 8) = voigt::kinetic::fourth_order_identity();
 
-    matrix16 M = matrix16::Zero();
+    auto const s_p = material.plasticity_viscous_denominator();
+    auto const n_p = material.plasticity_viscous_exponent();
+    auto const k_p = std::pow(s_p, -n_p); // plasticity viscous multiplier
+    auto const s_d = material.damage_viscous_denominator();
+    auto const n_d = material.damage_viscous_exponent();
+    auto const k_d = std::pow(s_d, -n_d); // damage viscous multiplier
+    auto const c_p = material.kinematic_hardening_modulus();
+    auto const a_p = material.softening_multiplier();
 
-    M(0, 0) = M(1, 1) = M(14, 14) = M(15, 15) = 1.0;
-
-    // TODO: double check kinetic kinematic
-    M.block<6, 6>(2, 2) = voigt::kinetic::fourth_order_identity();
-
-    auto const sp = material.plasticity_viscous_denominator();
-    auto const np = material.plasticity_viscous_exponent();
-    auto const kp = std::pow(sp, -np); // plasticity viscous multiplier
-    auto const sd = material.damage_viscous_denominator();
-    auto const nd = material.damage_viscous_exponent();
-    auto const kd = std::pow(sd, -nd); // damage viscous multiplier
-    auto const C = material.kinematic_hardening_modulus();
-    auto const gamma = material.softening_multiplier();
-
-    // TODO: use relative error instead of absolute one (for f and delta_y)
-    // TODO: use ResidualTolerance
-    while (f.norm() > 1.0e-6 && iterations < max_iterations)
+    // TODO: use relative error instead of absolute one (for residual and delta_y)
+    // Perform the non-linear hardening solve
+    int iterations = 0;
+    auto constexpr max_iterations{50};
+    while (residual.norm() > 1.0e-6 && iterations < max_iterations)
     {
-        auto const d_lam_plastic = y(0);
-        auto const d_lam_damage = y(1);
+        auto const delta_plastic_multiplier = solution(0);
+        auto const delta_damage_multiplier = solution(1);
 
-        auto const sigma = voigt::kinetic::from(y.segment<6>(2));
-        auto const beta = voigt::kinetic::from(y.segment<6>(8));
+        auto const cauchy_stress = voigt::kinetic::from(solution.segment<6>(2));
+        auto const back_stress = voigt::kinetic::from(solution.segment<6>(8));
 
-        auto const d = y(14);
-        auto const Y = y(15);
+        auto const scalar_damage = solution(14);
+        auto const one_minus_damage = (1.0 - scalar_damage);
+        auto const energy = solution(15);
 
-        matrix3 const tau = deviatoric(sigma) / (1.0 - d) - deviatoric(beta);
-
+        // Compute the normal direction to the yield surface
+        matrix3 const tau = cauchy_stress - back_stress;
         auto const von_mises = von_mises_stress(tau);
+        matrix3 const normal = std::sqrt(3.0 / 2.0) * deviatoric(tau)
+                               / (deviatoric(tau).norm() * one_minus_damage);
 
-        auto const f_vp = std::max(0.0, evaluate_yield_function(von_mises, beta));
-        auto const f_d = std::max(0.0, evaluate_damage_yield_function(Y));
+        matrix3 const eps_e = eps_e_t - delta_plastic_multiplier * normal;
 
-        matrix3 const normal_tild = 3.0 / 2.0 * tau / von_mises;
-        matrix3 const normal = normal_tild / (1.0 - d);
+        auto const yield_function = std::max(0.0,
+                                             evaluate_yield_function(von_mises,
+                                                                     back_stress,
+                                                                     scalar_damage));
+        auto const damage_yield_function = std::max(0.0, evaluate_damage_yield_function(energy));
 
-        // The residual TODO: compute_stress_like_vector and compute_stress_like_matrix could be
-        // optimised
+        matrix3 const& d_yield_d_stress = normal;
+        matrix3 const d_yield_d_back_stress = a_p / c_p * back_stress - normal;
+        double const d_yield_d_damage = von_mises / std::pow(one_minus_damage, 2);
+
         // clang-format off
-        f << d_lam_plastic - kp * std::pow(f_vp, np),
-             d_lam_damage - kd * std::pow(f_d, nd),
-             voigt::kinetic::to(sigma) - (1.0 - d) * compute_stress_like_vector(C_e, eps_e_t) + delta_t * d_lam_plastic * compute_stress_like_vector(C_e, normal_tild),
-             voigt::kinetic::to(beta - C * kin_hard - C * delta_t * d_lam_plastic * (normal_tild - gamma / C * beta)),
-             d - scalar_damage - delta_t * d_lam_damage,
-             Y - 0.5   * double_dot(eps_e_t - delta_t * d_lam_plastic * normal_tild / (1.0 - d),
-             compute_stress_like_matrix(C_e, eps_e_t - delta_t * d_lam_plastic * normal_tild / (1.0 - d)));
+        matrix6 const d_normal_wrt_cauchy_stress = std::sqrt(3.0 / 2.0) / one_minus_damage
+                                                 * (voigt::kinetic::deviatoric() / deviatoric(tau).norm()
+                                                    - outer_product(deviatoric(tau), deviatoric(tau))
+                                                    / std::pow(deviatoric(tau).norm(), 3));
+        matrix6 const d_normal_wrt_back_stress = -d_normal_wrt_cauchy_stress;
+        matrix3 const d_normal_wrt_damage = normal / one_minus_damage;
 
-        M.block<1, 6>(0, 2) = voigt::kinetic::to(deviatoric(-np * kp * std::pow(f_vp, np - 1) * normal));
-        M.block<1, 6>(0, 8) = voigt::kinetic::to(np * kp * std::pow(f_vp, np - 1) * (normal_tild - gamma / C * beta));
+        residual << delta_plastic_multiplier - k_p * std::pow(yield_function, n_p) * delta_t,
+                    delta_damage_multiplier - k_d * std::pow(damage_yield_function, n_d) * delta_t,
+                    voigt::kinetic::to(cauchy_stress) - one_minus_damage
+                      * compute_stress_like_vector_voigt(C_e, eps_e),
+                    voigt::kinetic::to(back_stress - back_stress_t
+                                      - delta_plastic_multiplier * (c_p * normal - a_p * back_stress)),
+                    scalar_damage - scalar_damage_t - delta_damage_multiplier,
+                    energy - 0.5 * double_dot(eps_e,
+                                   compute_stress_like_matrix(C_e, eps_e));
 
-        M(0, 14) = -np * kp * std::pow(f_vp, np - 1) * double_dot(normal_tild, deviatoric(sigma)) / std::pow(1.0 - d, 2);
-        M(1, 15) = -nd * kd * std::pow(f_d, nd - 1);
+        // Derivative of the plastic multiplier equation
+        jacobian.block<1, 6>(0, 2) = voigt::kinetic::to(
+            -n_p * k_p * std::pow(yield_function, n_p - 1) * d_yield_d_stress * delta_t);
+        jacobian.block<1, 6>(0, 8) = voigt::kinetic::to(
+            -n_p * k_p * std::pow(yield_function, n_p - 1) * d_yield_d_back_stress * delta_t);
+        jacobian(0, 14) =
+            -n_p * k_p * std::pow(yield_function, n_p - 1) * d_yield_d_damage * delta_t;
 
-        M.block<6, 1>(2, 0) = delta_t * compute_stress_like_vector(C_e, normal_tild);
-        M.block<6, 1>(2, 14) = compute_stress_like_vector(C_e, eps_e_t);
-        M.block<6, 1>(8, 0) = voigt::kinetic::to(-delta_t * C * (normal_tild - gamma / C * beta));
-        M.block<6, 6>(8, 8) = voigt::kinetic::fourth_order_identity() * (1.0 + delta_t * d_lam_plastic * gamma);
+        // Derivative of the damage multiplier equation
+        jacobian(1, 15) = -n_d * k_d * std::pow(damage_yield_function, n_d - 1) * delta_t;
 
-        M(14, 1) = -delta_t;
+        // Derivative of the stress equation
+        jacobian.block<6, 1>(2, 0) = compute_stress_like_vector_voigt(one_minus_damage * C_e, normal);
+        jacobian.block<6, 6>(2, 2) = voigt::kinetic::fourth_order_identity()
+                                     + mandel_notation(one_minus_damage * C_e)
+                                     * mandel_notation(delta_plastic_multiplier * d_normal_wrt_cauchy_stress);
+        jacobian.block<6, 6>(2, 8) = mandel_notation(one_minus_damage * C_e)
+                                     * mandel_notation(delta_plastic_multiplier * d_normal_wrt_back_stress);
+        jacobian.block<6, 1>(2, 14) = compute_stress_like_vector_voigt(C_e,
+                                          one_minus_damage * delta_plastic_multiplier * d_normal_wrt_damage + eps_e);
 
-        M(15, 0) = double_dot(delta_t * normal_tild / (1.0 - d),
-                              compute_stress_like_matrix(C_e, eps_e_t - delta_t * d_lam_plastic * normal_tild / (1.0 - d)));
+        // Derivative of the backstress equation
+        jacobian.block<6, 1>(8, 0) = voigt::kinetic::to(a_p * back_stress - c_p * normal);
+        jacobian.block<6, 6>(8, 2) = -c_p * delta_plastic_multiplier * d_normal_wrt_cauchy_stress;
+        jacobian.block<6, 6>(8, 8) = voigt::kinetic::fourth_order_identity()
+                                     * (1.0 + a_p * delta_plastic_multiplier)
+                                     - c_p * delta_plastic_multiplier * d_normal_wrt_back_stress;
+        jacobian.block<6, 1>(8, 14) = voigt::kinetic::to(-c_p * delta_plastic_multiplier * d_normal_wrt_damage);
 
-        M(15, 14) = delta_t * d_lam_plastic / std::pow(1.0 - d, 2)
-                    * double_dot(normal_tild,
-                                 compute_stress_like_matrix(C_e, eps_e_t - delta_t * d_lam_plastic * normal_tild / (1.0 - d)));
+        // Derivative of the damage equation
+        jacobian(14, 1) = -1;
+
+        // Derivative of the energy release rate equation
+        jacobian(15, 0) = double_dot(normal,
+                                 compute_stress_like_matrix(C_e, eps_e));
+        jacobian.block<1, 6>(15, 2) = delta_plastic_multiplier
+                                      * (d_normal_wrt_cauchy_stress
+                                      * compute_stress_like_vector_voigt(C_e, eps_e)).transpose();
+        jacobian.block<1, 6>(15, 8) = delta_plastic_multiplier
+                                      * (d_normal_wrt_back_stress
+                                      * compute_stress_like_vector_voigt(C_e, eps_e)).transpose();
+        jacobian(15, 14) = delta_plastic_multiplier
+                           * double_dot(d_normal_wrt_damage, compute_stress_like_matrix(C_e, eps_e));
+
         // clang-format on
 
-        // Eigen::JacobiSVD<Eigen::MatrixXd> svd(M);
-        // double cond = svd.singularValues()(0) /
-        // svd.singularValues()(svd.singularValues().size()
-        // - 1); std::cout << cond << "\n\n";
-        // vector a = -M.inverse() * f;
-
-        y -= M.fullPivLu().solve(f);
+        solution -= jacobian.fullPivLu().solve(residual);
 
         iterations++;
     }
 
     // ensure that the damage does not exceed one
-    if (y(14) > 1)
+    if (solution(14) > 1)
     {
         std::cout << "Damage is greater than one\nConsider decreasing the load\n";
         throw computational_error("Radial return failure\n");
@@ -217,32 +255,36 @@ double small_strain_J2_plasticity_damage::perform_radial_return(matrix3& cauchy_
 
     if (iterations == max_iterations)
     {
-        std::cout << "MAXIMUM NUMBER OF ITERATIONS IN RADIAL RETURN REACHED\n";
-        std::cout << "The residual norm " << f.norm() << "\n";
-        // std::cout << "The increment norm " << a.norm() << "\n";
+        std::cout << "MAXIMUM NUMBER OF ITERATIONS IN RADIAL RETURN IS REACHED\n";
+        std::cout << "The residual norm " << residual.norm() << "\n";
         throw computational_error("Radial return failure\n");
     }
 
-    cauchy_stress = voigt::kinetic::from(y.segment<6>(2));
+    // ensure a positive value for the plastic multiplier
+    auto plastic_increment = solution(0) > 0.0 ? solution(0) : 0.0;
 
-    back_stress = voigt::kinetic::from(y.segment<6>(8));
+    cauchy_stress_t = voigt::kinetic::from(solution.segment<6>(2));
 
-    scalar_damage = y(14);
+    back_stress_t = voigt::kinetic::from(solution.segment<6>(8));
 
-    energy_var = y(15);
+    // ensure no damage-reduction/healing
+    scalar_damage_t = solution(14) > scalar_damage_t ? solution(14) : scalar_damage_t;
 
-    kin_hard = back_stress / C;
+    energy_var_t = solution(15);
 
-    tangent_operator = (1.0 - scalar_damage) * mandel_notation(C_e)
-                       * mandel_notation(M.inverse().block<6, 6>(2, 2));
+    kin_hard_t = back_stress_t / c_p;
 
-    return y(0) * delta_t; // plastic_increment
+    tangent_operator = (1.0 - scalar_damage_t) * mandel_notation(C_e)
+                       * mandel_notation(jacobian.inverse().block<6, 6>(2, 2));
+
+    return plastic_increment * delta_t; // plastic_increment
 }
 
 double small_strain_J2_plasticity_damage::evaluate_yield_function(double const von_mises,
-                                                                  matrix3 const& back_stress) const
+                                                                  matrix3 const& back_stress,
+                                                                  double const damage) const
 {
-    return von_mises
+    return von_mises / (1 - damage)
            + 0.5 * material.softening_multiplier() / material.kinematic_hardening_modulus()
                  * double_dot(back_stress, back_stress)
            - material.yield_stress(0.0);
@@ -256,14 +298,13 @@ double small_strain_J2_plasticity_damage::evaluate_damage_yield_function(double 
 matrix3 small_strain_J2_plasticity_damage::compute_stress_like_matrix(matrix6 const& tangent_operator,
                                                                       matrix3 const& strain_like) const
 {
-    // could get the tangent_operator directly without passing it to this function
-    return voigt::kinetic::from(tangent_operator * voigt::kinematic::to(strain_like));
+    return voigt::kinetic::from(compute_stress_like_vector_voigt(tangent_operator, strain_like));
 }
 
-vector6 small_strain_J2_plasticity_damage::compute_stress_like_vector(matrix6 const& tangent_operator,
-                                                                      matrix3 const& strain_like) const
+vector6 small_strain_J2_plasticity_damage::compute_stress_like_vector_voigt(
+    matrix6 const& tangent_operator,
+    matrix3 const& strain_like) const
 {
-    // could get the tangent_operator directly without passing it to this function
     return tangent_operator * voigt::kinematic::to(strain_like);
 }
 }
