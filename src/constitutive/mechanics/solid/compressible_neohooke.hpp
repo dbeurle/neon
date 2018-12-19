@@ -20,7 +20,6 @@ namespace neon::mechanics::solid
              + \frac{1}{2}\lambda_0 (\ln{J})^2 - \mu_0 \ln J
    \f}
  * where \f$ \lambda_0 \f$ and \f$ \mu \f$ are the Lamé parameters.
- *
  */
 class compressible_neohooke : public constitutive_model
 {
