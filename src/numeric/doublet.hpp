@@ -3,6 +3,8 @@
 
 #include <type_traits>
 
+/// \file doublet.hpp
+
 namespace neon
 {
 /// Store the row and column index and return a value of zero.  This is used
