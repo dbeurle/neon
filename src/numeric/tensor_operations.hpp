@@ -79,7 +79,7 @@ template <typename MatrixExpression>
  * I2 returns the coefficient I2, the second stress invariant,
  * which is calculated by:
  * \f{align*}{
- * I_2 &= \frac{1}{2} \left( (tr \tau)^2 - tr(\tau \tau) \right)
+ *    I_2 &= \frac{1}{2} \left( (tr \tau)^2 - tr(\tau \tau) \right)
  * \f}
  * @return Second invariant
  */
@@ -430,7 +430,7 @@ template <typename matrix_expression>
  * Computes the outer product of two second order tensors in Voigt notation
  * in two dimensions
     \f{align*}{
-        & \mathbf{a} \otimes \mathbf{b} \otimes
+        & \mathbf{a} \otimes \mathbf{b}
     \f}
  * @return fourth order tensor in Voigt notation
  */
@@ -442,7 +442,7 @@ template <typename matrix_expression>
 /**
  * Computes the outer product of two second order tensors in two dimensions
     \f{align*}{
-        & \mathbf{a} \otimes \mathbf{b} \otimes
+        & \mathbf{a} \otimes \mathbf{b}
     \f}
  * @return fourth order tensor in Voigt notation
  */
@@ -454,7 +454,7 @@ template <typename matrix_expression>
 /**
  * Computes the outer product of two second order tensors in three dimensions
     \f{align*}{
-        & \mathbf{a} \otimes \mathbf{b} \otimes
+        & \mathbf{a} \otimes \mathbf{b}
     \f}
  * \return fourth order tensor in Voigt notation
  */
