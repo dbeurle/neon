@@ -83,7 +83,7 @@ void static_matrix::compute_external_force(double const load_factor)
                     {
                         for (std::int64_t b{0}; b < fe.size(); ++b)
                         {
-                            K.coefficient_update(dof_view(a), dof_view(b), ke(a, b));
+                            K.add_to(dof_view(a), dof_view(b), ke(a, b));
                         }
                     }
                 }
@@ -137,7 +137,7 @@ void static_matrix::assemble_stiffness()
             {
                 for (std::int64_t b{0}; b < dof_view.size(); b++)
                 {
-                    K.coefficient_update(dof_view(a), dof_view(b), local_tangent(a, b));
+                    K.add_to(dof_view(a), dof_view(b), local_tangent(a, b));
                 }
             }
         });

@@ -111,7 +111,7 @@ void dynamic_matrix::assemble_mass()
             {
                 for (std::int64_t b{0}; b < dofs.size(); b++)
                 {
-                    M.coefficient_update(dofs(a), dofs(b), m(a, b));
+                    M.add_to(dofs(a), dofs(b), m(a, b));
                 }
             }
         }
