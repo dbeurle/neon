@@ -3,8 +3,8 @@ $MeshFormat
 $EndMeshFormat
 $PhysicalNames
 3
-2 2 "Clamped"
-2 3 "x-fixed"
+2 2 "cantilever"
+2 3 "load"
 3 1 "beam"
 $EndPhysicalNames
 $Nodes

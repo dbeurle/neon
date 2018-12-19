@@ -4,6 +4,7 @@
 #include "mesh/boundary/dirichlet.hpp"
 #include "mesh/mechanics/solid/boundary/nonfollower_load.hpp"
 #include "mesh/mechanics/solid/submesh.hpp"
+#include "mesh/mechanics/solid/latin_submesh.hpp"
 #include "io/file_output.hpp"
 
 #include <map>
@@ -15,13 +16,14 @@ class basic_mesh;
 
 namespace neon::mechanics::solid
 {
+template <class SubMeshType>
 class mesh
 {
 public:
-    using internal_variable_type = submesh::internal_variable_type;
+    using internal_variable_type = typename SubMeshType::internal_variable_type;
 
     /// Alias traits to submesh
-    using traits = submesh::traits;
+    using traits = typename SubMeshType::traits;
 
 public:
     mesh(basic_mesh const& basic_mesh,
@@ -52,7 +54,7 @@ public:
     void save_internal_variables(bool const have_converged);
 
     /// Constant access to the sub-meshes
-    [[nodiscard]] std::vector<submesh> const& meshes() const noexcept { return submeshes; }
+    [[nodiscard]] std::vector<SubMeshType> const& meshes() const noexcept { return submeshes; }
 
     /// Non-const access to the sub-meshes
     [[nodiscard]] auto& meshes() noexcept { return submeshes; }
@@ -90,7 +92,7 @@ protected:
     std::shared_ptr<material_coordinates> coordinates;
 
     /// Meshes that contain individual element types
-    std::vector<submesh> submeshes;
+    std::vector<SubMeshType> submeshes;
 
     /// Displacement boundary conditions
     std::map<std::string, std::vector<dirichlet>> displacement_bcs;
@@ -117,4 +119,8 @@ protected:
     /// Output variables
     std::vector<variable::types> output_variables;
 };
+
+extern template class mesh<mechanics::solid::submesh>;
+extern template class mesh<mechanics::solid::latin_submesh>;
+
 }
