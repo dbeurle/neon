@@ -78,6 +78,9 @@ protected:
 
     [[nodiscard]] double evaluate_damage_yield_function(double const energy_var) const;
 
+    [[nodiscard]] double compute_energy_release_rate(matrix6 const& tangent_operator,
+                                                     matrix3 const& elastic_strain) const;
+
     [[nodiscard]] matrix3 compute_stress_like_matrix(matrix6 const& tangent_operator,
                                                      matrix3 const& strain_like) const;
 
