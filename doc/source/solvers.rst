@@ -25,7 +25,7 @@ An example of using the ``"PaStiX"`` solver is ::
         "type" : "PaStiX"
     }
 
-To specify an iterative solver require additional fields due to the white-box nature of the methods.  If these are not set, then defaults will be chosen for you.  The following table demonstrates the defaults
+To specify an iterative solver require additional fields due to the white-box nature of the methods.  If these are not set, then defaults will be chosen for you.  The following table demonstrates the defaults, where each iterative solver currently uses a diagonal pre-conditioner due to ease of parallelisation
 
 .. table:: Iterative solvers defaults
    :widths: auto
@@ -33,10 +33,9 @@ To specify an iterative solver require additional fields due to the white-box na
    ======================== ============================================
    Iterative solver option  Default value
    ======================== ============================================
-   ``"preconditioner"``     ``"diagonal"``
-   ``"backend"``            ``"cpu"``
-   ``"tolerance"``          ``1.0e-6``
-   ``"maximum_iterations"`` ``1.0e-6``
+   ``"device"``             ``"cpu"``
+   ``"tolerance"``          ``1.0e-6`` (Relative tolerance)
+   ``"maximum_iterations"`` ``1.0e-6`` (Maximum iterations before failure)
    ======================== ============================================
 
 and the option meanings
@@ -47,21 +46,40 @@ and the option meanings
    ==================== ============================================
    Additional options   Details
    ==================== ============================================
-   ``"backend"``        ``"cpu"`` and ``"gpu"`` for selecting computation backend (``"gpu"`` requires `-DENABLE_OCL=1` or `-DENABLE_CUDA` during compile time)
-   ``"preconditioner"`` ``"diagonal"`` is the only supported preconditioner available
+   ``"device"``         ``"cpu"`` and ``"gpu"``
+   ``"backend"``        Provide options for the acceleration framework
    ==================== ============================================
 
-An example of an iterative solver definition ::
+Note than when selecting ``"gpu"`` the binary must have compiled in support that is enabled through the ``-DENABLE_OPENCL=1`` or ``-DENABLE_CUDA`` CMake flags.
+
+An example of an iterative solver definition using the CUDA iterative linear solver ::
 
      "linear_solver" {
          "type" : "iterative",
-         "preconditioner" : "diagonal",
-         "backend" : "gpu",
+         "device" : "gpu",
          "tolerance" : 1.0e-6,
-         "maximum_iterations" : 1500
+         "maximum_iterations" : 1500,
+         "backend" : {
+            "type" : "cuda",
+            "device" : 0
+         }
      }
 
-All linear solvers use double floating point precision which may incur performance penalties on GPU devices.
+The ``"type"`` field can also contain ``"opencl"`` to use the OpenCL kernels for computation.  Because of the multi-device nature of OpenCL a ``"device"`` and a ``"platform"`` are then required to select the desired device ::
+
+    "linear_solver" {
+        "type" : "iterative",
+        "device" : "gpu",
+        "tolerance" : 1.0e-6,
+        "maximum_iterations" : 1500,
+        "backend" : {
+           "type" : "opencl",
+           "platform" : 0,
+           "device" : 0
+        }
+    }
+
+All linear solvers use double floating point precision which may incur performance penalties on GPU devices however testing shows a significant increase in performance is still obtained with double precision due to the higher memory bandwidth.  A single precision version of Krylov subspace solvers is not recommended due to round-off error in computing the search direction.
 
 Eigenvalue problems
 -------------------
