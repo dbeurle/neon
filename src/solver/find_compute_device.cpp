@@ -1,6 +1,8 @@
 
 #include "solver/find_compute_device.hpp"
 
+#include "io/json.hpp"
+
 #include <algorithm>
 #include <iostream>
 #include <vector>
@@ -11,7 +13,7 @@
 
 /// Check if the CUDA device exists at runtime
 /// \return true if CUDA device exists, false otherwise
-bool neon::has_cuda_device()
+bool neon::has_cuda_device(json const& device_options)
 {
     int device_count;
     cudaGetDeviceCount(&device_count);
@@ -20,121 +22,65 @@ bool neon::has_cuda_device()
 
 #endif
 
-#ifdef ENABLE_OCL
+#ifdef ENABLE_OPENCL
 
-#include "CL/cl.hpp"
+neon::opencl_context::opencl_context(std::size_t platform_index,
+                                     std::size_t device_index,
+                                     cl::Device device)
+    : m_platform_index(platform_index), m_device_index(device_index), m_device(device)
+{
+}
 
-namespace
+auto neon::opencl_context::platform_index() const noexcept -> std::size_t
 {
-/// highest_compute is a comparisor object for finding the device the largest
-/// number of compute units
-struct highest_compute
+    return m_platform_index;
+}
+
+auto neon::opencl_context::device_index() const noexcept -> std::size_t { return m_device_index; }
+
+auto neon::opencl_context::device() const noexcept -> cl::Device const& { return m_device; }
+
+auto neon::find_opencl_device(json const& device_options) -> opencl_context
 {
-    auto operator()(cl::Device const& left, cl::Device const& right) const noexcept -> bool
+    if (device_options.find("device") == end(device_options)
+        || device_options.find("platform") == end(device_options))
     {
-        return left.getInfo<CL_DEVICE_MAX_COMPUTE_UNITS>()
-               < right.getInfo<CL_DEVICE_MAX_COMPUTE_UNITS>();
+        throw std::domain_error("An OpenCL \"device\" and \"platform\" must be specified");
     }
-};
 
-/// highest_memory is a comparisor object for finding the device the largest
-/// amount of memory
-struct highest_memory
-{
-    auto operator()(cl::Device const& left, cl::Device const& right) const noexcept -> bool
+    if (!device_options["device"].is_number() || !device_options["platform"].is_number())
     {
-        return left.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>() < right.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
+        throw std::domain_error("\"device\" and \"platform\" must be integers");
     }
-};
 
-/// Check that the device is valid according to the computational requirements
-/// of the algorithms such as fp64 support and availability.
-static bool is_valid(cl::Device const& device) noexcept
-{
-    return device.getInfo<CL_DEVICE_AVAILABLE>();
-    //&& device.getInfo<CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE>();
-}
+    std::size_t const platform_index = device_options["platform"];
+    std::size_t const device_index = device_options["device"];
 
-/// Remove any invalid platforms by checking their available devices \sa is_valids
-static void remove_invalid(std::vector<cl::Platform>& platforms) noexcept
-{
-    platforms.erase(std::remove_if(begin(platforms),
-                                   end(platforms),
-                                   [](cl::Platform const& platform) {
-                                       // Check each device for this platform
-                                       std::vector<cl::Device> devices;
-                                       platform.getDevices(CL_DEVICE_TYPE_GPU | CL_DEVICE_TYPE_CPU,
-                                                           &devices);
-
-                                       return devices.empty()
-                                              || std::none_of(begin(devices),
-                                                              end(devices),
-                                                              [](cl::Device const& device) {
-                                                                  return is_valid(device);
-                                                              });
-                                   }),
-                    end(platforms));
-}
-
-/// Remove invalid devices \sa is_valid
-static void remove_invalid(std::vector<cl::Device>& devices) noexcept
-{
-    devices.erase(std::remove_if(begin(devices),
-                                 end(devices),
-                                 [](cl::Device const& device) { return !is_valid(device); }),
-                  end(devices));
-}
-}
-
-auto neon::find_opencl_device() -> cl::Device
-{
     // Populate with the available platforms
     std::vector<cl::Platform> platforms;
     cl::Platform::get(&platforms);
 
     if (platforms.empty())
     {
-        throw invalid_device("No OpenCL platforms found.  Do you have an OpenCL driver installed?");
+        throw invalid_device("No OpenCL platforms found.  Do you have an OpenCL driver installed "
+                             "and a working environment?");
     }
 
-    remove_invalid(platforms);
-
-    std::cout << "Number of platforms: " << platforms.size() << "\n";
-
-    std::vector<cl::Device> best_devices;
-
-    for (auto const& platform : platforms)
+    // check the validity of opencl device and platform
+    if (platform_index >= platforms.size())
     {
-        std::string output;
-        platform.getInfo(CL_PLATFORM_NAME, &output);
-
-        std::cout << "Platform " << output << '\n';
-
-        std::vector<cl::Device> devices;
-        platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
-
-        remove_invalid(devices);
-
-        std::cout << "  available devices " << devices.size() << "\n";
-
-        if (devices.empty())
-        {
-            continue;
-        }
-
-        auto const most_compute = std::max_element(begin(devices), end(devices), highest_compute{});
-        if (most_compute != end(devices))
-        {
-            best_devices.push_back(*most_compute);
-        }
-
-        auto const most_memory = std::max_element(begin(devices), end(devices), highest_memory{});
-        if (most_memory != end(devices))
-        {
-            best_devices.push_back(*most_memory);
-        }
+        throw std::domain_error("Platform number " + std::to_string(platform_index)
+                                + " is not valid\n");
     }
-    return best_devices.front();
+
+    std::vector<cl::Device> devices;
+    platforms[platform_index].getDevices(CL_DEVICE_TYPE_ALL, &devices);
+
+    if (device_index >= devices.size())
+    {
+        throw std::domain_error("Device number " + std::to_string(device_index) + " is not valid\n");
+    }
+    return opencl_context(platform_index, device_index, devices[device_index]);
 }
 
 #endif
