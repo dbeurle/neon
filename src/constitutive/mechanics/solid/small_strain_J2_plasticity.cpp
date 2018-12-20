@@ -27,7 +27,7 @@ small_strain_J2_plasticity::small_strain_J2_plasticity(std::shared_ptr<internal_
 
 small_strain_J2_plasticity::~small_strain_J2_plasticity() = default;
 
-void small_strain_J2_plasticity::update_internal_variables(double const time_step_size)
+void small_strain_J2_plasticity::update_internal_variables(double)
 {
     auto const shear_modulus = material.shear_modulus();
 

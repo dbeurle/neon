@@ -25,7 +25,7 @@ public:
                                    json const& material_data,
                                    unit_sphere_quadrature::point const rule);
 
-    virtual void update_internal_variables(double const time_step_size) override;
+    virtual void update_internal_variables(double) override;
 
 protected:
     /**

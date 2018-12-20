@@ -5,7 +5,7 @@
 
 #include "material/micromechanical_elastomer.hpp"
 #include "numeric/tensor_operations.hpp"
-#include "quadrature/unit_sphere_quadrature.hpp"
+#include "quadrature/sphere/unit_sphere_quadrature.hpp"
 #include "io/json_forward.hpp"
 
 namespace neon::mechanics::solid
@@ -35,7 +35,7 @@ public:
 
     virtual ~affine_microsphere() = default;
 
-    void update_internal_variables(double const time_step_size) override;
+    void update_internal_variables(double) override;
 
     [[nodiscard]] material_property const& intrinsic_material() const noexcept override final
     {

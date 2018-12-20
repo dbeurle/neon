@@ -41,7 +41,7 @@ submesh::submesh(json const& material_data,
         json{{"name", "rect"}, {"type", "rectangle"}, {"width", 1.0}, {"height", 1.0}});
 }
 
-void submesh::update_internal_variables(double const time_step_size)
+void submesh::update_internal_variables(double)
 {
     auto& A = variables->get(variable::scalar::cross_sectional_area);
     auto& As1 = variables->get(variable::scalar::shear_area_1);
@@ -85,8 +85,8 @@ std::pair<index_view, matrix const&> submesh::tangent_stiffness(std::int32_t con
 
 matrix const& submesh::bending_stiffness(matrix3x const& configuration, std::int32_t const element) const
 {
-    static thread_local matrix2x B_bending(2, 6 * sf->nodes());
-    static thread_local matrix k_bending(6 * sf->nodes(), 6 * sf->nodes());
+    static thread_local matrix2x B_bending(2, 6 * sf->number_of_nodes());
+    static thread_local matrix k_bending(6 * sf->number_of_nodes(), 6 * sf->number_of_nodes());
 
     B_bending.setZero();
     k_bending.setZero();
@@ -98,7 +98,7 @@ matrix const& submesh::bending_stiffness(matrix3x const& configuration, std::int
 
         auto const j = jacobian_determinant(configuration * dN);
 
-        for (int i = 0; i < sf->nodes(); ++i)
+        for (int i = 0; i < sf->number_of_nodes(); ++i)
         {
             auto const offset = i * 6;
 
@@ -112,8 +112,8 @@ matrix const& submesh::bending_stiffness(matrix3x const& configuration, std::int
 
 matrix const& submesh::shear_stiffness(matrix3x const& configuration, std::int32_t const element) const
 {
-    static thread_local matrix2x B_shear(2, 6 * sf->nodes());
-    static thread_local matrix k_shear(6 * sf->nodes(), 6 * sf->nodes());
+    static thread_local matrix2x B_shear(2, 6 * sf->number_of_nodes());
+    static thread_local matrix k_shear(6 * sf->number_of_nodes(), 6 * sf->number_of_nodes());
 
     B_shear.setZero();
     k_shear.setZero();
@@ -125,7 +125,7 @@ matrix const& submesh::shear_stiffness(matrix3x const& configuration, std::int32
 
         auto const j = jacobian_determinant(configuration * dN);
 
-        for (int i = 0; i < sf->nodes(); ++i)
+        for (int i = 0; i < sf->number_of_nodes(); ++i)
         {
             auto const offset = i * 6;
 
@@ -141,8 +141,8 @@ matrix const& submesh::shear_stiffness(matrix3x const& configuration, std::int32
 
 matrix const& submesh::axial_stiffness(matrix3x const& configuration, std::int32_t const element) const
 {
-    static thread_local vector B_axial(6 * sf->nodes());
-    static thread_local matrix k_axial(6 * sf->nodes(), 6 * sf->nodes());
+    static thread_local vector B_axial(6 * sf->number_of_nodes());
+    static thread_local matrix k_axial(6 * sf->number_of_nodes(), 6 * sf->number_of_nodes());
 
     B_axial.setZero();
     k_axial.setZero();
@@ -154,7 +154,7 @@ matrix const& submesh::axial_stiffness(matrix3x const& configuration, std::int32
 
         auto const j = jacobian_determinant(configuration * dN);
 
-        for (int i = 0; i < sf->nodes(); ++i)
+        for (int i = 0; i < sf->number_of_nodes(); ++i)
         {
             auto const offset = i * 6;
 
@@ -169,8 +169,8 @@ matrix const& submesh::axial_stiffness(matrix3x const& configuration, std::int32
 matrix const& submesh::torsional_stiffness(matrix3x const& configuration,
                                            std::int32_t const element) const
 {
-    static thread_local vector B_torsion(6 * sf->nodes());
-    static thread_local matrix k_torsion(6 * sf->nodes(), 6 * sf->nodes());
+    static thread_local vector B_torsion(6 * sf->number_of_nodes());
+    static thread_local matrix k_torsion(6 * sf->number_of_nodes(), 6 * sf->number_of_nodes());
 
     B_torsion.setZero();
     k_torsion.setZero();
@@ -182,7 +182,7 @@ matrix const& submesh::torsional_stiffness(matrix3x const& configuration,
 
         auto const j = jacobian_determinant(configuration * dN);
 
-        for (int i = 0; i < sf->nodes(); ++i)
+        for (int i = 0; i < sf->number_of_nodes(); ++i)
         {
             auto const offset = i * 6;
 

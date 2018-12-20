@@ -2,7 +2,7 @@
 #pragma once
 
 #include "shape_function.hpp"
-#include "quadrature/pyramid_quadrature.hpp"
+#include "quadrature/pyramid/pyramid_quadrature.hpp"
 
 namespace neon
 {
@@ -14,10 +14,6 @@ class pyramid5 : public volume_interpolation
 {
 public:
     explicit pyramid5(pyramid_quadrature::point const p);
-
-    virtual ~pyramid5() = default;
-
-    int nodes() const override final { return 5; }
 
     double compute_measure(matrix3x const& nodal_coordinates) const;
 
@@ -42,10 +38,6 @@ class pyramid13 : public volume_interpolation
 {
 public:
     explicit pyramid13(pyramid_quadrature::point const p);
-
-    virtual ~pyramid13() = default;
-
-    int nodes() const override final { return 13; }
 
     double compute_measure(matrix3x const& nodal_coordinates) const;
 

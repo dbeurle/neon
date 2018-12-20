@@ -5,7 +5,7 @@
 
 #include "material/micromechanical_elastomer.hpp"
 #include "numeric/tensor_operations.hpp"
-#include "quadrature/unit_sphere_quadrature.hpp"
+#include "quadrature/sphere/unit_sphere_quadrature.hpp"
 
 #include "io/json_forward.hpp"
 
@@ -32,7 +32,7 @@ public:
 
     virtual ~gaussian_affine_microsphere() = default;
 
-    virtual void update_internal_variables(double const time_step_size) override;
+    virtual void update_internal_variables(double) override;
 
     material_property const& intrinsic_material() const override final { return material; }
 

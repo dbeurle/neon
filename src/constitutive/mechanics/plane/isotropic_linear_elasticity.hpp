@@ -23,7 +23,7 @@ public:
     /// Update the required internal variables and tangent matrix at quadrature
     /// points
     /// @param time_step_size Time step size (or load increment if quasi-static)
-    virtual void update_internal_variables(double const time_step_size);
+    virtual void update_internal_variables(double);
 
     /** @return A base class reference to the common material properties */
     [[nodiscard]] virtual material_property const& intrinsic_material() const { return material; }

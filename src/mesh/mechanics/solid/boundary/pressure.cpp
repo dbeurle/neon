@@ -19,7 +19,7 @@ std::pair<index_view, vector> pressure::external_force(std::int64_t const elemen
     // Perform the computation of the external load vector
     matrix f_ext = -pressure
                    * sf->quadrature().integrate(matrix::Zero(X.cols(), 3).eval(),
-                                                [&](auto const& femval, auto const& l) -> matrix {
+                                                [&](auto const& femval, auto) -> matrix {
                                                     auto const& [N, dN] = femval;
 
                                                     matrix32 const jacobian = X * dN;

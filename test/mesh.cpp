@@ -151,7 +151,7 @@ TEST_CASE("Solid submesh test")
     {
         // Check the shape functions and dof definitions are ok
         REQUIRE(fem_submesh.dofs_per_node() == 3);
-        REQUIRE(fem_submesh.shape_function().nodes() == 8);
+        REQUIRE(fem_submesh.shape_function().number_of_nodes() == 8);
     }
     SECTION("Default internal variables test")
     {

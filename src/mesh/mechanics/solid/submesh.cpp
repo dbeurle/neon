@@ -119,9 +119,7 @@ matrix const& submesh::geometric_tangent_stiffness(matrix3x const& x, std::int32
     thread_local matrix k_geo_full(nodes_per_element() * dofs_per_node(),
                                    nodes_per_element() * dofs_per_node());
 
-    k_geo.setZero();
-
-    sf->quadrature().integrate_inplace(k_geo, [&](auto const& N_dN, auto const index) -> matrix {
+    sf->quadrature().integrate_inplace(k_geo.setZero(), [&](auto const& N_dN, auto const index) -> matrix {
         auto const& [N, dN] = N_dN;
 
         matrix3 const J = local_deformation_gradient(dN, x);
@@ -150,7 +148,7 @@ matrix const& submesh::material_tangent_stiffness(matrix3x const& x, std::int32_
     k_mat.setZero();
     B.setZero();
 
-    sf->quadrature().integrate_inplace(k_mat, [&](auto const& N_dN, auto const l) {
+    sf->quadrature().integrate_inplace(k_mat, [&](auto const& N_dN, auto const l) -> matrix {
         auto const& [N, dN] = N_dN;
 
         matrix6 const& D = tangent_operators[view(element, l)];
@@ -164,33 +162,38 @@ matrix const& submesh::material_tangent_stiffness(matrix3x const& x, std::int32_
     return k_mat;
 }
 
-std::pair<index_view, matrix> submesh::consistent_mass(std::int32_t const element) const
+std::pair<index_view, matrix const&> submesh::consistent_mass(std::int32_t const element) const
 {
     auto const& X = coordinates->initial_configuration(local_node_view(element));
 
-    auto const density_0 = cm->intrinsic_material().initial_density();
+    auto const density = cm->intrinsic_material().initial_density();
 
-    auto m = sf->quadrature().integrate(matrix::Zero(nodes_per_element(), nodes_per_element()).eval(),
-                                        [&](auto const& femval, auto const& l) -> matrix {
-                                            auto const& [N, dN] = femval;
+    thread_local matrix local_mass(nodes_per_element(), nodes_per_element());
+    thread_local matrix mass(nodes_per_element() * dofs_per_node(),
+                             nodes_per_element() * dofs_per_node());
 
-                                            matrix3 const J = local_deformation_gradient(dN, X);
+    sf->quadrature().integrate_inplace(local_mass.setZero(), [&](auto const& femval, auto) -> matrix {
+        auto const& [N, dN] = femval;
 
-                                            return N * density_0 * N.transpose() * J.determinant();
-                                        });
-    return {local_dof_view(element), identity_expansion(m, dofs_per_node())};
+        matrix3 const J = local_deformation_gradient(dN, X);
+
+        return density * N * N.transpose() * J.determinant();
+    });
+
+    identity_expansion_inplace<3>(local_mass, mass.setZero());
+
+    return {local_dof_view(element), mass};
 }
 
-std::pair<index_view, vector> submesh::diagonal_mass(std::int32_t const element) const
+std::pair<index_view, vector const&> submesh::diagonal_mass(std::int32_t const element) const
 {
-    auto const& [dofs, consistent_m] = this->consistent_mass(element);
+    thread_local vector diagonal_mass;
 
-    vector diagonal_m(consistent_m.rows());
-    for (auto i = 0; i < consistent_m.rows(); ++i)
-    {
-        diagonal_m(i) = consistent_m.row(i).sum();
-    }
-    return {local_dof_view(element), diagonal_m};
+    auto const& [dof_view, consistent_mass] = this->consistent_mass(element);
+
+    diagonal_mass = consistent_mass.rowwise().sum();
+
+    return {dof_view, diagonal_mass};
 }
 
 void submesh::update_internal_variables(double const time_step_size)

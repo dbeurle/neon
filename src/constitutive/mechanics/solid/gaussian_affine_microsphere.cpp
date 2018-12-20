@@ -20,7 +20,7 @@ gaussian_affine_microsphere::gaussian_affine_microsphere(std::shared_ptr<interna
     variables->commit();
 }
 
-void gaussian_affine_microsphere::update_internal_variables(double const time_step_size)
+void gaussian_affine_microsphere::update_internal_variables(double)
 {
     auto& tangent_operators = variables->get(variable::fourth::tangent_operator);
 

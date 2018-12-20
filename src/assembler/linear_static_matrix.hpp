@@ -15,7 +15,7 @@
 #include <iostream>
 #include <variant>
 
-namespace neon::fem
+namespace neon
 {
 /// fem_linear_static_matrix is responsible for assembling the stiffness matrix,
 /// solving the linear system of equations and dispatching the postprocessor
@@ -93,7 +93,7 @@ void linear_static_matrix<fem_mesh_type>::solve()
 }
 
 template <typename fem_mesh_type>
-void linear_static_matrix<fem_mesh_type>::compute_external_force(double const load_factor)
+void linear_static_matrix<fem_mesh_type>::compute_external_force(double)
 {
     auto const start = std::chrono::steady_clock::now();
 
@@ -152,7 +152,7 @@ void linear_static_matrix<fem_mesh_type>::assemble_stiffness()
             {
                 for (std::int64_t a{0}; a < dofs.size(); a++)
                 {
-                    Kt.coefficient_update(dofs(a), dofs(b), ke(a, b));
+                    Kt.add_to(dofs(a), dofs(b), ke(a, b));
                 }
             }
         });

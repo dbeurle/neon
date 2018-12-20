@@ -3,14 +3,20 @@
 
 #include "dense_matrix.hpp"
 
+/// \defgroup tensor Tensor Operations
+/// Tensor operations are used for computing common tensor operations for
+/// fixed size matrices commonly used in continuum mechanics.
+
 /// \file tensor_operations.hpp
 /// \brief Collection of tensor operations
 
 namespace neon
 {
-/// Performs the tensor dot product on two second order tensors in three dimensions.
+/// Performs the tensor dot product (contraction) on two second order tensors
+/// in three dimensions
+/// \ingroup tensor
 template <class MatrixLeft, class MatrixRight>
-[[nodiscard]] double double_dot(MatrixLeft const& a, MatrixRight const& b)
+[[nodiscard]] auto double_dot(MatrixLeft const& a, MatrixRight const& b) -> double
 {
     return (a.array() * b.array()).sum();
 }
@@ -36,6 +42,7 @@ namespace detail
 [[nodiscard]] inline matrix3 deviatoric(matrix3 const& a) { return a - volumetric(a); }
 }
 
+/// \ingroup tensor
 /// \return the volumetric part of the tensor
 template <typename MatrixExpression>
 [[nodiscard]] auto volumetric(MatrixExpression const& a)
@@ -43,6 +50,7 @@ template <typename MatrixExpression>
     return detail::volumetric(a.eval());
 }
 
+/// \ingroup tensor
 /// \return the deviatoric part of the tensor
 template <typename MatrixExpression>
 [[nodiscard]] auto deviatoric(MatrixExpression const& a)
@@ -55,23 +63,27 @@ template <typename MatrixExpression>
  * \f{align*}{
    \bar{F} &= \det(F)^{-1/3} F
    \f}
- * @return The unimodular decomposition of a second order tensor
+ * \return The unimodular decomposition of a second order tensor
+ * \ingroup tensor
  */
 [[nodiscard]] inline matrix3 unimodular(matrix3 const& a)
 {
     return std::pow(a.determinant(), -1.0 / 3.0) * a;
 }
 
+/// \ingroup tensor
 /// \return The symmetric part of the tensor
 [[nodiscard]] inline matrix2 symmetric(matrix2 const& a) { return 0.5 * (a.transpose() + a); }
 
+/// \ingroup tensor
 /// \return The symmetric part of the tensor
 [[nodiscard]] inline matrix3 symmetric(matrix3 const& a) { return 0.5 * (a.transpose() + a); }
 
 /**
  * I1 returns the coefficient I1, the first stress invariant,
  * which is equal to the trace
- * @return First invariant
+ * \return First invariant
+ * \ingroup tensor
  */
 [[nodiscard]] inline double I1(matrix3 const& a) { return a.trace(); }
 
@@ -79,9 +91,10 @@ template <typename MatrixExpression>
  * I2 returns the coefficient I2, the second stress invariant,
  * which is calculated by:
  * \f{align*}{
- * I_2 &= \frac{1}{2} \left( (tr \tau)^2 - tr(\tau \tau) \right)
+ *    I_2 &= \frac{1}{2} \left( (tr \tau)^2 - tr(\tau \tau) \right)
  * \f}
- * @return Second invariant
+ * \return Second invariant
+ * \ingroup tensor
  */
 [[nodiscard]] inline double I2(matrix3 const& a)
 {
@@ -89,6 +102,7 @@ template <typename MatrixExpression>
 }
 
 /// \return Third invariant, which is the determinant of the tensor
+/// \ingroup tensor
 [[nodiscard]] inline double I3(matrix3 const& a) { return a.determinant(); }
 
 [[nodiscard]] inline matrix identity_expansion(matrix const& H, int const nodal_dofs)
@@ -160,8 +174,8 @@ namespace d2
 }
 }
 
-//! Kinematic description of tensor to voigt notation where off diagonal components
-//! are multiplied by a factor of two (strain type)
+/// Kinematic description of tensor to voigt notation where off diagonal components
+/// are multiplied by a factor of two (strain type)
 namespace kinematic
 {
 namespace detail
@@ -213,8 +227,8 @@ namespace detail
 [[nodiscard]] inline matrix2 from(vector3 const& a)
 {
     // clang-format off
-        return (matrix2() <<     a(0), a(3)/2.0,
-                             a(3)/2.0,     a(1)).finished();
+        return (matrix2() <<       a(0), a(3) / 2.0,
+                             a(3) / 2.0,       a(1)).finished();
     // clang-format on
 }
 
@@ -430,9 +444,10 @@ template <typename matrix_expression>
  * Computes the outer product of two second order tensors in Voigt notation
  * in two dimensions
     \f{align*}{
-        & \mathbf{a} \otimes \mathbf{b} \otimes
+        & \mathbf{a} \otimes \mathbf{b}
     \f}
- * @return fourth order tensor in Voigt notation
+ * \return fourth order tensor in Voigt notation
+ * \ingroup tensor
  */
 [[nodiscard]] inline matrix3 outer_product(vector3 const& a, vector3 const& b)
 {
@@ -442,9 +457,10 @@ template <typename matrix_expression>
 /**
  * Computes the outer product of two second order tensors in two dimensions
     \f{align*}{
-        & \mathbf{a} \otimes \mathbf{b} \otimes
+        & \mathbf{a} \otimes \mathbf{b}
     \f}
- * @return fourth order tensor in Voigt notation
+ * \return fourth order tensor in Voigt notation
+ * \ingroup tensor
  */
 [[nodiscard]] inline matrix3 outer_product(matrix2 const& a, matrix2 const& b)
 {
@@ -452,11 +468,13 @@ template <typename matrix_expression>
 }
 
 /**
- * Computes the outer product of two second order tensors in three dimensions
+ * Computes the outer product of two symmetric second order tensors
+ * in three dimensions
     \f{align*}{
-        & \mathbf{a} \otimes \mathbf{b} \otimes
+        & \mathbf{a} \otimes \mathbf{b}
     \f}
  * \return fourth order tensor in Voigt notation
+ * \ingroup tensor
  */
 [[nodiscard]] inline matrix6 outer_product(matrix3 const& a, matrix3 const& b)
 {
@@ -468,7 +486,8 @@ template <typename matrix_expression>
     \f{align*}{
         & \mathbf{a} \otimes \mathbf{b} \otimes \mathbf{c} \otimes \mathbf{d}
     \f}
-*/
+ * \ingroup tensor
+ */
 [[nodiscard]] inline matrix6 outer_product(vector3 const& a,
                                            vector3 const& b,
                                            vector3 const& c,
@@ -481,6 +500,7 @@ template <typename matrix_expression>
 /// \f{align*}{
 ///    & \mathbf{a} \otimes \mathbf{b}
 /// \f}
+/// \ingroup tensor
 [[nodiscard]] inline matrix6 outer_product(matrix3 const& h) { return outer_product(h, h); }
 
 namespace detail
@@ -511,6 +531,7 @@ namespace detail
       c_{ijkl} &= a_{ijmn} b_{mnkl} \\
       [\mathbf{c}] &= [\mathbf{a}] [\mathbf{b}]
      \f}
+ * \ingroup tensor
  */
 template <typename matrix_expression>
 [[nodiscard]] inline auto mandel_notation(matrix_expression A)

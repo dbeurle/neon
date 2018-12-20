@@ -71,7 +71,7 @@ void natural_frequency_matrix<MeshType>::solve()
 template <typename MeshType>
 void natural_frequency_matrix<MeshType>::assemble_stiffness()
 {
-    fem::compute_sparsity_pattern(K, mesh);
+    compute_sparsity_pattern(K, mesh);
 
     auto const start = std::chrono::steady_clock::now();
 
@@ -79,18 +79,17 @@ void natural_frequency_matrix<MeshType>::assemble_stiffness()
 
     for (auto const& submesh : mesh.meshes())
     {
-        for (std::int64_t element = 0; element < submesh.elements(); ++element)
-        {
+        tbb::parallel_for(std::int64_t{0}, submesh.elements(), [&](auto const element) {
             auto const& [dofs, local_tangent] = submesh.tangent_stiffness(element);
 
             for (std::int64_t a{0}; a < dofs.size(); a++)
             {
                 for (std::int64_t b{0}; b < dofs.size(); b++)
                 {
-                    K.coefficient_update(dofs(a), dofs(b), local_tangent(a, b));
+                    K.add_to(dofs(a), dofs(b), local_tangent(a, b));
                 }
             }
-        }
+        });
     }
 
     auto const end = std::chrono::steady_clock::now();
@@ -104,7 +103,7 @@ void natural_frequency_matrix<MeshType>::assemble_stiffness()
 template <typename MeshType>
 void natural_frequency_matrix<MeshType>::assemble_mass()
 {
-    fem::compute_sparsity_pattern(M, mesh);
+    compute_sparsity_pattern(M, mesh);
 
     auto const start = std::chrono::steady_clock::now();
 
@@ -112,18 +111,17 @@ void natural_frequency_matrix<MeshType>::assemble_mass()
 
     for (auto const& submesh : mesh.meshes())
     {
-        for (std::int64_t element = 0; element < submesh.elements(); ++element)
-        {
+        tbb::parallel_for(std::int64_t{0}, submesh.elements(), [&](auto const element) {
             auto const& [dofs, local_mass] = submesh.consistent_mass(element);
 
             for (std::int64_t a{0}; a < dofs.size(); a++)
             {
                 for (std::int64_t b{0}; b < dofs.size(); b++)
                 {
-                    M.coefficient_update(dofs(a), dofs(b), local_mass(a, b));
+                    M.add_to(dofs(a), dofs(b), local_mass(a, b));
                 }
             }
-        }
+        });
     }
 
     auto const end = std::chrono::steady_clock::now();

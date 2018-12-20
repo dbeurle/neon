@@ -20,7 +20,6 @@ namespace neon::mechanics::solid
              + \frac{1}{2}\lambda_0 (\ln{J})^2 - \mu_0 \ln J
    \f}
  * where \f$ \lambda_0 \f$ and \f$ \mu \f$ are the Lamé parameters.
- *
  */
 class compressible_neohooke : public constitutive_model
 {
@@ -32,7 +31,7 @@ public:
 
     virtual ~compressible_neohooke() = default;
 
-    void update_internal_variables(double const time_step_size) override final;
+    void update_internal_variables(double) override final;
 
     material_property const& intrinsic_material() const override final { return material; };
 

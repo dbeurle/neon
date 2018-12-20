@@ -1,10 +1,11 @@
 
 #pragma once
 
-#include "numerical_quadrature.hpp"
+#include "quadrature/numerical_quadrature.hpp"
 
 namespace neon
 {
+/// \cite Bedrosian1992
 class prism_quadrature : public volume_quadrature
 {
 public:

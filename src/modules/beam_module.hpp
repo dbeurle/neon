@@ -24,7 +24,7 @@ class beam_module : public abstract_module
 {
 public:
     using mesh_type = mechanics::beam::mesh;
-    using matrix_type = fem::linear_static_matrix<mesh_type>;
+    using matrix_type = linear_static_matrix<mesh_type>;
 
 public:
     explicit beam_module(basic_mesh const& mesh,

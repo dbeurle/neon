@@ -2,7 +2,7 @@
 #pragma once
 
 #include "shape_function.hpp"
-#include "quadrature/line_quadrature.hpp"
+#include "quadrature/line/line_quadrature.hpp"
 
 namespace neon
 {
@@ -10,8 +10,6 @@ class hermite : public line_interpolation
 {
 public:
     hermite(line_quadrature::point const p);
-
-    int nodes() const override final { return 2; }
 
     /// \return element length
     double compute_measure(matrix const& nodal_coordinates) const;

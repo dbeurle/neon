@@ -2,7 +2,7 @@
 #pragma once
 
 #include "shape_function.hpp"
-#include "quadrature/quadrilateral_quadrature.hpp"
+#include "quadrature/quadrilateral/quadrilateral_quadrature.hpp"
 
 namespace neon
 {
@@ -11,10 +11,6 @@ class quadrilateral4 : public surface_interpolation
 {
 public:
     explicit quadrilateral4(quadrilateral_quadrature::point const p);
-
-    virtual ~quadrilateral4() = default;
-
-    int nodes() const override final { return 4; }
 
     [[nodiscard]] double compute_measure(matrix const& nodal_coordinates) const;
 
@@ -39,10 +35,6 @@ class quadrilateral8 : public surface_interpolation
 public:
     explicit quadrilateral8(quadrilateral_quadrature::point const p);
 
-    virtual ~quadrilateral8() = default;
-
-    int nodes() const override final { return 8; }
-
     [[nodiscard]] double compute_measure(matrix const& nodal_coordinates) const;
 
 protected:
@@ -54,10 +46,6 @@ class quadrilateral9 : public surface_interpolation
 {
 public:
     explicit quadrilateral9(quadrilateral_quadrature::point const p);
-
-    virtual ~quadrilateral9() = default;
-
-    int nodes() const override final { return 9; }
 
     [[nodiscard]] double compute_measure(matrix const& nodal_coordinates) const;
 

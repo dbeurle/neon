@@ -4,14 +4,14 @@
 namespace neon
 {
 tetrahedron4::tetrahedron4(tetrahedron_quadrature::point const p)
-    : volume_interpolation(std::make_unique<tetrahedron_quadrature>(p))
+    : volume_interpolation(std::make_unique<tetrahedron_quadrature>(p), 4)
 {
     this->precompute_shape_functions();
 }
 
 void tetrahedron4::precompute_shape_functions()
 {
-    numerical_quadrature->evaluate([&](auto const& coordinate) {
+    m_quadrature->evaluate([&](auto const& coordinate) {
         auto const& [l, r, s, t] = coordinate;
 
         vector N(4);
@@ -41,11 +41,11 @@ void tetrahedron4::precompute_shape_functions()
         return std::make_tuple(N, rhea);
     });
 
-    extrapolation = matrix::Ones(nodes(), 1);
+    extrapolation = matrix::Ones(number_of_nodes(), 1);
 }
 
 tetrahedron10::tetrahedron10(tetrahedron_quadrature::point const p)
-    : volume_interpolation(std::make_unique<volume_quadrature>(tetrahedron_quadrature(p)))
+    : volume_interpolation(std::make_unique<volume_quadrature>(tetrahedron_quadrature(p)), 10)
 {
     this->precompute_shape_functions();
 }
@@ -65,10 +65,10 @@ void tetrahedron10::precompute_shape_functions()
                                                                     {8, 0.5, 0.0, 0.5},
                                                                     {9, 0.0, 0.5, 0.0}}};
 
-    matrix N_matrix(numerical_quadrature->points(), nodes());
-    matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 4);
+    matrix N_matrix(m_quadrature->points(), number_of_nodes());
+    matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 4);
 
-    numerical_quadrature->evaluate([&](auto const& coordinate) {
+    m_quadrature->evaluate([&](auto const& coordinate) {
         auto const& [l, r, s, t] = coordinate;
 
         auto const u = 1.0 - r - s - t;
@@ -130,7 +130,7 @@ void tetrahedron10::precompute_shape_functions()
     });
 
     // Compute extrapolation algorithm matrices
-    matrix local_nodal_coordinates = matrix::Ones(nodes(), 4);
+    matrix local_nodal_coordinates = matrix::Ones(number_of_nodes(), 4);
 
     for (auto const& [a, r, s, t] : local_coordinates)
     {

@@ -2,7 +2,7 @@
 #include <catch2/catch.hpp>
 
 #include "interpolations/triangle.hpp"
-#include "quadrature/triangle_quadrature.hpp"
+#include "quadrature/triangle/triangle_quadrature.hpp"
 #include "mesh/basic_submesh.hpp"
 #include "mesh/boundary/boundary.hpp"
 #include "mesh/mechanics/solid/boundary/nonfollower_load.hpp"

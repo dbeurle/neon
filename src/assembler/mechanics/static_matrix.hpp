@@ -243,7 +243,7 @@ void static_matrix<MeshType>::assemble_stiffness()
 {
     if (!is_sparsity_computed)
     {
-        fem::compute_sparsity_pattern(Kt, mesh);
+        compute_sparsity_pattern(Kt, mesh);
         is_sparsity_computed = true;
     }
 
@@ -260,7 +260,7 @@ void static_matrix<MeshType>::assemble_stiffness()
             {
                 for (std::int64_t a{0}; a < dofs.size(); a++)
                 {
-                    Kt.coefficient_update(dofs(a), dofs(b), ke(a, b));
+                    Kt.add_to(dofs(a), dofs(b), ke(a, b));
                 }
             }
         });

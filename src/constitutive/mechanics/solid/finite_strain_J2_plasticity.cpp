@@ -30,7 +30,7 @@ finite_strain_J2_plasticity::finite_strain_J2_plasticity(std::shared_ptr<interna
 
 finite_strain_J2_plasticity::~finite_strain_J2_plasticity() = default;
 
-void finite_strain_J2_plasticity::update_internal_variables(double const time_step_size)
+void finite_strain_J2_plasticity::update_internal_variables(double)
 {
     using namespace ranges;
 

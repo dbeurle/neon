@@ -8,7 +8,7 @@
 namespace neon
 {
 prism6::prism6(prism_quadrature::point const p)
-    : volume_interpolation(std::make_unique<prism_quadrature>(p))
+    : volume_interpolation(std::make_unique<prism_quadrature>(p), 6)
 {
     this->precompute_shape_functions();
 }
@@ -25,10 +25,10 @@ void prism6::precompute_shape_functions()
                                                                 {4, 0.0, 1.0, 1.0},
                                                                 {5, 0.0, 0.0, 1.0}}};
 
-    matrix N_matrix(numerical_quadrature->points(), nodes());
-    matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 4);
+    matrix N_matrix(m_quadrature->points(), number_of_nodes());
+    matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 4);
 
-    numerical_quadrature->evaluate([&](auto const& coordinate) {
+    m_quadrature->evaluate([&](auto const& coordinate) {
         auto const& [l, r, s, xi] = coordinate;
 
         vector N(6);
@@ -74,7 +74,7 @@ void prism6::precompute_shape_functions()
     });
 
     // Compute extrapolation algorithm matrices
-    matrix local_nodal_coordinates = matrix::Ones(nodes(), 4);
+    matrix local_nodal_coordinates = matrix::Ones(number_of_nodes(), 4);
 
     for (auto const& [a, r_a, s_a, xi_a] : local_coordinates)
     {
@@ -87,7 +87,7 @@ void prism6::precompute_shape_functions()
 
 double prism6::compute_measure(matrix3x const& nodal_coordinates) const
 {
-    return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
+    return m_quadrature->integrate(0.0, [&](auto const& femval, auto) {
         auto const& [N, dN] = femval;
 
         matrix3 const Jacobian = nodal_coordinates * dN;
@@ -97,7 +97,7 @@ double prism6::compute_measure(matrix3x const& nodal_coordinates) const
 }
 
 prism15::prism15(prism_quadrature::point const p)
-    : volume_interpolation(std::make_unique<prism_quadrature>(p))
+    : volume_interpolation(std::make_unique<prism_quadrature>(p), 15)
 {
     this->precompute_shape_functions();
 }
@@ -125,10 +125,10 @@ void prism15::precompute_shape_functions()
                                                                  {13, 0.0, 0.5, 1.0},
                                                                  {14, 0.5, 0.0, 1.0}}};
 
-    matrix N_matrix(numerical_quadrature->points(), nodes());
-    matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 4);
+    matrix N_matrix(m_quadrature->points(), number_of_nodes());
+    matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 4);
 
-    numerical_quadrature->evaluate([&](auto const& coordinate) {
+    m_quadrature->evaluate([&](auto const& coordinate) {
         auto const& [l, r, s, xi] = coordinate;
 
         vector N(15);
@@ -208,7 +208,7 @@ void prism15::precompute_shape_functions()
     });
 
     // Compute extrapolation algorithm matrices
-    matrix local_nodal_coordinates = matrix::Ones(nodes(), 4);
+    matrix local_nodal_coordinates = matrix::Ones(number_of_nodes(), 4);
 
     for (auto const& [a, r_a, s_a, xi_a] : local_coordinates)
     {
@@ -221,7 +221,7 @@ void prism15::precompute_shape_functions()
 
 double prism15::compute_measure(matrix3x const& nodal_coordinates) const
 {
-    return numerical_quadrature->integrate(0.0, [&](auto const& femval, auto const& l) {
+    return m_quadrature->integrate(0.0, [&](auto const& femval, auto) {
         auto const& [N, dN] = femval;
 
         matrix3 const jacobian = nodal_coordinates * dN;

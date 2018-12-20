@@ -65,10 +65,10 @@ public:
     [[nodiscard]] std::pair<index_view, vector const&> internal_force(std::int32_t const element) const;
 
     /// \return consistent mass matrix \sa diagonal_mass
-    [[nodiscard]] std::pair<index_view, matrix> consistent_mass(std::int32_t const element) const;
+    [[nodiscard]] std::pair<index_view, matrix const&> consistent_mass(std::int32_t const element) const;
 
     /// \return consistent mass matrix \sa diagonal_mass
-    [[nodiscard]] std::pair<index_view, vector> diagonal_mass(std::int32_t const element) const;
+    [[nodiscard]] std::pair<index_view, vector const&> diagonal_mass(std::int32_t const element) const;
 
     /// Update the internal variables for the mesh group
     /// \sa update_deformation_measures()

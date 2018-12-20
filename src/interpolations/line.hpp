@@ -2,7 +2,7 @@
 #pragma once
 
 #include "shape_function.hpp"
-#include "quadrature/line_quadrature.hpp"
+#include "quadrature/line/line_quadrature.hpp"
 
 namespace neon
 {
@@ -11,10 +11,6 @@ class line2 : public line_interpolation
 {
 public:
     explicit line2(line_quadrature::point const p);
-
-    virtual ~line2() = default;
-
-    int nodes() const override final { return 2; }
 
     /// \return Element length
     double compute_measure(matrix const& nodal_coordinates) const;
@@ -35,10 +31,6 @@ class line3 : public line_interpolation
 {
 public:
     explicit line3(line_quadrature::point const p);
-
-    virtual ~line3() = default;
-
-    int nodes() const override final { return 3; }
 
     /// \return Element length
     double compute_measure(matrix const& nodal_coordinates) const;

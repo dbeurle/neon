@@ -4,7 +4,7 @@
 namespace neon
 {
 hermite::hermite(line_quadrature::point const p)
-    : line_interpolation(std::make_unique<line_quadrature>(p))
+    : line_interpolation(std::make_unique<line_quadrature>(p), 2)
 {
     this->precompute_shape_functions();
 }
@@ -16,10 +16,10 @@ void hermite::precompute_shape_functions()
     // Initialize nodal coordinates array as Xi, Eta, Zeta
     std::array<coordinates_type, 2> constexpr local_coordinates{{{0, -1.0}, {1, 1.0}}};
 
-    matrix N_matrix(numerical_quadrature->points(), nodes());
-    matrix local_quadrature_coordinates = matrix::Ones(numerical_quadrature->points(), 2);
+    matrix N_matrix(m_quadrature->points(), number_of_nodes());
+    matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 2);
 
-    numerical_quadrature->evaluate([&](auto const& coordinates) {
+    m_quadrature->evaluate([&](auto const& coordinates) {
         auto const& [l, xi] = coordinates;
 
         vector N(4);
@@ -45,7 +45,7 @@ void hermite::precompute_shape_functions()
     });
 
     // Compute extrapolation algorithm matrices
-    matrix local_nodal_coordinates = matrix::Ones(nodes(), 2);
+    matrix local_nodal_coordinates = matrix::Ones(number_of_nodes(), 2);
 
     for (auto const& [a, xi_a] : local_coordinates)
     {

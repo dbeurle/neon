@@ -49,7 +49,7 @@ public:
     /// time step increment
     void update_internal_variables(vector const& u, double const time_step_size = 0.0);
 
-    /// Update the internal variables if converged, otherwise revert back
+    /// Update the internal variables if converged, otherwise revert values back
     /// for next attempted load increment
     void save_internal_variables(bool const have_converged);
 

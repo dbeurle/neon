@@ -10,7 +10,7 @@ target_compile_options(neon PUBLIC $<$<CONFIG:RELEASE>:-O3>)
 set_target_properties(neon PROPERTIES CXX_STANDARD 17
                                       CXX_STANDARD_REQUIRED YES
                                       CXX_EXTENSIONS NO
-                           COMPILE_FLAGS "-Wall")
+                           COMPILE_FLAGS "-Wall -Wunused-parameter")
 
 if (ENABLE_LTO)
     include(CheckIPOSupported)
