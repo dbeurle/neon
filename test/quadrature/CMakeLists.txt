@@ -1,5 +1,5 @@
 
-set(test_names line triangle quadrilateral hexahedron prism pyramid sphere tetrahedron)
+set(test_names minimum_degree line triangle quadrilateral hexahedron prism pyramid sphere tetrahedron)
 
 foreach(test_name IN LISTS test_names)
 
