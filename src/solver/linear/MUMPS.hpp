@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "linear_solver.hpp"
 
 // Mumps includes

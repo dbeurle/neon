@@ -1,9 +1,10 @@
 
 #pragma once
 
+/// @file
+
 #include "numeric/dense_matrix.hpp"
 
-/// \file spectral_decomposition.hpp
 /// \brief Spectral decomposition routines for small matrices
 namespace neon
 {

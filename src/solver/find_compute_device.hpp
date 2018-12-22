@@ -1,14 +1,14 @@
 
 #pragma once
 
+/// @file
+
 #include <stdexcept>
 #include "io/json_forward.hpp"
 
 #ifdef ENABLE_OPENCL
 #include "CL/cl.hpp"
 #endif
-
-/// \file find_compute_device.hpp
 
 namespace neon
 {

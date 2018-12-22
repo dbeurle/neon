@@ -1,12 +1,14 @@
 
 #pragma once
 
+/// @file
+
 #include "numeric/tensor_operations.hpp"
 
 namespace neon::mechanics
 {
 /**
- * \fn evaluate_J2_yield_function Evaluates the yield function of the J2 plasticity surface
+ * @func evaluate_J2_yield_function Evaluates the yield function of the J2 plasticity surface
  *
  * \param material The material class providing a shear_modulus and yield_stress method
  * \param von_mises_stress Current von Mises stress
@@ -26,7 +28,7 @@ template <class material_type>
 }
 
 /**
- * \fn algorithm_tangent computes the consistent (algorithmic) tangent material
+ * @func algorithm_tangent computes the consistent (algorithmic) tangent material
  * operator for the J2 plasticity.  This operator has been linearised
  * consistently with the backward Euler method for the radial return method
  * (backward Euler).  This function is valid for the three-dimensional and the
@@ -99,7 +101,7 @@ tangent_operator_type algorithmic_tangent(double const G,
 
 /**
  * This computes the fourth order tensor B in Voigt notation for the plane strain
- * formulation from \cite Neto2011 on page 598.
+ * formulation from @cite Neto2011 on page 598.
  * \f{align*}{
      B_{ijkl} &= \delta_{ik}(\boldsymbol{B}^{e, trial}_{jl}) + \delta_{jk}(\boldsymbol{B}^{e,
  trial}_{il}) \f}
@@ -117,7 +119,7 @@ tangent_operator_type algorithmic_tangent(double const G,
 
 /**
  * This computes the fourth order tensor B in Voigt notation for the three
- * dimensional formulation from \cite Neto2011 on page 598.
+ * dimensional formulation from @cite Neto2011 on page 598.
  */
 [[nodiscard]] inline matrix6 finite_strain_B_operator(matrix3 const& Be_trial)
 {

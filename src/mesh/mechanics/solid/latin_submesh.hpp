@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "mesh/mechanics/solid/submesh.hpp"
 
 namespace neon

@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include <list>
 #include <map>
 #include <memory>

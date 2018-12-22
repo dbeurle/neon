@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "numeric/dense_matrix.hpp"
 #include "numeric/sparse_matrix.hpp"
 

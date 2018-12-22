@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "geometry/profile.hpp"
 #include "io/json_forward.hpp"
 

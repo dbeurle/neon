@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "constitutive/constitutive_model.hpp"
 #include "material/linear_diffusion.hpp"
 

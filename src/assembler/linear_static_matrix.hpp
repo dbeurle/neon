@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "solver/linear/linear_solver.hpp"
 #include "assembler/homogeneous_dirichlet.hpp"
 #include "assembler/sparsity_pattern.hpp"

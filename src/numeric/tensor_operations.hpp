@@ -1,13 +1,14 @@
 
 #pragma once
 
+/// @file
+
 #include "dense_matrix.hpp"
 
 /// \defgroup tensor Tensor Operations
 /// Tensor operations are used for computing common tensor operations for
 /// fixed size matrices commonly used in continuum mechanics.
 
-/// \file tensor_operations.hpp
 /// \brief Collection of tensor operations
 
 namespace neon

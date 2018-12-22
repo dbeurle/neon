@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "svd.hpp"
 
 namespace neon

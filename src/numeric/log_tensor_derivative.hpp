@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "numeric/dense_matrix.hpp"
+/// @file
 
-/// \file log_tensor_derivative.hpp
+#include "numeric/dense_matrix.hpp"
 
 namespace neon
 {

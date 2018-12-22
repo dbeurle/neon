@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "io/json_forward.hpp"
 #include "numeric/index_types.hpp"
 

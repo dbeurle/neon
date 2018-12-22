@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "io/json_forward.hpp"
 #include "solver/eigen/eigen_solver.hpp"
 
