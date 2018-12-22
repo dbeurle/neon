@@ -13,7 +13,7 @@
 namespace neon::mechanics::solid
 {
 /**
- * \ingroup Hyperelastic
+ * \addtogroup Hyperelastic
  * \{
  *
  * affine_microsphere is responsible for computing the Cauchy stress and the

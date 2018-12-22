@@ -11,7 +11,7 @@
 
 namespace neon::mechanics::solid
 {
-/// \ingroup Hyperelastic
+/// \addtogroup Hyperelastic
 /// \{
 ///
 /// gaussian_ageing_affine_microsphere is responsible for computing the Cauchy
