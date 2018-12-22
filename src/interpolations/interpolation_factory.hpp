@@ -6,8 +6,6 @@
 
 #include <memory>
 
-/// \file interpolation_factory.hpp
-
 namespace neon
 {
 /// Factory method for the three dimensional shape functions

@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 // \file minumum_degree.hpp
 
 namespace neon

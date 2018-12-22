@@ -1,7 +1,7 @@
 
 #pragma once
 
-/// \file volumetric_free_energy.hpp
+/// @file
 
 namespace neon
 {

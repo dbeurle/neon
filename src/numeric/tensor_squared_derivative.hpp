@@ -1,9 +1,10 @@
 
 #pragma once
 
+/// @file
+
 #include "numeric/tensor_operations.hpp"
 
-/// \file tensor_squared_derivative.hpp
 /// \brief Routines for computing the derivative of a tensor squared
 
 namespace neon

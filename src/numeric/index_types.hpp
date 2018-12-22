@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include <cstdint>
 #include <utility>
 #include <Eigen/Core>

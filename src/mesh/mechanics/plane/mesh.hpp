@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "mesh/boundary/dirichlet.hpp"
 #include "mesh/mechanics/plane/boundary/nonfollower_load.hpp"
 #include "mesh/mechanics/plane/submesh.hpp"

@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "abstract_module.hpp"
 
 #include "assembler/mechanics/static_matrix.hpp"

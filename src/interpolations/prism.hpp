@@ -1,13 +1,15 @@
 
 #pragma once
 
+/// @file
+
 #include "shape_function.hpp"
 
 namespace neon
 {
 /// prism6 is responsible for computing the shape functions for an prism or
 /// wedge shaped six noded element.
-/// The shape functions and nodal orderings are taken from \cite Hughes2012
+/// The shape functions and nodal orderings are taken from @cite Hughes2012
 /// with a volume of the unit element of one
 /**
  * Initialise the shape functions to the following polynomials
@@ -32,7 +34,7 @@ public:
 
 /// prism15 is responsible for computing the shape functions for an prism or
 /// wedge shaped fifteen noded element.
-/// The shape functions and nodal orderings are taken from \cite Hughes2012
+/// The shape functions and nodal orderings are taken from @cite Hughes2012
 /// with a volume of the unit element of one
 /**
  * Initialise the shape functions to the following:

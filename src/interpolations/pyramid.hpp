@@ -1,13 +1,15 @@
 
 #pragma once
 
+/// @file
+
 #include "shape_function.hpp"
 
 namespace neon
 {
 /// pyramid5 is responsible for computing the shape functions for an prism or
 /// wedge shaped six noded element.
-/// The shape functions and nodal orderings are taken from \cite Bedrosian1992
+/// The shape functions and nodal orderings are taken from @cite Bedrosian1992
 /// with a volume of the unit element of one
 /**
  * Initialise the shape functions to the following polynomials
@@ -31,7 +33,7 @@ public:
 
 /// pyramid13 is responsible for computing the shape functions for a pyramid
 /// twelve noded element. The shape functions and nodal orderings are taken from
-/// \cite Bedrosian1992 with a volume of the unit element of one
+/// @cite Bedrosian1992 with a volume of the unit element of one
 class pyramid13 : public volume_interpolation
 {
 public:

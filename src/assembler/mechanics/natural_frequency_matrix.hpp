@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "numeric/sparse_matrix.hpp"
 
 #include "assembler/sparsity_pattern.hpp"

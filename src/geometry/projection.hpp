@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "numeric/dense_matrix.hpp"
+/// @file
 
-/// \file projection.hpp
+#include "numeric/dense_matrix.hpp"
 
 namespace neon::geometry
 {

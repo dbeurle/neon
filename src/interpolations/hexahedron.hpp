@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "shape_function.hpp"
 
 namespace neon
@@ -33,7 +35,7 @@ public:
 
 /// hexahedron20 is responsible for computing the quadratic shape functions for an
 /// twenty noded hexahedron element.  Nodes are only defined on the midside
-/// and corner nodes.  The node ordering is from \cite Hughes2012.
+/// and corner nodes.  The node ordering is from @cite Hughes2012.
 class hexahedron20 : public volume_interpolation
 {
 public:
@@ -46,7 +48,7 @@ public:
 
 /// hexahedron27 is responsible for computing the quadratic shape functions for an
 /// twenty-nine noded hexahedron element.  Nodes are also on the faces and the centre
-/// of the reference cube.  The node ordering is from \cite Hughes2012.
+/// of the reference cube.  The node ordering is from @cite Hughes2012.
 class hexahedron27 : public volume_interpolation
 {
 public:

@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "solver/eigen/eigen_solver.hpp"
 
 namespace neon

@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "quadrature/numerical_quadrature.hpp"
 #include "numeric/dense_matrix.hpp"
 

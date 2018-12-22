@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "heat_flux.hpp"
 
 namespace neon::diffusion::boundary

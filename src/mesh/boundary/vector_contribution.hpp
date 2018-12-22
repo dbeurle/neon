@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "boundary_condition.hpp"
 
 #include "numeric/dense_matrix.hpp"

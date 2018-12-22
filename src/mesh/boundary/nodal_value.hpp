@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "mesh/boundary/boundary_condition.hpp"
 #include "numeric/index_types.hpp"
 

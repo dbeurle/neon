@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 // Do not parallelise the GEMM routines as this is called by multiple threads
 #ifndef NEON_PARALLEL_EIGEN_SOLVERS
 #define EIGEN_DONT_PARALLELIZE
@@ -8,8 +10,6 @@
 
 #include <Eigen/Core>
 #include <Eigen/LU>
-
-/// \file dense_matrix.hpp
 
 namespace neon
 {
