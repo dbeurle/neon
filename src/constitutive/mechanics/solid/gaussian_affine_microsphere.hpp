@@ -13,7 +13,7 @@
 
 namespace neon::mechanics::solid
 {
-/// \ingroup Hyperelastic
+/// \addtogroup Hyperelastic
 /// \{
 /// gaussian_affine_microsphere is responsible for computing the Cauchy stress and the
 /// material tangent in implicit methods.  The affine microsphere model @cite Miehe2004

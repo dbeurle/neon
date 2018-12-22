@@ -8,7 +8,7 @@
 namespace neon::mechanics::solid
 {
 /**
- * \ingroup Hyperelastic
+ * \addtogroup Hyperelastic
  * \{
  *
  * nonaffine_microsphere model computes the Kirchhoff stress and the material

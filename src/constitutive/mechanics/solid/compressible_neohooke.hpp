@@ -10,7 +10,7 @@
 namespace neon::mechanics::solid
 {
 /**
- * \ingroup Hyperelastic
+ * \addtogroup Hyperelastic
  * \{
  *
  * The compressible_neohooke material is a hyperelastic material model that
