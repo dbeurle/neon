@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "assembler/sparsity_pattern.hpp"
 #include "numeric/float_compare.hpp"
 #include "exceptions.hpp"

@@ -1,11 +1,11 @@
 
 #pragma once
 
+/// @file
+
 #include <type_traits>
 
 #include <boost/math/special_functions/relative_difference.hpp>
-
-/// \file float_compare.hpp
 
 /// neon namespace
 namespace neon

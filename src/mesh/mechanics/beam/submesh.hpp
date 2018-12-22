@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "mesh/basic_submesh.hpp"
 
 #include "mesh/material_coordinates.hpp"
@@ -26,7 +28,7 @@ class material_coordinates;
 namespace neon::mechanics::beam
 {
 /// submesh is responsible for computing the linear stiffness matrices
-/// for the three-dimensional small strain beam theory \cite Hughes2012.
+/// for the three-dimensional small strain beam theory @cite Hughes2012.
 class submesh : public basic_submesh //: public detail::submesh<beam::submesh>
 {
 public:

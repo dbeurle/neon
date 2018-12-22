@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include <string>
 
 // A cube mesh in the input mesh format

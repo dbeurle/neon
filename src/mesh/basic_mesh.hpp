@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "mesh/nodal_coordinates.hpp"
 #include "mesh/basic_submesh.hpp"
 

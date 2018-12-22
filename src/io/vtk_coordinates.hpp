@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "vtkDoubleArray.h"
 #include "vtkPoints.h"
 #include "vtkSmartPointer.h"

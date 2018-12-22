@@ -1,11 +1,11 @@
 
 #pragma once
 
+/// @file
+
 #include "numeric/dense_matrix.hpp"
 
 #include "constitutive/voigt_dimension.hpp"
-
-/// \file gradient_operator.hpp
 
 namespace neon
 {

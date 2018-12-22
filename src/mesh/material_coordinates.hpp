@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "mesh/nodal_coordinates.hpp"
 
 namespace neon

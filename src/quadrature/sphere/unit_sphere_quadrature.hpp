@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "quadrature/numerical_quadrature.hpp"
 
 namespace neon
@@ -9,7 +11,7 @@ namespace neon
 class unit_sphere_quadrature : public volume_quadrature
 {
 public:
-    /// Quadrature nomenclature from \cite Ehret2010
+    /// Quadrature nomenclature from @cite Ehret2010
     enum class point { BO21, BO33, BO61, FM900 };
 
 public:

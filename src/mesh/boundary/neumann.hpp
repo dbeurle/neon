@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "vector_contribution.hpp"
 
 #include "math/jacobian_determinant.hpp"

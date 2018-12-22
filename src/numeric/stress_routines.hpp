@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "numeric/tensor_operations.hpp"
+/// @file
 
-/// \file stress_routines.hpp
+#include "numeric/tensor_operations.hpp"
 
 namespace neon::mechanics
 {

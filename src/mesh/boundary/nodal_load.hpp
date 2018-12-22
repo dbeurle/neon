@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "mesh/boundary/boundary.hpp"
 
 namespace neon

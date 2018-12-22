@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "constitutive/constitutive_model.hpp"
 
 #include <material/isotropic_elastic_property.hpp>
@@ -9,7 +11,6 @@ namespace neon::mechanics::solid
 {
 /**
  * \ingroup Hyperelastic
- * \addtogroup Hyperelastic
  * \{
  *
  * The compressible_neohooke material is a hyperelastic material model that

@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include <variant>
+/// @file
 
-/// \file variable_types.hpp
+#include <variant>
 
 /// Define namespace for variable enumeration types
 namespace neon::variable

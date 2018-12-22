@@ -1,10 +1,10 @@
 
 #pragma once
 
+/// @file
+
 #include <cstdint>
 #include <stdexcept>
-
-/// \file interval.hpp
 
 namespace neon
 {

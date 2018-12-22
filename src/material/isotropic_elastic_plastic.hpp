@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "isotropic_elastic_property.hpp"
 
 namespace neon

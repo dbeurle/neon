@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include <type_traits>
+/// @file
 
-/// \file euler_integration.hpp
+#include <type_traits>
 
 namespace neon
 {

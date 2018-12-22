@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "io/json.hpp"
 
 namespace neon
