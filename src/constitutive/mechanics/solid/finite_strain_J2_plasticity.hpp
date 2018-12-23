@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "small_strain_J2_plasticity.hpp"
 
 #include "numeric/dense_matrix.hpp"
@@ -13,7 +15,7 @@ namespace neon::mechanics::solid
 /**
  * finite_strain_J2_plasticity is a material model for the large strain deformation
  * according to the J2 yield theory.  This implementation follows the steps
- * outlined in \cite Neto2011 on pages 598.  This does not use the principal
+ * outlined in @cite Neto2011 on pages 598.  This does not use the principal
  * stress formulation in order to reuse methods from small_strain_J2_plasticity.
  *
  * This class is responsible for computation of the Cauchy stress and the material

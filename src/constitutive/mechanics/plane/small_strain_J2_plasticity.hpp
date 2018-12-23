@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "isotropic_linear_elasticity.hpp"
 
 #include "numeric/tensor_operations.hpp"
@@ -13,7 +15,7 @@ namespace neon::mechanics::plane
  * small_strain_J2_plasticity is responsible for computing the small strain J2 plasticity
  * stress and tangent operator matrix for each internal variable at the quadrature
  * points.  The method can be found for small strain plasticity using a combination
- * of \cite Neto2011 and \cite Belytschko2013nonlinear
+ * of @cite Neto2011 and @cite Belytschko2013nonlinear
  */
 class small_strain_J2_plasticity : public isotropic_linear_elasticity
 {

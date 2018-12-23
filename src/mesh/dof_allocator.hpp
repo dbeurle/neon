@@ -1,14 +1,14 @@
 
 #pragma once
 
+/// @file
+
 #include "numeric/index_types.hpp"
 #include "math/view.hpp"
 
 #include <algorithm>
 #include <set>
 #include <vector>
-
-/// \file dof_allocator.hpp
 
 namespace neon
 {

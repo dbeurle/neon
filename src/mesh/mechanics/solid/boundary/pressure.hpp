@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "traction.hpp"
 
 namespace neon::mechanics::solid

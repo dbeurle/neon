@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "mesh/diffusion/reaction/submesh.hpp"
 #include "mesh/diffusion/reaction/boundary/surface_boundary.hpp"
 #include "mesh/boundary/dirichlet.hpp"

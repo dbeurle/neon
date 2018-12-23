@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "mesh/element_topology.hpp"
 #include "numeric/index_types.hpp"
 
@@ -9,7 +11,7 @@
 namespace neon
 {
 /// Convert the nodal connectivities from the gmsh node ordering to the
-/// reference ordering in \cite Hughes2012
+/// reference ordering in @cite Hughes2012
 ///
 /// \param [in, out] nodal_connectivity Local element nodal connectivity data
 /// \param [in] topology The element topology

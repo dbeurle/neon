@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "material_property.hpp"
 
 namespace neon

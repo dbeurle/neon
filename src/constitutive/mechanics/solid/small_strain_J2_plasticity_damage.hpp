@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "small_strain_J2_plasticity.hpp"
 
 #include "numeric/tensor_operations.hpp"
@@ -12,9 +14,9 @@ namespace neon::mechanics::solid
 /// small_strain_J2_plasticity_damage is responsible for computing the
 /// constitutive model of a standard ductile Chaboche damage model without
 /// microdefects closure effects. Theoritical details can be found in
-/// \cite Neto2011 (Lemaitre’s elastoplastic damage theory),
-/// \cite Ladeveze1999 (chapter 2) and
-/// \cite Lemaitre2005 (Isotropic Damage without Microdefects Closure).
+/// @cite Neto2011 (Lemaitre’s elastoplastic damage theory),
+/// @cite Ladeveze1999 (chapter 2) and
+/// @cite Lemaitre2005 (Isotropic Damage without Microdefects Closure).
 class small_strain_J2_plasticity_damage : public small_strain_J2_plasticity
 {
 public:

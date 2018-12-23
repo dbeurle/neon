@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 namespace neon
 {
 namespace mechanics

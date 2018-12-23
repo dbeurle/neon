@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "constitutive/constitutive_model.hpp"
 
 #include "numeric/dense_matrix.hpp"
@@ -11,7 +13,7 @@ namespace neon::mechanics::solid
 {
 /**
  * isotropic_linear_elasticity is responsible for compute the moduli and the
- * stress for the three-dimensional theory.  See \cite Hughes2012 for the
+ * stress for the three-dimensional theory.  See @cite Hughes2012 for the
  * theoretical developments.
  */
 class isotropic_linear_elasticity : public constitutive_model

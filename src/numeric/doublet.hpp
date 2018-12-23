@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include <type_traits>
+/// @file
 
-/// \file doublet.hpp
+#include <type_traits>
 
 namespace neon
 {

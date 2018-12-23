@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include <cstdint>
 
 namespace neon

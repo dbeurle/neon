@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "static_matrix.hpp"
 
 namespace neon::mechanics

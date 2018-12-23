@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #ifdef ENABLE_OPENCL
 
 #include "solver/linear/conjugate_gradient_ocl.hpp"

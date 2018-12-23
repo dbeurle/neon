@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "numeric/dense_matrix.hpp"
 #include "solver/time_step_control.hpp"
 

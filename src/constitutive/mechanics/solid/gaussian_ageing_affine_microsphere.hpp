@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "constitutive/mechanics/solid/gaussian_affine_microsphere.hpp"
 
 #include "numeric/dense_matrix.hpp"
@@ -9,7 +11,6 @@
 
 namespace neon::mechanics::solid
 {
-/// \ingroup Hyperelastic
 /// \addtogroup Hyperelastic
 /// \{
 ///

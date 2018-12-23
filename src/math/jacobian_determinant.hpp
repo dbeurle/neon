@@ -1,10 +1,10 @@
 
 #pragma once
 
+/// @file
+
 #include "numeric/dense_matrix.hpp"
 #include <Eigen/Geometry>
-
-/// \file jacobian_determinant.hpp
 
 namespace neon
 {
@@ -50,7 +50,7 @@ template <typename matrix_type>
  *      \end{bmatrix}
  * \f}
  * This is useful when the surface is described by a two dimensional
- * element but there are only three dimensional coordinates \cite Anton1998.
+ * element but there are only three dimensional coordinates @cite Anton1998.
  * \ingroup tensor
  */
 template <typename matrix_expression>

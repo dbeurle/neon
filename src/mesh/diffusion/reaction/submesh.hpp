@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "mesh/diffusion/submesh.hpp"
 
 #include "constitutive/constitutive_model.hpp"

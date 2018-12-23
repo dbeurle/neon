@@ -1,11 +1,13 @@
 
 #pragma once
 
+/// @file
+
 #include "quadrature/numerical_quadrature.hpp"
 
 namespace neon
 {
-/// \cite Bedrosian1992
+/// @cite Bedrosian1992
 class pyramid_quadrature : public volume_quadrature
 {
 public:

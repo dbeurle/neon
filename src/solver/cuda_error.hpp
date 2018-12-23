@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #ifdef ENABLE_CUDA
 
 #include "exceptions.hpp"

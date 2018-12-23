@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "numeric/dense_matrix.hpp"
+/// @file
 
-/// \file node_averaged_variable.hpp
+#include "numeric/dense_matrix.hpp"
 
 namespace neon
 {

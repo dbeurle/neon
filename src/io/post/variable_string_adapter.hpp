@@ -1,11 +1,11 @@
 
 #pragma once
 
+/// @file
+
 #include "constitutive/variable_types.hpp"
 
 #include <string>
-
-/// \file variable_string_adapter.hpp
 
 namespace neon::variable
 {

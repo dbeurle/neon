@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #ifdef ENABLE_OPENCL
 
 #include "linear_solver.hpp"

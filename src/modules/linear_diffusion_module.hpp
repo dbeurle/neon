@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "abstract_module.hpp"
 
 #include "assembler/diffusion/dynamic_matrix.hpp"

@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "numeric/index_types.hpp"
 #include "numeric/dense_matrix.hpp"
 #include "mesh/element_topology.hpp"

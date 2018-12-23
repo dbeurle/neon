@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include <cstdint>
+/// @file
 
-/// \file trapezoidal.hpp
+#include <cstdint>
 
 namespace neon
 {
