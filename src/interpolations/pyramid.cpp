@@ -31,7 +31,7 @@ void pyramid5::precompute_shape_functions()
         auto const& [l, u1, u2, u3] = coordinate;
 
         vector N(5);
-        matrix rhea(5, 3);
+        matrix dN(5, 3);
 
         N(0) = -(u1 - u3 + 1) * (u2 - u3 + 1) / (4 * (u3 - 1));
         N(1) = (u1 + u3 - 1) * (u2 - u3 + 1) / (4 * (u3 - 1));
@@ -39,23 +39,23 @@ void pyramid5::precompute_shape_functions()
         N(3) = (u1 - u3 + 1) * (u2 + u3 - 1) / (4 * (u3 - 1));
         N(4) = u3;
 
-        rhea(0, 0) = -(u2 - u3 + 1) / (4 * u3 - 4);
-        rhea(1, 0) = (u2 - u3 + 1) / (4 * (u3 - 1));
-        rhea(2, 0) = -(u2 + u3 - 1) / (4 * u3 - 4);
-        rhea(3, 0) = (u2 + u3 - 1) / (4 * (u3 - 1));
-        rhea(4, 0) = 0;
+        dN(0, 0) = -(u2 - u3 + 1) / (4 * u3 - 4);
+        dN(1, 0) = (u2 - u3 + 1) / (4 * (u3 - 1));
+        dN(2, 0) = -(u2 + u3 - 1) / (4 * u3 - 4);
+        dN(3, 0) = (u2 + u3 - 1) / (4 * (u3 - 1));
+        dN(4, 0) = 0;
 
-        rhea(0, 1) = -(u1 - u3 + 1) / (4 * u3 - 4);
-        rhea(1, 1) = (u1 + u3 - 1) / (4 * (u3 - 1));
-        rhea(2, 1) = -(u1 + u3 - 1) / (4 * u3 - 4);
-        rhea(3, 1) = (u1 - u3 + 1) / (4 * (u3 - 1));
-        rhea(4, 1) = 0;
+        dN(0, 1) = -(u1 - u3 + 1) / (4 * u3 - 4);
+        dN(1, 1) = (u1 + u3 - 1) / (4 * (u3 - 1));
+        dN(2, 1) = -(u1 + u3 - 1) / (4 * u3 - 4);
+        dN(3, 1) = (u1 - u3 + 1) / (4 * (u3 - 1));
+        dN(4, 1) = 0;
 
-        rhea(0, 2) = (u1 * u2 - std::pow(u3, 2) + 2 * u3 - 1) / (4 * (std::pow(u3, 2) - 2 * u3 + 1));
-        rhea(1, 2) = -(u1 * u2 + std::pow(u3, 2) - 2 * u3 + 1) / (4 * std::pow(u3, 2) - 8 * u3 + 4);
-        rhea(2, 2) = (u1 * u2 - std::pow(u3, 2) + 2 * u3 - 1) / (4 * (std::pow(u3, 2) - 2 * u3 + 1));
-        rhea(3, 2) = -(u1 * u2 + std::pow(u3, 2) - 2 * u3 + 1) / (4 * std::pow(u3, 2) - 8 * u3 + 4);
-        rhea(4, 2) = 1;
+        dN(0, 2) = (u1 * u2 - std::pow(u3, 2) + 2 * u3 - 1) / (4 * (std::pow(u3, 2) - 2 * u3 + 1));
+        dN(1, 2) = -(u1 * u2 + std::pow(u3, 2) - 2 * u3 + 1) / (4 * std::pow(u3, 2) - 8 * u3 + 4);
+        dN(2, 2) = (u1 * u2 - std::pow(u3, 2) + 2 * u3 - 1) / (4 * (std::pow(u3, 2) - 2 * u3 + 1));
+        dN(3, 2) = -(u1 * u2 + std::pow(u3, 2) - 2 * u3 + 1) / (4 * std::pow(u3, 2) - 8 * u3 + 4);
+        dN(4, 2) = 1;
 
         local_quadrature_coordinates(l, 0) = u1;
         local_quadrature_coordinates(l, 1) = u2;
@@ -63,7 +63,7 @@ void pyramid5::precompute_shape_functions()
 
         N_matrix.row(l) = N;
 
-        return std::make_tuple(N, rhea);
+        return std::make_tuple(N, dN);
     });
 
     // Compute extrapolation algorithm matrices
@@ -123,7 +123,7 @@ void pyramid13::precompute_shape_functions()
         auto const& [l, u1, u2, u3] = coordinate;
 
         vector N(13);
-        matrix rhea(13, 3);
+        matrix dN(13, 3);
 
         N(0) = -(u1 + u2 - 1) * (u1 - u3 + 1) * (u2 - u3 + 1) / (4 * (u3 - 1));
         N(1) = (u1 - u3 + 1) * (u1 + u3 - 1) * (u2 - u3 + 1) / (2 * (u3 - 1));
@@ -139,92 +139,91 @@ void pyramid13::precompute_shape_functions()
         N(11) = u3 * (u1 - u3 + 1) * (u2 + u3 - 1) / (u3 - 1);
         N(12) = u3 * (2 * u3 - 1);
 
-        rhea(0, 0) = -(2 * u1 * u2 - 2 * u1 * u3 + 2 * u1 + std::pow(u2, 2) - 2 * u2 * u3 + u2
-                       + std::pow(u3, 2) - u3)
-                     / (4 * u3 - 4);
-        rhea(1, 0) = u1 * (u2 - u3 + 1) / (u3 - 1);
-        rhea(2, 0) = -(2 * u1 * u2 - 2 * u1 * u3 + 2 * u1 - std::pow(u2, 2) + 2 * u2 * u3 - u2
-                       - std::pow(u3, 2) + u3)
-                     / (4 * u3 - 4);
-        rhea(3, 0) = -(u2 - u3 + 1) * (u2 + u3 - 1) / (2 * u3 - 2);
-        rhea(4, 0) = (2 * u1 * u2 + 2 * u1 * u3 - 2 * u1 + std::pow(u2, 2) + 2 * u2 * u3 - u2
-                      + std::pow(u3, 2) - u3)
-                     / (4 * (u3 - 1));
-        rhea(5, 0) = -u1 * (u2 + u3 - 1) / (u3 - 1);
-        rhea(6, 0) = (2 * u1 * u2 + 2 * u1 * u3 - 2 * u1 - std::pow(u2, 2) - 2 * u2 * u3 + u2
-                      - std::pow(u3, 2) + u3)
-                     / (4 * (u3 - 1));
-        rhea(7, 0) = (u2 - u3 + 1) * (u2 + u3 - 1) / (2 * (u3 - 1));
-        rhea(8, 0) = -u3 * (u2 - u3 + 1) / (u3 - 1);
-        rhea(9, 0) = u3 * (u2 - u3 + 1) / (u3 - 1);
-        rhea(10, 0) = -u3 * (u2 + u3 - 1) / (u3 - 1);
-        rhea(11, 0) = u3 * (u2 + u3 - 1) / (u3 - 1);
-        rhea(12, 0) = 0.0;
+        dN(0, 0) = -(2 * u1 * u2 - 2 * u1 * u3 + 2 * u1 + std::pow(u2, 2) - 2 * u2 * u3 + u2
+                     + std::pow(u3, 2) - u3)
+                   / (4 * u3 - 4);
+        dN(1, 0) = u1 * (u2 - u3 + 1) / (u3 - 1);
+        dN(2, 0) = -(2 * u1 * u2 - 2 * u1 * u3 + 2 * u1 - std::pow(u2, 2) + 2 * u2 * u3 - u2
+                     - std::pow(u3, 2) + u3)
+                   / (4 * u3 - 4);
+        dN(3, 0) = -(u2 - u3 + 1) * (u2 + u3 - 1) / (2 * u3 - 2);
+        dN(4, 0) = (2 * u1 * u2 + 2 * u1 * u3 - 2 * u1 + std::pow(u2, 2) + 2 * u2 * u3 - u2
+                    + std::pow(u3, 2) - u3)
+                   / (4 * (u3 - 1));
+        dN(5, 0) = -u1 * (u2 + u3 - 1) / (u3 - 1);
+        dN(6, 0) = (2 * u1 * u2 + 2 * u1 * u3 - 2 * u1 - std::pow(u2, 2) - 2 * u2 * u3 + u2
+                    - std::pow(u3, 2) + u3)
+                   / (4 * (u3 - 1));
+        dN(7, 0) = (u2 - u3 + 1) * (u2 + u3 - 1) / (2 * (u3 - 1));
+        dN(8, 0) = -u3 * (u2 - u3 + 1) / (u3 - 1);
+        dN(9, 0) = u3 * (u2 - u3 + 1) / (u3 - 1);
+        dN(10, 0) = -u3 * (u2 + u3 - 1) / (u3 - 1);
+        dN(11, 0) = u3 * (u2 + u3 - 1) / (u3 - 1);
+        dN(12, 0) = 0.0;
 
-        rhea(0, 1) = -(std::pow(u1, 2) + 2 * u1 * u2 - 2 * u1 * u3 + u1 - 2 * u2 * u3 + 2 * u2
-                       + std::pow(u3, 2) - u3)
-                     / (4 * u3 - 4);
-        rhea(1, 1) = (u1 - u3 + 1) * (u1 + u3 - 1) / (2 * (u3 - 1));
-        rhea(2, 1) = -(std::pow(u1, 2) - 2 * u1 * u2 + 2 * u1 * u3 - u1 - 2 * u2 * u3 + 2 * u2
-                       + std::pow(u3, 2) - u3)
-                     / (4 * u3 - 4);
-        rhea(3, 1) = -u2 * (u1 + u3 - 1) / (u3 - 1);
-        rhea(4, 1) = (std::pow(u1, 2) + 2 * u1 * u2 + 2 * u1 * u3 - u1 + 2 * u2 * u3 - 2 * u2
-                      + std::pow(u3, 2) - u3)
-                     / (4 * (u3 - 1));
-        rhea(5, 1) = -(u1 - u3 + 1) * (u1 + u3 - 1) / (2 * u3 - 2);
-        rhea(6, 1) = (std::pow(u1, 2) - 2 * u1 * u2 - 2 * u1 * u3 + u1 + 2 * u2 * u3 - 2 * u2
-                      + std::pow(u3, 2) - u3)
-                     / (4 * (u3 - 1));
-        rhea(7, 1) = u2 * (u1 - u3 + 1) / (u3 - 1);
-        rhea(8, 1) = -u3 * (u1 - u3 + 1) / (u3 - 1);
-        rhea(9, 1) = u3 * (u1 + u3 - 1) / (u3 - 1);
-        rhea(10, 1) = -u3 * (u1 + u3 - 1) / (u3 - 1);
-        rhea(11, 1) = u3 * (u1 - u3 + 1) / (u3 - 1);
-        rhea(12, 1) = 0.0;
+        dN(0, 1) = -(std::pow(u1, 2) + 2 * u1 * u2 - 2 * u1 * u3 + u1 - 2 * u2 * u3 + 2 * u2
+                     + std::pow(u3, 2) - u3)
+                   / (4 * u3 - 4);
+        dN(1, 1) = (u1 - u3 + 1) * (u1 + u3 - 1) / (2 * (u3 - 1));
+        dN(2, 1) = -(std::pow(u1, 2) - 2 * u1 * u2 + 2 * u1 * u3 - u1 - 2 * u2 * u3 + 2 * u2
+                     + std::pow(u3, 2) - u3)
+                   / (4 * u3 - 4);
+        dN(3, 1) = -u2 * (u1 + u3 - 1) / (u3 - 1);
+        dN(4, 1) = (std::pow(u1, 2) + 2 * u1 * u2 + 2 * u1 * u3 - u1 + 2 * u2 * u3 - 2 * u2
+                    + std::pow(u3, 2) - u3)
+                   / (4 * (u3 - 1));
+        dN(5, 1) = -(u1 - u3 + 1) * (u1 + u3 - 1) / (2 * u3 - 2);
+        dN(6, 1) = (std::pow(u1, 2) - 2 * u1 * u2 - 2 * u1 * u3 + u1 + 2 * u2 * u3 - 2 * u2
+                    + std::pow(u3, 2) - u3)
+                   / (4 * (u3 - 1));
+        dN(7, 1) = u2 * (u1 - u3 + 1) / (u3 - 1);
+        dN(8, 1) = -u3 * (u1 - u3 + 1) / (u3 - 1);
+        dN(9, 1) = u3 * (u1 + u3 - 1) / (u3 - 1);
+        dN(10, 1) = -u3 * (u1 + u3 - 1) / (u3 - 1);
+        dN(11, 1) = u3 * (u1 - u3 + 1) / (u3 - 1);
+        dN(12, 1) = 0.0;
 
-        rhea(0, 2) = -(u1 + u2 - 1) * (-u1 * u2 * u3 + u1 * u2 * (u3 - 1) + std::pow(u3 - 1, 2))
-                     / (4 * std::pow(u3 - 1, 2));
-        rhea(1, 2) = (-std::pow(u1, 2) * u2 / 2 - u2 * std::pow(u3, 2) / 2 + u2 * u3 - u2 / 2
-                      + std::pow(u3, 3) - 3 * std::pow(u3, 2) + 3 * u3 - 1)
-                     / (std::pow(u3, 2) - 2 * u3 + 1);
-        rhea(2, 2) = (u1 - u2 + 1) * (u1 * u2 * u3 - u1 * u2 * (u3 - 1) + std::pow(u3 - 1, 2))
-                     / (4 * std::pow(u3 - 1, 2));
-        rhea(3, 2) = (u1 * std::pow(u2, 2) + u1 * std::pow(u3, 2) - 2 * u1 * u3 + u1
-                      + 2 * std::pow(u3, 3) - 6 * std::pow(u3, 2) + 6 * u3 - 2)
-                     / (2 * (std::pow(u3, 2) - 2 * u3 + 1));
-        rhea(4, 2) = (u1 + u2 + 1) * (-u1 * u2 * u3 + u1 * u2 * (u3 - 1) + std::pow(u3 - 1, 2))
-                     / (4 * std::pow(u3 - 1, 2));
-        rhea(5, 2) = (std::pow(u1, 2) * u2 + u2 * std::pow(u3, 2) - 2 * u2 * u3 + u2
-                      + 2 * std::pow(u3, 3) - 6 * std::pow(u3, 2) + 6 * u3 - 2)
-                     / (2 * (std::pow(u3, 2) - 2 * u3 + 1));
-        rhea(6, 2) = (-u1 + u2 + 1) * (u1 * u2 * u3 - u1 * u2 * (u3 - 1) + std::pow(u3 - 1, 2))
-                     / (4 * std::pow(u3 - 1, 2));
-        rhea(7, 2) = (-u1 * std::pow(u2, 2) / 2 - u1 * std::pow(u3, 2) / 2 + u1 * u3 - u1 / 2
-                      + std::pow(u3, 3) - 3 * std::pow(u3, 2) + 3 * u3 - 1)
-                     / (std::pow(u3, 2) - 2 * u3 + 1);
-        rhea(8,
-             2) = (u3 * (u1 - u3 + 1) * (u2 - u3 + 1)
-                   + (u3 - 1)
-                         * (u3 * (u1 - u3 + 1) + u3 * (u2 - u3 + 1) - (u1 - u3 + 1) * (u2 - u3 + 1)))
-                  / std::pow(u3 - 1, 2);
-        rhea(9,
-             2) = (-u3 * (u1 + u3 - 1) * (u2 - u3 + 1)
-                   + (u3 - 1)
-                         * (-u3 * (u1 + u3 - 1) + u3 * (u2 - u3 + 1) + (u1 + u3 - 1) * (u2 - u3 + 1)))
-                  / std::pow(u3 - 1, 2);
-        rhea(10,
-             2) = (u3 * (u1 + u3 - 1) * (u2 + u3 - 1)
-                   - (u3 - 1)
-                         * (u3 * (u1 + u3 - 1) + u3 * (u2 + u3 - 1) + (u1 + u3 - 1) * (u2 + u3 - 1)))
-                  / std::pow(u3 - 1, 2);
-        rhea(11,
-             2) = (-u3 * (u1 - u3 + 1) * (u2 + u3 - 1)
-                   + (u3 - 1)
-                         * (u3 * (u1 - u3 + 1) - u3 * (u2 + u3 - 1) + (u1 - u3 + 1) * (u2 + u3 - 1)))
-                  / std::pow(u3 - 1, 2);
+        dN(0, 2) = -(u1 + u2 - 1) * (-u1 * u2 * u3 + u1 * u2 * (u3 - 1) + std::pow(u3 - 1, 2))
+                   / (4 * std::pow(u3 - 1, 2));
+        dN(1, 2) = (-std::pow(u1, 2) * u2 / 2 - u2 * std::pow(u3, 2) / 2 + u2 * u3 - u2 / 2
+                    + std::pow(u3, 3) - 3 * std::pow(u3, 2) + 3 * u3 - 1)
+                   / (std::pow(u3, 2) - 2 * u3 + 1);
+        dN(2, 2) = (u1 - u2 + 1) * (u1 * u2 * u3 - u1 * u2 * (u3 - 1) + std::pow(u3 - 1, 2))
+                   / (4 * std::pow(u3 - 1, 2));
+        dN(3, 2) = (u1 * std::pow(u2, 2) + u1 * std::pow(u3, 2) - 2 * u1 * u3 + u1
+                    + 2 * std::pow(u3, 3) - 6 * std::pow(u3, 2) + 6 * u3 - 2)
+                   / (2 * (std::pow(u3, 2) - 2 * u3 + 1));
+        dN(4, 2) = (u1 + u2 + 1) * (-u1 * u2 * u3 + u1 * u2 * (u3 - 1) + std::pow(u3 - 1, 2))
+                   / (4 * std::pow(u3 - 1, 2));
+        dN(5, 2) = (std::pow(u1, 2) * u2 + u2 * std::pow(u3, 2) - 2 * u2 * u3 + u2
+                    + 2 * std::pow(u3, 3) - 6 * std::pow(u3, 2) + 6 * u3 - 2)
+                   / (2 * (std::pow(u3, 2) - 2 * u3 + 1));
+        dN(6, 2) = (-u1 + u2 + 1) * (u1 * u2 * u3 - u1 * u2 * (u3 - 1) + std::pow(u3 - 1, 2))
+                   / (4 * std::pow(u3 - 1, 2));
+        dN(7, 2) = (-u1 * std::pow(u2, 2) / 2 - u1 * std::pow(u3, 2) / 2 + u1 * u3 - u1 / 2
+                    + std::pow(u3, 3) - 3 * std::pow(u3, 2) + 3 * u3 - 1)
+                   / (std::pow(u3, 2) - 2 * u3 + 1);
+        dN(8, 2) = (u3 * (u1 - u3 + 1) * (u2 - u3 + 1)
+                    + (u3 - 1)
+                          * (u3 * (u1 - u3 + 1) + u3 * (u2 - u3 + 1) - (u1 - u3 + 1) * (u2 - u3 + 1)))
+                   / std::pow(u3 - 1, 2);
+        dN(9,
+           2) = (-u3 * (u1 + u3 - 1) * (u2 - u3 + 1)
+                 + (u3 - 1)
+                       * (-u3 * (u1 + u3 - 1) + u3 * (u2 - u3 + 1) + (u1 + u3 - 1) * (u2 - u3 + 1)))
+                / std::pow(u3 - 1, 2);
+        dN(10,
+           2) = (u3 * (u1 + u3 - 1) * (u2 + u3 - 1)
+                 - (u3 - 1)
+                       * (u3 * (u1 + u3 - 1) + u3 * (u2 + u3 - 1) + (u1 + u3 - 1) * (u2 + u3 - 1)))
+                / std::pow(u3 - 1, 2);
+        dN(11,
+           2) = (-u3 * (u1 - u3 + 1) * (u2 + u3 - 1)
+                 + (u3 - 1)
+                       * (u3 * (u1 - u3 + 1) - u3 * (u2 + u3 - 1) + (u1 - u3 + 1) * (u2 + u3 - 1)))
+                / std::pow(u3 - 1, 2);
 
-        rhea(12, 2) = 4 * u3 - 1;
+        dN(12, 2) = 4 * u3 - 1;
 
         local_quadrature_coordinates(l, 0) = u1;
         local_quadrature_coordinates(l, 1) = u2;
@@ -232,7 +231,7 @@ void pyramid13::precompute_shape_functions()
 
         N_matrix.row(l) = N;
 
-        return std::make_tuple(N, rhea);
+        return std::make_tuple(N, dN);
     });
 
     // Compute extrapolation algorithm matrices
