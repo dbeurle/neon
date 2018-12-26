@@ -21,7 +21,7 @@ public:
     using coordinate_type = std::tuple<int, Spaces...>;
 
     /// Fix the size of the shape function derivative to the size of the quadrature points
-    using fem_value_type = std::tuple<vector, matrixxd<spatial_dimension>>;
+    using value_type = std::tuple<vector, matrixxd<spatial_dimension>>;
 
 public:
     /// Perform the numerical integration of a lambda function.
@@ -33,7 +33,7 @@ public:
     {
         for (std::size_t l{0}; l < points(); ++l)
         {
-            operand.noalias() += f(femvals[l], l) * m_weights[l];
+            operand.noalias() += f(values[l], l) * m_weights[l];
         }
         return operand;
     }
@@ -47,7 +47,7 @@ public:
     {
         for (std::size_t l{0}; l < points(); ++l)
         {
-            integral += f(femvals[l], l) * m_weights[l];
+            integral += f(values[l], l) * m_weights[l];
         }
         return integral;
     }
@@ -61,7 +61,7 @@ public:
     {
         for (std::size_t l{0}; l < points(); ++l)
         {
-            integral.noalias() += f(femvals[l], l) * m_weights[l];
+            integral.noalias() += f(values[l], l) * m_weights[l];
         }
     }
 
@@ -74,7 +74,7 @@ public:
     {
         for (std::size_t index{0}; index < points(); ++index)
         {
-            integral.noalias() += f(femvals[index], index) * m_weights[index];
+            integral.noalias() += f(values[index], index) * m_weights[index];
         }
     }
 
@@ -85,7 +85,7 @@ public:
     {
         for (std::size_t l{0}; l < points(); ++l)
         {
-            function(femvals[l], l);
+            function(values[l], l);
         }
     }
 
@@ -95,11 +95,11 @@ public:
     template <typename Callable>
     void evaluate(Callable&& f)
     {
-        femvals.clear();
-        femvals.reserve(points());
+        values.clear();
+        values.reserve(points());
         for (auto const& coordinate : m_coordinates)
         {
-            femvals.emplace_back(f(coordinate));
+            values.emplace_back(f(coordinate));
         }
     }
 
@@ -122,7 +122,7 @@ protected:
     std::vector<coordinate_type> m_coordinates;
 
     /// Shape functions and their derivatives evaluated at the quadrature points
-    std::vector<fem_value_type> femvals;
+    std::vector<value_type> values;
 
     std::uint8_t m_degree{0};
 };
@@ -131,6 +131,7 @@ extern template class numerical_quadrature<double>;
 extern template class numerical_quadrature<double, double>;
 extern template class numerical_quadrature<double, double, double>;
 
+using line_quadrature = numerical_quadrature<double>;
 using surface_quadrature = numerical_quadrature<double, double>;
 using volume_quadrature = numerical_quadrature<double, double, double>;
 }
