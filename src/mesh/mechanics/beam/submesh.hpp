@@ -64,7 +64,7 @@ public:
     [[nodiscard]] auto const& internal_variables() const { return *variables; }
 
     template <typename name_type>
-    std::pair<vector, vector> nodal_averaged_variable(name_type const) const
+    std::pair<vector, vector> nodal_averaged_variable(name_type) const
     {
         return std::make_pair(vector(), vector());
     }
