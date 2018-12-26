@@ -1,5 +1,5 @@
 {
-    "name" : "J2PlasticityDamage",
+    "name" : "J2Plasticity",
     "cores" : 1,
     "parts": [{
         "name" : "cube",
@@ -10,12 +10,7 @@
         "elastic_modulus": 134.0e3,
         "yield_stress": 85,
         "poissons_ratio": 0.3,
-        "kinematic_hardening_modulus": 5500,
-        "softening_multiplier" : 250,
-        "plasticity_viscous_exponent" : 2.5,
-        "plasticity_viscous_denominator" : 1220,
-        "damage_viscous_exponent" : 2,
-        "damage_viscous_denominator" : 0.6
+        "isotropic_hardening_modulus" : 400.0e6
     }],
     "steps" : [{
         "name" : "Uniaxial",
@@ -23,7 +18,8 @@
         "solution" : "equilibrium",
         "nonlinear_options" : {
           "residual_tolerance" : 1e-3,
-          "displacement_tolerance" : 1e-3
+          "displacement_tolerance" : 1e-3,
+          "newton_raphson_iterations" : 30
         },
         "time" : {
             "period" : 0.01,
@@ -38,7 +34,6 @@
             "name" : "cube",
             "constitutive" : {
                 "name" : "J2_plasticity",
-                "damage" : "isotropic_chaboche",
                 "finite_strain" : false
             },
             "element_options" : {
@@ -74,10 +69,7 @@
             "visualisation" : {
                 "fields" : ["displacement", "linearised_strain",
                             "linearised_plastic_strain", "cauchy_stress",
-                            "von_mises_stress", "effective_plastic_strain",
-                            "displacement_gradient", "damage",
-                            "energy_release_rate", "back_stress",
-                            "kinematic_hardening", "displacement_gradient"]
+                            "von_mises_stress", "effective_plastic_strain"]
             }
         }],
 		"linear_solver" : {

@@ -110,7 +110,7 @@ protected:
     [[nodiscard]] matrix const& material_tangent_stiffness(matrix3x const& configuration,
                                                            std::int32_t const element) const;
 
-private:
+protected:
     std::shared_ptr<material_coordinates> coordinates;
 
     /// Shape function (volume interpolation)

@@ -152,7 +152,7 @@ void linear_static_matrix<fem_mesh_type>::assemble_stiffness()
             {
                 for (std::int64_t a{0}; a < dofs.size(); a++)
                 {
-                    Kt.coefficient_update(dofs(a), dofs(b), ke(a, b));
+                    Kt.add_to(dofs(a), dofs(b), ke(a, b));
                 }
             }
         });

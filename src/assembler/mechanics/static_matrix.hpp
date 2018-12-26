@@ -260,7 +260,7 @@ void static_matrix<MeshType>::assemble_stiffness()
             {
                 for (std::int64_t a{0}; a < dofs.size(); a++)
                 {
-                    Kt.coefficient_update(dofs(a), dofs(b), ke(a, b));
+                    Kt.add_to(dofs(a), dofs(b), ke(a, b));
                 }
             }
         });
@@ -382,14 +382,12 @@ void static_matrix<MeshType>::print_convergence_progress() const
 template <class MeshType>
 void static_matrix<MeshType>::update_relative_norms()
 {
-    if (use_relative_norm)
+    if (use_relative_norm && !is_approx(displacement.norm(), 0.0, 1.0)
+        && !is_approx(std::max(f_ext.norm(), f_int.norm()), 0.0, 1.0))
     {
         displacement_norm = delta_d.norm() / displacement.norm();
-        force_norm = is_approx(std::max(f_ext.norm(), f_int.norm()), 0.0)
-                         ? 1.0
-                         : minus_residual.norm()
-                               / std::max(norm_initial_residual,
-                                          std::max(f_ext.norm(), f_int.norm()));
+        force_norm = minus_residual.norm()
+                     / std::max(norm_initial_residual, std::max(f_ext.norm(), f_int.norm()));
     }
     else
     {

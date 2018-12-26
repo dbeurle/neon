@@ -86,7 +86,7 @@ void natural_frequency_matrix<MeshType>::assemble_stiffness()
             {
                 for (std::int64_t b{0}; b < dofs.size(); b++)
                 {
-                    K.coefficient_update(dofs(a), dofs(b), local_tangent(a, b));
+                    K.add_to(dofs(a), dofs(b), local_tangent(a, b));
                 }
             }
         });
@@ -118,7 +118,7 @@ void natural_frequency_matrix<MeshType>::assemble_mass()
             {
                 for (std::int64_t b{0}; b < dofs.size(); b++)
                 {
-                    M.coefficient_update(dofs(a), dofs(b), local_mass(a, b));
+                    M.add_to(dofs(a), dofs(b), local_mass(a, b));
                 }
             }
         });

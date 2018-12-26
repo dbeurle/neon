@@ -74,7 +74,7 @@ void linear_buckling_matrix<MeshType>::assemble_stiffness()
             {
                 for (std::int64_t b{0}; b < dofs.size(); b++)
                 {
-                    K.coefficient_update(dofs(a), dofs(b), ke(a, b));
+                    K.add_to(dofs(a), dofs(b), ke(a, b));
                 }
             }
         }
