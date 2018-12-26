@@ -18,27 +18,27 @@
 
 namespace neon
 {
-static bool is_reduced_integration(json const& mesh_data)
+static bool is_reduced_integration(json const& simulation_data)
 {
-    return mesh_data["element_options"]["quadrature"].is_null()
+    return simulation_data["element_options"]["quadrature"].is_null()
                ? false
-               : mesh_data["element_options"]["quadrature"].get<std::string>() == "reduced";
+               : simulation_data["element_options"]["quadrature"].get<std::string>() == "reduced";
 }
 
-static void check_element_options(json const& mesh_data)
+static void check_element_options(json const& simulation_data)
 {
-    if (mesh_data.find("element_options") == end(mesh_data))
+    if (simulation_data.find("element_options") == end(simulation_data))
     {
         throw std::runtime_error("Missing \"part\": {\"element_options\" : {}}");
     }
 }
 
 std::unique_ptr<volume_interpolation> make_volume_interpolation(element_topology const topology,
-                                                                json const& mesh_data)
+                                                                json const& simulation_data)
 {
-    check_element_options(mesh_data);
+    check_element_options(simulation_data);
 
-    auto const is_reduced = is_reduced_integration(mesh_data);
+    auto const is_reduced = is_reduced_integration(simulation_data);
 
     switch (topology)
     {
@@ -97,11 +97,11 @@ std::unique_ptr<volume_interpolation> make_volume_interpolation(element_topology
 }
 
 std::unique_ptr<surface_interpolation> make_surface_interpolation(element_topology const topology,
-                                                                  json const& mesh_data)
+                                                                  json const& simulation_data)
 {
-    check_element_options(mesh_data);
+    check_element_options(simulation_data);
 
-    auto is_reduced = is_reduced_integration(mesh_data);
+    auto is_reduced = is_reduced_integration(simulation_data);
 
     switch (topology)
     {
@@ -142,11 +142,11 @@ std::unique_ptr<surface_interpolation> make_surface_interpolation(element_topolo
 }
 
 std::unique_ptr<line_interpolation> make_line_interpolation(element_topology const topology,
-                                                            json const& mesh_data)
+                                                            json const& simulation_data)
 {
-    check_element_options(mesh_data);
+    check_element_options(simulation_data);
 
-    auto is_reduced = is_reduced_integration(mesh_data);
+    auto is_reduced = is_reduced_integration(simulation_data);
 
     switch (topology)
     {
