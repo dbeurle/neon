@@ -53,7 +53,7 @@ public:
     void update_internal_variables(double const time_step_size = 1.0);
 
     /// \return A view of degrees of freedom for an element
-    [[nodiscard]] auto const local_dof_view(std::int64_t const element) const
+    [[nodiscard]] auto local_dof_view(std::int64_t const element) const
     {
         return dof_indices(Eigen::all, element);
     }
@@ -62,7 +62,7 @@ public:
     [[nodiscard]] auto const& internal_variables() const { return *variables; }
 
     template <typename name_type>
-    std::pair<vector, vector> nodal_averaged_variable(name_type const name) const
+    std::pair<vector, vector> nodal_averaged_variable(name_type) const
     {
         return std::make_pair(vector(), vector());
     }
