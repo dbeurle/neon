@@ -8,236 +8,127 @@
 
 namespace neon
 {
-quadrilateral4::quadrilateral4(quadrilateral_quadrature::point const p)
-    : surface_interpolation(std::make_unique<quadrilateral_quadrature>(p), 4)
+quadrilateral4::quadrilateral4() : surface_interpolation(4, 1, 1)
 {
-    this->precompute_shape_functions();
+    m_local_coordinates = {{0, -1.0, -1.0}, {1, 1.0, -1.0}, {2, 1.0, 1.0}, {3, -1.0, 1.0}};
 }
 
-void quadrilateral4::precompute_shape_functions()
+auto quadrilateral4::evaluate(coordinate_type const& coordinate) const noexcept(false) -> value_type
 {
-    using NodalCoordinate = std::tuple<int, double, double>;
+    auto const& [l, xi, eta] = coordinate;
 
-    std::array<NodalCoordinate, 4> constexpr local_coordinates = {
-        {{0, -1.0, -1.0}, {1, 1.0, -1.0}, {2, 1.0, 1.0}, {3, -1.0, 1.0}}};
+    vector N(4);
+    matrix dN(4, 2);
 
-    matrix N_matrix(m_quadrature->points(), number_of_nodes());
-    matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 3);
-
-    m_quadrature->evaluate([&](auto const& coordinate) {
-        auto const& [l, xi, eta] = coordinate;
-
-        vector N(4);
-        matrix rhea(4, 2);
-
-        for (auto const& [a, xi_a, eta_a] : local_coordinates)
-        {
-            N(a) = 0.25 * (1.0 + xi_a * xi) * (1.0 + eta_a * eta);
-            rhea(a, 0) = 0.25 * (1.0 + eta_a * eta) * xi_a;
-            rhea(a, 1) = 0.25 * (1.0 + xi_a * xi) * eta_a;
-        }
-
-        local_quadrature_coordinates(l, 0) = xi;
-        local_quadrature_coordinates(l, 1) = eta;
-
-        N_matrix.row(l) = N;
-
-        return std::make_tuple(N, rhea);
-    });
-
-    // Compute extrapolation algorithm matrices
-    matrix local_nodal_coordinates = matrix::Ones(number_of_nodes(), 3);
-
-    for (auto const& [a, xi_a, eta_a] : local_coordinates)
+    for (auto const& [a, xi_a, eta_a] : m_local_coordinates)
     {
-        local_nodal_coordinates(a, 0) = xi_a;
-        local_nodal_coordinates(a, 1) = eta_a;
+        N(a) = 0.25 * (1.0 + xi_a * xi) * (1.0 + eta_a * eta);
+        dN(a, 0) = 0.25 * (1.0 + eta_a * eta) * xi_a;
+        dN(a, 1) = 0.25 * (1.0 + xi_a * xi) * eta_a;
     }
-    compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
+
+    return {N, dN};
 }
 
-double quadrilateral4::compute_measure(matrix const& nodal_coordinates) const
+quadrilateral8::quadrilateral8() : surface_interpolation(8, 0, 0)
 {
-    return m_quadrature->integrate(0.0, [&](auto const& femval, auto) {
-        auto const& [N, dN] = femval;
-
-        matrix2 const Jacobian = geometry::project_to_plane(nodal_coordinates) * dN;
-
-        return Jacobian.determinant();
-    });
+    m_local_coordinates = {{0, -1.0, -1.0},
+                           {1, 1.0, -1.0},
+                           {2, 1.0, 1.0},
+                           {3, -1.0, 1.0},
+                           {4, 0.0, -1.0},
+                           {5, -1.0, 0.0},
+                           {6, 0.0, 1.0},
+                           {7, -1.0, 0.0}};
 }
 
-quadrilateral8::quadrilateral8(quadrilateral_quadrature::point const p)
-    : surface_interpolation(std::make_unique<quadrilateral_quadrature>(p), 8)
+auto quadrilateral8::evaluate(coordinate_type const& coordinate) const noexcept(false) -> value_type
 {
-    this->precompute_shape_functions();
+    [[maybe_unused]] auto const& [l, xi, eta] = coordinate;
+
+    vector N(8);
+    matrix dN(8, 2);
+
+    N(0) = 0.25 * (1.0 - xi) * (1.0 - eta) * (-1.0 - xi - eta);
+    N(1) = 0.25 * (1.0 + xi) * (1.0 - eta) * (-1.0 + xi - eta);
+    N(2) = 0.25 * (1.0 + xi) * (1.0 + eta) * (-1.0 + xi + eta);
+    N(3) = 0.25 * (1.0 - xi) * (1.0 + eta) * (-1.0 - xi + eta);
+    N(4) = 0.5 * (1.0 - xi * xi) * (1.0 - eta);
+    N(5) = 0.5 * (1.0 - eta * eta) * (1.0 + xi);
+    N(6) = 0.5 * (1.0 - xi * xi) * (1.0 + eta);
+    N(7) = 0.5 * (1.0 - eta * eta) * (1.0 - xi);
+
+    dN(0, 0) = 0.25 * (1.0 - eta) * (2.0 * xi + eta);
+    dN(1, 0) = 0.25 * (1.0 - eta) * (2.0 * xi - eta);
+    dN(2, 0) = 0.25 * (1.0 + eta) * (2.0 * xi + eta);
+    dN(3, 0) = 0.25 * (1.0 + eta) * (2.0 * xi - eta);
+    dN(4, 0) = -xi * (1.0 - eta);
+    dN(5, 0) = 0.5 * (1.0 - eta * eta);
+    dN(6, 0) = -xi * (1.0 + eta);
+    dN(7, 0) = -0.5 * (1.0 - eta * eta);
+
+    dN(0, 1) = 0.25 * (1.0 - xi) * (2.0 * eta + xi);
+    dN(1, 1) = 0.25 * (1.0 + xi) * (2.0 * eta - xi);
+    dN(2, 1) = 0.25 * (1.0 + xi) * (2.0 * eta + xi);
+    dN(3, 1) = 0.25 * (1.0 - xi) * (2.0 * eta - xi);
+    dN(4, 1) = -0.5 * (1.0 - xi * xi);
+    dN(5, 1) = -eta * (1.0 + xi);
+    dN(6, 1) = 0.5 * (1.0 - xi * xi);
+    dN(7, 1) = -eta * (1.0 - xi);
+
+    return {N, dN};
 }
 
-void quadrilateral8::precompute_shape_functions()
+quadrilateral9::quadrilateral9() : surface_interpolation(9, 0, 0)
 {
-    using NodalCoordinate = std::tuple<int, double, double>;
-
-    std::array<NodalCoordinate, 8> constexpr local_coordinates = {{{0, -1.0, -1.0},
-                                                                   {1, 1.0, -1.0},
-                                                                   {2, 1.0, 1.0},
-                                                                   {3, -1.0, 1.0},
-                                                                   {4, 0.0, -1.0},
-                                                                   {5, -1.0, 0.0},
-                                                                   {6, 0.0, 1.0},
-                                                                   {7, -1.0, 0.0}}};
-
-    matrix N_matrix(m_quadrature->points(), number_of_nodes());
-    matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 3);
-
-    m_quadrature->evaluate([&](auto const& coordinate) {
-        auto const& [l, xi, eta] = coordinate;
-
-        vector N(8);
-        matrix rhea(8, 2);
-
-        N(0) = 0.25 * (1.0 - xi) * (1.0 - eta) * (-1.0 - xi - eta);
-        N(1) = 0.25 * (1.0 + xi) * (1.0 - eta) * (-1.0 + xi - eta);
-        N(2) = 0.25 * (1.0 + xi) * (1.0 + eta) * (-1.0 + xi + eta);
-        N(3) = 0.25 * (1.0 - xi) * (1.0 + eta) * (-1.0 - xi + eta);
-        N(4) = 0.5 * (1.0 - xi * xi) * (1.0 - eta);
-        N(5) = 0.5 * (1.0 - eta * eta) * (1.0 + xi);
-        N(6) = 0.5 * (1.0 - xi * xi) * (1.0 + eta);
-        N(7) = 0.5 * (1.0 - eta * eta) * (1.0 - xi);
-
-        rhea(0, 0) = 0.25 * (1.0 - eta) * (2.0 * xi + eta);
-        rhea(1, 0) = 0.25 * (1.0 - eta) * (2.0 * xi - eta);
-        rhea(2, 0) = 0.25 * (1.0 + eta) * (2.0 * xi + eta);
-        rhea(3, 0) = 0.25 * (1.0 + eta) * (2.0 * xi - eta);
-        rhea(4, 0) = -xi * (1.0 - eta);
-        rhea(5, 0) = 0.5 * (1.0 - eta * eta);
-        rhea(6, 0) = -xi * (1.0 + eta);
-        rhea(7, 0) = -0.5 * (1.0 - eta * eta);
-
-        rhea(0, 1) = 0.25 * (1.0 - xi) * (2.0 * eta + xi);
-        rhea(1, 1) = 0.25 * (1.0 + xi) * (2.0 * eta - xi);
-        rhea(2, 1) = 0.25 * (1.0 + xi) * (2.0 * eta + xi);
-        rhea(3, 1) = 0.25 * (1.0 - xi) * (2.0 * eta - xi);
-        rhea(4, 1) = -0.5 * (1.0 - xi * xi);
-        rhea(5, 1) = -eta * (1.0 + xi);
-        rhea(6, 1) = 0.5 * (1.0 - xi * xi);
-        rhea(7, 1) = -eta * (1.0 - xi);
-
-        local_quadrature_coordinates(l, 0) = xi;
-        local_quadrature_coordinates(l, 1) = eta;
-
-        N_matrix.row(l) = N;
-
-        return std::make_tuple(N, rhea);
-    });
-
-    // Compute extrapolation algorithm matrices
-    matrix local_nodal_coordinates = matrix::Ones(number_of_nodes(), 3);
-
-    for (auto const& [a, xi_a, eta_a] : local_coordinates)
-    {
-        local_nodal_coordinates(a, 0) = xi_a;
-        local_nodal_coordinates(a, 1) = eta_a;
-    }
-    compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
+    m_local_coordinates = {{0, -1.0, -1.0},
+                           {1, 1.0, -1.0},
+                           {2, 1.0, 1.0},
+                           {3, -1.0, 1.0},
+                           {4, 0.0, -1.0},
+                           {5, -1.0, 0.0},
+                           {6, 0.0, 1.0},
+                           {7, -1.0, 0.0},
+                           {8, 0.0, 0.0}};
 }
 
-double quadrilateral8::compute_measure(matrix const& nodal_coordinates) const
+auto quadrilateral9::evaluate(coordinate_type const& coordinate) const noexcept(false) -> value_type
 {
-    return m_quadrature->integrate(0.0, [&](auto const& femval, auto) {
-        auto const& [N, dN] = femval;
+    [[maybe_unused]] auto const& [l, xi, eta] = coordinate;
 
-        matrix2 const Jacobian = geometry::project_to_plane(nodal_coordinates) * dN;
+    vector N(9);
+    matrix dN(9, 2);
 
-        return Jacobian.determinant();
-    });
-}
+    N(0) = eta * xi * (eta - 1) * (xi - 1) / 4.0;
+    N(1) = eta * xi * (eta - 1) * (xi + 1) / 4.0;
+    N(2) = eta * xi * (eta + 1) * (xi + 1) / 4.0;
+    N(3) = eta * xi * (eta + 1) * (xi - 1) / 4.0;
+    N(4) = -eta * (eta - 1) * (xi - 1) * (xi + 1) / 2.0;
+    N(5) = -xi * (eta - 1) * (eta + 1) * (xi + 1) / 2.0;
+    N(6) = -eta * (eta + 1) * (xi - 1) * (xi + 1) / 2.0;
+    N(7) = -xi * (eta - 1) * (eta + 1) * (xi - 1) / 2.0;
+    N(8) = (eta - 1) * (eta + 1) * (xi - 1) * (xi + 1);
 
-quadrilateral9::quadrilateral9(quadrilateral_quadrature::point const p)
-    : surface_interpolation(std::make_unique<quadrilateral_quadrature>(p), 9)
-{
-    this->precompute_shape_functions();
-}
+    dN(0, 0) = eta * (eta - 1) * (2 * xi - 1) / 4.0;
+    dN(1, 0) = eta * (eta - 1) * (2 * xi + 1) / 4.0;
+    dN(2, 0) = eta * (eta + 1) * (2 * xi + 1) / 4.0;
+    dN(3, 0) = eta * (eta + 1) * (2 * xi - 1) / 4.0;
+    dN(4, 0) = -eta * xi * (eta - 1);
+    dN(5, 0) = -(eta - 1) * (eta + 1) * (2 * xi + 1) / 2.0;
+    dN(6, 0) = -eta * xi * (eta + 1);
+    dN(7, 0) = -(eta - 1) * (eta + 1) * (2 * xi - 1) / 2.0;
+    dN(8, 0) = 2 * xi * (eta - 1) * (eta + 1);
 
-void quadrilateral9::precompute_shape_functions()
-{
-    using NodalCoordinate = std::tuple<int, double, double>;
+    dN(0, 1) = xi * (2 * eta - 1) * (xi - 1) / 4.0;
+    dN(1, 1) = xi * (2 * eta - 1) * (xi + 1) / 4.0;
+    dN(2, 1) = xi * (2 * eta + 1) * (xi + 1) / 4.0;
+    dN(3, 1) = xi * (2 * eta + 1) * (xi - 1) / 4.0;
+    dN(4, 1) = -(2 * eta - 1) * (xi - 1) * (xi + 1) / 2.0;
+    dN(5, 1) = -eta * xi * (xi + 1);
+    dN(6, 1) = -(2 * eta + 1) * (xi - 1) * (xi + 1) / 2.0;
+    dN(7, 1) = -eta * xi * (xi - 1);
+    dN(8, 1) = 2 * eta * (xi - 1) * (xi + 1);
 
-    std::array<NodalCoordinate, 9> constexpr local_coordinates = {{{0, -1.0, -1.0},
-                                                                   {1, 1.0, -1.0},
-                                                                   {2, 1.0, 1.0},
-                                                                   {3, -1.0, 1.0},
-                                                                   {4, 0.0, -1.0},
-                                                                   {5, -1.0, 0.0},
-                                                                   {6, 0.0, 1.0},
-                                                                   {7, -1.0, 0.0},
-                                                                   {8, 0.0, 0.0}}};
-
-    matrix N_matrix(m_quadrature->points(), number_of_nodes());
-    matrix local_quadrature_coordinates = matrix::Ones(m_quadrature->points(), 3);
-
-    m_quadrature->evaluate([&](auto const& coordinate) {
-        auto const& [l, xi, eta] = coordinate;
-
-        vector N(9);
-        matrix rhea(9, 2);
-
-        N(0) = eta * xi * (eta - 1) * (xi - 1) / 4.0;
-        N(1) = eta * xi * (eta - 1) * (xi + 1) / 4.0;
-        N(2) = eta * xi * (eta + 1) * (xi + 1) / 4.0;
-        N(3) = eta * xi * (eta + 1) * (xi - 1) / 4.0;
-        N(4) = -eta * (eta - 1) * (xi - 1) * (xi + 1) / 2.0;
-        N(5) = -xi * (eta - 1) * (eta + 1) * (xi + 1) / 2.0;
-        N(6) = -eta * (eta + 1) * (xi - 1) * (xi + 1) / 2.0;
-        N(7) = -xi * (eta - 1) * (eta + 1) * (xi - 1) / 2.0;
-        N(8) = (eta - 1) * (eta + 1) * (xi - 1) * (xi + 1);
-
-        rhea(0, 0) = eta * (eta - 1) * (2 * xi - 1) / 4.0;
-        rhea(1, 0) = eta * (eta - 1) * (2 * xi + 1) / 4.0;
-        rhea(2, 0) = eta * (eta + 1) * (2 * xi + 1) / 4.0;
-        rhea(3, 0) = eta * (eta + 1) * (2 * xi - 1) / 4.0;
-        rhea(4, 0) = -eta * xi * (eta - 1);
-        rhea(5, 0) = -(eta - 1) * (eta + 1) * (2 * xi + 1) / 2.0;
-        rhea(6, 0) = -eta * xi * (eta + 1);
-        rhea(7, 0) = -(eta - 1) * (eta + 1) * (2 * xi - 1) / 2.0;
-        rhea(8, 0) = 2 * xi * (eta - 1) * (eta + 1);
-
-        rhea(0, 1) = xi * (2 * eta - 1) * (xi - 1) / 4.0;
-        rhea(1, 1) = xi * (2 * eta - 1) * (xi + 1) / 4.0;
-        rhea(2, 1) = xi * (2 * eta + 1) * (xi + 1) / 4.0;
-        rhea(3, 1) = xi * (2 * eta + 1) * (xi - 1) / 4.0;
-        rhea(4, 1) = -(2 * eta - 1) * (xi - 1) * (xi + 1) / 2.0;
-        rhea(5, 1) = -eta * xi * (xi + 1);
-        rhea(6, 1) = -(2 * eta + 1) * (xi - 1) * (xi + 1) / 2.0;
-        rhea(7, 1) = -eta * xi * (xi - 1);
-        rhea(8, 1) = 2 * eta * (xi - 1) * (xi + 1);
-
-        local_quadrature_coordinates(l, 0) = xi;
-        local_quadrature_coordinates(l, 1) = eta;
-
-        N_matrix.row(l) = N;
-
-        return std::make_tuple(N, rhea);
-    });
-
-    // Compute extrapolation algorithm matrices
-    matrix local_nodal_coordinates = matrix::Ones(number_of_nodes(), 3);
-
-    for (auto const& [a, xi_a, eta_a] : local_coordinates)
-    {
-        local_nodal_coordinates(a, 0) = xi_a;
-        local_nodal_coordinates(a, 1) = eta_a;
-    }
-    compute_extrapolation_matrix(N_matrix, local_nodal_coordinates, local_quadrature_coordinates);
-}
-
-double quadrilateral9::compute_measure(matrix const& nodal_coordinates) const
-{
-    return m_quadrature->integrate(0.0, [&](auto const& femval, auto) {
-        auto const& [N, dN] = femval;
-
-        matrix2 const Jacobian = geometry::project_to_plane(nodal_coordinates) * dN;
-
-        return Jacobian.determinant();
-    });
+    return {N, dN};
 }
 }
