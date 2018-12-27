@@ -204,7 +204,9 @@ std::string simulation_data_json()
            //
            "\"nonlinear_options\" : { "
            "\"displacement_tolerance\" : 1.0e-5, "
-           "\"residual_tolerance\" : 0.001},"
+           "\"residual_tolerance\" : 0.001, "
+           "\"linear_iterations\" : 40, \"latin_scheme\" : \"incremental\", "
+           "\"latin_local_stage\" : \"implicit\", \"latin_search_direction\" : 0.0},"
            //
            "\"time\" : {\"period\" : 1.0, \"increments\": { "
            "\"initial\" : 1.0, \"minimum\" : 0.001, \"maximum\" : 10.0, \"adaptive\" : true }},"
