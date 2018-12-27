@@ -112,4 +112,65 @@ hollow_circle::hollow_circle(json const& section_data)
 //               width * height)
 // {
 // }
+
+rectangular_angle::rectangular_angle(json const& section_data)
+{
+    if (section_data.find("width") == section_data.end())
+    {
+        throw std::domain_error("\"width\" was not specified for \"rectangular_angle\" in profile");
+    }
+    if (section_data.find("height") == section_data.end())
+    {
+        throw std::domain_error("\"height\" was not specified for \"rectangular_angle\" in "
+                                "profile");
+    }
+    if (section_data.find("thickness") == section_data.end())
+    {
+        throw std::domain_error("\"thickness\" was not specified for \"rectangular_angle\" in "
+                                "profile");
+    }
+
+    double const width = section_data["width"];
+
+    double const height = section_data["height"];
+
+    double const thickness = section_data["thickness"];
+
+    if (width <= 0.0)
+    {
+        throw std::domain_error("\"width\" must have a positive value for \"rectangular_angle\" in "
+                                "profile");
+    }
+
+    if (height <= 0.0)
+    {
+        throw std::domain_error("\"height\" must have a positive value for \"rectangular_angle\" "
+                                "in "
+                                "profile");
+    }
+
+    if (thickness <= 0.0)
+    {
+        throw std::domain_error("\"thickness\" must have a positive value for "
+                                "\"rectangular_angle\" in "
+                                "profile");
+    }
+
+    // Formulas sourced from: http://structx.com/Shape_Formulas_008.html
+    double const c = width - thickness;
+    double const d = height - thickness;
+    double const C_x = (thickness * (2 * c + height) + std::pow(c, 2)) / (2 * (c + height));
+    double const C_y = (thickness * (2 * d + width) + std::pow(d, 2)) / (2 * (d + width));
+    double const y = height - C_y;
+    double const z = width - C_x;
+    I_x = (thickness * std::pow(y, 3) + width * std::pow(height - y, 3)
+           - (width - thickness) * std::pow(height - y - thickness, 3))
+          / 3.0;
+
+    I_y = (thickness * std::pow(z, 3) + height * std::pow(width - z, 3)
+           - (height - thickness) * std::pow(width - z - thickness, 3))
+          / 3.0;
+
+    A = thickness * (width + d);
+}
 }

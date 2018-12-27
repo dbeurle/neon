@@ -22,6 +22,7 @@ TEST_CASE("Dimensional values")
 {
     SECTION("Rectangle")
     {
+        // Spelling
         REQUIRE_THROWS_AS(geometry::make_profile(
                               json{{"type", "rectangle"}, {"wdth", 2.0}, {"height", 0.3}}),
                           std::domain_error);
@@ -30,6 +31,7 @@ TEST_CASE("Dimensional values")
                               json{{"type", "rectangle"}, {"width", 2.0}, {"hight", 0.3}}),
                           std::domain_error);
 
+        // Negative value
         REQUIRE_THROWS_AS(geometry::make_profile(
                               json{{"type", "rectangle"}, {"width", -2.0}, {"height", 0.3}}),
                           std::domain_error);
@@ -74,6 +76,41 @@ TEST_CASE("Dimensional values")
         REQUIRE_THROWS_AS(geometry::make_profile(json{{"type", "hollow_circle"},
                                                       {"inner_diameter", 2.0},
                                                       {"outer_diameter", 1.0}}),
+                          std::domain_error);
+    }
+    SECTION("Rectangular angle")
+    {
+        // Spelling
+        REQUIRE_THROWS_AS(geometry::make_profile(json{{"type", "rectangular_angle"},
+                                                      {"with", 1.0},
+                                                      {"height", 2.0},
+                                                      {"thickness", 0.5}}),
+                          std::domain_error);
+        REQUIRE_THROWS_AS(geometry::make_profile(json{{"type", "rectangular_angle"},
+                                                      {"width", 1.0},
+                                                      {"heigt", 2.0},
+                                                      {"thickness", 0.5}}),
+                          std::domain_error);
+        REQUIRE_THROWS_AS(geometry::make_profile(json{{"type", "rectangular_angle"},
+                                                      {"width", 1.0},
+                                                      {"height", 2.0},
+                                                      {"thickess", 0.5}}),
+                          std::domain_error);
+        // Negative value
+        REQUIRE_THROWS_AS(geometry::make_profile(json{{"type", "rectangular_angle"},
+                                                      {"width", -1.0},
+                                                      {"height", 2.0},
+                                                      {"thickess", 0.5}}),
+                          std::domain_error);
+        REQUIRE_THROWS_AS(geometry::make_profile(json{{"type", "rectangular_angle"},
+                                                      {"width", 1.0},
+                                                      {"height", -2.0},
+                                                      {"thickess", 0.5}}),
+                          std::domain_error);
+        REQUIRE_THROWS_AS(geometry::make_profile(json{{"type", "rectangular_angle"},
+                                                      {"width", 1.0},
+                                                      {"height", 2.0},
+                                                      {"thickess", -0.5}}),
                           std::domain_error);
     }
 }

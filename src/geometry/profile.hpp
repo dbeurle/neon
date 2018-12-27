@@ -16,7 +16,8 @@ namespace neon::geometry
 class profile
 {
 public:
-    /// \return first and second moments of inertia (I_x, I_y)
+    /// \return first and second moments of area
+    /// (area moment of inertia) (I_x, I_y)
     std::pair<double, double> second_moment_area() const noexcept;
 
     /// \return first and second shear areas (A_x, A_y)
@@ -71,5 +72,10 @@ class hollow_circle : public profile
 {
 public:
     explicit hollow_circle(json const& section_data);
+};
+class rectangular_angle : public profile
+{
+public:
+    explicit rectangular_angle(json const& section_data);
 };
 }
