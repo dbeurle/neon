@@ -1,6 +1,8 @@
 
 #include "solver/eigen/power_iteration.hpp"
 
+#ifdef ENABLE_OPENCL
+
 #include "exceptions.hpp"
 
 #define VIENNACL_HAVE_EIGEN
@@ -45,3 +47,4 @@ void power_iteration::solve(sparse_matrix const&, sparse_matrix const&)
     throw std::runtime_error("Method not implemented " + std::string(__FUNCTION__));
 }
 }
+#endif

@@ -1,6 +1,8 @@
 
 #include "solver/eigen/lanczos_ocl.hpp"
 
+#ifdef ENABLE_OPENCL
+
 #define VIENNACL_HAVE_EIGEN
 
 #include <viennacl/compressed_matrix.hpp>
@@ -46,3 +48,4 @@ void lanczos_ocl::solve(sparse_matrix const& A)
 
 void lanczos_ocl::solve(sparse_matrix const&, sparse_matrix const&) {}
 }
+#endif
