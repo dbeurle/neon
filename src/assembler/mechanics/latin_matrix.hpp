@@ -44,6 +44,9 @@ private:
     /// LATIN residual vector
     vector latin_residual;
 
+    /// LATIN search direction scaling factor \f$ \alpha \ \mathbb{C} \f$
+    double latin_search_direction = 0.0;
+
 public:
     explicit latin_matrix(mesh_type& mesh, json const& simulation);
 
@@ -66,6 +69,15 @@ template <class MeshType>
 latin_matrix<MeshType>::latin_matrix(mesh_type& mesh, json const& simulation)
     : base_type::static_matrix(mesh, simulation)
 {
+    auto const& nonlinear_options = simulation["nonlinear_options"];
+
+    if (nonlinear_options.find("latin_search_direction") == nonlinear_options.end())
+    {
+        throw std::domain_error("latin_search_direction not specified in nonlinear_options");
+    }
+
+    latin_search_direction = nonlinear_options["latin_search_direction"];
+
     latin_residual = vector::Zero(mesh.active_dofs());
 }
 
@@ -78,7 +90,9 @@ void latin_matrix<MeshType>::compute_incremental_latin_internal_force()
     {
         for (std::int64_t element{0}; element < submesh.elements(); ++element)
         {
-            auto const& [dofs, fe_int] = submesh.incremental_latin_internal_force(element);
+            auto const
+                & [dofs, fe_int] = submesh.incremental_latin_internal_force(element,
+                                                                            latin_search_direction);
 
             latin_residual(dofs) += fe_int;
         }
@@ -207,6 +221,9 @@ void latin_matrix<MeshType>::perform_equilibrium_iterations()
             latin_residual = minus_residual;
         }
 
+        // TODO: the convergence may be measure by the minus_residual = latin_residual. However, this
+        // will not ensure the balance of forces anymore. Also, the stifness matrix may be scaled by
+        // `latin_search_direction` but this did not improve the convergence of the incremental LATIN scheme
         enforce_dirichlet_conditions(Kt, minus_residual, latin_residual);
 
         solver->solve(Kt, delta_d, latin_residual);
