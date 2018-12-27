@@ -122,9 +122,9 @@ static_matrix<MeshType>::static_matrix(mesh_type& mesh, json const& simulation)
     {
         throw std::domain_error("residual_tolerance not specified in nonlinear_options");
     }
-    if (nonlinear_options.find("newton_raphson_iterations") != nonlinear_options.end())
+    if (nonlinear_options.find("linear_iterations") != nonlinear_options.end())
     {
-        maximum_iterations = nonlinear_options["newton_raphson_iterations"];
+        maximum_iterations = nonlinear_options["linear_iterations"];
     }
     if (nonlinear_options.find("absolute_tolerance") != nonlinear_options.end())
     {

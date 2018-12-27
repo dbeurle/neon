@@ -24,7 +24,7 @@
         "nonlinear_options" : {
             "residual_tolerance" : 1e-3,
             "displacement_tolerance" : 1e-3,
-            "newton_raphson_iterations" : 30
+            "linear_iterations" : 30
         },
         "time" : {
             "period" : 0.01,
