@@ -181,4 +181,21 @@ TEST_CASE("Calculated values")
         REQUIRE(profile->second_moment_area().first == Approx(0.736311));
         REQUIRE(profile->second_moment_area().second == Approx(0.736311));
     }
+    SECTION("Rectangular angle")
+    {
+        auto profile = geometry::make_profile(
+            json{{"type", "rectangular_angle"}, {"width", 1.0}, {"height", 2.0}, {"thickness", 0.5}});
+
+        REQUIRE(profile->area() == Approx(1.25));
+        REQUIRE(profile->second_moment_area().first == Approx(0.451042));
+        REQUIRE(profile->second_moment_area().second == Approx(0.076042));
+    }
+    {
+        auto profile = geometry::make_profile(
+            json{{"type", "rectangular_angle"}, {"width", 2.0}, {"height", 1.0}, {"thickness", 0.5}});
+
+        REQUIRE(profile->area() == Approx(1.25));
+        REQUIRE(profile->second_moment_area().first == Approx(0.076042));
+        REQUIRE(profile->second_moment_area().second == Approx(0.451042));
+    }
 }

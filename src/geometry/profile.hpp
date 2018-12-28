@@ -73,6 +73,7 @@ class hollow_circle : public profile
 public:
     explicit hollow_circle(json const& section_data);
 };
+
 class rectangular_angle : public profile
 {
 public:
