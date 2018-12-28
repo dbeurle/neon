@@ -21,7 +21,7 @@
             "residual_tolerance" : 1.0e-3,
             "displacement_tolerance" : 1.0e-3,
             "absolute_tolerance" : true,
-            "newton_raphson_iterations" : 50
+            "linear_iterations" : 50
         },
         "time" : {
             "period" : 1401.0,
