@@ -50,14 +50,6 @@ enum class scalar : short {
     second_moment_area_2
 };
 
-/// Names for vector values using a std::vector type
-enum class vector : short {
-    /// Accumulated ageing shear modulus integral
-    accumulated_ageing_integral,
-    /// Previous function evaluation for trapezoidal discretisation
-    previous_integrand
-};
-
 /// Second order tensor internal variables types
 enum class second : short {
     /// Cauchy stress
@@ -91,7 +83,9 @@ enum class second : short {
     /// Beam bending stiffness
     bending_stiffness,
     /// Beam shear stiffness
-    shear_stiffness
+    shear_stiffness,
+    /// Intermediate secondary Kirchhoff stress
+    intermediate_secondary_kirchhoff_stress
 };
 
 /// Fourth order tensor types
@@ -100,5 +94,5 @@ enum class fourth : short {
     tangent_operator
 };
 
-using types = std::variant<scalar, vector, second, fourth, nodal>;
+using types = std::variant<scalar, second, fourth, nodal>;
 }
