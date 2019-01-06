@@ -8,6 +8,8 @@
 #include "numeric/dense_matrix.hpp"
 #include "numeric/index_types.hpp"
 
+/// @file
+
 namespace neon
 {
 /// vector_contribution contributes to the right hand side loading vector.

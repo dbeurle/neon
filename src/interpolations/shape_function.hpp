@@ -1,14 +1,13 @@
 
 #pragma once
 
-/// @file
-
-#include <memory>
 #include <utility>
 #include <tuple>
 #include <vector>
 
 #include "numeric/dense_matrix.hpp"
+
+/// \file
 
 namespace neon
 {

@@ -45,6 +45,9 @@ public:
     [[nodiscard]] std::pair<index_view, vector const&> incremental_latin_internal_force(
         std::int32_t const element,
         double const latin_search_direction) const;
+
+protected:
+    using mechanics::solid::submesh::bilinear_gradient;
 };
 
 inline std::pair<index_view, vector const&> latin_submesh::incremental_latin_internal_force(

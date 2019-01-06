@@ -1,9 +1,9 @@
 
 #pragma once
 
-/// @file
-
 #include "mesh/boundary/boundary_condition.hpp"
+
+/// @file
 
 namespace neon
 {

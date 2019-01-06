@@ -6,6 +6,8 @@
 #include "mesh/boundary/boundary_condition.hpp"
 #include "numeric/index_types.hpp"
 
+/// @file
+
 namespace neon
 {
 /// nodal_value handles a prescribed nodal value for potentially multiple
