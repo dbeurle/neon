@@ -6,7 +6,7 @@
 namespace neon
 {
 nodal_value::nodal_value(std::vector<std::int32_t> dof_indices, json const& times, json const& loads)
-    : boundary{times, loads}, dof_indices{std::move(dof_indices)}
+    : boundary_condition{times, loads}, dof_indices{std::move(dof_indices)}
 {
 }
 
@@ -14,7 +14,7 @@ nodal_value::nodal_value(std::vector<std::int32_t> dof_indices,
                          json const& boundary_data,
                          std::string const& name,
                          double const generate_time_step)
-    : boundary{boundary_data, name, generate_time_step}, dof_indices{std::move(dof_indices)}
+    : boundary_condition{boundary_data, name, generate_time_step}, dof_indices{std::move(dof_indices)}
 {
 }
 

@@ -1,8 +1,6 @@
 
 #pragma once
 
-#include "quadrature/numerical_quadrature.hpp"
-
 namespace neon
 {
 template <typename... Spaces>

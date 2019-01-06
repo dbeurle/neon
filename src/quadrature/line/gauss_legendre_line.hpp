@@ -5,7 +5,8 @@
 
 namespace neon
 {
-class gauss_legendre_line : public numerical_quadrature<double>
+/// \cite Hughes2012
+class gauss_legendre_line : public line_quadrature
 {
 public:
     ///

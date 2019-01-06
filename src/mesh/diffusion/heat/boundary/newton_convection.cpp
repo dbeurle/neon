@@ -4,50 +4,53 @@
 #include "math/jacobian_determinant.hpp"
 #include "io/json.hpp"
 
-#include <range/v3/view/transform.hpp>
-#include <range/v3/view/zip.hpp>
-
 #include <utility>
 
 namespace neon::diffusion::boundary
 {
-newton_convection::newton_convection(std::unique_ptr<surface_interpolation>&& sf,
-                                     indices node_indices,
+newton_convection::newton_convection(indices node_indices,
                                      indices dof_indices,
                                      std::shared_ptr<material_coordinates>& coordinates,
                                      json const& times,
-                                     json const& heat_flux,
-                                     json const& heat_transfer_coefficient)
-    : surface_load<surface_interpolation>(std::move(sf),
-                                          std::move(node_indices),
-                                          std::move(dof_indices),
-                                          coordinates,
-                                          times,
-                                          heat_flux)
+                                     json const& heat_fluxes,
+                                     json const& heat_transfer_coefficients,
+                                     element_topology const topology,
+                                     json const& element_data)
+    : heat_flux(std::move(node_indices),
+                std::move(dof_indices),
+                coordinates,
+                times,
+                heat_fluxes,
+                topology,
+                element_data),
+      m_heat_transfer_coefficients{heat_transfer_coefficients.get<std::vector<double>>()}
 {
-    using ranges::view::transform;
-    using ranges::view::zip;
-
-    stiffness_time_data = zip(times | transform([](auto const i) { return i; }),
-                              heat_transfer_coefficient | transform([](auto const i) { return i; }));
+    if (m_heat_transfer_coefficients.size() != m_times.size())
+    {
+        throw std::domain_error("Heat transfer coefficients need to be the same size");
+    }
 }
 
-std::pair<index_view, matrix> newton_convection::external_stiffness(std::int64_t const element,
-                                                                    double const load_factor) const
+auto newton_convection::external_stiffness(std::int64_t const element,
+                                           double const load_factor) const -> matrix const&
 {
-    auto const X = coordinates->initial_configuration(local_node_view(element));
+    auto const configuration = coordinates->initial_configuration(local_node_view(element));
+
+    thread_local matrix k_ext;
+
+    k_ext.resize(configuration.cols(), configuration.cols());
 
     // Perform the computation of the external element stiffness matrix
-    auto const k_ext = sf->quadrature().integrate(matrix::Zero(X.cols(), X.cols()).eval(),
-                                                  [&](auto const& femval, auto) -> matrix {
-                                                      auto const& [N, dN] = femval;
+    linear_form.integrate(k_ext.setZero(), [&](auto const& values, auto) -> matrix {
+        auto const& [N, dN] = values;
 
-                                                      auto const j = jacobian_determinant(X * dN);
+        auto const determinant = jacobian_determinant(configuration * dN);
 
-                                                      return N * N.transpose() * j;
-                                                  });
+        return N * N.transpose() * determinant;
+    });
 
-    return {local_dof_view(element),
-            interpolate_prescribed_load(stiffness_time_data, load_factor) * k_ext};
+    k_ext *= interpolate(m_times, m_heat_transfer_coefficients, load_factor);
+
+    return k_ext;
 }
 }

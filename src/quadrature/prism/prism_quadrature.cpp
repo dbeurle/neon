@@ -1,6 +1,8 @@
 
 #include "prism_quadrature.hpp"
 
+#include <cmath>
+
 namespace neon
 {
 prism_quadrature::prism_quadrature(point const p)

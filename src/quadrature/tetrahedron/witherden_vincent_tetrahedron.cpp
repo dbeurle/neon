@@ -1,11 +1,11 @@
 
-#include "quadrature/tetrahedron/tetrahedron_witherden_vincent.hpp"
+#include "quadrature/tetrahedron/witherden_vincent_tetrahedron.hpp"
 
 #include <algorithm>
 
 namespace neon
 {
-tetrahedron_witherden_vincent::tetrahedron_witherden_vincent(int const minimum_degree)
+witherden_vincent_tetrahedron::witherden_vincent_tetrahedron(int const minimum_degree)
 {
     switch (minimum_degree)
     {

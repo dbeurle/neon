@@ -57,25 +57,29 @@ void static_matrix::compute_external_force(double const load_factor)
 
     f.setZero();
 
-    for (auto const& [name, surfaces] : mesh.surface_boundaries())
+    for (auto const& [name, boundaries] : mesh.surface_boundaries())
     {
-        for (auto const& surface : surfaces)
+        for (auto const& boundary : boundaries)
         {
-            for (auto const& mesh : surface.load_interface())
+            for (auto const& submesh : boundary.load_interface())
             {
-                for (std::int64_t element{0}; element < mesh.elements(); ++element)
+                for (std::int64_t element{0}; element < submesh.elements(); ++element)
                 {
-                    auto const [dof_view, fe] = mesh.external_force(element, load_factor);
+                    auto const dof_view = submesh.local_dof_view(element);
 
-                    f(dof_view) += fe;
+                    auto const& fe_ext = submesh.external_force(element, load_factor);
+
+                    f(dof_view) += fe_ext;
                 }
             }
-            for (auto const& mesh : surface.stiffness_load_interface())
+            for (auto const& submesh : boundary.stiffness_load_interface())
             {
-                for (std::int64_t element{0}; element < mesh.elements(); ++element)
+                for (std::int64_t element{0}; element < submesh.elements(); ++element)
                 {
-                    auto const [dof_view, fe] = mesh.external_force(element, load_factor);
-                    auto const [_, ke] = mesh.external_stiffness(element, load_factor);
+                    auto const dof_view = submesh.local_dof_view(element);
+
+                    auto const& fe = submesh.external_force(element, load_factor);
+                    auto const& ke = submesh.external_stiffness(element, load_factor);
 
                     f(dof_view) += fe;
 
@@ -131,13 +135,14 @@ void static_matrix::assemble_stiffness()
     for (auto const& submesh : mesh.meshes())
     {
         tbb::parallel_for(std::int64_t{0}, submesh.elements(), [&](auto const element) {
-            auto const& [dof_view, local_tangent] = submesh.tangent_stiffness(element);
+            auto const dof_view = submesh.local_dof_view(element);
+            auto const& ke_mat = submesh.tangent_stiffness(element);
 
             for (std::int64_t a{0}; a < dof_view.size(); a++)
             {
                 for (std::int64_t b{0}; b < dof_view.size(); b++)
                 {
-                    K.add_to(dof_view(a), dof_view(b), local_tangent(a, b));
+                    K.add_to(dof_view(a), dof_view(b), ke_mat(a, b));
                 }
             }
         });

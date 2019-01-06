@@ -193,9 +193,11 @@ void static_matrix<MeshType>::compute_internal_force()
     {
         for (std::int64_t element{0}; element < submesh.elements(); ++element)
         {
-            auto const& [dofs, fe_int] = submesh.internal_force(element);
+            auto const dof_view = submesh.local_dof_view(element);
 
-            f_int(dofs) += fe_int;
+            auto const& fe_int = submesh.internal_force(element);
+
+            f_int(dof_view) += fe_int;
         }
     }
 }
@@ -217,9 +219,10 @@ void static_matrix<MeshType>::compute_external_force()
                 [&](auto const& boundary_mesh) {
                     for (std::int64_t element{0}; element < boundary_mesh.elements(); ++element)
                     {
-                        auto const [dofs, fe_ext] = boundary_mesh.external_force(element, step_time);
+                        auto const dof_view = boundary_mesh.local_dof_view(element);
+                        auto const& fe_ext = boundary_mesh.external_force(element, step_time);
 
-                        f_ext(dofs) += fe_ext;
+                        f_ext(dof_view) += fe_ext;
                     }
                 },
                 boundary);
@@ -254,13 +257,15 @@ void static_matrix<MeshType>::assemble_stiffness()
     for (auto const& submesh : mesh.meshes())
     {
         tbb::parallel_for(std::int64_t{0}, submesh.elements(), [&](auto const element) {
-            auto const& [dofs, ke] = submesh.tangent_stiffness(element);
+            auto const dof_view = submesh.local_dof_view(element);
 
-            for (std::int64_t b{0}; b < dofs.size(); b++)
+            auto const& ke = submesh.tangent_stiffness(element);
+
+            for (std::int64_t b{0}; b < dof_view.size(); b++)
             {
-                for (std::int64_t a{0}; a < dofs.size(); a++)
+                for (std::int64_t a{0}; a < dof_view.size(); a++)
                 {
-                    Kt.add_to(dofs(a), dofs(b), ke(a, b));
+                    Kt.add_to(dof_view(a), dof_view(b), ke(a, b));
                 }
             }
         });

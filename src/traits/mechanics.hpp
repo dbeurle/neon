@@ -2,6 +2,7 @@
 #pragma once
 
 #include "numeric/dense_matrix.hpp"
+#include "math/integral_form.hpp"
 
 #include <array>
 #include <type_traits>
@@ -128,5 +129,8 @@ struct traits<theory::solid, D, is_symmetric_>
     using rank_two_tensor = matrix3;
     /// matrix type for a fourth order tensor
     using rank_four_tensor = typename std::conditional<is_symmetric, matrix6, matrix9>::type;
+
+    using bilinear_gradient = fem::integral<volume_interpolation, volume_quadrature, 1>;
+    using bilinear = fem::integral<volume_interpolation, volume_quadrature, 0>;
 };
 }

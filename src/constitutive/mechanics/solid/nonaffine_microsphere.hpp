@@ -23,7 +23,7 @@ public:
     /// \param material_data Json object with material data
     explicit nonaffine_microsphere(std::shared_ptr<internal_variables_t>& variables,
                                    json const& material_data,
-                                   unit_sphere_quadrature::point const rule);
+                                   unit_sphere_quadrature::scheme const rule);
 
     virtual void update_internal_variables(double) override;
 

@@ -28,7 +28,7 @@ public:
     /// \param material_data json object with input file material data
     explicit gaussian_affine_microsphere(std::shared_ptr<internal_variables_t>& variables,
                                          json const& material_data,
-                                         unit_sphere_quadrature::point const p);
+                                         unit_sphere_quadrature::scheme const p);
 
     virtual ~gaussian_affine_microsphere() = default;
 

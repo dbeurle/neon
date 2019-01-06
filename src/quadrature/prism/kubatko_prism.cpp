@@ -1,6 +1,8 @@
 
 #include "kubatko_prism.hpp"
 
+#include <algorithm>
+
 namespace neon
 {
 kubatko_prism::kubatko_prism(int const minimum_degree)

@@ -1,6 +1,8 @@
 
 #include "gauss_legendre_line.hpp"
 
+#include <cmath>
+
 namespace neon
 {
 gauss_legendre_line::gauss_legendre_line(int const minimum_degree)

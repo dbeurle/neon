@@ -2,7 +2,6 @@
 #pragma once
 
 #include "constitutive/internal_variables.hpp"
-#include "geometry/profile.hpp"
 #include "io/json_forward.hpp"
 #include "material/isotropic_elastic_property.hpp"
 #include "traits/mechanics.hpp"

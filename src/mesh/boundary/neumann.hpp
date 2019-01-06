@@ -1,10 +1,13 @@
 
 #pragma once
 
-#include "vector_contribution.hpp"
+#include "boundary_condition.hpp"
 
+#include "io/json_forward.hpp"
 #include "math/jacobian_determinant.hpp"
+#include "mesh/element_topology.hpp"
 #include "mesh/material_coordinates.hpp"
+#include "numeric/index_types.hpp"
 
 #include <memory>
 
@@ -14,7 +17,7 @@ namespace neon
 /// This includes the nodal connectivities and degrees of freedom lists.  Derived
 /// classes must implement shape functions and the appropriate finite element
 /// approximation for the given problem
-class neumann : public vector_contribution
+class neumann : public boundary_condition
 {
 public:
     /// \param node_indices Nodal list
@@ -61,130 +64,78 @@ protected:
     std::shared_ptr<material_coordinates> coordinates;
 };
 
-/// surface_load is a specialisation of a \p neumann boundary condition that
+/// constant_neumann is a specialisation of a \p neumann boundary condition that
 /// computes a surface integral for scalar loads
-template <typename surface_interpolation_type>
-class surface_load : public neumann
+template <typename LinearFormType>
+class constant_neumann : public neumann
 {
 public:
-    /// Type alias for the surface interpolation type
-    using surface_interpolation = surface_interpolation_type;
+    /// Type alias for the integration form
+    using linear_form_type = LinearFormType;
 
 public:
-    explicit surface_load(std::unique_ptr<surface_interpolation>&& sf,
-                          indices node_indices,
-                          indices dof_indices,
-                          std::shared_ptr<material_coordinates>& coordinates,
-                          json const& time_history,
-                          json const& load_history)
+    explicit constant_neumann(indices node_indices,
+                              indices dof_indices,
+                              std::shared_ptr<material_coordinates>& coordinates,
+                              json const& time_history,
+                              json const& load_history,
+                              element_topology const topology,
+                              json const& element_options)
         : neumann(node_indices, dof_indices, coordinates, time_history, load_history),
-          sf(std::move(sf))
+          linear_form(topology, element_options)
     {
     }
 
-    explicit surface_load(std::unique_ptr<surface_interpolation>&& sf,
-                          indices node_indices,
-                          indices dof_indices,
-                          std::shared_ptr<material_coordinates>& coordinates,
-                          json const& boundary,
-                          std::string const& name,
-                          double const generate_time_step)
+    explicit constant_neumann(indices node_indices,
+                              indices dof_indices,
+                              std::shared_ptr<material_coordinates>& coordinates,
+                              json const& boundary,
+                              std::string const& name,
+                              double const generate_time_step,
+                              element_topology const topology,
+                              json const& element_options)
         : neumann(node_indices, dof_indices, coordinates, boundary, name, generate_time_step),
-          sf(std::move(sf))
+          linear_form(topology, element_options)
     {
     }
 
-    virtual ~surface_load() = default;
+    virtual ~constant_neumann() = default;
 
-    surface_load(surface_load&& other) = default;
-    surface_load& operator=(surface_load const&) = default;
+    constant_neumann(constant_neumann&&) = default;
 
-    /// Compute the external force due to a neumann type boundary condition.
-    /// This computes the following integral on a boundary element
-    /// \param element Surface element to compute external force on
-    /// \param load_factor Load factor to interpolate load with
-    /// \return Dof list and a vector for assembly
-    virtual std::pair<index_view, vector> external_force(std::int64_t const element,
-                                                         double const load_factor) const override
+    constant_neumann& operator=(constant_neumann const&) = default;
+
+    /// Compute the external force contribution due to a neumann type boundary
+    /// condition. This computes the following integral on a boundary element
+    /// \param element Element to compute external force
+    /// \param load_factor Load factor to interpolate load
+    /// \return Load vector for assembly
+    virtual auto external_force(std::int64_t const element, double const load_factor) const
+        -> vector const&
     {
-        auto const node_view = node_indices(Eigen::all, element);
+        thread_local vector f_ext;
+
+        auto const node_view = local_node_view(element);
 
         auto const X = coordinates->initial_configuration(node_view);
 
+        f_ext.resize(node_view.size());
+
         // Perform the computation of the external load vector
-        auto const f_ext = sf->quadrature().integrate(vector::Zero(X.cols()).eval(),
-                                                      [&](auto const& femval, auto) -> vector {
-                                                          auto const& [N, dN] = femval;
+        linear_form.integrate(f_ext.setZero(), [&](auto const& value, auto) -> vector {
+            auto const& [N, dN] = value;
 
-                                                          return N * jacobian_determinant(X * dN);
-                                                      });
+            return N * jacobian_determinant(X * dN);
+        });
 
-        return {dof_indices(Eigen::all, element), interpolate_prescribed_load(load_factor) * f_ext};
+        f_ext *= interpolate_prescribed_load(load_factor);
+
+        return f_ext;
     }
 
 protected:
-    /// Shape function for surface interpolation
-    std::unique_ptr<surface_interpolation> sf;
+    /// Linear form for the integral evaluation
+    linear_form_type linear_form;
 };
 
-/// volume_load provides an interface for computing the contribution to the
-/// load vector from a volume load boundary.
-template <typename volume_interpolation_type>
-class volume_load : public neumann
-{
-public:
-    /// Type alias for the volume interpolation type
-    using volume_interpolation = volume_interpolation_type;
-
-public:
-    explicit volume_load(std::unique_ptr<volume_interpolation>&& sf,
-                         indices node_indices,
-                         indices dof_indices,
-                         std::shared_ptr<material_coordinates>& coordinates,
-                         json const& time_history,
-                         json const& load_history)
-        : neumann(node_indices, dof_indices, coordinates, time_history, load_history),
-          sf(std::move(sf))
-    {
-    }
-
-    explicit volume_load(std::unique_ptr<volume_interpolation>&& sf,
-                         indices node_indices,
-                         indices dof_indices,
-                         std::shared_ptr<material_coordinates>& coordinates,
-                         json const& boundary,
-                         std::string const& name,
-                         double const generate_time_step)
-        : neumann(node_indices, dof_indices, coordinates, boundary, name, generate_time_step),
-          sf(std::move(sf))
-    {
-    }
-
-    virtual ~volume_load() = default;
-
-    volume_load(volume_load&&) = default;
-
-    volume_load& operator=(volume_load const&) = default;
-
-    virtual std::pair<index_view, vector> external_force(std::int64_t const element,
-                                                         double const load_factor) const override
-    {
-        auto const node_view = node_indices(Eigen::all, element);
-
-        auto const X = coordinates->initial_configuration(node_view);
-
-        // Perform the computation of the external load vector
-        auto const f_ext = sf->quadrature().integrate(vector::Zero(X.cols()).eval(),
-                                                      [&](auto const& femval, auto) -> vector {
-                                                          auto const& [N, dN] = femval;
-
-                                                          return N * jacobian_determinant(X * dN);
-                                                      });
-
-        return {dof_indices(Eigen::all, element), interpolate_prescribed_load(load_factor) * f_ext};
-    }
-
-protected:
-    std::unique_ptr<volume_interpolation> sf;
-};
 }

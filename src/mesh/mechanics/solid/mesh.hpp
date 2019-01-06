@@ -82,9 +82,13 @@ protected:
 
     void allocate_variable_names();
 
-    void allocate_boundary_conditions(json const& boundary_data, basic_mesh const& reference_mesh);
+    void allocate_boundary_conditions(json const& boundary_data,
+                                      basic_mesh const& reference_mesh,
+                                      double const generate_time_step);
 
-    void allocate_displacement_boundary(json const& boundary, basic_mesh const& reference_mesh);
+    void allocate_displacement_boundary(json const& boundary,
+                                        basic_mesh const& reference_mesh,
+                                        double const generate_time_step);
 
     [[nodiscard]] bool is_nonfollower_load(std::string const& boundary_type) const;
 
@@ -104,14 +108,6 @@ protected:
     vector reaction_forces;
 
     std::unordered_map<std::string, int> const dof_table = {{"x", 0}, {"y", 1}, {"z", 2}};
-
-    /// This time step is taken from
-    /// "Time[Period][Increments][Initial]" in the
-    /// input file.  It is used in the boundary class
-    /// to generate cyclic loading for example. This
-    /// ensures the compatibility between user
-    /// defined and sinusoidal boundary conditions.
-    double generate_time_step;
 
     /// File output handle
     std::unique_ptr<io::file_output> writer;

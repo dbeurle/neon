@@ -27,7 +27,6 @@ mesh<SubMeshType>::mesh(basic_mesh const& basic_mesh,
                         json const& simulation_data,
                         double const generate_time_step)
     : coordinates(std::make_shared<material_coordinates>(basic_mesh.coordinates())),
-      generate_time_step{generate_time_step},
       writer(std::make_unique<io::vtk_file_output>(simulation_data["name"],
                                                    simulation_data["visualisation"]))
 {
@@ -41,7 +40,8 @@ mesh<SubMeshType>::mesh(basic_mesh const& basic_mesh,
 
         writer->mesh(submesh.all_node_indices(), submesh.topology());
     }
-    allocate_boundary_conditions(simulation_data, basic_mesh);
+    allocate_boundary_conditions(simulation_data, basic_mesh, generate_time_step);
+
     allocate_variable_names();
 }
 
@@ -63,6 +63,7 @@ void mesh<SubMeshType>::update_internal_variables(vector const& u, double const 
     for (auto& submesh : submeshes) submesh.update_internal_variables(time_step_size);
 
     auto const end = std::chrono::steady_clock::now();
+
     std::chrono::duration<double> const elapsed_seconds = end - start;
 
     std::cout << std::string(6, ' ') << "Internal variable update took " << elapsed_seconds.count()
@@ -72,7 +73,10 @@ void mesh<SubMeshType>::update_internal_variables(vector const& u, double const 
 template <class SubMeshType>
 void mesh<SubMeshType>::save_internal_variables(bool const have_converged)
 {
-    for (auto& submesh : submeshes) submesh.save_internal_variables(have_converged);
+    for (auto& submesh : submeshes)
+    {
+        submesh.save_internal_variables(have_converged);
+    }
 }
 
 template <class SubMeshType>
@@ -84,17 +88,18 @@ bool mesh<SubMeshType>::is_nonfollower_load(std::string const& boundary_type) co
 
 template <class SubMeshType>
 void mesh<SubMeshType>::allocate_boundary_conditions(json const& simulation_data,
-                                                     basic_mesh const& basic_mesh)
+                                                     basic_mesh const& basic_mesh,
+                                                     double const generate_time_step)
 {
     // Populate the boundary conditions and their corresponding mesh
-    for (auto const& boundary : simulation_data["boundaries"])
+    for (auto const& boundary_data : simulation_data["boundaries"])
     {
-        std::string const& boundary_name = boundary["name"];
-        std::string const& boundary_type = boundary["type"];
+        std::string const& boundary_name = boundary_data["name"];
+        std::string const& boundary_type = boundary_data["type"];
 
         if (boundary_type == "displacement")
         {
-            this->allocate_displacement_boundary(boundary, basic_mesh);
+            this->allocate_displacement_boundary(boundary_data, basic_mesh, generate_time_step);
         }
         else if (is_nonfollower_load(boundary_type))
         {
@@ -102,7 +107,7 @@ void mesh<SubMeshType>::allocate_boundary_conditions(json const& simulation_data
                                       nonfollower_load_boundary(coordinates,
                                                                 basic_mesh.meshes(boundary_name),
                                                                 simulation_data,
-                                                                boundary,
+                                                                boundary_data,
                                                                 dof_table,
                                                                 generate_time_step));
         }
@@ -115,7 +120,8 @@ void mesh<SubMeshType>::allocate_boundary_conditions(json const& simulation_data
 
 template <class SubMeshType>
 void mesh<SubMeshType>::allocate_displacement_boundary(json const& boundary,
-                                                       basic_mesh const& basic_mesh)
+                                                       basic_mesh const& basic_mesh,
+                                                       double const generate_time_step)
 {
     std::string const& boundary_name = boundary["name"];
 
@@ -152,7 +158,7 @@ std::vector<double> mesh<SubMeshType>::time_history() const
     {
         for (auto const& boundary : boundaries)
         {
-            auto const times = boundary.time_history();
+            auto const& times = boundary.times();
             history.insert(begin(times), end(times));
         }
     }
@@ -162,7 +168,7 @@ std::vector<double> mesh<SubMeshType>::time_history() const
         {
             std::visit(
                 [&](auto const& boundary_mesh) {
-                    auto const times = boundary_mesh.time_history();
+                    auto const& times = boundary_mesh.times();
                     history.insert(begin(times), end(times));
                 },
                 boundary_variant);

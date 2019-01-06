@@ -153,7 +153,7 @@ std::vector<double> mesh::time_history() const
     {
         for (auto const& boundary : boundaries)
         {
-            auto const times = boundary.time_history();
+            auto const& times = boundary.times();
             history.insert(begin(times), end(times));
         }
     }

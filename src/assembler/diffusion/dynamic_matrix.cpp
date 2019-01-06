@@ -105,13 +105,15 @@ void dynamic_matrix::assemble_mass()
     {
         for (std::int64_t element = 0; element < submesh.elements(); ++element)
         {
-            auto const& [dofs, m] = submesh.consistent_mass(element);
+            auto const dof_view = submesh.local_dof_view(element);
 
-            for (std::int64_t a{0}; a < dofs.size(); a++)
+            auto const& mass = submesh.consistent_mass(element);
+
+            for (std::int64_t a{0}; a < dof_view.size(); a++)
             {
-                for (std::int64_t b{0}; b < dofs.size(); b++)
+                for (std::int64_t b{0}; b < dof_view.size(); b++)
                 {
-                    M.add_to(dofs(a), dofs(b), m(a, b));
+                    M.add_to(dof_view(a), dof_view(b), mass(a, b));
                 }
             }
         }

@@ -62,10 +62,10 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
 
         auto const& model_type = constitutive_model["type"].get<std::string>();
 
-        std::map<std::string, unit_sphere_quadrature::point> const str_to_enum =
-            {{"BO21", unit_sphere_quadrature::point::BO21},
-             {"BO33", unit_sphere_quadrature::point::BO33},
-             {"FM900", unit_sphere_quadrature::point::FM900}};
+        std::map<std::string, unit_sphere_quadrature::scheme> const str_to_enum =
+            {{"BO21", unit_sphere_quadrature::scheme::BO21},
+             {"BO33", unit_sphere_quadrature::scheme::BO33},
+             {"FM900", unit_sphere_quadrature::scheme::FM900}};
 
         auto const entry = str_to_enum.find(constitutive_model["quadrature"].get<std::string>());
 

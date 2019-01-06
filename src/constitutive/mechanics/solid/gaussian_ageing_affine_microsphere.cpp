@@ -18,7 +18,7 @@ namespace neon::mechanics::solid
 gaussian_ageing_affine_microsphere::gaussian_ageing_affine_microsphere(
     std::shared_ptr<internal_variables_t>& variables,
     json const& material_data,
-    unit_sphere_quadrature::point const rule)
+    unit_sphere_quadrature::scheme const rule)
     : gaussian_affine_microsphere{variables, material_data, rule}, material{material_data}
 {
     variables->add(variable::scalar::active_shear_modulus,

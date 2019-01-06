@@ -7,6 +7,8 @@
 #include "constitutive/internal_variables.hpp"
 #include "constitutive/internal_variables_alias.hpp"
 #include "interpolations/shape_function.hpp"
+#include "interpolations/recovery_methods.hpp"
+#include "math/integral_form.hpp"
 #include "math/view.hpp"
 
 #include <memory>
@@ -21,6 +23,10 @@ namespace diffusion
 /// components for a three-dimensional heat equation discretisation.
 class submesh : public basic_submesh
 {
+public:
+    template <int N>
+    using bilinear_type = fem::integral<volume_interpolation, volume_quadrature, N>;
+
 public:
     explicit submesh(json const& material_data,
                      json const& mesh_data,
@@ -40,8 +46,6 @@ public:
 
     [[nodiscard]] auto dofs_per_node() const { return 1; }
 
-    [[nodiscard]] auto const& shape_function() const { return *sf; }
-
     [[nodiscard]] auto const& constitutive() const { return *cm; }
 
     /**
@@ -52,8 +56,7 @@ public:
      * where \f$ \kappa \f$ is the conductivity
      * @return DoFs and stiffness matrix
      */
-    [[nodiscard]] auto tangent_stiffness(std::int64_t const element) const
-        -> std::pair<index_view, matrix>;
+    [[nodiscard]] auto tangent_stiffness(std::int64_t const element) const -> matrix const&;
 
     /**
      * Compute the consistent (full) mass matrix according to
@@ -63,12 +66,10 @@ public:
      * where \f$ \rho \f$ is the density and \f$ c_p \f$ is the specific heat
      * @return DoFs and consistent mass matrix \sa diagonal_mass
      */
-    [[nodiscard]] auto consistent_mass(std::int64_t const element) const
-        -> std::pair<index_view, matrix>;
+    [[nodiscard]] auto consistent_mass(std::int64_t const element) const -> matrix const&;
 
     /// \return Diagonal mass matrix using row sum technique \sa consistent_mass
-    [[nodiscard]] auto diagonal_mass(std::int64_t const element) const
-        -> std::pair<index_view, vector>;
+    [[nodiscard]] auto diagonal_mass(std::int64_t const element) const -> vector const&;
 
     /// Update the internal variables for the mesh group
     void update_internal_variables(double const time_step_size);
@@ -92,14 +93,18 @@ public:
 private:
     /// Nodal coordinates
     std::shared_ptr<material_coordinates> coordinates;
-    /// Shape function
-    std::unique_ptr<volume_interpolation> sf;
+    /// Stiffness matrix bilinear form
+    bilinear_type<1> bilinear_gradient;
+    /// Mass matrix bilinear form
+    bilinear_type<0> bilinear;
 
     stride_view<> view;
     std::shared_ptr<internal_variables_t> variables;
 
     /// Constitutive model
     std::unique_ptr<constitutive_model> cm;
+
+    std::unique_ptr<local_extrapolation> patch_recovery;
 };
 }
 }

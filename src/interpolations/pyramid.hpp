@@ -16,7 +16,7 @@ namespace neon
  * N_2(r, s, t) &= \frac{1}{4}\left[(1-r)*(1+s) - t - \frac{rst}{1-t}\right] \\
  * N_3(r, s, t) &= \frac{1}{4}\left[(1-r)*(1-s) - t + \frac{rst}{1-t}\right] \\
  * N_4(r, s, t) &= \frac{1}{4}\left[(1+r)*(1-s) - t - \frac{rst}{1-t}\right] \\
- * N_5(r, s, t) &= t \\
+ * N_5(r, s, t) &= t
  * \f}
  */
 class pyramid5 : public volume_interpolation

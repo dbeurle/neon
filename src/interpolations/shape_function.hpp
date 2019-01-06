@@ -1,12 +1,11 @@
 
 #pragma once
 
-#include <memory>
 #include <utility>
+#include <tuple>
 #include <vector>
 
 #include "numeric/dense_matrix.hpp"
-#include "quadrature/numerical_quadrature.hpp"
 
 namespace neon
 {
@@ -15,6 +14,8 @@ template <typename... Spaces>
 class shape_function
 {
 public:
+    static constexpr auto spatial_dimension = sizeof...(Spaces);
+
     using coordinate_type = std::tuple<int, Spaces...>;
 
     /// Fix the size of the shape function derivative to the size of the quadrature points
@@ -46,7 +47,7 @@ public:
         -> value_type = 0;
 
     /// Evaluate the shape functions at multiple natural coordinates
-    [[nodiscard]] virtual auto evaluate(std::vector<coordinate_type> const& coordinates) const
+    [[nodiscard]] auto evaluate(std::vector<coordinate_type> const& coordinates) const
         noexcept(false) -> std::vector<value_type>
     {
         // This trick works because the virtual dispatch will pickup the correct

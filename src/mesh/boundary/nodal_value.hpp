@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "mesh/boundary/boundary.hpp"
+#include "mesh/boundary/boundary_condition.hpp"
 #include "numeric/index_types.hpp"
 
 namespace neon
@@ -10,7 +10,7 @@ namespace neon
 /// degrees of freedom with the same value history prescribed.  This can be
 /// used to represent nodal based boundary conditions
 /// \sa dirichlet
-class nodal_value : public boundary
+class nodal_value : public boundary_condition
 {
 public:
     explicit nodal_value(std::vector<std::int32_t> dof_indices, json const& times, json const& loads);
@@ -21,10 +21,10 @@ public:
                          double const generate_time_step);
 
     /// \return view of the unique dof indices for this boundary
-    [[nodiscard]] std::vector<std::int32_t> const& dof_view() const noexcept;
+    [[nodiscard]] auto dof_view() const noexcept -> std::vector<std::int32_t> const&;
 
     /// \return boundary value depending on the loading factor
-    [[nodiscard]] double value_view(double const load_factor = 1.0) const;
+    [[nodiscard]] auto value_view(double const load_factor = 1.0) const -> double;
 
 protected:
     /// Unique dof indices to apply the value
