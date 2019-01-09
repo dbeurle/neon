@@ -1,31 +1,26 @@
 
 #include "hexahedron_quadrature.hpp"
 
+#include <cmath>
+
 namespace neon
 {
-hexahedron_quadrature::hexahedron_quadrature(point const p)
+hexahedron_quadrature::hexahedron_quadrature(int const minimum_degree)
 {
-    switch (p)
+    switch (minimum_degree)
     {
-        case point::one:
+        case 1:
         {
+            m_degree = 1;
             m_weights = {8.0};
             m_coordinates = {{0, 0.0, 0.0, 0.0}};
             break;
         }
-        case point::six:
+        case 2:
+        case 3:
+        case 4:
         {
-            m_weights.resize(6, 4.0 / 3.0);
-            m_coordinates = {{0, 1.0, 0.0, 0.0},
-                             {1, -1.0, 0.0, 0.0},
-                             {2, 0.0, 1.0, 0.0},
-                             {3, 0.0, -1.0, 0.0},
-                             {4, 0.0, 0.0, 1.0},
-                             {5, 0.0, 0.0, -1.0}};
-            break;
-        }
-        case point::eight:
-        {
+            m_degree = 4;
             m_weights.resize(8, 1.0);
             auto const qp = 1.0 / std::sqrt(3.0);
             m_coordinates = {{0, -qp, -qp, -qp},
@@ -38,8 +33,10 @@ hexahedron_quadrature::hexahedron_quadrature(point const p)
                              {7, -qp, qp, qp}};
             break;
         }
-        case point::twentyseven:
+        case 5:
+        case 6:
         {
+            m_degree = 6;
             m_weights = {125.0 / 729.0, 125.0 / 729.0, 125.0 / 729.0, 125.0 / 729.0, 200.0 / 729.0,
                          200.0 / 729.0, 200.0 / 729.0, 200.0 / 729.0, 320.0 / 729.0, 200.0 / 729.0,
                          200.0 / 729.0, 200.0 / 729.0, 200.0 / 729.0, 320.0 / 729.0, 320.0 / 729.0,

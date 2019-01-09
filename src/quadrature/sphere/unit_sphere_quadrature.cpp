@@ -3,11 +3,11 @@
 
 namespace neon
 {
-unit_sphere_quadrature::unit_sphere_quadrature(point const p)
+unit_sphere_quadrature::unit_sphere_quadrature(scheme const rule)
 {
-    switch (p)
+    switch (rule)
     {
-        case point::BO21:
+        case scheme::BO21:
         {
             // 21 point unit sphere Gaussian quadrature scheme assuming orthogonal
             // symmetry see Bazant and Oh (1986) Table 1 on Page 43
@@ -30,7 +30,7 @@ unit_sphere_quadrature::unit_sphere_quadrature(point const p)
 
             break;
         }
-        case point::BO33:
+        case scheme::BO33:
         {
             // 21 point unit sphere Gaussian quadrature scheme assuming orthogonal
             // symmetry see Bazant and Oh (1986) Table 1 on Page 43
@@ -90,7 +90,7 @@ unit_sphere_quadrature::unit_sphere_quadrature(point const p)
 
             break;
         }
-        case point::BO61:
+        case scheme::BO61:
         {
             // Weightings for unit sphere
             constexpr auto weight1 = 0.00795844204678;
@@ -116,7 +116,7 @@ unit_sphere_quadrature::unit_sphere_quadrature(point const p)
             throw std::domain_error("Sphere integration rule BO61 not yet implemented");
             break;
         }
-        case point::FM900:
+        case scheme::FM900:
         {
             // 900 quadrature point scheme on the unit sphere.  This should only
             // be used for model verification or validation due to the computational
@@ -1337,17 +1337,14 @@ unit_sphere_quadrature::unit_sphere_quadrature(point const p)
             break;
         }
     }
-    this->precompute_coordinates();
-}
 
-void unit_sphere_quadrature::precompute_coordinates()
-{
-    this->evaluate([](auto const& coordinate) {
-        auto const& [l, r1, r2, r3] = coordinate;
+    m_values.reserve(m_weights.size());
 
-        vector3 t(r1, r2, r3);
+    for (auto const& [index, x, y, z] : m_coordinates)
+    {
+        vector3 r(x, y, z);
 
-        return std::make_tuple(t, t * t.transpose());
-    });
+        m_values.emplace_back(r, r * r.transpose());
+    }
 }
 }

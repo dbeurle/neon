@@ -1,14 +1,14 @@
 
 #pragma once
 
-#include "quadrature/numerical_quadrature.hpp"
+/// \file
 
 namespace neon
 {
-template <typename Quadrature>
+template <typename... Spaces>
 class shape_function;
 
-using line_interpolation = shape_function<numerical_quadrature<double>>;
-using surface_interpolation = shape_function<surface_quadrature>;
-using volume_interpolation = shape_function<volume_quadrature>;
+using line_interpolation = shape_function<double>;
+using surface_interpolation = shape_function<double, double>;
+using volume_interpolation = shape_function<double, double, double>;
 }

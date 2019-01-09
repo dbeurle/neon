@@ -63,8 +63,27 @@ std::unique_ptr<abstract_module> make_module(
         }
         else if (solution_type == "latin")
         {
-            return std::make_unique<solid_mechanics_module<mechanics::latin_matrix<
-                mechanics::solid::mesh<mechanics::solid::latin_submesh>>>>(mesh, material, simulation);
+            if (simulation.find("nonlinear_options") == simulation.end())
+            {
+                throw std::domain_error("\"nonlinear_options\" needs to be present for a "
+                                        "solid_mechanics simulation");
+            }
+
+            auto const nonlinear_options = simulation["nonlinear_options"];
+
+            if (nonlinear_options["latin_scheme"] == "incremental"
+                && nonlinear_options["latin_local_stage"] == "implicit")
+            {
+                return std::make_unique<solid_mechanics_module<mechanics::latin_matrix<
+                    mechanics::solid::mesh<mechanics::solid::latin_submesh>>>>(mesh,
+                                                                               material,
+                                                                               simulation);
+            }
+            else
+            {
+                throw std::runtime_error("Only incremental and implicit LATIN formulation has been "
+                                         "implemented so far");
+            }
         }
 
         throw std::domain_error("\"solution\" is not valid.  Please use \"equilibrium\"");

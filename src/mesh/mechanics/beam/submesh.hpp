@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "mesh/basic_submesh.hpp"
 
 #include "mesh/material_coordinates.hpp"
@@ -27,7 +29,7 @@ namespace neon::mechanics::beam
 {
 /// submesh is responsible for computing the linear stiffness matrices
 /// for the three-dimensional small strain beam theory \cite Hughes2012.
-class submesh : public basic_submesh //: public detail::submesh<beam::submesh>
+class submesh : public basic_submesh
 {
 public:
     // Type aliases
@@ -44,7 +46,7 @@ public:
                      basic_submesh const& submesh);
 
     /// \return degrees of freedom and the linear element stiffness matrix
-    [[nodiscard]] std::pair<index_view, matrix const&> tangent_stiffness(std::int32_t const element) const;
+    [[nodiscard]] matrix const& tangent_stiffness(std::int32_t const element) const;
 
     /// Update the internal variables for the mesh group
     /// \sa update_deformation_measures()
@@ -53,7 +55,7 @@ public:
     void update_internal_variables(double const time_step_size = 1.0);
 
     /// \return A view of degrees of freedom for an element
-    [[nodiscard]] auto const local_dof_view(std::int64_t const element) const
+    [[nodiscard]] auto local_dof_view(std::int64_t const element) const
     {
         return dof_indices(Eigen::all, element);
     }
@@ -62,7 +64,7 @@ public:
     [[nodiscard]] auto const& internal_variables() const { return *variables; }
 
     template <typename name_type>
-    std::pair<vector, vector> nodal_averaged_variable(name_type const name) const
+    std::pair<vector, vector> nodal_averaged_variable(name_type) const
     {
         return std::make_pair(vector(), vector());
     }
@@ -136,8 +138,7 @@ protected:
     void allocate_normal_and_tangent(json const& profile_data);
 
 protected:
-    /// Line shape function
-    std::unique_ptr<line_interpolation> sf;
+    fem::integral<line_interpolation, line_quadrature, 1> bilinear_gradient;
 
     /// Coordinates of each mesh
     std::shared_ptr<material_coordinates> coordinates;

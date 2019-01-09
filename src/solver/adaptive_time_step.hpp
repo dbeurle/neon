@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include <queue>
 #include <tuple>
 #include <vector>

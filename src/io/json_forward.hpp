@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "nlohmann/json_fwd.hpp"
 
 namespace neon

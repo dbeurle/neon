@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "shape_function.hpp"
 #include "quadrature/line/line_quadrature.hpp"
 

@@ -1,7 +1,7 @@
 
 #include "conjugate_gradient_ocl.hpp"
 
-#ifdef ENABLE_OCL
+#ifdef ENABLE_OPENCL
 
 #include "exceptions.hpp"
 #include "dmatrix_vector_product.hpp"
@@ -22,7 +22,7 @@ namespace neon
 {
 conjugate_gradient_ocl::conjugate_gradient_ocl() : iterative_linear_solver()
 {
-    viennacl::ocl::set_context_device_type(0, viennacl::ocl::gpu_tag());
+    viennacl::ocl::set_context_device_type(0, viennacl::ocl::cpu_tag());
 }
 
 conjugate_gradient_ocl::conjugate_gradient_ocl(double const residual_tolerance)

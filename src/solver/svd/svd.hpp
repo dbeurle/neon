@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "numeric/dense_matrix.hpp"
 #include <Eigen/SVD>
 
@@ -78,7 +80,7 @@ private:
 
 /// Implementation of the truncated Singular Value Decomposition, using
 /// randomized algorithms as described in 'finding structure with randomness'
-/// \cite halko2011finding.
+/// @cite halko2011finding.
 class randomised_svd : public svd
 {
 public:

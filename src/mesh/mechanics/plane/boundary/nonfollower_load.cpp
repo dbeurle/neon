@@ -26,14 +26,14 @@ nonfollower_load_boundary::nonfollower_load_boundary(
                 for (auto const& mesh : submeshes)
                 {
                     boundary_meshes.emplace_back(std::in_place_type_t<traction>{},
-                                                 make_line_interpolation(mesh.topology(),
-                                                                         simulation_data),
                                                  mesh.all_node_indices(),
                                                  2 * mesh.all_node_indices() + dof_offset,
                                                  coordinates,
                                                  boundary,
                                                  it->first,
-                                                 generate_time_step);
+                                                 generate_time_step,
+                                                 mesh.topology(),
+                                                 simulation_data);
                 }
             }
         }
@@ -49,14 +49,14 @@ nonfollower_load_boundary::nonfollower_load_boundary(
                 for (auto const& mesh : submeshes)
                 {
                     boundary_meshes.emplace_back(std::in_place_type_t<body_force>{},
-                                                 make_surface_interpolation(mesh.topology(),
-                                                                            simulation_data),
                                                  mesh.all_node_indices(),
                                                  2 * mesh.all_node_indices() + dof_offset,
                                                  coordinates,
                                                  boundary,
                                                  it->first,
-                                                 generate_time_step);
+                                                 generate_time_step,
+                                                 mesh.topology(),
+                                                 simulation_data);
                 }
             }
         }

@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "static_matrix.hpp"
 
 #include "solver/time/trapezoidal_integrator.hpp"

@@ -1,12 +1,12 @@
 
 #pragma once
 
+/// @file
+
 #include "numeric/doublet.hpp"
 
 #include <cstdint>
 #include <vector>
-
-/// \file sparsity_pattern.hpp
 
 namespace neon
 {

@@ -20,10 +20,11 @@ submesh::submesh(json const& material_data,
                  std::shared_ptr<material_coordinates>& coordinates,
                  basic_submesh const& submesh)
     : basic_submesh(submesh),
-      sf(make_line_interpolation(topology(), simulation_data)),
+      bilinear_gradient(topology(), simulation_data),
       coordinates(coordinates),
-      view(sf->quadrature().points()),
-      variables(std::make_shared<internal_variable_type>(elements() * sf->quadrature().points())),
+      view(bilinear_gradient.quadrature().points()),
+      variables(std::make_shared<internal_variable_type>(
+          elements() * bilinear_gradient.quadrature().points())),
       cm(std::make_unique<isotropic_linear>(variables, material_data))
 {
     allocate_normal_and_tangent(section_data);
@@ -53,7 +54,7 @@ void submesh::update_internal_variables(double)
     // Loop over all elements and quadrature points to compute the profile
     // properties for each quadrature point in the beam
     tbb::parallel_for(std::int64_t{0}, elements(), [&, this](auto const element) {
-        sf->quadrature().for_each([&, this](auto const&, auto const l) {
+        bilinear_gradient.for_each([&, this](auto const&, auto const l) {
             A.at(view(element, l)) = profile->area();
 
             auto const [shear_area_1, shear_area_2] = profile->shear_area();
@@ -69,7 +70,7 @@ void submesh::update_internal_variables(double)
     cm->update_internal_variables();
 }
 
-std::pair<index_view, matrix const&> submesh::tangent_stiffness(std::int32_t const element) const
+matrix const& submesh::tangent_stiffness(std::int32_t const element) const
 {
     static thread_local matrix ke(12, 12);
 
@@ -80,52 +81,55 @@ std::pair<index_view, matrix const&> submesh::tangent_stiffness(std::int32_t con
             + axial_stiffness(configuration, element) + torsional_stiffness(configuration, element))
          * rotation_matrix.transpose();
 
-    return {local_dof_view(element), ke};
+    return ke;
 }
 
 matrix const& submesh::bending_stiffness(matrix3x const& configuration, std::int32_t const element) const
 {
-    static thread_local matrix2x B_bending(2, 6 * sf->number_of_nodes());
-    static thread_local matrix k_bending(6 * sf->number_of_nodes(), 6 * sf->number_of_nodes());
+    static thread_local matrix2x B_bending(2,
+                                           6 * bilinear_gradient.shape_function().number_of_nodes());
+    static thread_local matrix k_bending(6 * bilinear_gradient.shape_function().number_of_nodes(),
+                                         6 * bilinear_gradient.shape_function().number_of_nodes());
 
     B_bending.setZero();
     k_bending.setZero();
 
     auto const& D_bending = variables->get(variable::second::bending_stiffness);
 
-    sf->quadrature().integrate_inplace(k_bending, [&, this](auto const& femval, auto const l) {
-        auto const& [N, dN] = femval;
+    bilinear_gradient.integrate(k_bending, [&, this](auto const& value, auto const l) {
+        auto const& [N, dN] = value;
 
         auto const j = jacobian_determinant(configuration * dN);
 
-        for (int i = 0; i < sf->number_of_nodes(); ++i)
+        for (int i = 0; i < bilinear_gradient.shape_function().number_of_nodes(); ++i)
         {
             auto const offset = i * 6;
 
             B_bending(0, 3 + offset) = B_bending(1, 4 + offset) = dN(i, l) / j;
         }
 
-        return B_bending.transpose() * D_bending.at(view(element, l)) * B_bending * j;
+        return B_bending.transpose() * D_bending[view(element, l)] * B_bending * j;
     });
     return k_bending;
 }
 
 matrix const& submesh::shear_stiffness(matrix3x const& configuration, std::int32_t const element) const
 {
-    static thread_local matrix2x B_shear(2, 6 * sf->number_of_nodes());
-    static thread_local matrix k_shear(6 * sf->number_of_nodes(), 6 * sf->number_of_nodes());
+    static thread_local matrix2x B_shear(2, 6 * bilinear_gradient.shape_function().number_of_nodes());
+    static thread_local matrix k_shear(6 * bilinear_gradient.shape_function().number_of_nodes(),
+                                       6 * bilinear_gradient.shape_function().number_of_nodes());
 
     B_shear.setZero();
     k_shear.setZero();
 
     auto const& D_shear = variables->get(variable::second::shear_stiffness);
 
-    sf->quadrature().integrate_inplace(k_shear, [&, this](auto const& femval, auto const l) {
+    bilinear_gradient.integrate(k_shear, [&, this](auto const& femval, auto const l) {
         auto const& [N, dN] = femval;
 
         auto const j = jacobian_determinant(configuration * dN);
 
-        for (int i = 0; i < sf->number_of_nodes(); ++i)
+        for (int i = 0; i < bilinear_gradient.shape_function().number_of_nodes(); ++i)
         {
             auto const offset = i * 6;
 
@@ -141,20 +145,21 @@ matrix const& submesh::shear_stiffness(matrix3x const& configuration, std::int32
 
 matrix const& submesh::axial_stiffness(matrix3x const& configuration, std::int32_t const element) const
 {
-    static thread_local vector B_axial(6 * sf->number_of_nodes());
-    static thread_local matrix k_axial(6 * sf->number_of_nodes(), 6 * sf->number_of_nodes());
+    static thread_local vector B_axial(6 * bilinear_gradient.shape_function().number_of_nodes());
+    static thread_local matrix k_axial(6 * bilinear_gradient.shape_function().number_of_nodes(),
+                                       6 * bilinear_gradient.shape_function().number_of_nodes());
 
     B_axial.setZero();
     k_axial.setZero();
 
     auto const D_axial = variables->get(variable::scalar::axial_stiffness);
 
-    sf->quadrature().integrate_inplace(k_axial, [&, this](auto const& femval, auto const l) {
+    bilinear_gradient.integrate(k_axial, [&, this](auto const& femval, auto const l) {
         auto const& [N, dN] = femval;
 
         auto const j = jacobian_determinant(configuration * dN);
 
-        for (int i = 0; i < sf->number_of_nodes(); ++i)
+        for (int i = 0; i < bilinear_gradient.shape_function().number_of_nodes(); ++i)
         {
             auto const offset = i * 6;
 
@@ -169,20 +174,21 @@ matrix const& submesh::axial_stiffness(matrix3x const& configuration, std::int32
 matrix const& submesh::torsional_stiffness(matrix3x const& configuration,
                                            std::int32_t const element) const
 {
-    static thread_local vector B_torsion(6 * sf->number_of_nodes());
-    static thread_local matrix k_torsion(6 * sf->number_of_nodes(), 6 * sf->number_of_nodes());
+    static thread_local vector B_torsion(6 * bilinear_gradient.shape_function().number_of_nodes());
+    static thread_local matrix k_torsion(6 * bilinear_gradient.shape_function().number_of_nodes(),
+                                         6 * bilinear_gradient.shape_function().number_of_nodes());
 
     B_torsion.setZero();
     k_torsion.setZero();
 
     auto const D_torsion = variables->get(variable::scalar::torsional_stiffness);
 
-    sf->quadrature().integrate_inplace(k_torsion, [&, this](auto const& femval, auto const l) {
+    bilinear_gradient.integrate(k_torsion, [&, this](auto const& femval, auto const l) {
         auto const& [N, dN] = femval;
 
         auto const j = jacobian_determinant(configuration * dN);
 
-        for (int i = 0; i < sf->number_of_nodes(); ++i)
+        for (int i = 0; i < bilinear_gradient.shape_function().number_of_nodes(); ++i)
         {
             auto const offset = i * 6;
 

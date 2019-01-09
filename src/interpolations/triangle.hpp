@@ -1,22 +1,23 @@
 
 #pragma once
 
+/// @file
+
 #include "shape_function.hpp"
-#include "quadrature/triangle/triangle_quadrature.hpp"
 
 namespace neon
 {
-/// Triangular 3 node element with analytic integration
+/// Triangular 3 node element (constant-strain / stress element).  Usually
+/// recommended for solving the Laplace equation but exhibits poor convergence
+/// and is generally not recommended for production use.
 class triangle3 : public surface_interpolation
 {
 public:
-    triangle3(triangle_quadrature::point const p);
+    triangle3();
 
-    double compute_measure(matrix const& nodal_coordinates) const;
-
-protected:
-    /// Initialize the shape functions
-    void precompute_shape_functions();
+    /// Evaluate the shape functions at the natural coordinate
+    virtual auto evaluate(coordinate_type const& coordinate) const noexcept(false)
+        -> value_type override final;
 };
 
 /// A six node triangle with midside nodes and quadrature shape functions.
@@ -24,14 +25,10 @@ protected:
 class triangle6 : public surface_interpolation
 {
 public:
-    triangle6(triangle_quadrature::point const p);
+    triangle6();
 
-    /// Compute the area of the element using numerical integration
-    /// \param nodal_coordinates element nodal coordinates
-    /// \return surface area
-    double compute_measure(matrix const& nodal_coordinates);
-
-protected:
-    void precompute_shape_functions();
+    /// Evaluate the shape functions at the natural coordinate
+    virtual auto evaluate(coordinate_type const& coordinate) const noexcept(false)
+        -> value_type override final;
 };
 }

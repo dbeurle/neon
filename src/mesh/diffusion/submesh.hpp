@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "mesh/basic_submesh.hpp"
 #include "mesh/material_coordinates.hpp"
 

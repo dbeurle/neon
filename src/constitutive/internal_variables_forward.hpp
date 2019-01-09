@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 namespace neon
 {
 template <int rank2_dimension, int rank4_dimension>

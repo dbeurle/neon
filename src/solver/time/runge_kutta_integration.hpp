@@ -1,12 +1,13 @@
 
 #pragma once
 
+/// @file
+
 #include "exceptions.hpp"
 
 #include <type_traits>
 #include <cfenv>
 
-/// \file runge_kutta_integration.hpp
 /// \brief Second, fourth and fifth order explicit methods for time integration
 
 namespace neon
@@ -54,7 +55,7 @@ double residual(left_expression const& left, right_expression const& right)
 }
 
 /// Perform the Dorman-Prince 4th order embedded Runge-Kutta time discretisation
-/// using the specified error tolerance \cite DormandPrince1980
+/// using the specified error tolerance @cite DormandPrince1980
 /// \tparam Lambda that returns the right hand side of the ODE
 /// \param f Function object
 /// \param error_tolerance Error tolerance for adaptive method

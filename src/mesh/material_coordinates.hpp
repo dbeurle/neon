@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "mesh/nodal_coordinates.hpp"
 
 namespace neon
@@ -13,14 +15,14 @@ public:
 
     /// \return element reference configuration based on the local node numbers
     template <typename indices_type>
-    auto const initial_configuration(indices_type const local_nodes) const
+    auto initial_configuration(indices_type const local_nodes) const
     {
         return X(Eigen::all, local_nodes);
     }
 
     /// \return element current configuration based on the local node numbers
     template <typename indices_type>
-    auto const current_configuration(indices_type const local_nodes) const
+    auto current_configuration(indices_type const local_nodes) const
     {
         return x(Eigen::all, local_nodes);
     }

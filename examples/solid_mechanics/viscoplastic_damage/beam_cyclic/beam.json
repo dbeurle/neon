@@ -24,10 +24,13 @@
         "nonlinear_options" : {
             "residual_tolerance" : 1e-5,
             "displacement_tolerance" : 1e-5,
-            "newton_raphson_iterations" : 40
+            "linear_iterations" : 40,
+            "latin_scheme" : "incremental",
+            "latin_local_stage" : "implicit",
+            "latin_search_direction" : 0.001
         },
         "time" : {
-            "period" : 30,
+            "period" : 20,
             "increments" : {
                 "initial" : 0.1,
                 "minimum" : 0.01,
@@ -48,7 +51,7 @@
             "boundaries" : [{
                 "name" : "cantilever",
                 "type" : "displacement",
-                "time" : [0.0, 30],
+                "time" : [0.0, 20],
                 "x" : [0.0, 0.0],
                 "y" : [0.0, 0.0],
                 "z" : [0.0, 0.0]
@@ -60,7 +63,7 @@
                 "generate_type" : "sinusoidal",
                 "period" : [10,10],
                 "phase" : [0,0],
-                "number_of_cycles" : [2,1]
+                "number_of_cycles" : [1,1]
             }],
             "visualisation" : {
                 "fields" : ["displacement", "linearised_strain",

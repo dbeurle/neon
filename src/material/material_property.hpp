@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include <string>
 
 #include "io/json_forward.hpp"

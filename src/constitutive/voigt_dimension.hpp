@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 namespace neon
 {
 /// Convert a spatial dimension to the size of the symmetric Voigt notation

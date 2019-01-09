@@ -20,7 +20,7 @@ The iterative nature of a non-linear problem requires the use of tolerances to d
         "displacement_tolerance" : 1.0e-5,
         "residual_tolerance" : 1.0e-4,
         "absolute_tolerance" : true,
-        "newton_raphson_iterations" : 15
+        "linear_iterations" : 15
     }
 
 Methods to improve the properties of the Newton-Raphson could be implemented on top of the current non-linear solvers, such as line searching algorithms to improve convergence properties.

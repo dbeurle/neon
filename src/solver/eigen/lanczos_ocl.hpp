@@ -1,6 +1,10 @@
 
 #pragma once
 
+/// @file
+
+#ifdef ENABLE_OPENCL
+
 #include "solver/eigen/eigen_solver.hpp"
 
 namespace neon
@@ -21,3 +25,4 @@ public:
     virtual void solve(sparse_matrix const& A, sparse_matrix const& B) override final;
 };
 }
+#endif

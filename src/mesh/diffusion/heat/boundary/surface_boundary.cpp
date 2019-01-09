@@ -6,6 +6,8 @@
 
 #include "io/json.hpp"
 
+#include <iostream>
+
 namespace neon::diffusion
 {
 boundary_mesh::boundary_mesh(std::shared_ptr<material_coordinates>& material_coordinates,
@@ -13,16 +15,19 @@ boundary_mesh::boundary_mesh(std::shared_ptr<material_coordinates>& material_coo
                              json const& boundary,
                              json const& mesh_data)
 {
+    std::cout << "mesh_data\n" << mesh_data << std::endl;
+
     if (std::string const& type = boundary["type"]; type == "flux")
     {
         for (auto const& mesh : submeshes)
         {
-            load_boundaries.emplace_back(make_surface_interpolation(mesh.topology(), mesh_data),
-                                         mesh.all_node_indices(),
+            load_boundaries.emplace_back(mesh.all_node_indices(),
                                          mesh.all_node_indices(),
                                          material_coordinates,
                                          boundary["time"],
-                                         boundary["value"]);
+                                         boundary["value"],
+                                         mesh.topology(),
+                                         mesh_data);
         }
     }
     else if (type == "newton_cooling")
@@ -38,14 +43,14 @@ boundary_mesh::boundary_mesh(std::shared_ptr<material_coordinates>& material_coo
                                        * boundary["ambient_temperature"][i].get<double>());
             }
 
-            stiffness_load_boundaries.emplace_back(make_surface_interpolation(mesh.topology(),
-                                                                              mesh_data),
-                                                   mesh.all_node_indices(),
+            stiffness_load_boundaries.emplace_back(mesh.all_node_indices(),
                                                    mesh.all_node_indices(),
                                                    material_coordinates,
                                                    boundary["time"],
                                                    heat_flux,
-                                                   boundary["heat_transfer_coefficient"]);
+                                                   boundary["heat_transfer_coefficient"],
+                                                   mesh.topology(),
+                                                   mesh_data);
         }
     }
 }

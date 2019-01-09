@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "constitutive/mechanics/solid/gaussian_affine_microsphere.hpp"
 
 #include "numeric/dense_matrix.hpp"
@@ -9,7 +11,6 @@
 
 namespace neon::mechanics::solid
 {
-/// \ingroup Hyperelastic
 /// \addtogroup Hyperelastic
 /// \{
 ///
@@ -29,7 +30,7 @@ public:
     /// \param material_data Json object with input file material data
     explicit gaussian_ageing_affine_microsphere(std::shared_ptr<internal_variables_t>& variables,
                                                 json const& material_data,
-                                                unit_sphere_quadrature::point const rule);
+                                                unit_sphere_quadrature::scheme const rule);
 
     virtual ~gaussian_ageing_affine_microsphere() = default;
 

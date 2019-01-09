@@ -53,11 +53,21 @@ std::unique_ptr<eigen_solver> make_eigen_solver(json const& solver_data)
 
     if (std::string const& type = solver_data["type"]; type == "power_iteration")
     {
+#ifndef ENABLE_OPENCL
+        throw std::domain_error("The \"power_iteration\" option requires OpenCL support.  "
+                                "Recompile with -DENABLE_OPENCL=1");
+#else
         return std::make_unique<power_iteration>(number_of_ev, spectrum);
+#endif
     }
     else if (type == "lanczos")
     {
+#ifndef ENABLE_OPENCL
+        throw std::domain_error("The \"lanczos\" option requires OpenCL support.  "
+                                "Recompile with -DENABLE_OPENCL=1");
+#else
         return std::make_unique<lanczos_ocl>(number_of_ev, spectrum);
+#endif
     }
     else if (type == "arpack")
     {

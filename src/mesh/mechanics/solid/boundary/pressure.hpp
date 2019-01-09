@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "traction.hpp"
 
 namespace neon::mechanics::solid
@@ -20,7 +22,7 @@ public:
 
     /// Evaluated the external force contributions for a pressure boundary
     /// condition in the initial configuration.
-    std::pair<index_view, vector> external_force(std::int64_t const element,
-                                                 double const load_factor) const override;
+    auto external_force(std::int64_t const element, double const load_factor) const
+        -> vector const& override;
 };
 }

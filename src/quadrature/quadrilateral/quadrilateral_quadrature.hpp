@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "quadrature/numerical_quadrature.hpp"
 
 namespace neon
@@ -8,10 +10,6 @@ namespace neon
 class quadrilateral_quadrature : public surface_quadrature
 {
 public:
-    /// Available quadrature rules for this element type
-    enum class point { one, four, nine };
-
-public:
-    explicit quadrilateral_quadrature(point const p);
+    explicit quadrilateral_quadrature(int const minimum_degree);
 };
 }

@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "numeric/dense_matrix.hpp"
+/// @file
 
-/// \file deformation_gradient.hpp
+#include "numeric/dense_matrix.hpp"
 
 namespace neon::mechanics
 {

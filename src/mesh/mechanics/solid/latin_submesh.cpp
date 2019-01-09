@@ -36,8 +36,8 @@ std::pair<index_view, vector const&> latin_submesh::incremental_latin_internal_f
 
     f_int_latin.setZero();
 
-    sf->quadrature()
-        .integrate_inplace(Eigen::Map<row_matrix>(f_int_latin.data(),
+    bilinear_gradient
+        .integrate(Eigen::Map<row_matrix>(f_int_latin.data(),
                                                   nodes_per_element(),
                                                   dofs_per_node()),
                            [&](auto const& N_dN, auto const index) -> matrix {

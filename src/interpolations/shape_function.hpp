@@ -1,111 +1,93 @@
 
 #pragma once
 
-#include <memory>
 #include <utility>
+#include <tuple>
 #include <vector>
 
 #include "numeric/dense_matrix.hpp"
-#include "quadrature/numerical_quadrature.hpp"
+
+/// \file
 
 namespace neon
 {
-/// Base class for a shape function.  This manages a pointer to the underlying
-/// quadrature scheme and provides an interface for the interpolation function
-/// properties.
-template <typename QuadratureType>
+/// shape_function is a base class for all polynomial based shape functions
+template <typename... Spaces>
 class shape_function
 {
 public:
-    using quadrature_type = QuadratureType;
+    static constexpr auto spatial_dimension = sizeof...(Spaces);
+
+    using coordinate_type = std::tuple<int, Spaces...>;
+
+    /// Fix the size of the shape function derivative to the size of the quadrature points
+    using value_type = std::pair<vector, matrixxd<sizeof...(Spaces)>>;
 
 public:
-    /// Construct the shape function by consuming a quadrature implementation
-    shape_function(std::unique_ptr<quadrature_type>&& quadrature_impl, std::uint8_t node_count)
-        : m_quadrature(std::move(quadrature_impl)), m_node_count{node_count}
+    /// Construct the shape function by specifying
+    /// \param node_count Number of nodes per element
+    /// \param polynomial_order Highest polynomial order of shape function
+    /// \param monomial_order Highest monomial order of shape function
+    explicit shape_function(std::uint8_t const node_count,
+                            std::uint8_t const polynomial_order,
+                            std::uint8_t const monomial_order)
+        : m_node_count{node_count}, m_polynomial_order{polynomial_order}, m_monomial_order{monomial_order}
     {
     }
 
     virtual ~shape_function() = default;
 
     /// \return Number of nodes in the element
-    auto number_of_nodes() const -> std::uint8_t { return m_node_count; }
+    [[nodiscard]] auto number_of_nodes() const -> std::uint8_t { return m_node_count; }
     /// \return Highest polynomial order in interpolation function
-    auto polynomial_order() const -> std::uint8_t { return m_polynomial_order; }
+    [[nodiscard]] auto polynomial_order() const -> std::uint8_t { return m_polynomial_order; }
     /// \return Highest monomial order in interpolation function
-    auto monomial_order() const -> std::uint8_t { return m_monomial_order; }
+    [[nodiscard]] auto monomial_order() const -> std::uint8_t { return m_monomial_order; }
 
-    quadrature_type const& quadrature() const { return *m_quadrature; };
+    /// Evaluate the shape functions at the natural coordinate
+    [[nodiscard]] virtual auto evaluate(coordinate_type const&) const noexcept(false)
+        -> value_type = 0;
 
-    /// \return  Quadrature point to nodal point extrapolation matrix
-    matrix const& local_quadrature_extrapolation() const { return extrapolation; }
+    /// Evaluate the shape functions at multiple natural coordinates
+    [[nodiscard]] auto evaluate(std::vector<coordinate_type> const& coordinates) const
+        noexcept(false) -> std::vector<value_type>
+    {
+        // This trick works because the virtual dispatch will pickup the correct
+        // evaluate() function call from above.  We are barred from instantiating
+        // a shape_function object directly since we have a pure virtual method
+        std::vector<value_type> values;
+        values.reserve(coordinates.size());
+
+        for (auto const& coordinate : coordinates)
+        {
+            values.emplace_back(this->evaluate(coordinate));
+        }
+        return values;
+    }
+
+    /// \return Natural element coordinates
+    [[nodiscard]] auto local_coordinates() const noexcept -> std::vector<coordinate_type> const&
+    {
+        return m_local_coordinates;
+    }
 
 protected:
-    /// Compute the extrapolation matrix to allow for quadrature valued variables
-    /// to be averaged to the nodal points without ill-effects when using a
-    /// least squares (for example with quadratric tetrahedron elements)
-    /// developed in \cite Durand2014
-    void compute_extrapolation_matrix(matrix const& N,
-                                      matrix const& local_nodal_coordinates,
-                                      matrix const& local_quadrature_coordinates);
-
-protected:
-    /// Quadrature point to nodal point mapping
-    matrix extrapolation;
-
-    /// Pointer to numerical quadrature scheme
-    std::unique_ptr<quadrature_type> m_quadrature;
-
     /// Nodes per element
     std::uint8_t m_node_count{0};
     /// Highest order of polynomral term
     std::uint8_t m_polynomial_order{0};
     /// Highest order of monomial term
     std::uint8_t m_monomial_order{0};
+
+    /// Natural element coordinates
+    std::vector<coordinate_type> m_local_coordinates;
 };
 
-template <typename QuadratureType>
-void shape_function<QuadratureType>::compute_extrapolation_matrix(
-    matrix const& N,
-    matrix const& local_nodal_coordinates,
-    matrix const& local_quadrature_coordinates)
-{
-    // Take short names for consistency with algorithm
+extern template class shape_function<double>;
+extern template class shape_function<double, double>;
+extern template class shape_function<double, double, double>;
 
-    // Narrowing conversion but rows is expected to be greater than zero
-    std::size_t const n = local_nodal_coordinates.rows();
-    auto const m{m_quadrature->points()};
-
-    assert(m == static_cast<std::size_t>(local_quadrature_coordinates.rows()));
-
-    auto const& xi = local_nodal_coordinates;
-    auto const& xi_hat = local_quadrature_coordinates;
-
-    if (m == n)
-    {
-        extrapolation = N.inverse();
-        return;
-    }
-
-    if (m > n)
-    {
-        extrapolation = (N.transpose() * N).inverse() * N.transpose();
-        return;
-    }
-
-    matrix const N_plus = N.transpose() * (N * N.transpose()).inverse();
-
-    // Number of quadrature points are less than the number of nodes
-    auto const xi_hat_plus = xi_hat.transpose() * (xi_hat * xi_hat.transpose()).inverse();
-
-    extrapolation = N_plus * (matrix::Identity(m, m) - xi_hat * xi_hat_plus) + xi * xi_hat_plus;
-}
-
-extern template class shape_function<numerical_quadrature<double>>;
-extern template class shape_function<surface_quadrature>;
-extern template class shape_function<volume_quadrature>;
-
-using line_interpolation = shape_function<numerical_quadrature<double>>;
-using surface_interpolation = shape_function<surface_quadrature>;
-using volume_interpolation = shape_function<volume_quadrature>;
+using line_interpolation = shape_function<double>;
+using surface_interpolation = shape_function<double, double>;
+using volume_interpolation = shape_function<double, double, double>;
 }

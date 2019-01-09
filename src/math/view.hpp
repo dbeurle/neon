@@ -1,10 +1,10 @@
 
 #pragma once
 
+/// @file
+
 #include <cstdint>
 #include <type_traits>
-
-/// \file view.hpp
 
 namespace neon
 {

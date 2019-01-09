@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "internal_variables_forward.hpp"
 
 #include <memory>

@@ -1,12 +1,15 @@
 
 #pragma once
 
+/// @file
+
 #include "mesh/mechanics/submesh.hpp"
 
 #include "constitutive/constitutive_model.hpp"
 #include "constitutive/internal_variables.hpp"
-#include "interpolations/shape_function.hpp"
+#include "interpolations/recovery_methods.hpp"
 #include "math/view.hpp"
+#include "math/integral_form.hpp"
 #include "traits/mechanics.hpp"
 
 #include <memory>
@@ -35,7 +38,7 @@ public:
 
     submesh(submesh&&) = default;
 
-    [[nodiscard]] index_view local_dof_view(std::int32_t const element) const noexcept
+    [[nodiscard]] auto local_dof_view(std::int32_t const element) const noexcept
     {
         return dof_list(Eigen::all, element);
     }
@@ -46,25 +49,23 @@ public:
 
     [[nodiscard]] auto dofs_per_node() const noexcept { return traits::dofs_per_node; }
 
-    [[nodiscard]] auto const& shape_function() const { return *sf; }
-
     [[nodiscard]] auto const& constitutive() const { return *cm; }
 
     /// \return the tangent consistent stiffness matrix
-    [[nodiscard]] std::pair<index_view, matrix> tangent_stiffness(std::int32_t const element) const;
+    [[nodiscard]] matrix const& tangent_stiffness(std::int32_t const element) const;
 
     /// \return the internal element force
-    [[nodiscard]] std::pair<index_view, vector> internal_force(std::int32_t const element) const;
+    [[nodiscard]] vector const& internal_force(std::int32_t const element) const;
 
     /// \return the consistent mass matrix \sa diagonal_mass
-    [[nodiscard]] std::pair<index_view, matrix> consistent_mass(std::int32_t const element) const;
+    [[nodiscard]] matrix const& consistent_mass(std::int32_t const element) const;
 
     /// \return the consistent mass matrix \sa diagonal_mass
-    [[nodiscard]] std::pair<index_view, vector> diagonal_mass(std::int32_t const element) const;
+    [[nodiscard]] vector const& diagonal_mass(std::int32_t const element) const;
 
     /// Update the internal variables for the mesh group
     /// \sa update_deformation_measures()
-    /// \sa update_Jacobian_determinants()
+    /// \sa update_jacobian_determinants()
     /// \sa check_element_distortion()
     void update_internal_variables(double const time_step_size = 1.0);
 
@@ -79,7 +80,7 @@ protected:
     void update_deformation_measures();
 
     /// Computes the Jacobian determinants and check if negative
-    void update_Jacobian_determinants();
+    void update_jacobian_determinants();
 
     /**
      * Compute the geometric stiffness matrix for in the computation solid
@@ -116,8 +117,10 @@ protected:
 private:
     std::shared_ptr<material_coordinates> coordinates;
 
-    /// Shape function
-    std::unique_ptr<surface_interpolation> sf;
+    /// Bilinear gradient form for stiffness matrix and internal force
+    fem::integral<surface_interpolation, surface_quadrature, 1> bilinear_gradient;
+    /// Bilinear form for mass matrix
+    fem::integral<surface_interpolation, surface_quadrature, 0> bilinear;
 
     stride_view<> view;
     std::shared_ptr<internal_variables_t> variables;
@@ -127,6 +130,8 @@ private:
 
     /// Map for the local element to process indices
     indices dof_list;
+
+    std::unique_ptr<local_extrapolation> patch_recovery = nullptr;
 };
 }
 }

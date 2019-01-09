@@ -1,19 +1,23 @@
 
 #include "quadrilateral_quadrature.hpp"
 
+#include <cmath>
+
 namespace neon
 {
-quadrilateral_quadrature::quadrilateral_quadrature(point const p)
+quadrilateral_quadrature::quadrilateral_quadrature(int const minimum_degree)
 {
-    switch (p)
+    switch (minimum_degree)
     {
-        case point::one:
+        case 1:
         {
+            m_degree = 1;
             m_weights = {4.0};
             m_coordinates = {{0, 0.0, 0.0}};
             break;
         }
-        case point::four:
+        case 2:
+        case 3:
         {
             m_weights = {1.0, 1.0, 1.0, 1.0};
 
@@ -23,7 +27,8 @@ quadrilateral_quadrature::quadrilateral_quadrature(point const p)
                              {3, -1.0 / std::sqrt(3.0), 1.0 / std::sqrt(3.0)}};
             break;
         }
-        case point::nine:
+        case 4:
+        case 5:
         {
             m_weights = {25.0 / 81.0,
                          25.0 / 81.0,

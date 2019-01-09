@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 #include "mesh/basic_mesh.hpp"
 #include "io/json_forward.hpp"
 

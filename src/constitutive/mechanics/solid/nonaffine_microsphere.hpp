@@ -1,17 +1,18 @@
 
 #pragma once
 
+/// @file
+
 #include "affine_microsphere.hpp"
 
 namespace neon::mechanics::solid
 {
 /**
- * \ingroup Hyperelastic
  * \addtogroup Hyperelastic
  * \{
  *
  * nonaffine_microsphere model computes the Kirchhoff stress and the material
- * tangent for the non-affine microsphere model \cite Miehe2004.  This model includes
+ * tangent for the non-affine microsphere model @cite Miehe2004.  This model includes
  * the interaction of the polymer chain with the neighbouring (forest) chains
  * through the inclusion of the tube model.  This is effectively an extension
  * of the affine_microsphere constitutive model.
@@ -23,7 +24,7 @@ public:
     /// \param material_data Json object with material data
     explicit nonaffine_microsphere(std::shared_ptr<internal_variables_t>& variables,
                                    json const& material_data,
-                                   unit_sphere_quadrature::point const rule);
+                                   unit_sphere_quadrature::scheme const rule);
 
     virtual void update_internal_variables(double) override;
 

@@ -1,6 +1,8 @@
 
 #pragma once
 
+/// @file
+
 namespace neon
 {
 /// Enumeration for the element shapes and follows the enumeration by GMSH

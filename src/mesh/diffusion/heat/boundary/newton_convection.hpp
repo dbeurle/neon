@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "mesh/boundary/neumann.hpp"
+/// @file
 
-#include "interpolations/shape_function.hpp"
+#include "heat_flux.hpp"
 
 namespace neon::diffusion::boundary
 {
@@ -20,7 +20,7 @@ namespace neon::diffusion::boundary
  * leaving the surface.  The surrounding temperature \f$T_\infty\f$ is computed by
  * \f$ T_\infty = h / \lambda \f$
  */
-class newton_convection : public surface_load<surface_interpolation>
+class newton_convection : public heat_flux
 {
 public:
     /// Construct the boundary condition
@@ -29,22 +29,23 @@ public:
     /// \param times A list of times and values
     /// \param heat_flux A list of heat fluxes
     /// \param external_temperature A list of heat transfer coefficients
-    explicit newton_convection(std::unique_ptr<surface_interpolation>&& sf,
-                               indices node_indices,
+    explicit newton_convection(indices node_indices,
                                indices dof_indices,
                                std::shared_ptr<material_coordinates>& coordinates,
                                json const& times,
                                json const& heat_flux,
-                               json const& heat_transfer_coefficient);
+                               json const& heat_transfer_coefficient,
+                               element_topology const topology,
+                               json const& element_data);
 
     /// Compute the element stiffness matrix contributing to the mixed boundary condition
     ///   \f{align*}{
     ///     k_{ab} &= \int_{\Gamma} N_a \lambda N_b d\Gamma
     ///   \f}
-    [[nodiscard]] std::pair<index_view, matrix> external_stiffness(std::int64_t const element,
-                                                                   double const load_factor) const;
+    [[nodiscard]] matrix const& external_stiffness(std::int64_t const element,
+                                                   double const load_factor) const;
 
 protected:
-    std::vector<std::pair<double, double>> stiffness_time_data;
+    std::vector<double> m_heat_transfer_coefficients;
 };
 }

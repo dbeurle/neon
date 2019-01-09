@@ -57,6 +57,7 @@ TEST_CASE("Arpack eigenvalues")
         REQUIRE(vectors.col(i).norm() == Approx(1.0));
     }
 }
+#ifdef ENABLE_OPENCL
 TEST_CASE("Power iteration eigenvalue")
 {
     neon::power_iteration solver{1};
@@ -91,3 +92,4 @@ TEST_CASE("Lanczos iteration eigenvalue")
         REQUIRE(vectors.col(i).norm() == Approx(1.0));
     }
 }
+#endif
