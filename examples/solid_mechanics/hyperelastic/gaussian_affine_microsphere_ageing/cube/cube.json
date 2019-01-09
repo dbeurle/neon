@@ -11,7 +11,7 @@
         "poissons_ratio" : 0.45,
         "segments_per_chain" : 60,
         "scission_probability" : 3.0e-6,
-        "recombination_probability" : 5.0e-7
+        "recombination_probability" : 2.0e-6
     }],
     "steps" : [{
         "name" : "ramped_load",
@@ -24,7 +24,7 @@
             "newton_raphson_iterations" : 50
         },
         "time" : {
-            "period" : 1401.0,
+            "period" : 1000.0,
             "increments" : {
                 "initial" : 1.0,
                 "minimum" : 0.001,
@@ -47,26 +47,26 @@
             "boundaries" : [{
                 "name" : "Xsym",
                 "type" : "displacement",
-                "time" : [0, 100, 1400, 1401],
+                "time" : [0, 1, 999, 1000],
                 "x" : [0.0, 0.0, 0.0, 0.0]
             },
             {
                 "name" : "Ysym",
                 "type" : "displacement",
-                "time" : [0.0, 100.0, 1400, 1401],
+                "time" : [0.0, 1.0, 999, 1000],
                 "y" : [0.0, 0.0, 0.0, 0.0]
             },
             {
                 "name" : "Zsym",
                 "type" : "displacement",
-                "time" : [0.0, 100.0, 1400, 1401],
+                "time" : [0.0, 1.0, 999, 1000],
                 "z" : [0.0, 0.0, 0.0, 0.0]
             },
             {
                 "name" : "ZLoad",
                 "type" : "displacement",
-                "time" : [0.0, 100.0, 1400],
-                "z" : [0.0, 0.2, 0.2]
+                "time" : [0.0, 1, 999, 1000],
+                "z" : [0.0, 0.3, 0.3, 0.0]
             }],
             "visualisation" : {
                 "fields" : ["displacement", "deformation_gradient", "cauchy_stress",
