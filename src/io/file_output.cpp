@@ -16,6 +16,7 @@
 #include <vtkDoubleArray.h>
 #include <vtkIdTypeArray.h>
 #include <vtkPointData.h>
+#include <vtkUnstructuredGrid.h>
 #include <vtkXMLUnstructuredGridWriter.h>
 
 #if defined __clang__
@@ -39,11 +40,11 @@ file_output::file_output(std::string const& file_name, json const& visualisation
         throw std::domain_error("\"name\" field for file IO must be specified");
     }
 
-    if (visualisation_data.find("write_every") != visualisation_data.end())
+    if (visualisation_data.find("write_every") != end(visualisation_data))
     {
         write_every = visualisation_data["write_every"];
     }
-    if (visualisation_data.find("fields") != visualisation_data.end())
+    if (visualisation_data.find("fields") != end(visualisation_data))
     {
         for (auto const& field : visualisation_data["fields"])
         {

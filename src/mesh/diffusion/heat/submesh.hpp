@@ -7,9 +7,6 @@
 
 #include "constitutive/constitutive_model.hpp"
 #include "constitutive/internal_variables.hpp"
-#include "constitutive/internal_variables_alias.hpp"
-#include "interpolations/shape_function.hpp"
-#include "interpolations/recovery_methods.hpp"
 #include "math/integral_form.hpp"
 #include "math/view.hpp"
 
@@ -18,6 +15,7 @@
 namespace neon
 {
 class material_coordinates;
+class recovery;
 
 namespace diffusion
 {
@@ -34,6 +32,16 @@ public:
                      json const& mesh_data,
                      std::shared_ptr<material_coordinates>& coordinates,
                      basic_submesh const& submesh);
+
+    ~submesh();
+
+    submesh(submesh const&) = delete;
+
+    submesh(submesh&&);
+
+    submesh& operator=(submesh&&);
+
+    submesh& operator=(submesh const&) = delete;
 
     /// \return list of global degrees of freedom for an element
     [[nodiscard]] auto local_dof_view(std::int64_t const element) const -> index_view
@@ -106,7 +114,7 @@ private:
     /// Constitutive model
     std::unique_ptr<constitutive_model> cm;
 
-    std::unique_ptr<local_extrapolation> patch_recovery;
+    std::unique_ptr<recovery> patch_recovery;
 };
 }
 }

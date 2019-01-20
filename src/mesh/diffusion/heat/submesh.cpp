@@ -2,17 +2,15 @@
 #include "submesh.hpp"
 
 #include "exceptions.hpp"
-
 #include "constitutive/constitutive_model_factory.hpp"
-#include "interpolations/interpolation_factory.hpp"
 #include "material/material_property.hpp"
 #include "mesh/material_coordinates.hpp"
 #include "numeric/gradient_operator.hpp"
-
-#include <cfenv>
-#include <omp.h>
+#include "mesh/projection/recovery.hpp"
 
 #include <termcolor/termcolor.hpp>
+
+#include <cfenv>
 
 namespace neon::diffusion
 {
@@ -30,6 +28,12 @@ submesh::submesh(json const& material_data,
       patch_recovery(nullptr)
 {
 }
+
+submesh::~submesh() = default;
+
+submesh::submesh(submesh&&) = default;
+
+submesh& submesh::operator=(submesh&&) = default;
 
 void submesh::save_internal_variables(bool const have_converged)
 {
@@ -53,19 +57,18 @@ auto submesh::tangent_stiffness(std::int64_t const element) const -> matrix cons
 
     auto const& D_Vec = variables->get(variable::second::conductivity);
 
-    bilinear_gradient.integrate(k_mat.setZero(),
-                                        [&](auto const& value, auto const index) -> matrix {
-                                            auto const& [N, dN] = value;
+    bilinear_gradient.integrate(k_mat.setZero(), [&](auto const& value, auto const index) -> matrix {
+        auto const& [N, dN] = value;
 
-                                            auto const& D = D_Vec[view(element, index)];
+        auto const& D = D_Vec[view(element, index)];
 
-                                            matrix3 const Jacobian = local_jacobian(dN, X);
+        matrix3 const Jacobian = local_jacobian(dN, X);
 
-                                            // Compute the symmetric gradient operator
-                                            matrix const B = (dN * Jacobian.inverse()).transpose();
+        // Compute the symmetric gradient operator
+        matrix const B = (dN * Jacobian.inverse()).transpose();
 
-                                            return B.transpose() * D * B * Jacobian.determinant();
-                                        });
+        return B.transpose() * D * B * Jacobian.determinant();
+    });
     return k_mat;
 }
 
@@ -116,39 +119,39 @@ std::pair<vector, vector> submesh::nodal_averaged_variable(variable::second cons
     vector count = vector::Zero(coordinates->size() * 9);
     vector value = count;
 
-    auto const& tensor_list = variables->get(tensor_name);
-
-    auto const& E = patch_recovery->extrapolation_matrix();
-
-    // vector format of values
-    vector component = vector::Zero(bilinear_gradient.quadrature().points());
-
-    for (std::int64_t e{0}; e < elements(); ++e)
-    {
-        // Assemble these into the global value vector
-        auto const& node_list = local_node_view(e);
-
-        for (auto ci = 0; ci < 3; ++ci)
-        {
-            for (auto cj = 0; cj < 3; ++cj)
-            {
-                for (std::size_t l{0}; l < bilinear_gradient.quadrature().points(); ++l)
-                {
-                    auto const& tensor = tensor_list[view(e, l)];
-                    component(l) = tensor(ci, cj);
-                }
-
-                // Local extrapolation to the nodes
-                vector const nodal_component = E * component;
-
-                for (auto n = 0; n < nodal_component.rows(); n++)
-                {
-                    value(node_list[n] * 9 + ci * 3 + cj) += nodal_component(n);
-                    count(node_list[n] * 9 + ci * 3 + cj) += 1.0;
-                }
-            }
-        }
-    }
+    // auto const& tensor_list = variables->get(tensor_name);
+    //
+    // auto const& E = patch_recovery->extrapolation_matrix();
+    //
+    // // vector format of values
+    // vector component = vector::Zero(bilinear_gradient.quadrature().points());
+    //
+    // for (std::int64_t e{0}; e < elements(); ++e)
+    // {
+    //     // Assemble these into the global value vector
+    //     auto const& node_list = local_node_view(e);
+    //
+    //     for (auto ci = 0; ci < 3; ++ci)
+    //     {
+    //         for (auto cj = 0; cj < 3; ++cj)
+    //         {
+    //             for (std::size_t l{0}; l < bilinear_gradient.quadrature().points(); ++l)
+    //             {
+    //                 auto const& tensor = tensor_list[view(e, l)];
+    //                 component(l) = tensor(ci, cj);
+    //             }
+    //
+    //             // Local extrapolation to the nodes
+    //             vector const nodal_component = E * component;
+    //
+    //             for (auto n = 0; n < nodal_component.rows(); n++)
+    //             {
+    //                 value(node_list[n] * 9 + ci * 3 + cj) += nodal_component(n);
+    //                 count(node_list[n] * 9 + ci * 3 + cj) += 1.0;
+    //             }
+    //         }
+    //     }
+    // }
     return {value, count};
 }
 
@@ -157,32 +160,32 @@ std::pair<vector, vector> submesh::nodal_averaged_variable(variable::scalar cons
     vector count = vector::Zero(coordinates->size());
     vector value = count;
 
-    auto const& scalar_list = variables->get(name);
-
-    auto const& E = patch_recovery->extrapolation_matrix();
-
-    // vector format of values
-    vector component = vector::Zero(bilinear_gradient.quadrature().points());
-
-    for (std::int64_t element{0}; element < elements(); ++element)
-    {
-        // Assemble these into the global value vector
-        auto const& node_list = local_node_view(element);
-
-        for (std::size_t l{0}; l < bilinear_gradient.quadrature().points(); ++l)
-        {
-            component(l) = scalar_list[view(element, l)];
-        }
-
-        // Local extrapolation to the nodes
-        vector const nodal_component = E * component;
-
-        for (auto n = 0l; n < nodal_component.rows(); n++)
-        {
-            value(node_list[n]) += nodal_component(n);
-            count(node_list[n]) += 1.0;
-        }
-    }
+    // auto const& scalar_list = variables->get(name);
+    //
+    // auto const& E = patch_recovery->extrapolation_matrix();
+    //
+    // // vector format of values
+    // vector component = vector::Zero(bilinear_gradient.quadrature().points());
+    //
+    // for (std::int64_t element{0}; element < elements(); ++element)
+    // {
+    //     // Assemble these into the global value vector
+    //     auto const& node_list = local_node_view(element);
+    //
+    //     for (std::size_t l{0}; l < bilinear_gradient.quadrature().points(); ++l)
+    //     {
+    //         component(l) = scalar_list[view(element, l)];
+    //     }
+    //
+    //     // Local extrapolation to the nodes
+    //     vector const nodal_component = E * component;
+    //
+    //     for (auto n = 0l; n < nodal_component.rows(); n++)
+    //     {
+    //         value(node_list[n]) += nodal_component(n);
+    //         count(node_list[n]) += 1.0;
+    //     }
+    // }
     return {value, count};
 }
 }

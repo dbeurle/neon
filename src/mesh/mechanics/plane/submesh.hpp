@@ -7,7 +7,7 @@
 
 #include "constitutive/constitutive_model.hpp"
 #include "constitutive/internal_variables.hpp"
-#include "interpolations/recovery_methods.hpp"
+#include "mesh/projection/recovery.hpp"
 #include "math/view.hpp"
 #include "math/integral_form.hpp"
 #include "traits/mechanics.hpp"

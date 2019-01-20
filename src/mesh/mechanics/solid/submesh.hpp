@@ -7,9 +7,8 @@
 
 #include "constitutive/constitutive_model.hpp"
 #include "constitutive/internal_variables.hpp"
+#include "math/integral_form.hpp"
 #include "math/view.hpp"
-#include "interpolations/recovery_methods.hpp"
-#include "interpolations/shape_function.hpp"
 #include "traits/mechanics.hpp"
 
 #include <memory>
@@ -17,6 +16,7 @@
 namespace neon
 {
 class material_coordinates;
+class recovery;
 
 namespace mechanics::solid
 {
@@ -37,6 +37,16 @@ public:
                      json const& mesh_data,
                      std::shared_ptr<material_coordinates>& coordinates,
                      basic_submesh const& submesh);
+
+    ~submesh();
+
+    submesh(submesh const&) = delete;
+
+    submesh(submesh&&);
+
+    submesh& operator=(submesh const&) = delete;
+
+    submesh& operator=(submesh&&);
 
     /// \return view of degrees of freedom for an element
     [[nodiscard]] auto local_dof_view(std::int32_t const element) const
@@ -128,7 +138,7 @@ protected:
     /// Map for the local to global dofs
     indices dof_indices;
 
-    std::unique_ptr<local_extrapolation> patch_recovery = nullptr;
+    std::unique_ptr<recovery> patch_recovery;
 };
 }
 }
