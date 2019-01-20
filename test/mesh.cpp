@@ -122,18 +122,18 @@ TEST_CASE("Solid submesh test")
     basic_mesh basic_mesh(json::parse(json_cube_mesh()));
     nodal_coordinates nodal_coordinates(json::parse(json_cube_mesh()));
 
-    auto& submeshes = basic_mesh.meshes("cube");
+    auto& basic_submeshes = basic_mesh.meshes("cube");
 
-    REQUIRE(submeshes.size() == 1);
+    REQUIRE(basic_submeshes.size() == 1);
 
-    auto& submesh = submeshes[0];
+    auto& basic_submesh = basic_submeshes[0];
 
     auto mesh_coordinates = std::make_shared<material_coordinates>(nodal_coordinates.coordinates());
 
-    mechanics::solid::submesh fem_submesh(json::parse(material_data_json()),
-                                          json::parse(simulation_data_json()),
-                                          mesh_coordinates,
-                                          submesh);
+    mechanics::solid::submesh submesh(json::parse(material_data_json()),
+                                      json::parse(simulation_data_json()),
+                                      mesh_coordinates,
+                                      basic_submesh);
 
     int constexpr number_of_nodes = 64;
     int constexpr number_of_dofs = number_of_nodes * 3;
@@ -143,16 +143,17 @@ TEST_CASE("Solid submesh test")
 
     mesh_coordinates->update_current_configuration(displacement);
 
-    fem_submesh.update_internal_variables();
+    submesh.update_internal_variables();
 
-    auto& internal_vars = fem_submesh.internal_variables();
+    auto& internal_vars = submesh.internal_variables();
 
     SECTION("Degree of freedom test")
     {
         // Check the shape functions and dof definitions are ok
-        REQUIRE(fem_submesh.dofs_per_node() == 3);
-        REQUIRE(fem_submesh.shape_function().number_of_nodes() == 8);
+        REQUIRE(submesh.dofs_per_node() == 3);
+        REQUIRE(submesh.local_dof_view(0).size() == number_of_local_dofs);
     }
+
     SECTION("Default internal variables test")
     {
         // Check the standard ones are used
@@ -163,8 +164,7 @@ TEST_CASE("Solid submesh test")
     }
     SECTION("Tangent stiffness")
     {
-        auto [local_dofs, stiffness] = fem_submesh.tangent_stiffness(0);
-        REQUIRE(local_dofs.size() == number_of_local_dofs);
+        auto const& stiffness = submesh.tangent_stiffness(0);
         REQUIRE(stiffness.rows() == number_of_local_dofs);
         REQUIRE(stiffness.cols() == number_of_local_dofs);
         REQUIRE(stiffness.norm() != Approx(0.0).margin(ZERO_MARGIN));
@@ -174,17 +174,15 @@ TEST_CASE("Solid submesh test")
     }
     SECTION("Internal force")
     {
-        auto [local_dofs, internal_force] = fem_submesh.internal_force(0);
+        auto const& internal_force = submesh.internal_force(0);
         REQUIRE(internal_force.rows() == number_of_local_dofs);
-        REQUIRE(local_dofs.size() == number_of_local_dofs);
+        REQUIRE(internal_force.cols() == 1);
+        REQUIRE(internal_force.size() == number_of_local_dofs);
     }
     SECTION("Consistent and diagonal mass")
     {
-        auto const& [local_dofs_0, mass_c] = fem_submesh.consistent_mass(0);
-        auto const& [local_dofs_1, mass_d] = fem_submesh.diagonal_mass(0);
-
-        REQUIRE(local_dofs_0.size() == number_of_local_dofs);
-        REQUIRE(local_dofs_1.size() == number_of_local_dofs);
+        auto const& mass_c = submesh.consistent_mass(0);
+        auto const& mass_d = submesh.diagonal_mass(0);
 
         REQUIRE(mass_c.rows() == number_of_local_dofs);
         REQUIRE(mass_c.cols() == number_of_local_dofs);
@@ -202,6 +200,7 @@ TEST_CASE("Solid submesh test")
 TEST_CASE("Solid mesh test")
 {
     using mechanics::solid::mesh;
+    using mechanics::solid::submesh;
 
     // Read in a cube mesh from the json input file and use this to
     // test the functionality of the basic mesh
@@ -209,42 +208,41 @@ TEST_CASE("Solid mesh test")
     auto simulation_data = json::parse(simulation_data_json());
 
     // Create the test objects
-    basic_mesh basic_mesh(json::parse(json_cube_mesh()));
+    basic_mesh basic_cube(json::parse(json_cube_mesh()));
     nodal_coordinates nodal_coordinates(json::parse(json_cube_mesh()));
 
     REQUIRE(!simulation_data["name"].empty());
 
-    mesh<mechanics::solid::submesh> fem_mesh(basic_mesh,
-                                             material_data,
-                                             simulation_data,
-                                             simulation_data["time"]["increments"]["initial"]);
+    mesh<submesh> cube(basic_cube,
+                       material_data,
+                       simulation_data,
+                       simulation_data["time"]["increments"]["initial"]);
 
-    REQUIRE(fem_mesh.active_dofs() == 192);
+    REQUIRE(cube.active_dofs() == 192);
 
-    int constexpr number_of_local_dofs = 8 * 3;
+    constexpr int number_of_local_dofs = 8 * 3;
 
     // Check that we only have one mesh group as we only have homogenous
     // element types
-    REQUIRE(fem_mesh.meshes().size() == 1);
+    REQUIRE(cube.meshes().size() == 1);
 
-    for (auto const& fem_submesh : fem_mesh.meshes())
+    for (auto const& submesh : cube.meshes())
     {
-        auto [local_dofs, internal_force] = fem_submesh.internal_force(0);
+        auto const& internal_force = submesh.internal_force(0);
         REQUIRE(internal_force.rows() == number_of_local_dofs);
-        REQUIRE(local_dofs.size() == number_of_local_dofs);
     }
 
     SECTION("Check Dirichlet boundaries")
     {
-        auto const& map = fem_mesh.dirichlet_boundaries();
+        auto const& map = cube.dirichlet_boundaries();
 
         // See if correctly input in the map
-        REQUIRE(map.find("bottom") != map.end());
-        REQUIRE(map.find("top") != map.end());
+        REQUIRE(map.find("bottom") != end(map));
+        REQUIRE(map.find("top") != end(map));
 
         // And the negative is true...
-        REQUIRE(map.find("sides") == map.end());
-        REQUIRE(map.find("cube") == map.end());
+        REQUIRE(map.find("sides") == end(map));
+        REQUIRE(map.find("cube") == end(map));
 
         // Check the correct values in the boundary conditions
         for (auto const& fixed_bottom : map.find("bottom")->second)

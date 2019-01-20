@@ -1,11 +1,11 @@
 
-#include "hexahedron_quadrature.hpp"
+#include "gauss_legendre.hpp"
 
 #include <cmath>
 
-namespace neon
+namespace neon::quadrature::hexahedron
 {
-hexahedron_quadrature::hexahedron_quadrature(int const minimum_degree)
+gauss_legendre::gauss_legendre(int const minimum_degree)
 {
     switch (minimum_degree)
     {

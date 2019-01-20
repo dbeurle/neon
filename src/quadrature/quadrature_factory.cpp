@@ -1,21 +1,21 @@
 
 #include "quadrature_factory.hpp"
 
-#include "quadrature/hexahedron/hexahedron_quadrature.hpp"
+#include "quadrature/hexahedron/gauss_legendre.hpp"
 
-#include "quadrature/line/gauss_legendre_line.hpp"
+#include "quadrature/line/gauss_legendre.hpp"
 
-#include "quadrature/prism/felippa_prism.hpp"
-#include "quadrature/prism/kubatko_prism.hpp"
+#include "quadrature/prism/felippa.hpp"
+#include "quadrature/prism/kubatko.hpp"
 
-#include "quadrature/pyramid/bedrosian_pyramid.hpp"
+#include "quadrature/pyramid/bedrosian.hpp"
 
-#include "quadrature/tetrahedron/jinyun_tetrahedron.hpp"
-#include "quadrature/tetrahedron/witherden_vincent_tetrahedron.hpp"
+#include "quadrature/tetrahedron/jinyun.hpp"
+#include "quadrature/tetrahedron/witherden_vincent.hpp"
 
-#include "quadrature/quadrilateral/quadrilateral_quadrature.hpp"
+#include "quadrature/quadrilateral/gauss_legendre.hpp"
 
-#include "quadrature/triangle/cowper_triangle.hpp"
+#include "quadrature/triangle/cowper.hpp"
 
 #include "io/json.hpp"
 
@@ -39,7 +39,7 @@ std::unique_ptr<volume_quadrature> make_volume_quadrature(element_topology const
             {
                 // provide a default
             }
-            return std::make_unique<hexahedron_quadrature>(minimum_degree);
+            return std::make_unique<quadrature::hexahedron::gauss_legendre>(minimum_degree);
         }
         case element_topology::tetrahedron4:
         case element_topology::tetrahedron10:
@@ -51,7 +51,7 @@ std::unique_ptr<volume_quadrature> make_volume_quadrature(element_topology const
             {
                 // provide a default
             }
-            return std::make_unique<witherden_vincent_tetrahedron>(minimum_degree);
+            return std::make_unique<quadrature::tetrahedron::witherden_vincent>(minimum_degree);
         }
         case element_topology::prism6:
         case element_topology::prism15:
@@ -61,7 +61,7 @@ std::unique_ptr<volume_quadrature> make_volume_quadrature(element_topology const
             {
                 // provide a default
             }
-            return std::make_unique<felippa_prism>(minimum_degree);
+            return std::make_unique<quadrature::prism::felippa>(minimum_degree);
         }
         case element_topology::pyramid5:
         case element_topology::pyramid13:
@@ -71,7 +71,7 @@ std::unique_ptr<volume_quadrature> make_volume_quadrature(element_topology const
             {
                 // provide a default
             }
-            return std::make_unique<bedrosian_pyramid>(minimum_degree);
+            return std::make_unique<quadrature::pyramid::bedrosian>(minimum_degree);
         }
         default:
         {
@@ -98,7 +98,7 @@ std::unique_ptr<surface_quadrature> make_surface_quadrature(element_topology con
             {
                 // provide a default
             }
-            return std::make_unique<quadrilateral_quadrature>(minimum_degree);
+            return std::make_unique<quadrature::quadrilateral::gauss_legendre>(minimum_degree);
         }
         case element_topology::triangle3:
         case element_topology::triangle6:
@@ -107,7 +107,7 @@ std::unique_ptr<surface_quadrature> make_surface_quadrature(element_topology con
             {
                 // provide a default
             }
-            return std::make_unique<cowper_triangle>(minimum_degree);
+            return std::make_unique<quadrature::triangle::cowper>(minimum_degree);
         }
         default:
         {
@@ -131,11 +131,13 @@ std::unique_ptr<line_quadrature> make_line_quadrature(element_topology const top
             {
                 // provide a default
             }
-            return std::make_unique<gauss_legendre_line>(minimum_degree);
+            return std::make_unique<quadrature::line::gauss_legendre>(minimum_degree);
         }
         default:
+        {
             throw std::runtime_error("Line element shape not implemented");
             break;
+        }
     }
     return nullptr;
 }

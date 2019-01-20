@@ -1,9 +1,9 @@
 
-#include "bedrosian_pyramid.hpp"
+#include "bedrosian.hpp"
 
-namespace neon
+namespace neon::quadrature::pyramid
 {
-bedrosian_pyramid::bedrosian_pyramid(int const minimum_degree)
+bedrosian::bedrosian(int const minimum_degree)
 {
     switch (minimum_degree)
     {

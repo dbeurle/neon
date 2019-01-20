@@ -1,11 +1,11 @@
 
-#include "cowper_triangle.hpp"
+#include "cowper.hpp"
 
 #include <algorithm>
 
-namespace neon
+namespace neon::quadrature::triangle
 {
-cowper_triangle::cowper_triangle(int const minimum_degree)
+cowper::cowper(int const minimum_degree)
 {
     switch (minimum_degree)
     {
