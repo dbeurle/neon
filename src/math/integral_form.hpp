@@ -20,6 +20,8 @@ public:
 public:
     /// Order of the derivative in the expression
     static constexpr auto derivative_order = DerivativeOrder;
+    /// Manual correction for rank-insufficient matrices in integral
+    static constexpr auto rank_correction = RankCorrection;
     /// Fix the size of the shape function derivative to the size of the quadrature points
     using value_type = std::tuple<vector, matrixxd<Quadrature::spatial_dimension>>;
     /// Type alias for Interpolation
