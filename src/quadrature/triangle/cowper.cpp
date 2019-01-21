@@ -136,6 +136,11 @@ cowper::cowper(int const minimum_degree)
                              {12, 0.04869031542531599, 0.312865496004875}};
             break;
         }
+        default:
+        {
+            throw std::domain_error("Schemes greater than seventh degree have not been "
+                                    "implemented");
+        }
     }
     std::transform(begin(m_weights), end(m_weights), begin(m_weights), [](auto const weight) {
         return 0.5 * weight;

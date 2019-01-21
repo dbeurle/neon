@@ -13,73 +13,49 @@ constexpr auto ZERO_MARGIN = 1.0e-5;
 
 using namespace neon;
 
+template <typename ShapeFunction, typename Quadrature>
+void check_shape_functions(ShapeFunction&& shape_function, Quadrature&& integration)
+{
+    for (auto const& coordinate : integration.coordinates())
+    {
+        auto const [N, dN] = shape_function.evaluate(coordinate);
+
+        REQUIRE(N.sum() == Approx(1.0));
+
+        REQUIRE(dN.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE(dN.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
+    }
+}
+
 TEST_CASE("Quadrilateral quadrature scheme test")
 {
     using namespace neon::quadrature::quadrilateral;
 
-    SECTION("Quadrilateral Gauss Quadrature")
+    SECTION("quadrilateral gauss legendre", "[quadrature.quadrilateral.gauss_legendre]")
     {
-        gauss_legendre q1(1);
-        gauss_legendre q4(3);
-        gauss_legendre q9(5);
-
-        REQUIRE(q1.points() == 1);
-        REQUIRE(q4.points() == 4);
-        REQUIRE(q9.points() == 9);
-
-        REQUIRE(std::accumulate(begin(q1.weights()), end(q1.weights()), 0.0) == Approx(4.0));
-        REQUIRE(std::accumulate(begin(q4.weights()), end(q4.weights()), 0.0) == Approx(4.0));
-        REQUIRE(std::accumulate(begin(q9.weights()), end(q9.weights()), 0.0) == Approx(4.0));
-    }
-    SECTION("quadrilateral4", "[quadrilateral4.gauss_legendre]")
-    {
-        quadrilateral4 quad4;
-        gauss_legendre integration(2);
-
-        REQUIRE(quad4.number_of_nodes() == 4);
-
-        for (auto const& coordinate : integration.coordinates())
+        for (auto&& degree : {1, 2, 3, 4, 5})
         {
-            auto const [N, dN] = quad4.evaluate(coordinate);
-
-            REQUIRE(N.sum() == Approx(1.0));
-
-            REQUIRE(dN.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(dN.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            gauss_legendre h(degree);
+            REQUIRE(h.degree() >= degree);
+            REQUIRE(std::accumulate(begin(h.weights()), end(h.weights()), 0.0) == Approx(4.0));
         }
+        REQUIRE(gauss_legendre{1}.points() == 1);
+        REQUIRE(gauss_legendre{2}.points() == 4);
+        REQUIRE(gauss_legendre{3}.points() == 4);
+        REQUIRE(gauss_legendre{4}.points() == 9);
+        REQUIRE(gauss_legendre{5}.points() == 9);
     }
-    SECTION("quadrilateral8", "[quadrilateral8.gauss_legendre]")
+    SECTION("quadrilateral shape functions", "[quadrature.quadrilateral.gauss_legendre]")
     {
-        quadrilateral8 quad8;
-        gauss_legendre integration(2);
+        REQUIRE(quadrilateral4{}.number_of_nodes() == 4);
+        REQUIRE(quadrilateral8{}.number_of_nodes() == 8);
+        REQUIRE(quadrilateral9{}.number_of_nodes() == 9);
 
-        REQUIRE(quad8.number_of_nodes() == 8);
-
-        for (auto const& coordinate : integration.coordinates())
+        for (auto&& degree : {1, 2, 3, 4, 5})
         {
-            auto const [N, dN] = quad8.evaluate(coordinate);
-
-            REQUIRE(N.sum() == Approx(1.0));
-
-            REQUIRE(dN.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(dN.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
-        }
-    }
-    SECTION("quadrilateral9", "[quadrilateral9.gauss_legendre]")
-    {
-        quadrilateral9 quad9;
-        gauss_legendre integration(3);
-
-        REQUIRE(quad9.number_of_nodes() == 9);
-
-        for (auto const& coordinate : integration.coordinates())
-        {
-            auto const [N, dN] = quad9.evaluate(coordinate);
-
-            REQUIRE(N.sum() == Approx(1.0));
-
-            REQUIRE(dN.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(dN.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            check_shape_functions(quadrilateral4{}, gauss_legendre{degree});
+            check_shape_functions(quadrilateral8{}, gauss_legendre{degree});
+            check_shape_functions(quadrilateral9{}, gauss_legendre{degree});
         }
     }
     // SECTION("quadrilateral4 surface area - one point")

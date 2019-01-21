@@ -9,18 +9,28 @@
 #include "interpolations/interpolation_factory.hpp"
 #include "mesh/element_topology.hpp"
 
-#include "io/json.hpp"
-
 #include <numeric>
 
 using namespace neon;
 
-json full() { return json::parse("{\"element_options\" : {\"quadrature\" : \"full\"}}"); }
-json reduced() { return json::parse("{\"element_options\" : {\"quadrature\" : \"reduced\"}}"); }
-
 constexpr auto ZERO_MARGIN = 1.0e-5;
 
-matrix3x six_node_coordinates()
+template <typename ShapeFunction, typename Quadrature>
+void check_shape_functions(ShapeFunction&& shape_function, Quadrature&& integration)
+{
+    for (auto const& coordinate : integration.coordinates())
+    {
+        auto const [N, dN] = shape_function.evaluate(coordinate);
+
+        REQUIRE(N.sum() == Approx(1.0));
+
+        REQUIRE(dN.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE(dN.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE(dN.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
+    }
+}
+
+static matrix3x six_node_coordinates()
 {
     matrix3x x(3, 6);
     x << 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, //
@@ -29,7 +39,7 @@ matrix3x six_node_coordinates()
     return x;
 }
 
-matrix3x fifteen_node_coordinates()
+static matrix3x fifteen_node_coordinates()
 {
     matrix3x x(3, 15);
     x << 1.0, 0.0, 0.0, 0.5, 0.0, 0.5, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.5, 0.0, 0.5, //
@@ -44,101 +54,49 @@ TEST_CASE("Prism quadrature scheme test")
 
     SECTION("Felippa quadrature")
     {
-        // Check one to six degree rules
-        felippa p1(1);
-        felippa p2(2);
-        felippa p3(3);
-        felippa p4(4);
-        felippa p5(5);
-        felippa p6(6);
-
-        REQUIRE(p1.points() == 1);
-        REQUIRE(p2.points() == 6);
-        REQUIRE(p3.points() == 6);
-        REQUIRE(p4.points() == 18);
-        REQUIRE(p5.points() == 21);
-        REQUIRE(p6.points() == 48);
-
-        REQUIRE(p1.degree() == 1);
-        REQUIRE(p2.degree() == 3);
-        REQUIRE(p3.degree() == 3);
-        REQUIRE(p4.degree() == 4);
-        REQUIRE(p5.degree() == 5);
-        REQUIRE(p6.degree() == 6);
-
-        REQUIRE(std::accumulate(begin(p1.weights()), end(p1.weights()), 0.0) == Approx(1.0));
-        REQUIRE(std::accumulate(begin(p2.weights()), end(p2.weights()), 0.0) == Approx(1.0));
-        REQUIRE(std::accumulate(begin(p3.weights()), end(p3.weights()), 0.0) == Approx(1.0));
-        REQUIRE(std::accumulate(begin(p4.weights()), end(p4.weights()), 0.0) == Approx(1.0));
-        REQUIRE(std::accumulate(begin(p5.weights()), end(p5.weights()), 0.0) == Approx(1.0));
-        REQUIRE(std::accumulate(begin(p6.weights()), end(p6.weights()), 0.0) == Approx(1.0));
+        for (auto&& degree : {1, 2, 3, 4, 5, 6})
+        {
+            felippa p{degree};
+            REQUIRE(p.degree() >= degree);
+            REQUIRE(std::accumulate(begin(p.weights()), end(p.weights()), 0.0) == Approx(1.0));
+        }
+        REQUIRE(felippa{1}.points() == 1);
+        REQUIRE(felippa{2}.points() == 6);
+        REQUIRE(felippa{3}.points() == 6);
+        REQUIRE(felippa{4}.points() == 18);
+        REQUIRE(felippa{5}.points() == 21);
+        REQUIRE(felippa{6}.points() == 48);
     }
     SECTION("Kubatko quadrature")
     {
-        // Check one to five degree rules
-        kubatko p1(1);
-        kubatko p2(2);
-        kubatko p3(3);
-        kubatko p4(4);
-        kubatko p5(5);
-
-        REQUIRE(p1.points() == 1);
-        REQUIRE(p2.points() == 4);
-        REQUIRE(p3.points() == 6);
-        REQUIRE(p4.points() == 11);
-        REQUIRE(p5.points() == 15);
-
-        REQUIRE(p1.degree() >= 1);
-        REQUIRE(p2.degree() >= 2);
-        REQUIRE(p3.degree() >= 3);
-        REQUIRE(p4.degree() >= 4);
-        REQUIRE(p5.degree() >= 5);
-
-        REQUIRE(std::accumulate(begin(p1.weights()), end(p1.weights()), 0.0) == Approx(1.0));
-        REQUIRE(std::accumulate(begin(p2.weights()), end(p2.weights()), 0.0) == Approx(1.0));
-        REQUIRE(std::accumulate(begin(p3.weights()), end(p3.weights()), 0.0) == Approx(1.0));
-        REQUIRE(std::accumulate(begin(p4.weights()), end(p4.weights()), 0.0) == Approx(1.0));
-        REQUIRE(std::accumulate(begin(p5.weights()), end(p5.weights()), 0.0) == Approx(1.0));
+        for (auto&& degree : {1, 2, 3, 4, 5})
+        {
+            kubatko p{degree};
+            REQUIRE(p.degree() >= degree);
+            REQUIRE(std::accumulate(begin(p.weights()), end(p.weights()), 0.0) == Approx(1.0));
+        }
+        REQUIRE(kubatko{1}.points() == 1);
+        REQUIRE(kubatko{2}.points() == 4);
+        REQUIRE(kubatko{3}.points() == 6);
+        REQUIRE(kubatko{4}.points() == 11);
+        REQUIRE(kubatko{5}.points() == 15);
     }
 }
 TEST_CASE("Element checks")
 {
     using namespace neon::quadrature::prism;
 
-    SECTION("prism6 kubatko")
+    REQUIRE(prism6{}.number_of_nodes() == 6);
+    REQUIRE(prism15{}.number_of_nodes() == 15);
+
+    SECTION("prism shape functions")
     {
-        prism6 element;
-        kubatko scheme(1);
-
-        REQUIRE(element.number_of_nodes() == 6);
-
-        for (auto const& coordinate : scheme.coordinates())
+        for (auto&& degree : {1, 2, 3, 4, 5})
         {
-            auto const [N, dN] = element.evaluate(coordinate);
-
-            REQUIRE(N.sum() == Approx(1.0));
-
-            REQUIRE(dN.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(dN.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(dN.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
-        }
-    }
-    SECTION("prism6 felippa")
-    {
-        prism6 element;
-        felippa scheme(1);
-
-        REQUIRE(element.number_of_nodes() == 6);
-
-        for (auto const& coordinate : scheme.coordinates())
-        {
-            auto const [N, dN] = element.evaluate(coordinate);
-
-            REQUIRE(N.sum() == Approx(1.0));
-
-            REQUIRE(dN.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(dN.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(dN.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            check_shape_functions(prism6{}, kubatko{degree});
+            check_shape_functions(prism6{}, felippa{degree});
+            check_shape_functions(prism15{}, kubatko{degree});
+            check_shape_functions(prism15{}, felippa{degree});
         }
     }
     // SECTION("Six node - six point area")
@@ -163,9 +121,6 @@ TEST_CASE("Element checks")
     //         REQUIRE(dN.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
     //         REQUIRE(dN.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
     //     });
-    //     REQUIRE(element.local_quadrature_extrapolation().rows() == 15);
-    //     REQUIRE(element.local_quadrature_extrapolation().cols() == 6);
-    //     REQUIRE(element.local_quadrature_extrapolation().allFinite());
     // }
     // SECTION("Fifteen node - nine point area")
     // {

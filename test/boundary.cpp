@@ -4,6 +4,8 @@
 #include "interpolations/triangle.hpp"
 #include "quadrature/triangle/cowper.hpp"
 
+#include "math/linear_interpolation.hpp"
+
 #include "mesh/basic_submesh.hpp"
 #include "mesh/boundary/boundary_condition.hpp"
 #include "mesh/mechanics/solid/boundary/nonfollower_load.hpp"
@@ -13,6 +15,8 @@
 #include "fixtures/cube_mesh.hpp"
 
 #include <memory>
+
+#include <iostream>
 
 using namespace neon;
 
@@ -36,6 +40,14 @@ matrix3 tri_quad_coordinates()
     return coordinates;
 }
 
+TEST_CASE("linear interpolation")
+{
+    REQUIRE(relative_distance(2.0, 0.0, 4.0) == Approx(0.5));
+    REQUIRE(relative_distance(5.0, 4.0, 6.0) == Approx(0.5));
+    REQUIRE(relative_distance(-5.0, 0.0, -10.0) == Approx(0.5));
+
+    REQUIRE(linear_interpolation(0.5, 5.0, 15.0) == Approx(10.0));
+}
 TEST_CASE("boundary unit test")
 {
     std::vector<double> times{0.0, 1.0, 2.0, 3.0};
@@ -81,12 +93,14 @@ TEST_CASE("boundary unit test")
     }
     SECTION("Non-matching length error test")
     {
-        REQUIRE_THROWS_AS(boundary_condition("[0.0, 1.0, 3.0]", "[0.0, 0.5, 1.0, 1.5]"),
+        REQUIRE_THROWS_AS(boundary_condition(json::parse("[0.0, 1.0, 3.0]"),
+                                             json::parse("[0.0, 0.5, 1.0, 1.5]")),
                           std::domain_error);
     }
     SECTION("Unordered time error test")
     {
-        REQUIRE_THROWS_AS(boundary_condition("[0.0, 10.0, 3.0]", "[0.0, 0.5, 1.0]"),
+        REQUIRE_THROWS_AS(boundary_condition(json::parse("[0.0, 10.0, 3.0]"),
+                                             json::parse("[0.0, 0.5, 1.0]")),
                           std::domain_error);
     }
 }
@@ -118,6 +132,8 @@ TEST_CASE("Traction test for triangle", "[Traction]")
 
         auto const& t = patch.external_force(0, 1.0);
 
+        std::cout << "traction\n" << t << "\n";
+
         REQUIRE((t - vector3::Constant(1.0 / 6.0)).norm() == Approx(0.0).margin(ZERO_MARGIN));
 
         REQUIRE((dof_indices.col(0) - dof_view).sum() == 0);
@@ -135,6 +151,8 @@ TEST_CASE("Traction test for triangle", "[Traction]")
         REQUIRE(patch.elements() == 1);
 
         auto const& t = patch.external_force(0, 1.0);
+
+        std::cout << "traction\n" << t << "\n";
 
         REQUIRE((t - vector3::Constant(2.0 / 6.0)).norm() == Approx(0.0).margin(ZERO_MARGIN));
         REQUIRE((dof_indices.col(0) - patch.local_dof_view(0)).sum() == 0);

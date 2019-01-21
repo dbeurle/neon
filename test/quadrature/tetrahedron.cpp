@@ -9,16 +9,26 @@
 #include "interpolations/interpolation_factory.hpp"
 #include "mesh/element_topology.hpp"
 
-#include "io/json.hpp"
-
 #include <numeric>
 
 using namespace neon;
 
-json full() { return json::parse("{\"element_options\" : {\"quadrature\" : \"full\"}}"); }
-json reduced() { return json::parse("{\"element_options\" : {\"quadrature\" : \"reduced\"}}"); }
-
 constexpr auto ZERO_MARGIN = 1.0e-5;
+
+template <typename ShapeFunction, typename Quadrature>
+void check_shape_functions(ShapeFunction&& shape_function, Quadrature&& integration)
+{
+    for (auto const& coordinate : integration.coordinates())
+    {
+        auto const [N, dN] = shape_function.evaluate(coordinate);
+
+        REQUIRE(N.sum() == Approx(1.0));
+
+        REQUIRE(dN.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE(dN.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE(dN.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
+    }
+}
 
 TEST_CASE("tetrahedron quadrature")
 {
@@ -26,115 +36,56 @@ TEST_CASE("tetrahedron quadrature")
 
     SECTION("jinyun")
     {
-        // tetrahedron_quadrature One(1);
-        // tetrahedron_quadrature Four(2);
-        // tetrahedron_quadrature Five(3);
-        //
-        // // Check the number of quadrature points are correctly set
-        // REQUIRE(One.points() == 1);
-        // REQUIRE(Four.points() == 4);
-        // REQUIRE(Five.points() == 5);
-        //
-        // // Check the weightings add to 1/6 for each scheme
-        // REQUIRE(ranges::accumulate(One.weights(), 0.0) == Approx(1.0 / 6.0));
-        // REQUIRE(ranges::accumulate(Four.weights(), 0.0) == Approx(1.0 / 6.0));
-        // REQUIRE(ranges::accumulate(Five.weights(), 0.0) == Approx(1.0 / 6.0));
+        for (auto&& degree : {1, 2, 3, 4, 5, 6})
+        {
+            jinyun t{degree};
+            REQUIRE(t.degree() >= degree);
+            REQUIRE(std::accumulate(begin(t.weights()), end(t.weights()), 0.0) == Approx(1.0 / 6.0));
+        }
+        REQUIRE(jinyun{1}.points() == 1);
+        REQUIRE(jinyun{2}.points() == 4);
+        REQUIRE(jinyun{3}.points() == 5);
+        REQUIRE(jinyun{4}.points() == 16);
+        REQUIRE(jinyun{5}.points() == 17);
+        REQUIRE(jinyun{6}.points() == 29);
     }
     SECTION("witherden_vincent")
     {
-        // tetrahedron_quadrature One(1);
-        // tetrahedron_quadrature Four(2);
-        // tetrahedron_quadrature Five(3);
-        //
-        // // Check the number of quadrature points are correctly set
-        // REQUIRE(One.points() == 1);
-        // REQUIRE(Four.points() == 4);
-        // REQUIRE(Five.points() == 5);
-        //
-        // // Check the weightings add to 1/6 for each scheme
-        // REQUIRE(ranges::accumulate(One.weights(), 0.0) == Approx(1.0 / 6.0));
-        // REQUIRE(ranges::accumulate(Four.weights(), 0.0) == Approx(1.0 / 6.0));
-        // REQUIRE(ranges::accumulate(Five.weights(), 0.0) == Approx(1.0 / 6.0));
+        for (auto&& degree : {1, 2, 3, 4, 5})
+        {
+            witherden_vincent t{degree};
+            REQUIRE(t.degree() >= degree);
+            REQUIRE(std::accumulate(begin(t.weights()), end(t.weights()), 0.0) == Approx(1.0 / 6.0));
+        }
+        REQUIRE(witherden_vincent{1}.points() == 1);
+        REQUIRE(witherden_vincent{2}.points() == 4);
+        REQUIRE(witherden_vincent{3}.points() == 8);
+        REQUIRE(witherden_vincent{4}.points() == 14);
+        REQUIRE(witherden_vincent{5}.points() == 14);
+        REQUIRE(witherden_vincent{6}.points() == 24);
     }
 }
 TEST_CASE("tetrahedron shape functions")
 {
     using namespace neon::quadrature::tetrahedron;
 
-    SECTION("tetrahedron4 jinyun quadrature")
+    REQUIRE(tetrahedron4{}.number_of_nodes() == 4);
+    REQUIRE(tetrahedron10{}.number_of_nodes() == 10);
+
+    SECTION("tetrahedron jinyun quadrature", "[quadrature.tetrahedron.jinyun]")
     {
-        tetrahedron4 element;
-
-        jinyun scheme(1);
-
-        REQUIRE(element.number_of_nodes() == 4);
-
-        for (auto const& coordinate : scheme.coordinates())
+        for (auto&& degree : {1, 2, 3, 4, 5})
         {
-            auto const [N, dN] = element.evaluate(coordinate);
-
-            REQUIRE(N.sum() == Approx(1.0));
-
-            REQUIRE(dN.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(dN.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(dN.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            check_shape_functions(tetrahedron4{}, jinyun{degree});
+            check_shape_functions(tetrahedron10{}, jinyun{degree});
         }
     }
-    SECTION("tetrahedron4 witherden vincent quadrature")
+    SECTION("tetrahedron witherden vincent", "[quadrature.tetrahedron.witherden_vincent]")
     {
-        tetrahedron4 element;
-
-        witherden_vincent scheme(1);
-
-        REQUIRE(element.number_of_nodes() == 4);
-
-        for (auto const& coordinate : scheme.coordinates())
+        for (auto&& degree : {1, 2, 3, 4, 5})
         {
-            auto const [N, dN] = element.evaluate(coordinate);
-
-            REQUIRE(N.sum() == Approx(1.0));
-
-            REQUIRE(dN.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(dN.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(dN.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
-        }
-    }
-    SECTION("tetrahedron10 jinyun quadrature")
-    {
-        tetrahedron10 element;
-
-        jinyun scheme(2);
-
-        REQUIRE(element.number_of_nodes() == 10);
-
-        for (auto const& coordinate : scheme.coordinates())
-        {
-            auto const [N, dN] = element.evaluate(coordinate);
-
-            REQUIRE(N.sum() == Approx(1.0));
-
-            REQUIRE(dN.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(dN.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(dN.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
-        }
-    }
-    SECTION("tetrahedron10 witherden vincent quadrature")
-    {
-        tetrahedron10 element;
-
-        witherden_vincent scheme(2);
-
-        REQUIRE(element.number_of_nodes() == 10);
-
-        for (auto const& coordinate : scheme.coordinates())
-        {
-            auto const [N, dN] = element.evaluate(coordinate);
-
-            REQUIRE(N.sum() == Approx(1.0));
-
-            REQUIRE(dN.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(dN.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(dN.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            check_shape_functions(tetrahedron4{}, witherden_vincent{degree});
+            check_shape_functions(tetrahedron10{}, witherden_vincent{degree});
         }
     }
 

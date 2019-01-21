@@ -13,83 +13,50 @@ constexpr auto ZERO_MARGIN = 1.0e-5;
 
 using namespace neon;
 
+template <typename ShapeFunction, typename Quadrature>
+void check_shape_functions(ShapeFunction&& shape_function, Quadrature&& integration)
+{
+    for (auto const& coordinate : integration.coordinates())
+    {
+        auto const [N, dN] = shape_function.evaluate(coordinate);
+
+        REQUIRE(N.sum() == Approx(1.0));
+
+        REQUIRE(dN.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE(dN.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
+        REQUIRE(dN.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
+    }
+}
+
 TEST_CASE("Hexahedron quadrature scheme test", "[quadrature.hexahedron]")
 {
     using namespace neon::quadrature::hexahedron;
 
     SECTION("Hexahedron", "[quadrature.hexahedron.gauss_legendre]")
     {
-        gauss_legendre h1(1);
-        gauss_legendre h3(3);
-        gauss_legendre h5(5);
-
-        REQUIRE(h1.points() == 1);
-        REQUIRE(h3.points() == 8);
-        REQUIRE(h5.points() == 27);
-
-        REQUIRE(std::accumulate(begin(h1.weights()), end(h1.weights()), 0.0) == Approx(8.0));
-        REQUIRE(std::accumulate(begin(h3.weights()), end(h3.weights()), 0.0) == Approx(8.0));
-        REQUIRE(std::accumulate(begin(h5.weights()), end(h5.weights()), 0.0) == Approx(8.0));
-    }
-    SECTION("hexahedron8")
-    {
-        hexahedron8 hex8;
-        gauss_legendre integration(1);
-
-        REQUIRE(hex8.number_of_nodes() == 8);
-
-        for (auto const& coordinate : integration.coordinates())
+        for (auto&& degree : {1, 2, 3, 4, 5})
         {
-            auto const [N, dN] = hex8.evaluate(coordinate);
-
-            for (int i = 0; i < 8; i++)
-            {
-                REQUIRE(N(i) == Approx(0.125));
-            }
-
-            REQUIRE(N.sum() == Approx(1.0));
-
-            REQUIRE(dN.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(dN.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(dN.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            gauss_legendre h(degree);
+            REQUIRE(h.degree() >= degree);
+            REQUIRE(std::accumulate(begin(h.weights()), end(h.weights()), 0.0) == Approx(8.0));
         }
+        REQUIRE(gauss_legendre{1}.points() == 1);
+        REQUIRE(gauss_legendre{2}.points() == 8);
+        REQUIRE(gauss_legendre{3}.points() == 8);
+        REQUIRE(gauss_legendre{4}.points() == 27);
+        REQUIRE(gauss_legendre{5}.points() == 27);
     }
-    SECTION("hexahedron20")
+    SECTION("hexahedron shape functions", "[quadrature.hexahedron.gauss_legendre]")
     {
-        hexahedron20 hex20;
+        REQUIRE(hexahedron8{}.number_of_nodes() == 8);
+        REQUIRE(hexahedron20{}.number_of_nodes() == 20);
+        REQUIRE(hexahedron27{}.number_of_nodes() == 27);
 
-        gauss_legendre integration(3);
-
-        REQUIRE(hex20.number_of_nodes() == 20);
-
-        for (auto const& coordinate : integration.coordinates())
+        for (auto&& degree : {1, 2, 3, 4, 5})
         {
-            auto const [N, dN] = hex20.evaluate(coordinate);
-
-            REQUIRE(N.sum() == Approx(1.0));
-
-            REQUIRE(dN.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(dN.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(dN.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
-        }
-    }
-    SECTION("hexahedron27 one Evaluation")
-    {
-        hexahedron27 hex27;
-
-        gauss_legendre integration(5);
-
-        REQUIRE(hex27.number_of_nodes() == 27);
-
-        for (auto const& coordinate : integration.coordinates())
-        {
-            auto const [N, dN] = hex27.evaluate(coordinate);
-
-            REQUIRE(N.sum() == Approx(1.0));
-
-            REQUIRE(dN.col(0).sum() == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(dN.col(1).sum() == Approx(0.0).margin(ZERO_MARGIN));
-            REQUIRE(dN.col(2).sum() == Approx(0.0).margin(ZERO_MARGIN));
+            check_shape_functions(hexahedron8{}, gauss_legendre{degree});
+            check_shape_functions(hexahedron20{}, gauss_legendre{degree});
+            check_shape_functions(hexahedron27{}, gauss_legendre{degree});
         }
     }
 }
