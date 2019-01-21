@@ -63,18 +63,22 @@ double boundary_condition::interpolate(std::vector<double> const& x_values,
                                   [&](auto const& value) { return is_approx(value, x_value); });
         match != end(x_values))
     {
-        return m_values[std::distance(begin(x_values), match)];
+        return y_values[std::distance(begin(x_values), match)];
     }
 
     // Otherwise we need to interpolate between the values
-    auto const lower_value = std::lower_bound(begin(x_values), end(x_values), x_value);
-    auto const upper_value = std::upper_bound(begin(x_values), end(x_values), x_value);
+    auto [lower_value, upper_value] = std::equal_range(begin(x_values), end(x_values), x_value);
 
-    if (lower_value == end(x_values) || upper_value == end(x_values))
+    // Handle edge case
+    if (lower_value != begin(x_values))
+    {
+        lower_value = std::prev(lower_value);
+    }
+
+    if (lower_value == end(x_values) || upper_value == end(x_values) || lower_value == upper_value)
     {
         throw std::domain_error("step_time was not found as a valid time to interpolate");
     }
-
     return linear_interpolation(relative_distance(x_value, *lower_value, *upper_value),
                                 y_values[std::distance(begin(x_values), lower_value)],
                                 y_values[std::distance(begin(x_values), upper_value)]);
@@ -131,11 +135,12 @@ void boundary_condition::generate_sinusoidal(json const& boundary,
                      });
 
         // compute the load corresponding to each time step
-        std::vector<double> load_block(number_of_steps);
-        load_block = time_block
-                     | view::transform([i, &amplitude, angular_frequency, &phase](double x) {
-                           return amplitude[i] * std::sin(angular_frequency * x + phase[i]);
-                       });
+        std::vector<double> load_block = time_block
+                                         | view::transform([i, &amplitude, angular_frequency, &phase](
+                                                               double x) {
+                                               return amplitude[i]
+                                                      * std::sin(angular_frequency * x + phase[i]);
+                                           });
 
         // append the current block time steps and loads to the total time and load vectors
         times.insert(end(times), begin(time_block), end(time_block));
