@@ -10,11 +10,12 @@
 #include "io/json_forward.hpp"
 
 #include <vtkSmartPointer.h>
-#include <vtkUnstructuredGrid.h>
 
 #include <future>
 #include <set>
 #include <string>
+
+class vtkUnstructuredGrid;
 
 namespace neon::io
 {

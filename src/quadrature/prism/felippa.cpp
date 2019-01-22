@@ -1,9 +1,9 @@
 
-#include "felippa_prism.hpp"
+#include "felippa.hpp"
 
-namespace neon
+namespace neon::quadrature::prism
 {
-felippa_prism::felippa_prism(int const minimum_degree)
+felippa::felippa(int const minimum_degree)
 {
     switch (minimum_degree)
     {

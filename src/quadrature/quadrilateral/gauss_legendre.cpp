@@ -1,11 +1,11 @@
 
-#include "quadrilateral_quadrature.hpp"
+#include "gauss_legendre.hpp"
 
 #include <cmath>
 
-namespace neon
+namespace neon::quadrature::quadrilateral
 {
-quadrilateral_quadrature::quadrilateral_quadrature(int const minimum_degree)
+gauss_legendre::gauss_legendre(int const minimum_degree)
 {
     switch (minimum_degree)
     {
@@ -19,8 +19,8 @@ quadrilateral_quadrature::quadrilateral_quadrature(int const minimum_degree)
         case 2:
         case 3:
         {
+            m_degree = 3;
             m_weights = {1.0, 1.0, 1.0, 1.0};
-
             m_coordinates = {{0, -1.0 / std::sqrt(3.0), -1.0 / std::sqrt(3.0)},
                              {1, 1.0 / std::sqrt(3.0), -1.0 / std::sqrt(3.0)},
                              {2, 1.0 / std::sqrt(3.0), 1.0 / std::sqrt(3.0)},
@@ -30,6 +30,7 @@ quadrilateral_quadrature::quadrilateral_quadrature(int const minimum_degree)
         case 4:
         case 5:
         {
+            m_degree = 5;
             m_weights = {25.0 / 81.0,
                          25.0 / 81.0,
                          25.0 / 81.0,
@@ -39,19 +40,20 @@ quadrilateral_quadrature::quadrilateral_quadrature(int const minimum_degree)
                          40.0 / 81.0,
                          40.0 / 81.0,
                          64.0 / 81.0};
-
-            auto const a = std::sqrt(3.0 / 5.0);
-
-            m_coordinates = {{0, -a, -a},
-                             {1, a, -a},
-                             {2, a, a},
-                             {3, -a, a},
-                             {4, 0.0, -a},
-                             {5, a, 0.0},
-                             {6, 0.0, a},
-                             {7, -a, 0.0},
+            m_coordinates = {{0, -std::sqrt(3.0 / 5.0), -std::sqrt(3.0 / 5.0)},
+                             {1, std::sqrt(3.0 / 5.0), -std::sqrt(3.0 / 5.0)},
+                             {2, std::sqrt(3.0 / 5.0), std::sqrt(3.0 / 5.0)},
+                             {3, -std::sqrt(3.0 / 5.0), std::sqrt(3.0 / 5.0)},
+                             {4, 0.0, -std::sqrt(3.0 / 5.0)},
+                             {5, std::sqrt(3.0 / 5.0), 0.0},
+                             {6, 0.0, std::sqrt(3.0 / 5.0)},
+                             {7, -std::sqrt(3.0 / 5.0), 0.0},
                              {8, 0.0, 0.0}};
             break;
+        }
+        default:
+        {
+            throw std::domain_error("quadrature scheme greater than degree 5 not yet available");
         }
     }
 }

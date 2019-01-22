@@ -1,11 +1,11 @@
 
-#include "gauss_legendre_line.hpp"
+#include "gauss_legendre.hpp"
 
 #include <cmath>
 
-namespace neon
+namespace neon::quadrature::line
 {
-gauss_legendre_line::gauss_legendre_line(int const minimum_degree)
+gauss_legendre::gauss_legendre(int const minimum_degree)
 {
     switch (minimum_degree)
     {

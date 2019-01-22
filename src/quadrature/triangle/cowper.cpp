@@ -1,11 +1,11 @@
 
-#include "cowper_triangle.hpp"
+#include "cowper.hpp"
 
 #include <algorithm>
 
-namespace neon
+namespace neon::quadrature::triangle
 {
-cowper_triangle::cowper_triangle(int const minimum_degree)
+cowper::cowper(int const minimum_degree)
 {
     switch (minimum_degree)
     {
@@ -135,6 +135,11 @@ cowper_triangle::cowper_triangle(int const minimum_degree)
                              {11, 0.312865496004875, 0.638444188569809},
                              {12, 0.04869031542531599, 0.312865496004875}};
             break;
+        }
+        default:
+        {
+            throw std::domain_error("Schemes greater than seventh degree have not been "
+                                    "implemented");
         }
     }
     std::transform(begin(m_weights), end(m_weights), begin(m_weights), [](auto const weight) {

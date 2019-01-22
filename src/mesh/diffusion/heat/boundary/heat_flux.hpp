@@ -9,5 +9,5 @@
 namespace neon::diffusion::boundary
 {
 /// heat_flux is a Neumann type boundary condition
-using heat_flux = constant_neumann<fem::integral<volume_interpolation, volume_quadrature, 0>>;
+using heat_flux = constant_neumann<fem::integral<surface_interpolation, surface_quadrature, 0>>;
 }

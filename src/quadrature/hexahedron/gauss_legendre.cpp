@@ -1,11 +1,11 @@
 
-#include "hexahedron_quadrature.hpp"
+#include "gauss_legendre.hpp"
 
 #include <cmath>
 
-namespace neon
+namespace neon::quadrature::hexahedron
 {
-hexahedron_quadrature::hexahedron_quadrature(int const minimum_degree)
+gauss_legendre::gauss_legendre(int const minimum_degree)
 {
     switch (minimum_degree)
     {
@@ -18,9 +18,8 @@ hexahedron_quadrature::hexahedron_quadrature(int const minimum_degree)
         }
         case 2:
         case 3:
-        case 4:
         {
-            m_degree = 4;
+            m_degree = 3;
             m_weights.resize(8, 1.0);
             auto const qp = 1.0 / std::sqrt(3.0);
             m_coordinates = {{0, -qp, -qp, -qp},
@@ -33,10 +32,10 @@ hexahedron_quadrature::hexahedron_quadrature(int const minimum_degree)
                              {7, -qp, qp, qp}};
             break;
         }
+        case 4:
         case 5:
-        case 6:
         {
-            m_degree = 6;
+            m_degree = 5;
             m_weights = {125.0 / 729.0, 125.0 / 729.0, 125.0 / 729.0, 125.0 / 729.0, 200.0 / 729.0,
                          200.0 / 729.0, 200.0 / 729.0, 200.0 / 729.0, 320.0 / 729.0, 200.0 / 729.0,
                          200.0 / 729.0, 200.0 / 729.0, 200.0 / 729.0, 320.0 / 729.0, 320.0 / 729.0,

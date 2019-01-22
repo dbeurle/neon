@@ -1,11 +1,11 @@
 
-#include "quadrature/tetrahedron/jinyun_tetrahedron.hpp"
+#include "quadrature/tetrahedron/jinyun.hpp"
 
 #include <algorithm>
 
-namespace neon
+namespace neon::quadrature::tetrahedron
 {
-jinyun_tetrahedron::jinyun_tetrahedron(int const minimum_degree)
+jinyun::jinyun(int const minimum_degree)
 {
     switch (minimum_degree)
     {

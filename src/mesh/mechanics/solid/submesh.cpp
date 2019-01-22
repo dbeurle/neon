@@ -3,11 +3,10 @@
 
 #include "submesh.hpp"
 
-#include "exceptions.hpp"
-
 #include "constitutive/constitutive_model_factory.hpp"
-#include "interpolations/interpolation_factory.hpp"
+#include "exceptions.hpp"
 #include "material/material_property.hpp"
+#include "mesh/projection/recovery.hpp"
 #include "mesh/material_coordinates.hpp"
 #include "numeric/gradient_operator.hpp"
 #include "numeric/mechanics"
@@ -15,7 +14,6 @@
 #include "traits/mechanics.hpp"
 
 #include <termcolor/termcolor.hpp>
-
 #include <tbb/parallel_for.h>
 
 #include <cfenv>
@@ -32,8 +30,7 @@ submesh::submesh(json const& material_data,
       bilinear_gradient(topology(), mesh_data),
       bilinear(topology(), mesh_data),
       view(bilinear_gradient.quadrature().points()),
-      variables(std::make_shared<internal_variables_t>(elements()
-                                                       * bilinear_gradient.quadrature().points())),
+      variables(std::make_shared<internal_variables_t>(elements() * view.size())),
       cm(make_constitutive_model(variables, material_data, mesh_data))
 {
     // Allocate storage for the displacement gradient
@@ -52,6 +49,12 @@ submesh::submesh(json const& material_data,
 
     dof_allocator(node_indices, dof_indices, traits::dof_order);
 }
+
+submesh::~submesh() = default;
+
+submesh::submesh(submesh&&) = default;
+
+submesh& submesh::operator=(submesh&&) = default;
 
 void submesh::save_internal_variables(bool const have_converged)
 {
@@ -78,7 +81,6 @@ matrix const& submesh::tangent_stiffness(std::int32_t const element) const
     {
         return k_e;
     }
-
     k_e.noalias() += geometric_tangent_stiffness(x, element);
 
     return k_e;
@@ -278,39 +280,39 @@ std::pair<vector, vector> submesh::nodal_averaged_variable(variable::second cons
     vector count = vector::Zero(coordinates->size() * 9),
            value = vector::Zero(coordinates->size() * 9);
 
-    auto const& tensor_list = variables->get(tensor_name);
-
-    auto const& E = patch_recovery->extrapolation_matrix();
-
-    // vector format of values
-    vector component = vector::Zero(bilinear_gradient.quadrature().points());
-
-    for (std::int64_t e{0}; e < elements(); ++e)
-    {
-        // Assemble these into the global value vector
-        auto const& node_list = local_node_view(e);
-
-        for (auto ci = 0; ci < 3; ++ci)
-        {
-            for (auto cj = 0; cj < 3; ++cj)
-            {
-                for (std::size_t l{0}; l < bilinear_gradient.quadrature().points(); ++l)
-                {
-                    auto const& tensor = tensor_list[view(e, l)];
-                    component(l) = tensor(ci, cj);
-                }
-
-                // Local extrapolation to the nodes
-                vector const nodal_component = E * component;
-
-                for (auto n = 0; n < nodal_component.rows(); n++)
-                {
-                    value(node_list[n] * 9 + ci * 3 + cj) += nodal_component(n);
-                    count(node_list[n] * 9 + ci * 3 + cj) += 1.0;
-                }
-            }
-        }
-    }
+    // auto const& tensor_list = variables->get(tensor_name);
+    //
+    // auto const& E = patch_recovery->extrapolation_matrix();
+    //
+    // // vector format of values
+    // vector component = vector::Zero(bilinear_gradient.quadrature().points());
+    //
+    // for (std::int64_t e{0}; e < elements(); ++e)
+    // {
+    //     // Assemble these into the global value vector
+    //     auto const& node_list = local_node_view(e);
+    //
+    //     for (auto ci = 0; ci < 3; ++ci)
+    //     {
+    //         for (auto cj = 0; cj < 3; ++cj)
+    //         {
+    //             for (std::size_t l{0}; l < bilinear_gradient.quadrature().points(); ++l)
+    //             {
+    //                 auto const& tensor = tensor_list[view(e, l)];
+    //                 component(l) = tensor(ci, cj);
+    //             }
+    //
+    //             // Local extrapolation to the nodes
+    //             vector const nodal_component = E * component;
+    //
+    //             for (auto n = 0; n < nodal_component.rows(); n++)
+    //             {
+    //                 value(node_list[n] * 9 + ci * 3 + cj) += nodal_component(n);
+    //                 count(node_list[n] * 9 + ci * 3 + cj) += 1.0;
+    //             }
+    //         }
+    //     }
+    // }
     return {value, count};
 }
 
@@ -319,32 +321,32 @@ std::pair<vector, vector> submesh::nodal_averaged_variable(variable::scalar cons
     vector count = vector::Zero(coordinates->size());
     vector value = count;
 
-    auto const& scalar_list = variables->get(scalar_name);
-
-    auto const& E = patch_recovery->extrapolation_matrix();
-
-    // vector format of values
-    vector component = vector::Zero(bilinear_gradient.quadrature().points());
-
-    for (std::int64_t e{0}; e < elements(); ++e)
-    {
-        // Assemble these into the global value vector
-        auto const& node_list = local_node_view(e);
-
-        for (std::size_t l{0}; l < bilinear_gradient.quadrature().points(); ++l)
-        {
-            component(l) = scalar_list[view(e, l)];
-        }
-
-        // Local extrapolation to the nodes
-        vector const nodal_component = E * component;
-
-        for (auto n = 0; n < nodal_component.rows(); n++)
-        {
-            value(node_list[n]) += nodal_component(n);
-            count(node_list[n]) += 1.0;
-        }
-    }
+    // auto const& scalar_list = variables->get(scalar_name);
+    //
+    // auto const& E = patch_recovery->extrapolation_matrix();
+    //
+    // // vector format of values
+    // vector component = vector::Zero(bilinear_gradient.quadrature().points());
+    //
+    // for (std::int64_t e{0}; e < elements(); ++e)
+    // {
+    //     // Assemble these into the global value vector
+    //     auto const& node_list = local_node_view(e);
+    //
+    //     for (std::size_t l{0}; l < bilinear_gradient.quadrature().points(); ++l)
+    //     {
+    //         component(l) = scalar_list[view(e, l)];
+    //     }
+    //
+    //     // Local extrapolation to the nodes
+    //     vector const nodal_component = E * component;
+    //
+    //     for (auto n = 0; n < nodal_component.rows(); n++)
+    //     {
+    //         value(node_list[n]) += nodal_component(n);
+    //         count(node_list[n]) += 1.0;
+    //     }
+    // }
     return {value, count};
 }
 }

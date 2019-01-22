@@ -18,6 +18,7 @@ template <class T>
 [[nodiscard]] inline T relative_distance(T const value, T const lower, T const upper) noexcept
 {
     static_assert(std::is_floating_point<T>::value, "fraction only accepts floating point arguments");
+
     return (value - lower) / (upper - lower);
 }
 

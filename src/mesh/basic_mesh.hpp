@@ -20,7 +20,7 @@ public:
     basic_mesh(json const& mesh_file);
 
     /// \return mesh matching a specific name
-    [[nodiscard]] std::vector<basic_submesh> const& meshes(std::string const& name) const;
+    [[nodiscard]] auto meshes(std::string const& name) const -> std::vector<basic_submesh> const&;
 
 protected:
     std::map<std::string, std::vector<basic_submesh>> meshes_map;

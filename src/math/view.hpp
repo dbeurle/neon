@@ -63,6 +63,8 @@ public:
         return stride * first_index + second_index;
     }
 
+    auto size() const noexcept -> Index { return stride; }
+
 private:
     Index stride;
 };

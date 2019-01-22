@@ -1,11 +1,11 @@
 
-#include "kubatko_prism.hpp"
+#include "kubatko.hpp"
 
 #include <algorithm>
 
-namespace neon
+namespace neon::quadrature::prism
 {
-kubatko_prism::kubatko_prism(int const minimum_degree)
+kubatko::kubatko(int const minimum_degree)
 {
     switch (minimum_degree)
     {
