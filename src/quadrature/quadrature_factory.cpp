@@ -47,17 +47,31 @@ std::unique_ptr<volume_quadrature> make_volume_quadrature(element_topology const
         case element_topology::tetrahedron35:
         case element_topology::tetrahedron56:
         {
-            if (quadrature_options.find("tetrahedron") == end(quadrature_options))
+            using namespace quadrature::tetrahedron;
+
+            if (quadrature_options.find("tetrahedron") != end(quadrature_options))
             {
-                // provide a default
+                if (std::string const& type = quadrature_options["tetrahedron"]; type == "jinyun")
+                {
+                    return std::make_unique<jinyun>(minimum_degree);
+                }
+                else if (type == "witherden_vincent")
+                {
+                    return std::make_unique<witherden_vincent>(minimum_degree);
+                }
+                else
+                {
+                    throw std::domain_error("\"jinyun\" and \"witherden_vincent\" are valid "
+                                            "tetrahedron rules");
+                }
             }
-            return std::make_unique<quadrature::tetrahedron::witherden_vincent>(minimum_degree);
+            return std::make_unique<jinyun>(minimum_degree);
         }
         case element_topology::prism6:
         case element_topology::prism15:
         case element_topology::prism18:
         {
-            if (quadrature_options.find("prism") == end(quadrature_options))
+            if (quadrature_options.find("prism") != end(quadrature_options))
             {
                 // provide a default
             }
@@ -78,7 +92,6 @@ std::unique_ptr<volume_quadrature> make_volume_quadrature(element_topology const
             throw std::runtime_error("Volume quadrature for element number "
                                      + std::to_string(static_cast<int>(topology))
                                      + " is not implemented");
-            break;
         }
     }
     return nullptr;

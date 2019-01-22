@@ -3,7 +3,10 @@
 
 namespace neon
 {
-triangle3::triangle3() : surface_interpolation(3, 0, 0) {}
+triangle3::triangle3() : surface_interpolation(3, 1, 1)
+{
+    m_local_coordinates = {{0, 1.0, 0.0}, {1, 0.0, 1.0}, {2, 0.0, 0.0}};
+}
 
 auto triangle3::evaluate(coordinate_type const& coordinate) const noexcept(false) -> value_type
 {
@@ -27,7 +30,7 @@ auto triangle3::evaluate(coordinate_type const& coordinate) const noexcept(false
     return {N, rhea};
 }
 
-triangle6::triangle6() : surface_interpolation(6, 0, 0)
+triangle6::triangle6() : surface_interpolation(6, 2, 2)
 {
     m_local_coordinates =
         {{0, 1.0, 0.0}, {1, 0.0, 1.0}, {2, 0.0, 0.0}, {3, 0.5, 0.5}, {4, 0.0, 0.5}, {5, 0.5, 0.0}};
@@ -67,5 +70,4 @@ auto triangle6::evaluate(coordinate_type const& coordinate) const noexcept(false
 
     return {N, rhea};
 }
-
 }

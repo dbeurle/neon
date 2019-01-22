@@ -88,7 +88,6 @@ TEST_CASE("tetrahedron shape functions")
             check_shape_functions(tetrahedron10{}, witherden_vincent{degree});
         }
     }
-
     // SECTION("tetrahedron10 Jacobian and volume check")
     // {
     //     SECTION("Parent element")

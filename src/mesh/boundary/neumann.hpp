@@ -137,5 +137,4 @@ protected:
     /// Linear form for the integral evaluation
     linear_form_type linear_form;
 };
-
 }

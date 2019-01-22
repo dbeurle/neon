@@ -32,7 +32,12 @@ TEST_CASE("Triangle quadrature")
     using namespace neon::quadrature::triangle;
 
     REQUIRE(triangle3{}.number_of_nodes() == 3);
+    REQUIRE(triangle3{}.polynomial_order() == 1);
+    REQUIRE(triangle3{}.monomial_order() == 1);
+
     REQUIRE(triangle6{}.number_of_nodes() == 6);
+    REQUIRE(triangle6{}.polynomial_order() == 2);
+    REQUIRE(triangle6{}.monomial_order() == 2);
 
     SECTION("triangle")
     {

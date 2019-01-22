@@ -16,8 +16,6 @@
 
 #include <memory>
 
-#include <iostream>
-
 using namespace neon;
 
 constexpr auto ZERO_MARGIN = 1.0e-5;
@@ -132,8 +130,6 @@ TEST_CASE("Traction test for triangle", "[Traction]")
 
         auto const& t = patch.external_force(0, 1.0);
 
-        std::cout << "traction\n" << t << "\n";
-
         REQUIRE((t - vector3::Constant(1.0 / 6.0)).norm() == Approx(0.0).margin(ZERO_MARGIN));
 
         REQUIRE((dof_indices.col(0) - dof_view).sum() == 0);
@@ -151,8 +147,6 @@ TEST_CASE("Traction test for triangle", "[Traction]")
         REQUIRE(patch.elements() == 1);
 
         auto const& t = patch.external_force(0, 1.0);
-
-        std::cout << "traction\n" << t << "\n";
 
         REQUIRE((t - vector3::Constant(2.0 / 6.0)).norm() == Approx(0.0).margin(ZERO_MARGIN));
         REQUIRE((dof_indices.col(0) - patch.local_dof_view(0)).sum() == 0);
@@ -189,7 +183,7 @@ TEST_CASE("Pressure test for triangle")
         REQUIRE((dof_indices.col(0) - dof_view).sum() == 0);
 
         // Compare the z-component to the analytical solution
-        REQUIRE((vector3(f_ext(2), f_ext(5), f_ext(8)) - 1.0 / 6.0 * vector3::Ones()).norm()
+        REQUIRE((vector3(f_ext(2), f_ext(5), f_ext(8)) - vector3::Constant(1.0 / 6.0)).norm()
                 == Approx(0.0).margin(ZERO_MARGIN));
     }
     SECTION("Twice unit load")

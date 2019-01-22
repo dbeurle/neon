@@ -22,12 +22,12 @@ public:
     static constexpr auto derivative_order = DerivativeOrder;
     /// Manual correction for rank-insufficient matrices in integral
     static constexpr auto rank_correction = RankCorrection;
-    /// Fix the size of the shape function derivative to the size of the quadrature points
-    using value_type = std::tuple<vector, matrixxd<Quadrature::spatial_dimension>>;
     /// Type alias for Interpolation
     using interpolation_type = Interpolation;
     /// Type alias for Quadrature
     using quadrature_type = Quadrature;
+    /// Fix the size of the shape function derivative to the size of the quadrature points
+    using value_type = typename interpolation_type::value_type;
 
 public:
     integral(element_topology const topology, json const& element_options)
@@ -37,7 +37,8 @@ public:
                                      minimum_degree(m_shape_function->polynomial_order(),
                                                     m_shape_function->monomial_order(),
                                                     derivative_order),
-                                     element_options)}
+                                     element_options)},
+          m_values(m_shape_function->evaluate(m_quadrature->coordinates()))
     {
     }
 
@@ -53,7 +54,7 @@ public:
 
         for (std::size_t index{0}; index < indices; ++index)
         {
-            integral.noalias() += f(values[index], index) * weights[index];
+            integral.noalias() += f(m_values[index], index) * weights[index];
         }
     }
 
@@ -69,7 +70,7 @@ public:
 
         for (std::size_t index{0}; index < indices; ++index)
         {
-            integral.noalias() += f(values[index], index) * weights[index];
+            integral.noalias() += f(m_values[index], index) * weights[index];
         }
     }
 
@@ -82,21 +83,7 @@ public:
 
         for (std::size_t index{0}; index < indices; ++index)
         {
-            function(values[index], index);
-        }
-    }
-
-    /// Evaluate a shape function and derivatives for the quadrature points
-    /// Throws std::out_of_memory
-    /// \param f - A lambda function that accepts a quadrature coordinate tuple
-    template <typename Callable>
-    void evaluate(Callable&& f)
-    {
-        values.clear();
-        values.reserve(m_quadrature->points());
-        for (auto const& coordinate : m_quadrature->coordinates())
-        {
-            values.emplace_back(f(coordinate));
+            function(m_values[index], index);
         }
     }
 
@@ -108,9 +95,8 @@ protected:
     std::unique_ptr<interpolation_type> m_shape_function;
 
     std::unique_ptr<quadrature_type> m_quadrature;
-
     /// Shape functions and their derivatives evaluated at the quadrature points
-    std::vector<value_type> values;
+    std::vector<value_type> m_values;
 };
 
 }

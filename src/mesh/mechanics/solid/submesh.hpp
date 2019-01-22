@@ -127,7 +127,7 @@ protected:
     std::shared_ptr<material_coordinates> coordinates;
 
     /// Gradient bilinear form for stiffness matrix
-    bilinear_type<1> bilinear_gradient;
+    bilinear_type<0> bilinear_gradient;
     /// Bilinear form for mass matrix
     bilinear_type<0> bilinear;
 
