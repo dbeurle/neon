@@ -1,3 +1,3 @@
 
-add_subdirectory(cube)
-add_subdirectory(specimen)
+# add_subdirectory(cube)
+# add_subdirectory(specimen)
