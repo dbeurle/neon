@@ -63,6 +63,10 @@ If you have an NVIDIA graphics card, then you can use the CUDA enabled iterative
 
 - `-DENABLE_CUDA=1`
 
+CUDA doesn't follow the latest GCC so a compatibility package is usually provided.  CMake can be told to use a specific compiler for the host compilation through
+
+- `-DCMAKE_CUDA_HOST_COMPILER=<compiler>`
+
 For checking the successful compilation of the program, invoke the test suite by executing
 
 - `$ ctest`
