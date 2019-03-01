@@ -539,4 +539,27 @@ template <typename matrix_expression>
 {
     return detail::mandel_notation(A.eval());
 }
+
+/// Compute the incremental deformation gradient given the current and the
+/// previous deformation gradient
+/// \param F The current deformation gradient
+/// \param F_old The previous deformation gradient
+/// \return The incremental deformation gradient
+/// \ingroup tensor
+[[nodiscard]] inline matrix3 incremental_deformation_gradient(matrix3 const& F, matrix3 const& F_old)
+{
+    return F * F_old.inverse();
+}
+
+/// Perform a push forward operation on a contravariant (kinetic)
+/// second order tensor using the deformation gradient
+/// \return Tensor pushed forward to the configuration determined by
+///         the deformation_gradient
+/// \ingroup tensor
+[[nodiscard]] inline matrix3 push_forward_contravariant(matrix3 const& deformation_gradient,
+                                                        matrix3 const& contravariant_tensor)
+{
+    return deformation_gradient * contravariant_tensor * deformation_gradient.transpose();
+}
+
 }

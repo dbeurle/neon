@@ -28,6 +28,7 @@ class gaussian_ageing_affine_microsphere : public gaussian_affine_microsphere
 public:
     /// \param variables Reference to internal state variable store
     /// \param material_data Json object with input file material data
+    /// \param rule A unit sphere quadrature scheme
     explicit gaussian_ageing_affine_microsphere(std::shared_ptr<internal_variables_t>& variables,
                                                 json const& material_data,
                                                 unit_sphere_quadrature::point const rule);
@@ -37,28 +38,20 @@ public:
     virtual void update_internal_variables(double const time_step_size) override;
 
 private:
-    [[nodiscard]] matrix3 compute_macro_stress(matrix3 const& F_bar,
-                                               std::vector<double> const& modulus,
-                                               double const reduction_factor) const;
+    [[nodiscard]] matrix3 compute_initial_macro_stress(matrix3 const& F_bar,
+                                                       double const reduction_factor) const;
+
+    /// Compute the macro stress on the intermediate configuration that overlaps
+    /// with the current configuration
+    [[nodiscard]] matrix3 compute_intermediate_macro_stress(double const shear_modulus_creation,
+                                                            double const reduction_factor) const;
 
     [[nodiscard]] matrix6 compute_macro_moduli(matrix3 const& F_bar,
                                                double const creation_rate,
                                                double const time_step_size) const;
 
-    /// Compute the force contribution to the secondary modulus
-    /// \return evaluated integrand
-    [[nodiscard]] double evaluate_integrand(double const creation_rate,
-                                            double const reduction_factor,
-                                            double const micro_stretch) const;
-
-    /// Integrate the time history and return the integrated value
-    [[nodiscard]] double integrate_history(double const modulus,
-                                           double const sphere_old,
-                                           double const sphere,
-                                           double const time_step_size) const;
-
 private:
-    /// Material with micromechanical parameters
+    /// Material with micromechanical network parameters
     ageing_micromechanical_elastomer material;
 
     double last_time_step_size = 0.0;

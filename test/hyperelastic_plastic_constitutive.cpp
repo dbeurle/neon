@@ -23,354 +23,343 @@ constexpr auto ZERO_MARGIN = 1.0e-5;
 using neon::json;
 using namespace neon;
 
-TEST_CASE("Gaussian affine microsphere model with ageing")
-{
-    using namespace neon::mechanics::solid;
-
-    auto variables = std::make_shared<internal_variables_t>(1);
-
-    // Add the required variables for an updated Lagrangian formulation
-    variables->add(variable::second::deformation_gradient, variable::second::cauchy_stress);
-
-    variables->add(variable::scalar::DetF);
-
-    auto const material_data{"{\"name\" : \"rubber\","
-                             "\"shear_modulus\" : 2.0e6,"
-                             "\"bulk_modulus\" : 100e6,"
-                             "\"segments_per_chain\" : 50,"
-                             "\"scission_probability\" : 1.0e-5,"
-                             "\"recombination_probability\" : 1.0e-5}"};
-
-    auto const constitutive_data{"{\"constitutive\" : {\"name\": \"microsphere\","
-                                 "\"type\":\"affine\","
-                                 "\"statistics\":\"gaussian\","
-                                 "\"quadrature\":\"BO21\","
-                                 "\"ageing\":\"BAND\"}}"};
-
-    auto affine = make_constitutive_model(variables,
-                                          json::parse(material_data),
-                                          json::parse(constitutive_data));
-
-    auto [F_list, cauchy_stresses] = variables->get(variable::second::deformation_gradient,
-                                                    variable::second::cauchy_stress);
-
-    auto& J_list = variables->get(variable::scalar::DetF);
-    std::fill(begin(J_list), end(J_list), 1.0);
-
-    auto& material_tangents = variables->get(variable::fourth::tangent_operator);
-
-    Eigen::EigenSolver<Eigen::MatrixXd> eigen_solver;
-
-    SECTION("Setup checks")
-    {
-        REQUIRE(affine->is_symmetric());
-        REQUIRE(affine->is_finite_deformation());
-        REQUIRE(affine->intrinsic_material().name() == "rubber");
-
-        REQUIRE(variables->has(variable::scalar::active_shear_modulus));
-        REQUIRE(variables->has(variable::scalar::inactive_shear_modulus));
-        REQUIRE(variables->has(variable::scalar::active_segments));
-        REQUIRE(variables->has(variable::scalar::inactive_segments));
-        REQUIRE(variables->has(variable::scalar::reduction_factor));
-
-        REQUIRE(variables->has(variable::vector::accumulated_ageing_integral));
-        REQUIRE(variables->has(variable::vector::previous_integrand));
-
-        for (auto segment : variables->get(variable::scalar::active_segments))
-        {
-            REQUIRE(segment == Approx(50.0));
-        }
-        for (auto shear_modulus : variables->get(variable::scalar::active_shear_modulus))
-        {
-            REQUIRE(shear_modulus == Approx(2.0e6));
-        }
-        for (auto& value : variables->get(variable::vector::accumulated_ageing_integral))
-        {
-            REQUIRE(value.size() == 21);
-        }
-        for (auto& value : variables->get(variable::vector::previous_integrand))
-        {
-            REQUIRE(value.size() == 21);
-        }
-    }
-    SECTION("no load")
-    {
-        std::fill(begin(F_list), end(F_list), neon::matrix3::Identity());
-
-        affine->update_internal_variables(1.0);
-
-        // Check the network parameters
-        auto [active_segments,
-              inactive_segments,
-              active_shear_moduli,
-              inactive_shear_moduli,
-              reductions] = variables->get(variable::scalar::active_segments,
-                                           variable::scalar::inactive_segments,
-                                           variable::scalar::active_shear_modulus,
-                                           variable::scalar::inactive_shear_modulus,
-                                           variable::scalar::reduction_factor);
-
-        for (auto active_segment : active_segments)
-        {
-            REQUIRE(active_segment > 49.0);
-            REQUIRE(active_segment < 50.0);
-        }
-        for (auto inactive_segment : inactive_segments)
-        {
-            REQUIRE(inactive_segment > 20.0);
-            REQUIRE(inactive_segment < 25.0);
-        }
-        for (auto shear_modulus : active_shear_moduli)
-        {
-            REQUIRE(shear_modulus < 2.01e6);
-            REQUIRE(shear_modulus > 2.0e6);
-        }
-        for (auto shear_modulus : inactive_shear_moduli)
-        {
-            REQUIRE(shear_modulus < 2000.0);
-            REQUIRE(shear_modulus > 1000.0);
-        }
-        for (auto reduction : reductions)
-        {
-            REQUIRE(reduction > 0.99);
-            REQUIRE(reduction < 1.0);
-        }
-
-        for (auto const& material_tangent : material_tangents)
-        {
-            REQUIRE((material_tangent - material_tangent.transpose()).norm()
-                    == Approx(0.0).margin(ZERO_MARGIN));
-
-            eigen_solver.compute(material_tangent);
-            REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
-        }
-    }
-    SECTION("uniaxial load")
-    {
-        std::fill(begin(F_list), end(F_list), matrix3::Identity());
-
-        affine->update_internal_variables(1.0);
-
-        for (auto& cauchy_stress : cauchy_stresses)
-        {
-            std::cout << cauchy_stress << "\n\n";
-            REQUIRE(cauchy_stress.norm() == Approx(0.0).margin(ZERO_MARGIN));
-        }
-
-        std::cout << "setting to stretch 1.1\n";
-
-        for (auto& F : F_list)
-        {
-            F(0, 0) = 1.1;
-            F(1, 1) = 1.0 / std::sqrt(1.1);
-            F(2, 2) = 1.0 / std::sqrt(1.1);
-        }
-
-        affine->update_internal_variables(1.0);
-
-        for (auto& cauchy_stress : cauchy_stresses)
-        {
-            std::cout << cauchy_stress << "\n\n";
-            REQUIRE(cauchy_stress.norm() > 0.0);
-        }
-
-        affine->update_internal_variables(1.0);
-
-        for (auto& cauchy_stress : cauchy_stresses)
-        {
-            std::cout << cauchy_stress << "\n\n";
-            REQUIRE(cauchy_stress.norm() > 0.0);
-        }
-
-        std::cout << "setting to unity\n";
-
-        for (auto& F : F_list)
-        {
-            F(0, 0) = 1.0;
-            F(1, 1) = 1.0;
-            F(2, 2) = 1.0;
-        }
-
-        affine->update_internal_variables(1.0);
-
-        for (auto& cauchy_stress : cauchy_stresses)
-        {
-            std::cout << cauchy_stress << "\n\n";
-            REQUIRE(cauchy_stress.norm() >= 0.0);
-        }
-
-        std::cout << "finished the analysis\n";
-
-        for (auto const& material_tangent : material_tangents)
-        {
-            REQUIRE((material_tangent - material_tangent.transpose()).norm()
-                    == Approx(0.0).margin(ZERO_MARGIN));
-
-            eigen_solver.compute(material_tangent);
-            REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
-        }
-    }
-}
-TEST_CASE("Gaussian affine microsphere model with crosslinking only")
-{
-    using namespace neon::mechanics::solid;
-
-    std::cout << "Constant cross-linking stress check\n";
-
-    auto variables = std::make_shared<internal_variables_t>(1);
-
-    // Add the required variables for an updated Lagrangian formulation
-    variables->add(variable::second::deformation_gradient, variable::second::cauchy_stress);
-
-    variables->add(variable::scalar::DetF);
-
-    auto const material_data{"{\"name\" : \"rubber\","
-                             "\"shear_modulus\" : 2.0e6,"
-                             "\"bulk_modulus\" : 100e6,"
-                             "\"segments_per_chain\" : 50,"
-                             "\"scission_probability\" : 0.0,"
-                             "\"recombination_probability\" : 1.0e-5}"};
-
-    auto const constitutive_data{"{\"constitutive\" : {\"name\": \"microsphere\","
-                                 "\"type\":\"affine\","
-                                 "\"statistics\":\"gaussian\","
-                                 "\"quadrature\":\"BO21\","
-                                 "\"ageing\":\"BAND\"}}"};
-
-    auto affine = make_constitutive_model(variables,
-                                          json::parse(material_data),
-                                          json::parse(constitutive_data));
-
-    auto [F_list, cauchy_stresses] = variables->get(variable::second::deformation_gradient,
-                                                    variable::second::cauchy_stress);
-
-    auto& J_list = variables->get(variable::scalar::DetF);
-    std::fill(begin(J_list), end(J_list), 1.0);
-
-    auto& material_tangents = variables->get(variable::fourth::tangent_operator);
-
-    Eigen::EigenSolver<Eigen::MatrixXd> eigen_solver;
-
-    SECTION("no load")
-    {
-        std::fill(begin(F_list), end(F_list), neon::matrix3::Identity());
-
-        affine->update_internal_variables(1.0);
-
-        // Check the network parameters
-        auto [active_segments,
-              inactive_segments,
-              active_shear_moduli,
-              inactive_shear_moduli,
-              reductions] = variables->get(variable::scalar::active_segments,
-                                           variable::scalar::inactive_segments,
-                                           variable::scalar::active_shear_modulus,
-                                           variable::scalar::inactive_shear_modulus,
-                                           variable::scalar::reduction_factor);
-
-        for (auto active_segment : active_segments)
-        {
-            REQUIRE(active_segment > 49.0);
-            REQUIRE(active_segment < 50.0);
-        }
-        for (auto inactive_segment : inactive_segments)
-        {
-            REQUIRE(inactive_segment == Approx(0.0).margin(0.0));
-        }
-        for (auto shear_modulus : active_shear_moduli)
-        {
-            REQUIRE(shear_modulus < 2.01e6);
-            REQUIRE(shear_modulus > 2.0e6);
-        }
-        for (auto shear_modulus : inactive_shear_moduli)
-        {
-            REQUIRE(shear_modulus == Approx(0.0).margin(0.0));
-        }
-        for (auto reduction : reductions)
-        {
-            REQUIRE(reduction <= 1.0);
-        }
-
-        for (auto const& material_tangent : material_tangents)
-        {
-            REQUIRE((material_tangent - material_tangent.transpose()).norm()
-                    == Approx(0.0).margin(ZERO_MARGIN));
-
-            eigen_solver.compute(material_tangent);
-            REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
-        }
-    }
-    SECTION("constant load")
-    {
-        // Check the network parameters
-        // auto [active_segments,
-        //       inactive_segments,
-        //       active_shear_moduli,
-        //       inactive_shear_moduli,
-        //       reductions] = variables->get(variable::scalar::active_segments,
-        //                                    variable::scalar::inactive_segments,
-        //                                    variable::scalar::active_shear_modulus,
-        //                                    variable::scalar::inactive_shear_modulus,
-        //                                    variable::scalar::reduction_factor);
-
-        std::fill(begin(F_list), end(F_list), neon::matrix3::Identity());
-
-        affine->update_internal_variables(1.0);
-
-        for (auto& F : F_list)
-        {
-            F(0, 0) = 1.1;
-            F(1, 1) = 1.0 / std::sqrt(1.1);
-            F(2, 2) = 1.0 / std::sqrt(1.1);
-        }
-
-        affine->update_internal_variables(1.0);
-
-        for (auto const& cauchy_stress : cauchy_stresses)
-        {
-            std::cout << "Step 1: cauchy_stress\n" << cauchy_stress << "\n\n";
-        }
-
-        affine->update_internal_variables(1.0);
-
-        for (auto const& cauchy_stress : cauchy_stresses)
-        {
-            std::cout << "Step 2: cauchy_stress\n" << cauchy_stress << "\n\n";
-        }
-
-        affine->update_internal_variables(1.0);
-
-        for (auto const& cauchy_stress : cauchy_stresses)
-        {
-            std::cout << "Step 3: cauchy_stress\n" << cauchy_stress << "\n\n";
-        }
-
-        affine->update_internal_variables(1.0);
-
-        for (auto const& cauchy_stress : cauchy_stresses)
-        {
-            std::cout << "Step 3: cauchy_stress\n" << cauchy_stress << "\n\n";
-        }
-
-        affine->update_internal_variables(1.0);
-
-        for (auto const& cauchy_stress : cauchy_stresses)
-        {
-            std::cout << "Step 3: cauchy_stress\n" << cauchy_stress << "\n\n";
-        }
-
-        for (auto const& material_tangent : material_tangents)
-        {
-            std::cout << "tangent_matrix\n" << material_tangent << "\n";
-
-            REQUIRE((material_tangent - material_tangent.transpose()).norm()
-                    == Approx(0.0).margin(ZERO_MARGIN));
-
-            eigen_solver.compute(material_tangent);
-            REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
-        }
-    }
-}
+// TEST_CASE("Gaussian affine microsphere model with ageing")
+// {
+//     using namespace neon::mechanics::solid;
+//
+//     auto variables = std::make_shared<internal_variables_t>(1);
+//
+//     // Add the required variables for an updated Lagrangian formulation
+//     variables->add(variable::second::deformation_gradient, variable::second::cauchy_stress);
+//
+//     variables->add(variable::scalar::DetF);
+//
+//     auto const material_data{"{\"name\" : \"rubber\","
+//                              "\"shear_modulus\" : 2.0e6,"
+//                              "\"bulk_modulus\" : 100e6,"
+//                              "\"segments_per_chain\" : 50,"
+//                              "\"scission_probability\" : 1.0e-5,"
+//                              "\"recombination_probability\" : 1.0e-5}"};
+//
+//     auto const constitutive_data{"{\"constitutive\" : {\"name\": \"microsphere\","
+//                                  "\"type\":\"affine\","
+//                                  "\"statistics\":\"gaussian\","
+//                                  "\"quadrature\":\"BO21\","
+//                                  "\"ageing\":\"BAND\"}}"};
+//
+//     auto affine = make_constitutive_model(variables,
+//                                           json::parse(material_data),
+//                                           json::parse(constitutive_data));
+//
+//     auto [F_list, cauchy_stresses] = variables->get(variable::second::deformation_gradient,
+//                                                     variable::second::cauchy_stress);
+//
+//     auto& J_list = variables->get(variable::scalar::DetF);
+//     std::fill(begin(J_list), end(J_list), 1.0);
+//
+//     auto& material_tangents = variables->get(variable::fourth::tangent_operator);
+//
+//     Eigen::EigenSolver<Eigen::MatrixXd> eigen_solver;
+//
+//     SECTION("Setup checks")
+//     {
+//         REQUIRE(affine->is_symmetric());
+//         REQUIRE(affine->is_finite_deformation());
+//         REQUIRE(affine->intrinsic_material().name() == "rubber");
+//
+//         REQUIRE(variables->has(variable::scalar::active_shear_modulus));
+//         REQUIRE(variables->has(variable::scalar::inactive_shear_modulus));
+//         REQUIRE(variables->has(variable::scalar::active_segments));
+//         REQUIRE(variables->has(variable::scalar::inactive_segments));
+//         REQUIRE(variables->has(variable::scalar::reduction_factor));
+//
+//         for (auto segment : variables->get(variable::scalar::active_segments))
+//         {
+//             REQUIRE(segment == Approx(50.0));
+//         }
+//         for (auto shear_modulus : variables->get(variable::scalar::active_shear_modulus))
+//         {
+//             REQUIRE(shear_modulus == Approx(2.0e6));
+//         }
+//     }
+//     SECTION("no load")
+//     {
+//         std::fill(begin(F_list), end(F_list), neon::matrix3::Identity());
+//
+//         affine->update_internal_variables(1.0);
+//
+//         // Check the network parameters
+//         auto [active_segments,
+//               inactive_segments,
+//               active_shear_moduli,
+//               inactive_shear_moduli,
+//               reductions] = variables->get(variable::scalar::active_segments,
+//                                            variable::scalar::inactive_segments,
+//                                            variable::scalar::active_shear_modulus,
+//                                            variable::scalar::inactive_shear_modulus,
+//                                            variable::scalar::reduction_factor);
+//
+//         for (auto active_segment : active_segments)
+//         {
+//             REQUIRE(active_segment > 49.0);
+//             REQUIRE(active_segment < 50.0);
+//         }
+//         for (auto inactive_segment : inactive_segments)
+//         {
+//             REQUIRE(inactive_segment > 20.0);
+//             REQUIRE(inactive_segment < 25.0);
+//         }
+//         for (auto shear_modulus : active_shear_moduli)
+//         {
+//             REQUIRE(shear_modulus < 2.01e6);
+//             REQUIRE(shear_modulus > 2.0e6);
+//         }
+//         for (auto shear_modulus : inactive_shear_moduli)
+//         {
+//             REQUIRE(shear_modulus < 2000.0);
+//             REQUIRE(shear_modulus > 1000.0);
+//         }
+//         for (auto reduction : reductions)
+//         {
+//             REQUIRE(reduction > 0.99);
+//             REQUIRE(reduction < 1.0);
+//         }
+//
+//         for (auto const& material_tangent : material_tangents)
+//         {
+//             REQUIRE((material_tangent - material_tangent.transpose()).norm()
+//                     == Approx(0.0).margin(ZERO_MARGIN));
+//
+//             eigen_solver.compute(material_tangent);
+//             REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
+//         }
+//     }
+//     SECTION("uniaxial load")
+//     {
+//         std::fill(begin(F_list), end(F_list), matrix3::Identity());
+//
+//         affine->update_internal_variables(1.0);
+//
+//         for (auto& cauchy_stress : cauchy_stresses)
+//         {
+//             std::cout << cauchy_stress << "\n\n";
+//             REQUIRE(cauchy_stress.norm() == Approx(0.0).margin(ZERO_MARGIN));
+//         }
+//
+//         std::cout << "setting to stretch 1.1\n";
+//
+//         for (auto& F : F_list)
+//         {
+//             F(0, 0) = 1.1;
+//             F(1, 1) = 1.0 / std::sqrt(1.1);
+//             F(2, 2) = 1.0 / std::sqrt(1.1);
+//         }
+//
+//         affine->update_internal_variables(1.0);
+//
+//         for (auto& cauchy_stress : cauchy_stresses)
+//         {
+//             std::cout << cauchy_stress << "\n\n";
+//             REQUIRE(cauchy_stress.norm() > 0.0);
+//         }
+//
+//         affine->update_internal_variables(1.0);
+//
+//         for (auto& cauchy_stress : cauchy_stresses)
+//         {
+//             std::cout << cauchy_stress << "\n\n";
+//             REQUIRE(cauchy_stress.norm() > 0.0);
+//         }
+//
+//         std::cout << "setting to unity\n";
+//
+//         for (auto& F : F_list)
+//         {
+//             F(0, 0) = 1.0;
+//             F(1, 1) = 1.0;
+//             F(2, 2) = 1.0;
+//         }
+//
+//         affine->update_internal_variables(1.0);
+//
+//         for (auto& cauchy_stress : cauchy_stresses)
+//         {
+//             std::cout << cauchy_stress << "\n\n";
+//             REQUIRE(cauchy_stress.norm() >= 0.0);
+//         }
+//
+//         std::cout << "finished the analysis\n";
+//
+//         for (auto const& material_tangent : material_tangents)
+//         {
+//             REQUIRE((material_tangent - material_tangent.transpose()).norm()
+//                     == Approx(0.0).margin(ZERO_MARGIN));
+//
+//             eigen_solver.compute(material_tangent);
+//             REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
+//         }
+//     }
+// }
+// TEST_CASE("Gaussian affine microsphere model with crosslinking only")
+// {
+//     using namespace neon::mechanics::solid;
+//
+//     std::cout << "Constant cross-linking stress check\n";
+//
+//     auto variables = std::make_shared<internal_variables_t>(1);
+//
+//     // Add the required variables for an updated Lagrangian formulation
+//     variables->add(variable::second::deformation_gradient, variable::second::cauchy_stress);
+//
+//     variables->add(variable::scalar::DetF);
+//
+//     auto const material_data{"{\"name\" : \"rubber\","
+//                              "\"shear_modulus\" : 2.0e6,"
+//                              "\"bulk_modulus\" : 100e6,"
+//                              "\"segments_per_chain\" : 50,"
+//                              "\"scission_probability\" : 0.0,"
+//                              "\"recombination_probability\" : 1.0e-5}"};
+//
+//     auto const constitutive_data{"{\"constitutive\" : {\"name\": \"microsphere\","
+//                                  "\"type\":\"affine\","
+//                                  "\"statistics\":\"gaussian\","
+//                                  "\"quadrature\":\"BO21\","
+//                                  "\"ageing\":\"BAND\"}}"};
+//
+//     auto affine = make_constitutive_model(variables,
+//                                           json::parse(material_data),
+//                                           json::parse(constitutive_data));
+//
+//     auto [F_list, cauchy_stresses] = variables->get(variable::second::deformation_gradient,
+//                                                     variable::second::cauchy_stress);
+//
+//     auto& J_list = variables->get(variable::scalar::DetF);
+//     std::fill(begin(J_list), end(J_list), 1.0);
+//
+//     auto& material_tangents = variables->get(variable::fourth::tangent_operator);
+//
+//     Eigen::EigenSolver<Eigen::MatrixXd> eigen_solver;
+//
+//     SECTION("no load")
+//     {
+//         std::fill(begin(F_list), end(F_list), neon::matrix3::Identity());
+//
+//         affine->update_internal_variables(1.0);
+//
+//         // Check the network parameters
+//         auto [active_segments,
+//               inactive_segments,
+//               active_shear_moduli,
+//               inactive_shear_moduli,
+//               reductions] = variables->get(variable::scalar::active_segments,
+//                                            variable::scalar::inactive_segments,
+//                                            variable::scalar::active_shear_modulus,
+//                                            variable::scalar::inactive_shear_modulus,
+//                                            variable::scalar::reduction_factor);
+//
+//         for (auto active_segment : active_segments)
+//         {
+//             REQUIRE(active_segment > 49.0);
+//             REQUIRE(active_segment < 50.0);
+//         }
+//         for (auto inactive_segment : inactive_segments)
+//         {
+//             REQUIRE(inactive_segment == Approx(0.0).margin(0.0));
+//         }
+//         for (auto shear_modulus : active_shear_moduli)
+//         {
+//             REQUIRE(shear_modulus < 2.01e6);
+//             REQUIRE(shear_modulus > 2.0e6);
+//         }
+//         for (auto shear_modulus : inactive_shear_moduli)
+//         {
+//             REQUIRE(shear_modulus == Approx(0.0).margin(0.0));
+//         }
+//         for (auto reduction : reductions)
+//         {
+//             REQUIRE(reduction <= 1.0);
+//         }
+//
+//         for (auto const& material_tangent : material_tangents)
+//         {
+//             REQUIRE((material_tangent - material_tangent.transpose()).norm()
+//                     == Approx(0.0).margin(ZERO_MARGIN));
+//
+//             eigen_solver.compute(material_tangent);
+//             REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
+//         }
+//     }
+//     SECTION("constant load")
+//     {
+//         // Check the network parameters
+//         // auto [active_segments,
+//         //       inactive_segments,
+//         //       active_shear_moduli,
+//         //       inactive_shear_moduli,
+//         //       reductions] = variables->get(variable::scalar::active_segments,
+//         //                                    variable::scalar::inactive_segments,
+//         //                                    variable::scalar::active_shear_modulus,
+//         //                                    variable::scalar::inactive_shear_modulus,
+//         //                                    variable::scalar::reduction_factor);
+//
+//         std::fill(begin(F_list), end(F_list), neon::matrix3::Identity());
+//
+//         affine->update_internal_variables(1.0);
+//
+//         for (auto& F : F_list)
+//         {
+//             F(0, 0) = 1.1;
+//             F(1, 1) = 1.0 / std::sqrt(1.1);
+//             F(2, 2) = 1.0 / std::sqrt(1.1);
+//         }
+//
+//         affine->update_internal_variables(1.0);
+//
+//         for (auto const& cauchy_stress : cauchy_stresses)
+//         {
+//             std::cout << "Step 1: cauchy_stress\n" << cauchy_stress << "\n\n";
+//         }
+//
+//         affine->update_internal_variables(1.0);
+//
+//         for (auto const& cauchy_stress : cauchy_stresses)
+//         {
+//             std::cout << "Step 2: cauchy_stress\n" << cauchy_stress << "\n\n";
+//         }
+//
+//         affine->update_internal_variables(1.0);
+//
+//         for (auto const& cauchy_stress : cauchy_stresses)
+//         {
+//             std::cout << "Step 3: cauchy_stress\n" << cauchy_stress << "\n\n";
+//         }
+//
+//         affine->update_internal_variables(1.0);
+//
+//         for (auto const& cauchy_stress : cauchy_stresses)
+//         {
+//             std::cout << "Step 3: cauchy_stress\n" << cauchy_stress << "\n\n";
+//         }
+//
+//         affine->update_internal_variables(1.0);
+//
+//         for (auto const& cauchy_stress : cauchy_stresses)
+//         {
+//             std::cout << "Step 3: cauchy_stress\n" << cauchy_stress << "\n\n";
+//         }
+//
+//         for (auto const& material_tangent : material_tangents)
+//         {
+//             std::cout << "tangent_matrix\n" << material_tangent << "\n";
+//
+//             REQUIRE((material_tangent - material_tangent.transpose()).norm()
+//                     == Approx(0.0).margin(ZERO_MARGIN));
+//
+//             eigen_solver.compute(material_tangent);
+//             REQUIRE((eigen_solver.eigenvalues().real().array() > 0.0).all());
+//         }
+//     }
+// }
 // TEST_CASE("Finite J2 plasticity")
 // {
 //     using namespace neon::mechanics::solid;
