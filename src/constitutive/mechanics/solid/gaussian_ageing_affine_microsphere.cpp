@@ -160,13 +160,7 @@ matrix3 gaussian_ageing_affine_microsphere::compute_intermediate_macro_stress(
     double const shear_modulus_created,
     double const reduction_factor) const
 {
-    return shear_modulus_created / reduction_factor
-           * unit_sphere.integrate(matrix3::Zero().eval(),
-                                   [&](auto const& coordinates, auto) -> matrix3 {
-                                       auto const& [r, r_outer_r] = coordinates;
-
-                                       return r_outer_r;
-                                   });
+    return shear_modulus_created / reduction_factor * 1.0 / 3.0 * matrix3::Identity();
 }
 
 matrix6 gaussian_ageing_affine_microsphere::compute_macro_moduli(matrix3 const& F_bar,
