@@ -73,9 +73,6 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
         REQUIRE(variables->has(variable::scalar::inactive_segments));
         REQUIRE(variables->has(variable::scalar::reduction_factor));
 
-        REQUIRE(variables->has(variable::vector::accumulated_ageing_integral));
-        REQUIRE(variables->has(variable::vector::previous_integrand));
-
         for (auto segment : variables->get(variable::scalar::active_segments))
         {
             REQUIRE(segment == Approx(50.0));
@@ -83,14 +80,6 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
         for (auto shear_modulus : variables->get(variable::scalar::active_shear_modulus))
         {
             REQUIRE(shear_modulus == Approx(2.0e6));
-        }
-        for (auto& value : variables->get(variable::vector::accumulated_ageing_integral))
-        {
-            REQUIRE(value.size() == 21);
-        }
-        for (auto& value : variables->get(variable::vector::previous_integrand))
-        {
-            REQUIRE(value.size() == 21);
         }
     }
     SECTION("no load")
