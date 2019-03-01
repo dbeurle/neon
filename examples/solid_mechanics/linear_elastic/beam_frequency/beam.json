@@ -13,7 +13,7 @@
     }],
     "steps" : [{
         "name" : "cantilever_force",
-		"module" : "solid_mechanics",
+        "module" : "solid_mechanics",
         "solution" : "natural_frequency",
         "time" : {
             "period" : 1.0,
