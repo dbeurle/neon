@@ -104,3 +104,33 @@ TEST_CASE("Log symmetric tensor derivative")
         REQUIRE(dA(2, 2) == Approx(0.5).margin(ZERO_MARGIN));
     }
 }
+TEST_CASE("Differential geometry functions")
+{
+    SECTION("Incremental deformation gradient")
+    {
+        REQUIRE((incremental_deformation_gradient(matrix3::Identity(), matrix3::Identity())
+                 - matrix3::Identity())
+                    .norm()
+                == Approx(0.0).margin(ZERO_MARGIN));
+
+        matrix3 random_deformation = matrix3::Random();
+
+        REQUIRE((incremental_deformation_gradient(random_deformation, matrix3::Identity())
+                 - random_deformation)
+                    .norm()
+                == Approx(0.0).margin(ZERO_MARGIN));
+    }
+    SECTION("Push forward and pull back for contravariant tensors")
+    {
+        matrix3 const no_deformation = matrix3::Identity();
+
+        REQUIRE((push_forward_contravariant(no_deformation, no_deformation) - no_deformation).norm()
+                == Approx(0.0).margin(ZERO_MARGIN));
+
+        matrix3 const random_deformation = matrix3::Random();
+
+        REQUIRE(
+            (push_forward_contravariant(no_deformation, random_deformation) - random_deformation).norm()
+            == Approx(0.0).margin(ZERO_MARGIN));
+    }
+}
