@@ -266,6 +266,9 @@ char const* convert(variable::second value)
         case variable::second::shear_stiffness:
             return "shear_stiffness";
             break;
+        case variable::second::intermediate_secondary_kirchhoff_stress:
+            return "intermediate_secondary_kirchhoff_stress";
+            break;
     }
     return "\0";
 }
