@@ -19,19 +19,21 @@ namespace neon
 template <int dof_size, typename BoundaryMeshType, class IndexType = std::int32_t>
 [[nodiscard]] auto unique_dof_allocator(BoundaryMeshType const& boundary_meshes)
 {
-    std::set<IndexType> dof_set;
+    std::set<IndexType> unique_dof_indices_set;
 
     for (auto const& boundary_mesh : boundary_meshes)
     {
         auto const unique_view = boundary_mesh.unique_node_indices();
-        dof_set.insert(begin(unique_view), end(unique_view));
+        unique_dof_indices_set.insert(begin(unique_view), end(unique_view));
     }
 
-    std::vector<IndexType> dof_unique_view(begin(dof_set), end(dof_set));
+    std::vector<IndexType> dof_indices(begin(unique_dof_indices_set), end(unique_dof_indices_set));
 
-    for (auto& i : dof_unique_view) i *= dof_size;
+    std::transform(begin(dof_indices), end(dof_indices), begin(dof_indices), [=](auto const index) {
+        return index * dof_size;
+    });
 
-    return dof_unique_view;
+    return dof_indices;
 }
 
 template <typename IndicesType, typename DofOrderType>
