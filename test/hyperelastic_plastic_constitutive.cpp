@@ -51,8 +51,9 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
                                           json::parse(material_data),
                                           json::parse(constitutive_data));
 
-    auto [F_list, cauchy_stresses] = variables->get(variable::second::deformation_gradient,
-                                                    variable::second::cauchy_stress);
+    auto [deformation_gradients,
+          cauchy_stresses] = variables->get(variable::second::deformation_gradient,
+                                            variable::second::cauchy_stress);
 
     auto& jacobians = variables->get(variable::scalar::DetF);
     std::fill(begin(jacobians), end(jacobians), 1.0);
@@ -84,7 +85,7 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
     }
     SECTION("no load")
     {
-        std::fill(begin(F_list), end(F_list), neon::matrix3::Identity());
+        std::fill(begin(deformation_gradients), end(deformation_gradients), neon::matrix3::Identity());
 
         affine->update_internal_variables(1.0);
 
@@ -142,7 +143,7 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
     }
     SECTION("uniaxial load")
     {
-        std::fill(begin(F_list), end(F_list), matrix3::Identity());
+        std::fill(begin(deformation_gradients), end(deformation_gradients), matrix3::Identity());
 
         affine->update_internal_variables(1.0);
 
@@ -153,7 +154,7 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
 
         std::cout << "setting to stretch 1.1\n";
 
-        for (auto& F : F_list)
+        for (auto& F : deformation_gradients)
         {
             F(0, 0) = 1.1;
             F(1, 1) = 1.0 / std::sqrt(1.1);
@@ -177,7 +178,7 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
         }
 
         std::cout << "setting to unity\n";
-        std::fill(begin(F_list), end(F_list), matrix3::Identity());
+        std::fill(begin(deformation_gradients), end(deformation_gradients), matrix3::Identity());
 
         affine->update_internal_variables(1.0);
 
@@ -203,8 +204,6 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
 {
     using namespace neon::mechanics::solid;
 
-    std::cout << "Constant cross-linking stress check\n";
-
     auto variables = std::make_shared<internal_variables_t>(1);
 
     // Add the required variables for an updated Lagrangian formulation
@@ -229,8 +228,9 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
                                           json::parse(material_data),
                                           json::parse(constitutive_data));
 
-    auto [F_list, cauchy_stresses] = variables->get(variable::second::deformation_gradient,
-                                                    variable::second::cauchy_stress);
+    auto [deformation_gradients,
+          cauchy_stresses] = variables->get(variable::second::deformation_gradient,
+                                            variable::second::cauchy_stress);
 
     auto& jacobians = variables->get(variable::scalar::DetF);
     std::fill(begin(jacobians), end(jacobians), 1.0);
@@ -241,7 +241,7 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
 
     SECTION("no load")
     {
-        std::fill(begin(F_list), end(F_list), neon::matrix3::Identity());
+        std::fill(begin(deformation_gradients), end(deformation_gradients), neon::matrix3::Identity());
 
         affine->update_internal_variables(1.0);
 
@@ -290,22 +290,11 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
     }
     SECTION("constant load")
     {
-        // Check the network parameters
-        // auto [active_segments,
-        //       inactive_segments,
-        //       active_shear_moduli,
-        //       inactive_shear_moduli,
-        //       reductions] = variables->get(variable::scalar::active_segments,
-        //                                    variable::scalar::inactive_segments,
-        //                                    variable::scalar::active_shear_modulus,
-        //                                    variable::scalar::inactive_shear_modulus,
-        //                                    variable::scalar::reduction_factor);
-
-        std::fill(begin(F_list), end(F_list), neon::matrix3::Identity());
+        std::fill(begin(deformation_gradients), end(deformation_gradients), neon::matrix3::Identity());
 
         affine->update_internal_variables(1.0);
 
-        for (auto& F : F_list)
+        for (auto& F : deformation_gradients)
         {
             F(0, 0) = 1.1;
             F(1, 1) = 1.0 / std::sqrt(1.1);
@@ -389,7 +378,7 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
 //     simulation_data);
 //
 //     // Get the tensor variables
-//     auto[F_list, cauchy_stresses] =
+//     auto[deformation_gradients, cauchy_stresses] =
 //     variables->get(variable::second::deformation_gradient,
 //                                               variable::second::cauchy_stress);
 //
@@ -397,7 +386,7 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
 //
 //     auto& material_tangents = variables->get(variable::fourth::tangent_operator);
 //
-//     for (auto& F : F_list) F = neon::matrix3::Identity();
+//     for (auto& F : deformation_gradients) F = neon::matrix3::Identity();
 //     for (auto& J : jacobians) J = 1.0;
 //
 //     variables.commit();
@@ -436,7 +425,7 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
 //     }
 //     // SECTION("Uniaxial elastic load")
 //     // {
-//     //     for (auto& F : F_list) F(2, 2) = 1.001;
+//     //     for (auto& F : deformation_gradients) F(2, 2) = 1.001;
 //     //
 //     //     small_strain_J2_plasticity->update_internal_variables(1.0);
 //     //
@@ -466,7 +455,7 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
 //     // }
 //     // SECTION("Plastic uniaxial elastic load")
 //     // {
-//     //     for (auto& F : F_list) F(2, 2) = 0.003;
+//     //     for (auto& F : deformation_gradients) F(2, 2) = 0.003;
 //     //
 //     //     small_strain_J2_plasticity->update_internal_variables(1.0);
 //     //
