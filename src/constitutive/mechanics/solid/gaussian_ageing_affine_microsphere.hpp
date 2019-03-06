@@ -38,17 +38,12 @@ public:
     virtual void update_internal_variables(double const time_step_size) override;
 
 private:
-    [[nodiscard]] matrix3 compute_initial_macro_stress(matrix3 const& F_bar,
-                                                       double const reduction_factor) const;
+    [[nodiscard]] matrix3 compute_initial_macro_stress(matrix3 const& F_bar) const;
 
     /// Compute the macro stress on the intermediate configuration that overlaps
     /// with the current configuration
     [[nodiscard]] matrix3 compute_intermediate_macro_stress(double const shear_modulus_creation,
                                                             double const reduction_factor) const;
-
-    [[nodiscard]] matrix6 compute_macro_moduli(matrix3 const& F_bar,
-                                               double const creation_rate,
-                                               double const time_step_size) const;
 
 private:
     /// Material with micromechanical network parameters

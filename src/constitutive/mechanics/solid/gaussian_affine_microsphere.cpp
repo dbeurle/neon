@@ -52,8 +52,7 @@ void gaussian_affine_microsphere::update_internal_variables(double)
 matrix3 gaussian_affine_microsphere::compute_kirchhoff_stress(double const pressure,
                                                               matrix3 const& macro_stress) const
 {
-    using namespace voigt;
-    return pressure * matrix3::Identity() + kinetic::from(P * kinetic::to(macro_stress));
+    return pressure * matrix3::Identity() + deviatoric(macro_stress);
 }
 
 matrix6 gaussian_affine_microsphere::compute_material_tangent(double const J,
