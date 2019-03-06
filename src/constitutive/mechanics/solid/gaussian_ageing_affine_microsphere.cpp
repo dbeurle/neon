@@ -106,19 +106,20 @@ void gaussian_ageing_affine_microsphere::update_internal_variables(double const 
 
         // Perform an implicit Euler update of the secondary network Kirchhoff stress
         matrix3 const
-            secondary_macro_stress = last_time_step_size * F_bar.inverse()
-                                         * F_bar.inverse().transpose()
-                                         * compute_intermediate_macro_stress(creation_rate,
-                                                                             reduction_factor[index])
+            secondary_macro_stress = last_time_step_size
+                                         * pull_back_contravariant(F_bar,
+                                                                   compute_intermediate_macro_stress(creation_rate,
+                                                                                                     reduction_factor
+                                                                                                         [index]))
                                      + intermediate_kirchhoff_stresses_old[index];
 
         // push forward old intermediate stress and accumulate with the recently
         // computed intermediate stress
         intermediate_kirchhoff_stresses[index] = secondary_macro_stress;
 
-        matrix3 const macro_stress = reduction_factor[index] * F_bar * secondary_macro_stress
-                                         * F_bar.transpose()
-                                     + primary_macro_stress;
+        matrix3 const macro_stress = reduction_factor[index]
+                                     * (primary_macro_stress
+                                        + push_forward_contravariant(F_bar, secondary_macro_stress));
 
         auto const J = det_F[index];
 
