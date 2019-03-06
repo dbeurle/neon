@@ -562,4 +562,16 @@ template <typename matrix_expression>
     return deformation_gradient * contravariant_tensor * deformation_gradient.transpose();
 }
 
+/// Perform a pull back operation on a contravariant (kinetic)
+/// second order tensor using the deformation gradient
+/// \return Tensor pulled back to the configuration determined by
+///         the deformation_gradient
+/// \ingroup tensor
+[[nodiscard]] inline matrix3 pull_back_contravariant(matrix3 const& deformation_gradient,
+                                                     matrix3 const& contravariant_tensor)
+{
+    return deformation_gradient.inverse() * contravariant_tensor
+           * deformation_gradient.inverse().transpose();
+}
+
 }
