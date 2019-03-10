@@ -9,7 +9,6 @@
 namespace neon
 {
 /// Find the first lowest degree node in the graph
-/// \tparam
 inline auto find_lowest_degree(std::vector<bool> const& is_reordered,
                                adjacency_graph const& graph) noexcept -> adjacency_graph::index_type
 {
