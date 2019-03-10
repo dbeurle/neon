@@ -167,7 +167,7 @@ void conjugate_gradient_cuda::solve(sparse_matrix const& input_matrix,
         cublasDdot(cublasHandle, N, d_z, 1, d_r, 1, &residual);
     }
 
-    std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << k << " (max. "
+    std::cout << std::string(6, ' ') << "Conjugate gradient iterations: " << k << " (max. "
               << max_iterations << "), estimated error: " << std::sqrt(residual) << " (min. "
               << residual_tolerance << ")\n";
 
@@ -178,6 +178,8 @@ void conjugate_gradient_cuda::solve(sparse_matrix const& input_matrix,
 
     // Copy device solution to the host
     cudaMemcpy(x.data(), d_x, N * sizeof(double), cudaMemcpyDeviceToHost);
+
+    x = P * x;
 }
 
 void conjugate_gradient_cuda::allocate_device_memory(sparse_matrix const& A)
