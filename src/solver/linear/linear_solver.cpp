@@ -6,6 +6,8 @@
 
 #include "exceptions.hpp"
 #include "simulation_parser.hpp"
+#include "graph/cuthill_mckee.hpp"
+#include "graph/bandwidth.hpp"
 
 #ifdef ENABLE_OPENMP
 #include <omp.h>
@@ -41,18 +43,60 @@ void conjugate_gradient::solve(sparse_matrix const& A, vector& x, vector const& 
 
     std::feclearexcept(FE_ALL_EXCEPT);
 
+    if (build_sparsity_pattern)
+    {
+        auto const start = std::chrono::steady_clock::now();
+
+        reverse_cuthill_mcgee reordering(A);
+
+        reordering.compute();
+
+        auto const& permutation = reordering.permutation();
+
+        P.indices().resize(permutation.size());
+
+        std::copy(begin(permutation), end(permutation), P.indices().data());
+
+        build_sparsity_pattern = false;
+
+        std::chrono::duration<double> const elapsed_seconds = std::chrono::steady_clock::now()
+                                                              - start;
+
+        std::cout << std::string(6, ' ') << "Reordering took " << elapsed_seconds.count() << "s\n";
+    }
+
+    auto const p_start = std::chrono::steady_clock::now();
+
+    permuted_matrix = P * A;
+    permuted_matrix = permuted_matrix * P.transpose();
+
+    std::cout << std::string(8, ' ') << "Bandwidth was " << compute_bandwidth(A) << " now "
+              << compute_bandwidth(permuted_matrix) << "\n";
+
+    permuted_rhs = P * b;
+
+    std::chrono::duration<double> const p_time = std::chrono::steady_clock::now() - p_start;
+
+    std::cout << std::string(8, ' ') << "Permutation took " << p_time.count() << "s\n";
+
     Eigen::ConjugateGradient<sparse_matrix, Eigen::Lower | Eigen::Upper> pcg;
 
     pcg.setTolerance(residual_tolerance);
     pcg.setMaxIterations(max_iterations);
 
-    pcg.compute(A);
+    auto const start = std::chrono::steady_clock::now();
 
-    x = pcg.solve(b);
+    x = P.transpose() * pcg.compute(permuted_matrix).solve(permuted_rhs);
 
-    std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << pcg.iterations()
-              << " (max. " << max_iterations << "), estimated error: " << pcg.error() << " (min. "
-              << residual_tolerance << ")\n";
+    // pcg.compute(A);
+    // x = pcg.solve(b);
+
+    auto const end = std::chrono::steady_clock::now();
+    std::chrono::duration<double> const elapsed_seconds = end - start;
+
+    std::cout << std::string(6, ' ') << "Conjugate Gradient took " << elapsed_seconds.count()
+              << "s, iterations: " << pcg.iterations() << " (max. " << max_iterations
+              << "), estimated error: " << pcg.error() << " (min. " << residual_tolerance << ")\n";
 
     if (std::fetestexcept(FE_INVALID))
     {

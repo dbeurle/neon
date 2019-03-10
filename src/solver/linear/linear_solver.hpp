@@ -58,6 +58,12 @@ public:
     using iterative_linear_solver::iterative_linear_solver;
 
     void solve(sparse_matrix const& A, vector& x, vector const& b) override final;
+
+private:
+    sparse_matrix permuted_matrix;
+    vector permuted_rhs;
+
+    permutation_matrix P;
 };
 
 /// biconjugate_gradient_stabilised is a simple solver wrapper for the preconditioned bi-conjugate gradient
