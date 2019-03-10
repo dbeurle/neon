@@ -70,8 +70,12 @@ conjugate_gradient_cuda::~conjugate_gradient_cuda()
     cudaFree(d_M_inv);
 }
 
-void conjugate_gradient_cuda::solve(sparse_matrix const& A, vector& x, vector const& b)
+void conjugate_gradient_cuda::solve(sparse_matrix const& input_matrix,
+                                    vector& x,
+                                    vector const& input_rhs)
 {
+    symmetric_reorder(input_matrix, input_rhs);
+
     this->allocate_device_memory(A, x, b);
 
     double constexpr one = 1.0;

@@ -36,19 +36,14 @@ iterative_linear_solver::iterative_linear_solver(double const residual_tolerance
 {
 }
 
-void conjugate_gradient::solve(sparse_matrix const& A, vector& x, vector const& b)
+void iterative_linear_solver::symmetric_reorder(sparse_matrix const& input_matrix,
+                                                vector const& input_rhs)
 {
-#ifdef ENABLE_OPENMP
-    omp_set_num_threads(simulation_parser::threads);
-#endif
-
-    std::feclearexcept(FE_ALL_EXCEPT);
-
     if (build_sparsity_pattern)
     {
         auto const start = std::chrono::steady_clock::now();
 
-        reverse_cuthill_mcgee reordering(A);
+        reverse_cuthill_mcgee reordering(input_matrix);
 
         reordering.compute();
 
@@ -65,27 +60,28 @@ void conjugate_gradient::solve(sparse_matrix const& A, vector& x, vector const& 
 
         std::cout << std::string(6, ' ') << "Reordering took " << elapsed_seconds.count() << "s\n";
     }
+    A = P.transpose() * input_matrix * P;
+    b = P.transpose() * input_rhs;
+}
 
-    auto const p_start = std::chrono::steady_clock::now();
+void conjugate_gradient::solve(sparse_matrix const& input_matrix, vector& x, vector const& input_rhs)
+{
+#ifdef ENABLE_OPENMP
+    omp_set_num_threads(simulation_parser::threads);
+#endif
 
-    permuted_matrix = P.transpose() * A * P;
-    permuted_rhs = P.transpose() * b;
+    std::feclearexcept(FE_ALL_EXCEPT);
 
-    std::cout << std::string(8, ' ') << "Bandwidth reduced from " << compute_bandwidth(A) << " to "
-              << compute_bandwidth(permuted_matrix) << "\n";
+    auto const start = std::chrono::steady_clock::now();
 
-    std::chrono::duration<double> const p_time = std::chrono::steady_clock::now() - p_start;
-
-    std::cout << std::string(8, ' ') << "Permutation took " << p_time.count() << "s\n";
+    symmetric_reorder(input_matrix, input_rhs);
 
     Eigen::ConjugateGradient<sparse_matrix, Eigen::Lower | Eigen::Upper> pcg;
 
     pcg.setTolerance(residual_tolerance);
     pcg.setMaxIterations(max_iterations);
 
-    auto const start = std::chrono::steady_clock::now();
-
-    x = P * pcg.compute(permuted_matrix).solve(permuted_rhs);
+    x = P * pcg.compute(A).solve(b);
 
     auto const end = std::chrono::steady_clock::now();
     std::chrono::duration<double> const elapsed_seconds = end - start;

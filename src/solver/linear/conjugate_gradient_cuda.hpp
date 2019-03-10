@@ -29,7 +29,7 @@ public:
     /// Deallocate the device memory and cuda BLAS handles
     virtual ~conjugate_gradient_cuda();
 
-    virtual void solve(sparse_matrix const& A, vector& x, vector const& b) override;
+    virtual void solve(sparse_matrix const& input_matrix, vector& x, vector const& input_rhs) override;
 
 protected:
     void find_compute_device();
