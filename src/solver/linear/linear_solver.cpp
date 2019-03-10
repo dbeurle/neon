@@ -36,32 +36,32 @@ iterative_linear_solver::iterative_linear_solver(double const residual_tolerance
 {
 }
 
-void iterative_linear_solver::symmetric_reorder(sparse_matrix const& input_matrix,
+void iterative_linear_solver::apply_permutation(sparse_matrix const& input_matrix,
                                                 vector const& input_rhs)
 {
-    if (build_sparsity_pattern)
-    {
-        auto const start = std::chrono::steady_clock::now();
-
-        reverse_cuthill_mcgee reordering(input_matrix);
-
-        reordering.compute();
-
-        auto const& permutation = reordering.permutation();
-
-        P.indices().resize(permutation.size());
-
-        std::copy(begin(permutation), end(permutation), P.indices().data());
-
-        build_sparsity_pattern = false;
-
-        std::chrono::duration<double> const elapsed_seconds = std::chrono::steady_clock::now()
-                                                              - start;
-
-        std::cout << std::string(6, ' ') << "Reordering took " << elapsed_seconds.count() << "s\n";
-    }
     A = P.transpose() * input_matrix * P;
     b = P.transpose() * input_rhs;
+}
+
+void iterative_linear_solver::compute_symmetric_reordering(sparse_matrix const& input_matrix)
+{
+    auto const start = std::chrono::steady_clock::now();
+
+    reverse_cuthill_mcgee reordering(input_matrix);
+
+    reordering.compute();
+
+    auto const& permutation = reordering.permutation();
+
+    P.indices().resize(permutation.size());
+
+    std::copy(begin(permutation), end(permutation), P.indices().data());
+
+    build_sparsity_pattern = false;
+
+    std::chrono::duration<double> const elapsed_seconds = std::chrono::steady_clock::now() - start;
+
+    std::cout << std::string(6, ' ') << "Reordering took " << elapsed_seconds.count() << "s\n";
 }
 
 void conjugate_gradient::solve(sparse_matrix const& input_matrix, vector& x, vector const& input_rhs)
@@ -74,7 +74,13 @@ void conjugate_gradient::solve(sparse_matrix const& input_matrix, vector& x, vec
 
     auto const start = std::chrono::steady_clock::now();
 
-    symmetric_reorder(input_matrix, input_rhs);
+    if (build_sparsity_pattern)
+    {
+        compute_symmetric_reordering(input_matrix);
+        build_sparsity_pattern = false;
+    }
+
+    apply_permutation(input_matrix, input_rhs);
 
     Eigen::ConjugateGradient<sparse_matrix, Eigen::Lower | Eigen::Upper> pcg;
 

@@ -41,7 +41,9 @@ public:
                                      std::int32_t const max_iterations);
 
 protected:
-    void symmetric_reorder(sparse_matrix const& input_matrix, vector const& input_rhs);
+    void compute_symmetric_reordering(sparse_matrix const& input_matrix);
+
+    void apply_permutation(sparse_matrix const& input_matrix, vector const& input_rhs);
 
 protected:
     double residual_tolerance{1.0e-5};
