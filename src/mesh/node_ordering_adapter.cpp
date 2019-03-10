@@ -334,7 +334,7 @@ indices convert_to_vtk(indices node_indices, element_topology const topology)
 element_topology gmsh_type_to_enum(std::int32_t const element_code)
 {
     auto const found = gmsh_converter.find(element_code);
-    if (found == gmsh_converter.end())
+    if (found == end(gmsh_converter))
     {
         throw std::domain_error("Element code " + std::to_string(element_code)
                                 + " not implemented for gmsh element type");
@@ -345,7 +345,7 @@ element_topology gmsh_type_to_enum(std::int32_t const element_code)
 VTKCellType to_vtk(element_topology const topology)
 {
     auto const found = vtk_converter.find(topology);
-    if (found == vtk_converter.end())
+    if (found == end(vtk_converter))
     {
         throw std::domain_error("Element code " + std::to_string(static_cast<int>(topology))
                                 + " not implemented for vtk element type");
