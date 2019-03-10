@@ -180,7 +180,7 @@ void conjugate_gradient_cuda::solve(sparse_matrix const& input_matrix,
     cudaMemcpy(x.data(), d_x, N * sizeof(double), cudaMemcpyDeviceToHost);
 }
 
-void conjugate_gradient_cuda::allocate_device_memory(sparse_matrix const& A, vector const& b)
+void conjugate_gradient_cuda::allocate_device_memory(sparse_matrix const& A)
 {
     // If this isn't our first time using the compute device or
     // the sparsity pattern hasn't changed, then we save on the allocation
