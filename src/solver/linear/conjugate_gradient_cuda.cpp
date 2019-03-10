@@ -76,7 +76,7 @@ void conjugate_gradient_cuda::solve(sparse_matrix const& input_matrix,
 {
     symmetric_reorder(input_matrix, input_rhs);
 
-    this->allocate_device_memory(A, x, b);
+    this->allocate_device_memory(A, b);
 
     double constexpr one = 1.0;
     double constexpr zero = 0.0;
