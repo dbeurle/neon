@@ -50,7 +50,7 @@ protected:
     cusparseMatDescr_t descr = 0;
 
 private:
-    void allocate_device_memory(sparse_matrix const& A, vector& x, vector const& b);
+    void allocate_device_memory(sparse_matrix const& A, vector const& b);
 
 private:
     double *d_r{nullptr}, *d_p{nullptr}, *d_Ap{nullptr}, *d_y{nullptr}, *d_z{nullptr};

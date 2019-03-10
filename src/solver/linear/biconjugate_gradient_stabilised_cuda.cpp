@@ -200,7 +200,6 @@ void biconjugate_gradient_stabilised_cuda::solve(sparse_matrix const& A, vector&
 }
 
 void biconjugate_gradient_stabilised_cuda::allocate_device_memory(sparse_matrix const& A,
-                                                                  vector& x,
                                                                   vector const& b)
 {
     // If this isn't our first time using the compute device or
