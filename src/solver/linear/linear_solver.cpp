@@ -54,15 +54,6 @@ void conjugate_gradient::solve(sparse_matrix const& A, vector& x, vector const& 
 
         auto const& permutation = reordering.permutation();
 
-        {
-            std::ofstream out("permutation.txt");
-
-            for (auto index : permutation)
-            {
-                out << index << "\n";
-            }
-        }
-
         P.indices().resize(permutation.size());
 
         std::copy(begin(permutation), end(permutation), P.indices().data());
@@ -77,33 +68,11 @@ void conjugate_gradient::solve(sparse_matrix const& A, vector& x, vector const& 
 
     auto const p_start = std::chrono::steady_clock::now();
 
-    // works
-    // permuted_matrix = P * A * P.transpose();
-    // or
-    permuted_matrix = P * A;
-    permuted_matrix = permuted_matrix * P.transpose();
+    permuted_matrix = P.transpose() * A * P;
+    permuted_rhs = P.transpose() * b;
 
-    // may not work
-    //
-    // permuted_matrix = P.transpose() * A;
-    // permuted_matrix = permuted_matrix * P;
-
-    // permuted_matrix = P.transpose() * A * P;
-
-    {
-        std::ofstream permuted_matrix_out("permuted_matrix.txt");
-        std::ofstream matrix_out("matrix.txt");
-
-        permuted_matrix_out << permuted_matrix;
-        matrix_out << A;
-    }
-
-    std::abort();
-
-    std::cout << std::string(8, ' ') << "Bandwidth was " << compute_bandwidth(A) << " now "
+    std::cout << std::string(8, ' ') << "Bandwidth reduced from " << compute_bandwidth(A) << " to "
               << compute_bandwidth(permuted_matrix) << "\n";
-
-    permuted_rhs = P * b;
 
     std::chrono::duration<double> const p_time = std::chrono::steady_clock::now() - p_start;
 
@@ -116,10 +85,7 @@ void conjugate_gradient::solve(sparse_matrix const& A, vector& x, vector const& 
 
     auto const start = std::chrono::steady_clock::now();
 
-    x = P.transpose() * pcg.compute(permuted_matrix).solve(permuted_rhs);
-
-    // pcg.compute(A);
-    // x = pcg.solve(b);
+    x = P * pcg.compute(permuted_matrix).solve(permuted_rhs);
 
     auto const end = std::chrono::steady_clock::now();
     std::chrono::duration<double> const elapsed_seconds = end - start;
