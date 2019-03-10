@@ -37,10 +37,9 @@ void update_queue(std::stack<T>& queue,
 {
     for (auto const& child : children)
     {
-        if (!is_reordered[child])
-        {
-            queue.push(child);
-        }
+        if (is_reordered[child]) continue;
+
+        queue.push(child);
     }
 }
 
@@ -67,23 +66,23 @@ public:
 
         while (m_permutation.size() != graph.size())
         {
-            auto const parent = find_lowest_degree(is_reordered, graph);
+            auto const peripheral = find_lowest_degree(is_reordered, graph);
 
-            m_permutation.emplace_back(parent);
+            m_permutation.emplace_back(peripheral);
 
-            is_reordered[parent] = true;
+            is_reordered[peripheral] = true;
 
-            update_queue(queue, graph.children(parent), is_reordered);
+            update_queue(queue, graph.children(peripheral), is_reordered);
 
             while (!queue.empty())
             {
                 if (!is_reordered[queue.top()])
                 {
-                    is_reordered[m_permutation.emplace_back(queue.top())] = true;
+                    is_reordered[queue.top()] = true;
+
+                    m_permutation.emplace_back(queue.top());
 
                     auto const& children = graph.children(queue.top());
-
-                    queue.pop();
 
                     update_queue(queue, children, is_reordered);
                 }
