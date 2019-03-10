@@ -3,7 +3,6 @@
 
 /// @file
 
-#include <cstdint>
 #include <vector>
 
 namespace neon
@@ -26,8 +25,10 @@ namespace neon
 template <typename SparseMatrixType, typename VectorType, typename MeshType>
 void apply_dirichlet_conditions(SparseMatrixType& A, VectorType& x, VectorType& b, MeshType const& mesh)
 {
+    using index_type = typename SparseMatrixType::StorageIndex;
+
     // Keep track of entries we have visited as we walk to the sparse matrix A
-    std::vector<std::int32_t> non_zero_visitor;
+    std::vector<index_type> non_zero_visitor;
     non_zero_visitor.reserve(A.nonZeros() / A.rows());
 
     for (auto const& [name, dirichlet_boundaries] : mesh.dirichlet_boundaries())
@@ -83,8 +84,10 @@ void apply_dirichlet_conditions(SparseMatrixType& A, VectorType& x, VectorType& 
 template <typename SparseMatrixType, typename MeshType>
 void apply_dirichlet_conditions(SparseMatrixType& A, MeshType const& mesh)
 {
+    using index_type = typename SparseMatrixType::StorageIndex;
+
     // Keep track of entries we have visited as we walk to the sparse matrix A
-    std::vector<std::int32_t> non_zero_visitor;
+    std::vector<index_type> non_zero_visitor;
     non_zero_visitor.reserve(A.nonZeros() / A.rows());
 
     for (auto const& [name, dirichlet_boundaries] : mesh.dirichlet_boundaries())
