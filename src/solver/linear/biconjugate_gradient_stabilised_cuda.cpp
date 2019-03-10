@@ -30,7 +30,7 @@ biconjugate_gradient_stabilised_cuda::~biconjugate_gradient_stabilised_cuda()
 
 void biconjugate_gradient_stabilised_cuda::solve(sparse_matrix const& A, vector& x, vector const& b)
 {
-    allocate_device_memory(A, b);
+    this->allocate_device_memory(A);
 
     constexpr double one = 1.0;
     constexpr double zero = 0.0;
