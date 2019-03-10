@@ -5,7 +5,6 @@
 
 #include "exceptions.hpp"
 #include "dmatrix_vector_product.hpp"
-#include "numeric/float_compare.hpp"
 #include "solver/cuda_error.hpp"
 
 #include <cmath>
@@ -70,9 +69,23 @@ conjugate_gradient_cuda::~conjugate_gradient_cuda()
     cudaFree(d_M_inv);
 }
 
-void conjugate_gradient_cuda::solve(sparse_matrix const& A, vector& x, vector const& b)
+void conjugate_gradient_cuda::solve(sparse_matrix const& input_matrix,
+                                    vector& x,
+                                    vector const& input_rhs)
 {
-    this->allocate_device_memory(A, x, b);
+    if (build_sparsity_pattern)
+    {
+        compute_symmetric_reordering(input_matrix);
+        apply_permutation(input_matrix, input_rhs);
+
+        this->allocate_device_memory();
+
+        build_sparsity_pattern = false;
+    }
+    else
+    {
+        apply_permutation(input_matrix, input_rhs);
+    }
 
     double constexpr one = 1.0;
     double constexpr zero = 0.0;
@@ -163,7 +176,7 @@ void conjugate_gradient_cuda::solve(sparse_matrix const& A, vector& x, vector co
         cublasDdot(cublasHandle, N, d_z, 1, d_r, 1, &residual);
     }
 
-    std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << k << " (max. "
+    std::cout << std::string(6, ' ') << "Conjugate gradient iterations: " << k << " (max. "
               << max_iterations << "), estimated error: " << std::sqrt(residual) << " (min. "
               << residual_tolerance << ")\n";
 
@@ -174,14 +187,12 @@ void conjugate_gradient_cuda::solve(sparse_matrix const& A, vector& x, vector co
 
     // Copy device solution to the host
     cudaMemcpy(x.data(), d_x, N * sizeof(double), cudaMemcpyDeviceToHost);
+
+    x = P * x;
 }
 
-void conjugate_gradient_cuda::allocate_device_memory(sparse_matrix const& A, vector& x, vector const& b)
+void conjugate_gradient_cuda::allocate_device_memory()
 {
-    // If this isn't our first time using the compute device or
-    // the sparsity pattern hasn't changed, then we save on the allocation
-    if (!build_sparsity_pattern) return;
-
     auto const N = A.cols();
 
     cuda::check(cudaMalloc((void**)&d_col, A.nonZeros() * sizeof(int)));
@@ -198,8 +209,6 @@ void conjugate_gradient_cuda::allocate_device_memory(sparse_matrix const& A, vec
     cuda::check(cudaMemcpy(d_row, A.outerIndexPtr(), (N + 1) * sizeof(int), cudaMemcpyHostToDevice));
     cuda::check(
         cudaMemcpy(d_col, A.innerIndexPtr(), A.nonZeros() * sizeof(int), cudaMemcpyHostToDevice));
-
-    build_sparsity_pattern = false;
 }
 
 void conjugate_gradient_cuda::find_compute_device()

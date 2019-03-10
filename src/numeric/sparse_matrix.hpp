@@ -15,4 +15,6 @@ namespace neon
 using sparse_matrix = Eigen::SparseMatrix<double, Eigen::RowMajor>;
 /// Type alias for row major complex-valued sparse matrix
 using complex_sparse_matrix = Eigen::SparseMatrix<std::complex<double>, Eigen::RowMajor>;
+/// Type alias for the permutation matrix
+using permutation_matrix = Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic, sparse_matrix::StorageIndex>;
 }

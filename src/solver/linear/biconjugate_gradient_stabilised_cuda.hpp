@@ -21,7 +21,7 @@ public:
     void solve(sparse_matrix const& A, vector& x, vector const& b) override final;
 
 private:
-    void allocate_device_memory(sparse_matrix const& A, vector& x, vector const& b);
+    void allocate_device_memory(sparse_matrix const& A);
 
 private:
     double *d_r{nullptr}, *d_r0, *d_t, *d_s_hat, *d_s, *d_p, *d_p_hat, *d_v;

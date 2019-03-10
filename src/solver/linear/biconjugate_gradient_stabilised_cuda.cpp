@@ -30,7 +30,7 @@ biconjugate_gradient_stabilised_cuda::~biconjugate_gradient_stabilised_cuda()
 
 void biconjugate_gradient_stabilised_cuda::solve(sparse_matrix const& A, vector& x, vector const& b)
 {
-    allocate_device_memory(A, x, b);
+    this->allocate_device_memory(A);
 
     constexpr double one = 1.0;
     constexpr double zero = 0.0;
@@ -199,9 +199,7 @@ void biconjugate_gradient_stabilised_cuda::solve(sparse_matrix const& A, vector&
     cuda::check(cudaMemcpy(x.data(), d_x, N * sizeof(double), cudaMemcpyDeviceToHost));
 }
 
-void biconjugate_gradient_stabilised_cuda::allocate_device_memory(sparse_matrix const& A,
-                                                                  vector& x,
-                                                                  vector const& b)
+void biconjugate_gradient_stabilised_cuda::allocate_device_memory(sparse_matrix const& A)
 {
     // If this isn't our first time using the compute device or
     // the sparsity pattern hasn't changed, then we save on the allocation
