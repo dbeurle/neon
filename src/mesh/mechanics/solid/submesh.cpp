@@ -275,13 +275,64 @@ void submesh::update_jacobian_determinants()
     }
 }
 
+std::pair<vector, vector> submesh::nodal_averaged_variable(variable::scalar const scalar_name) const
+{
+    vector count = vector::Zero(coordinates->size());
+    vector value = count;
+
+    // auto const& scalar_list = variables->get(scalar_name);
+    //
+    // auto const& E = patch_recovery->extrapolation_matrix();
+    //
+    // // vector format of values
+    // vector component = vector::Zero(bilinear_gradient.quadrature().points());
+    //
+    // for (std::int64_t e{0}; e < elements(); ++e)
+    // {
+    //     // Assemble these into the global value vector
+    //     auto const& node_list = local_node_view(e);
+    //
+    //     for (std::size_t l{0}; l < bilinear_gradient.quadrature().points(); ++l)
+    //     {
+    //         component(l) = scalar_list[view(e, l)];
+    //     }
+    //
+    //     // Local extrapolation to the nodes
+    //     vector const nodal_component = E * component;
+    //
+    //     for (auto n = 0; n < nodal_component.rows(); n++)
+    //     {
+    //         value(node_list[n]) += nodal_component(n);
+    //         count(node_list[n]) += 1.0;
+    //     }
+    // }
+    return {value, count};
+}
+
 std::pair<vector, vector> submesh::nodal_averaged_variable(variable::second const tensor_name) const
 {
     vector count = vector::Zero(coordinates->size() * 9),
            value = vector::Zero(coordinates->size() * 9);
 
-    // auto const& tensor_list = variables->get(tensor_name);
-    //
+    auto const& tensor_variables = variables->get(tensor_name);
+
+    std::vector<double> single_values;
+    single_values.reserve(tensor_variables.size());
+
+    for (std::int64_t index{}; index < 9; ++index)
+    {
+        for (auto const& tensor_variable : tensor_variables)
+        {
+            single_values.push_back(tensor_variable[index]);
+        }
+        single_values.clear();
+
+        auto result_pair = patch_recovery->project(single_values,
+                                                   view,
+                                                   node_indices,
+                                                   coordinates->size());
+    }
+
     // auto const& E = patch_recovery->extrapolation_matrix();
     //
     // // vector format of values
@@ -316,37 +367,4 @@ std::pair<vector, vector> submesh::nodal_averaged_variable(variable::second cons
     return {value, count};
 }
 
-std::pair<vector, vector> submesh::nodal_averaged_variable(variable::scalar const scalar_name) const
-{
-    vector count = vector::Zero(coordinates->size());
-    vector value = count;
-
-    // auto const& scalar_list = variables->get(scalar_name);
-    //
-    // auto const& E = patch_recovery->extrapolation_matrix();
-    //
-    // // vector format of values
-    // vector component = vector::Zero(bilinear_gradient.quadrature().points());
-    //
-    // for (std::int64_t e{0}; e < elements(); ++e)
-    // {
-    //     // Assemble these into the global value vector
-    //     auto const& node_list = local_node_view(e);
-    //
-    //     for (std::size_t l{0}; l < bilinear_gradient.quadrature().points(); ++l)
-    //     {
-    //         component(l) = scalar_list[view(e, l)];
-    //     }
-    //
-    //     // Local extrapolation to the nodes
-    //     vector const nodal_component = E * component;
-    //
-    //     for (auto n = 0; n < nodal_component.rows(); n++)
-    //     {
-    //         value(node_list[n]) += nodal_component(n);
-    //         count(node_list[n]) += 1.0;
-    //     }
-    // }
-    return {value, count};
-}
 }
