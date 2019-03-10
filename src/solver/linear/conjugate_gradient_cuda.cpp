@@ -5,7 +5,6 @@
 
 #include "exceptions.hpp"
 #include "dmatrix_vector_product.hpp"
-#include "numeric/float_compare.hpp"
 #include "solver/cuda_error.hpp"
 
 #include <cmath>
