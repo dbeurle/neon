@@ -3,7 +3,7 @@
 
 #include "graph/adjacency_graph.hpp"
 
-#include <stack>
+#include <queue>
 #include <vector>
 
 namespace neon
@@ -31,7 +31,7 @@ inline auto find_lowest_degree(std::vector<bool> const& is_reordered,
 }
 
 template <class T>
-void update_queue(std::stack<T>& queue,
+void update_queue(std::queue<T>& queue,
                   std::vector<T> const& children,
                   std::vector<bool> const& is_reordered) noexcept(false)
 {
@@ -62,7 +62,7 @@ public:
 
         std::vector<bool> is_reordered(graph.size(), false);
 
-        std::stack<index_type> queue;
+        std::queue<index_type> queue;
 
         while (m_permutation.size() != graph.size())
         {
@@ -76,20 +76,14 @@ public:
 
             while (!queue.empty())
             {
-                if (!is_reordered[queue.top()])
+                if (!is_reordered[queue.front()])
                 {
-                    is_reordered[queue.top()] = true;
+                    is_reordered[queue.front()] = true;
+                    m_permutation.emplace_back(queue.front());
 
-                    m_permutation.emplace_back(queue.top());
-
-                    auto const& children = graph.children(queue.top());
-
-                    update_queue(queue, children, is_reordered);
+                    update_queue(queue, graph.children(queue.front()), is_reordered);
                 }
-                else
-                {
-                    queue.pop();
-                }
+                queue.pop();
             }
         }
         // Reverse Cuthill-McKee algorithm

@@ -16,6 +16,7 @@
 #include <cfenv>
 #include <chrono>
 #include <iostream>
+#include <fstream>
 
 namespace neon
 {
@@ -53,6 +54,15 @@ void conjugate_gradient::solve(sparse_matrix const& A, vector& x, vector const& 
 
         auto const& permutation = reordering.permutation();
 
+        {
+            std::ofstream out("permutation.txt");
+
+            for (auto index : permutation)
+            {
+                out << index << "\n";
+            }
+        }
+
         P.indices().resize(permutation.size());
 
         std::copy(begin(permutation), end(permutation), P.indices().data());
@@ -67,8 +77,28 @@ void conjugate_gradient::solve(sparse_matrix const& A, vector& x, vector const& 
 
     auto const p_start = std::chrono::steady_clock::now();
 
+    // works
+    // permuted_matrix = P * A * P.transpose();
+    // or
     permuted_matrix = P * A;
     permuted_matrix = permuted_matrix * P.transpose();
+
+    // may not work
+    //
+    // permuted_matrix = P.transpose() * A;
+    // permuted_matrix = permuted_matrix * P;
+
+    // permuted_matrix = P.transpose() * A * P;
+
+    {
+        std::ofstream permuted_matrix_out("permuted_matrix.txt");
+        std::ofstream matrix_out("matrix.txt");
+
+        permuted_matrix_out << permuted_matrix;
+        matrix_out << A;
+    }
+
+    std::abort();
 
     std::cout << std::string(8, ' ') << "Bandwidth was " << compute_bandwidth(A) << " now "
               << compute_bandwidth(permuted_matrix) << "\n";
@@ -94,7 +124,7 @@ void conjugate_gradient::solve(sparse_matrix const& A, vector& x, vector const& 
     auto const end = std::chrono::steady_clock::now();
     std::chrono::duration<double> const elapsed_seconds = end - start;
 
-    std::cout << std::string(6, ' ') << "Conjugate Gradient took " << elapsed_seconds.count()
+    std::cout << std::string(6, ' ') << "Conjugate gradient took " << elapsed_seconds.count()
               << "s, iterations: " << pcg.iterations() << " (max. " << max_iterations
               << "), estimated error: " << pcg.error() << " (min. " << residual_tolerance << ")\n";
 
@@ -134,7 +164,7 @@ void biconjugate_gradient_stabilised::solve(sparse_matrix const& A, vector& x, v
                                   "reached\n");
     }
 
-    std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << bicgstab.iterations()
+    std::cout << std::string(6, ' ') << "Conjugate gradient iterations: " << bicgstab.iterations()
               << " (max. " << max_iterations << "), estimated error: " << bicgstab.error()
               << " (min. " << residual_tolerance << ")\n";
 }
