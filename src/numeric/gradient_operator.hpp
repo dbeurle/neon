@@ -5,8 +5,6 @@
 
 #include "numeric/dense_matrix.hpp"
 
-#include "constitutive/voigt_dimension.hpp"
-
 namespace neon
 {
 /** sym_gradient signals the use of
