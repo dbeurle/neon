@@ -78,11 +78,11 @@ public:
     /// \sa check_element_distortion()
     void update_internal_variables(double const time_step_size = 1.0);
 
-    [[nodiscard]] std::pair<vector, vector> nodal_averaged_variable(
-        variable::second const tensor_name) const;
+    [[nodiscard]] auto nodal_averaged_variable(variable::second const tensor_name) const
+        -> std::pair<vector, vector>;
 
-    [[nodiscard]] std::pair<vector, vector> nodal_averaged_variable(
-        variable::scalar const scalar_name) const;
+    [[nodiscard]] auto nodal_averaged_variable(variable::scalar const scalar_name) const
+        -> std::pair<vector, vector>;
 
 protected:
     /// Update the strain measures defined by the constitutive model
