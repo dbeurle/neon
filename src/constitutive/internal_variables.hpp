@@ -29,7 +29,7 @@ public:
     using fourth_tensor_type = FourthTensorType;
 
 public:
-    internal_variables(std::size_t const size) : size{size} {}
+    internal_variables(std::size_t const size) : m_size{size} {}
 
     /// Delete copy constructor to prevent references moving
     internal_variables(internal_variables const&) = delete;
@@ -44,8 +44,8 @@ public:
     template <typename... all_types>
     void add(variable::scalar const name, all_types const... names)
     {
-        scalars[name].resize(size, 0.0);
-        scalars_old[name].resize(size, 0.0);
+        scalars[name].resize(m_size, 0.0);
+        scalars_old[name].resize(m_size, 0.0);
         add(names...);
     }
 
@@ -53,29 +53,29 @@ public:
     template <typename... all_types>
     void add(variable::second const name, all_types... names)
     {
-        second_order_tensors[name].resize(size, second_tensor_type::Zero());
-        second_order_tensors_old[name].resize(size, second_tensor_type::Zero());
+        second_order_tensors[name].resize(m_size, second_tensor_type::Zero());
+        second_order_tensors_old[name].resize(m_size, second_tensor_type::Zero());
         add(names...);
     }
 
     /// Allocate scalars (defaulted to zeros)
     void add(variable::scalar const name, double const value = 0.0)
     {
-        scalars[name].resize(size, value);
-        scalars_old[name].resize(size, value);
+        scalars[name].resize(m_size, value);
+        scalars_old[name].resize(m_size, value);
     }
 
     /// Allocate second order tensors (defaulted to zeros)
     void add(variable::second const name)
     {
-        second_order_tensors[name].resize(size, second_tensor_type::Zero());
-        second_order_tensors_old[name].resize(size, second_tensor_type::Zero());
+        second_order_tensors[name].resize(m_size, second_tensor_type::Zero());
+        second_order_tensors_old[name].resize(m_size, second_tensor_type::Zero());
     }
 
     /// Allocate fourth order tensor (defaulted to zeros)
     void add(variable::fourth const name, fourth_tensor_type const m = fourth_tensor_type::Zero())
     {
-        fourth_order_tensors[name].resize(size, m);
+        fourth_order_tensors[name].resize(m_size, m);
     }
 
     bool has(variable::scalar const name) const { return scalars.find(name) != scalars.end(); }
@@ -214,22 +214,22 @@ public:
     }
 
     /// \return Number of internal variables
-    auto entries() const noexcept { return size; }
+    auto entries() const noexcept -> std::size_t { return m_size; }
 
 protected:
-    /// Hash map of scalar history
+    /// scalar history
     std::map<variable::scalar, std::vector<double>> scalars;
-    /// Hash map of old scalar history
+    /// old scalar history
     std::map<variable::scalar, std::vector<double>> scalars_old;
 
-    /// Hash map of second order tensors
+    /// second order tensors
     std::map<variable::second, std::vector<second_tensor_type>> second_order_tensors;
-    /// Hash map of old second order tensors
+    /// old second order tensors
     std::map<variable::second, std::vector<second_tensor_type>> second_order_tensors_old;
 
     /// Fourth order tensors
     std::map<variable::fourth, std::vector<fourth_tensor_type>> fourth_order_tensors;
 
-    std::size_t size;
+    std::size_t m_size;
 };
 }

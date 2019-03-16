@@ -23,19 +23,18 @@
 
 namespace neon::mechanics::solid
 {
-std::unique_ptr<constitutive_model> make_constitutive_model(
-    std::shared_ptr<internal_variables_t>& variables,
-    json const& material_data,
-    json const& mesh_data)
+auto make_constitutive_model(std::shared_ptr<internal_variables_t>& variables,
+                             json const& material_data,
+                             json const& mesh_data) -> std::unique_ptr<constitutive_model>
 {
-    if (mesh_data.find("constitutive") == mesh_data.end())
+    if (mesh_data.find("constitutive") == end(mesh_data))
     {
         throw std::domain_error("Missing \"constitutive\" in \"mesh\"");
     }
 
     auto const& constitutive_model = mesh_data["constitutive"];
 
-    if (constitutive_model.find("name") == constitutive_model.end())
+    if (constitutive_model.find("name") == end(constitutive_model))
     {
         throw std::domain_error("Missing \"name\" in \"constitutive\"");
     }
@@ -48,13 +47,13 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
     }
     else if (model_name == "microsphere")
     {
-        if (constitutive_model.find("type") == constitutive_model.end())
+        if (constitutive_model.find("type") == end(constitutive_model))
         {
             throw std::domain_error("Missing \"type\" as \"affine\" or \"nonaffine\" in "
                                     "microsphere model");
         }
 
-        if (constitutive_model.find("quadrature") == constitutive_model.end())
+        if (constitutive_model.find("quadrature") == end(constitutive_model))
         {
             throw std::domain_error("Missing \"quadrature\" as \"BO21\", \"BO33\" or \"FM900\" in "
                                     "microsphere model");
@@ -76,7 +75,7 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
         }
         if (model_type == "affine")
         {
-            if (constitutive_model.find("statistics") == constitutive_model.end())
+            if (constitutive_model.find("statistics") == end(constitutive_model))
             {
                 throw std::domain_error("Missing \"statistics\" as \"gaussian\" or \"langevin\" in "
                                         "the microsphere model");
@@ -92,7 +91,7 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
 
             if (chain_type == "gaussian")
             {
-                if (constitutive_model.find("ageing") != constitutive_model.end())
+                if (constitutive_model.find("ageing") != end(constitutive_model))
                 {
                     if (constitutive_model["ageing"].get<std::string>() != "BAND")
                     {
@@ -127,13 +126,13 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
     }
     else if (model_name == "J2_plasticity")
     {
-        if (constitutive_model.find("finite_strain") == constitutive_model.end())
+        if (constitutive_model.find("finite_strain") == end(constitutive_model))
         {
             throw std::domain_error("\"small_strain_J2_plasticity\" must have a boolean value for "
                                     "\"finite_strain\"");
         }
 
-        if (constitutive_model.find("damage") != constitutive_model.end())
+        if (constitutive_model.find("damage") != end(constitutive_model))
         {
             if (mesh_data["constitutive"]["finite_strain"].get<bool>())
             {
@@ -164,19 +163,18 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
 
 namespace neon::mechanics::plane
 {
-std::unique_ptr<constitutive_model> make_constitutive_model(
-    std::shared_ptr<internal_variables_t>& variables,
-    json const& material_data,
-    json const& mesh_data)
+auto make_constitutive_model(std::shared_ptr<internal_variables_t>& variables,
+                             json const& material_data,
+                             json const& mesh_data) -> std::unique_ptr<constitutive_model>
 {
-    if (mesh_data.find("constitutive") == mesh_data.end())
+    if (mesh_data.find("constitutive") == end(mesh_data))
     {
         throw std::domain_error("Missing \"constitutive\" in \"mesh\"");
     }
 
     auto const& constitutive_model = mesh_data["constitutive"];
 
-    if (constitutive_model.find("name") == constitutive_model.end())
+    if (constitutive_model.find("name") == end(constitutive_model))
     {
         throw std::domain_error("Missing \"name\" in \"constitutive\"");
     }
@@ -197,7 +195,7 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
     }
     else if (model_name == "J2_plasticity")
     {
-        if (constitutive_model.find("finite_strain") == constitutive_model.end())
+        if (constitutive_model.find("finite_strain") == end(constitutive_model))
         {
             throw std::domain_error("\"small_strain_J2_plasticity\" must have a boolean value for "
                                     "\"finite_strain\"");
@@ -217,19 +215,18 @@ std::unique_ptr<constitutive_model> make_constitutive_model(
 
 namespace neon::diffusion
 {
-std::unique_ptr<constitutive_model> make_constitutive_model(
-    std::shared_ptr<internal_variables_t>& variables,
-    json const& material_data,
-    json const& mesh_data)
+auto make_constitutive_model(std::shared_ptr<internal_variables_t>& variables,
+                             json const& material_data,
+                             json const& mesh_data) -> std::unique_ptr<constitutive_model>
 {
-    if (mesh_data.find("constitutive") == mesh_data.end())
+    if (mesh_data.find("constitutive") == end(mesh_data))
     {
         throw std::domain_error("A \"constitutive\" was not specified in \"mesh\"");
     }
 
     auto const& constitutive_model = mesh_data["constitutive"];
 
-    if (constitutive_model.find("name") == constitutive_model.end())
+    if (constitutive_model.find("name") == end(constitutive_model))
     {
         throw std::domain_error("\"constitutive\" requires a \"name\" field");
     }

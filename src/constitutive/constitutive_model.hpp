@@ -42,7 +42,10 @@ public:
 
     [[nodiscard]] virtual bool is_symmetric() const { return true; };
 
-    [[nodiscard]] std::set<std::string> const& variable_names() const noexcept { return names; }
+    [[nodiscard]] auto variable_names() const noexcept -> std::set<std::string> const&
+    {
+        return names;
+    }
 
 protected:
     /// Internal variables

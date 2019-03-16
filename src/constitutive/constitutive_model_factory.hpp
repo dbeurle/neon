@@ -16,24 +16,21 @@ namespace neon
 {
 namespace mechanics::solid
 {
-std::unique_ptr<constitutive_model> make_constitutive_model(
-    std::shared_ptr<internal_variables_t>& variables,
-    json const& material_data,
-    json const& simulation_data);
+auto make_constitutive_model(std::shared_ptr<internal_variables_t>& variables,
+                             json const& material_data,
+                             json const& simulation_data) -> std::unique_ptr<constitutive_model>;
 }
 namespace mechanics::plane
 {
-std::unique_ptr<constitutive_model> make_constitutive_model(
-    std::shared_ptr<internal_variables_t>& variables,
-    json const& material_data,
-    json const& simulation_data);
+auto make_constitutive_model(std::shared_ptr<internal_variables_t>& variables,
+                             json const& material_data,
+                             json const& simulation_data) -> std::unique_ptr<constitutive_model>;
 }
 
 namespace diffusion
 {
-std::unique_ptr<constitutive_model> make_constitutive_model(
-    std::shared_ptr<internal_variables_t>& variables,
-    json const& material_data,
-    json const& simulation_data);
+auto make_constitutive_model(std::shared_ptr<internal_variables_t>& variables,
+                             json const& material_data,
+                             json const& simulation_data) -> std::unique_ptr<constitutive_model>;
 }
 }
