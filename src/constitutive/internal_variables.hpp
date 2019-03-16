@@ -9,7 +9,7 @@
 #include "constitutive/variable_types.hpp"
 
 #include <functional>
-#include <unordered_map>
+#include <map>
 #include <vector>
 #include <cstdint>
 
@@ -19,21 +19,14 @@ namespace neon
 /// quadrature points.  These variables are duplicated and commited to memory
 /// when the data is converged to avoid polluting the variable history in the
 /// Newton-Raphson method.
-template <int rank2_dimension, int rank4_dimension>
+template <typename SecondTensorType, typename FourthTensorType>
 class internal_variables
 {
 public:
-    /// Spatial dimension (three, two or one dimension)
-    static auto constexpr r_n = rank2_dimension;
-    /// Voigt dimension for the tensor conversion
-    static auto constexpr v_n = rank4_dimension;
-
     /// A second order tensor type is a small matrix in tensor notation
-    using second_tensor_type = Eigen::Matrix<double, rank2_dimension, rank2_dimension>;
+    using second_tensor_type = SecondTensorType;
     /// A fourth order tensor type is a fixed size matrix in Voigt notation
-    using fourth_tensor_type = Eigen::Matrix<double, rank4_dimension, rank4_dimension>;
-
-    static auto constexpr tensor_size = rank2_dimension * rank2_dimension;
+    using fourth_tensor_type = FourthTensorType;
 
 public:
     internal_variables(std::size_t const size) : size{size} {}
@@ -225,17 +218,17 @@ public:
 
 protected:
     /// Hash map of scalar history
-    std::unordered_map<variable::scalar, std::vector<double>> scalars;
+    std::map<variable::scalar, std::vector<double>> scalars;
     /// Hash map of old scalar history
-    std::unordered_map<variable::scalar, std::vector<double>> scalars_old;
+    std::map<variable::scalar, std::vector<double>> scalars_old;
 
     /// Hash map of second order tensors
-    std::unordered_map<variable::second, std::vector<second_tensor_type>> second_order_tensors;
+    std::map<variable::second, std::vector<second_tensor_type>> second_order_tensors;
     /// Hash map of old second order tensors
-    std::unordered_map<variable::second, std::vector<second_tensor_type>> second_order_tensors_old;
+    std::map<variable::second, std::vector<second_tensor_type>> second_order_tensors_old;
 
     /// Fourth order tensors
-    std::unordered_map<variable::fourth, std::vector<fourth_tensor_type>> fourth_order_tensors;
+    std::map<variable::fourth, std::vector<fourth_tensor_type>> fourth_order_tensors;
 
     std::size_t size;
 };

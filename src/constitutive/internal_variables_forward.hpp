@@ -5,7 +5,7 @@
 
 namespace neon
 {
-template <int rank2_dimension, int rank4_dimension>
+template <typename SecondOrderTensor, typename FourthOrderTensor>
 class internal_variables;
 }
 

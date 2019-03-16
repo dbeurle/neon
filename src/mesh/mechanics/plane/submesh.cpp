@@ -260,7 +260,8 @@ void submesh::update_Jacobian_determinants()
     }
 }
 
-std::pair<vector, vector> submesh::nodal_averaged_variable(variable::scalar const scalar_name) const
+auto submesh::nodal_averaged_variable(variable::scalar const scalar_name) const
+    -> std::pair<vector, vector>
 {
     vector count = vector::Zero(coordinates->size());
     vector value = count;
