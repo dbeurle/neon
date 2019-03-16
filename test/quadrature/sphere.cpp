@@ -8,8 +8,6 @@
 
 using namespace neon;
 
-constexpr auto ZERO_MARGIN = 1.0e-5;
-
 TEST_CASE("Unit sphere quadrature scheme test", "[unit_sphere_quadrature]")
 {
     SECTION("BO21 rule test")

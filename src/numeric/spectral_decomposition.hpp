@@ -13,6 +13,6 @@ namespace neon
 /// - boolean flag (true if the values are unique)
 /// - a pair containing eigenvalues
 /// - a pair containing eigenprojections
-[[nodiscard]] std::tuple<bool, std::pair<double, double>, std::pair<matrix2, matrix2>> spectral_decomposition(
-    matrix2 const& A);
+[[nodiscard]] auto spectral_decomposition(matrix2 const& A)
+    -> std::tuple<bool, std::pair<double, double>, std::pair<matrix2, matrix2>>;
 }

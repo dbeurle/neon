@@ -5,8 +5,8 @@
 
 namespace neon
 {
-std::tuple<bool, std::pair<double, double>, std::pair<matrix2, matrix2>> spectral_decomposition(
-    matrix2 const& A)
+auto spectral_decomposition(matrix2 const& A)
+    -> std::tuple<bool, std::pair<double, double>, std::pair<matrix2, matrix2>>
 {
     // First invariant
     auto const I1 = A.trace();
