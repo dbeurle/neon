@@ -48,7 +48,7 @@ public:
     using index_type = sparse_matrix::StorageIndex;
 
 public:
-    reverse_cuthill_mcgee(sparse_matrix const& A) : graph(A) {}
+    explicit reverse_cuthill_mcgee(sparse_matrix const& A) : graph(A) {}
 
     void update(sparse_matrix const& A) noexcept(false) { graph.update(A); }
 
