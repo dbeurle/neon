@@ -1,4 +1,4 @@
-[![Build Status](https://beurle.ddns.net/buildStatus/icon?job=neon/master)](https://beurle.ddns.net/job/neon/job/master/)
+[![Build Status](https://beurle.ddns.net/jenkins/buildStatus/icon?job=neon/master)](https://beurle.ddns.net/job/neon/job/master/)
 [![Documentation Status](https://readthedocs.org/projects/neon-user/badge/?version=latest)](http://neon-user.readthedocs.io/en/latest/?badge=latest)
 [![Documentation](https://codedocs.xyz/dbeurle/neon.svg)](https://codedocs.xyz/dbeurle/neon/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
