@@ -6,6 +6,7 @@
 #include "mesh/dof_allocator.hpp"
 #include "interpolations/interpolation_factory.hpp"
 #include "numeric/float_compare.hpp"
+#include "io/json.hpp"
 
 #include <tbb/parallel_for.h>
 #include <Eigen/Geometry>

@@ -4,7 +4,7 @@
 /// @file
 
 #include "numeric/dense_matrix.hpp"
-#include "io/json.hpp"
+#include "io/json_forward.hpp"
 
 namespace neon
 {
