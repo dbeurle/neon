@@ -64,7 +64,7 @@ public:
      * \f}
      * \return internal element force
      */
-    [[nodiscard]] std::pair<index_view, vector const&> internal_force(std::int32_t const element) const;
+    [[nodiscard]] auto internal_force(std::int32_t const element) const -> vector const&;
 
     /// \return consistent mass matrix \sa diagonal_mass
     [[nodiscard]] std::pair<index_view, matrix const&> consistent_mass(std::int32_t const element) const;

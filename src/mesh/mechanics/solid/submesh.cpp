@@ -82,7 +82,7 @@ std::pair<index_view, matrix const&> submesh::tangent_stiffness(std::int32_t con
     return {local_dof_view(element), k_e};
 }
 
-std::pair<index_view, vector const&> submesh::internal_force(std::int32_t const element) const
+auto submesh::internal_force(std::int32_t const element) const -> vector const&
 {
     auto const& x = coordinates->current_configuration(local_node_view(element));
 
@@ -107,7 +107,7 @@ std::pair<index_view, vector const&> submesh::internal_force(std::int32_t const 
                                return Bt * cauchy_stress * jacobian.determinant();
                            });
 
-    return {local_dof_view(element), f_int};
+    return f_int;
 }
 
 matrix const& submesh::geometric_tangent_stiffness(matrix3x const& x, std::int32_t const element) const

@@ -114,19 +114,19 @@ static_matrix<MeshType>::static_matrix(mesh_type& mesh, json const& simulation)
 {
     auto const& nonlinear_options = simulation["nonlinear_options"];
 
-    if (nonlinear_options.find("displacement_tolerance") == nonlinear_options.end())
+    if (nonlinear_options.find("displacement_tolerance") == end(nonlinear_options))
     {
         throw std::domain_error("displacement_tolerance not specified in nonlinear_options");
     }
-    if (nonlinear_options.find("residual_tolerance") == nonlinear_options.end())
+    if (nonlinear_options.find("residual_tolerance") == end(nonlinear_options))
     {
         throw std::domain_error("residual_tolerance not specified in nonlinear_options");
     }
-    if (nonlinear_options.find("linear_iterations") != nonlinear_options.end())
+    if (nonlinear_options.find("linear_iterations") != end(nonlinear_options))
     {
         maximum_iterations = nonlinear_options["linear_iterations"];
     }
-    if (nonlinear_options.find("absolute_tolerance") != nonlinear_options.end())
+    if (nonlinear_options.find("absolute_tolerance") != end(nonlinear_options))
     {
         use_relative_norm = false;
     }
@@ -195,9 +195,9 @@ void static_matrix<MeshType>::compute_internal_force()
     {
         for (std::int64_t element{0}; element < submesh.elements(); ++element)
         {
-            auto const& [dofs, fe_int] = submesh.internal_force(element);
+            auto const dof_indices = submesh.local_dof_view(element);
 
-            f_int(dofs) += fe_int;
+            f_int(dof_indices) += submesh.internal_force(element);
         }
     }
 }
