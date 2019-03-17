@@ -174,7 +174,9 @@ TEST_CASE("Solid submesh test")
     }
     SECTION("Internal force")
     {
-        auto [local_dofs, internal_force] = fem_submesh.internal_force(0);
+        auto const local_dofs = fem_submesh.local_dof_view(0);
+        auto const& internal_force = fem_submesh.internal_force(0);
+
         REQUIRE(internal_force.rows() == number_of_local_dofs);
         REQUIRE(local_dofs.size() == number_of_local_dofs);
     }
@@ -229,7 +231,9 @@ TEST_CASE("Solid mesh test")
 
     for (auto const& fem_submesh : fem_mesh.meshes())
     {
-        auto [local_dofs, internal_force] = fem_submesh.internal_force(0);
+        auto const& internal_force = fem_submesh.internal_force(0);
+        auto const local_dofs = fem_submesh.local_dof_view(0);
+
         REQUIRE(internal_force.rows() == number_of_local_dofs);
         REQUIRE(local_dofs.size() == number_of_local_dofs);
     }
