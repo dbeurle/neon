@@ -29,7 +29,7 @@ submesh::submesh(json const& material_data,
 {
     allocate_normal_and_tangent(section_data);
 
-    dof_allocator(node_indices, dof_indices, traits::dof_order);
+    dof_allocator(node_indices, dof_indices, traits::dofs_per_node);
 
     variables->add(variable::second::cauchy_stress,
                    variable::scalar::shear_area_1,

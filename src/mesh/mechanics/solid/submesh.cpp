@@ -48,7 +48,7 @@ submesh::submesh(json const& material_data,
 
     variables->commit();
 
-    dof_allocator(node_indices, dof_indices, traits::dof_order);
+    dof_allocator(node_indices, dof_indices, traits::dofs_per_node);
 }
 
 void submesh::save_internal_variables(bool const have_converged)
