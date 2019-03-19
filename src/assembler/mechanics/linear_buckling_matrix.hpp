@@ -70,13 +70,14 @@ void linear_buckling_matrix<MeshType>::assemble_stiffness()
     {
         for (std::int64_t element = 0; element < submesh.elements(); ++element)
         {
-            auto const [dofs, ke] = submesh.tangent_stiffness(element);
+            auto const dof_indices = submesh.local_dof_view(element);
+            auto const& ke = submesh.tangent_stiffness(element);
 
-            for (std::int64_t a{0}; a < dofs.size(); a++)
+            for (std::int64_t a{0}; a < dof_indices.size(); a++)
             {
-                for (std::int64_t b{0}; b < dofs.size(); b++)
+                for (std::int64_t b{0}; b < dof_indices.size(); b++)
                 {
-                    K.add_to(dofs(a), dofs(b), ke(a, b));
+                    K.add_to(dof_indices(a), dof_indices(b), ke(a, b));
                 }
             }
         }

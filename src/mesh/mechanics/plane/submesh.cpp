@@ -59,7 +59,7 @@ void submesh::save_internal_variables(bool const have_converged)
     }
 }
 
-std::pair<index_view, matrix> submesh::tangent_stiffness(std::int32_t const element) const
+auto submesh::tangent_stiffness(std::int32_t const element) const -> matrix const&
 {
     auto const x = geometry::project_to_plane(
         coordinates->current_configuration(local_node_view(element)));
@@ -68,11 +68,11 @@ std::pair<index_view, matrix> submesh::tangent_stiffness(std::int32_t const elem
 
     k_e = material_tangent_stiffness(x, element);
 
-    if (!cm->is_finite_deformation()) return {local_dof_view(element), k_e};
-
-    k_e.noalias() += geometric_tangent_stiffness(x, element);
-
-    return {local_dof_view(element), k_e};
+    if (cm->is_finite_deformation())
+    {
+        k_e.noalias() += geometric_tangent_stiffness(x, element);
+    }
+    return k_e;
 }
 
 auto submesh::internal_force(std::int32_t const element) const -> vector const&
@@ -153,10 +153,13 @@ matrix const& submesh::material_tangent_stiffness(matrix2x const& x, std::int32_
     return k_mat;
 }
 
-std::pair<index_view, matrix> submesh::consistent_mass(std::int32_t const element) const
+auto submesh::consistent_mass(std::int32_t const element) const -> matrix const&
 {
-    auto const X = coordinates->initial_configuration(local_node_view(element));
-    return {local_dof_view(element), X};
+    static matrix X;
+
+    X = coordinates->initial_configuration(local_node_view(element));
+
+    return X;
     // auto const density_0 = cm->intrinsic_material().initial_density();
     //
     // auto m = sf->quadrature().integrate(matrix::Zero(nodes_per_element(), nodes_per_element()).eval(),
@@ -171,16 +174,13 @@ std::pair<index_view, matrix> submesh::consistent_mass(std::int32_t const elemen
     // return {local_dof_view(element), identity_expansion(m, dofs_per_node())};
 }
 
-std::pair<index_view, vector> submesh::diagonal_mass(std::int32_t const element) const
+auto submesh::diagonal_mass(std::int32_t const element) const -> vector const&
 {
-    auto const& [dofs, consistent_m] = this->consistent_mass(element);
+    thread_local vector diagonal_mass;
 
-    vector diagonal_m(consistent_m.rows());
-    for (auto i = 0; i < consistent_m.rows(); ++i)
-    {
-        diagonal_m(i) = consistent_m.row(i).sum();
-    }
-    return {local_dof_view(element), diagonal_m};
+    diagonal_mass = this->consistent_mass(element).rowwise().sum();
+
+    return diagonal_mass;
 }
 
 void submesh::update_internal_variables(double const time_step_size)

@@ -63,7 +63,7 @@ void submesh::save_internal_variables(bool const have_converged)
     }
 }
 
-std::pair<index_view, matrix const&> submesh::tangent_stiffness(std::int32_t const element) const
+auto submesh::tangent_stiffness(std::int32_t const element) const -> matrix const&
 {
     auto const x = coordinates->current_configuration(local_node_view(element));
 
@@ -72,14 +72,11 @@ std::pair<index_view, matrix const&> submesh::tangent_stiffness(std::int32_t con
 
     k_e = material_tangent_stiffness(x, element);
 
-    if (!cm->is_finite_deformation())
+    if (cm->is_finite_deformation())
     {
-        return {local_dof_view(element), k_e};
+        k_e.noalias() += geometric_tangent_stiffness(x, element);
     }
-
-    k_e.noalias() += geometric_tangent_stiffness(x, element);
-
-    return {local_dof_view(element), k_e};
+    return k_e;
 }
 
 auto submesh::internal_force(std::int32_t const element) const -> vector const&
@@ -162,7 +159,7 @@ matrix const& submesh::material_tangent_stiffness(matrix3x const& x, std::int32_
     return k_mat;
 }
 
-std::pair<index_view, matrix const&> submesh::consistent_mass(std::int32_t const element) const
+auto submesh::consistent_mass(std::int32_t const element) const -> matrix const&
 {
     auto const& X = coordinates->initial_configuration(local_node_view(element));
 
@@ -182,18 +179,16 @@ std::pair<index_view, matrix const&> submesh::consistent_mass(std::int32_t const
 
     identity_expansion_inplace<3>(local_mass, mass.setZero());
 
-    return {local_dof_view(element), mass};
+    return mass;
 }
 
-std::pair<index_view, vector const&> submesh::diagonal_mass(std::int32_t const element) const
+auto submesh::diagonal_mass(std::int32_t const element) const -> vector const&
 {
     thread_local vector diagonal_mass;
 
-    auto const& [dof_view, consistent_mass] = this->consistent_mass(element);
+    diagonal_mass = this->consistent_mass(element).rowwise().sum();
 
-    diagonal_mass = consistent_mass.rowwise().sum();
-
-    return {dof_view, diagonal_mass};
+    return diagonal_mass;
 }
 
 void submesh::update_internal_variables(double const time_step_size)

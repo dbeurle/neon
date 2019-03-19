@@ -66,11 +66,10 @@ void submesh::update_internal_variables(double)
             area_moment_2.at(view(element, l)) = I2;
         });
     });
-
     cm->update_internal_variables();
 }
 
-std::pair<index_view, matrix const&> submesh::tangent_stiffness(std::int32_t const element) const
+auto submesh::tangent_stiffness(std::int32_t const element) const -> matrix const&
 {
     static thread_local matrix ke(12, 12);
 
@@ -81,7 +80,7 @@ std::pair<index_view, matrix const&> submesh::tangent_stiffness(std::int32_t con
             + axial_stiffness(configuration, element) + torsional_stiffness(configuration, element))
          * rotation_matrix.transpose();
 
-    return {local_dof_view(element), ke};
+    return ke;
 }
 
 matrix const& submesh::bending_stiffness(matrix3x const& configuration, std::int32_t const element) const
