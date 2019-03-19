@@ -69,7 +69,6 @@ auto nodal_averaged_variable(VariableType const name,
                 {
                     component(l) = variable_list[view(element, l)](i, j);
                 }
-
                 // Local extrapolation to the nodes
                 vector const nodal_component = extrapolation_matrix * component;
 
@@ -83,5 +82,4 @@ auto nodal_averaged_variable(VariableType const name,
     }
     return {value, count};
 }
-
 }
