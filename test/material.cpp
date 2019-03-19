@@ -122,6 +122,7 @@ TEST_CASE("Micromechanical elastomer")
                        {"elastic_modulus", 10.0e6},
                        {"poissons_ratio", 0.45},
                        {"segments_per_chain", 70},
+                       {"cure_time", 100},
                        {"recombination_probability", 1.0e-6},
                        {"scission_probability", 1.0e-6}};
 
@@ -132,6 +133,7 @@ TEST_CASE("Micromechanical elastomer")
         REQUIRE(network.scission_probability() == Approx(1.0e-6));
         REQUIRE(network.recombination_probability() == Approx(1.0e-6));
         REQUIRE(network.segments_per_chain() == Approx(70.0));
+        REQUIRE(network.initial_inactive_shear_modulus() == Approx(0.0).margin(1E-5));
     }
     SECTION("network evolution test")
     {
