@@ -9,38 +9,39 @@
 namespace neon
 {
 /**
- * transform_expand_view takes a view of a contiguous input and output view
+ * transform_expand_view takes a view of a contiguous input and output iterator
  * of a contiguous storage and applies an inline expansion according to the
  * ordering provided.
  *
  * An example of this transformation is given by
  *
  * Input: (3, 6, 7)
- * Order: {0, 1, 2}
+ * Size: 3
  * Output: (9, 10, 11, 18, 19, 20, 21, 22, 23)
  *
  *
- * \param [in] input_view Contiguous view of input data to be transformed
- * \param [in out] output_view Contiguous view of input data to be transformed
- * \param order Storage e.g. {0, 1, 2}
+ * \param [in] input Contiguous iterator of input data to be transformed
+ * \param [in] count A size to use
+ * \param [in out] output Contiguous iterator of input data to be transformed (must be larger than
+ * input)
+ * \param [in] size to perform the inner loop to expand
  */
-template <class InputView, class OutputView, typename OrderType>
-inline void transform_expand_view(InputView input_view, OutputView output_view, OrderType const& order)
+template <class InputIterator, class Size, class OutputIterator, class ExpandSize>
+inline void transform_expand_n(InputIterator input,
+                               Size const count,
+                               OutputIterator output,
+                               ExpandSize const size) noexcept
 {
-    using index_type = decltype(output_view.size());
+    static_assert(std::is_integral<Size>::value, "count must be an integer type");
+    static_assert(std::is_integral<ExpandSize>::value, "size must be an integer type");
 
-    static_assert(std::is_integral<index_type>::value, "The size of the view needs to be an integer");
-
-    static_assert(sizeof(typename InputView::value_type) >= sizeof(typename OutputView::value_type),
-                  "The value type for the output range must be greater than or equal to input "
-                  "range");
-
-    for (index_type i{0}; i < input_view.size() * static_cast<index_type>(order.size()); ++i)
+    for (Size outer_index = 0; outer_index < count; ++outer_index)
     {
-        index_type const input_index = i / static_cast<index_type>(order.size());
-        index_type const order_index = i % static_cast<index_type>(order.size());
-
-        output_view[i] = input_view[input_index] * order.size() + order[order_index];
+        for (ExpandSize inner_index = 0; inner_index < size; ++inner_index)
+        {
+            *output++ = *input * size + inner_index;
+        }
+        ++input;
     }
 }
 

@@ -5,6 +5,6 @@
 
 namespace neon
 {
-template <int spatial_dimension, int voigt_dimension>
+template <typename SecondOrderTensor, typename FourthOrderTensor>
 class constitutive_model;
 }

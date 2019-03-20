@@ -11,11 +11,10 @@
 #include <utility>
 
 #include "mesh/basic_mesh.hpp"
-#include "io/json_forward.hpp"
+#include "io/json.hpp"
 
 namespace neon
 {
-// Forward declarations
 namespace geometry
 {
 class profile;

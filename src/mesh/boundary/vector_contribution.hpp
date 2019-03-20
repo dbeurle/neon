@@ -19,8 +19,7 @@ public:
     using boundary::boundary;
 
     /// \return element external force vector
-    [[nodiscard]] virtual std::pair<index_view, vector> external_force(
-        std::int64_t const element,
-        double const load_factor) const = 0;
+    [[nodiscard]] virtual auto external_force(std::int64_t const element, double const load_factor) const
+        -> std::pair<index_view, vector> = 0;
 };
 }

@@ -34,7 +34,7 @@ void isotropic_linear::update_internal_variables()
     auto& second_moment_area_1 = variables->get(variable::scalar::second_moment_area_1);
     auto& second_moment_area_2 = variables->get(variable::scalar::second_moment_area_2);
 
-    tbb::parallel_for(std::size_t{}, variables->entries(), [&](auto const l) {
+    tbb::parallel_for(std::size_t{}, variables->size(), [&](auto const l) {
         // Polar moment of area
         double const J = second_moment_area_1[l] + second_moment_area_2[l];
 

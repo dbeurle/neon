@@ -148,13 +148,14 @@ void linear_static_matrix<fem_mesh_type>::assemble_stiffness()
     for (auto const& submesh : fem_mesh.meshes())
     {
         tbb::parallel_for(std::int64_t{0}, submesh.elements(), [&](auto const element) {
-            auto const [dofs, ke] = submesh.tangent_stiffness(element);
+            auto const dof_indices = submesh.local_dof_view(element);
+            auto const& ke = submesh.tangent_stiffness(element);
 
-            for (std::int64_t b{0}; b < dofs.size(); b++)
+            for (std::int64_t b{0}; b < dof_indices.size(); b++)
             {
-                for (std::int64_t a{0}; a < dofs.size(); a++)
+                for (std::int64_t a{0}; a < dof_indices.size(); a++)
                 {
-                    Kt.add_to(dofs(a), dofs(b), ke(a, b));
+                    Kt.add_to(dof_indices(a), dof_indices(b), ke(a, b));
                 }
             }
         });

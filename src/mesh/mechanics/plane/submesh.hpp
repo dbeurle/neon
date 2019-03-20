@@ -53,16 +53,22 @@ public:
     [[nodiscard]] auto const& constitutive() const { return *cm; }
 
     /// \return the tangent consistent stiffness matrix
-    [[nodiscard]] std::pair<index_view, matrix> tangent_stiffness(std::int32_t const element) const;
+    [[nodiscard]] auto tangent_stiffness(std::int32_t const element) const -> matrix const&;
 
-    /// \return the internal element force
-    [[nodiscard]] std::pair<index_view, vector> internal_force(std::int32_t const element) const;
+    /**
+     * Compute the internal force vector using the formula
+     * \f{align*}{
+     * f_{int} &= \int_{V} B^{T} \sigma dV
+     * \f}
+     * @return the internal nodal force vector
+     */
+    [[nodiscard]] auto internal_force(std::int32_t const element) const -> vector const&;
 
     /// \return the consistent mass matrix \sa diagonal_mass
-    [[nodiscard]] std::pair<index_view, matrix> consistent_mass(std::int32_t const element) const;
+    [[nodiscard]] auto consistent_mass(std::int32_t const element) const -> matrix const&;
 
     /// \return the consistent mass matrix \sa diagonal_mass
-    [[nodiscard]] std::pair<index_view, vector> diagonal_mass(std::int32_t const element) const;
+    [[nodiscard]] auto diagonal_mass(std::int32_t const element) const -> vector const&;
 
     /// Update the internal variables for the mesh group
     /// \sa update_deformation_measures()
@@ -70,11 +76,11 @@ public:
     /// \sa check_element_distortion()
     void update_internal_variables(double const time_step_size = 1.0);
 
-    [[nodiscard]] std::pair<vector, vector> nodal_averaged_variable(
-        variable::second const tensor_name) const;
+    [[nodiscard]] auto nodal_averaged_variable(variable::scalar const scalar_name) const
+        -> std::pair<vector, vector>;
 
-    [[nodiscard]] std::pair<vector, vector> nodal_averaged_variable(
-        variable::scalar const scalar_name) const;
+    [[nodiscard]] auto nodal_averaged_variable(variable::second const tensor_name) const
+        -> std::pair<vector, vector>;
 
 protected:
     /// Update the strain measures defined by the constitutive model
@@ -105,28 +111,16 @@ protected:
     [[nodiscard]] matrix const& material_tangent_stiffness(matrix2x const& configuration,
                                                            std::int32_t const element) const;
 
-    /**
-     * Compute the internal force vector using the formula
-     * \f{align*}{
-     * f_{int} &= \int_{V} B^{T} \sigma dV
-     * \f}
-     * @return the internal nodal force vector
-     */
-    [[nodiscard]] vector const& internal_nodal_force(matrix2x const& configuration,
-                                                     std::int32_t const element) const;
-
 private:
-    std::shared_ptr<material_coordinates> coordinates;
-
+    /// Nodal coordinates
+    std::shared_ptr<material_coordinates const> coordinates;
     /// Shape function
     std::unique_ptr<surface_interpolation> sf;
-
+    /// View into the internal variables
     stride_view<> view;
     std::shared_ptr<internal_variables_t> variables;
-
     /// Constitutive model
     std::unique_ptr<constitutive_model> cm;
-
     /// Map for the local element to process indices
     indices dof_list;
 };

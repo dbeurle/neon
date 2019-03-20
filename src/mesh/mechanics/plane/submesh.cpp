@@ -44,7 +44,7 @@ submesh::submesh(json const& material_data,
 
     variables->commit();
 
-    dof_allocator(node_indices, dof_list, traits::dof_order);
+    dof_allocator(node_indices, dof_list, traits::dofs_per_node);
 }
 
 void submesh::save_internal_variables(bool const have_converged)
@@ -59,7 +59,7 @@ void submesh::save_internal_variables(bool const have_converged)
     }
 }
 
-std::pair<index_view, matrix> submesh::tangent_stiffness(std::int32_t const element) const
+auto submesh::tangent_stiffness(std::int32_t const element) const -> matrix const&
 {
     auto const x = geometry::project_to_plane(
         coordinates->current_configuration(local_node_view(element)));
@@ -68,19 +68,39 @@ std::pair<index_view, matrix> submesh::tangent_stiffness(std::int32_t const elem
 
     k_e = material_tangent_stiffness(x, element);
 
-    if (!cm->is_finite_deformation()) return {local_dof_view(element), k_e};
-
-    k_e.noalias() += geometric_tangent_stiffness(x, element);
-
-    return {local_dof_view(element), k_e};
+    if (cm->is_finite_deformation())
+    {
+        k_e.noalias() += geometric_tangent_stiffness(x, element);
+    }
+    return k_e;
 }
 
-std::pair<index_view, vector> submesh::internal_force(std::int32_t const element) const
+auto submesh::internal_force(std::int32_t const element) const -> vector const&
 {
+    thread_local vector f_int(nodes_per_element() * dofs_per_node());
+
+    f_int.setZero();
+
     auto const x = geometry::project_to_plane(
         coordinates->current_configuration(local_node_view(element)));
 
-    return {local_dof_view(element), internal_nodal_force(x, element)};
+    auto const& cauchy_stresses = variables->get(variable::second::cauchy_stress);
+
+    sf->quadrature()
+        .integrate_inplace(Eigen::Map<row_matrix>(f_int.data(), nodes_per_element(), dofs_per_node()),
+                           [&](auto const& N_dN, auto const index) {
+                               auto const& [N, dN] = N_dN;
+
+                               matrix2 const Jacobian = local_deformation_gradient(dN, x);
+
+                               matrix2 const& cauchy_stress = cauchy_stresses[view(element, index)];
+
+                               // symmetric gradient operator
+                               auto const Bt = dN * Jacobian.inverse();
+
+                               return Bt * cauchy_stress * Jacobian.determinant();
+                           });
+    return f_int;
 }
 
 matrix const& submesh::geometric_tangent_stiffness(matrix2x const& x, std::int32_t const element) const
@@ -133,35 +153,13 @@ matrix const& submesh::material_tangent_stiffness(matrix2x const& x, std::int32_
     return k_mat;
 }
 
-vector const& submesh::internal_nodal_force(matrix2x const& x, std::int32_t const element) const
+auto submesh::consistent_mass(std::int32_t const element) const -> matrix const&
 {
-    thread_local vector f_int(nodes_per_element() * dofs_per_node());
+    static matrix X;
 
-    f_int.setZero();
+    X = coordinates->initial_configuration(local_node_view(element));
 
-    auto const& cauchy_stresses = variables->get(variable::second::cauchy_stress);
-
-    sf->quadrature()
-        .integrate_inplace(Eigen::Map<row_matrix>(f_int.data(), nodes_per_element(), dofs_per_node()),
-                           [&](auto const& N_dN, auto const l) {
-                               auto const& [N, dN] = N_dN;
-
-                               matrix2 const Jacobian = local_deformation_gradient(dN, x);
-
-                               matrix2 const& cauchy_stress = cauchy_stresses[view(element, l)];
-
-                               // symmetric gradient operator
-                               auto const Bt = dN * Jacobian.inverse();
-
-                               return Bt * cauchy_stress * Jacobian.determinant();
-                           });
-    return f_int;
-}
-
-std::pair<index_view, matrix> submesh::consistent_mass(std::int32_t const element) const
-{
-    auto const X = coordinates->initial_configuration(local_node_view(element));
-    return {local_dof_view(element), X};
+    return X;
     // auto const density_0 = cm->intrinsic_material().initial_density();
     //
     // auto m = sf->quadrature().integrate(matrix::Zero(nodes_per_element(), nodes_per_element()).eval(),
@@ -176,16 +174,13 @@ std::pair<index_view, matrix> submesh::consistent_mass(std::int32_t const elemen
     // return {local_dof_view(element), identity_expansion(m, dofs_per_node())};
 }
 
-std::pair<index_view, vector> submesh::diagonal_mass(std::int32_t const element) const
+auto submesh::diagonal_mass(std::int32_t const element) const -> vector const&
 {
-    auto const& [dofs, consistent_m] = this->consistent_mass(element);
+    thread_local vector diagonal_mass;
 
-    vector diagonal_m(consistent_m.rows());
-    for (auto i = 0; i < consistent_m.rows(); ++i)
-    {
-        diagonal_m(i) = consistent_m.row(i).sum();
-    }
-    return {local_dof_view(element), diagonal_m};
+    diagonal_mass = this->consistent_mass(element).rowwise().sum();
+
+    return diagonal_mass;
 }
 
 void submesh::update_internal_variables(double const time_step_size)
@@ -260,7 +255,8 @@ void submesh::update_Jacobian_determinants()
     }
 }
 
-std::pair<vector, vector> submesh::nodal_averaged_variable(variable::scalar const scalar_name) const
+auto submesh::nodal_averaged_variable(variable::scalar const scalar_name) const
+    -> std::pair<vector, vector>
 {
     vector count = vector::Zero(coordinates->size());
     vector value = count;

@@ -18,7 +18,7 @@ std::string json_input_file()
     return "{\"name\": \"rubber\", \"elastic_modulus\": 2.0, \"poissons_ratio\": 0.45}";
 }
 
-constexpr auto ZERO_MARGIN = 1.0e-5;
+constexpr auto ZERO_MARGIN = 1E-5;
 
 using neon::json;
 using namespace neon;
@@ -38,6 +38,7 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
                              "\"shear_modulus\" : 2.0e6,"
                              "\"bulk_modulus\" : 100e6,"
                              "\"segments_per_chain\" : 50,"
+                             "\"cure_time\" : 100,"
                              "\"scission_probability\" : 1.0e-5,"
                              "\"recombination_probability\" : 1.0e-5}"};
 
@@ -215,6 +216,7 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
                              "\"shear_modulus\" : 2.0e6,"
                              "\"bulk_modulus\" : 100e6,"
                              "\"segments_per_chain\" : 50,"
+                             "\"cure_time\" : 100,"
                              "\"scission_probability\" : 0.0,"
                              "\"recombination_probability\" : 1.0e-5}"};
 
