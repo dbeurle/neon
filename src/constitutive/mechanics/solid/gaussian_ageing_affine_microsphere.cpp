@@ -36,9 +36,11 @@ gaussian_ageing_affine_microsphere::gaussian_ageing_affine_microsphere(
     auto [active_shear_modulus,
           inactive_shear_modulus,
           active_segments,
+          inactive_segments,
           reduction] = variables->get(variable::scalar::active_shear_modulus,
                                       variable::scalar::inactive_shear_modulus,
                                       variable::scalar::active_segments,
+                                      variable::scalar::inactive_segments,
                                       variable::scalar::reduction_factor);
 
     std::fill(begin(active_shear_modulus), end(active_shear_modulus), material.shear_modulus());
@@ -46,6 +48,7 @@ gaussian_ageing_affine_microsphere::gaussian_ageing_affine_microsphere(
               end(inactive_shear_modulus),
               material.initial_inactive_shear_modulus());
     std::fill(begin(active_segments), end(active_segments), material.segments_per_chain());
+    std::fill(begin(inactive_segments), end(inactive_segments), material.segments_per_chain());
     std::fill(begin(reduction), end(reduction), 1.0);
 
     variables->commit();
