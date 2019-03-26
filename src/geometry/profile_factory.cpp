@@ -24,13 +24,11 @@ std::unique_ptr<profile> make_profile(json const& profile_data)
         return std::make_unique<hollow_circle>(profile_data);
     }
     else if (profile_type == "rectangular_angle")
-    {
+    {   
         return std::make_unique<rectangular_angle>(profile_data);
     }
-
     throw std::domain_error("A valid profile type was not specified.  Valid profiles are "
                             "\"rectangle\"");
-
     return nullptr;
 }
 }
