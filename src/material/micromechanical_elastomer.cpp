@@ -39,7 +39,7 @@ ageing_micromechanical_elastomer::ageing_micromechanical_elastomer(json const& m
     {
         throw std::domain_error(exception_string("cure_time"));
     }
-    if (material_data["cure_time"].get<double>() <= 10)
+    else if (material_data["cure_time"].get<double>() <= 10)
     {
         throw std::domain_error("The \"cure_time\" is less than 10.  This is likely a mistake.  "
                                 "Please provide a value between 10 and 100");
