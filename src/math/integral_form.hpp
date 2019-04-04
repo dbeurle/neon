@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "interpolations/shape_function.hpp"
 #include "interpolations/interpolation_factory.hpp"
 #include "quadrature/quadrature_factory.hpp"
 #include "quadrature/minimum_degree.hpp"

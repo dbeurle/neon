@@ -27,11 +27,12 @@ template <int dof_size, typename BoundaryMeshType, class IndexType = std::int32_
         unique_dof_indices_set.insert(begin(unique_view), end(unique_view));
     }
 
-    std::vector<IndexType> unique_indices(dof_set.size());
+    std::vector<IndexType> unique_indices(unique_dof_indices_set.size());
 
-    std::transform(begin(dof_set), end(dof_set), begin(unique_indices), [=](auto const index) {
-        return index * dof_size;
-    });
+    std::transform(begin(unique_dof_indices_set),
+                   end(unique_dof_indices_set),
+                   begin(unique_indices),
+                   [=](auto const index) { return index * dof_size; });
 
     return unique_indices;
 }

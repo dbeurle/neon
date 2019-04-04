@@ -105,6 +105,8 @@ auto submesh::internal_force(std::int32_t const element) const -> vector const&
 
         // symmetric gradient operator
         matrix const Bt = dN * jacobian.inverse();
+
+        return Bt * cauchy_stress * jacobian.determinant();
     });
     return f_int;
 }
@@ -178,9 +180,7 @@ auto submesh::consistent_mass(std::int32_t const element) const -> matrix const&
 
         return density * N * N.transpose() * J.determinant();
     });
-
     identity_expansion_inplace<3>(local_mass, mass.setZero());
-
     return mass;
 }
 
@@ -319,7 +319,7 @@ std::pair<vector, vector> submesh::nodal_averaged_variable(variable::second cons
     {
         for (auto const& tensor_variable : tensor_variables)
         {
-            single_values.push_back(tensor_variable[index]);
+            single_values.push_back(tensor_variable.data()[index]);
         }
         single_values.clear();
 

@@ -88,24 +88,25 @@ auto submesh::internal_force(std::int32_t const element) const -> vector const&
 
     auto const& cauchy_stresses = variables->get(variable::second::cauchy_stress);
 
-    sf->quadrature()
-        .integrate_inplace(Eigen::Map<row_matrix>(f_int.data(), nodes_per_element(), dofs_per_node()),
-                           [&](auto const& N_dN, auto const index) {
-                               auto const& [N, dN] = N_dN;
+    Eigen::Map<row_matrix> matrix_view(f_int.data(), nodes_per_element(), dofs_per_node());
 
-                               matrix2 const Jacobian = local_deformation_gradient(dN, x);
+    bilinear_gradient.integrate(matrix_view, [&](auto const& N_dN, auto const index) {
+        auto const& [N, dN] = N_dN;
 
-                               matrix2 const& cauchy_stress = cauchy_stresses[view(element, index)];
+        matrix2 const Jacobian = local_deformation_gradient(dN, x);
 
-                               // symmetric gradient operator
-                               auto const Bt = dN * Jacobian.inverse();
+        matrix2 const& cauchy_stress = cauchy_stresses[view(element, index)];
 
-                               return Bt * cauchy_stress * Jacobian.determinant();
-                           });
+        // symmetric gradient operator
+        auto const Bt = dN * Jacobian.inverse();
+
+        return Bt * cauchy_stress * Jacobian.determinant();
+    });
     return f_int;
 }
 
-matrix const& submesh::geometric_tangent_stiffness(matrix2x const& x, std::int32_t const element) const
+auto submesh::geometric_tangent_stiffness(matrix2x const& x, std::int32_t const element) const
+    -> matrix const&
 {
     auto const& cauchy_stresses = variables->get(variable::second::cauchy_stress);
 
