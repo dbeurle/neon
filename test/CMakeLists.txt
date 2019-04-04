@@ -26,7 +26,6 @@ set(test_names boundary
                matrix_system
                mesh
                nodal_coordinates
-               nodal_variables
                sequence
                tensor
                time_stepping

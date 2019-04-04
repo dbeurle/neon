@@ -164,7 +164,9 @@ TEST_CASE("Solid submesh test")
     }
     SECTION("Tangent stiffness")
     {
-        auto const& stiffness = submesh.tangent_stiffness(0);
+        auto const local_dofs = fem_submesh.local_dof_view(0);
+        auto const& stiffness = fem_submesh.tangent_stiffness(0);
+        REQUIRE(local_dofs.size() == number_of_local_dofs);
         REQUIRE(stiffness.rows() == number_of_local_dofs);
         REQUIRE(stiffness.cols() == number_of_local_dofs);
         REQUIRE(stiffness.norm() != Approx(0.0).margin(ZERO_MARGIN));
@@ -174,15 +176,20 @@ TEST_CASE("Solid submesh test")
     }
     SECTION("Internal force")
     {
-        auto const& internal_force = submesh.internal_force(0);
+        auto const local_dofs = fem_submesh.local_dof_view(0);
+        auto const& internal_force = fem_submesh.internal_force(0);
+
         REQUIRE(internal_force.rows() == number_of_local_dofs);
         REQUIRE(internal_force.cols() == 1);
         REQUIRE(internal_force.size() == number_of_local_dofs);
     }
     SECTION("Consistent and diagonal mass")
     {
-        auto const& mass_c = submesh.consistent_mass(0);
-        auto const& mass_d = submesh.diagonal_mass(0);
+        auto const local_dofs = fem_submesh.local_dof_view(0);
+        auto const& mass_c = fem_submesh.consistent_mass(0);
+        auto const& mass_d = fem_submesh.diagonal_mass(0);
+
+        REQUIRE(local_dofs.size() == number_of_local_dofs);
 
         REQUIRE(mass_c.rows() == number_of_local_dofs);
         REQUIRE(mass_c.cols() == number_of_local_dofs);
@@ -228,7 +235,9 @@ TEST_CASE("Solid mesh test")
 
     for (auto const& submesh : cube.meshes())
     {
-        auto const& internal_force = submesh.internal_force(0);
+        auto const& internal_force = fem_submesh.internal_force(0);
+        auto const local_dofs = fem_submesh.local_dof_view(0);
+
         REQUIRE(internal_force.rows() == number_of_local_dofs);
     }
 

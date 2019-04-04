@@ -55,7 +55,7 @@ if (ENABLE_CUDA)
 
     target_link_libraries(neon PRIVATE dmatvec
                                        ${CUDA_cusparse_LIBRARY}
-                                       ${CUDA_CUBLAS_LIBRARIES}
+                                       ${CUDA_cublas_LIBRARY}
                                        ${CUDA_cusolver_LIBRARY})
     target_include_directories(neon PUBLIC ${CUDA_INCLUDE_DIRS})
 endif()

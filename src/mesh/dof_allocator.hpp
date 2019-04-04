@@ -27,26 +27,22 @@ template <int dof_size, typename BoundaryMeshType, class IndexType = std::int32_
         unique_dof_indices_set.insert(begin(unique_view), end(unique_view));
     }
 
-    std::vector<IndexType> dof_indices(begin(unique_dof_indices_set), end(unique_dof_indices_set));
+    std::vector<IndexType> unique_indices(dof_set.size());
 
-    std::transform(begin(dof_indices), end(dof_indices), begin(dof_indices), [=](auto const index) {
+    std::transform(begin(dof_set), end(dof_set), begin(unique_indices), [=](auto const index) {
         return index * dof_size;
     });
 
-    return dof_indices;
+    return unique_indices;
 }
 
-template <typename IndicesType, typename DofOrderType>
+/// Allocate the degree of freedom indices
+template <typename IndicesType>
 void dof_allocator(IndicesType const& node_indices,
                    IndicesType& dof_indices,
-                   DofOrderType const dof_order)
+                   std::int64_t const dof_order)
 {
-    // Allocate the degree of freedom indices
-    dof_indices.resize(node_indices.rows() * dof_order.size(), node_indices.cols());
-
-    for (typename IndicesType::Index i{0}; i < node_indices.cols(); ++i)
-    {
-        transform_expand_view(node_indices(Eigen::all, i), dof_indices(Eigen::all, i), dof_order);
-    }
+    dof_indices.resize(node_indices.rows() * dof_order, node_indices.cols());
+    transform_expand_n(node_indices.data(), node_indices.size(), dof_indices.data(), dof_order);
 }
 }

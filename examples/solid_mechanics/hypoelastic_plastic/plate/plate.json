@@ -71,13 +71,7 @@
 		"linear_solver" :  {
 		    "type" : "iterative",
             "maximum_iterations" : 3000,
-    	    "tolerance" : 1.0e-5,
-            "device" : "gpu",
-            "backend" : {
-                "type" : "opencl",
-                "device" : 0,
-                "platform" : 0
-            }
+    	    "tolerance" : 1.0e-8
         }
     }]
 }

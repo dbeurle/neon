@@ -13,11 +13,11 @@ using namespace neon;
 micromechanical_elastomer::micromechanical_elastomer(json const& material_data)
     : isotropic_elastic_property(material_data)
 {
-    if (material_data.find("segments_per_chain") == material_data.end())
+    if (material_data.find("segments_per_chain") == end(material_data))
     {
         throw std::domain_error("segments_per_chain not specified in material data\n");
     }
-    N = material_data["segments_per_chain"];
+    m_segments_per_chain = material_data["segments_per_chain"];
 }
 
 ageing_micromechanical_elastomer::ageing_micromechanical_elastomer(json const& material_data)
@@ -31,14 +31,23 @@ ageing_micromechanical_elastomer::ageing_micromechanical_elastomer(json const& m
     {
         throw std::domain_error(exception_string("scission_probability"));
     }
-
     if (material_data.find("recombination_probability") == end(material_data))
     {
         throw std::domain_error(exception_string("recombination_probability"));
     }
+    if (material_data.find("cure_time") == end(material_data))
+    {
+        throw std::domain_error(exception_string("cure_time"));
+    }
+    if (material_data["cure_time"].get<double>() <= 10)
+    {
+        throw std::domain_error("The \"cure_time\" is less than 10.  This is likely a mistake.  "
+                                "Please provide a value between 10 and 100");
+    }
 
-    scission = material_data["scission_probability"];
-    recombination = material_data["recombination_probability"];
+    scission = material_data["scission_probability"].get<double>();
+    recombination = material_data["recombination_probability"].get<double>();
+    m_shear_modulus_ia = (1.0 - material_data["cure_time"].get<double>() / 100.0) * shear_modulus();
 
     if (scission < 0.0 || recombination < 0.0)
     {

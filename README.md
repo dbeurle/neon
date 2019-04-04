@@ -1,4 +1,4 @@
-[![Build Status](https://beurle.ddns.net/buildStatus/icon?job=neon/master)](https://beurle.ddns.net/job/neon/job/master/)
+[![Build Status](https://beurle.ddns.net/jenkins/buildStatus/icon?job=neon/master)](https://beurle.ddns.net/jenkins/job/neon/job/master/)
 [![Documentation Status](https://readthedocs.org/projects/neon-user/badge/?version=latest)](http://neon-user.readthedocs.io/en/latest/?badge=latest)
 [![Documentation](https://codedocs.xyz/dbeurle/neon.svg)](https://codedocs.xyz/dbeurle/neon/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -62,6 +62,10 @@ which enables the compiler to generate the best machine code for your platform.
 If you have an NVIDIA graphics card, then you can use the CUDA enabled iterative solvers by specifying the `CMake` symbol
 
 - `-DENABLE_CUDA=1`
+
+CUDA doesn't follow the latest GCC so a compatibility package is usually provided.  CMake can be told to use a specific compiler for the host compilation through
+
+- `-DCMAKE_CUDA_HOST_COMPILER=<compiler>`
 
 For checking the successful compilation of the program, invoke the test suite by executing
 

@@ -18,10 +18,11 @@ namespace neon
 /// \param absolute_tolerance
 /// \param relative_tolerance
 template <class T>
-std::enable_if_t<std::is_floating_point<T>::value, bool> is_approx(T const x,
-                                                                   T const y,
-                                                                   T const absolute_tolerance = 0.0,
-                                                                   T const relative_tolerance = 1e-10) noexcept
+auto is_approx(T const x,
+               T const y,
+               T const absolute_tolerance = 0.0,
+               T const relative_tolerance = 1e-10) noexcept
+    -> std::enable_if_t<std::is_floating_point<T>::value, bool>
 {
     // References:
     // https://www.boost.org/doc/libs/1_67_0/libs/math/doc/html/math_toolkit/float_comparison.html

@@ -18,7 +18,6 @@
 
 #include <memory>
 #include <utility>
-#include <tuple>
 
 namespace neon
 {
@@ -46,7 +45,7 @@ public:
                      basic_submesh const& submesh);
 
     /// \return degrees of freedom and the linear element stiffness matrix
-    [[nodiscard]] matrix const& tangent_stiffness(std::int32_t const element) const;
+    [[nodiscard]] auto tangent_stiffness(std::int32_t const element) const -> matrix const&;
 
     /// Update the internal variables for the mesh group
     /// \sa update_deformation_measures()
@@ -64,7 +63,7 @@ public:
     [[nodiscard]] auto const& internal_variables() const { return *variables; }
 
     template <typename name_type>
-    std::pair<vector, vector> nodal_averaged_variable(name_type) const
+    auto nodal_averaged_variable(name_type) const -> std::pair<vector, vector>
     {
         return std::make_pair(vector(), vector());
     }

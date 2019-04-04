@@ -90,9 +90,9 @@ void latin_matrix<MeshType>::compute_incremental_latin_internal_force()
     {
         for (std::int64_t element{0}; element < submesh.elements(); ++element)
         {
-            auto const dof_view = submesh.local_dof_view(element);
-            auto const& fe_int = submesh.incremental_latin_internal_force(element,
-                                                                          latin_search_direction);
+            auto const
+                & [dofs, fe_int] = submesh.incremental_latin_internal_force(element,
+                                                                            latin_search_direction);
 
             latin_residual(dof_view) += fe_int;
         }

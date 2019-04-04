@@ -1,7 +1,9 @@
 
 #pragma once
 
-#include "shape_function.hpp"
+/// @file
+
+#include "shape_function_forward.hpp"
 #include "mesh/element_topology.hpp"
 
 #include <memory>

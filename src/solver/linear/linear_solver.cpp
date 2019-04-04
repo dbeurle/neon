@@ -6,6 +6,8 @@
 
 #include "exceptions.hpp"
 #include "simulation_parser.hpp"
+#include "graph/cuthill_mckee.hpp"
+#include "graph/bandwidth.hpp"
 
 #ifdef ENABLE_OPENMP
 #include <omp.h>
@@ -14,6 +16,7 @@
 #include <cfenv>
 #include <chrono>
 #include <iostream>
+#include <fstream>
 
 namespace neon
 {
@@ -33,7 +36,35 @@ iterative_linear_solver::iterative_linear_solver(double const residual_tolerance
 {
 }
 
-void conjugate_gradient::solve(sparse_matrix const& A, vector& x, vector const& b)
+void iterative_linear_solver::apply_permutation(sparse_matrix const& input_matrix,
+                                                vector const& input_rhs)
+{
+    A = P.transpose() * input_matrix * P;
+    b = P.transpose() * input_rhs;
+}
+
+void iterative_linear_solver::compute_symmetric_reordering(sparse_matrix const& input_matrix)
+{
+    auto const start = std::chrono::steady_clock::now();
+
+    reverse_cuthill_mcgee reordering(input_matrix);
+
+    reordering.compute();
+
+    auto const& permutation = reordering.permutation();
+
+    P.indices().resize(permutation.size());
+
+    std::copy(begin(permutation), end(permutation), P.indices().data());
+
+    build_sparsity_pattern = false;
+
+    std::chrono::duration<double> const elapsed_seconds = std::chrono::steady_clock::now() - start;
+
+    std::cout << std::string(6, ' ') << "Reordering took " << elapsed_seconds.count() << "s\n";
+}
+
+void conjugate_gradient::solve(sparse_matrix const& input_matrix, vector& x, vector const& input_rhs)
 {
 #ifdef ENABLE_OPENMP
     omp_set_num_threads(simulation_parser::threads);
@@ -41,18 +72,29 @@ void conjugate_gradient::solve(sparse_matrix const& A, vector& x, vector const& 
 
     std::feclearexcept(FE_ALL_EXCEPT);
 
+    auto const start = std::chrono::steady_clock::now();
+
+    if (build_sparsity_pattern)
+    {
+        compute_symmetric_reordering(input_matrix);
+        build_sparsity_pattern = false;
+    }
+
+    apply_permutation(input_matrix, input_rhs);
+
     Eigen::ConjugateGradient<sparse_matrix, Eigen::Lower | Eigen::Upper> pcg;
 
     pcg.setTolerance(residual_tolerance);
     pcg.setMaxIterations(max_iterations);
 
-    pcg.compute(A);
+    x = P * pcg.compute(A).solve(b);
 
-    x = pcg.solve(b);
+    auto const end = std::chrono::steady_clock::now();
+    std::chrono::duration<double> const elapsed_seconds = end - start;
 
-    std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << pcg.iterations()
-              << " (max. " << max_iterations << "), estimated error: " << pcg.error() << " (min. "
-              << residual_tolerance << ")\n";
+    std::cout << std::string(6, ' ') << "Conjugate gradient took " << elapsed_seconds.count()
+              << "s, iterations: " << pcg.iterations() << " (max. " << max_iterations
+              << "), estimated error: " << pcg.error() << " (min. " << residual_tolerance << ")\n";
 
     if (std::fetestexcept(FE_INVALID))
     {
@@ -90,7 +132,7 @@ void biconjugate_gradient_stabilised::solve(sparse_matrix const& A, vector& x, v
                                   "reached\n");
     }
 
-    std::cout << std::string(6, ' ') << "Conjugate Gradient iterations: " << bicgstab.iterations()
+    std::cout << std::string(6, ' ') << "Conjugate gradient iterations: " << bicgstab.iterations()
               << " (max. " << max_iterations << "), estimated error: " << bicgstab.error()
               << " (min. " << residual_tolerance << ")\n";
 }

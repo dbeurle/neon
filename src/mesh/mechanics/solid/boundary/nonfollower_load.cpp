@@ -4,7 +4,7 @@
 #include "interpolations/interpolation_factory.hpp"
 #include "io/json.hpp"
 #include "traits/mechanics.hpp"
-#include "math/view.hpp"
+#include "mesh/dof_allocator.hpp"
 
 #include <utility>
 
@@ -52,12 +52,9 @@ nonfollower_load_boundary::nonfollower_load_boundary(
 
             indices dof_indices(3 * node_indices.rows(), node_indices.cols());
 
-            for (indices::Index i{0}; i < node_indices.cols(); ++i)
-            {
-                transform_expand_view(node_indices(Eigen::all, i),
-                                      dof_indices(Eigen::all, i),
-                                      traits<theory::solid, discretisation::linear, true>::dof_order);
-            }
+            dof_allocator(node_indices,
+                          dof_indices,
+                          traits<theory::solid, discretisation::linear, true>::dofs_per_node);
 
             boundary_meshes.emplace_back(std::in_place_type_t<pressure>{},
                                          node_indices,

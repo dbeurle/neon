@@ -8,9 +8,8 @@ ExternalProject_Add(
     PREFIX ${CMAKE_BINARY_DIR}/eigen3
     HG_REPOSITORY https://bitbucket.org/eigen/eigen/
     TIMEOUT 10
-    # UPDATE_COMMAND ${HG_EXECUTABLE} pull
     UPDATE_COMMAND ""
-    HG_TAG default
+    HG_TAG 138971d
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ""

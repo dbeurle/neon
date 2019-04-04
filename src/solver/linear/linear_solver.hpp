@@ -41,8 +41,18 @@ public:
                                      std::int32_t const max_iterations);
 
 protected:
+    void compute_symmetric_reordering(sparse_matrix const& input_matrix);
+
+    void apply_permutation(sparse_matrix const& input_matrix, vector const& input_rhs);
+
+protected:
     double residual_tolerance{1.0e-5};
     std::int32_t max_iterations{2000};
+
+    sparse_matrix A;
+    vector b;
+
+    permutation_matrix P;
 };
 
 /// conjugate_gradient is a simple solver wrapper for the preconditioned conjugate gradient
@@ -57,7 +67,7 @@ class conjugate_gradient : public iterative_linear_solver
 public:
     using iterative_linear_solver::iterative_linear_solver;
 
-    void solve(sparse_matrix const& A, vector& x, vector const& b) override final;
+    void solve(sparse_matrix const& input_matrix, vector& x, vector const& input_rhs) override final;
 };
 
 /// biconjugate_gradient_stabilised is a simple solver wrapper for the preconditioned bi-conjugate gradient

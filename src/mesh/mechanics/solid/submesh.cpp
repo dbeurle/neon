@@ -47,7 +47,7 @@ submesh::submesh(json const& material_data,
 
     variables->commit();
 
-    dof_allocator(node_indices, dof_indices, traits::dof_order);
+    dof_allocator(node_indices, dof_indices, traits::dofs_per_node);
 }
 
 submesh::~submesh() = default;
@@ -68,7 +68,7 @@ void submesh::save_internal_variables(bool const have_converged)
     }
 }
 
-matrix const& submesh::tangent_stiffness(std::int32_t const element) const
+auto submesh::tangent_stiffness(std::int32_t const element) const -> matrix const&
 {
     auto const x = coordinates->current_configuration(local_node_view(element));
 
@@ -77,16 +77,14 @@ matrix const& submesh::tangent_stiffness(std::int32_t const element) const
 
     k_e = material_tangent_stiffness(x, element);
 
-    if (!cm->is_finite_deformation())
+    if (cm->is_finite_deformation())
     {
-        return k_e;
+        k_e.noalias() += geometric_tangent_stiffness(x, element);
     }
-    k_e.noalias() += geometric_tangent_stiffness(x, element);
-
     return k_e;
 }
 
-vector const& submesh::internal_force(std::int32_t const element) const
+auto submesh::internal_force(std::int32_t const element) const -> vector const&
 {
     auto const& x = coordinates->current_configuration(local_node_view(element));
 
@@ -107,8 +105,6 @@ vector const& submesh::internal_force(std::int32_t const element) const
 
         // symmetric gradient operator
         matrix const Bt = dN * jacobian.inverse();
-
-        return Bt * cauchy_stress * jacobian.determinant();
     });
     return f_int;
 }
@@ -165,7 +161,7 @@ matrix const& submesh::material_tangent_stiffness(matrix3x const& x, std::int32_
     return k_mat;
 }
 
-matrix const& submesh::consistent_mass(std::int32_t const element) const
+auto submesh::consistent_mass(std::int32_t const element) const -> matrix const&
 {
     auto const& X = coordinates->initial_configuration(local_node_view(element));
 
@@ -188,7 +184,7 @@ matrix const& submesh::consistent_mass(std::int32_t const element) const
     return mass;
 }
 
-vector const& submesh::diagonal_mass(std::int32_t const element) const
+auto submesh::diagonal_mass(std::int32_t const element) const -> vector const&
 {
     thread_local vector diagonal_mass;
 

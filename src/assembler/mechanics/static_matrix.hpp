@@ -114,19 +114,19 @@ static_matrix<MeshType>::static_matrix(mesh_type& mesh, json const& simulation)
 {
     auto const& nonlinear_options = simulation["nonlinear_options"];
 
-    if (nonlinear_options.find("displacement_tolerance") == nonlinear_options.end())
+    if (nonlinear_options.find("displacement_tolerance") == end(nonlinear_options))
     {
         throw std::domain_error("displacement_tolerance not specified in nonlinear_options");
     }
-    if (nonlinear_options.find("residual_tolerance") == nonlinear_options.end())
+    if (nonlinear_options.find("residual_tolerance") == end(nonlinear_options))
     {
         throw std::domain_error("residual_tolerance not specified in nonlinear_options");
     }
-    if (nonlinear_options.find("linear_iterations") != nonlinear_options.end())
+    if (nonlinear_options.find("linear_iterations") != end(nonlinear_options))
     {
         maximum_iterations = nonlinear_options["linear_iterations"];
     }
-    if (nonlinear_options.find("absolute_tolerance") != nonlinear_options.end())
+    if (nonlinear_options.find("absolute_tolerance") != end(nonlinear_options))
     {
         use_relative_norm = false;
     }
@@ -195,11 +195,9 @@ void static_matrix<MeshType>::compute_internal_force()
     {
         for (std::int64_t element{0}; element < submesh.elements(); ++element)
         {
-            auto const dof_view = submesh.local_dof_view(element);
+            auto const dof_indices = submesh.local_dof_view(element);
 
-            auto const& fe_int = submesh.internal_force(element);
-
-            f_int(dof_view) += fe_int;
+            f_int(dof_indices) += submesh.internal_force(element);
         }
     }
 }
@@ -259,15 +257,14 @@ void static_matrix<MeshType>::assemble_stiffness()
     for (auto const& submesh : mesh.meshes())
     {
         tbb::parallel_for(std::int64_t{0}, submesh.elements(), [&](auto const element) {
-            auto const dof_view = submesh.local_dof_view(element);
-
+            auto const dof_indices = submesh.local_dof_view(element);
             auto const& ke = submesh.tangent_stiffness(element);
 
-            for (std::int64_t b{0}; b < dof_view.size(); b++)
+            for (std::int64_t b{0}; b < dof_indices.size(); b++)
             {
-                for (std::int64_t a{0}; a < dof_view.size(); a++)
+                for (std::int64_t a{0}; a < dof_indices.size(); a++)
                 {
-                    Kt.add_to(dof_view(a), dof_view(b), ke(a, b));
+                    Kt.add_to(dof_indices(a), dof_indices(b), ke(a, b));
                 }
             }
         });

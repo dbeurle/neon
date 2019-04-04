@@ -18,7 +18,7 @@ std::string json_input_file()
     return "{\"name\": \"rubber\", \"elastic_modulus\": 2.0, \"poissons_ratio\": 0.45}";
 }
 
-constexpr auto ZERO_MARGIN = 1.0e-5;
+constexpr auto ZERO_MARGIN = 1E-5;
 
 using neon::json;
 using namespace neon;
@@ -38,6 +38,7 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
                              "\"shear_modulus\" : 2.0e6,"
                              "\"bulk_modulus\" : 100e6,"
                              "\"segments_per_chain\" : 50,"
+                             "\"cure_time\" : 100,"
                              "\"scission_probability\" : 1.0e-5,"
                              "\"recombination_probability\" : 1.0e-5}"};
 
@@ -51,11 +52,12 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
                                           json::parse(material_data),
                                           json::parse(constitutive_data));
 
-    auto [F_list, cauchy_stresses] = variables->get(variable::second::deformation_gradient,
-                                                    variable::second::cauchy_stress);
+    auto [deformation_gradients,
+          cauchy_stresses] = variables->get(variable::second::deformation_gradient,
+                                            variable::second::cauchy_stress);
 
-    auto& J_list = variables->get(variable::scalar::DetF);
-    std::fill(begin(J_list), end(J_list), 1.0);
+    auto& jacobians = variables->get(variable::scalar::DetF);
+    std::fill(begin(jacobians), end(jacobians), 1.0);
 
     auto& material_tangents = variables->get(variable::fourth::tangent_operator);
 
@@ -73,9 +75,6 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
         REQUIRE(variables->has(variable::scalar::inactive_segments));
         REQUIRE(variables->has(variable::scalar::reduction_factor));
 
-        REQUIRE(variables->has(variable::vector::accumulated_ageing_integral));
-        REQUIRE(variables->has(variable::vector::previous_integrand));
-
         for (auto segment : variables->get(variable::scalar::active_segments))
         {
             REQUIRE(segment == Approx(50.0));
@@ -84,18 +83,10 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
         {
             REQUIRE(shear_modulus == Approx(2.0e6));
         }
-        for (auto& value : variables->get(variable::vector::accumulated_ageing_integral))
-        {
-            REQUIRE(value.size() == 21);
-        }
-        for (auto& value : variables->get(variable::vector::previous_integrand))
-        {
-            REQUIRE(value.size() == 21);
-        }
     }
     SECTION("no load")
     {
-        std::fill(begin(F_list), end(F_list), neon::matrix3::Identity());
+        std::fill(begin(deformation_gradients), end(deformation_gradients), neon::matrix3::Identity());
 
         affine->update_internal_variables(1.0);
 
@@ -136,6 +127,12 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
             REQUIRE(reduction < 1.0);
         }
 
+        // Check for zero Cauchy stresses under no load
+        for (auto const& cauchy_stress : variables->get(variable::second::cauchy_stress))
+        {
+            REQUIRE(cauchy_stress.norm() == Approx(0.0).margin(ZERO_MARGIN));
+        }
+
         for (auto const& material_tangent : material_tangents)
         {
             REQUIRE((material_tangent - material_tangent.transpose()).norm()
@@ -147,19 +144,18 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
     }
     SECTION("uniaxial load")
     {
-        std::fill(begin(F_list), end(F_list), matrix3::Identity());
+        std::fill(begin(deformation_gradients), end(deformation_gradients), matrix3::Identity());
 
         affine->update_internal_variables(1.0);
 
         for (auto& cauchy_stress : cauchy_stresses)
         {
-            std::cout << cauchy_stress << "\n\n";
             REQUIRE(cauchy_stress.norm() == Approx(0.0).margin(ZERO_MARGIN));
         }
 
         std::cout << "setting to stretch 1.1\n";
 
-        for (auto& F : F_list)
+        for (auto& F : deformation_gradients)
         {
             F(0, 0) = 1.1;
             F(1, 1) = 1.0 / std::sqrt(1.1);
@@ -183,13 +179,7 @@ TEST_CASE("Gaussian affine microsphere model with ageing")
         }
 
         std::cout << "setting to unity\n";
-
-        for (auto& F : F_list)
-        {
-            F(0, 0) = 1.0;
-            F(1, 1) = 1.0;
-            F(2, 2) = 1.0;
-        }
+        std::fill(begin(deformation_gradients), end(deformation_gradients), matrix3::Identity());
 
         affine->update_internal_variables(1.0);
 
@@ -215,8 +205,6 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
 {
     using namespace neon::mechanics::solid;
 
-    std::cout << "Constant cross-linking stress check\n";
-
     auto variables = std::make_shared<internal_variables_t>(1);
 
     // Add the required variables for an updated Lagrangian formulation
@@ -228,6 +216,7 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
                              "\"shear_modulus\" : 2.0e6,"
                              "\"bulk_modulus\" : 100e6,"
                              "\"segments_per_chain\" : 50,"
+                             "\"cure_time\" : 100,"
                              "\"scission_probability\" : 0.0,"
                              "\"recombination_probability\" : 1.0e-5}"};
 
@@ -241,11 +230,12 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
                                           json::parse(material_data),
                                           json::parse(constitutive_data));
 
-    auto [F_list, cauchy_stresses] = variables->get(variable::second::deformation_gradient,
-                                                    variable::second::cauchy_stress);
+    auto [deformation_gradients,
+          cauchy_stresses] = variables->get(variable::second::deformation_gradient,
+                                            variable::second::cauchy_stress);
 
-    auto& J_list = variables->get(variable::scalar::DetF);
-    std::fill(begin(J_list), end(J_list), 1.0);
+    auto& jacobians = variables->get(variable::scalar::DetF);
+    std::fill(begin(jacobians), end(jacobians), 1.0);
 
     auto& material_tangents = variables->get(variable::fourth::tangent_operator);
 
@@ -253,7 +243,7 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
 
     SECTION("no load")
     {
-        std::fill(begin(F_list), end(F_list), neon::matrix3::Identity());
+        std::fill(begin(deformation_gradients), end(deformation_gradients), neon::matrix3::Identity());
 
         affine->update_internal_variables(1.0);
 
@@ -302,22 +292,11 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
     }
     SECTION("constant load")
     {
-        // Check the network parameters
-        // auto [active_segments,
-        //       inactive_segments,
-        //       active_shear_moduli,
-        //       inactive_shear_moduli,
-        //       reductions] = variables->get(variable::scalar::active_segments,
-        //                                    variable::scalar::inactive_segments,
-        //                                    variable::scalar::active_shear_modulus,
-        //                                    variable::scalar::inactive_shear_modulus,
-        //                                    variable::scalar::reduction_factor);
-
-        std::fill(begin(F_list), end(F_list), neon::matrix3::Identity());
+        std::fill(begin(deformation_gradients), end(deformation_gradients), neon::matrix3::Identity());
 
         affine->update_internal_variables(1.0);
 
-        for (auto& F : F_list)
+        for (auto& F : deformation_gradients)
         {
             F(0, 0) = 1.1;
             F(1, 1) = 1.0 / std::sqrt(1.1);
@@ -401,16 +380,16 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
 //     simulation_data);
 //
 //     // Get the tensor variables
-//     auto[F_list, cauchy_stresses] =
+//     auto[deformation_gradients, cauchy_stresses] =
 //     variables->get(variable::second::deformation_gradient,
 //                                               variable::second::cauchy_stress);
 //
-//     auto& J_list = variables->get(variable::scalar::DetF);
+//     auto& jacobians = variables->get(variable::scalar::DetF);
 //
 //     auto& material_tangents = variables->get(variable::fourth::tangent_operator);
 //
-//     for (auto& F : F_list) F = neon::matrix3::Identity();
-//     for (auto& J : J_list) J = 1.0;
+//     for (auto& F : deformation_gradients) F = neon::matrix3::Identity();
+//     for (auto& J : jacobians) J = 1.0;
 //
 //     variables.commit();
 //
@@ -448,7 +427,7 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
 //     }
 //     // SECTION("Uniaxial elastic load")
 //     // {
-//     //     for (auto& F : F_list) F(2, 2) = 1.001;
+//     //     for (auto& F : deformation_gradients) F(2, 2) = 1.001;
 //     //
 //     //     small_strain_J2_plasticity->update_internal_variables(1.0);
 //     //
@@ -478,7 +457,7 @@ TEST_CASE("Gaussian affine microsphere model with crosslinking only")
 //     // }
 //     // SECTION("Plastic uniaxial elastic load")
 //     // {
-//     //     for (auto& F : F_list) F(2, 2) = 0.003;
+//     //     for (auto& F : deformation_gradients) F(2, 2) = 0.003;
 //     //
 //     //     small_strain_J2_plasticity->update_internal_variables(1.0);
 //     //
