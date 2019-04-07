@@ -12,17 +12,17 @@ namespace neon
 basic_submesh::basic_submesh(json const& mesh)
 {
     // Error checking for empty fields
-    if (mesh.find("Name") == mesh.end())
+    if (mesh.find("Name") == end(mesh))
     {
         throw std::domain_error("The element group in the mesh file is missing the "
                                 "\"Name\" field");
     }
-    if (mesh.find("Type") == mesh.end())
+    if (mesh.find("Type") == end(mesh))
     {
         throw std::domain_error("The element group in the mesh file is missing the "
                                 "\"Type\" field");
     }
-    if (mesh.find("NodalConnectivity") == mesh.end())
+    if (mesh.find("NodalConnectivity") == end(mesh))
     {
         throw std::domain_error("The element group in the mesh file is missing the "
                                 "\"NodalConnectivity\" field");
