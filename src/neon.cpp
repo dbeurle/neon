@@ -1,6 +1,5 @@
 
 #include "simulation_parser.hpp"
-
 #include "exceptions.hpp"
 
 #include <termcolor/termcolor.hpp>
