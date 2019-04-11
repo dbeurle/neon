@@ -36,7 +36,7 @@ public:
     auto unique_node_indices() const -> std::vector<int32_t>;
 
     /// \return a two dimensional array with element nodes
-    auto const& all_node_indices() const { return node_indices; }
+    auto all_node_indices() const -> indices const& { return node_indices; }
 
 protected:
     element_topology m_topology;
