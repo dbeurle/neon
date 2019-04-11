@@ -17,7 +17,8 @@ namespace neon
 template <class T>
 [[nodiscard]] inline T relative_distance(T const value, T const lower, T const upper) noexcept
 {
-    static_assert(std::is_floating_point<T>::value, "fraction only accepts floating point arguments");
+    static_assert(std::is_floating_point<T>::value,
+                  "relative_distance only accepts floating point arguments");
 
     return (value - lower) / (upper - lower);
 }
@@ -25,7 +26,7 @@ template <class T>
 /// linear_interpolation performs a linear interpolation using the inbuilt
 /// fused-multiply add function \sa std::fma.  This method will be slow unless
 /// native optimisations are used but will maintain outstanding accuracy.
-/// With the znver1 architecture only two instructions are output
+/// For example the znver1 architecture only requires two instructions.
 /// \param fraction [0, 1]
 /// \param lower Lower value
 /// \param upper Upper value
