@@ -71,8 +71,25 @@ auto gradient = [](matrixdx<3>& gradient_operator, matrixdx<2> const& local_grad
         gradient_operator(2, b) = local_gradient(1, a);
         gradient_operator(1, b + 1) = local_gradient(1, a);
     }
+};
 }
-}
+
+namespace axisymmetric
+{
+/// Torsionless symmetric gradient operator for axisymmetric problems
+auto gradient = [](matrix4d& gradient_operator,
+                   matrix2d& local_gradient,
+                   vector const& local_function,
+                   double const radius) {
+    for (auto a = 0; a < local_gradient.cols(); ++a)
+    {
+        auto const b = a * 2;
+
+        gradient_operator(0, b) = gradient_operator(2, b + 1) = local_gradient(0, a);
+        gradient_operator(2, b) = gradient_operator(1, b + 1) = local_gradient(1, a);
+        gradient_operator(3, b) = local_function(a) / radius;
+    }
+};
 }
 
 namespace lagrangian
