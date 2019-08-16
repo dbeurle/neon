@@ -1,13 +1,13 @@
 
 #pragma once
 
-/// @file
+#include "mesh/boundary/boundary_condition.hpp"
 
-#include "mesh/boundary/boundary.hpp"
+/// @file
 
 namespace neon
 {
-class nodal_load : public boundary
+class nodal_load : public boundary_condition
 {
 public:
 protected:

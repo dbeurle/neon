@@ -149,7 +149,7 @@ std::vector<double> mesh::time_history() const
     {
         for (auto const& boundary : boundaries)
         {
-            auto const& times = boundary.time_history();
+            auto const& times = boundary.times();
 
             history.insert(begin(times), end(times));
         }
@@ -160,7 +160,7 @@ std::vector<double> mesh::time_history() const
         {
             std::visit(
                 [&](auto const& boundary_mesh) {
-                    auto const& times = boundary_mesh.time_history();
+                    auto const& times = boundary_mesh.times();
 
                     history.insert(begin(times), end(times));
                 },
@@ -176,13 +176,13 @@ void mesh::check_boundary_conditions(json const& boundary_data) const
     {
         for (auto const& mandatory_field : {"name", "type"})
         {
-            if (!boundary.count(mandatory_field))
+            if (boundary.find(mandatory_field) == end(boundary))
             {
                 throw std::domain_error("\"" + std::string(mandatory_field)
                                         + "\" was not specified in \"boundary\".");
             }
         }
-        if ((!boundary.count("Time")) && (!boundary.count("Generatetype")))
+        if (boundary.find("Time") == end(boundary) && boundary.find("Generatetype") == end(boundary))
         {
             throw std::domain_error("Neither \"Time\" nor \"Generatetype\" was specified in "
                                     "\"boundary\".");

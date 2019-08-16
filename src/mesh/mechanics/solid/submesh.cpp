@@ -3,11 +3,10 @@
 
 #include "submesh.hpp"
 
-#include "exceptions.hpp"
-
 #include "constitutive/constitutive_model_factory.hpp"
-#include "interpolations/interpolation_factory.hpp"
+#include "exceptions.hpp"
 #include "material/material_property.hpp"
+#include "mesh/projection/recovery.hpp"
 #include "mesh/material_coordinates.hpp"
 #include "numeric/gradient_operator.hpp"
 #include "numeric/mechanics"
@@ -15,7 +14,6 @@
 #include "traits/mechanics.hpp"
 
 #include <termcolor/termcolor.hpp>
-
 #include <tbb/parallel_for.h>
 
 #include <cfenv>
@@ -29,9 +27,10 @@ submesh::submesh(json const& material_data,
                  basic_submesh const& submesh)
     : basic_submesh(submesh),
       coordinates(coordinates),
-      sf(make_volume_interpolation(topology(), mesh_data)),
-      view(sf->quadrature().points()),
-      variables(std::make_shared<internal_variables_t>(elements() * sf->quadrature().points())),
+      bilinear_gradient(topology(), mesh_data),
+      bilinear(topology(), mesh_data),
+      view(bilinear_gradient.quadrature().points()),
+      variables(std::make_shared<internal_variables_t>(elements() * view.size())),
       cm(make_constitutive_model(variables, material_data, mesh_data))
 {
     // Allocate storage for the displacement gradient
@@ -50,6 +49,12 @@ submesh::submesh(json const& material_data,
 
     dof_allocator(node_indices, dof_indices, traits::dofs_per_node);
 }
+
+submesh::~submesh() = default;
+
+submesh::submesh(submesh&&) = default;
+
+submesh& submesh::operator=(submesh&&) = default;
 
 void submesh::save_internal_variables(bool const have_converged)
 {
@@ -87,23 +92,22 @@ auto submesh::internal_force(std::int32_t const element) const -> vector const&
 
     static vector f_int(nodes_per_element() * dofs_per_node());
 
+    Eigen::Map<row_matrix> matrix_view(f_int.data(), nodes_per_element(), dofs_per_node());
+
     f_int.setZero();
 
-    sf->quadrature()
-        .integrate_inplace(Eigen::Map<row_matrix>(f_int.data(), nodes_per_element(), dofs_per_node()),
-                           [&](auto const& N_dN, auto const index) -> matrix {
-                               auto const& [N, dN] = N_dN;
+    bilinear_gradient.integrate(matrix_view, [&](auto const& N_dN, auto const index) -> matrix {
+        auto const& [N, dN] = N_dN;
 
-                               matrix3 const jacobian = local_deformation_gradient(dN, x);
+        matrix3 const jacobian = local_deformation_gradient(dN, x);
 
-                               matrix3 const& cauchy_stress = cauchy_stresses[view(element, index)];
+        matrix3 const& cauchy_stress = cauchy_stresses[view(element, index)];
 
-                               // symmetric gradient operator
-                               matrix const Bt = dN * jacobian.inverse();
+        // symmetric gradient operator
+        matrix const Bt = dN * jacobian.inverse();
 
-                               return Bt * cauchy_stress * jacobian.determinant();
-                           });
-
+        return Bt * cauchy_stress * jacobian.determinant();
+    });
     return f_int;
 }
 
@@ -116,7 +120,7 @@ matrix const& submesh::geometric_tangent_stiffness(matrix3x const& x, std::int32
     thread_local matrix k_geo_full(nodes_per_element() * dofs_per_node(),
                                    nodes_per_element() * dofs_per_node());
 
-    sf->quadrature().integrate_inplace(k_geo.setZero(), [&](auto const& N_dN, auto const index) -> matrix {
+    bilinear_gradient.integrate(k_geo.setZero(), [&](auto const& N_dN, auto const index) -> matrix {
         auto const& [N, dN] = N_dN;
 
         matrix3 const J = local_deformation_gradient(dN, x);
@@ -145,7 +149,7 @@ matrix const& submesh::material_tangent_stiffness(matrix3x const& x, std::int32_
     k_mat.setZero();
     B.setZero();
 
-    sf->quadrature().integrate_inplace(k_mat, [&](auto const& N_dN, auto const l) -> matrix {
+    bilinear_gradient.integrate(k_mat, [&](auto const& N_dN, auto const l) -> matrix {
         auto const& [N, dN] = N_dN;
 
         matrix6 const& D = tangent_operators[view(element, l)];
@@ -169,16 +173,14 @@ auto submesh::consistent_mass(std::int32_t const element) const -> matrix const&
     thread_local matrix mass(nodes_per_element() * dofs_per_node(),
                              nodes_per_element() * dofs_per_node());
 
-    sf->quadrature().integrate_inplace(local_mass.setZero(), [&](auto const& femval, auto) -> matrix {
+    bilinear.integrate(local_mass.setZero(), [&](auto const& femval, auto) -> matrix {
         auto const& [N, dN] = femval;
 
         matrix3 const J = local_deformation_gradient(dN, X);
 
         return density * N * N.transpose() * J.determinant();
     });
-
     identity_expansion_inplace<3>(local_mass, mass.setZero());
-
     return mass;
 }
 
@@ -197,7 +199,7 @@ void submesh::update_internal_variables(double const time_step_size)
 
     update_deformation_measures();
 
-    update_Jacobian_determinants();
+    update_jacobian_determinants();
 
     cm->update_internal_variables(time_step_size);
 
@@ -217,7 +219,7 @@ void submesh::update_deformation_measures()
         auto const X = coordinates->initial_configuration(local_node_view(element));
         auto const x = coordinates->current_configuration(local_node_view(element));
 
-        sf->quadrature().for_each([&](auto const& femval, auto const l) {
+        bilinear_gradient.for_each([&](auto const& femval, auto const l) {
             auto const& [N, rhea] = femval;
 
             // Local deformation gradient for the initial configuration
@@ -236,7 +238,7 @@ void submesh::update_deformation_measures()
     });
 }
 
-void submesh::update_Jacobian_determinants()
+void submesh::update_jacobian_determinants()
 {
     auto const& deformation_gradients = variables->get(variable::second::deformation_gradient);
 
@@ -247,9 +249,9 @@ void submesh::update_Jacobian_determinants()
                    begin(F_determinants),
                    [](matrix3 const& F) { return F.determinant(); });
 
-    auto const found = std::find_if(begin(F_determinants), end(F_determinants), [](auto const i) {
-        return std::signbit(i);
-    });
+    auto const found = std::find_if(begin(F_determinants),
+                                    end(F_determinants),
+                                    [](auto const determinant) { return std::signbit(determinant); });
 
     if (found != end(F_determinants))
     {
@@ -257,9 +259,10 @@ void submesh::update_Jacobian_determinants()
                                          end(F_determinants),
                                          [](auto const i) { return std::signbit(i); });
 
-        auto const i = std::distance(begin(F_determinants), found);
+        auto const index = std::distance(begin(F_determinants), found);
 
-        auto const [element, quadrature_point] = std::div(i, sf->quadrature().points());
+        auto const [element, quadrature_point] = std::div(index,
+                                                          bilinear_gradient.quadrature().points());
 
         throw computational_error("Positive Jacobian assumption violated at element "
                                   + std::to_string(element) + " and local quadrature point "
@@ -268,78 +271,96 @@ void submesh::update_Jacobian_determinants()
     }
 }
 
-std::pair<vector, vector> submesh::nodal_averaged_variable(variable::second const tensor_name) const
-{
-    vector count = vector::Zero(coordinates->size() * 9),
-           value = vector::Zero(coordinates->size() * 9);
-
-    auto const& tensor_list = variables->get(tensor_name);
-
-    auto const& E = sf->local_quadrature_extrapolation();
-
-    // vector format of values
-    vector component = vector::Zero(sf->quadrature().points());
-
-    for (std::int64_t e{0}; e < elements(); ++e)
-    {
-        // Assemble these into the global value vector
-        auto const& node_list = local_node_view(e);
-
-        for (auto ci = 0; ci < 3; ++ci)
-        {
-            for (auto cj = 0; cj < 3; ++cj)
-            {
-                for (std::size_t l{0}; l < sf->quadrature().points(); ++l)
-                {
-                    auto const& tensor = tensor_list[view(e, l)];
-                    component(l) = tensor(ci, cj);
-                }
-
-                // Local extrapolation to the nodes
-                vector const nodal_component = E * component;
-
-                for (auto n = 0; n < nodal_component.rows(); n++)
-                {
-                    value(node_list[n] * 9 + ci * 3 + cj) += nodal_component(n);
-                    count(node_list[n] * 9 + ci * 3 + cj) += 1.0;
-                }
-            }
-        }
-    }
-    return {value, count};
-}
-
 std::pair<vector, vector> submesh::nodal_averaged_variable(variable::scalar const scalar_name) const
 {
     vector count = vector::Zero(coordinates->size());
     vector value = count;
 
-    auto const& scalar_list = variables->get(scalar_name);
-
-    auto const& E = sf->local_quadrature_extrapolation();
-
-    // vector format of values
-    vector component = vector::Zero(sf->quadrature().points());
-
-    for (std::int64_t e{0}; e < elements(); ++e)
-    {
-        // Assemble these into the global value vector
-        auto const& node_list = local_node_view(e);
-
-        for (std::size_t l{0}; l < sf->quadrature().points(); ++l)
-        {
-            component(l) = scalar_list[view(e, l)];
-        }
-
-        // Local extrapolation to the nodes
-        vector const nodal_component = E * component;
-
-        for (auto n = 0; n < nodal_component.rows(); n++)
-        {
-            value(node_list[n]) += nodal_component(n);
-            count(node_list[n]) += 1.0;
-        }
-    }
+    // auto const& scalar_list = variables->get(scalar_name);
+    //
+    // auto const& E = patch_recovery->extrapolation_matrix();
+    //
+    // // vector format of values
+    // vector component = vector::Zero(bilinear_gradient.quadrature().points());
+    //
+    // for (std::int64_t e{0}; e < elements(); ++e)
+    // {
+    //     // Assemble these into the global value vector
+    //     auto const& node_list = local_node_view(e);
+    //
+    //     for (std::size_t l{0}; l < bilinear_gradient.quadrature().points(); ++l)
+    //     {
+    //         component(l) = scalar_list[view(e, l)];
+    //     }
+    //
+    //     // Local extrapolation to the nodes
+    //     vector const nodal_component = E * component;
+    //
+    //     for (auto n = 0; n < nodal_component.rows(); n++)
+    //     {
+    //         value(node_list[n]) += nodal_component(n);
+    //         count(node_list[n]) += 1.0;
+    //     }
+    // }
     return {value, count};
 }
+
+std::pair<vector, vector> submesh::nodal_averaged_variable(variable::second const tensor_name) const
+{
+    vector count = vector::Zero(coordinates->size() * 9),
+           value = vector::Zero(coordinates->size() * 9);
+
+    auto const& tensor_variables = variables->get(tensor_name);
+
+    std::vector<double> single_values;
+    single_values.reserve(tensor_variables.size());
+
+    for (std::int64_t index{}; index < 9; ++index)
+    {
+        for (auto const& tensor_variable : tensor_variables)
+        {
+            single_values.push_back(tensor_variable.data()[index]);
+        }
+        single_values.clear();
+
+        auto result_pair = patch_recovery->project(single_values,
+                                                   view,
+                                                   node_indices,
+                                                   coordinates->size());
+    }
+
+    // auto const& E = patch_recovery->extrapolation_matrix();
+    //
+    // // vector format of values
+    // vector component = vector::Zero(bilinear_gradient.quadrature().points());
+    //
+    // for (std::int64_t e{0}; e < elements(); ++e)
+    // {
+    //     // Assemble these into the global value vector
+    //     auto const& node_list = local_node_view(e);
+    //
+    //     for (auto ci = 0; ci < 3; ++ci)
+    //     {
+    //         for (auto cj = 0; cj < 3; ++cj)
+    //         {
+    //             for (std::size_t l{0}; l < bilinear_gradient.quadrature().points(); ++l)
+    //             {
+    //                 auto const& tensor = tensor_list[view(e, l)];
+    //                 component(l) = tensor(ci, cj);
+    //             }
+    //
+    //             // Local extrapolation to the nodes
+    //             vector const nodal_component = E * component;
+    //
+    //             for (auto n = 0; n < nodal_component.rows(); n++)
+    //             {
+    //                 value(node_list[n] * 9 + ci * 3 + cj) += nodal_component(n);
+    //                 count(node_list[n] * 9 + ci * 3 + cj) += 1.0;
+    //             }
+    //         }
+    //     }
+    // }
+    return {value, count};
+}
+
 }

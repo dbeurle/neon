@@ -1,16 +1,15 @@
 
-#include "bedrosian_pyramid.hpp"
+#include "bedrosian.hpp"
 
-namespace neon
+namespace neon::quadrature::pyramid
 {
-bedrosian_pyramid::bedrosian_pyramid(int const minimum_degree)
+bedrosian::bedrosian(int const minimum_degree)
 {
     switch (minimum_degree)
     {
         case 1:
         {
             m_degree = 1;
-
             m_weights = {4.0 / 3.0};
             m_coordinates = {{0, 0.0, 0.0, 0.25}};
             break;
@@ -19,9 +18,6 @@ bedrosian_pyramid::bedrosian_pyramid(int const minimum_degree)
         case 3:
         {
             m_degree = 3;
-
-            // A three point stencil on each triangle and two quadrature points
-            // along the line element
             m_weights = {0.100785882079825,
                          0.232547451253508,
                          0.100785882079825,
@@ -30,7 +26,6 @@ bedrosian_pyramid::bedrosian_pyramid(int const minimum_degree)
                          0.232547451253508,
                          0.100785882079825,
                          0.232547451253508};
-
             m_coordinates = {{0, -0.263184055569714, -0.263184055569714, 0.544151844011225},
                              {1, -0.506616303349788, -0.506616303349788, 0.122514822655441},
                              {2, -0.263184055569714, 0.263184055569714, 0.544151844011225},
@@ -46,8 +41,6 @@ bedrosian_pyramid::bedrosian_pyramid(int const minimum_degree)
         case 5:
         {
             m_degree = 5;
-
-            // Three points on each triangle and three points along the line element
             m_weights = {0.009244044138450928, 0.045137737425884575, 0.048498876871878704,
                          0.01479047062152148,  0.0722203798814153,   0.07759820299500592,
                          0.009244044138450928, 0.045137737425884575, 0.048498876871878704,
@@ -57,7 +50,6 @@ bedrosian_pyramid::bedrosian_pyramid(int const minimum_degree)
                          0.009244044138450928, 0.045137737425884575, 0.048498876871878704,
                          0.01479047062152148,  0.0722203798814153,   0.07759820299500592,
                          0.009244044138450928, 0.045137737425884575, 0.048498876871878704};
-
             m_coordinates = {{0, -0.228504460573302, -0.228504460573302, 0.7050020098884979},
                              {1, -0.505808707853925, -0.505808707853925, 0.34700376603835204},
                              {2, -0.718055741319889, -0.718055741319889, 0.07299402407315003},
@@ -92,7 +84,6 @@ bedrosian_pyramid::bedrosian_pyramid(int const minimum_degree)
         case 7:
         {
             m_degree = 7;
-
             m_weights = {0.0012526521179532643, 0.008304905788749975,  0.017358942978834897,
                          0.013417830209662529,  0.0023484249849351022, 0.015569724404968645,
                          0.032543892130377255,  0.02515524243033622,   0.0023484249849351022,
@@ -115,7 +106,6 @@ bedrosian_pyramid::bedrosian_pyramid(int const minimum_degree)
                          0.015569724404968645,  0.032543892130377255,  0.02515524243033622,
                          0.0012526521179532643, 0.008304905788749975,  0.017358942978834897,
                          0.013417830209662529};
-
             m_coordinates = {{0, -0.1757997570095286, -0.1757997570095286, 0.795851417896773},
                              {1, -0.4158881109681957, -0.4158881109681957, 0.517047295104368},
                              {2, -0.655668552515022, -0.655668552515022, 0.23860073755186195},

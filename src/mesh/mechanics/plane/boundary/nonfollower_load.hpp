@@ -7,7 +7,6 @@
 #include "mesh/mechanics/plane/boundary/traction.hpp"
 #include "mesh/mechanics/plane/boundary/body_force.hpp"
 
-#include "interpolations/shape_function.hpp"
 #include "mesh/basic_submesh.hpp"
 
 #include <variant>

@@ -29,7 +29,7 @@ public:
     /// \param material_data json object with input file material data
     explicit gaussian_affine_microsphere(std::shared_ptr<internal_variables_t>& variables,
                                          json const& material_data,
-                                         unit_sphere_quadrature::point const p);
+                                         unit_sphere_quadrature::scheme const p);
 
     virtual ~gaussian_affine_microsphere() = default;
 
@@ -92,7 +92,6 @@ protected:
     matrix6 const I = voigt::kinematic::fourth_order_identity();
     /// Deviatoric fourth order tensor
     matrix6 const P = voigt::kinetic::deviatoric();
-
     /// Material with micromechanical parameters
     micromechanical_elastomer material;
 };

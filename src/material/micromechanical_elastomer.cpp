@@ -8,8 +8,8 @@
 
 #include <cmath>
 
-using namespace neon;
-
+namespace neon
+{
 micromechanical_elastomer::micromechanical_elastomer(json const& material_data)
     : isotropic_elastic_property(material_data)
 {
@@ -17,7 +17,7 @@ micromechanical_elastomer::micromechanical_elastomer(json const& material_data)
     {
         throw std::domain_error("segments_per_chain not specified in material data\n");
     }
-    m_segments_per_chain = material_data["segments_per_chain"];
+    m_segments_per_chain = material_data["segments_per_chain"].get<double>();
 }
 
 ageing_micromechanical_elastomer::ageing_micromechanical_elastomer(json const& material_data)
@@ -116,4 +116,5 @@ vector5 ageing_micromechanical_elastomer::integrate(vector5 const& z, double con
 
         return y;
     });
+}
 }

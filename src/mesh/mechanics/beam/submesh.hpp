@@ -27,8 +27,8 @@ class material_coordinates;
 namespace neon::mechanics::beam
 {
 /// submesh is responsible for computing the linear stiffness matrices
-/// for the three-dimensional small strain beam theory @cite Hughes2012.
-class submesh : public basic_submesh //: public detail::submesh<beam::submesh>
+/// for the three-dimensional small strain beam theory \cite Hughes2012.
+class submesh : public basic_submesh
 {
 public:
     // Type aliases
@@ -137,8 +137,7 @@ protected:
     void allocate_normal_and_tangent(json const& profile_data);
 
 protected:
-    /// Line shape function
-    std::unique_ptr<line_interpolation> sf;
+    fem::integral<line_interpolation, line_quadrature, 1> bilinear_gradient;
 
     /// Coordinates of each mesh
     std::shared_ptr<material_coordinates> coordinates;

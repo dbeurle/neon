@@ -4,7 +4,6 @@
 #include "constitutive/internal_variables.hpp"
 #include "constitutive/mechanics/detail/microsphere.hpp"
 #include "constitutive/mechanics/volumetric_free_energy.hpp"
-#include "solver/time/runge_kutta_integration.hpp"
 #include "numeric/float_compare.hpp"
 
 #include <tbb/parallel_for.h>
@@ -16,7 +15,7 @@ namespace neon::mechanics::solid
 gaussian_ageing_affine_microsphere::gaussian_ageing_affine_microsphere(
     std::shared_ptr<internal_variables_t>& variables,
     json const& material_data,
-    unit_sphere_quadrature::point const rule)
+    unit_sphere_quadrature::scheme const rule)
     : gaussian_affine_microsphere{variables, material_data, rule}, material{material_data}
 {
     variables->add(variable::scalar::active_shear_modulus,
@@ -155,5 +154,4 @@ matrix3 gaussian_ageing_affine_microsphere::compute_intermediate_macro_stress(
 {
     return shear_modulus_rate / reduction_factor * matrix3::Identity();
 }
-
 }

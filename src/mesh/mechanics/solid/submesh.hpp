@@ -7,8 +7,8 @@
 
 #include "constitutive/constitutive_model.hpp"
 #include "constitutive/internal_variables.hpp"
+#include "math/integral_form.hpp"
 #include "math/view.hpp"
-#include "interpolations/shape_function.hpp"
 #include "traits/mechanics.hpp"
 
 #include <memory>
@@ -16,6 +16,7 @@
 namespace neon
 {
 class material_coordinates;
+class recovery;
 
 namespace mechanics::solid
 {
@@ -28,11 +29,24 @@ public:
 
     using traits = mechanics::traits<theory::solid, discretisation::finite_strain>;
 
+    template <int N>
+    using bilinear_type = fem::integral<volume_interpolation, volume_quadrature, N>;
+
 public:
     explicit submesh(json const& material_data,
                      json const& mesh_data,
                      std::shared_ptr<material_coordinates>& coordinates,
                      basic_submesh const& submesh);
+
+    ~submesh();
+
+    submesh(submesh const&) = delete;
+
+    submesh(submesh&&);
+
+    submesh& operator=(submesh const&) = delete;
+
+    submesh& operator=(submesh&&);
 
     /// \return view of degrees of freedom for an element
     [[nodiscard]] auto local_dof_view(std::int32_t const element) const
@@ -47,9 +61,6 @@ public:
 
     /// \return number of degrees of freedom per node
     [[nodiscard]] auto dofs_per_node() const noexcept { return traits::dofs_per_node; }
-
-    /// \return interpolation function used on the mesh
-    [[nodiscard]] auto const& shape_function() const { return *sf; }
 
     /// \return underlying constitutive model
     [[nodiscard]] auto const& constitutive() const { return *cm; }
@@ -74,7 +85,7 @@ public:
 
     /// Update the internal variables for the mesh group
     /// \sa update_deformation_measures()
-    /// \sa update_Jacobian_determinants()
+    /// \sa update_jacobian_determinants()
     /// \sa check_element_distortion()
     void update_internal_variables(double const time_step_size = 1.0);
 
@@ -89,7 +100,7 @@ protected:
     void update_deformation_measures();
 
     /// Compute the Jacobian determinants and check if negative
-    void update_Jacobian_determinants();
+    void update_jacobian_determinants();
 
     /**
      * Compute the geometric stiffness matrix for the solid element. The
@@ -115,8 +126,10 @@ protected:
 protected:
     std::shared_ptr<material_coordinates const> coordinates;
 
-    /// Shape function (volume interpolation)
-    std::unique_ptr<volume_interpolation> sf;
+    /// Gradient bilinear form for stiffness matrix
+    bilinear_type<0> bilinear_gradient;
+    /// Bilinear form for mass matrix
+    bilinear_type<0> bilinear;
 
     stride_view<> view;
     std::shared_ptr<internal_variable_type> variables;
@@ -126,6 +139,8 @@ protected:
 
     /// Map for the local to global dofs
     indices dof_indices;
+
+    std::unique_ptr<recovery> patch_recovery;
 };
 }
 }

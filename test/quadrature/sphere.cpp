@@ -12,7 +12,7 @@ TEST_CASE("Unit sphere quadrature scheme test", "[unit_sphere_quadrature]")
 {
     SECTION("BO21 rule test")
     {
-        unit_sphere_quadrature unit_sphere(unit_sphere_quadrature::point::BO21);
+        unit_sphere_quadrature unit_sphere(unit_sphere_quadrature::scheme::BO21);
 
         REQUIRE(unit_sphere.points() == 21);
         REQUIRE(ranges::accumulate(unit_sphere.weights(), 0.0) == Approx(1.0));
@@ -26,7 +26,7 @@ TEST_CASE("Unit sphere quadrature scheme test", "[unit_sphere_quadrature]")
     }
     SECTION("BO33 rule test")
     {
-        unit_sphere_quadrature unit_sphere(unit_sphere_quadrature::point::BO33);
+        unit_sphere_quadrature unit_sphere(unit_sphere_quadrature::scheme::BO33);
 
         REQUIRE(unit_sphere.points() == 33);
         REQUIRE(ranges::accumulate(unit_sphere.weights(), 0.0) == Approx(1.0));
@@ -40,7 +40,7 @@ TEST_CASE("Unit sphere quadrature scheme test", "[unit_sphere_quadrature]")
     }
     SECTION("FM900 rule test")
     {
-        unit_sphere_quadrature unit_sphere(unit_sphere_quadrature::point::FM900);
+        unit_sphere_quadrature unit_sphere(unit_sphere_quadrature::scheme::FM900);
 
         REQUIRE(unit_sphere.points() == 900);
         REQUIRE(std::accumulate(begin(unit_sphere.weights()), end(unit_sphere.weights()), 0.0)

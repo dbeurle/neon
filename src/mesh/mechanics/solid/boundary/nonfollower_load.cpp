@@ -22,19 +22,19 @@ nonfollower_load_boundary::nonfollower_load_boundary(
     {
         for (auto const& [dof_name, dof_offset] : dof_table)
         {
-            if (boundary_data.find(dof_name) != boundary_data.end())
+            if (boundary_data.find(dof_name) != end(boundary_data))
             {
-                for (auto const& mesh : submeshes)
+                for (auto const& submesh : submeshes)
                 {
                     boundary_meshes.emplace_back(std::in_place_type_t<traction>{},
-                                                 make_surface_interpolation(mesh.topology(),
-                                                                            simulation_data),
-                                                 mesh.all_node_indices(),
-                                                 3 * mesh.all_node_indices() + dof_offset,
+                                                 submesh.all_node_indices(),
+                                                 3 * submesh.all_node_indices() + dof_offset,
                                                  material_coordinates,
                                                  boundary_data,
                                                  dof_name,
-                                                 generate_time_step);
+                                                 generate_time_step,
+                                                 submesh.topology(),
+                                                 simulation_data);
                 }
             }
         }
@@ -46,9 +46,9 @@ nonfollower_load_boundary::nonfollower_load_boundary(
             throw std::domain_error("Pressure boundary condition must specify a \"value\" array");
         }
 
-        for (auto const& mesh : submeshes)
+        for (auto const& submesh : submeshes)
         {
-            auto const& node_indices = mesh.all_node_indices();
+            auto const& node_indices = submesh.all_node_indices();
 
             indices dof_indices(3 * node_indices.rows(), node_indices.cols());
 
@@ -57,31 +57,32 @@ nonfollower_load_boundary::nonfollower_load_boundary(
                           traits<theory::solid, discretisation::linear, true>::dofs_per_node);
 
             boundary_meshes.emplace_back(std::in_place_type_t<pressure>{},
-                                         make_surface_interpolation(mesh.topology(), simulation_data),
                                          node_indices,
                                          dof_indices,
                                          material_coordinates,
                                          boundary_data["time"],
-                                         boundary_data["value"]);
+                                         boundary_data["value"],
+                                         submesh.topology(),
+                                         simulation_data);
         }
     }
     else if (type == "body_force")
     {
         for (auto const& [dof_name, dof_offset] : dof_table)
         {
-            if (boundary_data.find(dof_name) != boundary_data.end())
+            if (boundary_data.find(dof_name) != end(boundary_data))
             {
-                for (auto const& mesh : submeshes)
+                for (auto const& submesh : submeshes)
                 {
                     boundary_meshes.emplace_back(std::in_place_type_t<body_force>{},
-                                                 make_volume_interpolation(mesh.topology(),
-                                                                           simulation_data),
-                                                 mesh.all_node_indices(),
-                                                 3 * mesh.all_node_indices() + dof_offset,
+                                                 submesh.all_node_indices(),
+                                                 3 * submesh.all_node_indices() + dof_offset,
                                                  material_coordinates,
                                                  boundary_data,
                                                  dof_name,
-                                                 generate_time_step);
+                                                 generate_time_step,
+                                                 submesh.topology(),
+                                                 simulation_data);
                 }
             }
         }
@@ -90,12 +91,12 @@ nonfollower_load_boundary::nonfollower_load_boundary(
     {
         for (auto const& [dof_name, dof_offset] : dof_table)
         {
-            if (boundary_data.find(dof_name) != boundary_data.end())
+            if (boundary_data.find(dof_name) != end(boundary_data))
             {
-                for (auto const& mesh : submeshes)
+                for (auto const& submesh : submeshes)
                 {
                     // create linear dof indices
-                    auto node_indices = mesh.unique_node_indices();
+                    auto node_indices = submesh.unique_node_indices();
 
                     // Offset the degrees of freedom on the boundary
                     std::transform(begin(node_indices),

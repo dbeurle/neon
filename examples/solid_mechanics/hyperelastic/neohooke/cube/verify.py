@@ -15,12 +15,14 @@ displacement = 'displacement'
 def is_close(a, b, rel_tol=1e-09, abs_tol=0.0):
     return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
+
 def read_vtk_file(filename):
     # Read the vtk file with an unstructured grid
     reader = vtk.vtkXMLUnstructuredGridReader()
     reader.SetFileName(filename)
     reader.Update()
     return reader
+
 
 def create_line(p1, p2, sample_points):
     # Create the line along which you want to sample
@@ -30,6 +32,7 @@ def create_line(p1, p2, sample_points):
     line.SetPoint2(p2)
     line.Update()
     return line
+
 
 def interpolate_over_line(line, reader):
 
@@ -47,7 +50,7 @@ def interpolate_over_line(line, reader):
 
     samples_on_line = probe.GetOutput().GetNumberOfPoints()
 
-    # initialise the points on the line
+    # Initialise the points on the line
     x = np.zeros(samples_on_line)
     y = np.zeros(samples_on_line)
     z = np.zeros(samples_on_line)
@@ -59,41 +62,45 @@ def interpolate_over_line(line, reader):
         points[i, 0] = x[i]
         points[i, 1] = y[i]
         points[i, 2] = z[i]
-    return points,q
 
-if len(sys.argv) < 3:
-    print("A file name and a list of fields must be provided")
-    print('Number of arguments:', len(sys.argv), 'arguments.')
-    print('Argument List:', sys.argv[1::])
-    quit()
+    return points, q
 
-file_name = sys.argv[1]
-field_requests = sys.argv[2::]
 
-start_point = [0.0, 0.0, 0.0]
-end_point = [0.0, 0.0, 1.0]
+if __name__ == "__main__":
 
-interpolation_points = 10
+    if len(sys.argv) < 3:
+        print("A file name and a list of fields must be provided")
+        print('Number of arguments:', len(sys.argv), 'arguments.')
+        print('Argument List:', sys.argv[1::])
+        quit()
 
-reader = read_vtk_file(file_name)
-line = create_line(start_point, end_point, interpolation_points)
+    file_name = sys.argv[1]
+    field_requests = sys.argv[2::]
 
-if displacement in field_requests:
+    start_point = [0.0, 0.0, 0.0]
+    end_point = [0.0, 0.0, 1.0]
 
-    points, results = interpolate_over_line(line, reader)
+    interpolation_points = 10
 
-    if not is_close(max([max(sublist) for sublist in results]), 0.5):
-        print('maximum displacement incorrect', file=sys.stderr)
+    reader = read_vtk_file(file_name)
+    line = create_line(start_point, end_point, interpolation_points)
+
+    if displacement in field_requests:
+
+        points, results = interpolate_over_line(line, reader)
+
+        if not is_close(max([max(sublist) for sublist in results]), 0.5):
+            print('maximum displacement incorrect', file=sys.stderr)
+            sys.exit(1)
+
+        m, b = np.polyfit(points[:, 2], results[:, 2], 1)
+
+        if not is_close(m, 0.5, 1.0e-7) and not is_close(b, 0.0, 1.0e-7):
+            print('displacement gradient is incorrect', file=sys.stderr)
+            sys.exit(1)
+
+    else:
+        print('displacement not in output file', file=sys.stderr)
         sys.exit(1)
 
-    m, b = np.polyfit(points[:, 2], results[:, 2], 1)
-
-    if not is_close(m, 0.5, 1.0e-7) and not is_close(b, 0.0, 1.0e-7):
-        print('displacement gradient is incorrect', file=sys.stderr)
-        sys.exit(1)
-
-else:
-    print('displacement not in output file', file=sys.stderr)
-    sys.exit(1)
-
-print('All checks passed')
+    print('All checks passed')

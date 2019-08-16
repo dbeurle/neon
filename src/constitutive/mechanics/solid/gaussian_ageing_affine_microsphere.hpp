@@ -7,8 +7,6 @@
 
 #include "numeric/dense_matrix.hpp"
 
-#include <vector>
-
 namespace neon::mechanics::solid
 {
 /// \addtogroup Hyperelastic
@@ -31,7 +29,7 @@ public:
     /// \param rule A unit sphere quadrature scheme
     explicit gaussian_ageing_affine_microsphere(std::shared_ptr<internal_variables_t>& variables,
                                                 json const& material_data,
-                                                unit_sphere_quadrature::point const rule);
+                                                unit_sphere_quadrature::scheme const rule);
 
     virtual ~gaussian_ageing_affine_microsphere() = default;
 
