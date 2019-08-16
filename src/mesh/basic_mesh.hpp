@@ -7,6 +7,7 @@
 #include "mesh/basic_submesh.hpp"
 
 #include <map>
+#include <string>
 
 namespace neon
 {

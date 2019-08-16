@@ -27,7 +27,7 @@ basic_submesh::basic_submesh(json const& mesh)
         throw std::domain_error("The element group in the mesh file is missing the "
                                 "\"NodalConnectivity\" field");
     }
-    if (mesh["NodalConnectivity"].size() == 0 || mesh["NodalConnectivity"][0].size() == 0)
+    if (mesh["NodalConnectivity"].empty() || mesh["NodalConnectivity"][0].empty())
     {
         throw std::domain_error("The element group in the mesh file is empty");
     }
@@ -52,12 +52,28 @@ basic_submesh::basic_submesh(json const& mesh)
     convert_from_gmsh(node_indices, m_topology);
 }
 
-std::vector<std::int32_t> basic_submesh::unique_node_indices() const
+auto basic_submesh::unique_node_indices() const -> std::vector<std::int32_t>
 {
     std::set<std::int32_t> unique_set;
 
     std::copy_n(node_indices.data(), node_indices.size(), std::inserter(unique_set, end(unique_set)));
 
     return {begin(unique_set), end(unique_set)};
+}
+
+auto basic_submesh::attached_elements(std::int64_t const node_index) const -> std::set<std::int64_t>
+{
+    // Find the elements that contain a particular node index
+    std::set<std::int64_t> element_set;
+
+    for (std::int64_t element = 0; element < node_indices.cols(); ++element)
+    {
+        auto const location = std::find(node_indices.col(element).data(),
+                                        node_indices.col(element).data()
+                                            + node_indices.col(element).size(),
+                                        node_index);
+    }
+
+    return element_set;
 }
 }
