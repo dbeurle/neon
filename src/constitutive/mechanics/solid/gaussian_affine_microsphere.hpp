@@ -92,7 +92,6 @@ protected:
     matrix6 const I = voigt::kinematic::fourth_order_identity();
     /// Deviatoric fourth order tensor
     matrix6 const P = voigt::kinetic::deviatoric();
-
     /// Material with micromechanical parameters
     micromechanical_elastomer material;
 };

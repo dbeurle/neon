@@ -7,8 +7,6 @@
 
 #include "numeric/dense_matrix.hpp"
 
-#include <vector>
-
 namespace neon::mechanics::solid
 {
 /// \addtogroup Hyperelastic

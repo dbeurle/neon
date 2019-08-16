@@ -4,7 +4,6 @@
 #include "constitutive/internal_variables.hpp"
 #include "constitutive/mechanics/detail/microsphere.hpp"
 #include "constitutive/mechanics/volumetric_free_energy.hpp"
-#include "solver/time/runge_kutta_integration.hpp"
 #include "numeric/float_compare.hpp"
 
 #include <tbb/parallel_for.h>
@@ -155,5 +154,4 @@ matrix3 gaussian_ageing_affine_microsphere::compute_intermediate_macro_stress(
 {
     return shear_modulus_rate / reduction_factor * matrix3::Identity();
 }
-
 }
