@@ -1,7 +1,7 @@
 
 #pragma once
 
-/// @file
+/// \file
 
 #include "isotropic_elastic_property.hpp"
 #include "numeric/dense_matrix.hpp"

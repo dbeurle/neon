@@ -8,6 +8,8 @@
 
 #include "io/json_forward.hpp"
 
+#include <set>
+
 namespace neon
 {
 /// basic_submesh stores nodal indices and element typology for an element group
@@ -38,9 +40,12 @@ public:
     /// \return a two dimensional array with element nodes
     auto all_node_indices() const -> indices const& { return node_indices; }
 
-protected:
-    element_topology m_topology;
+    auto attached_elements(std::int64_t const node_index) const -> std::set<std::int64_t>;
 
-    indices node_indices; /// A column is one element, rows are the element
+protected:
+    /// Element topology identifier
+    element_topology m_topology;
+    /// A column is one element, rows are the element
+    indices node_indices;
 };
 }

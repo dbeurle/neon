@@ -567,11 +567,10 @@ template <typename matrix_expression>
 /// \return Tensor pulled back to the configuration determined by
 ///         the deformation_gradient
 /// \ingroup tensor
-[[nodiscard]] inline matrix3 pull_back_contravariant(matrix3 const& deformation_gradient,
-                                                     matrix3 const& contravariant_tensor)
+[[nodiscard]] inline auto pull_back_contravariant(matrix3 const& deformation_gradient,
+                                                  matrix3 const& contravariant_tensor) -> matrix3
 {
     return deformation_gradient.inverse() * contravariant_tensor
            * deformation_gradient.inverse().transpose();
 }
-
 }

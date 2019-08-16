@@ -64,4 +64,31 @@ private:
     matrix m_extrapolation;
 };
 
+namespace internal
+{
+auto linear_basis(double const x, double const y) -> vector3 { return vector3(1.0, x, y); }
+
+auto linear_basis(double const x, double const y, double const z) -> vector4
+{
+    return vector4(1.0, x, y, z);
+}
+}
+
+/// superconvergent_recovery is the classical superconvergent patch recovery
+/// method by Zienkiewicz and Zhu.  Originally designed for gradient recovery
+/// (stress) values at quadrature points by fitting a characteristic polynomial
+/// of a patch around an element
+template <typename MeshType>
+auto superconvergent_patch_recovery(std::int64_t const node_index, MeshType const& mesh) -> double
+{
+    // Obtain the highest basis function
+    auto basis = internal::linear_basis();
+
+    // for each node check if it exists in a submesh
+
+    // Compute the coordinates at the quadrature point
+    // coordinates * shape_functions
+
+    return 0.0;
+}
 }
