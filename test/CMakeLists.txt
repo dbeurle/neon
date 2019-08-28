@@ -51,7 +51,7 @@ foreach(test_name IN LISTS test_names)
     set_target_properties(${test_name}_test PROPERTIES CXX_STANDARD 17
                                                        CXX_STANDARD_REQUIRED YES
                                                        CXX_EXTENSIONS NO
-                                            COMPILE_FLAGS "-Wall -Wextra")
+                                            COMPILE_FLAGS "-Wall")
 
     if(ENABLE_COVERAGE)
         set_target_properties(${test_name}_test PROPERTIES COMPILE_FLAGS "--coverage")
