@@ -1,4 +1,3 @@
-
 cmake_minimum_required(VERSION 3.9)
 
 project(neonfe VERSION 0.1 LANGUAGES CXX)
@@ -7,12 +6,19 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 set(default_build_type "Release")
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  message(STATUS "Setting build type to '${default_build_type}' as none was specified.")
-  set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE
-      STRING "Choose the type of build." FORCE)
+  message(
+    STATUS
+      "Setting build type to '${default_build_type}' as none was specified.")
+  set(CMAKE_BUILD_TYPE "${default_build_type}"
+      CACHE STRING "Choose the type of build."
+      FORCE)
   # Set the possible values of build type for cmake-gui
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-    "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+  set_property(CACHE CMAKE_BUILD_TYPE
+               PROPERTY STRINGS
+                        "Debug"
+                        "Release"
+                        "MinSizeRel"
+                        "RelWithDebInfo")
 endif()
 
 # Performance options
@@ -42,36 +48,36 @@ find_package(OpenMP REQUIRED)
 find_package(TBB REQUIRED)
 find_package(VTK COMPONENTS vtkIOXML REQUIRED)
 
-if (ENABLE_OPENCL)
-    find_package(OpenCL REQUIRED)
-    find_package(ViennaCL CONFIG)
-    add_definitions(-DENABLE_OPENCL)
+if(ENABLE_OPENCL)
+  find_package(OpenCL REQUIRED)
+  find_package(ViennaCL CONFIG)
+  add_definitions(-DENABLE_OPENCL)
 endif()
 
-if (ENABLE_CUDA)
-    enable_language(CUDA)
-    find_package(CUDA REQUIRED)
-    add_definitions(-DENABLE_CUDA)
+if(ENABLE_CUDA)
+  enable_language(CUDA)
+  find_package(CUDA REQUIRED)
+  add_definitions(-DENABLE_CUDA)
 endif()
 
-if (ENABLE_COVERAGE)
-    include(Coverage)
+if(ENABLE_COVERAGE)
+  include(Coverage)
 endif()
 
-if (ENABLE_TESTS)
-    find_package(Catch2 2.3)
+if(ENABLE_TESTS)
+  find_package(Catch2 2.3)
 
-    if (NOT ${Catch2_FOUND})
-        message(STATUS "System Catch2 not found.  Building...")
-        add_subdirectory(${EXTERNAL_PROJECTS_DIR}/catch2)
-    endif()
+  if(NOT ${Catch2_FOUND})
+    message(STATUS "System Catch2 not found.  Building...")
+    add_subdirectory(${EXTERNAL_PROJECTS_DIR}/catch2)
+  endif()
 
-    # Required for integration tests
-    include(FindPythonInterp)
+  # Required for integration tests
+  include(FindPythonInterp)
 
-    enable_testing()
-    add_subdirectory(test)
-    add_subdirectory(examples)
+  enable_testing()
+  add_subdirectory(test)
+  add_subdirectory(examples)
 endif()
 
 add_subdirectory(src)
