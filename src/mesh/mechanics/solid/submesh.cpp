@@ -65,7 +65,7 @@ void submesh::save_internal_variables(bool const have_converged)
 
 auto submesh::tangent_stiffness(std::int32_t const element) const -> matrix const&
 {
-    auto const x = coordinates->current_configuration(local_node_view(element));
+    matrix3x const& x = coordinates->current_configuration(local_node_view(element));
 
     thread_local matrix k_e(nodes_per_element() * dofs_per_node(),
                             nodes_per_element() * dofs_per_node());
@@ -81,7 +81,7 @@ auto submesh::tangent_stiffness(std::int32_t const element) const -> matrix cons
 
 auto submesh::internal_force(std::int32_t const element) const -> vector const&
 {
-    auto const& x = coordinates->current_configuration(local_node_view(element));
+    matrix3x const& x = coordinates->current_configuration(local_node_view(element));
 
     auto const& cauchy_stresses = variables->get(variable::second::cauchy_stress);
 
@@ -161,7 +161,7 @@ matrix const& submesh::material_tangent_stiffness(matrix3x const& x, std::int32_
 
 auto submesh::consistent_mass(std::int32_t const element) const -> matrix const&
 {
-    auto const& X = coordinates->initial_configuration(local_node_view(element));
+    matrix3x const& X = coordinates->initial_configuration(local_node_view(element));
 
     auto const density = cm->intrinsic_material().initial_density();
 
@@ -214,8 +214,8 @@ void submesh::update_deformation_measures()
 
     tbb::parallel_for(std::int64_t{0}, elements(), [&](auto const element) {
         // Gather the material coordinates
-        auto const X = coordinates->initial_configuration(local_node_view(element));
-        auto const x = coordinates->current_configuration(local_node_view(element));
+        matrix3x const& X = coordinates->initial_configuration(local_node_view(element));
+        matrix3x const& x = coordinates->current_configuration(local_node_view(element));
 
         sf->quadrature().for_each([&](auto const& femval, auto const l) {
             auto const& [N, rhea] = femval;

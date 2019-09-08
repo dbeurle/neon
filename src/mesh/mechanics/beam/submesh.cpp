@@ -96,7 +96,7 @@ matrix const& submesh::bending_stiffness(matrix3x const& configuration, std::int
     sf->quadrature().integrate_inplace(k_bending, [&, this](auto const& femval, auto const l) {
         auto const& [N, dN] = femval;
 
-        auto const j = jacobian_determinant(configuration * dN);
+        double const j = jacobian_determinant(configuration * dN);
 
         for (int i = 0; i < sf->number_of_nodes(); ++i)
         {

@@ -51,7 +51,7 @@ inline std::pair<index_view, vector const&> latin_submesh::incremental_latin_int
     std::int32_t const element,
     double const latin_search_direction) const
 {
-    auto const& x = coordinates->current_configuration(local_node_view(element));
+    matrix3x const& x = coordinates->current_configuration(local_node_view(element));
 
     auto const& cauchy_stresses_local = variables->get(variable::second::cauchy_stress);
 

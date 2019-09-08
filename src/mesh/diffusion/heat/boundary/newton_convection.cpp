@@ -35,7 +35,7 @@ newton_convection::newton_convection(std::unique_ptr<surface_interpolation>&& sf
 std::pair<index_view, matrix> newton_convection::external_stiffness(std::int64_t const element,
                                                                     double const load_factor) const
 {
-    auto const X = coordinates->initial_configuration(local_node_view(element));
+    matrix3x const& X = coordinates->initial_configuration(local_node_view(element));
 
     // Perform the computation of the external element stiffness matrix
     auto const k_ext = sf->quadrature().integrate(matrix::Zero(X.cols(), X.cols()).eval(),

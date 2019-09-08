@@ -12,7 +12,7 @@ std::pair<index_view, vector> pressure::external_force(std::int64_t const elemen
 {
     auto const node_view = node_indices(Eigen::all, element);
 
-    auto const X = coordinates->initial_configuration(node_view);
+    matrix3x const& X = coordinates->initial_configuration(node_view);
 
     auto const pressure = interpolate_prescribed_load(load_factor);
 

@@ -111,7 +111,7 @@ public:
     {
         auto const node_view = node_indices(Eigen::all, element);
 
-        auto const X = coordinates->initial_configuration(node_view);
+        matrix3x const& X = coordinates->initial_configuration(node_view);
 
         // Perform the computation of the external load vector
         auto const f_ext = sf->quadrature().integrate(vector::Zero(X.cols()).eval(),
@@ -173,7 +173,7 @@ public:
     {
         auto const node_view = node_indices(Eigen::all, element);
 
-        auto const X = coordinates->initial_configuration(node_view);
+        matrix3x const& X = coordinates->initial_configuration(node_view);
 
         // Perform the computation of the external load vector
         auto const f_ext = sf->quadrature().integrate(vector::Zero(X.cols()).eval(),
