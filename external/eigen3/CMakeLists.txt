@@ -9,7 +9,8 @@ ExternalProject_Add(
     HG_REPOSITORY https://bitbucket.org/eigen/eigen/
     TIMEOUT 10
     UPDATE_COMMAND ""
-    HG_TAG 138971d
+    HG_TAG a67d661
+    #HG_TAG 138971d # works with linear solver error
     # HG_TAG 03bb4ad
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
