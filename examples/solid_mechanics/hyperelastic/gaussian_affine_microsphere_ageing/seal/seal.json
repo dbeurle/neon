@@ -1,0 +1,72 @@
+{
+    "name" : "seal_cross_section",
+    "cores" : 1,
+    "parts": [{
+        "name" : "seal",
+        "material" : "rubber"
+    }],
+    "materials" : [{
+        "name" : "rubber",
+        "elastic_modulus" : 1.0e6,
+        "poissons_ratio" : 0.48,
+        "segments_per_chain" : 70,
+        "scission_probability" : 3.5e-5,
+        "recombination_probability" : 1.0e-5,
+        "cure_time": 95
+    }],
+    "steps" : [{
+        "name" : "ramped_load",
+        "module" : "solid_mechanics",
+        "solution" : "equilibrium",
+        "nonlinear_options" : {
+            "displacement_tolerance" : 1.0e-5,
+            "residual_tolerance" : 1.0e-5,
+            "linear_iterations" : 15
+        },
+        "time" : {
+            "period" : 1001.0,
+            "increments" : {
+                "initial" : 1.0,
+                "minimum" : 0.1,
+                "maximum" : 50.0,
+                "adaptive" : true
+            }
+        },
+        "meshes" : [{
+            "name" : "seal",
+            "constitutive" : {
+                "name" : "microsphere",
+                "type" : "affine",
+                "statistics" : "gaussian",
+                "quadrature" : "BO21",
+                "ageing" : "BAND"
+            },
+            "element_options" : {
+                "quadrature" : "full"
+            },
+            "boundaries" : [{
+                "name" : "base",
+                "type" : "displacement",
+                "time" : [0.0, 1001.0],
+                "x" : [0.0, 0.0],
+                "y" : [0.0, 0.0],
+                "z" : [0.0, 0.0]
+            },
+            {
+                "name" : "load",
+                "type" : "traction",
+                "time" : [0.0, 1.0, 1000.0, 1001.0],
+                "y" : [0.0, -7.0, -7.0, 0.0]
+            }],
+            "visualisation" : {
+                "fields" : ["displacement", "deformation_gradient",
+                            "cauchy_stress"],
+                "write_every": 1
+            }
+        }],
+        "linear_solver" : {
+            "type" : "PaStiX",
+            "maximum_iterations" : 1000
+        }
+    }]
+}
