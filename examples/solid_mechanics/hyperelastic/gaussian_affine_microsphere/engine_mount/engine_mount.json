@@ -1,0 +1,76 @@
+{
+    "name" : "engine_mount",
+    "cores" : 1,
+    "parts": [{
+        "name" : "engine_mount",
+        "material" : "rubber"
+    }],
+    "materials" : [{
+        "name" : "rubber",
+        "elastic_modulus" : 2e6,
+        "poissons_ratio" : 0.48,
+        "segments_per_chain" : 70,
+        "scission_probability" : 1e-6,
+        "recombination_probability" : 0.0,
+        "cure_time" : 95
+    }],
+    "steps" : [{
+        "name" : "engine_mount_relaxation",
+        "module" : "solid_mechanics",
+        "solution" : "equilibrium",
+        "nonlinear_options" : {
+            "displacement_tolerance" : 1e-4,
+            "residual_tolerance" : 1e-4
+        },
+        "time" : {
+            "period" : 2000.0,
+            "increments" : {
+                "initial" : 0.5,
+                "minimum" : 0.001,
+                "maximum" : 100.0,
+                "adaptive" : true
+            }
+        },
+        "meshes" : [{
+            "name" : "engine_mount",
+            "constitutive" : {
+                "name" : "microsphere",
+                "type" : "affine",
+                "statistics" : "gaussian",
+                "quadrature" : "BO21",
+                "ageing" : "BAND"
+            },
+            "element_options" : {
+                "quadrature" : "full"
+            },
+            "boundaries" : [{
+                "name" : "outer_ring",
+                "type" : "displacement",
+                "time" : [0.0, 2000.0],
+                "x" : [0.0, 0.0],
+                "y" : [0.0, 0.0],
+                "z" : [0.0, 0.0]
+            },
+            {
+                "name" : "inner_ring",
+                "type" : "traction",
+                "time" : [0.0, 1.0, 1800.0, 2000.0],
+                "z" : [0.0, 0.1e6, 0.1e6, 0.0]
+            },
+            {
+                "name" : "y_symmetry",
+                "type" : "displacement",
+                "time" : [0.0, 2000.0],
+                "y" : [0.0, 0.0]
+            }],
+            "visualisation" : {
+                "fields" : ["displacement", "deformation_gradient", "cauchy_stress"]
+            }
+        }],
+        "linear_solver" : {
+            "type" : "PaStiX",
+            "maximum_iterations" : 3000,
+            "tolerance"  : 1.0e-6
+        }
+    }]
+}
