@@ -86,4 +86,5 @@ target_link_libraries(neon
                               ${VTK_LIBRARIES}
                               ${TBB_LIBRARIES}
                               ${PASTIX_LIBRARIES}
+                              spm
                               ${ARPACK_LIBRARY})

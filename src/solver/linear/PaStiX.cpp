@@ -1,72 +1,122 @@
 
 #include "PaStiX.hpp"
 
-#include "simulation_parser.hpp"
-
 #include <chrono>
 #include <termcolor/termcolor.hpp>
 
 namespace neon
 {
-PaStiXLDLT::PaStiXLDLT()
+PaStiX::PaStiX() : m_matrix(std::make_unique<spmatrix_t>())
 {
-    // Verbosity
-    ldlt.iparm(3) = 0;
+    pastixInitParam(m_integer_parameters.data(), m_float_parameters.data());
 
-    // Number of threads
-    ldlt.iparm(34) = simulation_parser::threads;
+    pastixInit(&m_data, MPI_COMM_WORLD, m_integer_parameters.data(), m_float_parameters.data());
 
-    // Number of Cuda devices
-    // ldlt.iparm(64) = 1;
+    m_matrix->mtxtype = SpmGeneral;
+    m_matrix->flttype = SpmDouble;
+    m_matrix->fmttype = SpmCSR;
+
+    m_matrix->gN = 0;
+    m_matrix->n = 0;
+    m_matrix->gnnz = 0;
+    m_matrix->nnz = 0;
+
+    m_matrix->gNexp = 0;
+    m_matrix->nexp = 0;
+    m_matrix->gnnzexp = 0;
+    m_matrix->nnzexp = 0;
+
+    m_matrix->dof = 1;
+    m_matrix->dofs = nullptr;
+    m_matrix->layout = SpmRowMajor;
+
+    m_matrix->colptr = nullptr;
+    m_matrix->rowptr = nullptr;
+    m_matrix->loc2glob = nullptr;
+    m_matrix->values = nullptr;
 }
+
+PaStiX::~PaStiX() { pastixFinalize(&m_data); }
+
+void PaStiX::analyse_pattern() { pastix_task_analyze(m_data, m_matrix.get()); }
 
 void PaStiXLDLT::solve(sparse_matrix const& A, vector& x, vector const& b)
 {
     auto const start = std::chrono::steady_clock::now();
 
+    assert(A.rows() == A.cols());
+
+    m_matrix->n = A.rows();
+    m_matrix->nnz = A.nonZeros();
+    m_matrix->colptr = const_cast<pastix_int_t*>(A.innerIndexPtr());
+    m_matrix->rowptr = const_cast<pastix_int_t*>(A.outerIndexPtr());
+    m_matrix->values = const_cast<double*>(A.valuePtr());
+
     if (build_sparsity_pattern)
     {
-        ldlt.analyzePattern(A);
+        this->analyse_pattern();
         build_sparsity_pattern = false;
     }
 
-    ldlt.factorize(A);
+    auto constexpr nrhs = 1;
 
-    x = ldlt.solve(b);
+    pastix_task_numfact(m_data, m_matrix.get());
+
+    pastix_task_solve(m_data, nrhs, x.data(), m_matrix->n);
+
+    x = b;
+
+    pastix_task_refine(m_data,
+                       m_matrix->n,
+                       nrhs,
+                       const_cast<double*>(b.data()),
+                       m_matrix->n,
+                       x.data(),
+                       m_matrix->n);
 
     auto const end = std::chrono::steady_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::chrono::duration<double> const elapsed_seconds = end - start;
     std::cout << std::string(6, ' ') << "PaStiX LDLT direct solver took " << elapsed_seconds.count()
               << "s\n";
 }
 
-PaStiXLU::PaStiXLU()
-{
-    // Verbosity
-    lu.iparm(3) = 0;
-
-    // Number of threads
-    lu.iparm(34) = simulation_parser::threads;
-
-    // Number of Cuda devices
-    // ldlt.iparm(64) = 1;
-}
+PaStiXLU::PaStiXLU() {}
 
 void PaStiXLU::solve(sparse_matrix const& A, vector& x, vector const& b)
 {
-    auto start = std::chrono::steady_clock::now();
+    auto const start = std::chrono::steady_clock::now();
+
+    assert(A.rows() == A.cols());
+
+    m_matrix->n = A.rows();
+    m_matrix->nnz = A.nonZeros();
+    m_matrix->colptr = const_cast<pastix_int_t*>(A.innerIndexPtr());
+    m_matrix->rowptr = const_cast<pastix_int_t*>(A.outerIndexPtr());
+    m_matrix->values = const_cast<double*>(A.valuePtr());
 
     if (build_sparsity_pattern)
     {
-        lu.analyzePattern(A);
+        this->analyse_pattern();
         build_sparsity_pattern = false;
     }
 
-    lu.factorize(A);
+    auto constexpr nrhs = 1;
 
-    x = lu.solve(b);
+    pastix_task_numfact(m_data, m_matrix.get());
 
-    auto end = std::chrono::steady_clock::now();
+    pastix_task_solve(m_data, nrhs, x.data(), m_matrix->n);
+
+    x = b;
+
+    pastix_task_refine(m_data,
+                       m_matrix->n,
+                       nrhs,
+                       const_cast<double*>(b.data()),
+                       m_matrix->n,
+                       x.data(),
+                       m_matrix->n);
+
+    auto const end = std::chrono::steady_clock::now();
     std::chrono::duration<double> const elapsed_seconds = end - start;
     std::cout << std::string(6, ' ') << "PaStiX LU direct solver took " << elapsed_seconds.count()
               << "s\n";
