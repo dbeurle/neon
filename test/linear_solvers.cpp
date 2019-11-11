@@ -22,10 +22,11 @@ sparse_matrix create_sparse_matrix()
                                                     {1, 2, -1.0},
                                                     {2, 0, 0.0},
                                                     {2, 1, -1.0},
-                                                    {2, 2, 2.0}};
+                                                    {2, 2, 2.0},
+                                                    {3, 3, 1.0}};
 
-    sparse_matrix A(3, 3);
-    A.setFromTriplets(std::begin(triplets), std::end(triplets));
+    sparse_matrix A(4, 4);
+    A.setFromTriplets(begin(triplets), end(triplets));
     A.finalize();
     return A;
 }
@@ -33,19 +34,36 @@ sparse_matrix create_sparse_matrix()
 /** Create an example right hand side */
 vector create_right_hand_side()
 {
-    Eigen::VectorXd b(3);
+    Eigen::VectorXd b(4);
     b(0) = 1.0;
     b(1) = 0.5;
     b(2) = 1.5;
+    b(3) = 1.0;
     return b;
 }
 
 /** The known solution */
 vector solution()
 {
-    vector x(3);
-    x << 1.375, 1.75, 1.625;
+    vector x(4);
+    x << 1.375, 1.75, 1.625, 1.0;
     return x;
+}
+
+void test_linear_solver(json const& option,
+                        bool const is_symmetric,
+                        sparse_matrix const& A,
+                        vector& x,
+                        vector const& b)
+{
+    json solver_data{option};
+
+    auto linear_solver = make_linear_solver(solver_data);
+
+    linear_solver->solve(A, x, b);
+
+    REQUIRE((x - solution()).norm() == Approx(0.0).margin(ZERO_MARGIN));
+    REQUIRE((A * x - b).norm() == Approx(0.0).margin(ZERO_MARGIN));
 }
 
 TEST_CASE("Linear solver test suite")
