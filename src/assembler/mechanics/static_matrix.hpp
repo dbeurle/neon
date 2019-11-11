@@ -255,7 +255,9 @@ void static_matrix<MeshType>::assemble_stiffness()
 
     for (auto const& submesh : mesh.meshes())
     {
-        tbb::parallel_for(std::int64_t{0}, submesh.elements(), [&](auto const element) {
+        // tbb::parallel_for(std::int64_t{0}, submesh.elements(), [&](auto const element) {
+        for (std::int64_t element{0}; element < submesh.elements(); ++element)
+        {
             auto const dof_indices = submesh.local_dof_view(element);
             auto const& ke = submesh.tangent_stiffness(element);
 
@@ -263,10 +265,12 @@ void static_matrix<MeshType>::assemble_stiffness()
             {
                 for (std::int64_t a{0}; a < dof_indices.size(); a++)
                 {
-                    Kt.add_to(dof_indices(a), dof_indices(b), ke(a, b));
+                    // Kt.add_to(dof_indices(a), dof_indices(b), ke(a, b));
+                    Kt.coeffRef(dof_indices(a), dof_indices(b)) += ke(a, b);
                 }
             }
-        });
+        }
+        // });
     }
 
     auto const end = std::chrono::steady_clock::now();
@@ -444,7 +448,10 @@ void static_matrix<MeshType>::perform_equilibrium_iterations()
         std::cout << std::string(6, ' ') << "Equilibrium iteration required "
                   << elapsed_seconds.count() << "s\n";
 
-        if (is_iteration_converged()) break;
+        if (is_iteration_converged())
+        {
+            break;
+        }
 
         current_iteration++;
     }
