@@ -30,7 +30,7 @@ protected:
 
     std::unique_ptr<spmatrix_t> m_matrix;
 
-    pastix_data_t* m_data;
+    pastix_data_t* m_data{nullptr};
 };
 
 /// PaStiXLDLT is a supernodal direct solver with multithreading support.  This

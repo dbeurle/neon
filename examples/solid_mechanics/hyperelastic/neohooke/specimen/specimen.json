@@ -64,7 +64,7 @@
             }
         }],
         "linear_solver" : {
-            "type" : "iterative",
+            "type" : "PaStiX",
             "maximum_iterations" : 1000,
             "tolerance"  : 1.0e-6
         }
