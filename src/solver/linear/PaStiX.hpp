@@ -38,7 +38,7 @@ protected:
 class PaStiXLDLT : public PaStiX
 {
 public:
-    explicit PaStiXLDLT() = default;
+    explicit PaStiXLDLT();
 
     void solve(sparse_matrix const& A, vector& x, vector const& b) override final;
 };
